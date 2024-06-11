@@ -1,0 +1,15 @@
+{
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  "[typescriptreact][typescript][javascript]": {
+    // use eslint for prettier
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "always",
+      "source.organizeImports": "never"
+    }
+  },
+  "eslint.format.enable": true,
+  "prettier.enable": false
+}
