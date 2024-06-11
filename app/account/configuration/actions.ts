@@ -64,7 +64,11 @@ export const readFields = async (): Promise<Field[]> => {
       isVersioned: true,
       type: true,
       name: true,
-      Option: true,
+      Option: {
+        orderBy: {
+          order: 'asc',
+        },
+      },
     },
   })
 }

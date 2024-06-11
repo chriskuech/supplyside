@@ -1,5 +1,6 @@
 'use client'
 
+import { fail } from 'assert'
 import Autocomplete, {
   AutocompleteRenderInputParams,
 } from '@mui/material/Autocomplete'
@@ -33,14 +34,11 @@ type Props = {
   onChange: (values: OptionPatch[]) => void
 }
 
-export default function ReorderableAutocomplete({
-  label,
-  values,
-  onChange,
-}: Props) {
+export default function OptionsControl({ label, values, onChange }: Props) {
+  const optionNames = new Set(...values.map((v) => v.name))
+
   return (
     <Autocomplete<OptionPatch, true, boolean, true>
-      id="attribute-search"
       multiple
       freeSolo
       options={[]}
@@ -84,14 +82,30 @@ export default function ReorderableAutocomplete({
       renderTags={(values) => (
         <SortableChips values={values} onChange={onChange} />
       )}
-      renderInput={(params: AutocompleteRenderInputParams) => (
-        <TextField {...params} label={label} placeholder="Option name" />
-      )}
+      renderInput={(params: AutocompleteRenderInputParams) => {
+        const invalid =
+          typeof params.inputProps.value === 'string' &&
+          optionNames.has(params.inputProps.value)
+        return (
+          <TextField
+            {...params}
+            label={label}
+            placeholder="Option name"
+            error={invalid}
+            helperText={
+              invalid && 'Option names must be unique within a field.'
+            }
+            onKeyDown={(e) =>
+              invalid && e.key === 'Enter' && e.stopPropagation()
+            }
+          />
+        )
+      }}
     />
   )
 }
 
-const SortableItem: FC<{
+const SortableChip: FC<{
   value: OptionPatch
   onRemove: (op: OptionPatch) => void
 }> = ({ value, onRemove }) => {
@@ -104,6 +118,7 @@ const SortableItem: FC<{
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
+        cursor: attributes['aria-pressed'] ? 'grabbing' : 'grab',
       }}
       {...attributes}
       {...listeners}
@@ -147,13 +162,14 @@ const SortableChips: FC<{
       onDragEnd={({ active, over }) => {
         if (!active || !over || active.id === over.id) return
 
-        const item = values.find((v) => v.id === active.id)
         const removed = values.filter((v) => v.id !== active.id)
-        const index = removed.findIndex((v) => v.id === over.id)
+        const i = values.findIndex((v) => v.id === over.id)
 
-        if (!item) return
-
-        onChange([...removed.slice(0, index), item, ...removed.slice(index)])
+        onChange([
+          ...removed.slice(0, i),
+          values.find((v) => v.id === active.id) ?? fail(),
+          ...removed.slice(i),
+        ])
       }}
     >
       <SortableContext items={values} strategy={rectSortingStrategy}>
@@ -161,7 +177,7 @@ const SortableChips: FC<{
           {values
             .filter((v) => v.op !== 'remove')
             .map((value) => (
-              <SortableItem
+              <SortableChip
                 key={value.id}
                 value={value}
                 onRemove={(value) =>

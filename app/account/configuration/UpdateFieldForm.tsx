@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { FieldType } from '@prisma/client'
-import ReorderableAutocomplete from './ReorderableAutocomplete'
+import OptionsControl from './OptionsControl'
 import { Field, OptionPatch, UpdateFieldDto } from './actions'
 
 type Props = {
@@ -65,7 +65,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
       </Stack>
 
       {(field.type === 'MultiSelect' || field.type === 'Select') && (
-        <ReorderableAutocomplete
+        <OptionsControl
           label={'Options'}
           values={options}
           onChange={setOptions}
