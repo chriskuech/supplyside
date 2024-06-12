@@ -7,18 +7,35 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { createField, deleteField, readFields, updateField } from './actions'
+import {
+  createField,
+  deleteField,
+  readFields,
+  updateField,
+} from './fields/actions'
+import {
+  createSection,
+  deleteSection,
+  readSchemas,
+  updateSchema,
+  updateSection,
+} from './schemas/actions'
 
-const FieldsTable = dynamic(() => import('./FieldsTable'), { ssr: false })
-const CreateFieldForm = dynamic(() => import('./CreateFieldForm'), {
+const FieldsTable = dynamic(() => import('./fields/FieldsTable'), {
+  ssr: false,
+})
+const CreateFieldForm = dynamic(() => import('./fields/CreateFieldForm'), {
+  ssr: false,
+})
+const SchemasControl = dynamic(() => import('./schemas/SchemasControl'), {
   ssr: false,
 })
 
 export default async function Configuration() {
-  const fields = await readFields()
+  const [fields, schemas] = await Promise.all([readFields(), readSchemas()])
 
   return (
-    <Container maxWidth={'md'} sx={{ marginTop: 5 }}>
+    <Container maxWidth={'md'} sx={{ marginY: 5 }}>
       <Stack spacing={5} direction={'column'} textAlign={'left'}>
         <Box>
           <Typography variant={'h4'}>Configuration</Typography>
@@ -45,6 +62,22 @@ export default async function Configuration() {
             fields={fields}
             onUpdate={updateField}
             onDelete={deleteField}
+          />
+        </Stack>
+        <Stack spacing={2}>
+          <Box>
+            <Typography variant={'h5'}>Schema</Typography>
+            <Typography variant={'caption'}>
+              Add, update, and remove Schemas.
+            </Typography>
+          </Box>
+          <SchemasControl
+            fields={fields}
+            schemas={schemas}
+            onCreateSection={createSection}
+            onDeleteSection={deleteSection}
+            onUpdateSection={updateSection}
+            onUpdateSchema={updateSchema}
           />
         </Stack>
       </Stack>

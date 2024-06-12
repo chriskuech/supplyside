@@ -65,11 +65,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
       </Stack>
 
       {(field.type === 'MultiSelect' || field.type === 'Select') && (
-        <OptionsControl
-          label={'Options'}
-          values={options}
-          onChange={setOptions}
-        />
+        <OptionsControl values={options} onChange={setOptions} />
       )}
 
       <Stack direction={'row'} spacing={1} flexWrap={'wrap'}>

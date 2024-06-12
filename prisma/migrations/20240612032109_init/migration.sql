@@ -75,6 +75,8 @@ CREATE TABLE "Field" (
 CREATE TABLE "Option" (
     "id" UUID NOT NULL,
     "fieldId" UUID NOT NULL,
+    "name" VARCHAR NOT NULL,
+    "order" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -105,6 +107,42 @@ CREATE TABLE "ValueOption" (
     CONSTRAINT "ValueOption_pkey" PRIMARY KEY ("valueId","optionId")
 );
 
+-- CreateTable
+CREATE TABLE "Schema" (
+    "id" UUID NOT NULL,
+    "accountId" UUID NOT NULL,
+    "resourceType" "ResourceType" NOT NULL,
+
+    CONSTRAINT "Schema_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Section" (
+    "id" UUID NOT NULL,
+    "schemaId" UUID NOT NULL,
+    "name" TEXT NOT NULL,
+    "order" INTEGER NOT NULL,
+
+    CONSTRAINT "Section_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SchemaField" (
+    "schemaId" UUID NOT NULL,
+    "fieldId" UUID NOT NULL,
+
+    CONSTRAINT "SchemaField_pkey" PRIMARY KEY ("schemaId","fieldId")
+);
+
+-- CreateTable
+CREATE TABLE "SectionField" (
+    "sectionId" UUID NOT NULL,
+    "fieldId" UUID NOT NULL,
+    "order" INTEGER NOT NULL,
+
+    CONSTRAINT "SectionField_pkey" PRIMARY KEY ("sectionId","fieldId")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -113,6 +151,9 @@ CREATE UNIQUE INDEX "Resource_accountId_type_key_revision_key" ON "Resource"("ac
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Field_accountId_name_key" ON "Field"("accountId", "name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Schema_accountId_resourceType_key" ON "Schema"("accountId", "resourceType");
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -146,3 +187,21 @@ ALTER TABLE "ValueOption" ADD CONSTRAINT "ValueOption_valueId_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "ValueOption" ADD CONSTRAINT "ValueOption_optionId_fkey" FOREIGN KEY ("optionId") REFERENCES "Option"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Schema" ADD CONSTRAINT "Schema_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Section" ADD CONSTRAINT "Section_schemaId_fkey" FOREIGN KEY ("schemaId") REFERENCES "Schema"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SchemaField" ADD CONSTRAINT "SchemaField_schemaId_fkey" FOREIGN KEY ("schemaId") REFERENCES "Schema"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SchemaField" ADD CONSTRAINT "SchemaField_fieldId_fkey" FOREIGN KEY ("fieldId") REFERENCES "Field"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SectionField" ADD CONSTRAINT "SectionField_sectionId_fkey" FOREIGN KEY ("sectionId") REFERENCES "Section"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SectionField" ADD CONSTRAINT "SectionField_fieldId_fkey" FOREIGN KEY ("fieldId") REFERENCES "Field"("id") ON DELETE CASCADE ON UPDATE CASCADE;

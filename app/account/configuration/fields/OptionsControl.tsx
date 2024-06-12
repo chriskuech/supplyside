@@ -29,12 +29,11 @@ import { P, match } from 'ts-pattern'
 import { OptionPatch } from './actions'
 
 type Props = {
-  label: string
   values: OptionPatch[]
   onChange: (values: OptionPatch[]) => void
 }
 
-export default function OptionsControl({ label, values, onChange }: Props) {
+export default function OptionsControl({ values, onChange }: Props) {
   const optionNames = new Set(...values.map((v) => v.name))
 
   return (
@@ -89,7 +88,7 @@ export default function OptionsControl({ label, values, onChange }: Props) {
         return (
           <TextField
             {...params}
-            label={label}
+            label="Options"
             placeholder="Option name"
             error={invalid}
             helperText={
