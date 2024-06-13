@@ -81,8 +81,6 @@ export const updateSchema = async (dto: {
 }) => {
   const { accountId } = await requireSession()
 
-  console.log('sectionIds', dto.sectionIds)
-
   await prisma.schema.update({
     where: {
       accountId,
@@ -130,6 +128,7 @@ export const updateSection = async (dto: {
   await Promise.all([
     prisma.sectionField.deleteMany({
       where: {
+        sectionId: dto.sectionId,
         fieldId: {
           notIn: dto.fieldIds,
         },

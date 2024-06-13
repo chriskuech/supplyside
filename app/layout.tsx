@@ -2,8 +2,8 @@ import { Box, CssBaseline } from '@mui/material'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { PropsWithChildren } from 'react'
-import AppBar from './lib/components/AppBar'
-import { ColorModeProvider } from './lib/components/ColorModeProvider'
+import AppBar from './lib/client/AppBar'
+import { ColorModeProvider } from './lib/client/ColorModeProvider'
 import { readSession } from './lib/auth'
 
 const inter = Inter({ subsets: ['latin'] })

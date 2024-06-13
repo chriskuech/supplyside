@@ -45,6 +45,7 @@ export default function FieldsTable({ fields, onUpdate, onDelete }: Props) {
     {
       field: '_delete',
       headerName: 'Delete',
+      type: 'actions',
       width: 75,
       sortable: false,
       disableColumnMenu: true,

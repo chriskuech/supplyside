@@ -1,5 +1,6 @@
 'use server'
 
+import { fail } from 'assert'
 import { hash } from 'bcrypt'
 import { cookies } from 'next/headers'
 import { RedirectType, redirect } from 'next/navigation'
@@ -11,8 +12,10 @@ type Session = {
   userId: string
 }
 
-export const requireSession = async () => {
-  const session = await readSession()
+export const requireSession = async () => (await readSession()) ?? fail()
+
+export const requireSessionWithRedirect = async () => {
+  const session = (await readSession()) ?? fail()
 
   if (!session) redirect('/auth/login', RedirectType.replace)
 
