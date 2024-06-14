@@ -15,6 +15,7 @@ import { useState } from 'react'
 import { FieldType } from '@prisma/client'
 import OptionsControl from './OptionsControl'
 import { Field, OptionPatch, UpdateFieldDto } from './actions'
+import ResourceTypeSelect from './ResourceTypeSelect'
 
 type Props = {
   field: Field
@@ -78,6 +79,17 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
             />
           }
         />
+
+        {field.type === 'Resource' && (
+          <FormControl sx={{ width: 150 }}>
+            <InputLabel id="field-resource-type-label">
+              Resource Type
+            </InputLabel>
+            <ResourceTypeSelect
+              resourceType={field.resourceType ?? undefined}
+            />
+          </FormControl>
+        )}
       </Stack>
 
       <Stack justifyContent={'end'} direction={'row'} spacing={1}>

@@ -1,3 +1,5 @@
+'use server'
+
 import { Container, Stack, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import { requireSessionWithRedirect } from '@/lib/auth'
@@ -11,7 +13,7 @@ const CreateResourceButton = dynamic(
   { ssr: false },
 )
 
-export default async function OrderDetail({
+export default async function DetailPage({
   params: { key },
 }: {
   params: { key: string }

@@ -1,7 +1,13 @@
 'use client'
 
-import { Card, CardContent, Typography } from '@mui/material'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Typography,
+} from '@mui/material'
 import { FC } from 'react'
+import { ExpandMore } from '@mui/icons-material'
 import AddSectionControl from './AddSectionControl'
 import { Field, Schema } from './actions'
 import SchemaSectionsControl from './SchemaSectionsControl'
@@ -63,11 +69,13 @@ const SchemaControl: FC<{
   onDeleteSection,
   onUpdateSchema,
 }) => (
-  <Card key={schema.id}>
-    <CardContent>
+  <Accordion key={schema.id}>
+    <AccordionSummary expandIcon={<ExpandMore />}>
       <Typography variant="h6" gutterBottom>
         {schema.resourceType}
       </Typography>
+    </AccordionSummary>
+    <AccordionDetails>
       <AddSectionControl schema={schema} onAddSection={onCreateSection} />
       <SchemaSectionsControl
         fields={fields}
@@ -76,6 +84,6 @@ const SchemaControl: FC<{
         onUpdateSection={onUpdateSection}
         onDeleteSection={onDeleteSection}
       />
-    </CardContent>
-  </Card>
+    </AccordionDetails>
+  </Accordion>
 )

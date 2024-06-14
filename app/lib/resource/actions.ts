@@ -13,7 +13,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireSession } from '../auth'
 import prisma from '../prisma'
-import { Resource } from './types'
+import { JsonLogic, Resource } from './types'
 
 export type CreateResourceParams = {
   type: ResourceType
@@ -88,6 +88,7 @@ export const readResource = async ({
                   Option: true,
                 },
               },
+              Resource: true,
             },
           },
         },
@@ -100,10 +101,12 @@ export const readResource = async ({
 
 export type ReadResourcesParams = {
   type: ResourceType
+  query?: JsonLogic
 }
 
 export const readResources = async ({
   type,
+  query,
 }: ReadResourcesParams): Promise<Resource[]> => {
   const { accountId } = await requireSession()
 
@@ -124,6 +127,7 @@ export const readResources = async ({
                   Option: true,
                 },
               },
+              Resource: true,
             },
           },
         },
@@ -160,6 +164,7 @@ const mapResource = (
         Option: Option | null
         User: User | null
         ValueOption: (ValueOption & { Option: Option })[]
+        Resource: ResourceModel | null
       }
     })[]
   },
@@ -176,6 +181,7 @@ const mapResource = (
       option: rf.Value.Option,
       options: rf.Value.ValueOption.map((vo) => vo.Option),
       user: rf.Value.User,
+      resourceKey: rf.Value.Resource?.key,
     },
   })),
 })

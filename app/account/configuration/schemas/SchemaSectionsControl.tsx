@@ -94,7 +94,7 @@ export default function SchemaSectionsControl({
         <SortableContext items={schema.Section} strategy={rectSortingStrategy}>
           {schema.Section.map((section) => (
             <Fragment key={section.id}>
-              <Divider variant="middle" />
+              <Divider variant="fullWidth" />
               <SortableRow
                 key={section.id}
                 fields={fields}

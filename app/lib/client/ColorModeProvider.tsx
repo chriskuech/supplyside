@@ -6,6 +6,7 @@ import {
   PropsWithChildren,
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -17,6 +18,10 @@ export const ColorModeProvider: FC<PropsWithChildren> = ({ children }) => {
   const [mode, setMode] = useState<'light' | 'dark'>(
     prefersDarkMode ? 'dark' : 'light',
   )
+
+  useEffect(() => {
+    setMode(prefersDarkMode ? 'dark' : 'light')
+  }, [prefersDarkMode])
 
   const context = useMemo(
     () => ({

@@ -59,6 +59,7 @@ model Resource {
 
   Account       Account         @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   ResourceField ResourceField[]
+  Value         Value[]
 
   @@unique([accountId, type, key, revision])
 }
@@ -87,15 +88,17 @@ enum FieldType {
   Select
   MultiSelect
   User
+  Resource
 }
 
 model Field {
-  id          String    @id @default(uuid()) @db.Uuid
-  accountId   String    @db.Uuid
-  type        FieldType
-  name        String
-  isEditable  Boolean
-  isVersioned Boolean
+  id           String        @id @default(uuid()) @db.Uuid
+  accountId    String        @db.Uuid
+  type         FieldType
+  name         String
+  isEditable   Boolean
+  isVersioned  Boolean
+  resourceType ResourceType?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -124,18 +127,20 @@ model Option {
 }
 
 model Value {
-  id       String   @id @default(uuid()) @db.Uuid
-  boolean  Boolean?
-  number   Float?
-  string   String?
-  userId   String?  @db.Uuid
-  optionId String?  @db.Uuid
+  id         String   @id @default(uuid()) @db.Uuid
+  boolean    Boolean?
+  number     Float?
+  string     String?
+  userId     String?  @db.Uuid
+  optionId   String?  @db.Uuid
+  resourceId String?  @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   User               User?           @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   Option             Option?         @relation(fields: [optionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  Resource           Resource?       @relation(fields: [resourceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   ValueOption        ValueOption[]
   ResourceFieldValue ResourceField[]
 }

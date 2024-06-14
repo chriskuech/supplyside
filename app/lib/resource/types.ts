@@ -20,4 +20,5 @@ export type Value = {
   options?: Option[]
   string: string | null
   user: User | null
+  resourceKey?: number | null
 }

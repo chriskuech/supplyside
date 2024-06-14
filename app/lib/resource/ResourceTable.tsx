@@ -37,54 +37,51 @@ export default function ResourceTable({ schema, resources }: Props) {
           .with('Select', () => 'singleSelect')
           .with('Text', () => 'string')
           .with('User', () => 'custom')
+          .with('Resource', () => 'custom')
           .exhaustive(),
         valueGetter: (_, row) => {
           const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
 
-          return match(field.type)
-            .with(FieldType.Checkbox, () => value?.boolean)
+          type Primitive = string | number | boolean | null | undefined
+
+          return match<FieldType, Primitive>(field.type)
+            .with('Checkbox', () => value?.boolean)
+            .with(P.union('Money', 'Number'), () => value?.number)
+            .with('MultiSelect', () =>
+              value?.options?.map((o) => o.name).join(' '),
+            )
+            .with(P.union('Text', 'RichText'), () => value?.string)
             .with(
-              P.union(FieldType.Money, FieldType.Number),
-              () => value?.number,
-            )
-            .with(FieldType.MultiSelect, () =>
-              value?.options?.map((o) => o.name),
-            )
-            .with(
-              P.union(FieldType.Text, FieldType.RichText),
-              () => value?.string,
-            )
-            .with(FieldType.Select, () =>
-              field.options?.find((o) => o.id === value?.option?.id),
+              'Select',
+              () =>
+                field.options?.find((o) => o.id === value?.option?.id)?.name,
             )
             .with(
-              FieldType.User,
+              'User',
               () =>
                 value?.user &&
                 `${value.user.firstName} ${value.user.firstName}`,
             )
+            .with('Resource', () => value?.resourceKey)
             .exhaustive()
         },
         valueFormatter: (_, row) => {
           const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
 
-          return match(field.type)
-            .with(FieldType.Checkbox, () => value?.boolean && <Check />)
-            .with(FieldType.Money, () =>
+          return match<FieldType>(field.type)
+            .with('Checkbox', () => value?.boolean && <Check />)
+            .with('Money', () =>
               value?.number?.toLocaleString('en-US', {
                 style: 'currency',
                 currency: 'USD',
               }),
             )
-            .with(FieldType.Number, () => value?.number)
-            .with(FieldType.MultiSelect, () =>
+            .with('Number', () => value?.number)
+            .with('MultiSelect', () =>
               value?.options?.map((o) => <Chip key={o.id} label={o.name} />),
             )
-            .with(
-              P.union(FieldType.Text, FieldType.RichText),
-              () => value?.string,
-            )
-            .with(FieldType.Select, () => {
+            .with(P.union('Text', 'RichText'), () => value?.string)
+            .with('Select', () => {
               const name = field.options?.find(
                 (o) => o.id === value?.option?.id,
               )?.name
@@ -92,11 +89,12 @@ export default function ResourceTable({ schema, resources }: Props) {
               return name ? <Chip label={name} /> : undefined
             })
             .with(
-              FieldType.User,
+              'User',
               () =>
                 value?.user &&
                 `${value.user.firstName} ${value.user.firstName}`,
             )
+            .with('Resource', () => value?.resourceKey)
             .exhaustive()
         },
       })),

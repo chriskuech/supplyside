@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { FieldType } from '@prisma/client'
+import { FieldType, ResourceType } from '@prisma/client'
 import { match } from 'ts-pattern'
 import { requireSession } from '@/lib/auth'
 import prisma from '@/lib/prisma'
@@ -24,24 +24,29 @@ export type Field = {
   id: string
   name: string
   type: FieldType
+  resourceType: ResourceType | null
   isVersioned: boolean
   Option: Option[]
 }
 
-export const createField = async (data: {
+export type CreateFieldParams = {
   name: string
   type: FieldType
   isVersioned: boolean
-}) => {
+  resourceType?: ResourceType
+}
+
+export const createField = async (params: CreateFieldParams) => {
   const session = await requireSession()
 
   await prisma.field.create({
     data: {
       accountId: session.accountId,
-      isVersioned: data.isVersioned,
+      isVersioned: params.isVersioned,
       isEditable: true,
-      name: data.name,
-      type: data.type,
+      name: params.name,
+      type: params.type,
+      resourceType: params.resourceType,
     },
   })
 
@@ -64,6 +69,7 @@ export const readFields = async (): Promise<Field[]> => {
       isVersioned: true,
       type: true,
       name: true,
+      resourceType: true,
       Option: {
         orderBy: {
           order: 'asc',
