@@ -15,7 +15,7 @@ type Session = {
 export const requireSession = async () => (await readSession()) ?? fail()
 
 export const requireSessionWithRedirect = async () => {
-  const session = (await readSession()) ?? fail()
+  const session = await readSession()
 
   if (!session) redirect('/auth/login', RedirectType.replace)
 

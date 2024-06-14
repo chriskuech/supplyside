@@ -1,9 +1,8 @@
-import { readSession, requireSession } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { requireSessionWithRedirect } from '@/lib/auth'
 
 export default async function Home() {
-  await requireSession()
+  await requireSessionWithRedirect()
 
-  const session = await readSession()
-
-  return <main>Home: {session?.accountId}</main>
+  redirect('/orders')
 }

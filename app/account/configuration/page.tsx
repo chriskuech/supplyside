@@ -1,12 +1,5 @@
 import dynamic from 'next/dynamic'
-import {
-  Box,
-  Card,
-  CardContent,
-  Container,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Box, Container, Stack, Typography } from '@mui/material'
 import {
   createField,
   deleteField,
@@ -24,7 +17,7 @@ import {
 const FieldsTable = dynamic(() => import('./fields/FieldsTable'), {
   ssr: false,
 })
-const CreateFieldForm = dynamic(() => import('./fields/CreateFieldForm'), {
+const AddFieldButton = dynamic(() => import('./fields/AddFieldButton'), {
   ssr: false,
 })
 const SchemasControl = dynamic(() => import('./schemas/SchemasControl'), {
@@ -45,19 +38,16 @@ export default async function Configuration() {
         </Box>
         <Stack spacing={2}>
           <Box>
-            <Typography variant={'h5'}>Fields</Typography>
+            <Stack flexDirection={'row'}>
+              <Typography variant={'h5'} sx={{ flexGrow: 1 }}>
+                Fields
+              </Typography>
+              <AddFieldButton onSubmit={createField} />
+            </Stack>
             <Typography variant={'caption'}>
-              Add, update, and remove Fields.
+              Add, update, and remove Fields to be referenced in your Schemas.
             </Typography>
           </Box>
-          <Card sx={{ width: 'fit-content' }}>
-            <CardContent>
-              <Typography gutterBottom variant="h6">
-                Create Field
-              </Typography>
-              <CreateFieldForm onSubmit={createField} />
-            </CardContent>
-          </Card>
           <FieldsTable
             fields={fields}
             onUpdate={updateField}
@@ -68,7 +58,10 @@ export default async function Configuration() {
           <Box>
             <Typography variant={'h5'}>Schema</Typography>
             <Typography variant={'caption'}>
-              Add, update, and remove Schemas.
+              Modify the schema of your data. Schemas are comprised of Sections
+              that appear as accordions on their respective pages. Sections can
+              be drag-and-drop reordered within a Schema, and Fields can be
+              drag-and-drop reordered within a Section.
             </Typography>
           </Box>
           <SchemasControl

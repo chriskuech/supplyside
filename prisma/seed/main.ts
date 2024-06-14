@@ -2,15 +2,13 @@ import { PrismaClient } from '@prisma/client'
 import { hash } from 'bcrypt'
 import { z } from 'zod'
 import { config as loadDotenv } from 'dotenv'
+import { expand as expandDotenv } from 'dotenv-expand'
 
-loadDotenv()
+expandDotenv(loadDotenv())
 
 const config = z
   .object({
-    SALT: z
-      .string()
-      .min(1)
-      .transform((s) => s.replace(/\\\$/g, '$')),
+    SALT: z.string().min(1),
   })
   .parse(process.env)
 
