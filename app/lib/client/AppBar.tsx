@@ -17,6 +17,7 @@ import Link from 'next/link'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import {
+  AlignHorizontalRight,
   Brightness4,
   Brightness7,
   Business,
@@ -38,6 +39,7 @@ export default function AppBar({ isLoggedIn }: { isLoggedIn: boolean }) {
     >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
+          <AlignHorizontalRight />
           <Typography
             fontStyle={'italic'}
             fontWeight={'bold'}
