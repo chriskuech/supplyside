@@ -9,7 +9,7 @@ import { readSession } from './lib/auth'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Zen Procure',
+  title: 'SupplySide',
   description: 'Procurement without the stress',
 }
 

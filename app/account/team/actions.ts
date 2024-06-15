@@ -25,9 +25,9 @@ export async function inviteUser(email: string) {
   })
 
   await smtp.sendEmail({
-    From: 'bot@kuech.dev',
+    From: 'bot@supplyside.io',
     To: email,
-    Subject: 'Hello from Zen Procure',
+    Subject: 'Hello from SupplySide',
     HtmlBody: renderInviteTemplate({ email, password }),
     MessageStream: 'broadcast',
   })
@@ -51,7 +51,7 @@ export async function deleteUser(userId: string) {
 const loginUrl = 'http://localhost:3000/auth/login'
 
 const renderInviteTemplate = (d: { email: string; password: string }) => `
-  <h3>Welcome to ZenProcure!<h3>
+  <h3>Welcome to SupplySide!<h3>
 
   <p>Use the temporary email and password below to log into <a href="${loginUrl}">${loginUrl}</a>.</p>
 

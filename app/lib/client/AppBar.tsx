@@ -38,7 +38,13 @@ export default function AppBar({ isLoggedIn }: { isLoggedIn: boolean }) {
     >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Typography>Zen Procurement</Typography>
+          <Typography
+            fontStyle={'italic'}
+            fontWeight={'bold'}
+            fontSize={'larger'}
+          >
+            SupplySide
+          </Typography>
           {isLoggedIn && (
             <Stack
               flexGrow={1}
