@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TYPE "ResourceType" AS ENUM ('Line', 'Item', 'Order', 'Invoice', 'Vendor');
 
 -- CreateEnum
-CREATE TYPE "FieldType" AS ENUM ('Checkbox', 'Money', 'Number', 'Text', 'RichText', 'Select', 'MultiSelect', 'User');
+CREATE TYPE "FieldType" AS ENUM ('Checkbox', 'Money', 'Number', 'Text', 'RichText', 'Select', 'MultiSelect', 'User', 'Resource');
 
 -- CreateTable
 CREATE TABLE "Account" (
@@ -65,6 +65,7 @@ CREATE TABLE "Field" (
     "name" TEXT NOT NULL,
     "isEditable" BOOLEAN NOT NULL,
     "isVersioned" BOOLEAN NOT NULL,
+    "resourceType" "ResourceType",
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -91,6 +92,7 @@ CREATE TABLE "Value" (
     "string" TEXT,
     "userId" UUID,
     "optionId" UUID,
+    "resourceId" UUID,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -181,6 +183,9 @@ ALTER TABLE "Value" ADD CONSTRAINT "Value_userId_fkey" FOREIGN KEY ("userId") RE
 
 -- AddForeignKey
 ALTER TABLE "Value" ADD CONSTRAINT "Value_optionId_fkey" FOREIGN KEY ("optionId") REFERENCES "Option"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Value" ADD CONSTRAINT "Value_resourceId_fkey" FOREIGN KEY ("resourceId") REFERENCES "Resource"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ValueOption" ADD CONSTRAINT "ValueOption_valueId_fkey" FOREIGN KEY ("valueId") REFERENCES "Value"("id") ON DELETE CASCADE ON UPDATE CASCADE;
