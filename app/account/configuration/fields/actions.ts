@@ -44,7 +44,7 @@ export const createField = async (params: CreateFieldParams) => {
       accountId: session.accountId,
       isVersioned: params.isVersioned,
       isEditable: true,
-      name: params.name,
+      name: sanitizeColumnName(params.name),
       type: params.type,
       resourceType: params.resourceType,
     },
@@ -96,7 +96,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
         accountId: session.accountId,
       },
       data: {
-        name: dto.name,
+        name: sanitizeColumnName(dto.name),
         isVersioned: dto.isVersioned,
       },
     }),
@@ -161,3 +161,5 @@ export const deleteField = async (fieldId: string) => {
 
   revalidatePath('.')
 }
+
+const sanitizeColumnName = (name: string) => name.replace('"', '')

@@ -8,21 +8,40 @@ import {
   Option,
   Value,
   User,
+  Prisma,
 } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { P, match } from 'ts-pattern'
+import { Ajv } from 'ajv'
 import { requireSession } from '../auth'
 import prisma from '../prisma'
-import { JsonLogic, Resource } from './types'
+import { readSchema } from '../schema/actions'
+import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
+import { Field } from '../schema/types'
+import { Data, Resource } from './types'
+import { createSql } from './json-logic/compile'
+import { OrderBy, Where } from './json-logic/types'
+
+const ajv = new Ajv()
 
 export type CreateResourceParams = {
   type: ResourceType
+  data?: Record<string, string | number | boolean | string[] | null>
 }
 
 export const createResource = async ({
   type,
+  data,
 }: CreateResourceParams): Promise<ResourceModel> => {
   const { accountId } = await requireSession()
+
+  const schema = await readSchema({ resourceType: type })
+  const jsonSchema = mapSchemaToJsonSchema(schema)
+
+  if (data && !ajv.validate(jsonSchema, data)) {
+    throw new Error('invalid')
+  }
 
   const {
     _max: { key },
@@ -44,6 +63,89 @@ export const createResource = async ({
       type,
       key: (key ?? 0) + 1,
       revision: 0,
+      ResourceField: data
+        ? {
+            create: schema.fields.map((f) => ({
+              Field: {
+                connect: {
+                  id: f.id,
+                },
+              },
+              Value: {
+                create: match<
+                  [Field, Data[string]],
+                  Prisma.ValueCreateWithoutResourceFieldValueInput
+                >([f, data[f.name]])
+                  .with(
+                    [{ type: 'Checkbox' }, P.union(P.boolean, null)],
+                    ([, val]) => ({
+                      boolean: val,
+                    }),
+                  )
+                  .with(
+                    [
+                      { type: P.union('Text', 'RichText') },
+                      P.union(P.string, null),
+                    ],
+                    ([, val]) => ({
+                      string: val,
+                    }),
+                  )
+                  .with(
+                    [{ type: 'MultiSelect' }, P.union(P.array(P.string), null)],
+                    ([, vals]) => ({
+                      ValueOption: vals
+                        ? {
+                            createMany: {
+                              data: vals.map((optionId) => ({
+                                optionId,
+                              })),
+                            },
+                          }
+                        : undefined,
+                    }),
+                  )
+                  .with(
+                    [{ type: 'Resource' }, P.union(P.string, null)],
+                    ([, val]) => ({
+                      Resource: val
+                        ? {
+                            connect: {
+                              id: val,
+                            },
+                          }
+                        : undefined,
+                    }),
+                  )
+                  .with(
+                    [{ type: 'Select' }, P.union(P.string, null)],
+                    ([, val]) => ({
+                      Option: val
+                        ? {
+                            connect: {
+                              id: val,
+                            },
+                          }
+                        : undefined,
+                    }),
+                  )
+                  .with(
+                    [{ type: 'User' }, P.union(P.string, null)],
+                    ([, val]) => ({
+                      User: val
+                        ? {
+                            connect: {
+                              id: val,
+                            },
+                          }
+                        : undefined,
+                    }),
+                  )
+                  .otherwise(() => ({})),
+              },
+            })),
+          }
+        : undefined,
     },
   })
 }
@@ -58,23 +160,28 @@ export const createResourceWithRedirect = async (
 
 export type ReadResourceParams = {
   type: ResourceType
-  key: number
-}
+  key?: number
+  id?: string
+} & ({ key: number } | { id: string })
 
 export const readResource = async ({
   type,
   key,
+  id,
 }: ReadResourceParams): Promise<Resource> => {
   const { accountId } = await requireSession()
 
   const model = await prisma.resource.findUniqueOrThrow({
     where: {
-      accountId_type_key_revision: {
-        accountId,
-        type,
-        key,
-        revision: 0,
-      },
+      id,
+      accountId_type_key_revision: key
+        ? {
+            accountId,
+            type,
+            key,
+            revision: 0,
+          }
+        : undefined,
     },
     include: {
       ResourceField: {
@@ -101,19 +208,32 @@ export const readResource = async ({
 
 export type ReadResourcesParams = {
   type: ResourceType
-  query?: JsonLogic
+  where?: Where
+  orderBy?: OrderBy[]
 }
 
 export const readResources = async ({
   type,
-  query,
+  where,
+  orderBy,
 }: ReadResourcesParams): Promise<Resource[]> => {
   const { accountId } = await requireSession()
+
+  const schema = await readSchema({ resourceType: type })
+
+  const sql = createSql({ accountId, where, orderBy, schema })
+
+  console.log(sql)
+
+  const results: { _id: string }[] = await prisma.$queryRawUnsafe(sql)
 
   const models = await prisma.resource.findMany({
     where: {
       accountId,
       type,
+      id: {
+        in: results.map((row) => row._id),
+      },
     },
     include: {
       ResourceField: {

@@ -1,11 +1,6 @@
 'use server'
 
-import {
-  Field as FieldModel,
-  FieldType,
-  Option,
-  ResourceType,
-} from '@prisma/client'
+import { Field as FieldModel, Option, ResourceType } from '@prisma/client'
 import { requireSession } from '../auth'
 import prisma from '../prisma'
 import { Field, Schema } from './types'
@@ -55,10 +50,14 @@ export const readSchema = async ({
   return {
     resourceType,
     sections: schema.Section.map((s) => ({
+      id: s.id,
       name: s.name,
       fields: s.SectionField.map((sf) => mapField(sf.Field)),
     })),
-    fields: schema.SchemaField.map((sf) => mapField(sf.Field)),
+    fields: [
+      ...schema.Section.flatMap((s) => s.SectionField.map((sf) => sf.Field)),
+      ...schema.SchemaField.map((sf) => sf.Field),
+    ].map(mapField),
   }
 }
 
@@ -70,11 +69,8 @@ const mapField = (
   id: model.id,
   name: model.name,
   type: model.type,
-  options:
-    model.type === FieldType.Select || model.type === FieldType.MultiSelect
-      ? model.Option.map((o) => ({
-          id: o.id,
-          name: o.name,
-        }))
-      : undefined,
+  options: model.Option.map((o) => ({
+    id: o.id,
+    name: o.name,
+  })),
 })

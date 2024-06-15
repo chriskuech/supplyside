@@ -4,7 +4,11 @@ import { requireSessionWithRedirect } from '@/lib/auth'
 import ResourceFieldsControl from '@/lib/resource-fields/ResourceFieldsControl'
 import ResourceTable from '@/lib/resource/ResourceTable'
 import { readSchema } from '@/lib/schema/actions'
-import { createResource, readResources } from '@/lib/resource/actions'
+import {
+  createResource,
+  readResource,
+  readResources,
+} from '@/lib/resource/actions'
 
 const CreateResourceButton = dynamic(
   () => import('@/lib/resource/CreateResourceButton'),
@@ -18,12 +22,17 @@ export default async function OrderDetail({
 }) {
   await requireSessionWithRedirect()
 
-  const [schema, resources] = await Promise.all([
+  const { id } = await readResource({ type: 'Order', key: Number(key) })
+
+  const [lineSchema, lineResources] = await Promise.all([
     readSchema({
       resourceType: 'Line',
     }),
     readResources({
       type: 'Line',
+      where: {
+        '==': [{ var: 'Order' }, id],
+      },
     }),
   ])
 
@@ -48,9 +57,12 @@ export default async function OrderDetail({
             <CreateResourceButton
               type={'Line'}
               createResource={createResource}
+              data={{
+                Order: id,
+              }}
             />
           </Stack>
-          <ResourceTable schema={schema} resources={resources} />
+          <ResourceTable schema={lineSchema} resources={lineResources} />
         </Stack>
       </Stack>
     </Container>

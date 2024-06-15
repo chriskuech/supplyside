@@ -10,4 +10,4 @@ if (!gbl.prisma) {
   process.on('exit', () => gbl.prisma.$disconnect())
 }
 
-export default gbl.prisma
+export default gbl.prisma as PrismaClient

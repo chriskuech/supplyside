@@ -8,6 +8,7 @@ import {
   Select,
   TextField,
   TextareaAutosize,
+  Typography,
 } from '@mui/material'
 import { User } from '@prisma/client'
 import { match } from 'ts-pattern'
@@ -122,5 +123,6 @@ export default function ResourceFieldControl({
         ))}
       </Select>
     ))
+    .with('Resource', () => <Typography>NYI</Typography>)
     .exhaustive()
 }

@@ -5,15 +5,18 @@ import { Button } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 import { redirect } from 'next/navigation'
 import { CreateResourceParams } from './actions'
+import { Data } from './types'
 
 type Props = {
   type: ResourceType
   createResource: (params: CreateResourceParams) => Promise<{ key: number }>
   shouldRedirect?: boolean
+  data?: Data
 }
 
 export default function CreateResourceButton({
   type,
+  data,
   createResource,
   shouldRedirect,
 }: Props) {
@@ -21,7 +24,7 @@ export default function CreateResourceButton({
     <Button
       variant="contained"
       onClick={() =>
-        createResource({ type }).then(
+        createResource({ type, data }).then(
           ({ key }) =>
             shouldRedirect && redirect(`/${type.toLowerCase()}/${key}`),
         )

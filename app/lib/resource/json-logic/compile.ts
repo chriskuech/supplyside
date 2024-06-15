@@ -1,38 +1,97 @@
-import { Prisma, ResourceType } from '@prisma/client'
-import { Sql } from '@prisma/client/runtime/library'
-import { JsonLogic } from './types'
+import { FieldType, Value } from '@prisma/client'
+import { P, match } from 'ts-pattern'
+import { JsonLogicValue, OrderBy, Where } from './types'
 import { Schema } from '@/lib/schema/types'
 
 export type MapToSqlParams = {
   accountId: string
-  resourceType: ResourceType
-  query: JsonLogic
+  schema: Schema
+  where: Where | undefined
+  orderBy: OrderBy[] | undefined
 }
 
-export const createSql = ({ accountId, resourceType, query }: MapToSqlParams) =>
-  Prisma.sql`
+export const createSql = ({
+  accountId,
+  schema,
+  where,
+  orderBy,
+}: MapToSqlParams) =>
+  `
     WITH "View" AS (
       SELECT
-        "Resource"."id" AS "resourceId",
-        "Resource"."type" AS "resourceType",
-        "Field"."name" AS "fieldName",
-        "Value"."boolean" AS "valueBoolean",
-        "Value"."number" AS "valueNumber",
-        "Value"."string" AS "valueString",
-        "Value"."userId" AS "valueUserId",
-        "Value"."optionId" AS "valueOptionId",
-        "Value"."
+        "Resource"."id" AS "_id",
+        ${schema.fields.map((f) => `(${createPropertySubquery(f.type)}) AS ${sanitizeColumnName(f.name)}`).join(', ')}
       FROM "Resource"
-      LEFT JOIN "ResourceField" ON "ResourceField"."resourceId" = "Resource"."id"
-      LEFT JOIN "Field" ON "Field"."id" = "ResourceField"."fieldId"
-      LEFT JOIN "Value" ON "Value"."id" = "ResourceField"."valueId"
+      WHERE "Resource"."accountId" = '${accountId}'
+        AND "type" = '${schema.resourceType}'
     )
-    SELECT "id"
-    FROM "Resource"
-    WHERE "accountId" = ${accountId}
-      AND "type" = ${resourceType}
+    SELECT "_id"
+    FROM "View"
+    ${where ? `WHERE ${createWhere(where)}` : ''}
+    ${orderBy ? `ORDER BY ${createOrderBy(orderBy)}` : ''}
   `
 
-const mapToClause = (schema: Schema, query: JsonLogic): Sql =>
-  Prisma.sql`
-  `
+const createWhere = (where: Where) =>
+  match(where)
+    .with(
+      { '==': P.any },
+      ({ '==': [{ var: var_ }, val] }) =>
+        `${sanitizeColumnName(var_)} = ${sanitizeValue(val)}`,
+    )
+    .with(
+      { '!=': P.any },
+      ({ '!=': [{ var: var_ }, val] }) =>
+        `${sanitizeColumnName(var_)} <> ${sanitizeValue(val)}`,
+    )
+    .exhaustive()
+
+const createOrderBy = (orderBy: OrderBy[]) =>
+  orderBy.map((o) => `${sanitizeValue(o.var)} ${o.dir}`).join(', ')
+
+const createPropertySubquery = (type: FieldType) =>
+  match(type)
+    .with(
+      'MultiSelect',
+      () => `
+        SELECT array_agg("ValueOption"."optionId")
+        FROM "ResourceField"
+        LEFT JOIN "Field" ON "Field"."id" = "ResourceField"."fieldId"
+        LEFT JOIN "ValueOption" ON "ValueOption"."valueId" = "ResourceField"."valueId"
+        WHERE "Resource"."id" = "ResourceField"."resourceId"
+      `,
+    )
+    .with(
+      P.any,
+      (t) => `
+        SELECT "Value"."${mapFieldTypeToValueColumn(t)}"
+        FROM "ResourceField"
+        LEFT JOIN "Field" ON "Field"."id" = "ResourceField"."fieldId"
+        LEFT JOIN "Value" ON "Value"."id" = "ResourceField"."valueId"
+        WHERE "Resource"."id" = "ResourceField"."resourceId"
+      `,
+    )
+    .exhaustive()
+
+const mapFieldTypeToValueColumn = (t: Exclude<FieldType, 'MultiSelect'>) =>
+  match<Exclude<FieldType, 'MultiSelect'>, keyof Value>(t)
+    .with('Checkbox', () => 'boolean')
+    .with(P.union('Money', 'Number'), () => 'number')
+    .with('User', () => 'userId')
+    .with('Select', () => 'optionId')
+    .with(P.union('RichText', 'Text'), () => 'string')
+    .with('Resource', () => 'resourceId')
+    .exhaustive()
+
+const sanitizeColumnName = (column: string) => {
+  if (!/^[a-zA-Z0-9_]+$/.test(column)) {
+    throw new Error('Invalid column name')
+  }
+
+  return `"${column}"`
+}
+
+const sanitizeValue = (value: JsonLogicValue) =>
+  match(value)
+    .with(P.string, (s) => `'${s.replace(/'/g, "''")}'`)
+    .with(P.union(P.boolean, P.number, null), (n) => String(n))
+    .exhaustive()

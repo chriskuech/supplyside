@@ -42,7 +42,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
           sx={{ width: 300 }}
           label="Name"
           value={name ?? ''}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value.replace('"', ''))}
         />
 
         <FormControl sx={{ width: 150 }}>

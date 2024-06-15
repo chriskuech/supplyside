@@ -22,3 +22,5 @@ export type Value = {
   user: User | null
   resourceKey?: number | null
 }
+
+export type Data = Record<string, string[] | string | number | boolean | null>

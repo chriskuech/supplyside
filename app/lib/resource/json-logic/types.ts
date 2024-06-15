@@ -1,6 +1,10 @@
 type JsonLogicVariable = { var: string }
-type JsonLogicValue = string | number | boolean | null
+export type JsonLogicValue = string | number | boolean | null
 
-export type JsonLogic =
+type JsonLogic =
   | { '==': [JsonLogicVariable, JsonLogicValue] }
   | { '!=': [JsonLogicVariable, JsonLogicValue] }
+
+export type Where = JsonLogic
+
+export type OrderBy = JsonLogicVariable & { dir: 'asc' | 'desc' }
