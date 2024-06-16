@@ -51,8 +51,8 @@ jobs:
         with:
           name: node-app
 
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
+      # - name: Unzip artifact for deployment
+      #   run: unzip release.zip
       
       - name: Login to Azure
         uses: azure/login@v1
@@ -67,5 +67,6 @@ jobs:
         with:
           app-name: 'supplyside-int'
           slot-name: 'Production'
-          package: .
+          # package: .
+          package: release.zip
           
