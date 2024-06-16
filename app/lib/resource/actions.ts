@@ -221,7 +221,7 @@ export const readResources = async ({
 
   const schema = await readSchema({ resourceType: type })
 
-  const sql = createSql({ accountId, where, orderBy, schema })
+  const sql = createSql({ accountId, schema, where, orderBy })
 
   console.log(sql)
 
