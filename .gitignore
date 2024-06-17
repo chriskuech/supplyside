@@ -2,6 +2,9 @@
 
 .env.*
 
+# IDK wy these keep appearing
+*.swp
+
 # dependencies
 /node_modules
 /.pnp

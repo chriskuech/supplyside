@@ -11,5 +11,9 @@
     }
   },
   "eslint.format.enable": true,
-  "prettier.enable": false
+  // "prettier.enable": false,
+  "eslint.runtime": "node",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
