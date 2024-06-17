@@ -44,7 +44,7 @@ enum ResourceType {
   Line
   Item
   Order
-  Invoice
+  Bill
   Vendor
 }
 

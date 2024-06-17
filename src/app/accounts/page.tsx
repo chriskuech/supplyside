@@ -1,9 +1,9 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
-import { inviteUser } from '../account/team/actions'
 import prisma from '@/lib/prisma'
 import { impersonate, requireSessionWithRedirect } from '@/lib/session'
 import { systemAccountId } from '@/lib/const'
+import { inviteAccount } from '@/lib/iam/actions'
 
 const InviteUserControl = dynamic(() => import('@/lib/ux/InviteUserControl'), {
   ssr: false,
@@ -29,7 +29,7 @@ export default async function AdminPage() {
       <Stack spacing={2}>
         <Typography variant="h4">Accounts</Typography>
         <Box width={400}>
-          <InviteUserControl onSubmit={inviteUser} />
+          <InviteUserControl onSubmit={inviteAccount} />
         </Box>
         <AccountsTable accounts={accounts} onRowClick={impersonate} />
       </Stack>
