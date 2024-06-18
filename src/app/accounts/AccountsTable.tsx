@@ -9,9 +9,16 @@ import { systemAccountId } from '@/lib/const'
 type Props = {
   accounts: Account[]
   onRowClick: (accountId: string) => void
+  onDelete: (accountId: string) => void
+  onRefresh: (accountId: string) => void
 }
 
-export default function AccountsTable({ accounts, onRowClick }: Props) {
+export default function AccountsTable({
+  accounts,
+  onRowClick,
+  onDelete,
+  onRefresh,
+}: Props) {
   return (
     <DataGrid
       columns={[
@@ -38,18 +45,17 @@ export default function AccountsTable({ accounts, onRowClick }: Props) {
           field: 'actions',
           headerName: 'Actions',
           type: 'actions',
-          getActions: ({ row: { id: accountId } }) => [
-            <IconButton key="sync">
-              <Sync />
-            </IconButton>,
-            ...(accountId !== systemAccountId
+          getActions: ({ row: { id: accountId } }) =>
+            accountId !== systemAccountId
               ? [
-                  <IconButton key="delete">
+                  <IconButton key="sync" onClick={() => onRefresh(accountId)}>
+                    <Sync />
+                  </IconButton>,
+                  <IconButton key="delete" onClick={() => onDelete(accountId)}>
                     <Delete />
                   </IconButton>,
                 ]
-              : []),
-          ],
+              : [],
         },
       ]}
       rows={accounts}

@@ -1,7 +1,7 @@
 import { FieldType, Value } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { JsonLogicValue, OrderBy, Where } from './types'
-import { Schema } from '@/lib/schema/types'
+import { Schema, Field } from '@/domain/schema/types'
 
 export type MapToSqlParams = {
   accountId: string
@@ -23,7 +23,7 @@ export const createSql = ({
           '"Resource"."id" AS "_id"',
           ...schema.fields.map(
             (f) =>
-              `(${createPropertySubquery(f.type)}) AS ${sanitizeColumnName(f.name)}`,
+              `(${createPropertySubquery(f)}) AS ${sanitizeColumnName(f.name)}`,
           ),
         ].join(', ')}
       FROM "Resource"
@@ -53,16 +53,16 @@ const createWhere = (where: Where) =>
 const createOrderBy = (orderBy: OrderBy[]) =>
   orderBy.map((o) => `${sanitizeValue(o.var)} ${o.dir}`).join(', ')
 
-const createPropertySubquery = (type: FieldType) =>
-  match(type)
+const createPropertySubquery = (field: Field) =>
+  match(field.type)
     .with(
       'MultiSelect',
       () => `
         SELECT array_agg("ValueOption"."optionId")
         FROM "ResourceField"
-        LEFT JOIN "Field" ON "Field"."id" = "ResourceField"."fieldId"
         LEFT JOIN "ValueOption" ON "ValueOption"."valueId" = "ResourceField"."valueId"
         WHERE "Resource"."id" = "ResourceField"."resourceId"
+          AND "ResourceField"."fieldId" = '${field.id}'
       `,
     )
     .with(
@@ -70,9 +70,9 @@ const createPropertySubquery = (type: FieldType) =>
       (t) => `
         SELECT "Value"."${mapFieldTypeToValueColumn(t)}"
         FROM "ResourceField"
-        LEFT JOIN "Field" ON "Field"."id" = "ResourceField"."fieldId"
         LEFT JOIN "Value" ON "Value"."id" = "ResourceField"."valueId"
         WHERE "Resource"."id" = "ResourceField"."resourceId"
+          AND "ResourceField"."fieldId" = '${field.id}'
       `,
     )
     .exhaustive()

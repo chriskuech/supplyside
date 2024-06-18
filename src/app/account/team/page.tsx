@@ -4,9 +4,9 @@ import UsersTable from './UsersTable'
 import { inviteUserToAccount } from './actions'
 import { requireSession } from '@/lib/session'
 import prisma from '@/lib/prisma'
-import { deleteUser } from '@/lib/iam/actions'
+import { deleteUser } from '@/domain/iam/user'
 
-const InviteUserControl = dynamic(() => import('@/lib/ux/InviteUserControl'), {
+const InviteUserControl = dynamic(() => import('@/lib/iam/InviteUserControl'), {
   ssr: false,
 })
 

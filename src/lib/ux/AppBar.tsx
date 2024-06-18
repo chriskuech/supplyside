@@ -6,11 +6,11 @@ import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 import Link from 'next/link'
 import { AlignHorizontalRight } from '@mui/icons-material'
-import ImpersonationControl from '../impersonation/ImpersonationControl'
 import { readSession } from '../session'
 import { systemAccountId } from '../const'
-import { AccountMenu } from './AccountMenu'
+import ImpersonationControl from '../iam/ImpersonationControl'
 import { UserMenu } from './UserMenu'
+import { AccountMenu } from './AccountMenu'
 
 export default async function AppBar() {
   const session = await readSession()

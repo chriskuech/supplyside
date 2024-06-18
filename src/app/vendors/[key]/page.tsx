@@ -1,6 +1,6 @@
 import { Container, Stack, Typography } from '@mui/material'
 import { requireSessionWithRedirect } from '@/lib/session'
-import ResourceFieldsControl from '@/lib/resource-fields/ResourceFieldsControl'
+import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 
 export default async function VendorDetail({
   params: { key },

@@ -1,7 +1,7 @@
 import { P, match } from 'ts-pattern'
 import { concat, filter, pipe, unique } from 'remeda'
 import { OrderBy, Where } from './types'
-import { Schema } from '@/lib/schema/types'
+import { Schema } from '@/domain/schema/types'
 
 export const getInvalidVars = ({
   schema,

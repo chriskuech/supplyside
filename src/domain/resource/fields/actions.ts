@@ -1,9 +1,9 @@
 'use server'
 
 import { Prisma } from '@prisma/client'
-import { revalidatePath } from 'next/cache'
-import { requireSession } from '../session'
-import prisma from '../prisma'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import prisma from '@/lib/prisma'
+import { requireSession } from '@/lib/session'
 
 export type UpdateValueDto = {
   resourceId: string
@@ -47,6 +47,8 @@ export const updateValue = async ({
 
 export const readUsers = async () => {
   const { accountId } = await requireSession()
+
+  revalidateTag('resource')
 
   return await prisma.user.findMany({
     where: { accountId },

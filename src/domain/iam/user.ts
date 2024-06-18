@@ -1,24 +1,16 @@
 'use server'
 
-import { ServerClient } from 'postmark'
 import { faker } from '@faker-js/faker'
 import { hash } from 'bcrypt'
-import { revalidatePath } from 'next/cache'
+import { revalidateTag } from 'next/cache'
+import { ServerClient } from 'postmark'
 import { config } from '@/lib/config'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
 
 const smtp = new ServerClient(config.POSTMARK_API_KEY)
 
-export const inviteAccount = async (email: string) => {
-  const { id: accountId } = await prisma.account.create({
-    data: {
-      name: `${email}'s Account`,
-    },
-  })
-
-  await inviteUser(accountId, email)
-}
+const loginUrl = `${config.BASE_URL}/auth/login`
 
 export async function inviteUser(accountId: string, email: string) {
   const password = faker.string.nanoid()
@@ -37,26 +29,11 @@ export async function inviteUser(accountId: string, email: string) {
     To: email,
     Subject: 'Hello from SupplySide',
     HtmlBody: renderInviteTemplate({ email, password }),
-    MessageStream: 'broadcast',
+    MessageStream: 'outbound',
   })
 
-  revalidatePath('.')
+  revalidateTag('iam')
 }
-
-export async function deleteUser(userId: string) {
-  const { accountId } = await requireSession()
-
-  await prisma.user.delete({
-    where: {
-      accountId,
-      id: userId,
-    },
-  })
-
-  revalidatePath('.')
-}
-
-const loginUrl = `${config.BASE_URL}/auth/login`
 
 const renderInviteTemplate = (d: { email: string; password: string }) => `
   <h3>Welcome to SupplySide!<h3>
@@ -75,3 +52,16 @@ const renderInviteTemplate = (d: { email: string; password: string }) => `
     </tr>
   </table>
 `
+
+export async function deleteUser(userId: string) {
+  const { accountId } = await requireSession()
+
+  await prisma.user.delete({
+    where: {
+      accountId,
+      id: userId,
+    },
+  })
+
+  revalidateTag('iam')
+}

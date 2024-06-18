@@ -2,9 +2,9 @@
 
 import { fail } from 'assert'
 import dynamic from 'next/dynamic'
-import { systemAccountId } from '../const'
 import prisma from '@/lib/prisma'
 import { impersonate, readSession } from '@/lib/session'
+import { systemAccountId } from '@/lib/const'
 
 const ImpersonationClientControl = dynamic(
   () => import('./ImpersonationClientControl'),

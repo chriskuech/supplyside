@@ -1,14 +1,14 @@
 import { Container, Stack, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import { requireSessionWithRedirect } from '@/lib/session'
-import ResourceFieldsControl from '@/lib/resource-fields/ResourceFieldsControl'
+import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import ResourceTable from '@/lib/resource/ResourceTable'
-import { readSchema } from '@/lib/schema/actions'
+import { readSchema } from '@/domain/schema/actions'
 import {
   createResource,
   readResource,
   readResources,
-} from '@/lib/resource/actions'
+} from '@/domain/resource/actions'
 
 const CreateResourceButton = dynamic(
   () => import('@/lib/resource/CreateResourceButton'),

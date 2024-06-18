@@ -13,9 +13,9 @@ import {
 import { User } from '@prisma/client'
 import { match } from 'ts-pattern'
 import { Money } from '@mui/icons-material'
-import { Field } from '../schema/types'
-import { Value } from '../resource/types'
-import { UpdateValueDto } from './actions'
+import { Value } from '@/domain/resource/types'
+import { UpdateValueDto } from '@/domain/resource/fields/actions'
+import { Field } from '@/domain/schema/types'
 
 type Props = {
   id: string

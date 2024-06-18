@@ -4,8 +4,8 @@ import { Add } from '@mui/icons-material'
 import { Button } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 import { redirect } from 'next/navigation'
-import { CreateResourceParams } from './actions'
-import { Data } from './types'
+import { CreateResourceParams } from '@/domain/resource/actions'
+import { Data } from '@/domain/resource/types'
 
 type Props = {
   type: ResourceType

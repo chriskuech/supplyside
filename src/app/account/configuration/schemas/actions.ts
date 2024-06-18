@@ -2,7 +2,6 @@
 
 import { ResourceType } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
-import { map, pipe, values } from 'remeda'
 import { requireSession } from '@/lib/session'
 import prisma from '@/lib/prisma'
 
@@ -26,53 +25,38 @@ export type Schema = {
 export const readSchemas = async (): Promise<Schema[]> => {
   const { accountId } = await requireSession()
 
-  return await Promise.all(
-    pipe(
-      ResourceType,
-      values(),
-      map((resourceType) =>
-        prisma.schema.upsert({
-          where: {
-            accountId_resourceType: {
-              accountId,
-              resourceType,
-            },
-          },
-          create: {
-            accountId,
-            resourceType,
-          },
-          update: {},
-          select: {
-            id: true,
-            resourceType: true,
-            Section: {
-              select: {
-                id: true,
-                name: true,
-                SectionField: {
-                  select: {
-                    Field: {
-                      select: {
-                        id: true,
-                        name: true,
-                      },
-                    },
-                  },
-                  orderBy: {
-                    order: 'asc',
-                  },
+  return await prisma.schema.findMany({
+    where: { accountId },
+    select: {
+      id: true,
+      resourceType: true,
+      Section: {
+        select: {
+          id: true,
+          name: true,
+          SectionField: {
+            select: {
+              Field: {
+                select: {
+                  id: true,
+                  name: true,
                 },
               },
-              orderBy: {
-                order: 'asc',
-              },
+            },
+            orderBy: {
+              order: 'asc',
             },
           },
-        }),
-      ),
-    ),
-  )
+        },
+        orderBy: {
+          order: 'asc',
+        },
+      },
+    },
+    orderBy: {
+      resourceType: 'asc',
+    },
+  })
 }
 
 export const updateSchema = async (dto: {

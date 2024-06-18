@@ -29,6 +29,5 @@ export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
       }))
       .exhaustive(),
   ]),
-  required: schema.fields.map((f) => f.name),
   additionalProperties: false,
 })

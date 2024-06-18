@@ -6,10 +6,10 @@ import { Chip, IconButton } from '@mui/material'
 import { Check, Delete } from '@mui/icons-material'
 import { P, match } from 'ts-pattern'
 import { useMemo } from 'react'
-import { selectFields } from '../schema/selectors'
-import { Schema } from '../schema/types'
-import { deleteResource } from './actions'
-import { Resource } from './types'
+import { Resource } from '@/domain/resource/types'
+import { Schema } from '@/domain/schema/types'
+import { selectFields } from '@/domain/schema/selectors'
+import { deleteResource } from '@/domain/resource/actions'
 
 type Props = {
   schema: Schema

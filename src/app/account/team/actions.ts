@@ -1,6 +1,6 @@
 'use server'
 
-import { inviteUser } from '@/lib/iam/actions'
+import { inviteUser } from '@/domain/iam/user'
 import { requireSession } from '@/lib/session'
 
 export const inviteUserToAccount = async (email: string) => {

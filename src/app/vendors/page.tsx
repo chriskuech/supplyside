@@ -1,4 +1,4 @@
-import ListPage from '@/lib/ux/ListPage'
+import ListPage from '@/lib/resource/ListPage'
 
 export default async function Vendors() {
   return <ListPage resourceType={'Vendor'} />

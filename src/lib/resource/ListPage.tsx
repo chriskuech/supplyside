@@ -4,17 +4,16 @@ import { Container, Stack, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import { ResourceType } from '@prisma/client'
 import { requireSessionWithRedirect } from '@/lib/session'
-import { createResource, readResources } from '@/lib/resource/actions'
-import { readSchema } from '@/lib/schema/actions'
+import { readSchema } from '@/domain/schema/actions'
+import { createResource, readResources } from '@/domain/resource/actions'
 
-const ResourceTable = dynamic(() => import('@/lib/resource/ResourceTable'), {
+const ResourceTable = dynamic(() => import('./ResourceTable'), {
   ssr: false,
 })
 
-const CreateResourceButton = dynamic(
-  () => import('@/lib/resource/CreateResourceButton'),
-  { ssr: false },
-)
+const CreateResourceButton = dynamic(() => import('./CreateResourceButton'), {
+  ssr: false,
+})
 
 type Props = {
   resourceType: ResourceType

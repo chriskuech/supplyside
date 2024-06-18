@@ -13,14 +13,14 @@ import {
 import { revalidatePath } from 'next/cache'
 import { P, match } from 'ts-pattern'
 import { Ajv } from 'ajv'
-import { requireSession } from '../session'
-import prisma from '../prisma'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { Field } from '../schema/types'
 import { Data, Resource } from './types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
+import { requireSession } from '@/lib/session'
+import prisma from '@/lib/prisma'
 
 const ajv = new Ajv()
 
@@ -54,7 +54,7 @@ export const createResource = async ({
     },
   })
 
-  revalidatePath('.')
+  revalidatePath('resource')
 
   return await prisma.resource.create({
     data: {
@@ -194,6 +194,8 @@ export const readResource = async ({
     },
   })
 
+  revalidatePath('resource')
+
   return mapResource(model)
 }
 
@@ -212,6 +214,7 @@ export const readResources = async ({
 
   const schema = await readSchema({ resourceType: type })
   const sql = createSql({ accountId, schema, where, orderBy })
+  console.log('sql', sql)
   const results: { _id: string }[] = await prisma.$queryRawUnsafe(sql)
 
   const models = await prisma.resource.findMany({
@@ -242,6 +245,8 @@ export const readResources = async ({
     },
   })
 
+  revalidatePath('resource')
+
   return models.map(mapResource)
 }
 
@@ -261,7 +266,7 @@ export const deleteResource = async ({
     },
   })
 
-  revalidatePath('.')
+  revalidatePath('resource')
 }
 
 const mapResource = (

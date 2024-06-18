@@ -1,25 +1,26 @@
 'use server'
 
 import { Field as FieldModel, Option, ResourceType } from '@prisma/client'
-import { requireSession } from '../session'
-import prisma from '../prisma'
 import { Field, Schema } from './types'
+import { requireSession } from '@/lib/session'
+import prisma from '@/lib/prisma'
 
 type ReadSchemaParams = {
   resourceType: ResourceType
+  isSystem?: boolean
 }
 
 export const readSchema = async ({
   resourceType,
+  isSystem,
 }: ReadSchemaParams): Promise<Schema> => {
   const { accountId } = await requireSession()
 
-  const schema = await prisma.schema.findUniqueOrThrow({
+  const schemas = await prisma.schema.findMany({
     where: {
-      accountId_resourceType: {
-        accountId,
-        resourceType,
-      },
+      accountId,
+      resourceType,
+      isSystem,
     },
     include: {
       Section: {
@@ -35,29 +36,22 @@ export const readSchema = async ({
           },
         },
       },
-      SchemaField: {
-        include: {
-          Field: {
-            include: {
-              Option: true,
-            },
-          },
-        },
-      },
     },
   })
 
   return {
     resourceType,
-    sections: schema.Section.map((s) => ({
-      id: s.id,
-      name: s.name,
-      fields: s.SectionField.map((sf) => mapField(sf.Field)),
-    })),
-    fields: [
-      ...schema.Section.flatMap((s) => s.SectionField.map((sf) => sf.Field)),
-      ...schema.SchemaField.map((sf) => sf.Field),
-    ].map(mapField),
+    sections: schemas
+      .flatMap((s) => s.Section)
+      .map((s) => ({
+        id: s.id,
+        name: s.name,
+        fields: s.SectionField.map((sf) => mapField(sf.Field)),
+      })),
+    fields: schemas
+      .flatMap((s) => s.Section)
+      .flatMap((s) => s.SectionField)
+      .map((sf) => mapField(sf.Field)),
   }
 }
 

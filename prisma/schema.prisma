@@ -100,6 +100,7 @@ model Field {
   isEditable   Boolean
   isVersioned  Boolean
   resourceType ResourceType?
+  templateId   String?       @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -107,10 +108,10 @@ model Field {
   Option             Option[]
   Account            Account         @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   ResourceFieldValue ResourceField[]
-  SchemaField        SchemaField[]
   SectionField       SectionField[]
 
   @@unique([accountId, name])
+  @@unique([accountId, templateId])
 }
 
 model Option {
@@ -163,12 +164,12 @@ model Schema {
   id           String       @id @default(uuid()) @db.Uuid
   accountId    String       @db.Uuid
   resourceType ResourceType
+  isSystem     Boolean
 
-  Account     Account       @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Section     Section[]
-  SchemaField SchemaField[]
+  Account Account   @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Section Section[]
 
-  @@unique([accountId, resourceType])
+  @@unique([accountId, resourceType, isSystem])
 }
 
 model Section {
@@ -179,16 +180,8 @@ model Section {
 
   Schema       Schema         @relation(fields: [schemaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   SectionField SectionField[]
-}
 
-model SchemaField {
-  schemaId String @db.Uuid
-  fieldId  String @db.Uuid
-
-  Schema Schema @relation(fields: [schemaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Field  Field  @relation(fields: [fieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@id([schemaId, fieldId])
+  @@unique([schemaId, name])
 }
 
 model SectionField {

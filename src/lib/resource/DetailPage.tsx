@@ -2,16 +2,15 @@
 
 import { Container, Stack, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
+import ResourceTable from './ResourceTable'
 import { requireSessionWithRedirect } from '@/lib/session'
-import ResourceFieldsControl from '@/lib/resource-fields/ResourceFieldsControl'
-import ResourceTable from '@/lib/resource/ResourceTable'
-import { readSchema } from '@/lib/schema/actions'
-import { createResource, readResources } from '@/lib/resource/actions'
+import { readResources, createResource } from '@/domain/resource/actions'
+import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
+import { readSchema } from '@/domain/schema/actions'
 
-const CreateResourceButton = dynamic(
-  () => import('@/lib/resource/CreateResourceButton'),
-  { ssr: false },
-)
+const CreateResourceButton = dynamic(() => import('./CreateResourceButton'), {
+  ssr: false,
+})
 
 export default async function DetailPage({
   params: { key },
