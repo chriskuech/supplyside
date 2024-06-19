@@ -12,8 +12,8 @@ import { ResourceType } from '@prisma/client'
 import { map, pipe, range } from 'remeda'
 import dynamic from 'next/dynamic'
 import { ExpandMore } from '@mui/icons-material'
-import { readResource } from '../../domain/resource/actions'
-import { readUsers, updateValue } from '../../domain/resource/fields/actions'
+import { readResource } from '@/domain/resource/actions'
+import { readUsers, updateValue } from '@/domain/resource/fields/actions'
 import { readSchema } from '@/domain/schema/actions'
 
 const ResourceFieldControl = dynamic(() => import('./ResourceFieldControl'), {
@@ -46,7 +46,9 @@ export default async function ResourceFieldsControl({
           {ss.map((s) => (
             <Accordion key={s.id} defaultExpanded>
               <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography variant="h6">{s.name}</Typography>
+                <Typography variant="h6" fontWeight={'bold'}>
+                  {s.name}
+                </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <Stack spacing={2}>
