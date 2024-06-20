@@ -1,16 +1,28 @@
 'use client'
 
-import { IconButton, ListItemIcon, ListItemText, useTheme } from '@mui/material'
+import {
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  ToggleButton,
+  ToggleButtonGroup,
+} from '@mui/material'
 import Link from 'next/link'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import { Brightness4, Brightness7, Logout, Person } from '@mui/icons-material'
+import {
+  Computer,
+  DarkMode,
+  LightMode,
+  Logout,
+  Palette,
+  Person,
+} from '@mui/icons-material'
 import { useState } from 'react'
-import { useColorModeContext } from './ColorModeProvider'
+import { useThemePreference } from './DynamicThemeProvider'
 
 export function UserMenu() {
-  const theme = useTheme()
-  const { toggleColorMode } = useColorModeContext()
+  const [themePreference, setThemePreference] = useThemePreference()
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
@@ -24,12 +36,28 @@ export function UserMenu() {
         open={!!anchorEl}
         onClose={() => setAnchorEl(null)}
       >
-        <MenuItem onClick={toggleColorMode}>
+        <MenuItem>
           <ListItemIcon>
-            {theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+            <Palette />
           </ListItemIcon>
           <ListItemText>
-            {theme.palette.mode === 'dark' ? 'Light Theme' : 'Dark Theme'}
+            <ToggleButtonGroup
+              value={themePreference}
+              exclusive
+              onChange={(e, value) => value && setThemePreference(value)}
+              aria-label="theme selection"
+              size="small"
+            >
+              <ToggleButton value="light" aria-label="light theme">
+                <LightMode />
+              </ToggleButton>
+              <ToggleButton value="dark" aria-label="dark theme">
+                <DarkMode />
+              </ToggleButton>
+              <ToggleButton value="system" aria-label="system theme">
+                <Computer />
+              </ToggleButton>
+            </ToggleButtonGroup>
           </ListItemText>
         </MenuItem>
         <MenuItem

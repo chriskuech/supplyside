@@ -1,15 +1,18 @@
 import { Box, CssBaseline } from '@mui/material'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import { PropsWithChildren } from 'react'
-import AppBar from '../lib/ux/AppBar'
-import { ColorModeProvider } from '../lib/ux/ColorModeProvider'
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
+import dynamic from 'next/dynamic'
+import AppBar from '@/lib/ux/AppBar'
 
-const inter = Inter({ subsets: ['latin'] })
+const DynamicThemeProvider = dynamic(
+  () => import('@/lib/ux/DynamicThemeProvider'),
+  { ssr: false },
+)
 
 export const metadata: Metadata = {
   title: 'SupplySide',
-  description: 'Procurement without the stress',
+  description: 'Software for the supply side of your business',
 }
 
 export default async function RootLayout({
@@ -21,7 +24,6 @@ export default async function RootLayout({
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </head>
       <body
-        className={inter.className}
         style={{
           width: '100vw',
           height: '100vh',
@@ -29,13 +31,15 @@ export default async function RootLayout({
           flexDirection: 'column',
         }}
       >
-        <ColorModeProvider>
-          <CssBaseline />
-          <AppBar />
-          <Box width={'100vw'} flexGrow={1}>
-            {children}
-          </Box>
-        </ColorModeProvider>
+        <AppRouterCacheProvider>
+          <DynamicThemeProvider>
+            <CssBaseline />
+            <AppBar />
+            <Box width={'100vw'} flexGrow={1}>
+              {children}
+            </Box>
+          </DynamicThemeProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
   )

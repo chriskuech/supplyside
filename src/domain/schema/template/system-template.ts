@@ -16,7 +16,7 @@ export const fields = {
     name: 'Description',
     type: 'RichText',
   },
-  Bill: {
+  bill: {
     templateId: '50292f4a-f926-4d0f-a6e9-6b7a48f8b4c4',
     name: 'Bill',
     type: 'Resource',
@@ -87,7 +87,7 @@ export const schemas: SchemaTemplate[] = [
     sections: [
       {
         name: 'Line',
-        fields: [fields.order, fields.item, fields.quantity, fields.Bill],
+        fields: [fields.order, fields.item, fields.quantity, fields.bill],
       },
     ],
   },
