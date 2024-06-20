@@ -3,7 +3,6 @@
 import { Add } from '@mui/icons-material'
 import { Button } from '@mui/material'
 import { ResourceType } from '@prisma/client'
-import { redirect } from 'next/navigation'
 import { CreateResourceParams } from '@/domain/resource/actions'
 import { Data } from '@/domain/resource/types'
 
@@ -24,10 +23,11 @@ export default function CreateResourceButton({
     <Button
       variant="contained"
       onClick={() =>
-        createResource({ type, data }).then(
-          ({ key }) =>
-            shouldRedirect && redirect(`/${type.toLowerCase()}s/${key}`),
-        )
+        createResource({ type, data }).then(({ key }) => {
+          if (shouldRedirect) {
+            location.href = `/${type.toLowerCase()}s/${key}`
+          }
+        })
       }
       endIcon={<Add />}
     >
