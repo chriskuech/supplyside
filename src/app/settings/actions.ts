@@ -22,14 +22,10 @@ export const handleSaveSettings = async (
 
   const update: Prisma.UserUpdateInput = {}
 
-  if (file !== null) {
-    if (typeof file === 'string') {
-      errors['file'] = 'File must be a file'
-    } else {
-      const { id: logoBlobId } = await createBlob({ accountId, file })
+  if (file && typeof file !== 'string' && file.size > 0) {
+    const { id: imageBlobId } = await createBlob({ accountId, file })
 
-      update['ImageBlob'] = { connect: { id: logoBlobId } }
-    }
+    update['ImageBlob'] = { connect: { id: imageBlobId } }
   }
 
   if (firstName !== null) {

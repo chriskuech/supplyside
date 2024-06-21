@@ -17,6 +17,19 @@ export const inviteAccount = async (email: string) => {
   revalidateTag('iam')
 }
 
+export const readAccount = async (accountId: string) => {
+  revalidateTag('iam')
+
+  return prisma.account.findUnique({
+    where: {
+      id: accountId,
+    },
+    include: {
+      LogoBlob: true,
+    },
+  })
+}
+
 export const deleteAccount = async (accountId: string) => {
   await prisma.account.delete({
     where: {

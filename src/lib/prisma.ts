@@ -8,6 +8,14 @@ export default lazyStatic(Symbol.for('prisma'), () => {
 
   return client.$extends({
     result: {
+      blob: {
+        fileExtension: {
+          needs: { mimeType: true },
+          compute(blob) {
+            return blob.mimeType.split('/').pop()
+          },
+        },
+      },
       user: {
         fullName: {
           needs: { firstName: true, lastName: true },

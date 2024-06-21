@@ -4,7 +4,7 @@ import { IconButton, ListItemIcon, ListItemText } from '@mui/material'
 import Link from 'next/link'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import { Business, People, Settings } from '@mui/icons-material'
+import { Business, ContactMail, People, Settings } from '@mui/icons-material'
 import { useState } from 'react'
 
 export function AccountMenu() {
@@ -20,6 +20,16 @@ export function AccountMenu() {
         open={!!anchorEl}
         onClose={() => setAnchorEl(null)}
       >
+        <MenuItem
+          href="/account/info"
+          component={Link}
+          onClick={() => setAnchorEl(null)}
+        >
+          <ListItemIcon>
+            <ContactMail fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Info</ListItemText>
+        </MenuItem>
         <MenuItem
           href="/account/team"
           component={Link}

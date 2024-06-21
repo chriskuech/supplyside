@@ -2,10 +2,12 @@ import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
 import Image from 'next/image'
 import { handleSaveSettings } from './actions'
-import { readUser } from '@/domain/iam/user'
+import { requireSession } from '@/lib/session'
+import { readAccount } from '@/domain/iam/account'
 
-export default async function SettingsPage() {
-  const user = await readUser()
+export default async function InfoPage() {
+  const { accountId } = await requireSession()
+  const account = await readAccount(accountId)
 
   return (
     <Stack
@@ -17,18 +19,18 @@ export default async function SettingsPage() {
       width={'fit-content'}
     >
       <Box>
-        <Typography variant={'h4'}>Settings</Typography>
+        <Typography variant={'h4'}>Info</Typography>
         <Typography variant={'caption'}>
-          Personalize your profile and preferences.
+          Provide your company information for use across the platform.
         </Typography>
       </Box>
       <form action={handleSaveSettings}>
         <Stack spacing={2} direction={'column'}>
-          {user?.ImageBlob && (
+          {account?.LogoBlob && (
             <Stack direction={'row'} justifyContent={'center'}>
               <Image
-                src={`/api/download/profile-pic.${user.ImageBlob.fileExtension}?blobId=${user.ImageBlob.id}`}
-                alt="Profile Picture"
+                src={`/api/download/logo.${account.LogoBlob.fileExtension}?blobId=${account.LogoBlob.id}`}
+                alt="Logo"
                 style={{ borderRadius: '50%' }}
                 width={300}
                 height={300}
@@ -42,7 +44,7 @@ export default async function SettingsPage() {
               startIcon={<CloudUpload />}
               variant="contained"
             >
-              Upload Profile Pic
+              Upload Logo
               <input
                 style={{ display: 'none' }}
                 type="file"
@@ -53,16 +55,13 @@ export default async function SettingsPage() {
           </Stack>
 
           <TextField
-            label="First Name"
-            name="firstName"
-            defaultValue={user?.firstName}
+            label={'Company Name'}
+            variant={'outlined'}
             fullWidth
-          />
-          <TextField
-            label="Last Name"
-            name="lastName"
-            defaultValue={user?.lastName}
-            fullWidth
+            required
+            margin={'normal'}
+            name="name"
+            defaultValue={account?.name}
           />
 
           <Stack direction={'row'} justifyContent={'center'}>

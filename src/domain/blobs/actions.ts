@@ -28,7 +28,7 @@ export const createBlob = async ({ accountId, file }: CreateBlobParams) => {
   const blob = await prisma.blob.create({
     data: {
       accountId: accountId,
-      mimeType: file.type,
+      mimeType: file.type.toLowerCase(),
       name: blobName,
     },
   })
