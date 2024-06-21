@@ -33,7 +33,7 @@ export function UserMenu({ user }: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   const profilePicSrc = user.ImageBlob
-    ? `/api/download/profile.${user.ImageBlob.mimeType.split('/').pop()?.toLowerCase()}?blobId=${user.ImageBlob.id}`
+    ? `/api/download/profile.${user.ImageBlob.mimeType.split('/').pop()?.toLowerCase()}?blobId=${user.ImageBlob.id}&no-impersonation`
     : undefined
 
   return (

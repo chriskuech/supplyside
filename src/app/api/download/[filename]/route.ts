@@ -3,17 +3,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readBlob } from '@/domain/blobs/actions'
 import { readSession } from '@/lib/session'
+import prisma from '@/lib/prisma'
 
 /**
- * /api/download/[filename]?blobId=<blobId>
+ * /api/download/[filename]?blobId=<blobId>[&no-impersonation]
  */
 export async function GET(
   req: NextRequest,
   { params: { filename } }: { params: { filename: string } },
 ): Promise<NextResponse> {
-  console.log('here', req.url)
+  const query = new URL(req.url).searchParams
 
-  const blobId = new URL(req.url).searchParams.get('blobId')
+  const blobId = query.get('blobId')
   if (!blobId) {
     return NextResponse.json({ error: '`blobId` is required' }, { status: 400 })
   }
@@ -23,7 +24,14 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const blob = await readBlob({ accountId: session.accountId, blobId })
+  const { accountId } =
+    query.get('no-impersonation') !== null
+      ? await prisma.user.findUniqueOrThrow({
+          where: { id: session.userId },
+        })
+      : session
+
+  const blob = await readBlob({ accountId, blobId })
   if (!blob) {
     return NextResponse.json({ error: 'File not found' }, { status: 404 })
   }
