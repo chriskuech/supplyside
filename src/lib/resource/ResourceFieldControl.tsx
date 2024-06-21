@@ -12,7 +12,6 @@ import {
 } from '@mui/material'
 import { User } from '@prisma/client'
 import { match } from 'ts-pattern'
-import { Money } from '@mui/icons-material'
 import { Value } from '@/domain/resource/types'
 import { UpdateValueDto } from '@/domain/resource/fields/actions'
 import { Field } from '@/domain/schema/types'
