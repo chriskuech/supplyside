@@ -13,11 +13,11 @@ import {
 } from 'react'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
-import themes from './theme'
+import theme from './theme'
 
 const storageKey = 'theme_preference'
 
-const { dark, light } = themes.steel
+const { dark, light } = theme
 
 export type ThemePreference = 'dark' | 'light' | 'system'
 type SetThemePreference = (themePreference: ThemePreference) => void
