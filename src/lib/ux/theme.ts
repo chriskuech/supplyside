@@ -77,7 +77,7 @@ const themes = {
           // pinnedBackground: '#340606',
           // Headers, and top & bottom fixed rows
           // containerBackground: '#343434',
-          containerBackground: '#dadada',
+          containerBackground: '#eeeeee',
         },
       } as Partial<Mixins>,
     }),
