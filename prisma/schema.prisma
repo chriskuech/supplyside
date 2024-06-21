@@ -11,16 +11,34 @@ datasource db {
 }
 
 model Account {
-  id   String @id @default(uuid()) @db.Uuid
-  name String
+  id         String  @id @default(uuid()) @db.Uuid
+  name       String
+  logoBlobId String? @unique @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  LogoBlob Blob? @relation(name: "logo", fields: [logoBlobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   User     User[]
   Resource Resource[]
   Field    Field[]
   Schema   Schema[]
+  Blob     Blob[]     @relation(name: "owner")
+}
+
+model Blob {
+  id        String @id @default(uuid()) @db.Uuid
+  accountId String @db.Uuid
+  name      String
+  mimeType  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  OwnedBy Account  @relation(name: "owner", fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  LogoFor Account? @relation(name: "logo")
+  User    User?
 }
 
 model User {
@@ -32,12 +50,14 @@ model User {
   tsAndCsSignedAt      DateTime?
   passwordHash         String?
   requirePasswordReset Boolean
+  imageBlobId          String?   @unique @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Account Account @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Value   Value[]
+  Account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ImageBlob Blob?   @relation(fields: [imageBlobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  Value     Value[]
 }
 
 enum ResourceType {

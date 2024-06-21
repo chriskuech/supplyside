@@ -1,13 +1,21 @@
 import { PrismaClient } from '@prisma/client'
+import { lazyStatic } from './lazyStatic'
 
-// Mitigate local dev hot reload not cleaning up prisma connections
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const gbl = global as any
+export default lazyStatic(Symbol.for('prisma'), () => {
+  const client = new PrismaClient()
+  client.$connect()
+  process.on('exit', () => client.$disconnect())
 
-if (!gbl.prisma) {
-  gbl.prisma = new PrismaClient()
-  gbl.prisma.$connect()
-  process.on('exit', () => gbl.prisma.$disconnect())
-}
-
-export default gbl.prisma as PrismaClient
+  return client.$extends({
+    result: {
+      user: {
+        fullName: {
+          needs: { firstName: true, lastName: true },
+          compute(user) {
+            return [user.firstName, user.lastName].filter(Boolean).join(' ')
+          },
+        },
+      },
+    },
+  })
+})

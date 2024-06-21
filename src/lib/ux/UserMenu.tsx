@@ -17,6 +17,7 @@ import {
   Logout,
   Palette,
   Person,
+  Settings,
 } from '@mui/icons-material'
 import { useState } from 'react'
 import { useThemePreference } from './DynamicThemeProvider'
@@ -59,6 +60,16 @@ export function UserMenu() {
               </ToggleButton>
             </ToggleButtonGroup>
           </ListItemText>
+        </MenuItem>
+        <MenuItem
+          href="/settings"
+          component={Link}
+          onClick={() => setAnchorEl(null)}
+        >
+          <ListItemIcon>
+            <Settings />
+          </ListItemIcon>
+          <ListItemText>Settings</ListItemText>
         </MenuItem>
         <MenuItem
           href="/auth/logout"

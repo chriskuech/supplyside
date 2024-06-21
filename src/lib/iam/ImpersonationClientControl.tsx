@@ -19,6 +19,7 @@ export default function ImpersonationClientControl({
       disableClearable
       renderInput={(params) => <TextField {...params} />}
       getOptionLabel={(o) => o.name}
+      isOptionEqualToValue={(o, v) => o.id === v.id}
       options={accounts}
       value={account}
       onChange={(e, value) => onChange(value.id)}

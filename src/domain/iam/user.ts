@@ -35,6 +35,19 @@ export async function inviteUser(accountId: string, email: string) {
   revalidateTag('iam')
 }
 
+export async function readUser() {
+  const { userId } = await requireSession()
+
+  revalidateTag('iam')
+
+  return await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      ImageBlob: true,
+    },
+  })
+}
+
 const renderInviteTemplate = (d: { email: string; password: string }) => `
   <h3>Welcome to SupplySide!<h3>
 
