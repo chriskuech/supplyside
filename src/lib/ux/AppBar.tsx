@@ -11,9 +11,11 @@ import { systemAccountId } from '../const'
 import ImpersonationControl from '../iam/ImpersonationControl'
 import { UserMenu } from './UserMenu'
 import { AccountMenu } from './AccountMenu'
+import { readUser } from '@/domain/iam/user'
 
 export default async function AppBar() {
   const session = await readSession()
+  const user = await readUser()
 
   return (
     <MAppBar
@@ -87,7 +89,7 @@ export default async function AppBar() {
                 )}
 
                 <AccountMenu />
-                <UserMenu />
+                {user && <UserMenu user={user} />}
               </Stack>
             </>
           )}

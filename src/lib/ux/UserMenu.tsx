@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Avatar,
   IconButton,
   ListItemIcon,
   ListItemText,
@@ -16,21 +17,32 @@ import {
   LightMode,
   Logout,
   Palette,
-  Person,
   Settings,
 } from '@mui/icons-material'
 import { useState } from 'react'
+import { Blob, User } from '@prisma/client'
 import { useThemePreference } from './DynamicThemeProvider'
 
-export function UserMenu() {
+type Props = {
+  user: User & { ImageBlob: Blob | null }
+}
+
+export function UserMenu({ user }: Props) {
   const [themePreference, setThemePreference] = useThemePreference()
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
+  const profilePicSrc = user.ImageBlob
+    ? `/api/download/profile.${user.ImageBlob.mimeType.split('/').pop()?.toLowerCase()}?blobId=${user.ImageBlob.id}`
+    : undefined
+
   return (
     <>
       <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-        <Person />
+        <Avatar
+          alt={[user.firstName, user.lastName].join(' ')}
+          src={profilePicSrc}
+        />
       </IconButton>
       <Menu
         anchorEl={anchorEl}
