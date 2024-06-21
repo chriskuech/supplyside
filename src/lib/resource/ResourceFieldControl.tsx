@@ -56,11 +56,7 @@ export default function ResourceFieldControl({
         value={value?.number}
         onChange={(e) => handleChange({ number: parseFloat(e.target.value) })}
         InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Money />
-            </InputAdornment>
-          ),
+          startAdornment: <InputAdornment position="start">$</InputAdornment>,
         }}
       />
     ))
