@@ -1,6 +1,6 @@
 import { Inter } from 'next/font/google'
 import { Theme, createTheme } from '@mui/material/styles'
-import { PaletteMode } from '@mui/material'
+import { Mixins, PaletteMode } from '@mui/material'
 
 const font = Inter({
   weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
@@ -20,10 +20,10 @@ const colors = {
   white: '#ffffff',
   offWhite: '#f0f0f0',
   offBlack: '#2e2e2e',
-  warmWhite: '#f8f9fa',
-  warmBlack: '#1c1c1c',
+  warmWhite: '#fffcf5',
+  warmBlack: '#111400',
   purple: '#8a2be2',
-  cyan: '#00ffff',
+  cyan: '#121616',
 }
 
 const themes = {
@@ -71,6 +71,15 @@ const themes = {
       typography: {
         fontFamily: font.style.fontFamily,
       },
+      mixins: {
+        MuiDataGrid: {
+          // Pinned columns sections
+          // pinnedBackground: '#340606',
+          // Headers, and top & bottom fixed rows
+          // containerBackground: '#343434',
+          containerBackground: '#dadada',
+        },
+      } as Partial<Mixins>,
     }),
     dark: createTheme({
       palette: {
@@ -87,6 +96,15 @@ const themes = {
       typography: {
         fontFamily: font.style.fontFamily,
       },
+      mixins: {
+        MuiDataGrid: {
+          // Pinned columns sections
+          // pinnedBackground: '#340606',
+          // Headers, and top & bottom fixed rows
+          // containerBackground: '#343434',
+          containerBackground: '#1a1a1a',
+        },
+      } as Partial<Mixins>,
     }),
   },
   industrial: {

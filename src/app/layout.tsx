@@ -29,6 +29,7 @@ export default async function RootLayout({
           height: '100vh',
           display: 'flex',
           flexDirection: 'column',
+          backgroundImage: 'url(/noise.png)',
         }}
       >
         <AppRouterCacheProvider>

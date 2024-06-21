@@ -116,6 +116,7 @@ export default function ResourceTable({ schema, resources }: Props) {
       columns={columns}
       rows={resources}
       rowSelection={false}
+      sx={{ backgroundColor: 'background.paper' }}
       onRowClick={({ row: { type, key } }) => {
         if (type === 'Line') return
 
