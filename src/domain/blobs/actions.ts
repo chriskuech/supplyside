@@ -7,9 +7,15 @@ import prisma from '@/lib/prisma'
 
 const containerName = 'app-data'
 
+export type FileDto = {
+  name: string
+  type: string
+  buffer: ArrayBuffer
+}
+
 type CreateBlobParams = {
   accountId: string
-  file: File
+  file: FileDto
 }
 
 export const createBlob = async ({ accountId, file }: CreateBlobParams) => {
@@ -19,11 +25,9 @@ export const createBlob = async ({ accountId, file }: CreateBlobParams) => {
 
   await containerClient.createIfNotExists()
 
-  const buffer = await file.arrayBuffer()
-
-  await containerClient
-    .getBlockBlobClient(blobName)
-    .uploadData(buffer, { blobHTTPHeaders: { blobContentType: file.type } })
+  await containerClient.getBlockBlobClient(blobName).uploadData(file.buffer, {
+    blobHTTPHeaders: { blobContentType: file.type },
+  })
 
   const blob = await prisma.blob.create({
     data: {

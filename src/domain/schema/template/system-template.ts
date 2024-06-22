@@ -1,6 +1,11 @@
 import { FieldTemplate, SchemaTemplate } from './types'
 
 export const fields = {
+  document: {
+    templateId: 'cb4a0c88-df20-485d-9881-e2c3b1b2b180',
+    name: 'Document',
+    type: 'File',
+  },
   name: {
     templateId: 'aebb8b9f-d49a-4d5b-b6cf-453bfad847b4',
     name: 'Name',
@@ -69,7 +74,7 @@ export const schemas: SchemaTemplate[] = [
     sections: [
       {
         name: 'Bill',
-        fields: [fields.number, fields.vendor, fields.order],
+        fields: [fields.number, fields.vendor, fields.order, fields.document],
       },
     ],
   },
@@ -96,7 +101,7 @@ export const schemas: SchemaTemplate[] = [
     sections: [
       {
         name: 'Order',
-        fields: [fields.number, fields.vendor, fields.total],
+        fields: [fields.number, fields.vendor, fields.total, fields.document],
       },
     ],
   },

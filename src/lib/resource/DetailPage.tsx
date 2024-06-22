@@ -20,12 +20,8 @@ export default async function DetailPage({
   await requireSessionWithRedirect()
 
   const [schema, resources] = await Promise.all([
-    readSchema({
-      resourceType: 'Line',
-    }),
-    readResources({
-      type: 'Line',
-    }),
+    readSchema({ resourceType: 'Line' }),
+    readResources({ type: 'Line' }),
   ])
 
   return (

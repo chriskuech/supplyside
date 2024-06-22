@@ -11,6 +11,7 @@ import { systemAccountId } from '../const'
 import ImpersonationControl from '../iam/ImpersonationControl'
 import { UserMenu } from './UserMenu'
 import { AccountMenu } from './AccountMenu'
+import { NavMenu } from './NavMenu'
 import { readUser } from '@/domain/iam/user'
 
 export default async function AppBar() {
@@ -57,12 +58,21 @@ export default async function AppBar() {
                         key={item}
                         href={`/${item.toLowerCase()}`}
                         component={Link}
+                        sx={{
+                          display: { xs: 'none', lg: 'inherit' },
+                        }}
                       >
                         {item}
                       </Button>
                     ))}
 
-                    <Box display={'flex'} alignItems={'center'}>
+                    <Box
+                      display={'flex'}
+                      alignItems={'center'}
+                      sx={{
+                        display: { xs: 'none', lg: 'inherit' },
+                      }}
+                    >
                       <Divider
                         orientation="vertical"
                         sx={{ mx: 2, height: '1em' }}
@@ -74,6 +84,9 @@ export default async function AppBar() {
                         key={item}
                         href={`/${item.toLowerCase()}`}
                         component={Link}
+                        sx={{
+                          display: { xs: 'none', lg: 'inherit' },
+                        }}
                       >
                         {item}
                       </Button>
@@ -90,6 +103,7 @@ export default async function AppBar() {
 
                 <AccountMenu />
                 {user && <UserMenu user={user} />}
+                {session.accountId !== systemAccountId && <NavMenu />}
               </Stack>
             </>
           )}

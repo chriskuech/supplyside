@@ -19,9 +19,8 @@ const colors = {
   black: '#000000',
   white: '#ffffff',
   offWhite: '#f0f0f0',
-  offBlack: '#2e2e2e',
-  warmWhite: '#fffcf5',
-  warmBlack: '#111400',
+  offBlack: '#111111',
+  // warmBlack: '#111400',
   purple: '#8a2be2',
   cyan: '#121616',
 }
@@ -62,7 +61,7 @@ const themes = {
         primary: { main: colors.purple },
         secondary: { main: colors.cyan },
         background: {
-          default: colors.warmWhite,
+          default: colors.white,
           paper: colors.white,
         },
         // accent: { main: '#FF9800' },
@@ -87,8 +86,8 @@ const themes = {
         primary: { main: colors.purple },
         secondary: { main: colors.cyan },
         background: {
-          default: colors.warmBlack,
-          paper: colors.black,
+          default: colors.black,
+          paper: colors.offBlack,
         },
         // accent: { main: '#FF9800' },
         error: { main: '#D32F2F' },

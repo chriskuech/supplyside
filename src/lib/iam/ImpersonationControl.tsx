@@ -1,6 +1,5 @@
 'use server'
 
-import { fail } from 'assert'
 import dynamic from 'next/dynamic'
 import prisma from '@/lib/prisma'
 import { impersonate, readSession } from '@/lib/session'
@@ -33,9 +32,13 @@ export default async function ImpersonationControl() {
 
   if (user?.accountId !== systemAccountId) return
 
+  const account = accounts.find((a) => a.id === session.accountId)
+
+  if (!account) return
+
   return (
     <ImpersonationClientControl
-      account={accounts.find((a) => a.id === session.accountId) ?? fail()}
+      account={account}
       accounts={accounts}
       onChange={impersonate}
     />

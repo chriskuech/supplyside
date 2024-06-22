@@ -30,14 +30,15 @@ export default function ResourceTable({ schema, resources }: Props) {
         width: 300,
         type: match<FieldType, GridColType>(field.type)
           .with('Checkbox', () => 'boolean')
+          .with('File', () => 'boolean')
           .with('Money', () => 'number')
           .with('MultiSelect', () => 'custom')
           .with('Number', () => 'number')
+          .with('Resource', () => 'custom')
           .with('RichText', () => 'string')
           .with('Select', () => 'singleSelect')
           .with('Text', () => 'string')
           .with('User', () => 'custom')
-          .with('Resource', () => 'custom')
           .exhaustive(),
         valueGetter: (_, row) => {
           const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
@@ -46,6 +47,7 @@ export default function ResourceTable({ schema, resources }: Props) {
 
           return match<FieldType, Primitive>(field.type)
             .with('Checkbox', () => value?.boolean)
+            .with('File', () => !!value?.file)
             .with(P.union('Money', 'Number'), () => value?.number)
             .with('MultiSelect', () =>
               value?.options?.map((o) => o.name).join(' '),
@@ -70,6 +72,7 @@ export default function ResourceTable({ schema, resources }: Props) {
 
           return match<FieldType>(field.type)
             .with('Checkbox', () => value?.boolean && <Check />)
+            .with('File', () => value?.file && <Check />)
             .with('Money', () =>
               value?.number?.toLocaleString('en-US', {
                 style: 'currency',

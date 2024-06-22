@@ -3,17 +3,22 @@
 import {
   Autocomplete,
   Checkbox,
+  IconButton,
   InputAdornment,
   MenuItem,
   Select,
+  Stack,
   TextField,
   TextareaAutosize,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { User } from '@prisma/client'
 import { match } from 'ts-pattern'
+import { Download, UploadFile } from '@mui/icons-material'
+import { ChangeEvent, useRef } from 'react'
 import { Value } from '@/domain/resource/types'
-import { UpdateValueDto } from '@/domain/resource/fields/actions'
+import { UpdateValueDto, uploadFile } from '@/domain/resource/fields/actions'
 import { Field } from '@/domain/schema/types'
 
 type Props = {
@@ -23,6 +28,7 @@ type Props = {
   value: Value | undefined
   users: User[]
   onChange: (dto: UpdateValueDto) => void
+  uploadFile: typeof uploadFile
 }
 
 export default function ResourceFieldControl({
@@ -32,7 +38,10 @@ export default function ResourceFieldControl({
   value,
   users,
   onChange,
+  uploadFile,
 }: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const handleChange = (dto: Omit<UpdateValueDto, 'resourceId' | 'fieldId'>) =>
     onChange({
       resourceId,
@@ -47,6 +56,48 @@ export default function ResourceFieldControl({
         value={value?.boolean}
         onChange={(e) => handleChange({ boolean: e.target.checked })}
       />
+    ))
+    .with('File', () => (
+      <Stack direction={'row'}>
+        <input
+          style={{ display: 'none' }}
+          type="file"
+          ref={fileInputRef}
+          onChange={async (e: ChangeEvent<HTMLInputElement>) => {
+            const [file] = [...(e.target.files ?? [])]
+
+            if (!file) return
+
+            uploadFile(
+              resourceId,
+              field.id,
+              file.name,
+              file.type,
+              (await file.arrayBuffer()) satisfies NodeJS.TypedArray,
+            )
+          }}
+        />
+        <Typography flexGrow={1}>{value?.file?.name ?? '-'}</Typography>
+        {value?.file && (
+          <Tooltip title="Download File">
+            <IconButton
+              onClick={() =>
+                value.file &&
+                window.open(
+                  `/api/download/${encodeURIComponent(value.file.name)}?blobId=${value.file.blobId}`,
+                )
+              }
+            >
+              <Download />
+            </IconButton>
+          </Tooltip>
+        )}
+        <Tooltip title="Upload File">
+          <IconButton onClick={() => fileInputRef.current?.click()}>
+            <UploadFile />
+          </IconButton>
+        </Tooltip>
+      </Stack>
     ))
     .with('Money', () => (
       <TextField
@@ -89,7 +140,9 @@ export default function ResourceFieldControl({
       <Select
         id={id}
         value={value?.option?.id}
-        onChange={(e) => handleChange({ optionId: e.target.value })}
+        onChange={(e) =>
+          handleChange({ Option: { connect: { id: e.target.value } } })
+        }
       >
         {field.options.map((o) => (
           <MenuItem key={o.id} value={o.id}>
@@ -109,7 +162,9 @@ export default function ResourceFieldControl({
       <Select
         id={id}
         value={value?.user?.id}
-        onChange={(e) => handleChange({ userId: e.target.value })}
+        onChange={(e) =>
+          handleChange({ User: { connect: { id: e.target.value } } })
+        }
       >
         {users.map((u) => (
           <MenuItem key={u.id} value={u.id}>
