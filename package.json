@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "watch": "tsc --noEmit --watch",
+    "watch": "tsc --noEmit --watch --project .",
+    "prebuild": "prisma generate",
     "build": "next build",
     "start": "./node_modules/next/dist/bin/next start",
     "lint": "next lint"
@@ -28,6 +29,7 @@
     "next": "14.2.4",
     "next-auth": "^4.24.7",
     "postmark": "^4.0.2",
+    "puppeteer": "^22.12.0",
     "react": "^18",
     "react-dom": "^18",
     "remeda": "^2.0.9",
@@ -38,7 +40,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.12.0",
     "@typescript-eslint/parser": "^7.12.0",
     "dotenv": "^16.4.5",

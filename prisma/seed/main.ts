@@ -13,6 +13,8 @@ const config = z
   })
   .parse(process.env)
 
+const testId = '00000000-0000-0000-0000-000000000001'
+
 async function main() {
   const prisma = new PrismaClient()
 
@@ -37,12 +39,14 @@ async function main() {
 
   const account = await prisma.account.create({
     data: {
+      id: testId,
       name: "Chris's Test Company",
     },
   })
 
   await prisma.user.create({
     data: {
+      id: testId,
       accountId: account.id,
       email: 'chris@kuech.dev',
       firstName: 'Christopher',

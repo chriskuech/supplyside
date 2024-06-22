@@ -1,5 +1,16 @@
-import { CircularProgress } from '@mui/material'
+import { Box, CircularProgress } from '@mui/material'
 
 export default function Loading() {
-  return <CircularProgress />
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexGrow: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <CircularProgress />
+    </Box>
+  )
 }

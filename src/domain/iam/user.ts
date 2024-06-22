@@ -6,7 +6,7 @@ import { revalidateTag } from 'next/cache'
 import { ServerClient } from 'postmark'
 import { config } from '@/lib/config'
 import prisma from '@/lib/prisma'
-import { requireSession } from '@/lib/session'
+import { readSession, requireSession } from '@/lib/session'
 
 const smtp = new ServerClient(config.POSTMARK_API_KEY)
 
@@ -36,12 +36,14 @@ export async function inviteUser(accountId: string, email: string) {
 }
 
 export async function readUser() {
-  const { userId } = await requireSession()
+  const session = await readSession()
+
+  if (!session) return
 
   revalidateTag('iam')
 
   return await prisma.user.findUnique({
-    where: { id: userId },
+    where: { id: session.userId },
     include: {
       ImageBlob: true,
     },
