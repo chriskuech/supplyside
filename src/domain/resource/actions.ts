@@ -9,6 +9,7 @@ import {
   Value,
   User,
   Prisma,
+  File,
 } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { P, match } from 'ts-pattern'
@@ -179,6 +180,7 @@ export const readResource = async ({
         include: {
           Value: {
             include: {
+              File: true,
               Option: true,
               User: true,
               ValueOption: {
@@ -230,6 +232,7 @@ export const readResources = async ({
         include: {
           Value: {
             include: {
+              File: true,
               Option: true,
               User: true,
               ValueOption: {
@@ -273,6 +276,7 @@ const mapResource = (
   model: ResourceModel & {
     ResourceField: (ResourceField & {
       Value: Value & {
+        File: File | null
         Option: Option | null
         User: User | null
         ValueOption: (ValueOption & { Option: Option })[]
@@ -294,6 +298,7 @@ const mapResource = (
       options: rf.Value.ValueOption.map((vo) => vo.Option),
       user: rf.Value.User,
       resourceKey: rf.Value.Resource?.key,
+      file: rf.Value.File,
     },
   })),
 })

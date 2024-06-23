@@ -25,6 +25,7 @@ model Account {
   Field    Field[]
   Schema   Schema[]
   Blob     Blob[]     @relation(name: "owner")
+  File     File[]
 }
 
 model Blob {
@@ -39,6 +40,7 @@ model Blob {
   OwnedBy Account  @relation(name: "owner", fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   LogoFor Account? @relation(name: "logo")
   User    User?
+  File    File[]
 }
 
 model User {
@@ -102,14 +104,15 @@ model ResourceField {
 
 enum FieldType {
   Checkbox
+  File
   Money
+  MultiSelect
   Number
-  Text
+  Resource
   RichText
   Select
-  MultiSelect
+  Text
   User
-  Resource
 }
 
 model Field {
@@ -148,6 +151,17 @@ model Option {
   ValueOption ValueOption[]
 }
 
+model File {
+  id        String @id @default(uuid()) @db.Uuid
+  accountId String @db.Uuid
+  name      String
+  blobId    String @unique @db.Uuid
+
+  Blob    Blob    @relation(fields: [blobId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Account Account @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Value   Value[]
+}
+
 model Value {
   id         String   @id @default(uuid()) @db.Uuid
   boolean    Boolean?
@@ -156,10 +170,12 @@ model Value {
   userId     String?  @db.Uuid
   optionId   String?  @db.Uuid
   resourceId String?  @db.Uuid
+  fileId     String?  @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  File               File?           @relation(fields: [fileId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   User               User?           @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   Option             Option?         @relation(fields: [optionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   Resource           Resource?       @relation(fields: [resourceId], references: [id], onDelete: SetNull, onUpdate: Cascade)

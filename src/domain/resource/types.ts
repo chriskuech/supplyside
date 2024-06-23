@@ -1,4 +1,4 @@
-import { ResourceType, User } from '@prisma/client'
+import { File, ResourceType, User } from '@prisma/client'
 import { Option } from '../schema/types'
 
 export type Resource = {
@@ -20,6 +20,7 @@ export type Value = {
   options?: Option[]
   string: string | null
   user: User | null
+  file: File | null
   resourceKey?: number | null
 }
 

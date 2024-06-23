@@ -12,6 +12,10 @@ export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
     f.name,
     match<Field, JSONSchema7>(f)
       .with({ type: 'Checkbox' }, () => ({ type: ['boolean', 'null'] }))
+      .with({ type: 'File' }, () => ({
+        type: ['string', 'null'],
+        pattern: uuidPattern,
+      }))
       .with({ type: P.union('Number', 'Money') }, () => ({
         type: ['number', 'null'],
       }))

@@ -38,7 +38,7 @@ export function UserMenu({ user }: Props) {
     : undefined
 
   return (
-    <Stack justifyContent={'center'}>
+    <Stack justifyContent="center">
       <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
         <Avatar
           alt={[user.firstName, user.lastName].join(' ')}

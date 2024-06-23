@@ -11,7 +11,7 @@ export function AccountMenu() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   return (
-    <Stack justifyContent={'center'}>
+    <Stack justifyContent="center">
       <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
         <Business />
       </IconButton>

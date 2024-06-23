@@ -50,7 +50,7 @@ export default async function OrderDetail({
               <span style={{ fontWeight: 100 }}>Order #</span>
               <span style={{ fontWeight: 700 }}>{key}</span>
             </Typography>
-            <CreatePoButton onClick={createPo} />
+            <CreatePoButton resourceId={id} onClick={createPo} />
           </Stack>
           <ResourceFieldsControl
             resourceType={'Order'}

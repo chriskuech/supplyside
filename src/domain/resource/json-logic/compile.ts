@@ -80,6 +80,7 @@ const createPropertySubquery = (field: Field) =>
 const mapFieldTypeToValueColumn = (t: Exclude<FieldType, 'MultiSelect'>) =>
   match<Exclude<FieldType, 'MultiSelect'>, keyof Value>(t)
     .with('Checkbox', () => 'boolean')
+    .with('File', () => 'fileId')
     .with(P.union('Money', 'Number'), () => 'number')
     .with('User', () => 'userId')
     .with('Select', () => 'optionId')

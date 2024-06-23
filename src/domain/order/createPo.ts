@@ -5,29 +5,34 @@ import puppeteer from 'puppeteer'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 /* @ts-expect-error */
 import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.browser.production'
+import { Prisma } from '@prisma/client'
+import { revalidateTag } from 'next/cache'
 import { createBlob } from '../blobs/actions'
+import { fields } from '../schema/template/system-template'
 import { requireSession } from '@/lib/session'
 import PoDocument from '@/lib/order/PoDocument'
 import PoDocumentFooter from '@/lib/order/PoDocumentFooter'
+import prisma from '@/lib/prisma'
 
-export const createPo = async () => {
+export const createPo = async (resourceId: string) => {
   const { accountId } = await requireSession()
 
   const browser = await puppeteer.launch({ headless: true })
 
-  const page = await browser.newPage()
+  const [page, main, footer] = await Promise.all([
+    browser.newPage(),
+    PoDocument(),
+    PoDocumentFooter(),
+  ])
 
-  const mainHtml = ReactDom.renderToString(await PoDocument())
-  const footerHtml = ReactDom.renderToString(await PoDocumentFooter())
-
-  await page.setContent(mainHtml, {
+  await page.setContent(ReactDom.renderToString(main), {
     timeout: 300,
     waitUntil: 'domcontentloaded',
   })
 
   const buffer = await page.pdf({
     format: 'letter',
-    footerTemplate: footerHtml,
+    footerTemplate: ReactDom.renderToString(footer),
     displayHeaderFooter: true,
     margin: {
       top: '15px',
@@ -37,13 +42,72 @@ export const createPo = async () => {
     },
   })
 
-  await browser.close()
+  browser.close()
 
-  const { name: blobName } = await createBlob({
-    accountId,
-    buffer,
-    type: 'application/pdf',
+  const [blob, field] = await Promise.all([
+    createBlob({
+      accountId,
+      buffer,
+      type: 'application/pdf',
+    }),
+    prisma.field.findUniqueOrThrow({
+      where: {
+        accountId_templateId: {
+          accountId,
+          templateId: fields.document.templateId,
+        },
+      },
+      select: {
+        id: true,
+      },
+    }),
+  ])
+
+  const input: Prisma.ValueCreateInput = {
+    File: {
+      create: {
+        name: 'po.pdf',
+        Account: {
+          connect: {
+            id: accountId,
+          },
+        },
+        Blob: {
+          connect: {
+            id: blob.id,
+          },
+        },
+      },
+    },
+  }
+
+  await prisma.resourceField.upsert({
+    where: {
+      Resource: {
+        accountId,
+      },
+      resourceId_fieldId: {
+        resourceId,
+        fieldId: field.id,
+      },
+    },
+    create: {
+      Resource: {
+        connect: {
+          id: resourceId,
+        },
+      },
+      Field: {
+        connect: {
+          id: field.id,
+        },
+      },
+      Value: { create: input },
+    },
+    update: {
+      Value: { update: input },
+    },
   })
 
-  console.log('PO blob created', blobName)
+  revalidateTag('resource')
 }
