@@ -4,56 +4,52 @@
 
 FROM node:18-alpine AS base
 
-# Install dependencies only when needed
+###
+# Base
+#
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+
+# https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install and cache chromium early
-RUN npx puppeteer browsers install chrome
-
-# Install dependencies based on the preferred package manager
-COPY package.json package-lock.json* ./
-RUN npm ci
-
-##
-#
-#
-
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-# ENV NEXT_TELEMETRY_DISABLED 1
-
-RUN npm run build
-
-##
-#
-#
-
-# Production image, copy all the files and run next
-FROM base AS runner
-WORKDIR /app
-
-# RUN npx puppeteer install
-
-ENV NODE_ENV production
-# Uncomment the following line in case you want to disable telemetry during runtime.
+# https://nextjs.org/telemetry
 # ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+USER nextjs
+RUN npx puppeteer browsers install chrome
+USER root
+
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+##
+# Build
+#
+
+FROM base AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+RUN npm run build
+
+##
+# Release
+#
+
+FROM base AS runner
+WORKDIR /app
+
 COPY --from=builder /app/public ./public
 
-# Set the correct permission for prerender cache
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
@@ -71,4 +67,3 @@ ENV PORT 3000
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
 CMD HOSTNAME="0.0.0.0" node server.js
-# CMD HOSTNAME="localhost" node server.js
