@@ -5,6 +5,7 @@ import {
   IconButton,
   ListItemIcon,
   ListItemText,
+  Stack,
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material'
@@ -37,7 +38,7 @@ export function UserMenu({ user }: Props) {
     : undefined
 
   return (
-    <>
+    <Stack justifyContent={'center'}>
       <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
         <Avatar
           alt={[user.firstName, user.lastName].join(' ')}
@@ -94,6 +95,6 @@ export function UserMenu({ user }: Props) {
           <ListItemText>Logout</ListItemText>
         </MenuItem>
       </Menu>
-    </>
+    </Stack>
   )
 }

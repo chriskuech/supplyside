@@ -1,6 +1,6 @@
 'use client'
 
-import { IconButton, ListItemIcon, ListItemText } from '@mui/material'
+import { IconButton, ListItemIcon, ListItemText, Stack } from '@mui/material'
 import Link from 'next/link'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
@@ -11,7 +11,7 @@ export function AccountMenu() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   return (
-    <>
+    <Stack justifyContent={'center'}>
       <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
         <Business />
       </IconButton>
@@ -51,6 +51,6 @@ export function AccountMenu() {
           <ListItemText>Configuration</ListItemText>
         </MenuItem>
       </Menu>
-    </>
+    </Stack>
   )
 }
