@@ -4,12 +4,17 @@ import { Add } from '@mui/icons-material'
 import { Button } from '@mui/material'
 
 type Props = {
-  onClick: () => void
+  resourceId: string
+  onClick: (resourceId: string) => void
 }
 
-export default function CreatePoButton({ onClick }: Props) {
+export default function CreatePoButton({ resourceId, onClick }: Props) {
   return (
-    <Button onClick={() => onClick()} variant={'contained'} endIcon={<Add />}>
+    <Button
+      onClick={() => onClick(resourceId)}
+      variant={'contained'}
+      endIcon={<Add />}
+    >
       Create PO
     </Button>
   )
