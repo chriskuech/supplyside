@@ -45,6 +45,7 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
+COPY --from=deps --chown=nextjs:nodejs /home/nextjs/.cache/puppeteer /home/nextjs/.cache/puppeteer
 COPY --from=builder /app/public ./public
 
 RUN addgroup --system --gid 1001 nodejs
