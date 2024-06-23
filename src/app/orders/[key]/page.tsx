@@ -9,11 +9,16 @@ import {
   readResource,
   readResources,
 } from '@/domain/resource/actions'
+import { createPo } from '@/domain/order/createPo'
 
 const CreateResourceButton = dynamic(
   () => import('@/lib/resource/CreateResourceButton'),
   { ssr: false },
 )
+
+const CreatePoButton = dynamic(() => import('@/lib/order/CreatePoButton'), {
+  ssr: false,
+})
 
 export default async function OrderDetail({
   params: { key },
@@ -40,10 +45,13 @@ export default async function OrderDetail({
     <Container sx={{ my: 5 }}>
       <Stack spacing={5}>
         <Stack spacing={2}>
-          <Typography variant="h3">
-            <span style={{ fontWeight: 100 }}>Order #</span>
-            <span style={{ fontWeight: 700 }}>{key}</span>
-          </Typography>
+          <Stack direction={'row'} justifyContent={'space-between'}>
+            <Typography variant="h3">
+              <span style={{ fontWeight: 100 }}>Order #</span>
+              <span style={{ fontWeight: 700 }}>{key}</span>
+            </Typography>
+            <CreatePoButton onClick={createPo} />
+          </Stack>
           <ResourceFieldsControl
             resourceType={'Order'}
             resourceKey={Number(key)}

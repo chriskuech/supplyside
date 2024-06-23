@@ -7,32 +7,37 @@ import prisma from '@/lib/prisma'
 
 const containerName = 'app-data'
 
-export type FileDto = {
-  name: string
-  type: string
-  buffer: ArrayBuffer
-}
+type CreateBlobParams = { accountId: string } & (
+  | {
+      buffer?: undefined
+      type?: undefined
+      file: File
+    }
+  | {
+      file?: undefined
+      buffer: Buffer
+      type: string
+    }
+)
 
-type CreateBlobParams = {
-  accountId: string
-  file: FileDto
-}
-
-export const createBlob = async ({ accountId, file }: CreateBlobParams) => {
+export const createBlob = async ({ accountId, ...rest }: CreateBlobParams) => {
   const blobName = randomUUID()
 
   const containerClient = azblob.getContainerClient(containerName)
 
   await containerClient.createIfNotExists()
 
-  await containerClient.getBlockBlobClient(blobName).uploadData(file.buffer, {
-    blobHTTPHeaders: { blobContentType: file.type },
-  })
+  const buffer = rest.buffer ?? (await rest.file.arrayBuffer())
+  const type = rest.type ?? rest.file.type
+
+  await containerClient
+    .getBlockBlobClient(blobName)
+    .uploadData(buffer, { blobHTTPHeaders: { blobContentType: type } })
 
   const blob = await prisma.blob.create({
     data: {
       accountId: accountId,
-      mimeType: file.type.toLowerCase(),
+      mimeType: type.toLowerCase(),
       name: blobName,
     },
   })

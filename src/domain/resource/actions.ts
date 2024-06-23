@@ -216,7 +216,7 @@ export const readResources = async ({
 
   const schema = await readSchema({ resourceType: type })
   const sql = createSql({ accountId, schema, where, orderBy })
-  console.log('sql', sql)
+
   const results: { _id: string }[] = await prisma.$queryRawUnsafe(sql)
 
   const models = await prisma.resource.findMany({

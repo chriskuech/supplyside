@@ -48,7 +48,7 @@ export default async function ResourceFieldsControl({
       ]).map((ss, i) => (
         <Stack key={i} flex={1} spacing={2}>
           {ss.map((s) => (
-            <Accordion key={s.id} defaultExpanded>
+            <Accordion key={s.id} defaultExpanded variant="outlined">
               <AccordionSummary expandIcon={<ExpandMore />}>
                 <Typography variant="h6" fontWeight={'bold'}>
                   {s.name}

@@ -38,7 +38,7 @@ export async function inviteUser(accountId: string, email: string) {
 export async function readUser() {
   const session = await readSession()
 
-  if (!session) return null
+  if (!session) return
 
   revalidateTag('iam')
 
