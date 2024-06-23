@@ -4,7 +4,7 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
-import { FileDto, createBlob } from '@/domain/blobs/actions'
+import { createBlob } from '@/domain/blobs/actions'
 
 export type UpdateValueDto = {
   resourceId: string
@@ -14,18 +14,18 @@ export type UpdateValueDto = {
   //   mediaType: string
   //   buffer: ArrayBuffer
   // }
-  file?: FileDto
+  // file?: FileDto
 } & Prisma.ValueCreateInput
 
 export const updateValue = async ({
   resourceId,
   fieldId,
-  file,
+  // file,
   ...value
 }: UpdateValueDto) => {
   const input: Prisma.ValueCreateInput = {
     ...value,
-    ...(file ? await createFile(file) : {}),
+    // ...(file ? await createFile(file) : {}),
   }
 
   await prisma.resourceField.upsert({
@@ -67,40 +67,40 @@ export const readUsers = async () => {
   })
 }
 
-const createFile = async (file: FileDto): Promise<Prisma.ValueCreateInput> => {
-  const { accountId } = await requireSession()
+// const createFile = async (file: FileDto): Promise<Prisma.ValueCreateInput> => {
+//   const { accountId } = await requireSession()
 
-  const blob = await createBlob({ accountId, file })
+//   const blob = await createBlob({ accountId, file })
 
-  return {
-    File: {
-      create: {
-        name: file.name,
-        Account: {
-          connect: {
-            id: accountId,
-          },
-        },
-        Blob: {
-          connect: {
-            id: blob.id,
-          },
-        },
-      },
-    },
-  }
-}
+//   return {
+//     File: {
+//       create: {
+//         name: file.name,
+//         Account: {
+//           connect: {
+//             id: accountId,
+//           },
+//         },
+//         Blob: {
+//           connect: {
+//             id: blob.id,
+//           },
+//         },
+//       },
+//     },
+//   }
+// }
 
 export const uploadFile = async (
   resourceId: string,
   fieldId: string,
   name: string,
   type: string,
-  buffer: ArrayBuffer,
+  buffer: Buffer,
 ) => {
   const { accountId } = await requireSession()
 
-  const blob = await createBlob({ accountId, file: { name, type, buffer } })
+  const blob = await createBlob({ accountId, type, buffer })
 
   const input: Prisma.ValueCreateInput = {
     File: {

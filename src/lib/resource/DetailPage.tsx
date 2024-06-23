@@ -1,13 +1,12 @@
 'use server'
 
-import { Button, Container, Stack, Typography } from '@mui/material'
+import { Container, Stack, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import ResourceTable from './ResourceTable'
 import { requireSessionWithRedirect } from '@/lib/session'
 import { readResources, createResource } from '@/domain/resource/actions'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import { readSchema } from '@/domain/schema/actions'
-import { createPo } from '@/domain/order/createPo'
 
 const CreateResourceButton = dynamic(() => import('./CreateResourceButton'), {
   ssr: false,
@@ -34,7 +33,6 @@ export default async function DetailPage({
               <span style={{ fontWeight: 100 }}>Order #</span>
               <span style={{ fontWeight: 700 }}>{key}</span>
             </Typography>
-            <Button onClick={() => createPo()}>Create PO</Button>
           </Stack>
           <ResourceFieldsControl
             resourceType={'Order'}

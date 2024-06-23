@@ -13,11 +13,7 @@ import { map, pipe, range } from 'remeda'
 import dynamic from 'next/dynamic'
 import { ExpandMore } from '@mui/icons-material'
 import { readResource } from '@/domain/resource/actions'
-import {
-  readUsers,
-  updateValue,
-  uploadFile,
-} from '@/domain/resource/fields/actions'
+import { readUsers, updateValue } from '@/domain/resource/fields/actions'
 import { readSchema } from '@/domain/schema/actions'
 
 const ResourceFieldControl = dynamic(() => import('./ResourceFieldControl'), {
@@ -69,7 +65,6 @@ export default async function ResourceFieldsControl({
                             ?.value
                         }
                         onChange={updateValue}
-                        uploadFile={uploadFile}
                       />
                     </Box>
                   ))}

@@ -18,7 +18,7 @@ import { match } from 'ts-pattern'
 import { Download, UploadFile } from '@mui/icons-material'
 import { ChangeEvent, useRef } from 'react'
 import { Value } from '@/domain/resource/types'
-import { UpdateValueDto, uploadFile } from '@/domain/resource/fields/actions'
+import { UpdateValueDto } from '@/domain/resource/fields/actions'
 import { Field } from '@/domain/schema/types'
 
 type Props = {
@@ -28,7 +28,6 @@ type Props = {
   value: Value | undefined
   users: User[]
   onChange: (dto: UpdateValueDto) => void
-  uploadFile: typeof uploadFile
 }
 
 export default function ResourceFieldControl({
@@ -38,7 +37,6 @@ export default function ResourceFieldControl({
   value,
   users,
   onChange,
-  uploadFile,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -68,13 +66,13 @@ export default function ResourceFieldControl({
 
             if (!file) return
 
-            uploadFile(
-              resourceId,
-              field.id,
-              file.name,
-              file.type,
-              (await file.arrayBuffer()) satisfies NodeJS.TypedArray,
-            )
+            // uploadFile(
+            //   resourceId,
+            //   field.id,
+            //   file.name,
+            //   file.type,
+            //   (await file.arrayBuffer()) satisfies NodeJS.TypedArray,
+            // )
           }}
         />
         <Typography flexGrow={1}>{value?.file?.name ?? '-'}</Typography>
