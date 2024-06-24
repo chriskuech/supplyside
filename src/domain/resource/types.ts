@@ -1,4 +1,4 @@
-import { File, ResourceType, User } from '@prisma/client'
+import { Blob, File, ResourceType, User } from '@prisma/client'
 import { Option } from '../schema/types'
 
 export type Resource = {
@@ -20,7 +20,7 @@ export type Value = {
   options?: Option[]
   string: string | null
   user: User | null
-  file: File | null
+  file: (File & { Blob: Blob }) | null
   resourceKey?: number | null
 }
 

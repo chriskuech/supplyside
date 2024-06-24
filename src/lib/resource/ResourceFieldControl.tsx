@@ -20,6 +20,7 @@ import { ChangeEvent, useRef } from 'react'
 import { Value } from '@/domain/resource/types'
 import { UpdateValueDto } from '@/domain/resource/fields/actions'
 import { Field } from '@/domain/schema/types'
+import { getDownloadPath } from '@/domain/blobs/utils'
 
 type Props = {
   id: string
@@ -82,7 +83,11 @@ export default function ResourceFieldControl({
               onClick={() =>
                 value.file &&
                 window.open(
-                  `/api/download/${encodeURIComponent(value.file.name)}?blobId=${value.file.blobId}`,
+                  getDownloadPath({
+                    blobId: value.file.blobId,
+                    fileName: value.file.name,
+                    mimeType: value.file.Blob.mimeType,
+                  }),
                 )
               }
             >

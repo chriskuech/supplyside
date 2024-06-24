@@ -10,6 +10,7 @@ import {
   User,
   Prisma,
   File,
+  Blob,
 } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { P, match } from 'ts-pattern'
@@ -175,25 +176,7 @@ export const readResource = async ({
           }
         : undefined,
     },
-    include: {
-      ResourceField: {
-        include: {
-          Value: {
-            include: {
-              File: true,
-              Option: true,
-              User: true,
-              ValueOption: {
-                include: {
-                  Option: true,
-                },
-              },
-              Resource: true,
-            },
-          },
-        },
-      },
-    },
+    include,
   })
 
   revalidatePath('resource')
@@ -227,25 +210,7 @@ export const readResources = async ({
         in: results.map((row) => row._id),
       },
     },
-    include: {
-      ResourceField: {
-        include: {
-          Value: {
-            include: {
-              File: true,
-              Option: true,
-              User: true,
-              ValueOption: {
-                include: {
-                  Option: true,
-                },
-              },
-              Resource: true,
-            },
-          },
-        },
-      },
-    },
+    include,
   })
 
   revalidatePath('resource')
@@ -272,11 +237,35 @@ export const deleteResource = async ({
   revalidatePath('resource')
 }
 
+const include = {
+  ResourceField: {
+    include: {
+      Value: {
+        include: {
+          File: {
+            include: {
+              Blob: true,
+            },
+          },
+          Option: true,
+          User: true,
+          ValueOption: {
+            include: {
+              Option: true,
+            },
+          },
+          Resource: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.ResourceInclude
+
 const mapResource = (
   model: ResourceModel & {
     ResourceField: (ResourceField & {
       Value: Value & {
-        File: File | null
+        File: (File & { Blob: Blob }) | null
         Option: Option | null
         User: User | null
         ValueOption: (ValueOption & { Option: Option })[]
