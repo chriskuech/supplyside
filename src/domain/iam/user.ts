@@ -4,6 +4,8 @@ import { faker } from '@faker-js/faker'
 import { hash } from 'bcrypt'
 import { revalidateTag } from 'next/cache'
 import { ServerClient } from 'postmark'
+import { getDownloadPath } from '../blobs/utils'
+import { User } from './types'
 import { config } from '@/lib/config'
 import prisma from '@/lib/prisma'
 import { readSession, requireSession } from '@/lib/session'
@@ -12,7 +14,10 @@ const smtp = new ServerClient(config.POSTMARK_API_KEY)
 
 const loginUrl = `${config.BASE_URL}/auth/login`
 
-export async function inviteUser(accountId: string, email: string) {
+export async function inviteUser(
+  accountId: string,
+  email: string,
+): Promise<void> {
   const password = faker.string.nanoid()
 
   await prisma.user.create({
@@ -35,19 +40,38 @@ export async function inviteUser(accountId: string, email: string) {
   revalidateTag('iam')
 }
 
-export async function readUser() {
+export async function readUser(): Promise<User | undefined> {
   const session = await readSession()
 
   if (!session) return
 
   revalidateTag('iam')
 
-  return await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: session.userId },
     include: {
       ImageBlob: true,
     },
   })
+
+  if (!user) return
+
+  const profilePicPath =
+    user.ImageBlob &&
+    getDownloadPath({
+      blobId: user.ImageBlob.id,
+      mimeType: user.ImageBlob.mimeType,
+      fileName: 'profile-pic',
+    })
+
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    fullName: `${user.firstName} ${user.lastName}`,
+    email: user.email,
+    profilePicPath,
+  }
 }
 
 const renderInviteTemplate = (d: { email: string; password: string }) => `
@@ -68,7 +92,7 @@ const renderInviteTemplate = (d: { email: string; password: string }) => `
   </table>
 `
 
-export async function deleteUser(userId: string) {
+export async function deleteUser(userId: string): Promise<void> {
   const { accountId } = await requireSession()
 
   await prisma.user.delete({

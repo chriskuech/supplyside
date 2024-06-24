@@ -21,11 +21,11 @@ import {
   Settings,
 } from '@mui/icons-material'
 import { useState } from 'react'
-import { Blob, User } from '@prisma/client'
 import { useThemePreference } from './DynamicThemeProvider'
+import { User } from '@/domain/iam/types'
 
 type Props = {
-  user: User & { ImageBlob: Blob | null }
+  user: User
 }
 
 export function UserMenu({ user }: Props) {
@@ -33,17 +33,10 @@ export function UserMenu({ user }: Props) {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
-  const profilePicSrc = user.ImageBlob
-    ? `/api/download/profile.${user.ImageBlob.mimeType.split('/').pop()?.toLowerCase()}?blobId=${user.ImageBlob.id}&no-impersonation`
-    : undefined
-
   return (
     <Stack justifyContent="center">
       <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-        <Avatar
-          alt={[user.firstName, user.lastName].join(' ')}
-          src={profilePicSrc}
-        />
+        <Avatar alt={user.fullName} src={user.profilePicPath ?? ''} />
       </IconButton>
       <Menu
         anchorEl={anchorEl}

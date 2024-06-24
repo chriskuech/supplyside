@@ -26,10 +26,10 @@ export default async function InfoPage() {
       </Box>
       <form action={handleSaveSettings}>
         <Stack spacing={2} direction={'column'}>
-          {account?.LogoBlob && (
+          {account?.logoPath && (
             <Stack direction={'row'} justifyContent={'center'}>
               <Image
-                src={`/api/download/logo.${account.LogoBlob.fileExtension}?blobId=${account.LogoBlob.id}`}
+                src={account.logoPath}
                 alt="Logo"
                 style={{ borderRadius: '50%' }}
                 width={300}

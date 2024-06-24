@@ -24,10 +24,10 @@ export default async function SettingsPage() {
       </Box>
       <form action={handleSaveSettings}>
         <Stack spacing={2} direction={'column'}>
-          {user?.ImageBlob && (
+          {user?.profilePicPath && (
             <Stack direction={'row'} justifyContent={'center'}>
               <Image
-                src={`/api/download/profile-pic.${user.ImageBlob.fileExtension}?blobId=${user.ImageBlob.id}`}
+                src={user.profilePicPath}
                 alt="Profile Picture"
                 style={{ borderRadius: '50%' }}
                 width={300}
