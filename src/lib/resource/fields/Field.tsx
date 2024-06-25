@@ -56,6 +56,7 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
     ))
     .with('Date', () => (
       <DatePicker
+        sx={{ width: '100%' }}
         defaultValue={dayjs(value?.date)}
         onChange={(value) => handleChange({ date: value?.toDate() ?? null })}
       />
@@ -66,6 +67,7 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
     .with('Money', () => (
       <TextField
         id={inputId}
+        fullWidth
         type="number"
         defaultValue={value?.number}
         onChange={(e) => handleChange({ number: parseFloat(e.target.value) })}
@@ -96,16 +98,10 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
         onChange={(e) => handleChange({ number: parseFloat(e.target.value) })}
       />
     ))
-    .with('Textarea', () => (
-      <TextareaAutosize
-        id={inputId}
-        defaultValue={value?.string ?? ''}
-        onChange={(e) => handleChange({ string: e.target.value })}
-      />
-    ))
     .with('Select', () => (
       <Select
         id={inputId}
+        fullWidth
         defaultValue={value?.option?.id}
         onChange={(e) => handleChange({ optionId: e.target.value })}
       >
@@ -119,8 +115,23 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
     .with('Text', () => (
       <TextField
         id={inputId}
+        fullWidth
         defaultValue={value?.string}
         onChange={(e) => handleChange({ string: e.target.value })}
+      />
+    ))
+    .with('Textarea', () => (
+      <TextareaAutosize
+        id={inputId}
+        minRows={3}
+        defaultValue={value?.string ?? ''}
+        onChange={(e) => handleChange({ string: e.target.value })}
+        style={{
+          width: '100%',
+          border: '1px solid #ccc',
+          borderRadius: 4,
+          padding: 8,
+        }}
       />
     ))
     .with('User', () => (

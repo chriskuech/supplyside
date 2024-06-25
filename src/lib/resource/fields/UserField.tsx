@@ -21,6 +21,7 @@ export default function UserField({ userId, inputId, onChange }: Props) {
   return (
     <Select
       id={inputId}
+      fullWidth
       defaultValue={userId}
       onChange={(e) => onChange(e.target.value)}
     >

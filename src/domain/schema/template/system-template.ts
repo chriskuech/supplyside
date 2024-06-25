@@ -90,7 +90,7 @@ export const fields = {
   poRecipient: {
     templateId: 'b735b67c-be50-4859-9242-00572b4d32cb',
     name: 'PO Recipient',
-    type: 'User',
+    type: 'Contact',
   },
   preferredPaymentType: {
     templateId: 'c0d7d3f0-0b5e-4b7f-8f1b-2b3d1f7c3f9f',

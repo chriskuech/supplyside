@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material'
 import { ResourceType } from '@prisma/client'
-import { map, pipe, range } from 'remeda'
+import { map, range } from 'remeda'
 import { ExpandMore } from '@mui/icons-material'
 import Field from './fields/Field'
 import { readResource } from '@/domain/resource/actions'
@@ -75,10 +75,5 @@ export default async function ResourceFieldsControl({
  * @param array the array to split
  * @returns an array of arrays, each containing an approximately equal portion of the original array
  */
-const splitIntoNParts = <T,>(n: number, array: T[]): T[][] => {
-  const result: T[][] = pipe(
-    range(0, n),
-    map((i) => array.filter((_, j) => j % n === i)),
-  )
-  return result
-}
+const splitIntoNParts = <T,>(n: number, array: T[]): T[][] =>
+  map(range(0, n), (i) => array.filter((_, j) => j % n === i))
