@@ -21,6 +21,7 @@ export type ResourceField = {
 
 export type Value = {
   boolean: boolean | null
+  date: Date | null
   number: number | null
   option: Option | null
   options?: Option[]

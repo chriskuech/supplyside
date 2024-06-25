@@ -5,10 +5,9 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import dynamic from 'next/dynamic'
 import AppBar from '@/lib/ux/AppBar'
 
-const DynamicThemeProvider = dynamic(
-  () => import('@/lib/ux/DynamicThemeProvider'),
-  { ssr: false },
-)
+const RootProvider = dynamic(() => import('@/lib/ux/RootProvider'), {
+  ssr: false,
+})
 
 export const metadata: Metadata = {
   title: 'SupplySide',
@@ -32,13 +31,13 @@ export default async function RootLayout({
         }}
       >
         <AppRouterCacheProvider>
-          <DynamicThemeProvider>
+          <RootProvider>
             <CssBaseline />
             <AppBar />
             <Box width={'100vw'} flexGrow={1}>
               {children}
             </Box>
-          </DynamicThemeProvider>
+          </RootProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

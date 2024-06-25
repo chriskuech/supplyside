@@ -11,6 +11,8 @@ import {
   TextareaAutosize,
 } from '@mui/material'
 import { match } from 'ts-pattern'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import dayjs from 'dayjs'
 import FileField from './FileField'
 import UserField from './UserField'
 import ResourceField from './ResourceField'
@@ -39,6 +41,12 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
         id={inputId}
         defaultChecked={value?.boolean ?? false}
         onChange={(e) => handleChange({ boolean: e.target.checked })}
+      />
+    ))
+    .with('Date', () => (
+      <DatePicker
+        defaultValue={dayjs(value?.date)}
+        onChange={(value) => handleChange({ date: value?.toDate() ?? null })}
       />
     ))
     .with('File', () => (

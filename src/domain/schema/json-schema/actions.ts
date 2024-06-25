@@ -3,6 +3,7 @@ import { mapToObj } from 'remeda'
 import { P, match } from 'ts-pattern'
 import { Field, Schema } from '../types'
 
+// const datePattern = '[0-1]?[0-9]/[0-3]?[0-9]/[0-9]{4}'
 const uuidPattern =
   '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
 
@@ -12,6 +13,10 @@ export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
     f.name,
     match<Field, JSONSchema7>(f)
       .with({ type: 'Checkbox' }, () => ({ type: ['boolean', 'null'] }))
+      .with({ type: 'Date' }, () => ({
+        type: ['string', 'null'],
+        format: 'date',
+      }))
       .with({ type: 'File' }, () => ({
         type: ['string', 'null'],
         pattern: uuidPattern,

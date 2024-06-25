@@ -104,6 +104,7 @@ model ResourceField {
 
 enum FieldType {
   Checkbox
+  Date
   File
   Money
   MultiSelect
@@ -163,14 +164,15 @@ model File {
 }
 
 model Value {
-  id         String   @id @default(uuid()) @db.Uuid
+  id         String    @id @default(uuid()) @db.Uuid
   boolean    Boolean?
+  date       DateTime? @db.Date
   number     Float?
   string     String?
-  userId     String?  @db.Uuid
-  optionId   String?  @db.Uuid
-  resourceId String?  @db.Uuid
-  fileId     String?  @db.Uuid
+  userId     String?   @db.Uuid
+  optionId   String?   @db.Uuid
+  resourceId String?   @db.Uuid
+  fileId     String?   @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

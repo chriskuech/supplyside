@@ -8,7 +8,7 @@ export const sanitizeValue = (value: JsonLogicValue) =>
     .exhaustive()
 
 export const sanitizeColumnName = (column: string) => {
-  if (!/^[a-zA-Z0-9_]+$/.test(column)) {
+  if (!/^[a-zA-Z0-9_ ]+$/.test(column)) {
     throw new Error('Invalid column name')
   }
 

@@ -11,6 +11,7 @@ export type UpdateValueDto = {
   fieldId: string
   value: {
     boolean?: boolean | null | undefined
+    date?: Date | null | undefined
     number?: number | null | undefined
     string?: string | null | undefined
     userId?: string | null | undefined

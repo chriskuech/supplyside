@@ -281,6 +281,7 @@ const mapResource = (
     fieldId: rf.fieldId,
     value: {
       boolean: rf.Value.boolean,
+      date: rf.Value.date,
       string: rf.Value.string,
       number: rf.Value.number,
       option: rf.Value.Option,

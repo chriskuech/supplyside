@@ -30,6 +30,7 @@ export default function ResourceTable({ schema, resources }: Props) {
         width: 300,
         type: match<FieldType, GridColType>(field.type)
           .with('Checkbox', () => 'boolean')
+          .with('Date', () => 'date')
           .with('File', () => 'boolean')
           .with('Money', () => 'number')
           .with('MultiSelect', () => 'custom')
@@ -47,6 +48,7 @@ export default function ResourceTable({ schema, resources }: Props) {
 
           return match<FieldType, Primitive>(field.type)
             .with('Checkbox', () => value?.boolean)
+            .with('Date', () => value?.date?.toISOString())
             .with('File', () => !!value?.file)
             .with(P.union('Money', 'Number'), () => value?.number)
             .with('MultiSelect', () =>
@@ -72,6 +74,7 @@ export default function ResourceTable({ schema, resources }: Props) {
 
           return match<FieldType>(field.type)
             .with('Checkbox', () => value?.boolean && <Check />)
+            .with('Date', () => value?.date?.toLocaleDateString())
             .with('File', () => value?.file && <Check />)
             .with('Money', () =>
               value?.number?.toLocaleString('en-US', {
