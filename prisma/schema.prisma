@@ -111,7 +111,7 @@ enum FieldType {
   MultiSelect
   Number
   Resource
-  RichText
+  Textarea
   Select
   Text
   User

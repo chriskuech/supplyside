@@ -38,7 +38,7 @@ export default function ResourceTable({ schema, resources }: Props) {
           .with('MultiSelect', () => 'custom')
           .with('Number', () => 'number')
           .with('Resource', () => 'custom')
-          .with('RichText', () => 'string')
+          .with('Textarea', () => 'string')
           .with('Select', () => 'singleSelect')
           .with('Text', () => 'string')
           .with('User', () => 'custom')
@@ -57,7 +57,7 @@ export default function ResourceTable({ schema, resources }: Props) {
             .with('MultiSelect', () =>
               value?.options?.map((o) => o.name).join(' '),
             )
-            .with(P.union('Text', 'RichText'), () => value?.string)
+            .with(P.union('Text', 'Textarea'), () => value?.string)
             .with(
               'Select',
               () =>
@@ -93,7 +93,7 @@ export default function ResourceTable({ schema, resources }: Props) {
             .with('MultiSelect', () =>
               value?.options?.map((o) => <Chip key={o.id} label={o.name} />),
             )
-            .with(P.union('Text', 'RichText'), () => value?.string)
+            .with(P.union('Text', 'Textarea'), () => value?.string)
             .with('Select', () => {
               const name = field.options?.find(
                 (o) => o.id === value?.option?.id,

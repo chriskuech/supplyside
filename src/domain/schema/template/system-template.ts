@@ -19,7 +19,7 @@ export const fields = {
   description: {
     templateId: '70b02f35-f631-4da1-a506-6b8d4635e9b5',
     name: 'Description',
-    type: 'RichText',
+    type: 'Textarea',
   },
   bill: {
     templateId: '50292f4a-f926-4d0f-a6e9-6b7a48f8b4c4',

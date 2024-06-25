@@ -99,6 +99,6 @@ const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
     .with(P.union('Money', 'Number'), () => 'number')
     .with('User', () => 'userId')
     .with('Select', () => 'optionId')
-    .with(P.union('RichText', 'Text'), () => 'string')
+    .with(P.union('Textarea', 'Text'), () => 'string')
     .with('Resource', () => 'resourceId')
     .exhaustive()

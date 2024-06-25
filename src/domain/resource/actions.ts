@@ -86,7 +86,7 @@ export const createResource = async ({
                   )
                   .with(
                     [
-                      { type: P.union('Text', 'RichText') },
+                      { type: P.union('Text', 'Textarea') },
                       P.union(P.string, null),
                     ],
                     ([, val]) => ({

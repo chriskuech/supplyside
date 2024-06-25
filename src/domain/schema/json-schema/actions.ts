@@ -44,7 +44,7 @@ export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
         type: ['string', 'null'],
         pattern: uuidPattern,
       }))
-      .with({ type: P.union('Text', 'RichText') }, () => ({
+      .with({ type: P.union('Text', 'Textarea') }, () => ({
         type: ['string', 'null'],
         minLength: 1,
       }))

@@ -96,7 +96,7 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
         onChange={(e) => handleChange({ number: parseFloat(e.target.value) })}
       />
     ))
-    .with('RichText', () => (
+    .with('Textarea', () => (
       <TextareaAutosize
         id={inputId}
         defaultValue={value?.string ?? ''}
