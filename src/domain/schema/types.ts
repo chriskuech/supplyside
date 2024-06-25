@@ -17,6 +17,7 @@ export type Field = {
   name: string
   type: FieldType
   options: Option[]
+  resourceType: ResourceType | null
 }
 
 export type Option = {

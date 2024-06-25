@@ -1,6 +1,8 @@
 import { FieldType, Value } from '@prisma/client'
 import { P, match } from 'ts-pattern'
-import { JsonLogicValue, OrderBy, Where } from './types'
+import { OrderBy, Where } from './types'
+import { sanitizeValue } from '@/lib/sanitize'
+import { sanitizeColumnName } from '@/lib/sanitize'
 import { Schema, Field } from '@/domain/schema/types'
 
 export type MapToSqlParams = {
@@ -86,18 +88,4 @@ const mapFieldTypeToValueColumn = (t: Exclude<FieldType, 'MultiSelect'>) =>
     .with('Select', () => 'optionId')
     .with(P.union('RichText', 'Text'), () => 'string')
     .with('Resource', () => 'resourceId')
-    .exhaustive()
-
-const sanitizeColumnName = (column: string) => {
-  if (!/^[a-zA-Z0-9_]+$/.test(column)) {
-    throw new Error('Invalid column name')
-  }
-
-  return `"${column}"`
-}
-
-const sanitizeValue = (value: JsonLogicValue) =>
-  match(value)
-    .with(P.string, (s) => `'${s.replace(/'/g, "''")}'`)
-    .with(P.union(P.boolean, P.number, null), (n) => String(n))
     .exhaustive()

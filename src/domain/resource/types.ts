@@ -1,4 +1,10 @@
-import { Blob, File, ResourceType, User } from '@prisma/client'
+import {
+  Resource as ResourceModel,
+  Blob,
+  File,
+  ResourceType,
+  User,
+} from '@prisma/client'
 import { Option } from '../schema/types'
 
 export type Resource = {
@@ -21,7 +27,7 @@ export type Value = {
   string: string | null
   user: User | null
   file: (File & { Blob: Blob }) | null
-  resourceKey?: number | null
+  resource: ResourceModel | null
 }
 
 export type Data = Record<string, string[] | string | number | boolean | null>

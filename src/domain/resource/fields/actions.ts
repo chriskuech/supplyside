@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
@@ -9,25 +9,22 @@ import { createBlob } from '@/domain/blobs/actions'
 export type UpdateValueDto = {
   resourceId: string
   fieldId: string
-  // file?: {
-  //   name: string
-  //   mediaType: string
-  //   buffer: ArrayBuffer
-  // }
-  // file?: FileDto
-} & Prisma.ValueCreateInput
+  value: {
+    boolean?: boolean | null | undefined
+    number?: number | null | undefined
+    string?: string | null | undefined
+    userId?: string | null | undefined
+    optionId?: string | null | undefined
+    optionIds?: string[] | null | undefined
+    resourceId?: string | null | undefined
+  }
+}
 
 export const updateValue = async ({
   resourceId,
   fieldId,
-  // file,
-  ...value
+  value,
 }: UpdateValueDto) => {
-  const input: Prisma.ValueCreateInput = {
-    ...value,
-    // ...(file ? await createFile(file) : {}),
-  }
-
   await prisma.resourceField.upsert({
     where: {
       resourceId_fieldId: {
@@ -46,66 +43,34 @@ export const updateValue = async ({
           id: fieldId,
         },
       },
-      Value: { create: input },
+      Value: { create: value },
     },
     update: {
-      Value: { update: input },
+      Value: { update: value },
     },
   })
 
-  revalidatePath('.')
+  revalidatePath('resource')
 }
-
-export const readUsers = async () => {
-  const { accountId } = await requireSession()
-
-  revalidateTag('resource')
-
-  return await prisma.user.findMany({
-    where: { accountId },
-    orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
-  })
-}
-
-// const createFile = async (file: FileDto): Promise<Prisma.ValueCreateInput> => {
-//   const { accountId } = await requireSession()
-
-//   const blob = await createBlob({ accountId, file })
-
-//   return {
-//     File: {
-//       create: {
-//         name: file.name,
-//         Account: {
-//           connect: {
-//             id: accountId,
-//           },
-//         },
-//         Blob: {
-//           connect: {
-//             id: blob.id,
-//           },
-//         },
-//       },
-//     },
-//   }
-// }
 
 export const uploadFile = async (
   resourceId: string,
   fieldId: string,
-  name: string,
-  type: string,
-  buffer: Buffer,
+  formData: FormData,
 ) => {
+  console.log('uploadFile')
   const { accountId } = await requireSession()
 
-  const blob = await createBlob({ accountId, type, buffer })
+  const file = formData.get('file')
+
+  if (!file || typeof file === 'string' || file.size === 0) return
+
+  const { id: blobId } = await createBlob({ accountId, file })
 
   const input: Prisma.ValueCreateInput = {
     File: {
       create: {
-        name,
+        name: file.name,
         Account: {
           connect: {
             id: accountId,
@@ -113,7 +78,7 @@ export const uploadFile = async (
         },
         Blob: {
           connect: {
-            id: blob.id,
+            id: blobId,
           },
         },
       },
@@ -145,5 +110,5 @@ export const uploadFile = async (
     },
   })
 
-  revalidatePath('.')
+  revalidatePath('resource')
 }

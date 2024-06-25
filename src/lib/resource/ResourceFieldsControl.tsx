@@ -10,15 +10,10 @@ import {
 } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 import { map, pipe, range } from 'remeda'
-import dynamic from 'next/dynamic'
 import { ExpandMore } from '@mui/icons-material'
+import Field from './fields/Field'
 import { readResource } from '@/domain/resource/actions'
-import { readUsers, updateValue } from '@/domain/resource/fields/actions'
 import { readSchema } from '@/domain/schema/actions'
-
-const ResourceFieldControl = dynamic(() => import('./ResourceFieldControl'), {
-  ssr: false,
-})
 
 type Props = {
   resourceType: ResourceType
@@ -29,11 +24,10 @@ export default async function ResourceFieldsControl({
   resourceType,
   resourceKey,
 }: Props) {
-  const [systemSchema, customSchema, resource, users] = await Promise.all([
+  const [systemSchema, customSchema, resource] = await Promise.all([
     readSchema({ resourceType, isSystem: true }),
     readSchema({ resourceType, isSystem: false }),
     readResource({ type: resourceType, key: resourceKey }),
-    readUsers(),
   ])
 
   return (
@@ -55,16 +49,14 @@ export default async function ResourceFieldsControl({
                   {s.fields.map((f) => (
                     <Box key={f.id}>
                       <Typography fontWeight={'bold'}>{f.name}</Typography>
-                      <ResourceFieldControl
-                        id={`rf-${f.id}`}
+                      <Field
+                        inputId={`rf-${f.id}`}
                         resourceId={resource.id}
                         field={f}
-                        users={users}
                         value={
                           resource.fields.find((rf) => rf.fieldId === f.id)
                             ?.value
                         }
-                        onChange={updateValue}
                       />
                     </Box>
                   ))}

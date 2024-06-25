@@ -67,4 +67,5 @@ const mapField = (
     id: o.id,
     name: o.name,
   })),
+  resourceType: model.resourceType,
 })

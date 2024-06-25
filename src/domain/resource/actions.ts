@@ -286,7 +286,7 @@ const mapResource = (
       option: rf.Value.Option,
       options: rf.Value.ValueOption.map((vo) => vo.Option),
       user: rf.Value.User,
-      resourceKey: rf.Value.Resource?.key,
+      resource: rf.Value.Resource,
       file: rf.Value.File,
     },
   })),

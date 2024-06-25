@@ -64,7 +64,7 @@ export default function ResourceTable({ schema, resources }: Props) {
                 value?.user &&
                 `${value.user.firstName} ${value.user.firstName}`,
             )
-            .with('Resource', () => value?.resourceKey)
+            .with('Resource', () => value?.resource?.key)
             .exhaustive()
         },
         valueFormatter: (_, row) => {
@@ -97,7 +97,7 @@ export default function ResourceTable({ schema, resources }: Props) {
                 value?.user &&
                 `${value.user.firstName} ${value.user.firstName}`,
             )
-            .with('Resource', () => value?.resourceKey)
+            .with('Resource', () => value?.resource?.key)
             .exhaustive()
         },
       })),

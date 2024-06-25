@@ -74,6 +74,36 @@ export async function readUser(): Promise<User | undefined> {
   }
 }
 
+export async function readUsers(): Promise<User[]> {
+  const { accountId } = await requireSession()
+
+  revalidateTag('iam')
+
+  const users = await prisma.user.findMany({
+    where: {
+      accountId,
+    },
+    include: {
+      ImageBlob: true,
+    },
+  })
+
+  return users.map((user) => ({
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    fullName: `${user.firstName} ${user.lastName}`,
+    email: user.email,
+    profilePicPath:
+      user.ImageBlob &&
+      getDownloadPath({
+        blobId: user.ImageBlob.id,
+        mimeType: user.ImageBlob.mimeType,
+        fileName: 'profile-pic',
+      }),
+  }))
+}
+
 const renderInviteTemplate = (d: { email: string; password: string }) => `
   <h3>Welcome to SupplySide!<h3>
 
