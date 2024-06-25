@@ -104,6 +104,7 @@ model ResourceField {
 
 enum FieldType {
   Checkbox
+  Contact
   Date
   File
   Money
@@ -163,6 +164,19 @@ model File {
   Value   Value[]
 }
 
+model Contact {
+  valueId String  @id @db.Uuid
+  name    String?
+  title   String?
+  email   String?
+  phone   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Value Value @relation(fields: [valueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
 model Value {
   id         String    @id @default(uuid()) @db.Uuid
   boolean    Boolean?
@@ -183,6 +197,7 @@ model Value {
   Resource           Resource?       @relation(fields: [resourceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   ValueOption        ValueOption[]
   ResourceFieldValue ResourceField[]
+  Contact            Contact?
 }
 
 model ValueOption {

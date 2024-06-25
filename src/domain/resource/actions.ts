@@ -11,6 +11,7 @@ import {
   Prisma,
   File,
   Blob,
+  Contact,
 } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { P, match } from 'ts-pattern'
@@ -242,6 +243,7 @@ const include = {
     include: {
       Value: {
         include: {
+          Contact: true,
           File: {
             include: {
               Blob: true,
@@ -265,6 +267,7 @@ const mapResource = (
   model: ResourceModel & {
     ResourceField: (ResourceField & {
       Value: Value & {
+        Contact: Contact | null
         File: (File & { Blob: Blob }) | null
         Option: Option | null
         User: User | null
@@ -281,6 +284,7 @@ const mapResource = (
     fieldId: rf.fieldId,
     value: {
       boolean: rf.Value.boolean,
+      contact: rf.Value.Contact,
       date: rf.Value.date,
       string: rf.Value.string,
       number: rf.Value.number,

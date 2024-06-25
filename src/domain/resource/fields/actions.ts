@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
@@ -112,4 +112,86 @@ export const uploadFile = async (
   })
 
   revalidatePath('resource')
+}
+
+export type UpdateContactDto = {
+  name?: string
+  title?: string
+  email?: string
+  phone?: string
+}
+
+export const updateContact = async (
+  resourceId: string,
+  fieldId: string,
+  dto: UpdateContactDto | null,
+) => {
+  revalidateTag('resource')
+
+  if (!dto) {
+    await prisma.resourceField.update({
+      where: {
+        resourceId_fieldId: {
+          resourceId,
+          fieldId,
+        },
+      },
+      data: {
+        Value: {
+          update: {
+            Contact: {
+              delete: true,
+            },
+          },
+        },
+      },
+    })
+  } else {
+    await prisma.resourceField.upsert({
+      where: {
+        resourceId_fieldId: {
+          resourceId,
+          fieldId,
+        },
+      },
+      create: {
+        Resource: {
+          connect: {
+            id: resourceId,
+          },
+        },
+        Field: {
+          connect: {
+            id: fieldId,
+          },
+        },
+        Value: {
+          create: {
+            Contact: {
+              create: dto,
+            },
+          },
+        },
+      },
+      update: {
+        Value: {
+          upsert: {
+            create: {
+              Contact: {
+                create: dto,
+              },
+            },
+            update: {
+              Contact: {
+                upsert: {
+                  create: dto,
+                  update: dto,
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+  }
 }

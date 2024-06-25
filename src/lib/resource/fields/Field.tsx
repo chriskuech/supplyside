@@ -16,8 +16,13 @@ import dayjs from 'dayjs'
 import FileField from './FileField'
 import UserField from './UserField'
 import ResourceField from './ResourceField'
+import ContactField from './ContactField'
 import { Value } from '@/domain/resource/types'
-import { UpdateValueDto, updateValue } from '@/domain/resource/fields/actions'
+import {
+  UpdateValueDto,
+  updateContact,
+  updateValue,
+} from '@/domain/resource/fields/actions'
 import { Field as FieldModel } from '@/domain/schema/types'
 
 type Props = {
@@ -41,6 +46,12 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
         id={inputId}
         defaultChecked={value?.boolean ?? false}
         onChange={(e) => handleChange({ boolean: e.target.checked })}
+      />
+    ))
+    .with('Contact', () => (
+      <ContactField
+        contact={value?.contact ?? null}
+        onChange={(contact) => updateContact(resourceId, field.id, contact)}
       />
     ))
     .with('Date', () => (

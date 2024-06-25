@@ -58,6 +58,16 @@ const createOrderBy = (orderBy: OrderBy[]) =>
 const createPropertySubquery = (field: Field) =>
   match(field.type)
     .with(
+      'Contact',
+      () => `
+        SELECT "Contact"."name"
+        FROM "ResourceField"
+        LEFT JOIN "Contact" ON "Contact"."valueId" = "ResourceField"."valueId"
+        WHERE "Resource"."id" = "ResourceField"."resourceId"
+          AND "ResourceField"."fieldId" = '${field.id}'
+      `,
+    )
+    .with(
       'MultiSelect',
       () => `
         SELECT array_agg("ValueOption"."optionId")
@@ -79,8 +89,10 @@ const createPropertySubquery = (field: Field) =>
     )
     .exhaustive()
 
-const mapFieldTypeToValueColumn = (t: Exclude<FieldType, 'MultiSelect'>) =>
-  match<Exclude<FieldType, 'MultiSelect'>, keyof Value>(t)
+type PrimitiveFieldType = Exclude<FieldType, 'Contact' | 'MultiSelect'>
+
+const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
+  match<PrimitiveFieldType, keyof Value>(t)
     .with('Checkbox', () => 'boolean')
     .with('Date', () => 'date')
     .with('File', () => 'fileId')

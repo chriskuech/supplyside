@@ -6,6 +6,7 @@ import { Chip, IconButton } from '@mui/material'
 import { Check, Delete } from '@mui/icons-material'
 import { P, match } from 'ts-pattern'
 import { useMemo } from 'react'
+import ContactCard from './fields/ContactCard'
 import { Resource } from '@/domain/resource/types'
 import { Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
@@ -30,6 +31,7 @@ export default function ResourceTable({ schema, resources }: Props) {
         width: 300,
         type: match<FieldType, GridColType>(field.type)
           .with('Checkbox', () => 'boolean')
+          .with('Contact', () => 'custom')
           .with('Date', () => 'date')
           .with('File', () => 'boolean')
           .with('Money', () => 'number')
@@ -48,6 +50,7 @@ export default function ResourceTable({ schema, resources }: Props) {
 
           return match<FieldType, Primitive>(field.type)
             .with('Checkbox', () => value?.boolean)
+            .with('Contact', () => value?.contact?.name)
             .with('Date', () => value?.date?.toISOString())
             .with('File', () => !!value?.file)
             .with(P.union('Money', 'Number'), () => value?.number)
@@ -74,6 +77,10 @@ export default function ResourceTable({ schema, resources }: Props) {
 
           return match<FieldType>(field.type)
             .with('Checkbox', () => value?.boolean && <Check />)
+            .with(
+              'Contact',
+              () => value?.contact && <ContactCard contact={value?.contact} />,
+            )
             .with('Date', () => value?.date?.toLocaleDateString())
             .with('File', () => value?.file && <Check />)
             .with('Money', () =>

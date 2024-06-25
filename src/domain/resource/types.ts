@@ -4,6 +4,7 @@ import {
   File,
   ResourceType,
   User,
+  Contact,
 } from '@prisma/client'
 import { Option } from '../schema/types'
 
@@ -21,6 +22,7 @@ export type ResourceField = {
 
 export type Value = {
   boolean: boolean | null
+  contact: Contact | null
   date: Date | null
   number: number | null
   option: Option | null
