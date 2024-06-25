@@ -70,10 +70,15 @@ export default async function ResourceFieldsControl({
   )
 }
 
+/**
+ * @param n the number of groups to create
+ * @param array the array to split
+ * @returns an array of arrays, each containing an approximately equal portion of the original array
+ */
 const splitIntoNParts = <T,>(n: number, array: T[]): T[][] => {
-  const partSize = Math.ceil(array.length / n)
-  return pipe(
+  const result: T[][] = pipe(
     range(0, n),
-    map((i) => array.slice(i * partSize, (i + 1) * partSize)),
+    map((i) => array.filter((_, j) => j % n === i)),
   )
+  return result
 }
