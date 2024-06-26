@@ -10,6 +10,10 @@ expandDotenv(loadDotenv())
 const config = z
   .object({
     SALT: z.string().min(1),
+    DEV_EMAIL: z.string().email(),
+    DEV_FIRST_NAME: z.string().min(1),
+    DEV_LAST_NAME: z.string().min(1),
+    DEV_PASSWORD: z.string().min(1),
   })
   .parse(process.env)
 
@@ -29,30 +33,18 @@ async function main() {
     data: {
       id: systemAccountId,
       accountId: systemAccountId,
-      email: 'chris@supplyside.io',
-      firstName: 'Chris',
-      lastName: 'Kuech',
-      passwordHash: await hash('Zen123', config.SALT),
+      email: config.DEV_EMAIL,
+      firstName: config.DEV_FIRST_NAME,
+      lastName: config.DEV_LAST_NAME,
+      passwordHash: await hash(config.DEV_PASSWORD, config.SALT),
       requirePasswordReset: false,
     },
   })
 
-  const account = await prisma.account.create({
+  await prisma.account.create({
     data: {
       id: testId,
-      name: "Chris's Test Company",
-    },
-  })
-
-  await prisma.user.create({
-    data: {
-      id: testId,
-      accountId: account.id,
-      email: 'chris@kuech.dev',
-      firstName: 'Christopher',
-      lastName: 'Kuech',
-      passwordHash: await hash('Zen123', config.SALT),
-      requirePasswordReset: false,
+      name: `${config.DEV_FIRST_NAME}'s Test Company`,
     },
   })
 }
