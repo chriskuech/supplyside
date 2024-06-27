@@ -4,7 +4,7 @@ import { fail } from 'assert'
 import { hash } from 'bcrypt'
 import { cookies } from 'next/headers'
 import { RedirectType, redirect } from 'next/navigation'
-import { config } from './config'
+import config from './config'
 import prisma from './prisma'
 import { systemAccountId } from './const'
 
@@ -20,7 +20,7 @@ export const requireSessionWithRedirect = async () => {
 
   if (!session) redirect('/auth/login', RedirectType.replace)
 
-  const user = await prisma.user.findUniqueOrThrow({
+  const user = await prisma().user.findUniqueOrThrow({
     where: {
       id: session.userId,
     },
@@ -33,9 +33,9 @@ export const requireSessionWithRedirect = async () => {
 }
 
 export const createSession = async (email: string, password: string) => {
-  const passwordHash = await hash(password, config.SALT)
+  const passwordHash = await hash(password, config().SALT)
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma().user.findUnique({
     where: {
       email,
       passwordHash,
@@ -67,7 +67,7 @@ export const clearSession = () => {
 export const impersonate = async (accountId: string) => {
   const { userId } = await requireSession()
 
-  await prisma.user.findUniqueOrThrow({
+  await prisma().user.findUniqueOrThrow({
     where: {
       id: userId,
       accountId: systemAccountId,

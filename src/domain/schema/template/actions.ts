@@ -11,7 +11,7 @@ export const applyTemplate = async (accountId: string) => {
 const applyFields = async (accountId: string) =>
   await Promise.all(
     Object.values(fields).map(({ templateId, ...field }) =>
-      prisma.field.upsert({
+      prisma().field.upsert({
         where: {
           accountId_templateId: {
             accountId,
@@ -31,7 +31,7 @@ const applyFields = async (accountId: string) =>
   )
 
 const applySchemas = async (accountId: string) => {
-  await prisma.schema.deleteMany({
+  await prisma().schema.deleteMany({
     where: {
       accountId,
       isSystem: true,
@@ -40,7 +40,7 @@ const applySchemas = async (accountId: string) => {
 
   await Promise.all(
     schemas.map(async ({ resourceType, sections }) => {
-      await prisma.schema.create({
+      await prisma().schema.create({
         data: {
           accountId,
           isSystem: true,

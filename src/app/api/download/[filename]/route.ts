@@ -26,7 +26,7 @@ export async function GET(
 
   const { accountId } =
     query.get('no-impersonation') !== null
-      ? await prisma.user.findUniqueOrThrow({
+      ? await prisma().user.findUniqueOrThrow({
           where: { id: session.userId },
         })
       : session

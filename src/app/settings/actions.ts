@@ -49,7 +49,7 @@ export const handleSaveSettings = async (
   }
 
   if (!isEmpty(update) && isEmpty(errors)) {
-    await prisma.user.update({
+    await prisma().user.update({
       where: { id: userId },
       data: update,
     })

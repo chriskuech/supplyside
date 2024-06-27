@@ -8,7 +8,7 @@ import { Account } from './types'
 import prisma from '@/lib/prisma'
 
 export const inviteAccount = async (email: string): Promise<void> => {
-  const { id: accountId } = await prisma.account.create({
+  const { id: accountId } = await prisma().account.create({
     data: {
       name: `${email}'s Account`,
     },
@@ -24,7 +24,7 @@ export const readAccount = async (
 ): Promise<Account | undefined> => {
   revalidateTag('iam')
 
-  const account = await prisma.account.findUnique({
+  const account = await prisma().account.findUnique({
     where: {
       id: accountId,
     },
@@ -51,7 +51,7 @@ export const readAccount = async (
 }
 
 export const deleteAccount = async (accountId: string): Promise<void> => {
-  await prisma.account.delete({
+  await prisma().account.delete({
     where: {
       id: accountId,
     },

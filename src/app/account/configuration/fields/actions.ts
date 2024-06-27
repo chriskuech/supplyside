@@ -39,7 +39,7 @@ export type CreateFieldParams = {
 export const createField = async (params: CreateFieldParams) => {
   const session = await requireSession()
 
-  await prisma.field.create({
+  await prisma().field.create({
     data: {
       accountId: session.accountId,
       isVersioned: params.isVersioned,
@@ -56,7 +56,7 @@ export const createField = async (params: CreateFieldParams) => {
 export const readFields = async (): Promise<Field[]> => {
   const session = await requireSession()
 
-  return await prisma.field.findMany({
+  return await prisma().field.findMany({
     where: {
       accountId: session.accountId,
       isEditable: true,
@@ -90,7 +90,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
   const session = await requireSession()
 
   await Promise.all([
-    prisma.field.update({
+    prisma().field.update({
       where: {
         id: dto.id,
         accountId: session.accountId,
@@ -103,7 +103,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
     ...dto.options.map((o, i) =>
       match(o)
         .with({ op: 'add' }, (o) =>
-          prisma.option.create({
+          prisma().option.create({
             data: {
               Field: {
                 connect: {
@@ -117,7 +117,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
           }),
         )
         .with({ op: 'update' }, (o) =>
-          prisma.option.update({
+          prisma().option.update({
             where: {
               id: o.optionId,
               Field: {
@@ -132,7 +132,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
           }),
         )
         .with({ op: 'remove' }, (o) =>
-          prisma.option.delete({
+          prisma().option.delete({
             where: {
               id: o.optionId,
               Field: {
@@ -152,7 +152,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
 export const deleteField = async (fieldId: string) => {
   const session = await requireSession()
 
-  await prisma.field.delete({
+  await prisma().field.delete({
     where: {
       accountId: session.accountId,
       id: fieldId,

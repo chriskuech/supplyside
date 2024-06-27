@@ -25,7 +25,7 @@ export type Schema = {
 export const readSchemas = async (): Promise<Schema[]> => {
   const { accountId } = await requireSession()
 
-  return await prisma.schema.findMany({
+  return await prisma().schema.findMany({
     where: { accountId },
     select: {
       id: true,
@@ -65,7 +65,7 @@ export const updateSchema = async (dto: {
 }) => {
   const { accountId } = await requireSession()
 
-  await prisma.schema.update({
+  await prisma().schema.update({
     where: {
       accountId,
       id: dto.schemaId,
@@ -91,7 +91,7 @@ export const createSection = async (dto: {
   schemaId: string
   name: string
 }) => {
-  await prisma.section.create({
+  await prisma().section.create({
     data: {
       schemaId: dto.schemaId,
       name: dto.name,
@@ -110,7 +110,7 @@ export const updateSection = async (dto: {
   const { accountId } = await requireSession()
 
   await Promise.all([
-    prisma.sectionField.deleteMany({
+    prisma().sectionField.deleteMany({
       where: {
         sectionId: dto.sectionId,
         fieldId: {
@@ -118,7 +118,7 @@ export const updateSection = async (dto: {
         },
       },
     }),
-    prisma.section.update({
+    prisma().section.update({
       where: {
         id: dto.sectionId,
         Schema: {
@@ -154,7 +154,7 @@ export const updateSection = async (dto: {
 export const deleteSection = async (sectionId: string) => {
   const { accountId } = await requireSession()
 
-  await prisma.section.delete({
+  await prisma().section.delete({
     where: {
       id: sectionId,
       Schema: {

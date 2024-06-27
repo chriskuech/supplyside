@@ -1,10 +1,15 @@
 import { PrismaClient } from '@prisma/client'
-import { lazyStatic } from './lazyStatic'
 
-export default lazyStatic(Symbol.for('prisma'), () => {
-  const client = new PrismaClient()
-  client.$connect()
-  process.on('exit', () => client.$disconnect())
+let _prisma: PrismaClient | null = null
 
-  return client
-})
+const prisma = () => {
+  if (!_prisma) {
+    _prisma = new PrismaClient()
+    _prisma.$connect()
+    process.on('exit', () => _prisma?.$disconnect())
+  }
+
+  return _prisma
+}
+
+export default prisma

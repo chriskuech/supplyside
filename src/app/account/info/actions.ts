@@ -38,7 +38,7 @@ export const handleSaveSettings = async (
   }
 
   if (!isEmpty(update) && isEmpty(errors)) {
-    await prisma.account.update({
+    await prisma().account.update({
       where: { id: accountId },
       data: update,
     })

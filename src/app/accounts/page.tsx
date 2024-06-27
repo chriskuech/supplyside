@@ -23,7 +23,7 @@ export default async function AdminPage() {
 
   if (accountId !== systemAccountId) return
 
-  const accounts = await prisma.account.findMany({
+  const accounts = await prisma().account.findMany({
     orderBy: {
       name: 'asc',
     },

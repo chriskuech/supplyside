@@ -50,7 +50,7 @@ export const createPo = async (resourceId: string) => {
       buffer,
       type: 'application/pdf',
     }),
-    prisma.field.findUniqueOrThrow({
+    prisma().field.findUniqueOrThrow({
       where: {
         accountId_templateId: {
           accountId,
@@ -81,7 +81,7 @@ export const createPo = async (resourceId: string) => {
     },
   }
 
-  await prisma.resourceField.upsert({
+  await prisma().resourceField.upsert({
     where: {
       Resource: {
         accountId,

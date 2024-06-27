@@ -47,7 +47,7 @@ export const createResource = async ({
 
   const {
     _max: { key },
-  } = await prisma.resource.aggregate({
+  } = await prisma().resource.aggregate({
     where: {
       accountId,
       type,
@@ -59,7 +59,7 @@ export const createResource = async ({
 
   revalidatePath('resource')
 
-  return await prisma.resource.create({
+  return await prisma().resource.create({
     data: {
       accountId,
       type,
@@ -165,7 +165,7 @@ export const readResource = async ({
 }: ReadResourceParams): Promise<Resource> => {
   const { accountId } = await requireSession()
 
-  const model = await prisma.resource.findUniqueOrThrow({
+  const model = await prisma().resource.findUniqueOrThrow({
     where: {
       id,
       accountId_type_key_revision: key
@@ -201,9 +201,9 @@ export const readResources = async ({
   const schema = await readSchema({ resourceType: type })
   const sql = createSql({ accountId, schema, where, orderBy })
 
-  const results: { _id: string }[] = await prisma.$queryRawUnsafe(sql)
+  const results: { _id: string }[] = await prisma().$queryRawUnsafe(sql)
 
-  const models = await prisma.resource.findMany({
+  const models = await prisma().resource.findMany({
     where: {
       accountId,
       type,
@@ -228,7 +228,7 @@ export const deleteResource = async ({
 }: DeleteResourceParams): Promise<void> => {
   const { accountId } = await requireSession()
 
-  await prisma.resource.delete({
+  await prisma().resource.delete({
     where: {
       accountId,
       id,

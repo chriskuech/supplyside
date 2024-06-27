@@ -16,7 +16,7 @@ export const readSchema = async ({
 }: ReadSchemaParams): Promise<Schema> => {
   const { accountId } = await requireSession()
 
-  const schemas = await prisma.schema.findMany({
+  const schemas = await prisma().schema.findMany({
     where: {
       accountId,
       resourceType,

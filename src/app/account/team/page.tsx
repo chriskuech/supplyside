@@ -13,7 +13,7 @@ const InviteUserControl = dynamic(() => import('@/lib/iam/InviteUserControl'), {
 export default async function Team() {
   const session = await requireSession()
 
-  const users = await prisma.user.findMany({
+  const users = await prisma().user.findMany({
     where: { accountId: session.accountId },
     orderBy: { email: 'asc' },
   })

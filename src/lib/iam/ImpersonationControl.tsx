@@ -16,10 +16,10 @@ export default async function ImpersonationControl() {
   if (!session) return
 
   const [user, accounts] = await Promise.all([
-    prisma.user.findUnique({
+    prisma().user.findUnique({
       where: { id: session.userId },
     }),
-    prisma.account.findMany({
+    prisma().account.findMany({
       orderBy: {
         name: 'asc',
       },

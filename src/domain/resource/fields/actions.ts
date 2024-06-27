@@ -26,7 +26,7 @@ export const updateValue = async ({
   fieldId,
   value,
 }: UpdateValueDto) => {
-  await prisma.resourceField.upsert({
+  await prisma().resourceField.upsert({
     where: {
       resourceId_fieldId: {
         resourceId,
@@ -86,7 +86,7 @@ export const uploadFile = async (
     },
   }
 
-  await prisma.resourceField.upsert({
+  await prisma().resourceField.upsert({
     where: {
       resourceId_fieldId: {
         resourceId,
@@ -129,7 +129,7 @@ export const updateContact = async (
   revalidateTag('resource')
 
   if (!dto) {
-    await prisma.resourceField.update({
+    await prisma().resourceField.update({
       where: {
         resourceId_fieldId: {
           resourceId,
@@ -147,7 +147,7 @@ export const updateContact = async (
       },
     })
   } else {
-    await prisma.resourceField.upsert({
+    await prisma().resourceField.upsert({
       where: {
         resourceId_fieldId: {
           resourceId,

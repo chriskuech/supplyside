@@ -6,13 +6,15 @@ import { revalidateTag } from 'next/cache'
 import { ServerClient } from 'postmark'
 import { getDownloadPath } from '../blobs/utils'
 import { User } from './types'
-import { config } from '@/lib/config'
+import config from '@/lib/config'
 import prisma from '@/lib/prisma'
 import { readSession, requireSession } from '@/lib/session'
 
-const smtp = new ServerClient(config.POSTMARK_API_KEY)
+let _smtp: ServerClient | null = null
 
-const loginUrl = `${config.BASE_URL}/auth/login`
+const smtp = () => (_smtp ??= new ServerClient(config().POSTMARK_API_KEY))
+
+const loginPath = '/auth/login'
 
 export async function inviteUser(
   accountId: string,
@@ -20,16 +22,16 @@ export async function inviteUser(
 ): Promise<void> {
   const password = faker.string.nanoid()
 
-  await prisma.user.create({
+  await prisma().user.create({
     data: {
       email,
       accountId,
-      passwordHash: await hash(password, config.SALT),
+      passwordHash: await hash(password, config().SALT),
       requirePasswordReset: true,
     },
   })
 
-  await smtp.sendEmail({
+  await smtp().sendEmail({
     From: 'bot@supplyside.io',
     To: email,
     Subject: 'Hello from SupplySide',
@@ -47,7 +49,7 @@ export async function readUser(): Promise<User | undefined> {
 
   revalidateTag('iam')
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma().user.findUnique({
     where: { id: session.userId },
     include: {
       ImageBlob: true,
@@ -79,7 +81,7 @@ export async function readUsers(): Promise<User[]> {
 
   revalidateTag('iam')
 
-  const users = await prisma.user.findMany({
+  const users = await prisma().user.findMany({
     where: {
       accountId,
     },
@@ -107,7 +109,7 @@ export async function readUsers(): Promise<User[]> {
 const renderInviteTemplate = (d: { email: string; password: string }) => `
   <h3>Welcome to SupplySide!<h3>
 
-  <p>Use the temporary email and password below to log into <a href="${loginUrl}">${loginUrl}</a>.</p>
+  <p>Use the temporary email and password below to log into <a href="${config().BASE_URL}${loginPath}">${config().BASE_URL}${loginPath}</a>.</p>
 
   <h5>Credentials</h5>
   <table>
@@ -125,7 +127,7 @@ const renderInviteTemplate = (d: { email: string; password: string }) => `
 export async function deleteUser(userId: string): Promise<void> {
   const { accountId } = await requireSession()
 
-  await prisma.user.delete({
+  await prisma().user.delete({
     where: {
       accountId,
       id: userId,

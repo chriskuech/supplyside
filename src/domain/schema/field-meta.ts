@@ -12,7 +12,7 @@ export const readUsers = async (): Promise<Option[]> => {
 
   revalidateTag('iam')
 
-  const users = await prisma.user.findMany({
+  const users = await prisma().user.findMany({
     where: { accountId },
     orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
   })
@@ -34,7 +34,7 @@ export const findResources = async ({
 }: FindResourcesParams): Promise<Option[]> => {
   const { accountId } = await requireSession()
 
-  const results = await prisma.$queryRaw`
+  const results = await prisma().$queryRaw`
     WITH "View" AS (
       SELECT
         "Resource"."id" AS "id",

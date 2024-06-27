@@ -23,7 +23,7 @@ type CreateBlobParams = { accountId: string } & (
 export const createBlob = async ({ accountId, ...rest }: CreateBlobParams) => {
   const blobName = randomUUID()
 
-  const containerClient = azblob.getContainerClient(containerName)
+  const containerClient = azblob().getContainerClient(containerName)
 
   await containerClient.createIfNotExists()
 
@@ -34,7 +34,7 @@ export const createBlob = async ({ accountId, ...rest }: CreateBlobParams) => {
     .getBlockBlobClient(blobName)
     .uploadData(buffer, { blobHTTPHeaders: { blobContentType: type } })
 
-  const blob = await prisma.blob.create({
+  const blob = await prisma().blob.create({
     data: {
       accountId: accountId,
       mimeType: type.toLowerCase(),
@@ -54,14 +54,14 @@ export const readBlob = async ({
   accountId,
   blobId,
 }: ReadBlobParams): Promise<(Blob & { buffer: Buffer }) | undefined> => {
-  const blob = await prisma.blob.findUnique({
+  const blob = await prisma().blob.findUnique({
     where: { accountId, id: blobId },
   })
   if (!blob) {
     throw new Error('Blob not found')
   }
 
-  const buffer = await azblob
+  const buffer = await azblob()
     .getContainerClient(containerName)
     .getBlockBlobClient(blob.name)
     .downloadToBuffer()
@@ -75,7 +75,7 @@ type DeleteBlobParams = {
 }
 
 export const deleteBlob = async ({ accountId, blobId }: DeleteBlobParams) => {
-  const blob = await prisma.blob.findUnique({
+  const blob = await prisma().blob.findUnique({
     where: { accountId, id: blobId },
   })
 
@@ -83,10 +83,10 @@ export const deleteBlob = async ({ accountId, blobId }: DeleteBlobParams) => {
     throw new Error('Blob not found')
   }
 
-  await azblob
+  await azblob()
     .getContainerClient(containerName)
     .getBlockBlobClient(blob.name)
     .deleteIfExists()
 
-  await prisma.blob.delete({ where: { accountId, id: blobId } })
+  await prisma().blob.delete({ where: { accountId, id: blobId } })
 }
