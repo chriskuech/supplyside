@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material'
 import { ResourceType } from '@prisma/client'
-import { map, range } from 'remeda'
+import { chunk } from 'remeda'
 import { ExpandMore } from '@mui/icons-material'
 import Field from './fields/Field'
 import { readResource } from '@/domain/resource/actions'
@@ -31,22 +31,19 @@ export default async function ResourceFieldsControl({
   ])
 
   return (
-    <Stack flexDirection={'row'} gap={2}>
-      {splitIntoNParts(3, [
-        ...systemSchema.sections,
-        ...customSchema.sections,
-      ]).map((ss, i) => (
-        <Stack key={i} flex={1}>
-          {ss.map((s) => (
-            <Accordion key={s.id} defaultExpanded variant="outlined">
-              <AccordionSummary expandIcon={<ExpandMore />}>
-                <Typography variant="h6" fontWeight={'bold'}>
-                  {s.name}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Stack spacing={2}>
-                  {s.fields.map((f) => (
+    <Box>
+      {[...systemSchema.sections, ...customSchema.sections].map((s, i) => (
+        <Accordion key={s.id} defaultExpanded={i === 0} variant="outlined">
+          <AccordionSummary expandIcon={<ExpandMore />}>
+            <Typography variant="h6" fontWeight={'bold'}>
+              {s.name}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Stack spacing={2} direction={'row'}>
+              {chunk(s.fields, Math.ceil(s.fields.length / 3)).map((fs, i) => (
+                <Stack key={i} spacing={2} flex={1}>
+                  {fs.map((f) => (
                     <Box key={f.id}>
                       <Typography fontWeight={'bold'}>{f.name}</Typography>
                       <Field
@@ -61,19 +58,11 @@ export default async function ResourceFieldsControl({
                     </Box>
                   ))}
                 </Stack>
-              </AccordionDetails>
-            </Accordion>
-          ))}
-        </Stack>
+              ))}
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
       ))}
-    </Stack>
+    </Box>
   )
 }
-
-/**
- * @param n the number of groups to create
- * @param array the array to split
- * @returns an array of arrays, each containing an approximately equal portion of the original array
- */
-const splitIntoNParts = <T,>(n: number, array: T[]): T[][] =>
-  map(range(0, n), (i) => array.filter((_, j) => j % n === i))
