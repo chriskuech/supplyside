@@ -3,11 +3,6 @@ import { FieldTemplate, SchemaTemplate } from './types'
 // Define a templateId on macOS with
 //   `uuidgen | awk '{print tolower($0)}'`
 export const fields = {
-  accountNumber: {
-    templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
-    name: 'Account Number',
-    type: 'Text',
-  },
   assignee: {
     templateId: '726e01bc-66cb-4114-b900-10102f9c081c',
     name: 'Assignee',
@@ -56,11 +51,6 @@ export const fields = {
     type: 'Resource',
     resourceType: 'Line',
   },
-  method: {
-    templateId: '01bcb707-bd68-4726-8220-65bd19eee224',
-    name: 'Method',
-    type: 'Select',
-  },
   name: {
     templateId: 'aebb8b9f-d49a-4d5b-b6cf-453bfad847b4',
     name: 'Name',
@@ -82,6 +72,11 @@ export const fields = {
     type: 'Resource',
     resourceType: 'Order',
   },
+  orderNotes: {
+    templateId: 'a4d4eb67-b952-4a51-83d7-1c58c812de30',
+    name: 'Order Notes',
+    type: 'Textarea',
+  },
   paymentTerms: {
     templateId: '8a9c85a4-1aea-4c0c-9cd2-51c6943aaaf7',
     name: 'Payment Terms',
@@ -102,20 +97,25 @@ export const fields = {
     name: 'Primary Address',
     type: 'Textarea',
   },
-  purchaseNotes: {
-    templateId: 'a4d4eb67-b952-4a51-83d7-1c58c812de30',
-    name: 'Purchase Notes',
-    type: 'Textarea',
-  },
   quantity: {
     templateId: '8c04f743-23a3-417f-8fd9-98cd5ffa4a67',
     name: 'Quantity',
     type: 'Number',
   },
+  shippingAccountNumber: {
+    templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
+    name: 'Shipping Account Number',
+    type: 'Select',
+  },
   shippingAddress: {
     templateId: '848fe67b-ee4f-4c68-bdaa-3089622337f6',
     name: 'Shipping Address',
     type: 'Textarea',
+  },
+  shippingMethod: {
+    templateId: '01bcb707-bd68-4726-8220-65bd19eee224',
+    name: 'Shipping Method',
+    type: 'Select',
   },
   shippingNotes: {
     templateId: '0d5a6944-49e6-45bc-ac1e-5ed1c2ccc55c',
@@ -220,7 +220,7 @@ export const schemas: SchemaTemplate[] = [
       },
       {
         name: 'General Info',
-        fields: [fields.purchaseNotes],
+        fields: [fields.orderNotes],
       },
       {
         name: 'Payment Info',
@@ -231,11 +231,15 @@ export const schemas: SchemaTemplate[] = [
         fields: [
           fields.shippingAddress,
           fields.poRecipient,
-          fields.method,
-          fields.accountNumber,
+          fields.shippingMethod,
+          fields.shippingAccountNumber,
           fields.incoterms,
           fields.shippingNotes,
         ],
+      },
+      {
+        name: 'Terms & Conditions',
+        fields: [fields.termsAndConditions],
       },
     ],
   },

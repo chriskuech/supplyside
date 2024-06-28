@@ -3,9 +3,10 @@ import { mapToObj } from 'remeda'
 import { P, match } from 'ts-pattern'
 import { Field, Schema } from '../types'
 
+const datePattern = '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+const phonePattern = '^[0-9]{10}$'
 const uuidPattern =
   '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
-const phonePattern = '^[0-9]{10}$'
 
 export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
   type: 'object',
@@ -27,7 +28,7 @@ export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
       }))
       .with({ type: 'Date' }, () => ({
         type: ['string', 'null'],
-        format: 'date',
+        pattern: datePattern,
       }))
       .with({ type: 'File' }, () => ({
         type: ['string', 'null'],

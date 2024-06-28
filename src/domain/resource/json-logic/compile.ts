@@ -1,8 +1,8 @@
+import { fail } from 'assert'
 import { FieldType, Value } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { OrderBy, Where } from './types'
-import { sanitizeValue } from '@/lib/sanitize'
-import { sanitizeColumnName } from '@/lib/sanitize'
+import { mapUuidToBase64, sanitizeValue } from '@/lib/sanitize'
 import { Schema, Field } from '@/domain/schema/types'
 
 export type MapToSqlParams = {
@@ -25,7 +25,7 @@ export const createSql = ({
           '"Resource"."id" AS "_id"',
           ...schema.fields.map(
             (f) =>
-              `(${createPropertySubquery(f)}) AS ${sanitizeColumnName(f.name)}`,
+              `(${createPropertySubquery(f)}) AS "${mapUuidToBase64(f.id)}"`,
           ),
         ].join(', ')}
       FROM "Resource"
@@ -34,21 +34,21 @@ export const createSql = ({
     )
     SELECT "_id"
     FROM "View"
-    ${where ? `WHERE ${createWhere(where)}` : ''}
+    ${where ? `WHERE ${createWhere(where, schema)}` : ''}
     ${orderBy ? `ORDER BY ${createOrderBy(orderBy)}` : ''}
   `
 
-const createWhere = (where: Where) =>
+const createWhere = (where: Where, schema: Schema) =>
   match(where)
     .with(
       { '==': P.any },
       ({ '==': [{ var: var_ }, val] }) =>
-        `${sanitizeColumnName(var_)} = ${sanitizeValue(val)}`,
+        `${resolveFieldNameToColumn(var_, schema)} = ${sanitizeValue(val)}`,
     )
     .with(
       { '!=': P.any },
       ({ '!=': [{ var: var_ }, val] }) =>
-        `${sanitizeColumnName(var_)} <> ${sanitizeValue(val)}`,
+        `${resolveFieldNameToColumn(var_, schema)} <> ${sanitizeValue(val)}`,
     )
     .exhaustive()
 
@@ -102,3 +102,13 @@ const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
     .with(P.union('Textarea', 'Text'), () => 'string')
     .with('Resource', () => 'resourceId')
     .exhaustive()
+
+const resolveFieldNameToColumn = (fieldName: string, schema: Schema) => {
+  const field =
+    schema.fields.find((f) => f.name === fieldName) ??
+    fail(
+      `Field with name "${fieldName}" not found in Schema ${schema.resourceType}`,
+    )
+
+  return `"${mapUuidToBase64(field.id)}"`
+}

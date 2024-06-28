@@ -1,15 +1,12 @@
 import { PrismaClient } from '@prisma/client'
+import singleton from './singleton'
 
-let _prisma: PrismaClient | null = null
+const prisma = singleton(() => {
+  const prisma = new PrismaClient()
+  prisma.$connect()
+  process.on('exit', () => prisma?.$disconnect())
 
-const prisma = () => {
-  if (!_prisma) {
-    _prisma = new PrismaClient()
-    _prisma.$connect()
-    process.on('exit', () => _prisma?.$disconnect())
-  }
-
-  return _prisma
-}
+  return prisma
+})
 
 export default prisma

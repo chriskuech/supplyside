@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import singleton from './singleton'
 
 const schema = z.object({
   SALT: z.string().min(1),
@@ -10,8 +11,6 @@ const schema = z.object({
 
 export type Config = z.infer<typeof schema>
 
-let _config: Config | null = null
-
-const config = (): Config => (_config ??= schema.parse(process.env))
+const config = singleton(() => schema.parse(process.env))
 
 export default config

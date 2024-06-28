@@ -1,11 +1,11 @@
 import { BlobServiceClient } from '@azure/storage-blob'
 import config from './config'
+import singleton from './singleton'
 
-let _azblob: BlobServiceClient | null = null
-
-const azblob = (): BlobServiceClient =>
-  (_azblob ??= BlobServiceClient.fromConnectionString(
+const azblob = singleton(() =>
+  BlobServiceClient.fromConnectionString(
     config().AZURE_STORAGE_CONNECTION_STRING,
-  ))
+  ),
+)
 
 export default azblob
