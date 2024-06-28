@@ -17,8 +17,7 @@ export const createSql = ({
   schema,
   where,
   orderBy,
-}: MapToSqlParams) =>
-  `
+}: MapToSqlParams) => /*sql*/ `
     WITH "View" AS (
       SELECT
         ${[
@@ -59,7 +58,7 @@ const createPropertySubquery = (field: Field) =>
   match(field.type)
     .with(
       'Contact',
-      () => `
+      () => /*sql*/ `
         SELECT "Contact"."name"
         FROM "ResourceField"
         LEFT JOIN "Contact" ON "Contact"."valueId" = "ResourceField"."valueId"
@@ -69,7 +68,7 @@ const createPropertySubquery = (field: Field) =>
     )
     .with(
       'MultiSelect',
-      () => `
+      () => /*sql*/ `
         SELECT array_agg("ValueOption"."optionId")
         FROM "ResourceField"
         LEFT JOIN "ValueOption" ON "ValueOption"."valueId" = "ResourceField"."valueId"
@@ -79,7 +78,7 @@ const createPropertySubquery = (field: Field) =>
     )
     .with(
       P.any,
-      (t) => `
+      (t) => /*sql*/ `
         SELECT "Value"."${mapFieldTypeToValueColumn(t)}"
         FROM "ResourceField"
         LEFT JOIN "Value" ON "Value"."id" = "ResourceField"."valueId"
