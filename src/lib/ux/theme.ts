@@ -2,6 +2,11 @@ import { Open_Sans, Ubuntu } from 'next/font/google'
 import { Theme, createTheme as createThemeInner } from '@mui/material/styles'
 import { Components, Mixins, PaletteMode, ThemeOptions } from '@mui/material'
 
+// TODO:
+//  - I think the gradients can be replaced with `elevation` and custom shadows
+//  - There is a ton of casting in this file because it's hard to get the type hinting to work with incomplete type defs and deep merging themes.
+//  - Somehow support "elevation"-like text-shadow on `Typography` (currently hardcoded in ListPage)
+
 declare module '@mui/material/Button' {
   interface ButtonPropsVariantOverrides {
     // gradient: true
