@@ -12,8 +12,8 @@ export function AccountMenu() {
 
   return (
     <Stack justifyContent="center">
-      <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-        <Business />
+      <IconButton color="primary" onClick={(e) => setAnchorEl(e.currentTarget)}>
+        <Business fontSize="large" />
       </IconButton>
       <Menu
         anchorEl={anchorEl}

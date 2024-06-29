@@ -1,6 +1,11 @@
 'use client'
 
-import { DataGrid, GridColDef, GridColType } from '@mui/x-data-grid'
+import {
+  DataGrid,
+  DataGridProps,
+  GridColDef,
+  GridColType,
+} from '@mui/x-data-grid'
 import { FieldType } from '@prisma/client'
 import { Chip, IconButton } from '@mui/material'
 import { Check, Delete } from '@mui/icons-material'
@@ -15,9 +20,9 @@ import { deleteResource } from '@/domain/resource/actions'
 type Props = {
   schema: Schema
   resources: Resource[]
-}
+} & Partial<DataGridProps>
 
-export default function ResourceTable({ schema, resources }: Props) {
+export default function ResourceTable({ schema, resources, ...props }: Props) {
   const columns = useMemo<GridColDef<Resource>[]>(
     () => [
       {
@@ -129,12 +134,13 @@ export default function ResourceTable({ schema, resources }: Props) {
       columns={columns}
       rows={resources}
       rowSelection={false}
-      sx={{ backgroundColor: 'background.paper' }}
+      autoHeight
       onRowClick={({ row: { type, key } }) => {
         if (type === 'Line') return
 
         window.location.href = `/${type.toLowerCase()}s/${key}`
       }}
+      {...props}
     />
   )
 }

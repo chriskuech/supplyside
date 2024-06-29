@@ -17,6 +17,7 @@ export default function ImpersonationClientControl({
     <Autocomplete
       fullWidth
       disableClearable
+      size="small"
       renderInput={(params) => <TextField {...params} />}
       getOptionLabel={(o) => o.name}
       isOptionEqualToValue={(o, v) => o.id === v.id}

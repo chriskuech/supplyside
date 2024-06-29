@@ -1,11 +1,11 @@
 'use server'
 
-import { Box, Button, Divider, Stack, Typography } from '@mui/material'
+import { Box, Button, Divider, Stack } from '@mui/material'
 import MAppBar from '@mui/material/AppBar'
 import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 import Link from 'next/link'
-import { AlignHorizontalRight } from '@mui/icons-material'
+import Image from 'next/image'
 import { readSession } from '../session'
 import { systemAccountId } from '../const'
 import ImpersonationControl from '../iam/ImpersonationControl'
@@ -19,25 +19,17 @@ export default async function AppBar() {
   const user = await readUser()
 
   return (
-    <MAppBar
-      position="static"
-      color="transparent"
-      enableColorOnDark
-      variant="outlined"
-      sx={{ border: 'none' }}
-    >
+    <MAppBar>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           {session && (
             <>
-              <AlignHorizontalRight />
-              <Typography
-                fontStyle={'italic'}
-                fontWeight={'bold'}
-                fontSize={'larger'}
-              >
-                SupplySide
-              </Typography>
+              <Image
+                src={'/logo.png'}
+                alt="SupplySide"
+                width={200}
+                height={45}
+              />
 
               <Stack
                 flexGrow={1}
@@ -45,9 +37,9 @@ export default async function AppBar() {
                 justifyContent={'end'}
                 spacing={1}
               >
-                <Box width={300}>
+                <Stack width={300} justifyContent={'center'}>
                   <ImpersonationControl />
-                </Box>
+                </Stack>
 
                 <Box width={10} />
 
@@ -61,6 +53,7 @@ export default async function AppBar() {
                         sx={{
                           display: { xs: 'none', lg: 'inherit' },
                         }}
+                        disableElevation
                       >
                         {item}
                       </Button>
@@ -83,6 +76,7 @@ export default async function AppBar() {
                       <Button
                         key={item}
                         href={`/${item.toLowerCase()}`}
+                        disableElevation={true}
                         component={Link}
                         sx={{
                           display: { xs: 'none', lg: 'inherit' },

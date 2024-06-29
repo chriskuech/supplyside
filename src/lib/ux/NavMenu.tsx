@@ -16,7 +16,7 @@ export function NavMenu() {
       sx={{ display: { md: 'inherit', lg: 'none' } }}
     >
       <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-        <MenuIcon />
+        <MenuIcon fontSize="large" />
       </IconButton>
       <Menu
         anchorEl={anchorEl}

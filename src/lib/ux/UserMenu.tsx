@@ -35,8 +35,12 @@ export function UserMenu({ user }: Props) {
 
   return (
     <Stack justifyContent="center">
-      <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-        <Avatar alt={user.fullName} src={user.profilePicPath ?? ''} />
+      <IconButton color="primary" onClick={(e) => setAnchorEl(e.currentTarget)}>
+        <Avatar
+          alt={user.fullName}
+          src={user.profilePicPath ?? ''}
+          sx={{ bgcolor: 'primary.main' }}
+        />
       </IconButton>
       <Menu
         anchorEl={anchorEl}

@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material'
 import { ResourceType } from '@prisma/client'
-import { chunk } from 'remeda'
+import { chunk, range } from 'remeda'
 import { ExpandMore } from '@mui/icons-material'
 import Field from './fields/Field'
 import { readResource } from '@/domain/resource/actions'
@@ -41,7 +41,7 @@ export default async function ResourceFieldsControl({
           </AccordionSummary>
           <AccordionDetails>
             <Stack spacing={2} direction={'row'}>
-              {chunk(s.fields, Math.ceil(s.fields.length / 3)).map((fs, i) => (
+              {chunkByN(s.fields, 3).map((fs, i) => (
                 <Stack key={i} spacing={2} flex={1}>
                   {fs.map((f) => (
                     <Box key={f.id}>
@@ -65,4 +65,11 @@ export default async function ResourceFieldsControl({
       ))}
     </Box>
   )
+}
+
+const chunkByN = <T,>(arr: T[], n: number): T[][] => {
+  const chunks = chunk(arr, Math.ceil(arr.length / n))
+  const fill = range(chunks.length, n).map(() => [])
+
+  return [...chunks, ...fill]
 }

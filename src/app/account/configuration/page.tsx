@@ -64,14 +64,16 @@ export default async function Configuration() {
               drag-and-drop reordered within a Section.
             </Typography>
           </Box>
-          <SchemasControl
-            fields={fields}
-            schemas={schemas}
-            onCreateSection={createSection}
-            onDeleteSection={deleteSection}
-            onUpdateSection={updateSection}
-            onUpdateSchema={updateSchema}
-          />
+          <Box>
+            <SchemasControl
+              fields={fields}
+              schemas={schemas}
+              onCreateSection={createSection}
+              onDeleteSection={deleteSection}
+              onUpdateSection={updateSection}
+              onUpdateSchema={updateSchema}
+            />
+          </Box>
         </Stack>
       </Stack>
     </Container>

@@ -1,7 +1,7 @@
 'use client'
 
 import { Add } from '@mui/icons-material'
-import { Button } from '@mui/material'
+import { Button, ButtonProps } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 import { CreateResourceParams } from '@/domain/resource/actions'
 import { Data } from '@/domain/resource/types'
@@ -11,6 +11,7 @@ type Props = {
   createResource: (params: CreateResourceParams) => Promise<{ key: number }>
   shouldRedirect?: boolean
   data?: Data
+  buttonProps?: ButtonProps
 }
 
 export default function CreateResourceButton({
@@ -18,10 +19,11 @@ export default function CreateResourceButton({
   data,
   createResource,
   shouldRedirect,
+  buttonProps,
 }: Props) {
   return (
     <Button
-      variant="contained"
+      variant="gradient"
       onClick={() =>
         createResource({ type, data }).then(({ key }) => {
           if (shouldRedirect) {
@@ -30,6 +32,7 @@ export default function CreateResourceButton({
         })
       }
       endIcon={<Add />}
+      {...buttonProps}
     >
       Create {type}
     </Button>

@@ -9,6 +9,7 @@ import {
   Select,
   TextField,
   TextareaAutosize,
+  useTheme,
 } from '@mui/material'
 import { match } from 'ts-pattern'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -33,6 +34,8 @@ type Props = {
 }
 
 export default function Field({ inputId, resourceId, field, value }: Props) {
+  const theme = useTheme()
+
   const handleChange = async (value: UpdateValueDto['value']) =>
     updateValue({
       resourceId,
@@ -102,7 +105,7 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
       <Select
         id={inputId}
         fullWidth
-        defaultValue={value?.option?.id}
+        defaultValue={value?.option?.id ?? ''}
         onChange={(e) => handleChange({ optionId: e.target.value })}
       >
         {field.options.map((o) => (
@@ -128,9 +131,15 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
         onChange={(e) => handleChange({ string: e.target.value })}
         style={{
           width: '100%',
-          border: '1px solid #ccc',
-          borderRadius: 4,
+          border: '1px solid',
+          borderRadius: 8,
           padding: 8,
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+          ...match(theme.palette.mode)
+            .with('dark', () => ({ borderColor: '#333' }))
+            .with('light', () => ({ borderColor: '#ccc' }))
+            .exhaustive(),
         }}
       />
     ))

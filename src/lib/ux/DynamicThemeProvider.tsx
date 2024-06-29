@@ -1,7 +1,7 @@
 'use client'
 
 import { fail } from 'assert'
-import { ThemeProvider, useMediaQuery } from '@mui/material'
+import { GlobalStyles, ThemeProvider, useMediaQuery } from '@mui/material'
 import {
   FC,
   PropsWithChildren,
@@ -14,6 +14,7 @@ import {
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 import theme from './theme'
+import globalStyles from './globalStyles'
 
 const storageKey = 'theme_preference'
 
@@ -54,7 +55,10 @@ const DynamicThemeProvider: FC<PropsWithChildren> = ({ children }) => {
     <ThemePreferenceContext.Provider
       value={[themePreference, setThemePreference]}
     >
-      <ThemeProvider theme={theme}>{children}</ThemeProvider>
+      <ThemeProvider theme={theme}>
+        <GlobalStyles styles={globalStyles} />
+        {children}
+      </ThemeProvider>
     </ThemePreferenceContext.Provider>
   )
 }

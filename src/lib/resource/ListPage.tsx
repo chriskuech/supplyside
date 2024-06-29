@@ -1,6 +1,6 @@
 'use server'
 
-import { Container, Stack, Typography } from '@mui/material'
+import { Box, Container, Stack, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import { ResourceType } from '@prisma/client'
 import { requireSessionWithRedirect } from '@/lib/session'
@@ -30,17 +30,31 @@ export default async function ListPage({ resourceType }: Props) {
   return (
     <Container sx={{ my: 5 }}>
       <Stack spacing={4}>
-        <Stack direction="row">
-          <Typography variant="h3" flexGrow={1}>
+        <Stack direction="row" alignItems={'center'}>
+          <Typography
+            variant="h3"
+            flexGrow={1}
+            sx={{ textShadow: '0px 7px 27px rgba(0, 0, 0, 0.3)' }}
+          >
             {resourceType}s
           </Typography>
-          <CreateResourceButton
-            type={resourceType}
-            createResource={createResource}
-            shouldRedirect
-          />
+          <Box>
+            <CreateResourceButton
+              type={resourceType}
+              createResource={createResource}
+              shouldRedirect
+              buttonProps={{
+                size: 'large',
+                variant: 'gradient',
+              }}
+            />
+          </Box>
         </Stack>
-        <ResourceTable schema={schema} resources={resources} />
+        <ResourceTable
+          schema={schema}
+          resources={resources}
+          className="elevated"
+        />
       </Stack>
     </Container>
   )

@@ -1,78 +1,303 @@
-import { Inter } from 'next/font/google'
-import { Theme, createTheme } from '@mui/material/styles'
-import { Mixins, PaletteMode } from '@mui/material'
+import { Open_Sans, Ubuntu } from 'next/font/google'
+import { Theme, createTheme as createThemeInner } from '@mui/material/styles'
+import { Components, Mixins, PaletteMode, ThemeOptions } from '@mui/material'
+import { mergeDeep } from 'remeda'
 
-const font = Inter({
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+declare module '@mui/material/Button' {
+  interface ButtonPropsVariantOverrides {
+    gradient: true
+  }
+}
+
+const createTheme = (options: ThemeOptions): Theme =>
+  createThemeInner(
+    mergeDeep(
+      base as Record<string, unknown>,
+      options as Record<string, unknown>,
+    ) as ThemeOptions,
+  )
+
+// these must be consts in module scope
+const ubuntu = Ubuntu({
+  weight: ['300', '400', '500', '700'],
   subsets: ['latin'],
   display: 'swap',
+  preload: true,
+})
+const opensans = Open_Sans({
+  weight: ['300', '400', '500', '600', '700', '800'],
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
 })
 
-// const font = Roboto({
-//   weight: ['300', '400', '500', '700'],
-//   subsets: ['latin'],
-//   display: 'swap',
-// })
-
 const colors = {
-  yellow: '#ffff00',
+  brandBlue: 'rgb(65, 154, 248)',
+  brandCyan: 'rgb(95, 207, 216)',
+  brandPurple: 'rgb(96, 63, 138)',
+  accentMagenta: 'rgb(151, 31, 160)',
+  accentOrange: 'rgb(237, 115, 72)',
   black: '#000000',
   white: '#ffffff',
-  offWhite: '#dddddd',
-  offBlack: '#222222',
-  purple: '#8a2be2',
-  orange: '#ff7300',
   red: '#D32F2F',
+} as const
+
+const fonts = {
+  display: ubuntu,
+  text: opensans,
 }
+
+const base: ThemeOptions = {
+  shape: {
+    borderRadius: 16,
+  },
+  palette: {
+    primary: { main: colors.brandPurple },
+    secondary: { main: colors.brandCyan },
+    error: { main: colors.red },
+  },
+  // shadows: [],
+  components: {
+    MuiAccordion: {
+      styleOverrides: {
+        root: {
+          border: 'none',
+        },
+      },
+    },
+    MuiAppBar: {
+      defaultProps: {
+        position: 'static',
+        variant: 'elevation',
+        color: 'transparent',
+        elevation: 0,
+        enableColorOnDark: true,
+      },
+    },
+    MuiButton: {
+      variants: [
+        {
+          props: { variant: 'gradient' },
+          style: {
+            color: colors.white,
+            background: `linear-gradient(45deg, ${colors.accentMagenta} 30%, ${colors.accentOrange} 90%)`,
+            '&:hover': {
+              marginTop: 2,
+              backgroundColor: `linear-gradient(60deg, ${colors.accentMagenta} 30%, ${colors.accentOrange} 90%)`,
+            },
+            transition: 'all 0.15s',
+          },
+        },
+      ],
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+        },
+      },
+    },
+    MuiCard: {
+      variants: [
+        {
+          props: { variant: 'gradient' },
+          style: {
+            background: `linear-gradient(45deg, ${colors.accentMagenta} 30%, ${colors.accentOrange} 90%)`,
+            color: colors.white,
+          },
+        },
+        {
+          props: { variant: 'elevation' },
+          style: {
+            borderRadius: 16,
+          },
+        },
+      ],
+    },
+    MuiDataGrid: {
+      defaultProps: {
+        autoHeight: true,
+        density: 'compact',
+        noResultsOverlay: true,
+      },
+      styleOverrides: {
+        root: {
+          overflow: 'clip',
+          border: 'none',
+          borderRadius: 16,
+        },
+        columnHeader: {
+          textTransform: 'uppercase',
+          opacity: 0.7,
+          fontSize: '0.75em',
+        },
+      },
+    },
+    MuiSelect: {
+      defaultProps: {
+        variant: 'outlined',
+      },
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+        },
+      },
+    },
+    MuiTextField: {
+      defaultProps: {
+        variant: 'outlined',
+        fullWidth: true,
+        size: 'small',
+      },
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-root': {
+            borderRadius: 8,
+          },
+        },
+      },
+    },
+  } as Components<Omit<Theme, 'components'>>,
+  spacing: 8,
+  typography: {
+    allVariants: {
+      fontFamily: fonts.text.style.fontFamily,
+    },
+    h1: {
+      // fontFamily: fonts.display.style.fontFamily,
+      fontWeight: 600,
+    },
+    h2: {
+      // fontFamily: fonts.display.style.fontFamily,
+      fontWeight: 600,
+    },
+    h3: {
+      // fontFamily: fonts.display.style.fontFamily,
+      fontWeight: 600,
+    },
+    h4: {
+      // fontFamily: fonts.display.style.fontFamily,
+      fontWeight: 600,
+    },
+    h5: {
+      // fontFamily: fonts.display.style.fontFamily,
+      fontWeight: 600,
+    },
+    h6: {
+      // fontFamily: fonts.display.style.fontFamily,
+      fontWeight: 600,
+    },
+  },
+} as ThemeOptions
 
 const themes = {
   light: createTheme({
     palette: {
       mode: 'light',
-      primary: { main: colors.purple },
-      secondary: { main: colors.orange },
       background: {
-        default: colors.white,
-        paper: colors.white,
+        default: 'rgb(248, 249, 250)',
+        paper: '#ffffff',
       },
-      // accent: { main: '#FF9800' },
-      error: { main: colors.red },
     },
-    typography: {
-      fontFamily: font.style.fontFamily,
-    },
+    components: {
+      MuiAccordion: {
+        styleOverrides: {
+          root: {
+            boxShadow: 'rgba(0, 0, 0, 0.05) 0px 20px 27px 0px',
+          },
+        },
+      },
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            '&:not(.MuiButton-disableElevation)': {
+              boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 14px 0px',
+            },
+            '&:hover:not(.MuiButton-disableElevation)': {
+              boxShadow: 'rgba(0, 0, 0, 0.3) 0px 2px 3px 0px',
+            },
+          },
+        },
+      },
+      MuiDataGrid: {
+        styleOverrides: {
+          root: {
+            backgroundColor: colors.white,
+            boxShadow: 'rgba(0, 0, 0, 0.05) 0px 20px 27px 0px',
+          },
+          columnHeader: {
+            backgroundColor: colors.white,
+          },
+        },
+      },
+      MuiTextField: {
+        defaultProps: {},
+        styleOverrides: {
+          root: {
+            '& .MuiInputBase-root': {
+              backgroundColor: colors.white,
+            },
+          },
+        },
+      },
+    } as Components<Omit<Theme, 'components'>>,
     mixins: {
       MuiDataGrid: {
-        // Pinned columns sections
-        // pinnedBackground: '#340606',
-        // Headers, and top & bottom fixed rows
-        // containerBackground: '#343434',
-        containerBackground: '#eeeeee',
+        containerBackground: colors.white,
       },
     } as Partial<Mixins>,
   }),
   dark: createTheme({
     palette: {
       mode: 'dark',
-      primary: { main: colors.purple },
-      secondary: { main: colors.orange },
       background: {
-        default: colors.black,
+        default: '#111111',
         paper: colors.black,
       },
-      // accent: { main: '#FF9800' },
-      error: { main: colors.red },
     },
-    typography: {
-      fontFamily: font.style.fontFamily,
-    },
+    components: {
+      MuiAccordion: {
+        styleOverrides: {
+          root: {
+            boxShadow: 'rgba(0, 0, 0, 0.5) 0px 20px 27px 0px',
+          },
+        },
+      },
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            '&:not(.MuiButton-disableElevation)': {
+              boxShadow: 'rgba(0, 0, 0, 0.5) 0px 10px 14px 0px',
+            },
+            '&:hover:not(.MuiButton-disableElevation)': {
+              boxShadow: 'rgba(0, 0, 0, 1) 0px 2px 3px 0px',
+            },
+          },
+        },
+      },
+      MuiDataGrid: {
+        styleOverrides: {
+          root: {
+            backgroundColor: colors.black,
+            boxShadow: 'rgba(0, 0, 0, 0.5) 0px 20px 27px 0px',
+          },
+          columnHeader: {
+            backgroundColor: colors.black,
+          },
+        },
+      },
+      MuiTextField: {
+        defaultProps: {},
+        styleOverrides: {
+          root: {
+            '& .MuiInputBase-root': {
+              backgroundColor: colors.black,
+            },
+          },
+        },
+      },
+    } as Components<Omit<Theme, 'components'>>,
     mixins: {
       MuiDataGrid: {
-        // Pinned columns sections
-        // pinnedBackground: '#340606',
-        // Headers, and top & bottom fixed rows
-        // containerBackground: '#343434',
-        containerBackground: '#111111',
+        containerBackground: colors.black,
       },
     } as Partial<Mixins>,
   }),

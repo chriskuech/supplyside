@@ -45,7 +45,11 @@ export default async function OrderDetail({
     <Container sx={{ my: 5 }}>
       <Stack spacing={5}>
         <Stack spacing={2}>
-          <Stack direction={'row'} justifyContent={'space-between'}>
+          <Stack
+            direction={'row'}
+            justifyContent={'space-between'}
+            alignItems={'center'}
+          >
             <Typography variant="h3">
               <span style={{ fontWeight: 100 }}>Order #</span>
               <span style={{ fontWeight: 700 }}>{key}</span>
