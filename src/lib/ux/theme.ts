@@ -1,7 +1,6 @@
 import { Open_Sans, Ubuntu } from 'next/font/google'
 import { Theme, createTheme as createThemeInner } from '@mui/material/styles'
 import { Components, Mixins, PaletteMode, ThemeOptions } from '@mui/material'
-import { mergeDeep } from 'remeda'
 
 declare module '@mui/material/Button' {
   interface ButtonPropsVariantOverrides {
@@ -11,10 +10,37 @@ declare module '@mui/material/Button' {
 
 const createTheme = (options: ThemeOptions): Theme =>
   createThemeInner(
-    mergeDeep(
+    mergeAll([
       base as Record<string, unknown>,
       options as Record<string, unknown>,
-    ) as ThemeOptions,
+    ]) as ThemeOptions,
+  )
+
+const mergeAll = (objs: Record<string, unknown>[]) =>
+  objs.reduce(
+    (acc, obj) => {
+      for (const key in obj) {
+        if (Array.isArray(obj[key]) && Array.isArray(acc[key])) {
+          acc[key] = [
+            ...(acc[key] as Array<unknown>),
+            ...(obj[key] as Array<unknown>),
+          ]
+        } else if (
+          typeof obj[key] === 'object' &&
+          typeof acc[key] === 'object'
+        ) {
+          acc[key] = mergeAll([
+            acc[key] as Record<string, unknown>,
+            obj[key] as Record<string, unknown>,
+          ])
+        } else {
+          acc[key] = obj[key]
+        }
+      }
+
+      return acc
+    },
+    {} as Record<string, unknown>,
   )
 
 // these must be consts in module scope
@@ -206,16 +232,30 @@ const themes = {
         },
       },
       MuiButton: {
-        styleOverrides: {
-          root: {
-            '&:not(.MuiButton-disableElevation)': {
-              boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 14px 0px',
-            },
-            '&:hover:not(.MuiButton-disableElevation)': {
-              boxShadow: 'rgba(0, 0, 0, 0.3) 0px 2px 3px 0px',
+        variants: [
+          {
+            props: { variant: 'contained' },
+            style: {
+              '&:not(.MuiButton-disableElevation)': {
+                boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 14px 0px',
+              },
+              '&:hover:not(.MuiButton-disableElevation)': {
+                boxShadow: 'rgba(0, 0, 0, 0.3) 0px 2px 3px 0px',
+              },
             },
           },
-        },
+          {
+            props: { variant: 'gradient' },
+            style: {
+              '&:not(.MuiButton-disableElevation)': {
+                boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 14px 0px',
+              },
+              '&:hover:not(.MuiButton-disableElevation)': {
+                boxShadow: 'rgba(0, 0, 0, 0.3) 0px 2px 3px 0px',
+              },
+            },
+          },
+        ],
       },
       MuiDataGrid: {
         styleOverrides: {

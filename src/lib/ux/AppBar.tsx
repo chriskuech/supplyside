@@ -24,12 +24,14 @@ export default async function AppBar() {
         <Toolbar disableGutters>
           {session && (
             <>
-              <Image
-                src={'/logo.png'}
-                alt="SupplySide"
-                width={200}
-                height={45}
-              />
+              <Link href="/">
+                <Image
+                  src={'/logo.png'}
+                  alt="SupplySide"
+                  width={200}
+                  height={45}
+                />
+              </Link>
 
               <Stack
                 flexGrow={1}
