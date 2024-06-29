@@ -45,7 +45,6 @@ export default async function ListPage({ resourceType }: Props) {
               shouldRedirect
               buttonProps={{
                 size: 'large',
-                variant: 'gradient',
               }}
             />
           </Box>

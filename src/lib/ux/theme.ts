@@ -4,7 +4,7 @@ import { Components, Mixins, PaletteMode, ThemeOptions } from '@mui/material'
 
 declare module '@mui/material/Button' {
   interface ButtonPropsVariantOverrides {
-    gradient: true
+    // gradient: true
   }
 }
 
@@ -79,7 +79,7 @@ const base: ThemeOptions = {
   },
   palette: {
     primary: { main: colors.brandPurple },
-    secondary: { main: colors.brandCyan },
+    secondary: { main: colors.brandBlue },
     error: { main: colors.red },
   },
   // shadows: [],
@@ -103,13 +103,29 @@ const base: ThemeOptions = {
     MuiButton: {
       variants: [
         {
-          props: { variant: 'gradient' },
+          props: { variant: 'contained', color: 'secondary' },
           style: {
             color: colors.white,
-            background: `linear-gradient(45deg, ${colors.accentMagenta} 30%, ${colors.accentOrange} 90%)`,
+            background: `linear-gradient(60deg, ${colors.brandPurple} -20%, ${colors.brandBlue} 40%, ${colors.brandCyan} 140%)`,
+            backgroundSize: '120%',
+            backgroundPosition: '20%',
             '&:hover': {
               marginTop: 2,
-              backgroundColor: `linear-gradient(60deg, ${colors.accentMagenta} 30%, ${colors.accentOrange} 90%)`,
+              backgroundPosition: '0%',
+            },
+            transition: 'all 0.15s',
+          },
+        },
+        {
+          props: { variant: 'contained', color: 'primary' },
+          style: {
+            color: colors.white,
+            background: `linear-gradient(60deg, ${colors.brandPurple} -20%, ${colors.accentMagenta} 40%, ${colors.accentOrange} 140%)`,
+            backgroundSize: '120%',
+            backgroundPosition: '20%',
+            '&:hover': {
+              marginTop: 2,
+              backgroundPosition: '0%',
             },
             transition: 'all 0.15s',
           },
@@ -123,13 +139,6 @@ const base: ThemeOptions = {
     },
     MuiCard: {
       variants: [
-        {
-          props: { variant: 'gradient' },
-          style: {
-            background: `linear-gradient(45deg, ${colors.accentMagenta} 30%, ${colors.accentOrange} 90%)`,
-            color: colors.white,
-          },
-        },
         {
           props: { variant: 'elevation' },
           style: {

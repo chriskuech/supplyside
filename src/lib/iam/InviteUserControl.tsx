@@ -33,7 +33,6 @@ const InviteUserControl: FC<Props> = ({ onSubmit }) => {
               }}
               disabled={!isValid}
               edge="end"
-              color="primary"
             >
               <Send />
             </IconButton>

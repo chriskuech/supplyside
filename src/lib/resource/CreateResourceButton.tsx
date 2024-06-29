@@ -23,7 +23,7 @@ export default function CreateResourceButton({
 }: Props) {
   return (
     <Button
-      variant="gradient"
+      variant="contained"
       onClick={() =>
         createResource({ type, data }).then(({ key }) => {
           if (shouldRedirect) {
