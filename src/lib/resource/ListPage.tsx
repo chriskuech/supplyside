@@ -45,6 +45,7 @@ export default async function ListPage({ resourceType }: Props) {
               shouldRedirect
               buttonProps={{
                 size: 'large',
+                color: 'secondary',
               }}
             />
           </Box>
