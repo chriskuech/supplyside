@@ -47,7 +47,9 @@ export default function ContactField({ contact, onChange }: ContactFieldProps) {
           </Stack>
         </Stack>
       ) : (
-        <Button onClick={() => setIsOpen(true)}>Add Contact</Button>
+        <Button variant="text" onClick={() => setIsOpen(true)}>
+          Add Contact
+        </Button>
       )}
     </>
   )
@@ -134,7 +136,7 @@ const ContactForm: FC<ContactFormProps> = ({ contact, onChange, onCancel }) => {
         <Button size="small" onClick={onCancel}>
           Cancel
         </Button>
-        <Button size="small" onClick={() => onChange(dto)} variant="contained">
+        <Button size="small" onClick={() => onChange(dto)}>
           Save
         </Button>
       </Stack>

@@ -11,6 +11,6 @@ const schema = z.object({
 
 export type Config = z.infer<typeof schema>
 
-const config = singleton(() => schema.parse(process.env))
+const config = singleton('config', () => schema.parse(process.env))
 
 export default config

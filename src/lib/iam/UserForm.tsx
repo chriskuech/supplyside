@@ -102,7 +102,7 @@ const UserForm: FC<{
         />
 
         <Stack direction={'row'} justifyContent={'end'}>
-          <Button type="submit" variant="contained" disabled={!isValid}>
+          <Button type="submit" disabled={!isValid}>
             Submit
           </Button>
         </Stack>

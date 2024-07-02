@@ -1,13 +1,12 @@
 {
-  "name": "front",
+  "name": "supplyside",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
+    "scripts": {
     "dev": "next dev",
     "watch": "tsc --noEmit --watch --project .",
     "prebuild": "prisma generate",
     "build": "next build",
-    "start": "./node_modules/next/dist/bin/next start",
     "lint": "next lint"
   },
   "dependencies": {

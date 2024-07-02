@@ -13,14 +13,24 @@ import { requireSession } from '@/lib/session'
 import PoDocument from '@/lib/order/PoDocument'
 import PoDocumentFooter from '@/lib/order/PoDocumentFooter'
 import prisma from '@/lib/prisma'
+import singleton from '@/lib/singleton'
+
+const browser = singleton('browser', async (clear) => {
+  const browser = await puppeteer.launch()
+
+  browser.once('disconnected', () => {
+    browser.close()
+    clear()
+  })
+
+  return browser
+})
 
 export const createPo = async (resourceId: string) => {
   const { accountId } = await requireSession()
 
-  const browser = await puppeteer.launch({ headless: true })
-
   const [page, main, footer] = await Promise.all([
-    browser.newPage(),
+    (await browser()).newPage(),
     PoDocument(),
     PoDocumentFooter(),
   ])
@@ -42,8 +52,6 @@ export const createPo = async (resourceId: string) => {
     },
   })
 
-  browser.close()
-
   const [blob, field] = await Promise.all([
     createBlob({
       accountId,
@@ -62,6 +70,8 @@ export const createPo = async (resourceId: string) => {
       },
     }),
   ])
+
+  page.close()
 
   const input: Prisma.ValueCreateInput = {
     File: {

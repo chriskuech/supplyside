@@ -106,6 +106,9 @@ const base: ThemeOptions = {
       },
     },
     MuiButton: {
+      defaultProps: {
+        variant: 'contained',
+      },
       variants: [
         {
           props: { variant: 'contained', color: 'secondary' },
@@ -139,6 +142,12 @@ const base: ThemeOptions = {
       styleOverrides: {
         root: {
           borderRadius: 8,
+        },
+        contained: {
+          '&.Mui-disabled': {
+            color: colors.white,
+            opacity: 0.7,
+          },
         },
       },
     },

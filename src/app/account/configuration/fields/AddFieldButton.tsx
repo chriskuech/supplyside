@@ -15,11 +15,7 @@ export default function AddFieldButton({ onSubmit }: Props): ReactNode {
 
   return (
     <>
-      <Button
-        onClick={() => setIsOpen(true)}
-        endIcon={<Add />}
-        variant="contained"
-      >
+      <Button onClick={() => setIsOpen(true)} endIcon={<Add />}>
         Add Field
       </Button>
       <Modal

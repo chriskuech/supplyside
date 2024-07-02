@@ -12,7 +12,6 @@ export default function CreatePoButton({ resourceId, onClick }: Props) {
   return (
     <Button
       onClick={() => onClick(resourceId)}
-      variant={'contained'}
       endIcon={<Add />}
       sx={{ height: 'fit-content' }}
       size="large"

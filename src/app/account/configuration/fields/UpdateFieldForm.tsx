@@ -98,7 +98,6 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         </Button>
 
         <Button
-          variant="contained"
           disabled={!isValid}
           onClick={() => onSubmit({ id: field.id, name, isVersioned, options })}
         >

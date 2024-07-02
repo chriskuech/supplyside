@@ -14,17 +14,13 @@ import {
 import { FC, useMemo, useState } from 'react'
 import { useFormState } from 'react-dom'
 import { z } from 'zod'
+import { handleLogin } from './actions'
 
-const LoginForm: FC<{
-  onSubmit: (
-    state: unknown,
-    formData: FormData,
-  ) => Promise<{ error: string } | undefined>
-}> = ({ onSubmit }) => {
+const LoginForm: FC = () => {
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [showPassword, setShowPassword] = useState<boolean>(false)
-  const [state, formAction] = useFormState(onSubmit, undefined)
+  const [state, formAction] = useFormState(handleLogin, undefined)
 
   const emailErrors = useMemo(
     () =>
@@ -68,7 +64,6 @@ const LoginForm: FC<{
           </Alert>
         )}
         <TextField
-          variant="filled"
           label="Email"
           error={!!emailErrors}
           helperText={emailErrors}
@@ -79,7 +74,6 @@ const LoginForm: FC<{
           onChange={(e) => setEmail(e.target.value)}
         />
         <TextField
-          variant="filled"
           error={!!passwordErrors}
           label="Password"
           helperText={passwordErrors}
@@ -102,7 +96,7 @@ const LoginForm: FC<{
         />
 
         <Stack direction={'row'} justifyContent={'end'}>
-          <Button type="submit" variant="contained" disabled={!isValid}>
+          <Button type="submit" disabled={!isValid}>
             Submit
           </Button>
         </Stack>

@@ -23,7 +23,6 @@ export default function CreateResourceButton({
 }: Props) {
   return (
     <Button
-      variant="contained"
       onClick={() =>
         createResource({ type, data }).then(({ key }) => {
           if (shouldRedirect) {

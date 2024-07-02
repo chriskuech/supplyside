@@ -52,6 +52,7 @@ export default async function AppBar() {
                         key={item}
                         href={`/${item.toLowerCase()}`}
                         component={Link}
+                        variant="text"
                         sx={{
                           display: { xs: 'none', lg: 'inherit' },
                         }}
@@ -62,8 +63,8 @@ export default async function AppBar() {
                     ))}
 
                     <Box
-                      display={'flex'}
-                      alignItems={'center'}
+                      display="flex"
+                      alignItems="center"
                       sx={{
                         display: { xs: 'none', lg: 'inherit' },
                       }}
@@ -80,6 +81,7 @@ export default async function AppBar() {
                         href={`/${item.toLowerCase()}`}
                         disableElevation={true}
                         component={Link}
+                        variant="text"
                         sx={{
                           display: { xs: 'none', lg: 'inherit' },
                         }}

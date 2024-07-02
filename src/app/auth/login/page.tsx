@@ -1,10 +1,9 @@
 import { Box } from '@mui/material'
 import dynamic from 'next/dynamic'
-import { handleLogin } from './actions'
 
 const LoginForm = dynamic(() => import('./LoginForm'), { ssr: false })
 
-export default function Login() {
+export default async function Login() {
   return (
     <Box
       width={'100vw'}
@@ -15,7 +14,7 @@ export default function Login() {
       flexDirection={'column'}
     >
       <Box width={500}>
-        <LoginForm onSubmit={handleLogin} />
+        <LoginForm />
       </Box>
     </Box>
   )

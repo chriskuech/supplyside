@@ -1,22 +1,22 @@
 /**
- * Ensures
+ * Ensures that--
  *   - that no code runs at build time (via module import)
  *   - that clients are not reinstantiated from hot reloads in local dev
- * @param fn
- * @returns
+ * @param fn - the function that creates the singleton instance. It receives a `clear` function that can be called to clear the singleton instance.
+ * @returns the singleton instance
  */
-const singleton = <T>(fn: () => T): (() => T) => {
-  const key = new URL(import.meta.url).pathname
+const singleton = <T>(key: string, fn: (clear: () => void) => T): (() => T) => {
+  const nsKey = `__singleton__${key}`
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const gany = global as any
 
   return () => {
-    if (!(key in gany)) {
-      gany[key] = fn()
+    if (!(nsKey in gany)) {
+      gany[nsKey] = fn(() => (gany[nsKey] = undefined))
     }
 
-    return gany[key]
+    return gany[nsKey]
   }
 }
 

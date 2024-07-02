@@ -39,11 +39,7 @@ export default async function InfoPage() {
           )}
 
           <Stack direction={'row'} justifyContent={'center'}>
-            <Button
-              component="label"
-              startIcon={<CloudUpload />}
-              variant="contained"
-            >
+            <Button component="label" startIcon={<CloudUpload />}>
               Upload Logo
               <input
                 style={{ display: 'none' }}
@@ -65,9 +61,7 @@ export default async function InfoPage() {
           />
 
           <Stack direction={'row'} justifyContent={'center'}>
-            <Button type="submit" variant="contained">
-              Save
-            </Button>
+            <Button type="submit">Save</Button>
           </Stack>
         </Stack>
       </form>

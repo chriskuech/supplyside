@@ -64,7 +64,6 @@ export default function CreateFieldForm({ onSubmit }: Props) {
         </FormControl>
 
         <Button
-          variant="contained"
           disabled={!isValid}
           onClick={() => {
             if (!name || !type) return
