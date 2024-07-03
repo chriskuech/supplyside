@@ -1,29 +1,53 @@
 'use server'
 
-import { ResourceType } from '@prisma/client'
-import { z } from 'zod'
+import { Resource as ResourceModel, ResourceType } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
-import prisma from '@/lib/prisma'
-import { requireSession } from '@/lib/session'
+import { z } from 'zod'
+import { requireSession } from '../session'
+import * as domain from '@/domain/resource/actions'
+import { Resource } from '@/domain/resource/types'
 import { Option } from '@/domain/schema/types'
+import prisma from '@/lib/prisma'
 
-export const readUsers = async (): Promise<Option[]> => {
+export const createResource = async (
+  params: Omit<domain.CreateResourceParams, 'accountId'>,
+): Promise<ResourceModel> => {
   const { accountId } = await requireSession()
 
-  revalidateTag('iam')
-
-  const users = await prisma().user.findMany({
-    where: { accountId },
-    orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
-  })
-
-  return users.map((user) => ({
-    id: user.id,
-    name: `${user.firstName} ${user.lastName}`,
-  }))
+  return domain.createResource({ ...params, accountId })
 }
 
-type FindResourcesParams = {
+type ReadResourceParams = {
+  type: ResourceType
+  key?: number
+  id?: string
+} & ({ key: number } | { id: string })
+
+export const readResource = async (
+  params: ReadResourceParams,
+): Promise<Resource> => {
+  const { accountId } = await requireSession()
+
+  return domain.readResource({ ...params, accountId })
+}
+
+export const readResources = async (
+  params: Omit<domain.ReadResourcesParams, 'accountId'>,
+): Promise<Resource[]> => {
+  const { accountId } = await requireSession()
+
+  return domain.readResources({ ...params, accountId })
+}
+
+export const deleteResource = async (
+  params: Omit<domain.DeleteResourceParams, 'accountId'>,
+): Promise<void> => {
+  const { accountId } = await requireSession()
+
+  return domain.deleteResource({ ...params, accountId })
+}
+
+export type FindResourcesParams = {
   resourceType: ResourceType
   input: string
 }

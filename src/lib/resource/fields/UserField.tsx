@@ -3,7 +3,7 @@
 import { MenuItem, Select } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { Option } from '@/domain/schema/types'
-import { readUsers } from '@/domain/schema/field-meta'
+import { readUsers } from '@/lib/schema/field-meta'
 
 type Props = {
   inputId: string

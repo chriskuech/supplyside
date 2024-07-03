@@ -1,8 +1,7 @@
 import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
 import Image from 'next/image'
-import { handleSaveSettings } from './actions'
-import { readUser } from '@/domain/iam/user'
+import { handleSaveSettings, readUser } from './actions'
 
 export default async function SettingsPage() {
   const user = await readUser()

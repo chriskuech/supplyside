@@ -5,13 +5,13 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { User } from '@prisma/client'
 import { IconButton } from '@mui/material'
 import { Delete } from '@mui/icons-material'
+import { deleteUser } from './actions'
 
 type Props = {
   users: User[] | undefined
-  onDelete: (userId: string) => void
 }
 
-const UsersTable: FC<Props> = ({ users, onDelete }) => {
+const UsersTable: FC<Props> = ({ users }) => {
   const columns: GridColDef<User>[] = [
     {
       field: 'email',
@@ -39,7 +39,7 @@ const UsersTable: FC<Props> = ({ users, onDelete }) => {
       sortable: false,
       disableColumnMenu: true,
       renderCell: ({ row }) => (
-        <IconButton onClick={() => onDelete(row.id)}>
+        <IconButton onClick={() => deleteUser(row.id)}>
           <Delete />
         </IconButton>
       ),

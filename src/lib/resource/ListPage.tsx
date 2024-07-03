@@ -3,9 +3,9 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import { ResourceType } from '@prisma/client'
+import { readSchema } from '../schema/actions'
+import { readResources } from './actions'
 import { requireSessionWithRedirect } from '@/lib/session'
-import { readSchema } from '@/domain/schema/actions'
-import { createResource, readResources } from '@/domain/resource/actions'
 
 const ResourceTable = dynamic(() => import('./ResourceTable'), {
   ssr: false,
@@ -41,7 +41,6 @@ export default async function ListPage({ resourceType }: Props) {
           <Box>
             <CreateResourceButton
               type={resourceType}
-              createResource={createResource}
               shouldRedirect
               buttonProps={{
                 size: 'large',

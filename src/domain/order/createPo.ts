@@ -9,7 +9,6 @@ import { Prisma } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
 import { createBlob } from '../blobs/actions'
 import { fields } from '../schema/template/system-template'
-import { requireSession } from '@/lib/session'
 import PoDocument from '@/lib/order/PoDocument'
 import PoDocumentFooter from '@/lib/order/PoDocumentFooter'
 import prisma from '@/lib/prisma'
@@ -26,9 +25,12 @@ const browser = singleton('browser', async (clear) => {
   return browser
 })
 
-export const createPo = async (resourceId: string) => {
-  const { accountId } = await requireSession()
+type CreatePoParams = {
+  accountId: string
+  resourceId: string
+}
 
+export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   const [page, main, footer] = await Promise.all([
     (await browser()).newPage(),
     PoDocument(),

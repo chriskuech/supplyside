@@ -8,11 +8,12 @@ import { getDownloadPath } from '../blobs/utils'
 import { User } from './types'
 import config from '@/lib/config'
 import prisma from '@/lib/prisma'
-import { readSession, requireSession } from '@/lib/session'
+import singleton from '@/lib/singleton'
 
-let _smtp: ServerClient | null = null
-
-const smtp = () => (_smtp ??= new ServerClient(config().POSTMARK_API_KEY))
+const smtp = singleton(
+  'smtp',
+  () => new ServerClient(config().POSTMARK_API_KEY),
+)
 
 const loginPath = '/auth/login'
 
@@ -42,21 +43,19 @@ export async function inviteUser(
   revalidateTag('iam')
 }
 
-export async function readUser(): Promise<User | undefined> {
-  const session = await readSession()
+type ReadUserParams = {
+  userId: string
+}
 
-  if (!session) return
-
+export async function readUser({ userId }: ReadUserParams): Promise<User> {
   revalidateTag('iam')
 
-  const user = await prisma().user.findUnique({
-    where: { id: session.userId },
+  const user = await prisma().user.findUniqueOrThrow({
+    where: { id: userId },
     include: {
       ImageBlob: true,
     },
   })
-
-  if (!user) return
 
   const profilePicPath =
     user.ImageBlob &&
@@ -76,9 +75,11 @@ export async function readUser(): Promise<User | undefined> {
   }
 }
 
-export async function readUsers(): Promise<User[]> {
-  const { accountId } = await requireSession()
+type ReadUsersParams = { accountId: string }
 
+export async function readUsers({
+  accountId,
+}: ReadUsersParams): Promise<User[]> {
   revalidateTag('iam')
 
   const users = await prisma().user.findMany({
@@ -124,9 +125,12 @@ const renderInviteTemplate = (d: { email: string; password: string }) => `
   </table>
 `
 
-export async function deleteUser(userId: string): Promise<void> {
-  const { accountId } = await requireSession()
+type DeleteUserParams = { accountId: string; userId: string }
 
+export async function deleteUser({
+  userId,
+  accountId,
+}: DeleteUserParams): Promise<void> {
   await prisma().user.delete({
     where: {
       accountId,

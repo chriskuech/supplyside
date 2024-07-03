@@ -3,13 +3,9 @@ import dynamic from 'next/dynamic'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import ResourceTable from '@/lib/resource/ResourceTable'
-import { readSchema } from '@/domain/schema/actions'
-import {
-  createResource,
-  readResource,
-  readResources,
-} from '@/domain/resource/actions'
-import { createPo } from '@/domain/order/createPo'
+import { readResource, readResources } from '@/lib/resource/actions'
+import { readSchema } from '@/lib/schema/actions'
+import { createPo } from '@/lib/order/actions'
 
 const CreateResourceButton = dynamic(
   () => import('@/lib/resource/CreateResourceButton'),
@@ -68,7 +64,6 @@ export default async function OrderDetail({
             </Typography>
             <CreateResourceButton
               type={'Line'}
-              createResource={createResource}
               data={{
                 Order: id,
               }}

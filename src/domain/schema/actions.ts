@@ -2,20 +2,19 @@
 
 import { Field as FieldModel, Option, ResourceType } from '@prisma/client'
 import { Field, Schema } from './types'
-import { requireSession } from '@/lib/session'
 import prisma from '@/lib/prisma'
 
-type ReadSchemaParams = {
+export type ReadSchemaParams = {
+  accountId: string
   resourceType: ResourceType
   isSystem?: boolean
 }
 
 export const readSchema = async ({
+  accountId,
   resourceType,
   isSystem,
 }: ReadSchemaParams): Promise<Schema> => {
-  const { accountId } = await requireSession()
-
   const schemas = await prisma().schema.findMany({
     where: {
       accountId,

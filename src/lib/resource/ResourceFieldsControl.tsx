@@ -11,9 +11,9 @@ import {
 import { ResourceType } from '@prisma/client'
 import { chunk, range } from 'remeda'
 import { ExpandMore } from '@mui/icons-material'
+import { readSchema } from '../schema/actions'
 import Field from './fields/Field'
-import { readResource } from '@/domain/resource/actions'
-import { readSchema } from '@/domain/schema/actions'
+import { readResource } from './actions'
 
 type Props = {
   resourceType: ResourceType

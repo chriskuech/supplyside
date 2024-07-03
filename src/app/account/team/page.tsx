@@ -4,7 +4,6 @@ import UsersTable from './UsersTable'
 import { inviteUserToAccount } from './actions'
 import { requireSession } from '@/lib/session'
 import prisma from '@/lib/prisma'
-import { deleteUser } from '@/domain/iam/user'
 
 const InviteUserControl = dynamic(() => import('@/lib/iam/InviteUserControl'), {
   ssr: false,
@@ -27,7 +26,7 @@ export default async function Team() {
         <Box width={300}>
           <InviteUserControl onSubmit={inviteUserToAccount} />
         </Box>
-        <UsersTable users={users} onDelete={deleteUser} />
+        <UsersTable users={users} />
       </Stack>
     </Container>
   )
