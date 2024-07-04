@@ -1,6 +1,6 @@
 'use client'
 
-import { Clear, Delete } from '@mui/icons-material'
+import { Clear } from '@mui/icons-material'
 import { Card, CardContent, IconButton } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import Box from '@mui/material/Box'
