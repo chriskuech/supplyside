@@ -3,17 +3,11 @@
 import { faker } from '@faker-js/faker'
 import { hash } from 'bcrypt'
 import { revalidateTag } from 'next/cache'
-import { ServerClient } from 'postmark'
 import { getDownloadPath } from '../blobs/utils'
 import { User } from './types'
+import smtp from '@/lib/smtp'
 import config from '@/lib/config'
 import prisma from '@/lib/prisma'
-import singleton from '@/lib/singleton'
-
-const smtp = singleton(
-  'smtp',
-  () => new ServerClient(config().POSTMARK_API_KEY),
-)
 
 const loginPath = '/auth/login'
 

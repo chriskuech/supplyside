@@ -8,7 +8,7 @@ import {
 } from '@mui/x-data-grid'
 import { FieldType } from '@prisma/client'
 import { Chip, IconButton } from '@mui/material'
-import { Check, Delete } from '@mui/icons-material'
+import { Check, Clear } from '@mui/icons-material'
 import { P, match } from 'ts-pattern'
 import { useMemo } from 'react'
 import ContactCard from './fields/ContactCard'
@@ -121,7 +121,7 @@ export default function ResourceTable({ schema, resources, ...props }: Props) {
         headerName: 'Delete',
         renderCell: ({ row: { id } }) => (
           <IconButton onClick={() => deleteResource({ id })}>
-            <Delete />
+            <Clear />
           </IconButton>
         ),
       },

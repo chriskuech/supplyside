@@ -1,6 +1,6 @@
 'use client'
 
-import { Delete } from '@mui/icons-material'
+import { Clear, Delete } from '@mui/icons-material'
 import { Card, CardContent, IconButton } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import Box from '@mui/material/Box'
@@ -51,7 +51,7 @@ export default function FieldsTable({ fields, onUpdate, onDelete }: Props) {
       disableColumnMenu: true,
       renderCell: ({ row }) => (
         <IconButton onClick={() => onDelete(row.id)}>
-          <Delete />
+          <Clear />
         </IconButton>
       ),
     },

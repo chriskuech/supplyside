@@ -1,6 +1,6 @@
 'use client'
 
-import { Delete, Sync } from '@mui/icons-material'
+import { Clear, Sync } from '@mui/icons-material'
 import { IconButton } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { Account } from '@prisma/client'
@@ -52,7 +52,7 @@ export default function AccountsTable({
                     <Sync />
                   </IconButton>,
                   <IconButton key="delete" onClick={() => onDelete(accountId)}>
-                    <Delete />
+                    <Clear />
                   </IconButton>,
                 ]
               : [],

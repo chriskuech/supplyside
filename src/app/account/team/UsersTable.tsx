@@ -4,7 +4,7 @@ import { FC } from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { User } from '@prisma/client'
 import { IconButton } from '@mui/material'
-import { Delete } from '@mui/icons-material'
+import { Clear } from '@mui/icons-material'
 import { deleteUser } from './actions'
 
 type Props = {
@@ -40,7 +40,7 @@ const UsersTable: FC<Props> = ({ users }) => {
       disableColumnMenu: true,
       renderCell: ({ row }) => (
         <IconButton onClick={() => deleteUser(row.id)}>
-          <Delete />
+          <Clear />
         </IconButton>
       ),
     },

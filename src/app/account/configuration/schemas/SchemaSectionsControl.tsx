@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material'
 import { CSS } from '@dnd-kit/utilities'
-import { Delete } from '@mui/icons-material'
+import { Clear } from '@mui/icons-material'
 import { FC, Fragment } from 'react'
 import {
   SortableContext,
@@ -137,7 +137,7 @@ const SortableRow: FC<{
       {...listeners}
       secondaryAction={
         <IconButton edge="end" onClick={() => onRemove(section.id)}>
-          <Delete />
+          <Clear />
         </IconButton>
       }
     >

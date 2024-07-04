@@ -9,26 +9,20 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { ResourceType } from '@prisma/client'
 import { chunk, range } from 'remeda'
 import { ExpandMore } from '@mui/icons-material'
 import { readSchema } from '../schema/actions'
 import Field from './fields/Field'
-import { readResource } from './actions'
+import { Resource } from '@/domain/resource/types'
 
 type Props = {
-  resourceType: ResourceType
-  resourceId: string
+  resource: Resource
 }
 
-export default async function ResourceFieldsControl({
-  resourceType,
-  resourceId,
-}: Props) {
-  const [systemSchema, customSchema, resource] = await Promise.all([
-    readSchema({ resourceType, isSystem: true }),
-    readSchema({ resourceType, isSystem: false }),
-    readResource({ type: resourceType, id: resourceId }),
+export default async function ResourceFieldsControl({ resource }: Props) {
+  const [systemSchema, customSchema] = await Promise.all([
+    readSchema({ resourceType: resource.type, isSystem: true }),
+    readSchema({ resourceType: resource.type, isSystem: false }),
   ])
 
   return (
