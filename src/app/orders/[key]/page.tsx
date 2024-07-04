@@ -68,24 +68,21 @@ export default async function OrderDetail({
             <Stack width={375}>
               <Typography variant="overline">Vendor</Typography>
               <ResourceFieldControl
-                resourceType={'Order'}
-                resourceId={resource.id}
+                resource={resource}
                 fieldTemplateId={fields.vendor.templateId}
               />
             </Stack>
             <Stack width={250}>
               <Typography variant="overline">Assignee</Typography>
               <ResourceFieldControl
-                resourceType={'Order'}
-                resourceId={resource.id}
+                resource={resource}
                 fieldTemplateId={fields.assignee.templateId}
               />
             </Stack>
             <Stack flexGrow={1}>
               <Typography variant="overline">Description</Typography>
               <ResourceFieldControl
-                resourceType={'Order'}
-                resourceId={resource.id}
+                resource={resource}
                 fieldTemplateId={fields.description.templateId}
               />
             </Stack>

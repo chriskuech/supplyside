@@ -238,10 +238,11 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'Vendor',
+    fields: [fields.name],
     sections: [
       {
         name: 'Summary',
-        fields: [fields.name, fields.description, fields.primaryAddress],
+        fields: [fields.description, fields.primaryAddress],
       },
       {
         name: 'Contacts',

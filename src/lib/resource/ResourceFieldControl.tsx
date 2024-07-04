@@ -1,25 +1,22 @@
 'use server'
 
-import { ResourceType } from '@prisma/client'
 import { readSchema } from '../schema/actions'
 import Field from './fields/Field'
-import { readResource } from './actions'
+import { Resource } from '@/domain/resource/types'
 
 type Props = {
-  resourceType: ResourceType
-  resourceId: string
+  resource: Resource
   fieldTemplateId: string
 }
 
 export default async function ResourceFieldControl({
-  resourceType,
-  resourceId,
+  resource,
   fieldTemplateId,
 }: Props) {
-  const [systemSchema, resource] = await Promise.all([
-    readSchema({ resourceType, isSystem: true }),
-    readResource({ type: resourceType, id: resourceId }),
-  ])
+  const systemSchema = await readSchema({
+    resourceType: resource.type,
+    isSystem: true,
+  })
 
   const field = systemSchema.fields.find(
     (f) => f.templateId === fieldTemplateId,
