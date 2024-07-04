@@ -135,6 +135,7 @@ model Field {
   Account            Account         @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   ResourceFieldValue ResourceField[]
   SectionField       SectionField[]
+  SchemaField        SchemaField[]
 
   @@unique([accountId, name])
   @@unique([accountId, templateId])
@@ -220,10 +221,22 @@ model Schema {
   resourceType ResourceType
   isSystem     Boolean
 
-  Account Account   @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Section Section[]
+  Account     Account       @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Section     Section[]
+  SchemaField SchemaField[]
 
   @@unique([accountId, resourceType, isSystem])
+}
+
+model SchemaField {
+  schemaId String @db.Uuid
+  fieldId  String @db.Uuid
+  order    Int    @db.Integer
+
+  Schema Schema @relation(fields: [schemaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Field  Field  @relation(fields: [fieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([schemaId, fieldId])
 }
 
 model Section {

@@ -6,6 +6,8 @@ import ResourceTable from '@/lib/resource/ResourceTable'
 import { readResource, readResources } from '@/lib/resource/actions'
 import { readSchema } from '@/lib/schema/actions'
 import { createPo } from '@/lib/order/actions'
+import ResourceFieldControl from '@/lib/resource/ResourceFieldControl'
+import { fields } from '@/domain/schema/template/system-template'
 
 const CreateResourceButton = dynamic(
   () => import('@/lib/resource/CreateResourceButton'),
@@ -23,7 +25,10 @@ export default async function OrderDetail({
 }) {
   await requireSessionWithRedirect()
 
-  const { id } = await readResource({ type: 'Order', key: Number(key) })
+  const { id: resourceId } = await readResource({
+    type: 'Order',
+    key: Number(key),
+  })
 
   const [lineSchema, lineResources] = await Promise.all([
     readSchema({
@@ -32,7 +37,7 @@ export default async function OrderDetail({
     readResources({
       type: 'Line',
       where: {
-        '==': [{ var: 'Order' }, id],
+        '==': [{ var: 'Order' }, resourceId],
       },
     }),
   ])
@@ -50,11 +55,37 @@ export default async function OrderDetail({
               <span style={{ fontWeight: 100 }}>Order #</span>
               <span style={{ fontWeight: 700 }}>{key}</span>
             </Typography>
-            <CreatePoButton resourceId={id} onClick={createPo} />
+            <CreatePoButton resourceId={resourceId} onClick={createPo} />
+          </Stack>
+          <Stack direction={'row'} spacing={2}>
+            <Stack width={375}>
+              <Typography variant="overline">Vendor</Typography>
+              <ResourceFieldControl
+                resourceType={'Order'}
+                resourceId={resourceId}
+                fieldTemplateId={fields.vendor.templateId}
+              />
+            </Stack>
+            <Stack width={250}>
+              <Typography variant="overline">Assignee</Typography>
+              <ResourceFieldControl
+                resourceType={'Order'}
+                resourceId={resourceId}
+                fieldTemplateId={fields.assignee.templateId}
+              />
+            </Stack>
+            <Stack flexGrow={1}>
+              <Typography variant="overline">Description</Typography>
+              <ResourceFieldControl
+                resourceType={'Order'}
+                resourceId={resourceId}
+                fieldTemplateId={fields.description.templateId}
+              />
+            </Stack>
           </Stack>
           <ResourceFieldsControl
             resourceType={'Order'}
-            resourceKey={Number(key)}
+            resourceId={resourceId}
           />
         </Stack>
         <Stack spacing={2}>
@@ -65,7 +96,7 @@ export default async function OrderDetail({
             <CreateResourceButton
               type={'Line'}
               data={{
-                Order: id,
+                Order: resourceId,
               }}
             />
           </Stack>

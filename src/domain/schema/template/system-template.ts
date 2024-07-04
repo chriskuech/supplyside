@@ -205,21 +205,14 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'Order',
+    fields: [fields.number, fields.vendor, fields.description, fields.assignee],
     sections: [
       {
         name: 'Order Info',
-        fields: [
-          fields.number,
-          fields.description,
-          fields.vendor,
-          fields.issuedDate,
-          fields.document,
-          fields.assignee,
-          fields.totalCost,
-        ],
+        fields: [fields.issuedDate, fields.document, fields.totalCost],
       },
       {
-        name: 'General Info',
+        name: 'Order Notes',
         fields: [fields.orderNotes],
       },
       {

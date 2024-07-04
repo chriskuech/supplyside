@@ -153,10 +153,10 @@ export const createResource = async ({
 
 export type ReadResourceParams = {
   accountId: string
-  type: ResourceType
+  type?: ResourceType
   key?: number
   id?: string
-} & ({ key: number } | { id: string })
+} & ({ type: ResourceType; key: number } | { id: string })
 
 export const readResource = async ({
   accountId,
@@ -167,14 +167,15 @@ export const readResource = async ({
   const model = await prisma().resource.findUniqueOrThrow({
     where: {
       id,
-      accountId_type_key_revision: key
-        ? {
-            accountId,
-            type,
-            key,
-            revision: 0,
-          }
-        : undefined,
+      accountId_type_key_revision:
+        type && key
+          ? {
+              accountId,
+              type,
+              key,
+              revision: 0,
+            }
+          : undefined,
     },
     include,
   })

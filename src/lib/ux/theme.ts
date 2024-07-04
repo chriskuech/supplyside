@@ -183,6 +183,7 @@ const base: ThemeOptions = {
     MuiSelect: {
       defaultProps: {
         variant: 'outlined',
+        size: 'small',
       },
       styleOverrides: {
         root: {
@@ -291,6 +292,15 @@ const themes = {
           },
         },
       },
+      MuiSelect: {
+        styleOverrides: {
+          root: {
+            '& .MuiSelect-select': {
+              backgroundColor: colors.white,
+            },
+          },
+        },
+      },
       MuiTextField: {
         defaultProps: {},
         styleOverrides: {
@@ -344,6 +354,15 @@ const themes = {
           },
           columnHeader: {
             backgroundColor: colors.black,
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          root: {
+            '& .MuiSelect-select': {
+              backgroundColor: colors.black,
+            },
           },
         },
       },

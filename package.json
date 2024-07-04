@@ -22,7 +22,7 @@
     "@mui/x-data-grid": "^7.8.0",
     "@mui/x-data-grid-pro": "^7.8.0",
     "@mui/x-date-pickers": "^7.8.0",
-    "@prisma/client": "^5.15.0",
+    "@prisma/client": "^5.16.1",
     "@types/json-schema": "^7.0.15",
     "ajv": "^8.16.0",
     "bcrypt": "^5.1.1",

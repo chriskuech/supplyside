@@ -22,6 +22,18 @@ export const readSchema = async ({
       isSystem,
     },
     include: {
+      SchemaField: {
+        include: {
+          Field: {
+            include: {
+              Option: true,
+            },
+          },
+        },
+        orderBy: {
+          order: 'asc',
+        },
+      },
       Section: {
         include: {
           SectionField: {
@@ -50,10 +62,13 @@ export const readSchema = async ({
         name: s.name,
         fields: s.SectionField.map((sf) => mapField(sf.Field)),
       })),
-    fields: schemas
-      .flatMap((s) => s.Section)
-      .flatMap((s) => s.SectionField)
-      .map((sf) => mapField(sf.Field)),
+    fields: [
+      ...schemas.flatMap((s) => s.SchemaField).map((sf) => sf.Field),
+      ...schemas
+        .flatMap((s) => s.Section)
+        .flatMap((s) => s.SectionField)
+        .map((sf) => sf.Field),
+    ].map(mapField),
   }
 }
 
@@ -63,6 +78,7 @@ const mapField = (
   },
 ): Field => ({
   id: model.id,
+  templateId: model.templateId,
   name: model.name,
   type: model.type,
   options: model.Option.map((o) => ({

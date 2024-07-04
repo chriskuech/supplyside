@@ -39,12 +39,25 @@ const applySchemas = async (accountId: string) => {
   })
 
   await Promise.all(
-    schemas.map(async ({ resourceType, sections }) => {
+    schemas.map(async ({ resourceType, fields, sections }) => {
       await prisma().schema.create({
         data: {
           accountId,
           isSystem: true,
           resourceType,
+          SchemaField: {
+            create: fields?.map(({ templateId }, order) => ({
+              order,
+              Field: {
+                connect: {
+                  accountId_templateId: {
+                    accountId,
+                    templateId,
+                  },
+                },
+              },
+            })),
+          },
           Section: {
             create: sections?.map(({ name, fields }, order) => ({
               name,

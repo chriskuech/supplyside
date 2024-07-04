@@ -18,10 +18,10 @@ export const createResource = async (
 }
 
 type ReadResourceParams = {
-  type: ResourceType
+  type?: ResourceType
   key?: number
   id?: string
-} & ({ key: number } | { id: string })
+} & ({ type: ResourceType; key: number } | { id: string })
 
 export const readResource = async (
   params: ReadResourceParams,
