@@ -26,6 +26,20 @@ export const updateValue = async ({
   fieldId,
   value,
 }: UpdateValueDto) => {
+  const data: any = {
+    boolean: value.boolean,
+    date: value.date,
+    number: value.number,
+    string: value.string,
+    userId: value.userId,
+    optionId: value.optionId,
+    resourceId: value.resourceId,
+  };
+
+  if (value.optionIds !== undefined && value.optionIds !== null) {
+    data.options = { connect: value.optionIds.map(id => ({ id })) };
+  }
+
   await prisma().resourceField.upsert({
     where: {
       resourceId_fieldId: {
@@ -44,10 +58,10 @@ export const updateValue = async ({
           id: fieldId,
         },
       },
-      Value: { create: value },
+      Value: { create: data },
     },
     update: {
-      Value: { update: value },
+      Value: { update: data },
     },
   })
 

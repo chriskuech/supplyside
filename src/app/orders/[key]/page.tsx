@@ -74,7 +74,7 @@ export default async function OrderDetail({
               }}
             />
           </Stack>
-          <ResourceTable schema={lineSchema} resources={lineResources} />
+          <ResourceTable schema={lineSchema} resources={lineResources} iseditable={true} />
         </Stack>
       </Stack>
     </Container>
