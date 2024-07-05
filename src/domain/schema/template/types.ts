@@ -16,6 +16,12 @@ export type FieldTemplate = {
   name: string
   type: FieldType
   resourceType?: ResourceType
+  options?: OptionTemplate[]
+}
+
+export type OptionTemplate = {
+  templateId: string
+  name: string
 }
 
 export type FieldTemplateReference = {

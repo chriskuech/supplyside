@@ -142,10 +142,11 @@ model Field {
 }
 
 model Option {
-  id      String @id @default(uuid()) @db.Uuid
-  fieldId String @db.Uuid
-  name    String @db.VarChar
-  order   Int    @db.Integer
+  id         String  @id @default(uuid()) @db.Uuid
+  fieldId    String  @db.Uuid
+  name       String  @db.VarChar
+  order      Int     @db.Integer
+  templateId String? @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -153,6 +154,8 @@ model Option {
   Field       Field         @relation(fields: [fieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   Value       Value[]
   ValueOption ValueOption[]
+
+  @@unique([fieldId, templateId])
 }
 
 model File {

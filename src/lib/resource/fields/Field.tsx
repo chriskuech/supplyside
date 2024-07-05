@@ -154,7 +154,10 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
       <ResourceField
         value={
           value?.resource
-            ? { id: value.resource.id, name: value.resource.key.toString() }
+            ? {
+                id: value.resource.id,
+                name: value.resource.key.toString(),
+              }
             : null
         }
         onChange={(resourceId) => handleChange({ resourceId })}

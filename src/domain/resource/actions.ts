@@ -12,6 +12,7 @@ import {
   File,
   Blob,
   Contact,
+  Field as FieldModel,
 } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { P, match } from 'ts-pattern'
@@ -241,6 +242,7 @@ export const deleteResource = async ({
 const include = {
   ResourceField: {
     include: {
+      Field: true,
       Value: {
         include: {
           Contact: true,
@@ -266,6 +268,7 @@ const include = {
 const mapResource = (
   model: ResourceModel & {
     ResourceField: (ResourceField & {
+      Field: FieldModel
       Value: Value & {
         Contact: Contact | null
         File: (File & { Blob: Blob }) | null
@@ -282,6 +285,7 @@ const mapResource = (
   type: model.type,
   fields: model.ResourceField.map((rf) => ({
     fieldId: rf.fieldId,
+    templateId: rf.Field.templateId,
     value: {
       boolean: rf.Value.boolean,
       contact: rf.Value.Contact,

@@ -26,7 +26,11 @@ export const readSchema = async ({
         include: {
           Field: {
             include: {
-              Option: true,
+              Option: {
+                orderBy: {
+                  order: 'asc',
+                },
+              },
             },
           },
         },
@@ -40,7 +44,11 @@ export const readSchema = async ({
             include: {
               Field: {
                 include: {
-                  Option: true,
+                  Option: {
+                    orderBy: {
+                      order: 'asc',
+                    },
+                  },
                 },
               },
             },

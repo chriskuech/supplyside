@@ -14,7 +14,7 @@ export default function SendPoButton({ resourceId }: Props) {
     <Button
       onClick={() => sendPo(resourceId)}
       endIcon={<Send />}
-      sx={{ height: 'fit-content' }}
+      sx={{ height: 'fit-content', fontSize: '1.2em' }}
       size="large"
       color="secondary"
     >

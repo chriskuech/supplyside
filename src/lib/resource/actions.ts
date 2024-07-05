@@ -82,11 +82,5 @@ export const findResources = async ({
 
   revalidateTag('resource')
 
-  return z
-    .object({
-      id: z.string(),
-      name: z.string(),
-    })
-    .array()
-    .parse(results)
+  return z.object({ id: z.string(), name: z.string() }).array().parse(results)
 }
