@@ -16,7 +16,7 @@ import { readUser } from '@/domain/iam/user'
 
 export default async function AppBar() {
   const session = await readSession()
-  const user = await readUser()
+  const user = session ? await readUser({ userId: session.userId }) : null
 
   return (
     <MAppBar>

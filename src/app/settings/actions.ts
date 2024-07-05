@@ -6,6 +6,7 @@ import { revalidateTag } from 'next/cache'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
 import { createBlob } from '@/domain/blobs/actions'
+import * as domain from '@/domain/iam/user'
 
 type ClientErrors = Record<string, string>
 
@@ -58,4 +59,10 @@ export const handleSaveSettings = async (
   } else {
     return errors
   }
+}
+
+export const readUser = async () => {
+  const { userId } = await requireSession()
+
+  return domain.readUser({ userId })
 }

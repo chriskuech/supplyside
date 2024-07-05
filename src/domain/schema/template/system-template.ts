@@ -77,6 +77,37 @@ export const fields = {
     name: 'Order Notes',
     type: 'Textarea',
   },
+  orderStatus: {
+    templateId: 'd51e1004-c999-4ac1-8692-ff3d966c5dc3',
+    name: 'Order Status',
+    type: 'Select',
+    options: [
+      {
+        templateId: '84c65f46-b8dd-43bf-9bbe-537b816fdeb5',
+        name: 'Draft',
+      },
+      {
+        templateId: '45b2ab63-6c20-4548-8427-027286d03759',
+        name: 'Submitted',
+      },
+      {
+        templateId: '9946f309-a3e4-4fdf-991a-cc9d3df80ec0',
+        name: 'Approved',
+      },
+      {
+        templateId: '37551c24-8610-4952-abcb-a9e54c086272',
+        name: 'Ordered',
+      },
+      {
+        templateId: 'f3f9b5a6-6b0e-4d4d-8d4e-2f7f3b1b7a3a',
+        name: 'Received',
+      },
+      {
+        templateId: 'e8b7c2c8-0b7b-4e9a-8e8d-7b2f5e1f6f4e',
+        name: 'Canceled',
+      },
+    ],
+  },
   paymentTerms: {
     templateId: '8a9c85a4-1aea-4c0c-9cd2-51c6943aaaf7',
     name: 'Payment Terms',
@@ -205,21 +236,20 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'Order',
+    fields: [
+      fields.orderStatus,
+      fields.number,
+      fields.vendor,
+      fields.description,
+      fields.assignee,
+    ],
     sections: [
       {
         name: 'Order Info',
-        fields: [
-          fields.number,
-          fields.description,
-          fields.vendor,
-          fields.issuedDate,
-          fields.document,
-          fields.assignee,
-          fields.totalCost,
-        ],
+        fields: [fields.issuedDate, fields.document, fields.totalCost],
       },
       {
-        name: 'General Info',
+        name: 'Order Notes',
         fields: [fields.orderNotes],
       },
       {
@@ -245,10 +275,11 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'Vendor',
+    fields: [fields.name],
     sections: [
       {
         name: 'Summary',
-        fields: [fields.name, fields.description, fields.primaryAddress],
+        fields: [fields.description, fields.primaryAddress],
       },
       {
         name: 'Contacts',

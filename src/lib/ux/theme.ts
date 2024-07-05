@@ -183,6 +183,7 @@ const base: ThemeOptions = {
     MuiSelect: {
       defaultProps: {
         variant: 'outlined',
+        size: 'small',
       },
       styleOverrides: {
         root: {
@@ -267,17 +268,6 @@ const themes = {
               },
             },
           },
-          {
-            props: { variant: 'gradient' },
-            style: {
-              '&:not(.MuiButton-disableElevation)': {
-                boxShadow: 'rgba(0, 0, 0, 0.1) 0px 10px 14px 0px',
-              },
-              '&:hover:not(.MuiButton-disableElevation)': {
-                boxShadow: 'rgba(0, 0, 0, 0.3) 0px 2px 3px 0px',
-              },
-            },
-          },
         ],
       },
       MuiDataGrid: {
@@ -288,6 +278,15 @@ const themes = {
           },
           columnHeader: {
             backgroundColor: colors.white,
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          root: {
+            '& .MuiSelect-select': {
+              backgroundColor: colors.white,
+            },
           },
         },
       },
@@ -325,16 +324,19 @@ const themes = {
         },
       },
       MuiButton: {
-        styleOverrides: {
-          root: {
-            '&:not(.MuiButton-disableElevation)': {
-              boxShadow: 'rgba(0, 0, 0, 0.5) 0px 10px 14px 0px',
-            },
-            '&:hover:not(.MuiButton-disableElevation)': {
-              boxShadow: 'rgba(0, 0, 0, 1) 0px 2px 3px 0px',
+        variants: [
+          {
+            props: { variant: 'contained' },
+            style: {
+              '&:not(.MuiButton-disableElevation)': {
+                boxShadow: 'rgba(0, 0, 0, 0.5) 0px 10px 14px 0px',
+              },
+              '&:hover:not(.MuiButton-disableElevation)': {
+                boxShadow: 'rgba(0, 0, 0, 1) 0px 2px 3px 0px',
+              },
             },
           },
-        },
+        ],
       },
       MuiDataGrid: {
         styleOverrides: {
@@ -344,6 +346,15 @@ const themes = {
           },
           columnHeader: {
             backgroundColor: colors.black,
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          root: {
+            '& .MuiSelect-select': {
+              backgroundColor: colors.black,
+            },
           },
         },
       },

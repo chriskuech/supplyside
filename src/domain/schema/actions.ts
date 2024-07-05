@@ -2,20 +2,19 @@
 
 import { Field as FieldModel, Option, ResourceType } from '@prisma/client'
 import { Field, Schema } from './types'
-import { requireSession } from '@/lib/session'
 import prisma from '@/lib/prisma'
 
-type ReadSchemaParams = {
+export type ReadSchemaParams = {
+  accountId: string
   resourceType: ResourceType
   isSystem?: boolean
 }
 
 export const readSchema = async ({
+  accountId,
   resourceType,
   isSystem,
 }: ReadSchemaParams): Promise<Schema> => {
-  const { accountId } = await requireSession()
-
   const schemas = await prisma().schema.findMany({
     where: {
       accountId,
@@ -23,13 +22,33 @@ export const readSchema = async ({
       isSystem,
     },
     include: {
+      SchemaField: {
+        include: {
+          Field: {
+            include: {
+              Option: {
+                orderBy: {
+                  order: 'asc',
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          order: 'asc',
+        },
+      },
       Section: {
         include: {
           SectionField: {
             include: {
               Field: {
                 include: {
-                  Option: true,
+                  Option: {
+                    orderBy: {
+                      order: 'asc',
+                    },
+                  },
                 },
               },
             },
@@ -51,10 +70,13 @@ export const readSchema = async ({
         name: s.name,
         fields: s.SectionField.map((sf) => mapField(sf.Field)),
       })),
-    fields: schemas
-      .flatMap((s) => s.Section)
-      .flatMap((s) => s.SectionField)
-      .map((sf) => mapField(sf.Field)),
+    fields: [
+      ...schemas.flatMap((s) => s.SchemaField).map((sf) => sf.Field),
+      ...schemas
+        .flatMap((s) => s.Section)
+        .flatMap((s) => s.SectionField)
+        .map((sf) => sf.Field),
+    ].map(mapField),
   }
 }
 
@@ -64,6 +86,7 @@ const mapField = (
   },
 ): Field => ({
   id: model.id,
+  templateId: model.templateId,
   name: model.name,
   type: model.type,
   options: model.Option.map((o) => ({

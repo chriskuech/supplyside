@@ -13,7 +13,7 @@ export default function CreatePoButton({ resourceId, onClick }: Props) {
     <Button
       onClick={() => onClick(resourceId)}
       endIcon={<Add />}
-      sx={{ height: 'fit-content' }}
+      sx={{ height: 'fit-content', fontSize: '1.2em' }}
       size="large"
       color="secondary"
     >

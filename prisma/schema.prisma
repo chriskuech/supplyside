@@ -135,16 +135,18 @@ model Field {
   Account            Account         @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   ResourceFieldValue ResourceField[]
   SectionField       SectionField[]
+  SchemaField        SchemaField[]
 
   @@unique([accountId, name])
   @@unique([accountId, templateId])
 }
 
 model Option {
-  id      String @id @default(uuid()) @db.Uuid
-  fieldId String @db.Uuid
-  name    String @db.VarChar
-  order   Int    @db.Integer
+  id         String  @id @default(uuid()) @db.Uuid
+  fieldId    String  @db.Uuid
+  name       String  @db.VarChar
+  order      Int     @db.Integer
+  templateId String? @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -152,6 +154,8 @@ model Option {
   Field       Field         @relation(fields: [fieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   Value       Value[]
   ValueOption ValueOption[]
+
+  @@unique([fieldId, templateId])
 }
 
 model File {
@@ -220,10 +224,22 @@ model Schema {
   resourceType ResourceType
   isSystem     Boolean
 
-  Account Account   @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Section Section[]
+  Account     Account       @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Section     Section[]
+  SchemaField SchemaField[]
 
   @@unique([accountId, resourceType, isSystem])
+}
+
+model SchemaField {
+  schemaId String @db.Uuid
+  fieldId  String @db.Uuid
+  order    Int    @db.Integer
+
+  Schema Schema @relation(fields: [schemaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Field  Field  @relation(fields: [fieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([schemaId, fieldId])
 }
 
 model Section {

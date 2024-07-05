@@ -1,6 +1,7 @@
 import { Container, Stack, Typography } from '@mui/material'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
+import { readResource } from '@/lib/resource/actions'
 
 export default async function LinesDetail({
   params: { key },
@@ -8,6 +9,7 @@ export default async function LinesDetail({
   params: { key: string }
 }) {
   await requireSessionWithRedirect()
+  const resource = await readResource({ type: 'Line', key: Number(key) })
 
   return (
     <Container sx={{ my: 5 }}>
@@ -17,10 +19,7 @@ export default async function LinesDetail({
             <span style={{ fontWeight: 100 }}>Line #</span>
             <span style={{ fontWeight: 700 }}>{key}</span>
           </Typography>
-          <ResourceFieldsControl
-            resourceType={'Line'}
-            resourceKey={Number(key)}
-          />
+          <ResourceFieldsControl resource={resource} />
         </Stack>
       </Stack>
     </Container>

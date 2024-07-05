@@ -3,10 +3,11 @@
 import { DataGrid, GridColDef, GridColType, DataGridProps } from '@mui/x-data-grid'
 import { FieldType } from '@prisma/client'
 import { Chip, IconButton } from '@mui/material'
-import { Check, Delete } from '@mui/icons-material'
+import { Check, Clear } from '@mui/icons-material'
 import { P, match } from 'ts-pattern'
 import { useMemo, useState } from 'react'
 import ContactCard from './fields/ContactCard'
+import { deleteResource } from './actions'
 import { Resource } from '@/domain/resource/types'
 import { Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
@@ -123,7 +124,7 @@ export default function ResourceTable({ schema, resources, iseditable, ...props 
         headerName: 'Delete',
         renderCell: ({ row: { id } }) => (
           <IconButton onClick={() => deleteResource({ id })}>
-            <Delete />
+            <Clear />
           </IconButton>
         ),
       },

@@ -1,11 +1,12 @@
 'use client'
 
-import { Badge, Email, Person, Phone } from '@mui/icons-material'
+import { Badge, Clear, Edit, Email, Person, Phone } from '@mui/icons-material'
 import {
   Button,
   Dialog,
   DialogContent,
   DialogTitle,
+  IconButton,
   InputAdornment,
   Stack,
   TextField,
@@ -42,8 +43,12 @@ export default function ContactField({ contact, onChange }: ContactFieldProps) {
         <Stack spacing={1}>
           <ContactCard contact={contact} />
           <Stack spacing={1} direction={'row'} justifyContent={'end'}>
-            <Button onClick={() => setIsOpen(true)}>Edit</Button>
-            <Button onClick={() => onChange(null)}>Remove</Button>
+            <IconButton size="small" onClick={() => setIsOpen(true)}>
+              <Edit />
+            </IconButton>
+            <IconButton size="small" onClick={() => onChange(null)}>
+              <Clear />
+            </IconButton>
           </Stack>
         </Stack>
       ) : (

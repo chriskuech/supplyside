@@ -17,6 +17,7 @@ export type Resource = {
 
 export type ResourceField = {
   fieldId: string
+  templateId: string | null
   value: Value
 }
 

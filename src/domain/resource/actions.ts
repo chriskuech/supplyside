@@ -12,6 +12,7 @@ import {
   File,
   Blob,
   Contact,
+  Field as FieldModel,
 } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { P, match } from 'ts-pattern'
@@ -22,23 +23,22 @@ import { Field } from '../schema/types'
 import { Data, Resource } from './types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
-import { requireSession } from '@/lib/session'
 import prisma from '@/lib/prisma'
 
 const ajv = new Ajv()
 
 export type CreateResourceParams = {
+  accountId: string
   type: ResourceType
   data?: Record<string, string | number | boolean | string[] | null>
 }
 
 export const createResource = async ({
+  accountId,
   type,
   data,
 }: CreateResourceParams): Promise<ResourceModel> => {
-  const { accountId } = await requireSession()
-
-  const schema = await readSchema({ resourceType: type })
+  const schema = await readSchema({ accountId, resourceType: type })
   const jsonSchema = mapSchemaToJsonSchema(schema)
 
   if (data && !ajv.validate(jsonSchema, data)) {
@@ -153,29 +153,30 @@ export const createResource = async ({
 }
 
 export type ReadResourceParams = {
-  type: ResourceType
+  accountId: string
+  type?: ResourceType
   key?: number
   id?: string
-} & ({ key: number } | { id: string })
+} & ({ type: ResourceType; key: number } | { id: string })
 
 export const readResource = async ({
+  accountId,
   type,
   key,
   id,
 }: ReadResourceParams): Promise<Resource> => {
-  const { accountId } = await requireSession()
-
   const model = await prisma().resource.findUniqueOrThrow({
     where: {
       id,
-      accountId_type_key_revision: key
-        ? {
-            accountId,
-            type,
-            key,
-            revision: 0,
-          }
-        : undefined,
+      accountId_type_key_revision:
+        type && key
+          ? {
+              accountId,
+              type,
+              key,
+              revision: 0,
+            }
+          : undefined,
     },
     include,
   })
@@ -186,19 +187,19 @@ export const readResource = async ({
 }
 
 export type ReadResourcesParams = {
+  accountId: string
   type: ResourceType
   where?: Where
   orderBy?: OrderBy[]
 }
 
 export const readResources = async ({
+  accountId,
   type,
   where,
   orderBy,
 }: ReadResourcesParams): Promise<Resource[]> => {
-  const { accountId } = await requireSession()
-
-  const schema = await readSchema({ resourceType: type })
+  const schema = await readSchema({ accountId, resourceType: type })
   const sql = createSql({ accountId, schema, where, orderBy })
 
   const results: { _id: string }[] = await prisma().$queryRawUnsafe(sql)
@@ -220,14 +221,14 @@ export const readResources = async ({
 }
 
 export type DeleteResourceParams = {
+  accountId: string
   id: string
 }
 
 export const deleteResource = async ({
+  accountId,
   id,
 }: DeleteResourceParams): Promise<void> => {
-  const { accountId } = await requireSession()
-
   await prisma().resource.delete({
     where: {
       accountId,
@@ -241,6 +242,7 @@ export const deleteResource = async ({
 const include = {
   ResourceField: {
     include: {
+      Field: true,
       Value: {
         include: {
           Contact: true,
@@ -266,6 +268,7 @@ const include = {
 const mapResource = (
   model: ResourceModel & {
     ResourceField: (ResourceField & {
+      Field: FieldModel
       Value: Value & {
         Contact: Contact | null
         File: (File & { Blob: Blob }) | null
@@ -282,6 +285,7 @@ const mapResource = (
   type: model.type,
   fields: model.ResourceField.map((rf) => ({
     fieldId: rf.fieldId,
+    templateId: rf.Field.templateId,
     value: {
       boolean: rf.Value.boolean,
       contact: rf.Value.Contact,

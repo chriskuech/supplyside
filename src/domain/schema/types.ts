@@ -14,6 +14,7 @@ export type Section = {
 
 export type Field = {
   id: string
+  templateId: string | null
   name: string
   type: FieldType
   options: Option[]
