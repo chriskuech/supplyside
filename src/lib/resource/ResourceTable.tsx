@@ -1,6 +1,11 @@
 'use client'
 
-import { DataGrid, GridColDef, GridColType, DataGridProps } from '@mui/x-data-grid'
+import {
+  DataGrid,
+  GridColDef,
+  GridColType,
+  DataGridProps,
+} from '@mui/x-data-grid'
 import { FieldType } from '@prisma/client'
 import { Chip, IconButton } from '@mui/material'
 import { Check, Clear } from '@mui/icons-material'
@@ -11,19 +16,21 @@ import { deleteResource } from './actions'
 import { Resource } from '@/domain/resource/types'
 import { Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
-import { deleteResource } from '@/domain/resource/actions'
 import { updateValue } from '@/domain/resource/fields/actions'
 
 type Props = {
   schema: Schema
   resources: Resource[]
-  iseditable: boolean
+  isEditable?: boolean
 } & Partial<DataGridProps>
 
-export default function ResourceTable({ schema, resources, iseditable, ...props }: Props) {
+export default function ResourceTable({
+  schema,
+  resources,
+  isEditable,
+  ...props
+}: Props) {
   const [rows, setRows] = useState(resources)
-
-  
 
   const columns = useMemo<GridColDef<Resource>[]>(
     () => [
@@ -31,7 +38,7 @@ export default function ResourceTable({ schema, resources, iseditable, ...props 
         field: 'key',
         headerName: 'ID',
         type: 'number',
-        editable: iseditable,
+        editable: isEditable,
       },
       ...selectFields(schema).map<GridColDef<Resource>>((field) => ({
         field: field.id,
@@ -51,7 +58,7 @@ export default function ResourceTable({ schema, resources, iseditable, ...props 
           .with('Text', () => 'string')
           .with('User', () => 'custom')
           .exhaustive(),
-        editable: iseditable,
+        editable: isEditable,
         valueGetter: (_, row) => {
           const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
           type Primitive = string | number | boolean | null | undefined
@@ -129,47 +136,52 @@ export default function ResourceTable({ schema, resources, iseditable, ...props 
         ),
       },
     ],
-    [schema, iseditable],
+    [schema, isEditable],
   )
 
   const handleProcessRowUpdate = async (newRow: any) => {
     const updatedFields = newRow.fields.map((field: any) => {
-      const newValue = newRow[field.fieldId];
+      const newValue = newRow[field.fieldId]
       if (newValue !== undefined) {
         const updatedField = {
           ...field,
           value: {
             ...field.value,
-            number: typeof newValue === 'number' ? newValue : field.value.number,
-            date: typeof newValue === 'object' && 
-            !isNaN(Date.parse(newValue)) ? new Date(newValue) : field.value.date,
-            string: typeof newValue === 'string' ? newValue : field.value.string,
+            number:
+              typeof newValue === 'number' ? newValue : field.value.number,
+            date:
+              typeof newValue === 'object' && !isNaN(Date.parse(newValue))
+                ? new Date(newValue)
+                : field.value.date,
+            string:
+              typeof newValue === 'string' ? newValue : field.value.string,
           },
-        };
-  
+        }
+
         updateValue({
           resourceId: newRow.id,
           fieldId: field.fieldId,
           value: updatedField.value,
-        });
+        })
       }
-      return field;
-    });
-  
+
+      return field
+    })
+
     const updatedRow = {
       ...newRow,
       fields: updatedFields,
-    };
-  
+    }
+
     updatedRow.fields.forEach((field: any) => {
-      delete updatedRow[field.fieldId];
-    });
-  
+      delete updatedRow[field.fieldId]
+    })
+
     setRows((prevRows) =>
-      prevRows.map((row) => (row.id === updatedRow.id ? updatedRow : row))
-    );
-    return updatedRow;
-  };
+      prevRows.map((row) => (row.id === updatedRow.id ? updatedRow : row)),
+    )
+    return updatedRow
+  }
 
   return (
     <DataGrid<Resource>
@@ -183,12 +195,11 @@ export default function ResourceTable({ schema, resources, iseditable, ...props 
         if (type === 'Line') return
 
         window.location.href = `/${type.toLowerCase()}s/${key}`
-      } }
-      processRowUpdate={(newRow) =>handleProcessRowUpdate(newRow)}
-     
+      }}
+      processRowUpdate={(newRow) => handleProcessRowUpdate(newRow)}
       onProcessRowUpdateError={(error) => {
         console.error('Error updating row:', error)
-      } }
+      }}
       {...props}
     />
   )

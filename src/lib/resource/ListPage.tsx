@@ -52,7 +52,7 @@ export default async function ListPage({ resourceType }: Props) {
         <ResourceTable
           schema={schema}
           resources={resources}
-          iseditable={false}
+          isEditable={false}
         />
       </Stack>
     </Container>
