@@ -139,8 +139,8 @@ export default function ResourceTable({
     [schema, isEditable],
   )
 
-  const handleProcessRowUpdate = async (newRow: any) => {
-    const updatedFields = newRow.fields.map((field: any) => {
+  const handleProcessRowUpdate = async (newRow: Resource) => {
+    const updatedFields = newRow.fields.map((field) => {
       const newValue = newRow[field.fieldId]
       if (newValue !== undefined) {
         const updatedField = {
@@ -173,7 +173,7 @@ export default function ResourceTable({
       fields: updatedFields,
     }
 
-    updatedRow.fields.forEach((field: any) => {
+    updatedRow.fields.forEach((field) => {
       delete updatedRow[field.fieldId]
     })
 
