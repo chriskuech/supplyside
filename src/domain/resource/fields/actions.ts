@@ -36,13 +36,7 @@ export const updateValue = async ({
     resourceId: value.resourceId,
     ValueOption: value.optionIds
       ? {
-          create: value.optionIds.map((optionId) => ({
-            Option: {
-              connect: {
-                id: optionId,
-              },
-            },
-          })),
+          create: value.optionIds.map((optionId) => ({ optionId })),
         }
       : undefined,
   }
