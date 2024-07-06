@@ -81,7 +81,13 @@ export default async function OrderDetail({
     (f) => f.templateId === fields.orderStatus.templateId,
   )?.value.option?.name
 
-  const statusColor = match(status)
+  const statusColorStart = match(status)
+    .with('Draft', () => yellow[600])
+    .with('Received', () => green[900])
+    .with('Canceled', () => red[900])
+    .otherwise(() => yellow[900])
+
+  const statusColorEnd = match(status)
     .with('Draft', () => yellow[500])
     .with('Received', () => green[800])
     .with('Canceled', () => red[800])
@@ -129,7 +135,12 @@ export default async function OrderDetail({
 
       <Stack sx={{ pt: 5, backgroundColor: 'rgb(65 154 248 / 21%)' }}>
         <Stack direction={'row'} height={100}>
-          <Box flexGrow={1} bgcolor={statusColor} />
+          <Box
+            flexGrow={1}
+            sx={{
+              background: `linear-gradient(90deg, ${statusColorStart} 0%, ${statusColorEnd} 100%)`,
+            }}
+          />
           <Container sx={{ flexShrink: 0 }} disableGutters>
             <Stack direction={'row'}>
               <Box sx={{ borderRadius: 10 }}>
