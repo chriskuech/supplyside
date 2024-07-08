@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "watch": "tsc --noEmit --watch --project .",
+    "check": "tsc --noEmit --project .",
+    "check:watch": "tsc --noEmit --watch --project .",
     "prebuild": "prisma generate",
     "build": "next build",
     "lint": "next lint"
