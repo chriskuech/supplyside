@@ -94,23 +94,25 @@ export default function ResourceTable({
             .with('File', () => !!value?.file)
             .with(P.union('Money', 'Number'), () => value?.number)
             .with('MultiSelect', () =>
-              value?.options?.map((o) => o.name).join(' ')
+              value?.options?.map((o) => o.name).join(' '),
             )
             .with(P.union('Text', 'Textarea'), () => value?.string)
             .with(
               'Select',
-              () => field.options?.find((o) => o.id === value?.option?.id)?.name,
+              () =>
+                field.options?.find((o) => o.id === value?.option?.id)?.name,
             )
             .with(
               'User',
               () =>
-                value?.user && `${value.user.firstName} ${value.user.firstName}`,
+                value?.user &&
+                `${value.user.firstName} ${value.user.firstName}`,
             )
             .with('Resource', () => value?.resource?.key)
             .exhaustive()
         },
         valueFormatter: (_, row) => {
-          const value = row.fields.find((rf) => rf.fieldId === field.id)?.value;
+          const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
 
           return match<FieldType>(field.type)
             .with('Checkbox', () => value?.boolean && <Check />)
@@ -134,17 +136,18 @@ export default function ResourceTable({
             .with('Select', () => {
               const name = field.options?.find(
                 (o) => o.id === value?.option?.id,
-              )?.name;
+              )?.name
 
-              return name ? <Chip label={name} /> : undefined;
+              return name ? <Chip label={name} /> : undefined
             })
             .with(
               'User',
               () =>
-                value?.user && `${value.user.firstName} ${value.user.firstName}`,
+                value?.user &&
+                `${value.user.firstName} ${value.user.firstName}`,
             )
             .with('Resource', () => value?.resource?.key)
-            .exhaustive();
+            .exhaustive()
         },
       })),
       {
@@ -157,7 +160,7 @@ export default function ResourceTable({
         ),
       },
     ],
-    [schema, isEditable]
+    [schema, isEditable],
   )
 
   const handleProcessRowUpdate = async (newRow: Resource) => {
