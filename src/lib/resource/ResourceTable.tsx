@@ -99,24 +99,24 @@ export default function ResourceTable({
             .with(P.union('Text', 'Textarea'), () => value?.string)
             .with(
               'Select',
-              () => field.options?.find((o) => o.id === value?.option?.id)?.name
+              () => field.options?.find((o) => o.id === value?.option?.id)?.name,
             )
             .with(
               'User',
               () =>
-                value?.user && `${value.user.firstName} ${value.user.firstName}`
+                value?.user && `${value.user.firstName} ${value.user.firstName}`,
             )
             .with('Resource', () => value?.resource?.key)
             .exhaustive()
         },
         valueFormatter: (_, row) => {
-          const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
+          const value = row.fields.find((rf) => rf.fieldId === field.id)?.value;
 
           return match<FieldType>(field.type)
             .with('Checkbox', () => value?.boolean && <Check />)
             .with(
               'Contact',
-              () => value?.contact && <ContactCard contact={value?.contact} />
+              () => value?.contact && <ContactCard contact={value?.contact} />,
             )
             .with('Date', () => value?.date?.toLocaleDateString())
             .with('File', () => value?.file && <Check />)
@@ -124,27 +124,27 @@ export default function ResourceTable({
               value?.number?.toLocaleString('en-US', {
                 style: 'currency',
                 currency: 'USD',
-              })
+              }),
             )
             .with('Number', () => value?.number)
             .with('MultiSelect', () =>
-              value?.options?.map((o) => <Chip key={o.id} label={o.name} />)
+              value?.options?.map((o) => <Chip key={o.id} label={o.name} />),
             )
             .with(P.union('Text', 'Textarea'), () => value?.string)
             .with('Select', () => {
               const name = field.options?.find(
-                (o) => o.id === value?.option?.id
-              )?.name
+                (o) => o.id === value?.option?.id,
+              )?.name;
 
-              return name ? <Chip label={name} /> : undefined
+              return name ? <Chip label={name} /> : undefined;
             })
             .with(
               'User',
               () =>
-                value?.user && `${value.user.firstName} ${value.user.firstName}`
+                value?.user && `${value.user.firstName} ${value.user.firstName}`,
             )
             .with('Resource', () => value?.resource?.key)
-            .exhaustive()
+            .exhaustive();
         },
       })),
       {
@@ -176,7 +176,7 @@ export default function ResourceTable({
       columns={columns}
       rows={resources}
       rowSelection={false}
-      editMode='row'
+      editMode="row"
       autoHeight
       sx={{ backgroundColor: 'background.paper' }}
       onRowClick={({ row: { type, key } }) => {
