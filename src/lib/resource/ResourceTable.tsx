@@ -10,7 +10,7 @@ import { FieldType } from '@prisma/client'
 import { Chip, IconButton } from '@mui/material'
 import { Check, Clear } from '@mui/icons-material'
 import { P, match } from 'ts-pattern'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import ContactCard from './fields/ContactCard'
 import { deleteResource } from './actions'
 import { Resource } from '@/domain/resource/types'
@@ -180,7 +180,7 @@ export default function ResourceTable({
       columns={columns}
       rows={resources}
       rowSelection={false}
-      editMode='row'
+      editMode="row"
       autoHeight
       sx={{ backgroundColor: 'background.paper' }}
       onRowClick={({ row: { type, key } }) => {
