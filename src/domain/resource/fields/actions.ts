@@ -62,7 +62,7 @@ export const updateValue = async ({
       Value: { create: data },
     },
     update: {
-      Value: { create: data },
+      Value: { update: data },
     },
   })
 

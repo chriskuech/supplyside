@@ -30,7 +30,6 @@ export default function ResourceTable({
   isEditable,
   ...props
 }: Props) {
-  const [rows, setRows] = useState(resources)
 
   const columns = useMemo<GridColDef<Resource>[]>(
     () => [
@@ -59,6 +58,32 @@ export default function ResourceTable({
           .with('User', () => 'custom')
           .exhaustive(),
         editable: isEditable,
+        valueSetter: (value, row: Resource) => {
+          const updateFields = row.fields.map((f) => {
+            if (value !== undefined && f.fieldId == field.id) {
+              const updatedField = {
+                ...f,
+                value: {
+                  ...f.value,
+                  number: typeof value === 'number' ? value : f.value.number,
+                  string: typeof value === 'string' ? value : f.value.string,
+                  date:
+                    typeof value === 'object' && !isNaN(Date.parse(value))
+                      ? new Date(value)
+                      : f.value.date,
+                },
+              }
+              return updatedField
+            }
+
+            return f
+          })
+          const updatedRow = {
+            ...row,
+            fields: updateFields,
+          }
+          return updatedRow
+        },
         valueGetter: (_, row) => {
           const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
           type Primitive = string | number | boolean | null | undefined
@@ -140,47 +165,14 @@ export default function ResourceTable({
   )
 
   const handleProcessRowUpdate = async (newRow: Resource) => {
-    const updatedFields = newRow.fields.map((field) => {
-      const newValue = newRow[field.fieldId]
-      if (newValue !== undefined) {
-        const updatedField = {
-          ...field,
-          value: {
-            ...field.value,
-            number:
-              typeof newValue === 'number' ? newValue : field.value.number,
-            date:
-              typeof newValue === 'object' && !isNaN(Date.parse(newValue))
-                ? new Date(newValue)
-                : field.value.date,
-            string:
-              typeof newValue === 'string' ? newValue : field.value.string,
-          },
-        }
-
-        updateValue({
-          resourceId: newRow.id,
-          fieldId: field.fieldId,
-          value: updatedField.value,
-        })
-      }
-
-      return field
+    newRow.fields.map((field) => {
+      updateValue({
+        resourceId: newRow.id,
+        fieldId: field.fieldId,
+        value: field.value,
+      })
     })
-
-    const updatedRow = {
-      ...newRow,
-      fields: updatedFields,
-    }
-
-    updatedRow.fields.forEach((field) => {
-      delete updatedRow[field.fieldId]
-    })
-
-    setRows((prevRows) =>
-      prevRows.map((row) => (row.id === updatedRow.id ? updatedRow : row)),
-    )
-    return updatedRow
+    return newRow
   }
 
   return (
@@ -188,7 +180,7 @@ export default function ResourceTable({
       columns={columns}
       rows={resources}
       rowSelection={false}
-      editMode="row"
+      editMode='row'
       autoHeight
       sx={{ backgroundColor: 'background.paper' }}
       onRowClick={({ row: { type, key } }) => {
@@ -196,7 +188,7 @@ export default function ResourceTable({
 
         window.location.href = `/${type.toLowerCase()}s/${key}`
       }}
-      processRowUpdate={(newRow) => handleProcessRowUpdate(newRow)}
+      processRowUpdate={(newRow: Resource) => handleProcessRowUpdate(newRow)}
       onProcessRowUpdateError={(error) => {
         console.error('Error updating row:', error)
       }}
