@@ -56,32 +56,57 @@ export default function ResourceTable({
           .with('Text', () => 'string')
           .with('User', () => 'custom')
           .exhaustive(),
-        editable: isEditable,
-        valueSetter: (value, row: Resource) => {
-          const updateFields = row.fields.map((f) => {
-            if (value !== undefined && f.fieldId == field.id) {
-              const updatedField = {
-                ...f,
-                value: {
-                  ...f.value,
-                  number: typeof value === 'number' ? value : f.value.number,
-                  string: typeof value === 'string' ? value : f.value.string,
-                  date:
-                    typeof value === 'object' && !isNaN(Date.parse(value))
-                      ? new Date(value)
-                      : f.value.date,
-                },
+          editable: field.name !== 'Subtotal Cost' && isEditable,
+          valueSetter: (value, row: Resource) => {
+            const getFieldId = (name: string) =>
+              selectFields(schema).find((field) => field.name === name)?.id;
+          
+            const quantityFieldId = getFieldId('Quantity');
+            const unitCostFieldId = getFieldId('Unit Cost');
+            const totalCostFieldId = getFieldId('Subtotal Cost');
+          
+            const updatedFields = row.fields.map((f) => {
+              if (value !== undefined && f.fieldId === field.id) {
+                return {
+                  ...f,
+                  value: {
+                    ...f.value,
+                    number: typeof value === 'number' ? value : f.value.number,
+                    string: typeof value === 'string' ? value : f.value.string,
+                    date:
+                      typeof value === 'object' && !isNaN(Date.parse(value))
+                        ? new Date(value)
+                        : f.value.date,
+                  },
+                }
               }
-              return updatedField
+              return f;
+            });
+          
+            const getFieldValue = (id: string | undefined) =>
+              updatedFields.find((f) => f.fieldId === id)?.value.number ?? null;
+          
+            const quantity = getFieldValue(quantityFieldId);
+            const unitCost = getFieldValue(unitCostFieldId);
+          
+            if (quantity !== null && unitCost !== null) {
+              const totalCost = quantity * unitCost;
+              const totalCostFieldIndex = updatedFields.findIndex(
+                (f) => f.fieldId === totalCostFieldId
+              );
+          
+              if (totalCostFieldIndex !== -1) {
+                updatedFields[totalCostFieldIndex] = {
+                  ...updatedFields[totalCostFieldIndex],
+                  value: {
+                    ...updatedFields[totalCostFieldIndex].value,
+                    number: totalCost,
+                  },
+                };
+              }
             }
-
-            return f
-          })
-          const updatedRow = {
-            ...row,
-            fields: updateFields,
-          }
-          return updatedRow
+          
+            return { ...row, fields: updatedFields };
         },
         valueGetter: (_, row) => {
           const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
@@ -171,6 +196,7 @@ export default function ResourceTable({
         value: field.value,
       })
     })
+    console.log("RRR ",newRow)
     return newRow
   }
 
