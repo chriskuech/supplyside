@@ -35,7 +35,7 @@ export default function ResourceTable({
         field: 'key',
         headerName: 'ID',
         type: 'number',
-        editable: isEditable,
+        editable: false,
       },
       ...selectFields(schema).map<GridColDef<Resource>>((field) => ({
         field: field.id,
@@ -57,28 +57,44 @@ export default function ResourceTable({
           .exhaustive(),
         editable: isEditable,
         valueSetter: (value, row: Resource) => {
-          const updateFields = row.fields.map((f) => {
+          const updatedFields = row.fields.map((f) => {
             if (value !== undefined && f.fieldId == field.id) {
-              const updatedField = {
-                ...f,
-                value: {
+              const updatedValue = match<FieldType>(field.type)
+                .with('Checkbox', () => ({ ...f.value, boolean: value }))
+                .with('Contact', () => ({ ...f.value, contact: value.contact }))
+                .with('Date', () => ({
                   ...f.value,
-                  number: typeof value === 'number' ? value : f.value.number,
-                  string: typeof value === 'string' ? value : f.value.string,
-                  date:
-                    typeof value === 'object' && !isNaN(Date.parse(value))
-                      ? new Date(value)
-                      : f.value.date,
-                },
+                  date: !isNaN(Date.parse(value))
+                    ? new Date(value)
+                    : f.value.date,
+                }))
+                .with('File', () => ({ ...f.value, file: value.file }))
+                .with('Money', () => ({ ...f.value, number: value }))
+                .with('Number', () => ({ ...f.value, number: value }))
+                .with('MultiSelect', () => ({
+                  ...f.value,
+                  options: value.options,
+                }))
+                .with('Text', () => ({ ...f.value, string: value }))
+                .with('Textarea', () => ({ ...f.value, string: value }))
+                .with('Select', () => ({ ...f.value, option: value.option }))
+                .with('User', () => ({ ...f.value, user: value.user }))
+                .with('Resource', () => ({
+                  ...f.value,
+                  resource: value.resource,
+                }))
+                .otherwise(() => f.value)
+              return {
+                ...f,
+                value: updatedValue,
               }
-              return updatedField
             }
 
             return f
           })
           const updatedRow = {
             ...row,
-            fields: updateFields,
+            fields: updatedFields,
           }
           return updatedRow
         },
@@ -163,13 +179,16 @@ export default function ResourceTable({
   )
 
   const handleProcessRowUpdate = async (newRow: Resource) => {
-    newRow.fields.map((field) => {
-      updateValue({
-        resourceId: newRow.id,
-        fieldId: field.fieldId,
-        value: field.value,
-      })
-    })
+    // TODO: use single `updateResource` function
+    await Promise.all(
+      newRow.fields.map((field) =>
+        updateValue({
+          resourceId: newRow.id,
+          fieldId: field.fieldId,
+          value: field.value,
+        }),
+      ),
+    )
     return newRow
   }
 
@@ -180,7 +199,6 @@ export default function ResourceTable({
       rowSelection={false}
       editMode="row"
       autoHeight
-      sx={{ backgroundColor: 'background.paper' }}
       onRowClick={({ row: { type, key } }) => {
         if (type === 'Line') return
 
