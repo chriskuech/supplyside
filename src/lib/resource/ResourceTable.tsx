@@ -196,7 +196,6 @@ export default function ResourceTable({
         value: field.value,
       })
     })
-    console.log("RRR ",newRow)
     return newRow
   }
 
