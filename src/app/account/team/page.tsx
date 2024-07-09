@@ -1,21 +1,15 @@
 import dynamic from 'next/dynamic'
 import { Box, Container, Stack, Typography } from '@mui/material'
-import UsersTable from './UsersTable'
-import { inviteUserToAccount } from './actions'
-import { requireSession } from '@/lib/session'
-import prisma from '@/lib/prisma'
+import { inviteUserToAccount, readUsers, readUser } from '@/lib/iam/actions'
+
+const UsersTable = dynamic(() => import('./UsersTable'), { ssr: false })
 
 const InviteUserControl = dynamic(() => import('@/lib/iam/InviteUserControl'), {
   ssr: false,
 })
 
 export default async function Team() {
-  const session = await requireSession()
-
-  const users = await prisma().user.findMany({
-    where: { accountId: session.accountId },
-    orderBy: { email: 'asc' },
-  })
+  const [users, user] = await Promise.all([readUsers(), readUser()])
 
   return (
     <Container maxWidth={'md'} sx={{ marginTop: 5 }}>
@@ -26,7 +20,7 @@ export default async function Team() {
         <Box width={300}>
           <InviteUserControl onSubmit={inviteUserToAccount} />
         </Box>
-        <UsersTable users={users} />
+        <UsersTable currentUser={user} users={users} />
       </Stack>
     </Container>
   )

@@ -11,10 +11,17 @@ import prisma from '@/lib/prisma'
 
 const loginPath = '/auth/login'
 
-export async function inviteUser(
-  accountId: string,
-  email: string,
-): Promise<void> {
+type InviteUserParams = {
+  accountId: string
+  email: string
+  isAdmin?: boolean
+}
+
+export async function inviteUser({
+  accountId,
+  email,
+  isAdmin,
+}: InviteUserParams): Promise<void> {
   const password = faker.string.nanoid()
 
   await prisma().user.create({
@@ -23,6 +30,7 @@ export async function inviteUser(
       accountId,
       passwordHash: await hash(password, config().SALT),
       requirePasswordReset: true,
+      isAdmin,
     },
   })
 

@@ -13,6 +13,7 @@ import {
   orderStatusOptions,
 } from '@/domain/schema/template/system-fields'
 import OrderStatusTracker from '@/lib/order/OrderStatusTracker'
+import { readUser } from '@/lib/iam/actions'
 
 const CreateResourceButton = dynamic(
   () => import('@/lib/resource/CreateResourceButton'),
@@ -75,7 +76,8 @@ export default async function OrderDetail({
 }) {
   await requireSessionWithRedirect()
 
-  const [schema, resource] = await Promise.all([
+  const [user, schema, resource] = await Promise.all([
+    readUser(),
     readSchema({
       resourceType: 'Order',
     }),
@@ -217,6 +219,7 @@ export default async function OrderDetail({
                 resourceId={resource.id}
                 statusOption={orderStatusOptions.approved}
                 label={'Approve'}
+                isDisabled={user.isApprover}
               />
             )}
             {status?.templateId === orderStatusOptions.approved.templateId && (
