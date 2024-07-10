@@ -2,16 +2,16 @@
 
 import { Add } from '@mui/icons-material'
 import { Button } from '@mui/material'
+import { createPo } from './actions'
 
 type Props = {
   resourceId: string
-  onClick: (resourceId: string) => void
 }
 
-export default function CreatePoButton({ resourceId, onClick }: Props) {
+export default function CreatePoButton({ resourceId }: Props) {
   return (
     <Button
-      onClick={() => onClick(resourceId)}
+      onClick={() => createPo(resourceId)}
       endIcon={<Add />}
       sx={{ height: 'fit-content', fontSize: '1.2em' }}
       size="large"

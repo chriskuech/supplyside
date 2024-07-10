@@ -1,16 +1,19 @@
 'use server'
 
 import { requireSession } from '../session'
-import * as domain from '@/domain/order/createPo'
+import { transitionStatus } from '../resource/actions'
+import * as order from '@/domain/order/createPo'
+import { orderStatusOptions } from '@/domain/schema/template/system-fields'
 
 export const createPo = async (resourceId: string) => {
   const { accountId } = await requireSession()
 
-  return domain.createPo({ accountId, resourceId })
+  return order.createPo({ accountId, resourceId })
 }
 
 export const sendPo = async (resourceId: string) => {
   const { accountId } = await requireSession()
 
-  return domain.sendPo({ accountId, resourceId })
+  await order.sendPo({ accountId, resourceId })
+  await transitionStatus(resourceId, orderStatusOptions.ordered)
 }

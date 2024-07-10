@@ -1,6 +1,7 @@
 'use server'
 
-import { fields, schemas } from './system-template'
+import { schemas } from './system-schemas'
+import { fields } from './system-fields'
 import { FieldTemplate } from './types'
 import prisma from '@/lib/prisma'
 
@@ -57,6 +58,7 @@ const applyFields = async (accountId: string) =>
           prisma().option.deleteMany({
             where: {
               fieldId,
+              templateId: { not: null },
               NOT: {
                 templateId: {
                   in: options?.map(({ templateId }) => templateId),

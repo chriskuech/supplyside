@@ -3,7 +3,7 @@ import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import { readResource } from '@/lib/resource/actions'
 import ResourceFieldControl from '@/lib/resource/ResourceFieldControl'
-import { fields } from '@/domain/schema/template/system-template'
+import { fields } from '@/domain/schema/template/system-fields'
 
 export default async function VendorDetail({
   params: { key },

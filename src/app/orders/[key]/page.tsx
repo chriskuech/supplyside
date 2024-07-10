@@ -1,21 +1,42 @@
-import { Box, Button, Container, Stack, Typography } from '@mui/material'
+import { Box, Container, Stack, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
-import { ArrowLeft } from '@mui/icons-material'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import ResourceTable from '@/lib/resource/ResourceTable'
 import { readResource, readResources } from '@/lib/resource/actions'
 import { readSchema } from '@/lib/schema/actions'
-import { createPo } from '@/lib/order/actions'
 import ResourceFieldControl from '@/lib/resource/ResourceFieldControl'
-import { fields } from '@/domain/schema/template/system-template'
+import {
+  fields,
+  orderStatusOptions,
+} from '@/domain/schema/template/system-fields'
 import OrderStatusTracker from '@/lib/order/OrderStatusTracker'
+import { readUser } from '@/lib/iam/actions'
 
 const CreateResourceButton = dynamic(
   () => import('@/lib/resource/CreateResourceButton'),
   { ssr: false },
+)
+
+const EditButton = dynamic(() => import('@/lib/order/EditButton'), {
+  ssr: false,
+})
+
+const SkipButton = dynamic(() => import('@/lib/order/SkipButton'), {
+  ssr: false,
+})
+
+const CancelButton = dynamic(() => import('@/lib/order/CancelButton'), {
+  ssr: false,
+})
+
+const StatusTransitionButton = dynamic(
+  () => import('@/lib/order/StatusTransitionButton'),
+  {
+    ssr: false,
+  },
 )
 
 const CreatePoButton = dynamic(() => import('@/lib/order/CreatePoButton'), {
@@ -55,7 +76,8 @@ export default async function OrderDetail({
 }) {
   await requireSessionWithRedirect()
 
-  const [schema, resource] = await Promise.all([
+  const [user, schema, resource] = await Promise.all([
+    readUser(),
     readSchema({
       resourceType: 'Order',
     }),
@@ -79,18 +101,18 @@ export default async function OrderDetail({
 
   const status = resource.fields.find(
     (f) => f.templateId === fields.orderStatus.templateId,
-  )?.value.option?.name
+  )?.value.option
 
-  const statusColorStart = match(status)
-    .with('Draft', () => yellow[600])
-    .with('Received', () => green[900])
-    .with('Canceled', () => red[900])
+  const statusColorStart = match(status?.templateId)
+    .with(orderStatusOptions.draft.templateId, () => yellow[600])
+    .with(orderStatusOptions.received.templateId, () => green[900])
+    .with(orderStatusOptions.canceled.templateId, () => red[900])
     .otherwise(() => yellow[900])
 
-  const statusColorEnd = match(status)
-    .with('Draft', () => yellow[500])
-    .with('Received', () => green[800])
-    .with('Canceled', () => red[800])
+  const statusColorEnd = match(status?.templateId)
+    .with(orderStatusOptions.draft.templateId, () => yellow[500])
+    .with(orderStatusOptions.received.templateId, () => green[800])
+    .with(orderStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
 
   return (
@@ -105,30 +127,38 @@ export default async function OrderDetail({
             <span style={{ fontWeight: 100 }}>Order #</span>
             <span style={{ fontWeight: 700 }}>{key}</span>
           </Typography>
-          <Stack spacing={2}>
-            <Stack direction={'row'} spacing={2}>
-              <Stack width={375}>
-                <Typography variant="overline">Vendor</Typography>
-                <ResourceFieldControl
-                  resource={resource}
-                  fieldTemplateId={fields.vendor.templateId}
-                />
-              </Stack>
-              <Stack width={250}>
-                <Typography variant="overline">Assignee</Typography>
-                <ResourceFieldControl
-                  resource={resource}
-                  fieldTemplateId={fields.assignee.templateId}
-                />
-              </Stack>
-            </Stack>
-            <Stack flexGrow={1}>
-              <Typography variant="overline">Description</Typography>
+          <Stack direction={'row'} spacing={2} height={'min-content'}>
+            <Stack width={250}>
+              <Typography variant="overline">Assignee</Typography>
               <ResourceFieldControl
                 resource={resource}
-                fieldTemplateId={fields.description.templateId}
+                fieldTemplateId={fields.assignee.templateId}
               />
             </Stack>
+            <Stack justifyContent={'end'}>
+              <CancelButton resourceId={resource.id} />
+            </Stack>
+          </Stack>
+        </Stack>
+        <Stack
+          direction={'row'}
+          justifyContent={'space-between'}
+          alignItems={'start'}
+          spacing={2}
+        >
+          <Stack width={375}>
+            <Typography variant="overline">Vendor</Typography>
+            <ResourceFieldControl
+              resource={resource}
+              fieldTemplateId={fields.vendor.templateId}
+            />
+          </Stack>
+          <Stack flexGrow={1}>
+            <Typography variant="overline">Description</Typography>
+            <ResourceFieldControl
+              resource={resource}
+              fieldTemplateId={fields.description.templateId}
+            />
           </Stack>
         </Stack>
       </Container>
@@ -158,8 +188,8 @@ export default async function OrderDetail({
                   textAlign: 'center',
                 }}
               >
-                <Box maxWidth={'70%'}>
-                  {status ? description(status) : undefined}
+                <Box maxWidth={'70%'} sx={{ opacity: 0.7, fontSize: '0.9em' }}>
+                  {status ? description(status.name) : undefined}
                 </Box>
               </Stack>
             </Stack>
@@ -174,21 +204,38 @@ export default async function OrderDetail({
             spacing={2}
             p={7}
           >
-            <Button
-              sx={{ fontSize: '1.2em', boxShadow: 'none' }}
-              startIcon={<ArrowLeft />}
-              variant={'text'}
-            >
-              Edit
-            </Button>
-            <SendPoButton resourceId={resource.id} />
-            <CreatePoButton resourceId={resource.id} onClick={createPo} />
-            <Box>
-              <ResourceFieldControl
-                resource={resource}
-                fieldTemplateId={fields.orderStatus.templateId}
+            {status?.templateId !== orderStatusOptions.draft.templateId && (
+              <EditButton resourceId={resource.id} />
+            )}
+            {status?.templateId === orderStatusOptions.draft.templateId && (
+              <StatusTransitionButton
+                resourceId={resource.id}
+                statusOption={orderStatusOptions.submitted}
+                label={'Submit'}
               />
-            </Box>
+            )}
+            {status?.templateId === orderStatusOptions.submitted.templateId && (
+              <StatusTransitionButton
+                resourceId={resource.id}
+                statusOption={orderStatusOptions.approved}
+                label={'Approve'}
+                isDisabled={user.isApprover}
+              />
+            )}
+            {status?.templateId === orderStatusOptions.approved.templateId && (
+              <>
+                <CreatePoButton resourceId={resource.id} />
+                <SendPoButton resourceId={resource.id} />
+                <SkipButton resourceId={resource.id} />
+              </>
+            )}
+            {status?.templateId === orderStatusOptions.ordered.templateId && (
+              <StatusTransitionButton
+                resourceId={resource.id}
+                statusOption={orderStatusOptions.received}
+                label={'Confirm Receipt'}
+              />
+            )}
           </Stack>
         </Container>
       </Stack>
@@ -203,9 +250,7 @@ export default async function OrderDetail({
               </Typography>
               <CreateResourceButton
                 type={'Line'}
-                data={{
-                  Order: resource.id,
-                }}
+                data={{ Order: resource.id }}
               />
             </Stack>
             <ResourceTable

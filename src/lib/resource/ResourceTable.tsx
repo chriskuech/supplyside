@@ -15,7 +15,7 @@ import { deleteResource } from './actions'
 import { Resource } from '@/domain/resource/types'
 import { Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
-import { updateValue } from '@/domain/resource/fields/actions'
+import { updateValue, UpdateValueDto } from '@/domain/resource/fields/actions'
 
 type Props = {
   schema: Schema
@@ -35,7 +35,7 @@ export default function ResourceTable({
         field: 'key',
         headerName: 'ID',
         type: 'number',
-        editable: isEditable,
+        editable: false,
       },
       ...selectFields(schema).map<GridColDef<Resource>>((field) => ({
         field: field.id,
@@ -55,57 +55,51 @@ export default function ResourceTable({
           .with('Text', () => 'string')
           .with('User', () => 'custom')
           .exhaustive(),
-          editable: field.name !== 'Subtotal Cost' && isEditable,
-          valueSetter: (value, row: Resource) => {
-            const getFieldId = (name: string) =>
-              selectFields(schema).find((field) => field.name === name)?.id;
-          
-            const quantityFieldId = getFieldId('Quantity');
-            const unitCostFieldId = getFieldId('Unit Cost');
-            const totalCostFieldId = getFieldId('Subtotal Cost');
-          
-            const updatedFields = row.fields.map((f) => {
-              if (value !== undefined && f.fieldId === field.id) {
-                return {
-                  ...f,
-                  value: {
-                    ...f.value,
-                    number: typeof value === 'number' ? value : f.value.number,
-                    string: typeof value === 'string' ? value : f.value.string,
-                    date:
-                      typeof value === 'object' && !isNaN(Date.parse(value))
-                        ? new Date(value)
-                        : f.value.date,
-                  },
-                }
-              }
-              return f;
-            });
-          
-            const getFieldValue = (id: string | undefined) =>
-              updatedFields.find((f) => f.fieldId === id)?.value.number ?? null;
-          
-            const quantity = getFieldValue(quantityFieldId);
-            const unitCost = getFieldValue(unitCostFieldId);
-          
-            if (quantity !== null && unitCost !== null) {
-              const totalCost = quantity * unitCost;
-              const totalCostFieldIndex = updatedFields.findIndex(
-                (f) => f.fieldId === totalCostFieldId
-              );
-          
-              if (totalCostFieldIndex !== -1) {
-                updatedFields[totalCostFieldIndex] = {
-                  ...updatedFields[totalCostFieldIndex],
-                  value: {
-                    ...updatedFields[totalCostFieldIndex].value,
-                    number: totalCost,
-                  },
-                };
+        editable: isEditable,
+        valueSetter: (value, row: Resource) => {
+          const updatedFields = row.fields.map((f) => {
+            if (value !== undefined && f.fieldId === field.id) {
+              const updatedValue = match<FieldType>(field.type)
+                .with('Checkbox', () => ({ ...f.value, boolean: value }))
+                .with('Contact', () => ({ ...f.value, contact: value.contact }))
+                .with('Date', () => ({
+                  ...f.value,
+                  date: !isNaN(Date.parse(value))
+                    ? new Date(value)
+                    : f.value.date,
+                }))
+                .with('File', () => ({ ...f.value, file: value.file }))
+                .with('Money', () => ({ ...f.value, number: value }))
+                .with('Number', () => ({ ...f.value, number: value }))
+                .with('MultiSelect', () => ({
+                  ...f.value,
+                  options: value.options,
+                }))
+                .with('Text', () => ({ ...f.value, string: value }))
+                .with('Textarea', () => ({ ...f.value, string: value }))
+                .with('Select', () => ({
+                  ...f.value,
+                  optionIds: value.option ? [value.option.id] : [],
+                }))
+                .with('User', () => ({ ...f.value, user: value.user }))
+                .with('Resource', () => ({
+                  ...f.value,
+                  resource: value.resource,
+                }))
+                .exhaustive()
+              return {
+                ...f,
+                value: updatedValue,
               }
             }
-          
-            return { ...row, fields: updatedFields };
+
+            return f
+          })
+          const updatedRow = {
+            ...row,
+            fields: updatedFields,
+          }
+          return updatedRow
         },
         valueGetter: (_, row) => {
           const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
@@ -188,13 +182,16 @@ export default function ResourceTable({
   )
 
   const handleProcessRowUpdate = async (newRow: Resource) => {
-    newRow.fields.map((field) => {
-      updateValue({
-        resourceId: newRow.id,
-        fieldId: field.fieldId,
-        value: field.value,
-      })
-    })
+    // TODO: use single `updateResource` function
+    await Promise.all(
+      newRow.fields.map((field) =>
+        updateValue({
+          resourceId: newRow.id,
+          fieldId: field.fieldId,
+          value: field.value as UpdateValueDto['value'],
+        }),
+      ),
+    )
     return newRow
   }
 
@@ -205,7 +202,6 @@ export default function ResourceTable({
       rowSelection={false}
       editMode="row"
       autoHeight
-      sx={{ backgroundColor: 'background.paper' }}
       onRowClick={({ row: { type, key } }) => {
         if (type === 'Line') return
 

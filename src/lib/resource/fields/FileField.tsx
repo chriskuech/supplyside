@@ -18,7 +18,7 @@ export default function FileField({ resourceId, field, value }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   return (
-    <Stack direction={'row'}>
+    <Stack direction={'row'} alignItems={'center'}>
       <input
         style={{ display: 'none' }}
         type="file"

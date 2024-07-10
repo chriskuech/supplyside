@@ -14,7 +14,10 @@ export const inviteAccount = async (email: string): Promise<void> => {
     },
   })
 
-  await Promise.all([inviteUser(accountId, email), applyTemplate(accountId)])
+  await Promise.all([
+    inviteUser({ accountId, email, isAdmin: true }),
+    applyTemplate(accountId),
+  ])
 
   revalidateTag('iam')
 }

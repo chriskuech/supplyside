@@ -24,4 +24,5 @@ export type Field = {
 export type Option = {
   id: string
   name: string
+  templateId?: string | null
 }
