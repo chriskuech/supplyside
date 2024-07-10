@@ -15,7 +15,7 @@ import { deleteResource } from './actions'
 import { Resource } from '@/domain/resource/types'
 import { Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
-import { updateValue } from '@/domain/resource/fields/actions'
+import { updateValue, UpdateValueDto } from '@/domain/resource/fields/actions'
 
 type Props = {
   schema: Schema
@@ -58,7 +58,7 @@ export default function ResourceTable({
         editable: isEditable,
         valueSetter: (value, row: Resource) => {
           const updatedFields = row.fields.map((f) => {
-            if (value !== undefined && f.fieldId == field.id) {
+            if (value !== undefined && f.fieldId === field.id) {
               const updatedValue = match<FieldType>(field.type)
                 .with('Checkbox', () => ({ ...f.value, boolean: value }))
                 .with('Contact', () => ({ ...f.value, contact: value.contact }))
@@ -77,13 +77,16 @@ export default function ResourceTable({
                 }))
                 .with('Text', () => ({ ...f.value, string: value }))
                 .with('Textarea', () => ({ ...f.value, string: value }))
-                .with('Select', () => ({ ...f.value, option: value.option }))
+                .with('Select', () => ({
+                  ...f.value,
+                  optionIds: value.option ? [value.option.id] : [],
+                }))
                 .with('User', () => ({ ...f.value, user: value.user }))
                 .with('Resource', () => ({
                   ...f.value,
                   resource: value.resource,
                 }))
-                .otherwise(() => f.value)
+                .exhaustive()
               return {
                 ...f,
                 value: updatedValue,
@@ -185,7 +188,7 @@ export default function ResourceTable({
         updateValue({
           resourceId: newRow.id,
           fieldId: field.fieldId,
-          value: field.value,
+          value: field.value as UpdateValueDto['value'],
         }),
       ),
     )
