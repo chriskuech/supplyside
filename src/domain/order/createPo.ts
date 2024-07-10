@@ -8,7 +8,7 @@ import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.b
 import { Prisma } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
 import { createBlob, readBlob } from '../blobs/actions'
-import { fields } from '../schema/template/system-template'
+import { fields } from '../schema/template/system-fields'
 import { readResource } from '../resource/actions'
 import PoDocument from '@/lib/order/PoDocument'
 import PoDocumentFooter from '@/lib/order/PoDocumentFooter'

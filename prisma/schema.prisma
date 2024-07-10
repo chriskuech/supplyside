@@ -53,6 +53,8 @@ model User {
   passwordHash         String?
   requirePasswordReset Boolean
   imageBlobId          String?   @unique @db.Uuid
+  isAdmin              Boolean   @default(false)
+  isApprover           Boolean   @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

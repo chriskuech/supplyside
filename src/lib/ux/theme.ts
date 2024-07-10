@@ -187,6 +187,11 @@ const base: ThemeOptions = {
       },
       styleOverrides: {
         root: {
+          '&.MuiInputBase-root': {
+            borderRadius: 8,
+          },
+        },
+        select: {
           borderRadius: 8,
         },
       },

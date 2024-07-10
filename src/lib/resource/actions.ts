@@ -1,5 +1,6 @@
 'use server'
 
+import { fail } from 'assert'
 import { Resource as ResourceModel, ResourceType } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
@@ -8,6 +9,11 @@ import * as domain from '@/domain/resource/actions'
 import { Resource } from '@/domain/resource/types'
 import { Option } from '@/domain/schema/types'
 import prisma from '@/lib/prisma'
+import * as resources from '@/domain/resource/actions'
+import * as fields from '@/domain/resource/fields/actions'
+import * as schemas from '@/domain/schema/actions'
+import { fields as systemFields } from '@/domain/schema/template/system-fields'
+import { OptionTemplate } from '@/domain/schema/template/types'
 
 export const createResource = async (
   params: Omit<domain.CreateResourceParams, 'accountId'>,
@@ -83,4 +89,34 @@ export const findResources = async ({
   revalidateTag('resource')
 
   return z.object({ id: z.string(), name: z.string() }).array().parse(results)
+}
+
+export const transitionStatus = async (
+  resourceId: string,
+  status: OptionTemplate,
+) => {
+  const { accountId } = await requireSession()
+  const { type: resourceType } = await resources.readResource({
+    accountId,
+    id: resourceId,
+  })
+  const schema = await schemas.readSchema({
+    accountId,
+    resourceType,
+    isSystem: true,
+  })
+  const field =
+    schema.fields.find(
+      (field) => field.templateId === systemFields.orderStatus.templateId,
+    ) ?? fail('Order status field not found')
+
+  return fields.updateValue({
+    resourceId,
+    fieldId: field.id,
+    value: {
+      optionId:
+        field.options.find((o) => o.templateId === status.templateId)?.id ??
+        fail('Option not found'),
+    },
+  })
 }

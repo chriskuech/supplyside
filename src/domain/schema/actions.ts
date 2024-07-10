@@ -92,6 +92,7 @@ const mapField = (
   options: model.Option.map((o) => ({
     id: o.id,
     name: o.name,
+    templateId: o.templateId,
   })),
   resourceType: model.resourceType,
 })

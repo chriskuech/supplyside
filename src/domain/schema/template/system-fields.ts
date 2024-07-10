@@ -1,7 +1,35 @@
-import { FieldTemplate, SchemaTemplate } from './types'
+import { FieldTemplate } from './types'
 
 // Define a templateId on macOS with
 //   `uuidgen | awk '{print tolower($0)}'`
+
+export const orderStatusOptions = {
+  draft: {
+    templateId: '84c65f46-b8dd-43bf-9bbe-537b816fdeb5',
+    name: 'Draft',
+  },
+  submitted: {
+    templateId: '45b2ab63-6c20-4548-8427-027286d03759',
+    name: 'Submitted',
+  },
+  approved: {
+    templateId: '9946f309-a3e4-4fdf-991a-cc9d3df80ec0',
+    name: 'Approved',
+  },
+  ordered: {
+    templateId: '37551c24-8610-4952-abcb-a9e54c086272',
+    name: 'Ordered',
+  },
+  received: {
+    templateId: 'f3f9b5a6-6b0e-4d4d-8d4e-2f7f3b1b7a3a',
+    name: 'Received',
+  },
+  canceled: {
+    templateId: 'e8b7c2c8-0b7b-4e9a-8e8d-7b2f5e1f6f4e',
+    name: 'Canceled',
+  },
+}
+
 export const fields = {
   assignee: {
     templateId: '726e01bc-66cb-4114-b900-10102f9c081c',
@@ -81,32 +109,7 @@ export const fields = {
     templateId: 'd51e1004-c999-4ac1-8692-ff3d966c5dc3',
     name: 'Order Status',
     type: 'Select',
-    options: [
-      {
-        templateId: '84c65f46-b8dd-43bf-9bbe-537b816fdeb5',
-        name: 'Draft',
-      },
-      {
-        templateId: '45b2ab63-6c20-4548-8427-027286d03759',
-        name: 'Submitted',
-      },
-      {
-        templateId: '9946f309-a3e4-4fdf-991a-cc9d3df80ec0',
-        name: 'Approved',
-      },
-      {
-        templateId: '37551c24-8610-4952-abcb-a9e54c086272',
-        name: 'Ordered',
-      },
-      {
-        templateId: 'f3f9b5a6-6b0e-4d4d-8d4e-2f7f3b1b7a3a',
-        name: 'Received',
-      },
-      {
-        templateId: 'e8b7c2c8-0b7b-4e9a-8e8d-7b2f5e1f6f4e',
-        name: 'Canceled',
-      },
-    ],
+    options: Object.values(orderStatusOptions),
   },
   paymentTerms: {
     templateId: '8a9c85a4-1aea-4c0c-9cd2-51c6943aaaf7',
@@ -190,105 +193,3 @@ export const fields = {
     resourceType: 'Vendor',
   },
 } as const satisfies Record<string, FieldTemplate>
-
-export const schemas: SchemaTemplate[] = [
-  {
-    resourceType: 'Bill',
-    sections: [
-      {
-        name: 'Summary',
-        fields: [
-          fields.number,
-          fields.document,
-          fields.order,
-          fields.vendor,
-          fields.issuedDate,
-        ],
-      },
-    ],
-  },
-  {
-    resourceType: 'Item',
-    sections: [
-      {
-        name: 'Summary',
-        fields: [fields.name, fields.description, fields.unitOfMeasure],
-      },
-    ],
-  },
-  {
-    resourceType: 'Line',
-    sections: [
-      {
-        name: 'Summary',
-        fields: [
-          fields.quantity,
-          fields.unitCost,
-          fields.needDate,
-          fields.order,
-          fields.bill,
-          fields.item,
-          fields.subtotalCost,
-          fields.totalCost,
-        ],
-      },
-    ],
-  },
-  {
-    resourceType: 'Order',
-    fields: [
-      fields.orderStatus,
-      fields.number,
-      fields.vendor,
-      fields.description,
-      fields.assignee,
-    ],
-    sections: [
-      {
-        name: 'Order Info',
-        fields: [fields.issuedDate, fields.document, fields.totalCost],
-      },
-      {
-        name: 'Order Notes',
-        fields: [fields.orderNotes],
-      },
-      {
-        name: 'Payment Info',
-        fields: [fields.currency, fields.paymentTerms, fields.taxable],
-      },
-      {
-        name: 'Shipping Info',
-        fields: [
-          fields.shippingAddress,
-          fields.poRecipient,
-          fields.shippingMethod,
-          fields.shippingAccountNumber,
-          fields.incoterms,
-          fields.shippingNotes,
-        ],
-      },
-      {
-        name: 'Terms & Conditions',
-        fields: [fields.termsAndConditions],
-      },
-    ],
-  },
-  {
-    resourceType: 'Vendor',
-    fields: [fields.name],
-    sections: [
-      {
-        name: 'Summary',
-        fields: [fields.description, fields.primaryAddress],
-      },
-      {
-        name: 'Contacts',
-        fields: [fields.poRecipient],
-      },
-      {
-        name: 'Payment Info',
-        fields: [fields.paymentTerms, fields.preferredPaymentType],
-      },
-    ],
-  },
-]
