@@ -121,20 +121,22 @@ enum FieldType {
 }
 
 model Field {
-  id           String        @id @default(uuid()) @db.Uuid
-  accountId    String        @db.Uuid
-  type         FieldType
-  name         String
-  isEditable   Boolean
-  isVersioned  Boolean
-  resourceType ResourceType?
-  templateId   String?       @db.Uuid
+  id             String        @id @default(uuid()) @db.Uuid
+  accountId      String        @db.Uuid
+  type           FieldType
+  name           String
+  isEditable     Boolean
+  isVersioned    Boolean
+  resourceType   ResourceType?
+  templateId     String?       @db.Uuid
+  defaultValueId String?       @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Option             Option[]
   Account            Account         @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  DefaultValue       Value?          @relation(fields: [defaultValueId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  Option             Option[]
   ResourceFieldValue ResourceField[]
   SectionField       SectionField[]
   SchemaField        SchemaField[]
@@ -205,6 +207,7 @@ model Value {
   ValueOption        ValueOption[]
   ResourceFieldValue ResourceField[]
   Contact            Contact?
+  Field              Field[]
 }
 
 model ValueOption {

@@ -17,6 +17,7 @@ import {
 import { revalidatePath } from 'next/cache'
 import { P, match } from 'ts-pattern'
 import { Ajv } from 'ajv'
+import { omit } from 'remeda'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { Field } from '../schema/types'
@@ -65,89 +66,101 @@ export const createResource = async ({
       type,
       key: (key ?? 0) + 1,
       revision: 0,
-      ResourceField: data
-        ? {
-            create: schema.fields.map((f) => ({
-              Field: {
-                connect: {
-                  id: f.id,
+      ResourceField: {
+        create: schema.fields.map((f) => ({
+          Field: {
+            connect: {
+              id: f.id,
+            },
+          },
+          Value:
+            f.defaultValue && !data?.[f.name]
+              ? {
+                  connect: {
+                    id: f.defaultValue.id,
+                  },
+                }
+              : {
+                  create: match<
+                    [Field, Data[string] | undefined],
+                    Prisma.ValueCreateWithoutResourceFieldValueInput
+                  >([f, data?.[f.name]])
+                    .with(
+                      [{ defaultValue: P.not(P.nullish) }, P.nullish],
+                      ([{ defaultValue }]) => omit(defaultValue, ['id']),
+                    )
+                    .with(
+                      [{ type: 'Checkbox' }, P.union(P.boolean, null)],
+                      ([, val]) => ({
+                        boolean: val,
+                      }),
+                    )
+                    .with(
+                      [
+                        { type: P.union('Text', 'Textarea') },
+                        P.union(P.string, null),
+                      ],
+                      ([, val]) => ({
+                        string: val,
+                      }),
+                    )
+                    .with(
+                      [
+                        { type: 'MultiSelect' },
+                        P.union(P.array(P.string), null),
+                      ],
+                      ([, vals]) => ({
+                        ValueOption: vals
+                          ? {
+                              createMany: {
+                                data: vals.map((optionId) => ({
+                                  optionId,
+                                })),
+                              },
+                            }
+                          : undefined,
+                      }),
+                    )
+                    .with(
+                      [{ type: 'Resource' }, P.union(P.string, null)],
+                      ([, val]) => ({
+                        Resource: val
+                          ? {
+                              connect: {
+                                id: val,
+                              },
+                            }
+                          : undefined,
+                      }),
+                    )
+                    .with(
+                      [{ type: 'Select' }, P.union(P.string, null)],
+                      ([, val]) => ({
+                        Option: val
+                          ? {
+                              connect: {
+                                id: val,
+                              },
+                            }
+                          : undefined,
+                      }),
+                    )
+                    .with(
+                      [{ type: 'User' }, P.union(P.string, null)],
+                      ([, val]) => ({
+                        User: val
+                          ? {
+                              connect: {
+                                id: val,
+                              },
+                            }
+                          : undefined,
+                      }),
+                    )
+                    .otherwise(() => ({})),
                 },
-              },
-              Value: {
-                create: match<
-                  [Field, Data[string]],
-                  Prisma.ValueCreateWithoutResourceFieldValueInput
-                >([f, data[f.name]])
-                  .with(
-                    [{ type: 'Checkbox' }, P.union(P.boolean, null)],
-                    ([, val]) => ({
-                      boolean: val,
-                    }),
-                  )
-                  .with(
-                    [
-                      { type: P.union('Text', 'Textarea') },
-                      P.union(P.string, null),
-                    ],
-                    ([, val]) => ({
-                      string: val,
-                    }),
-                  )
-                  .with(
-                    [{ type: 'MultiSelect' }, P.union(P.array(P.string), null)],
-                    ([, vals]) => ({
-                      ValueOption: vals
-                        ? {
-                            createMany: {
-                              data: vals.map((optionId) => ({
-                                optionId,
-                              })),
-                            },
-                          }
-                        : undefined,
-                    }),
-                  )
-                  .with(
-                    [{ type: 'Resource' }, P.union(P.string, null)],
-                    ([, val]) => ({
-                      Resource: val
-                        ? {
-                            connect: {
-                              id: val,
-                            },
-                          }
-                        : undefined,
-                    }),
-                  )
-                  .with(
-                    [{ type: 'Select' }, P.union(P.string, null)],
-                    ([, val]) => ({
-                      Option: val
-                        ? {
-                            connect: {
-                              id: val,
-                            },
-                          }
-                        : undefined,
-                    }),
-                  )
-                  .with(
-                    [{ type: 'User' }, P.union(P.string, null)],
-                    ([, val]) => ({
-                      User: val
-                        ? {
-                            connect: {
-                              id: val,
-                            },
-                          }
-                        : undefined,
-                    }),
-                  )
-                  .otherwise(() => ({})),
-              },
-            })),
-          }
-        : undefined,
+        })),
+      },
     },
   })
 }

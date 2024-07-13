@@ -59,7 +59,6 @@ export const uploadFile = async (
   fieldId: string,
   formData: FormData,
 ) => {
-  console.log('uploadFile')
   const { accountId } = await requireSession()
 
   const file = formData.get('file')

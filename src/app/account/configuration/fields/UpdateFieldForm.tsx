@@ -2,9 +2,7 @@
 
 import {
   Button,
-  Checkbox,
   FormControl,
-  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -16,6 +14,7 @@ import { FieldType } from '@prisma/client'
 import OptionsControl from './OptionsControl'
 import { Field, OptionPatch, UpdateFieldDto } from './actions'
 import ResourceTypeSelect from './ResourceTypeSelect'
+import DefaultValueControl from './DefaultValueControl'
 
 type Props = {
   field: Field
@@ -24,8 +23,11 @@ type Props = {
 }
 
 export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
+  const [defaultValueId, setDefaultValueId] = useState<string | null>(
+    field.DefaultValue?.id ?? null,
+  )
   const [name, setName] = useState<string>(field.name)
-  const [isVersioned, setIsVersioned] = useState<boolean>(field.isVersioned)
+  // const [isVersioned, setIsVersioned] = useState<boolean>(field.isVersioned)
   const [options, setOptions] = useState<OptionPatch[]>(
     field.Option.map((o) => ({
       id: o.id,
@@ -70,7 +72,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
       )}
 
       <Stack direction={'row'} spacing={1} flexWrap={'wrap'}>
-        <FormControlLabel
+        {/* <FormControlLabel
           label="Versioned"
           control={
             <Checkbox
@@ -78,7 +80,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
               onChange={(e) => setIsVersioned(e.target.checked)}
             />
           }
-        />
+        /> */}
 
         {field.type === 'Resource' && (
           <FormControl sx={{ width: 150 }}>
@@ -91,6 +93,17 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
           </FormControl>
         )}
       </Stack>
+      <FormControl fullWidth>
+        <InputLabel htmlFor="default-field-value-control">
+          Default Value
+        </InputLabel>
+
+        <DefaultValueControl
+          field={field}
+          defaultValueId={defaultValueId}
+          onChange={setDefaultValueId}
+        />
+      </FormControl>
 
       <Stack justifyContent={'end'} direction={'row'} spacing={1}>
         <Button variant="text" onClick={onCancel}>
@@ -99,7 +112,15 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
 
         <Button
           disabled={!isValid}
-          onClick={() => onSubmit({ id: field.id, name, isVersioned, options })}
+          onClick={() =>
+            onSubmit({
+              id: field.id,
+              name,
+              isVersioned: false, // commented it all out
+              options,
+              defaultValueId,
+            })
+          }
         >
           Save
         </Button>
