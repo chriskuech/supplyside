@@ -59,8 +59,6 @@ export const createResource = async ({
 
   revalidatePath('resource')
 
-  console.log('schema', schema)
-
   return await prisma().resource.create({
     data: {
       accountId,

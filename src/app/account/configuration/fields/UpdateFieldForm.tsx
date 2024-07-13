@@ -23,7 +23,6 @@ type Props = {
 }
 
 export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
-  console.log('field', field)
   const [defaultValueId, setDefaultValueId] = useState<string | null>(
     field.DefaultValue?.id ?? null,
   )
