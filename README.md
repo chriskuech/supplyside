@@ -4,7 +4,7 @@
 
 - NVM
 - Docker
-- VS Code
+- VS Code (Install all recommended extensions)
 
 ## Commands
 
