@@ -17,6 +17,7 @@ import {
 import { revalidatePath } from 'next/cache'
 import { P, match } from 'ts-pattern'
 import { Ajv } from 'ajv'
+import { omit } from 'remeda'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { Field } from '../schema/types'
@@ -84,6 +85,10 @@ export const createResource = async ({
                     [Field, Data[string] | undefined],
                     Prisma.ValueCreateWithoutResourceFieldValueInput
                   >([f, data?.[f.name]])
+                    .with(
+                      [{ defaultValue: P.not(P.nullish) }, P.nullish],
+                      ([{ defaultValue }]) => omit(defaultValue, ['id']),
+                    )
                     .with(
                       [{ type: 'Checkbox' }, P.union(P.boolean, null)],
                       ([, val]) => ({
