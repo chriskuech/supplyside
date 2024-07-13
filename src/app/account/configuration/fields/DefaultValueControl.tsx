@@ -1,6 +1,6 @@
 'use client'
 
-import { Checkbox, TextareaAutosize, useTheme } from '@mui/material'
+import { Checkbox, Select, TextareaAutosize, useTheme } from '@mui/material'
 import { match } from 'ts-pattern'
 import { useEffect, useState } from 'react'
 import { Value } from '@prisma/client'
@@ -42,6 +42,25 @@ export default function DefaultValueControl({
           onChange(valueId)
         }}
       />
+    ))
+    .with('Select', () => (
+      <Select
+        id="default-field-value-control"
+        value={value?.optionId ?? ''}
+        onChange={async (e) => {
+          const { id: valueId } = await createValue({
+            optionId: e.target.value,
+          })
+
+          onChange(valueId)
+        }}
+      >
+        {field.Option.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.name}
+          </option>
+        ))}
+      </Select>
     ))
     .with('Textarea', () => (
       <TextareaAutosize
