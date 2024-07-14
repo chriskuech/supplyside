@@ -55,8 +55,14 @@ export default function ResourceTable({
           .with('Text', () => 'string')
           .with('User', () => 'custom')
           .exhaustive(),
-        editable: isEditable,
+        editable: field.name !== 'Total Cost' && isEditable,
         valueSetter: (value, row: Resource) => {
+          const getFieldId = (name: string) =>
+            selectFields(schema).find((field) => field.name === name)?.id
+
+          const quantityFieldId = getFieldId('Quantity')
+          const unitCostFieldId = getFieldId('Unit Cost')
+          const totalCostFieldId = getFieldId('Total Cost')
           const updatedFields = row.fields.map((f) => {
             if (value !== undefined && f.fieldId === field.id) {
               const updatedValue = match<FieldType>(field.type)
@@ -95,11 +101,27 @@ export default function ResourceTable({
 
             return f
           })
-          const updatedRow = {
-            ...row,
-            fields: updatedFields,
+          const getField = (id: string | undefined) =>
+            updatedFields.find((f) => f.fieldId === id)?.value.number ?? null
+          const quantity = getField(quantityFieldId)
+          const unitCost = getField(unitCostFieldId)
+          if (quantity !== null && unitCost !== null) {
+            const totalCost = quantity * unitCost
+            const totalCostFieldIndex = updatedFields.findIndex(
+              (f) => f.fieldId === totalCostFieldId,
+            )
+            if (totalCostFieldIndex !== -1) {
+              updatedFields[totalCostFieldIndex] = {
+                ...updatedFields[totalCostFieldIndex],
+                value: {
+                  ...updatedFields[totalCostFieldIndex].value,
+                  number: totalCost,
+                },
+              }
+            }
           }
-          return updatedRow
+
+          return { ...row, fields: updatedFields }
         },
         valueGetter: (_, row) => {
           const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
