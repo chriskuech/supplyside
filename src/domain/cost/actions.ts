@@ -42,7 +42,6 @@ export const updateCost = async (id: string, updatedData: Partial<Cost>) => {
 
 export const createCost = async (data: Cost) => {
   try {
-    console.log(data)
     const newCost = await prisma().cost.create({
       data,
     })
