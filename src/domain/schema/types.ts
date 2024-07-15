@@ -1,4 +1,4 @@
-import { FieldType, ResourceType } from '@prisma/client'
+import { FieldType, ResourceType, Value } from '@prisma/client'
 
 export type Schema = {
   resourceType: ResourceType
@@ -19,6 +19,7 @@ export type Field = {
   type: FieldType
   options: Option[]
   resourceType: ResourceType | null
+  defaultValue: Value | null
 }
 
 export type Option = {

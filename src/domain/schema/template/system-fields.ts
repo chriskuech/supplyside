@@ -110,6 +110,9 @@ export const fields = {
     name: 'Order Status',
     type: 'Select',
     options: Object.values(orderStatusOptions),
+    defaultValue: {
+      optionId: orderStatusOptions.draft.templateId,
+    },
   },
   paymentTerms: {
     templateId: '8a9c85a4-1aea-4c0c-9cd2-51c6943aaaf7',

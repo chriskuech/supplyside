@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { FieldType, ResourceType } from '@prisma/client'
+import { FieldType, ResourceType, Value } from '@prisma/client'
 import { match } from 'ts-pattern'
 import { requireSession } from '@/lib/session'
 import prisma from '@/lib/prisma'
@@ -27,6 +27,7 @@ export type Field = {
   resourceType: ResourceType | null
   isVersioned: boolean
   Option: Option[]
+  DefaultValue: Value | null
 }
 
 export type CreateFieldParams = {
@@ -56,6 +57,8 @@ export const createField = async (params: CreateFieldParams) => {
 export const readFields = async (): Promise<Field[]> => {
   const session = await requireSession()
 
+  revalidatePath('.')
+
   return await prisma().field.findMany({
     where: {
       accountId: session.accountId,
@@ -70,6 +73,7 @@ export const readFields = async (): Promise<Field[]> => {
       type: true,
       name: true,
       resourceType: true,
+      DefaultValue: true,
       Option: {
         orderBy: {
           order: 'asc',
@@ -84,6 +88,7 @@ export type UpdateFieldDto = {
   name: string
   isVersioned: boolean
   options: OptionPatch[]
+  defaultValueId: string | null
 }
 
 export const updateField = async (dto: UpdateFieldDto) => {
@@ -98,6 +103,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
       data: {
         name: sanitizeColumnName(dto.name),
         isVersioned: dto.isVersioned,
+        defaultValueId: dto.defaultValueId,
       },
     }),
     ...dto.options.map((o, i) =>

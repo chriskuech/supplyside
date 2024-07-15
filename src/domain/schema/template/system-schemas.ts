@@ -38,7 +38,6 @@ export const schemas: SchemaTemplate[] = [
           fields.order,
           fields.bill,
           fields.item,
-          fields.subtotalCost,
           fields.totalCost,
         ],
       },

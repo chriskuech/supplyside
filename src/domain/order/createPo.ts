@@ -147,12 +147,12 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
 
   const poRecipient = order.fields.find(
     (f) => f.fieldId === fields.poRecipient.templateId,
-  )?.value.user
+  )?.value.contact
 
   const po = order.fields.find((f) => f.fieldId === fields.document.templateId)
     ?.value.file
 
-  if (!po || !poRecipient) return
+  if (!po || !poRecipient?.email) return
 
   const blob = await readBlob({ accountId, blobId: po.Blob.id })
 

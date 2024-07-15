@@ -1,5 +1,6 @@
 'use server'
 
+import { fail } from 'assert'
 import { schemas } from './system-schemas'
 import { fields } from './system-fields'
 import { FieldTemplate } from './types'
@@ -13,7 +14,12 @@ export const applyTemplate = async (accountId: string) => {
 const applyFields = async (accountId: string) =>
   await Promise.all(
     Object.values(fields).map(
-      async ({ templateId, options, ...field }: FieldTemplate) => {
+      async ({
+        templateId,
+        options,
+        defaultValue,
+        ...field
+      }: FieldTemplate) => {
         const { id: fieldId } = await prisma().field.upsert({
           where: {
             accountId_templateId: {
@@ -68,6 +74,43 @@ const applyFields = async (accountId: string) =>
           })
 
         await Promise.all([cleaningOptions, ...(upsertingOptions ?? [])])
+
+        if (defaultValue?.optionId) {
+          const templateId =
+            options?.find(
+              ({ templateId }) => templateId === defaultValue?.optionId,
+            )?.templateId ?? fail()
+
+          await prisma().field.update({
+            where: { id: fieldId },
+            data: {
+              DefaultValue: {
+                upsert: {
+                  create: {
+                    Option: {
+                      connect: {
+                        fieldId_templateId: {
+                          fieldId,
+                          templateId,
+                        },
+                      },
+                    },
+                  },
+                  update: {
+                    Option: {
+                      connect: {
+                        fieldId_templateId: {
+                          fieldId,
+                          templateId,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          })
+        }
       },
     ),
   )
