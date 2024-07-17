@@ -15,7 +15,7 @@ import {
   Contact,
   Field as FieldModel,
 } from '@prisma/client'
-import { revalidatePath } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { P, match } from 'ts-pattern'
 import { Ajv } from 'ajv'
 import { omit } from 'remeda'
@@ -60,7 +60,7 @@ export const createResource = async ({
     },
   })
 
-  revalidatePath('resource')
+  revalidateTag('resource')
 
   const resource = await prisma().resource.create({
     data: {
@@ -211,7 +211,7 @@ export const readResource = async ({
     include,
   })
 
-  revalidatePath('resource')
+  revalidateTag('resource')
 
   return mapResource(model)
 }
@@ -245,7 +245,7 @@ export const readResources = async ({
     include,
   })
 
-  revalidatePath('resource')
+  revalidateTag('resource')
 
   return models.map(mapResource)
 }
@@ -266,7 +266,7 @@ export const deleteResource = async ({
     },
   })
 
-  revalidatePath('resource')
+  revalidateTag('resource')
 }
 
 const include = {

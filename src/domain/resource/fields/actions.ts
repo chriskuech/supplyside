@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { Prisma } from '@prisma/client'
 import { omit } from 'remeda'
 import prisma from '@/lib/prisma'
@@ -58,7 +58,7 @@ export const updateValue = async ({
       : []),
   ])
 
-  revalidatePath('resource')
+  revalidateTag('resource')
 }
 
 export const uploadFile = async (
@@ -117,7 +117,7 @@ export const uploadFile = async (
     },
   })
 
-  revalidatePath('resource')
+  revalidateTag('resource')
 }
 
 export type UpdateContactDto = {
@@ -229,40 +229,143 @@ export const copyLinkedResourceFields = async (
   await Promise.all(
     linkedFieldIds
       .filter((fieldId) => thisFieldIds.includes(fieldId))
-      .map(async (fieldId) => {
-        const rf = await prisma().resourceField.findUniqueOrThrow({
-          where: {
-            resourceId_fieldId: { resourceId: linkedResourceId, fieldId },
-          },
-          include: { Value: true },
-        })
-
-        if (!rf.Value) return
-
-        await prisma().resourceField.upsert({
-          where: {
-            resourceId_fieldId: {
-              resourceId: linkedResourceId,
-              fieldId,
-            },
-          },
-          create: {
-            Resource: {
-              connect: {
-                id: linkedResourceId,
-              },
-            },
-            Field: {
-              connect: {
-                id: fieldId,
-              },
-            },
-            Value: { create: rf.Value },
-          },
-          update: {
-            Value: { update: omit(rf.Value, ['id']) },
-          },
-        })
-      }),
+      .map((fieldId) => copyField(linkedResourceId, resourceId, fieldId)),
   )
+}
+
+export const copyField = async (
+  fromResourceId: string,
+  toResourceId: string,
+  fieldId: string,
+) => {
+  const rf = await prisma().resourceField.findUniqueOrThrow({
+    where: {
+      resourceId_fieldId: { resourceId: fromResourceId, fieldId },
+    },
+    include: {
+      Value: {
+        include: {
+          Contact: true,
+          ValueOption: true,
+        },
+      },
+    },
+  })
+
+  if (!rf.Value) return
+
+  await prisma().resourceField.upsert({
+    where: {
+      resourceId_fieldId: {
+        resourceId: toResourceId,
+        fieldId,
+      },
+    },
+    create: {
+      Resource: {
+        connect: {
+          id: toResourceId,
+        },
+      },
+      Field: {
+        connect: {
+          id: fieldId,
+        },
+      },
+      Value: {
+        create: {
+          boolean: rf.Value.boolean,
+          date: rf.Value.date,
+          number: rf.Value.number,
+          string: rf.Value.string,
+          Contact: rf.Value.Contact
+            ? {
+                create: omit(rf.Value.Contact, ['valueId']),
+              }
+            : undefined,
+          Option: rf.Value.optionId
+            ? {
+                connect: {
+                  id: rf.Value.optionId,
+                },
+              }
+            : undefined,
+          File: rf.Value.fileId
+            ? {
+                connect: {
+                  id: rf.Value.fileId,
+                },
+              }
+            : undefined,
+          Resource: rf.Value.resourceId
+            ? {
+                connect: {
+                  id: rf.Value.resourceId,
+                },
+              }
+            : undefined,
+          User: rf.Value.userId
+            ? {
+                connect: {
+                  id: rf.Value.userId,
+                },
+              }
+            : undefined,
+          ValueOption: {
+            create: rf.Value.ValueOption.map(({ optionId }) => ({
+              optionId,
+            })),
+          },
+        },
+      },
+    },
+    update: {
+      Value: {
+        update: {
+          boolean: rf.Value.boolean,
+          date: rf.Value.date,
+          number: rf.Value.number,
+          string: rf.Value.string,
+          Contact: rf.Value.Contact
+            ? {
+                create: omit(rf.Value.Contact, ['valueId']),
+              }
+            : undefined,
+          Option: rf.Value.optionId
+            ? {
+                connect: {
+                  id: rf.Value.optionId,
+                },
+              }
+            : undefined,
+          File: rf.Value.fileId
+            ? {
+                connect: {
+                  id: rf.Value.fileId,
+                },
+              }
+            : undefined,
+          Resource: rf.Value.resourceId
+            ? {
+                connect: {
+                  id: rf.Value.resourceId,
+                },
+              }
+            : undefined,
+          User: rf.Value.userId
+            ? {
+                connect: {
+                  id: rf.Value.userId,
+                },
+              }
+            : undefined,
+          ValueOption: {
+            create: rf.Value.ValueOption.map(({ optionId }) => ({
+              optionId,
+            })),
+          },
+        },
+      },
+    },
+  })
 }
