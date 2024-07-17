@@ -3,7 +3,7 @@ import { FieldType, ResourceType, Value } from '@prisma/client'
 export type Schema = {
   resourceType: ResourceType
   sections: Section[]
-  fields: Field[]
+  allFields: Field[]
 }
 
 export type Section = {

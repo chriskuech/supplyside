@@ -106,7 +106,7 @@ export const transitionStatus = async (
     isSystem: true,
   })
   const field =
-    schema.fields.find(
+    schema.allFields.find(
       (field) => field.templateId === systemFields.orderStatus.templateId,
     ) ?? fail('Order status field not found')
 

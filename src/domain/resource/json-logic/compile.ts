@@ -22,7 +22,7 @@ export const createSql = ({
       SELECT
         ${[
           '"Resource"."id" AS "_id"',
-          ...schema.fields.map(
+          ...schema.allFields.map(
             (f) =>
               `(${createPropertySubquery(f)}) AS "${mapUuidToBase64(f.id)}"`,
           ),
@@ -104,7 +104,7 @@ const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
 
 const resolveFieldNameToColumn = (fieldName: string, schema: Schema) => {
   const field =
-    schema.fields.find((f) => f.name === fieldName) ??
+    schema.allFields.find((f) => f.name === fieldName) ??
     fail(
       `Field with name "${fieldName}" not found in Schema ${schema.resourceType}`,
     )

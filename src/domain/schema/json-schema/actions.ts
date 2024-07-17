@@ -11,7 +11,7 @@ const uuidPattern =
 
 export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
   type: 'object',
-  properties: mapToObj(schema.fields, (f) => [
+  properties: mapToObj(schema.allFields, (f) => [
     f.name,
     match<Field, JSONSchema7>(f)
       .with({ type: 'Checkbox' }, () => ({ type: ['boolean', 'null'] }))

@@ -77,7 +77,7 @@ export const readSchema = async ({
         name: s.name,
         fields: s.SectionField.map((sf) => mapField(sf.Field)),
       })),
-    fields: [
+    allFields: [
       ...schemas.flatMap((s) => s.SchemaField).map((sf) => sf.Field),
       ...schemas
         .flatMap((s) => s.Section)
