@@ -2,9 +2,11 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { Prisma } from '@prisma/client'
+import { omit } from 'remeda'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
 import { createBlob } from '@/domain/blobs/actions'
+import { readSchema } from '@/lib/schema/actions'
 
 export type UpdateValueDto = {
   resourceId: string
@@ -26,30 +28,35 @@ export const updateValue = async ({
   fieldId,
   value,
 }: UpdateValueDto) => {
-  await prisma().resourceField.upsert({
-    where: {
-      resourceId_fieldId: {
-        resourceId,
-        fieldId,
-      },
-    },
-    create: {
-      Resource: {
-        connect: {
-          id: resourceId,
+  await Promise.all([
+    prisma().resourceField.upsert({
+      where: {
+        resourceId_fieldId: {
+          resourceId,
+          fieldId,
         },
       },
-      Field: {
-        connect: {
-          id: fieldId,
+      create: {
+        Resource: {
+          connect: {
+            id: resourceId,
+          },
         },
+        Field: {
+          connect: {
+            id: fieldId,
+          },
+        },
+        Value: { create: value },
       },
-      Value: { create: value },
-    },
-    update: {
-      Value: { update: value },
-    },
-  })
+      update: {
+        Value: { update: value },
+      },
+    }),
+    ...(value.resourceId
+      ? [copyLinkedResourceFields(resourceId, fieldId, value.resourceId)]
+      : []),
+  ])
 
   revalidatePath('resource')
 }
@@ -193,4 +200,69 @@ export const updateContact = async (
       },
     })
   }
+}
+
+export const copyLinkedResourceFields = async (
+  resourceId: string,
+  fieldId: string,
+  linkedResourceId: string,
+) => {
+  const { resourceType: linkedResourceType } =
+    await prisma().field.findUniqueOrThrow({
+      where: { id: fieldId },
+    })
+
+  if (!linkedResourceType || !linkedResourceId) return
+
+  const { type: thisResourceType } = await prisma().resource.findUniqueOrThrow({
+    where: { id: resourceId },
+  })
+
+  const [thisSchema, linkedSchema] = await Promise.all([
+    readSchema({ resourceType: thisResourceType }),
+    readSchema({ resourceType: linkedResourceType }),
+  ])
+
+  const thisFieldIds = thisSchema.allFields.map(({ id }) => id)
+  const linkedFieldIds = linkedSchema.allFields.map(({ id }) => id)
+
+  await Promise.all(
+    linkedFieldIds
+      .filter((fieldId) => thisFieldIds.includes(fieldId))
+      .map(async (fieldId) => {
+        const rf = await prisma().resourceField.findUniqueOrThrow({
+          where: {
+            resourceId_fieldId: { resourceId: linkedResourceId, fieldId },
+          },
+          include: { Value: true },
+        })
+
+        if (!rf.Value) return
+
+        await prisma().resourceField.upsert({
+          where: {
+            resourceId_fieldId: {
+              resourceId: linkedResourceId,
+              fieldId,
+            },
+          },
+          create: {
+            Resource: {
+              connect: {
+                id: linkedResourceId,
+              },
+            },
+            Field: {
+              connect: {
+                id: fieldId,
+              },
+            },
+            Value: { create: rf.Value },
+          },
+          update: {
+            Value: { update: omit(rf.Value, ['id']) },
+          },
+        })
+      }),
+  )
 }

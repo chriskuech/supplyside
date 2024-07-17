@@ -30,7 +30,7 @@ export default function OrderStatusTracker({
   schema,
   fieldTemplateId,
 }: Props) {
-  const field = schema.fields.find(
+  const field = schema.allFields.find(
     (field) => field.templateId === fieldTemplateId,
   )
 

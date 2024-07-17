@@ -18,7 +18,7 @@ export default async function ResourceFieldControl({
     isSystem: true,
   })
 
-  const field = systemSchema.fields.find(
+  const field = systemSchema.allFields.find(
     (f) => f.templateId === fieldTemplateId,
   )
 
