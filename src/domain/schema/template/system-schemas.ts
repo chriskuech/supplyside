@@ -58,10 +58,6 @@ export const schemas: SchemaTemplate[] = [
         fields: [fields.issuedDate, fields.document, fields.totalCost],
       },
       {
-        name: 'Order Notes',
-        fields: [fields.orderNotes],
-      },
-      {
         name: 'Payment Info',
         fields: [fields.currency, fields.paymentTerms, fields.taxable],
       },
