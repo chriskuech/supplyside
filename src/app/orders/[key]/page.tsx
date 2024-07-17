@@ -135,9 +135,15 @@ export default async function OrderDetail({
                 fieldTemplateId={fields.assignee.templateId}
               />
             </Stack>
-            <Stack justifyContent={'end'}>
+
+            {status?.templateId !== orderStatusOptions.draft.templateId && (
+              <Box height={'min-content'}>
+                <EditButton resourceId={resource.id} />
+              </Box>
+            )}
+            <Box height={'min-content'}>
               <CancelButton resourceId={resource.id} />
-            </Stack>
+            </Box>
           </Stack>
         </Stack>
         <Stack
@@ -204,9 +210,6 @@ export default async function OrderDetail({
             spacing={2}
             p={7}
           >
-            {status?.templateId !== orderStatusOptions.draft.templateId && (
-              <EditButton resourceId={resource.id} />
-            )}
             {status?.templateId === orderStatusOptions.draft.templateId && (
               <StatusTransitionButton
                 resourceId={resource.id}
