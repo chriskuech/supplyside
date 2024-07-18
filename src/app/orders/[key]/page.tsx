@@ -267,11 +267,7 @@ export default async function OrderDetail({
                 data={{ Order: resource.id }}
               />
             </Stack>
-            <ResourceTable
-              schema={lineSchema}
-              resources={lineResources}
-              isEditable
-            />
+            <ResourceTable schema={lineSchema} resources={lineResources} />
             <ItemizedCostLines resource={resource} subTotal={subTotal} />
           </Stack>
         </Stack>

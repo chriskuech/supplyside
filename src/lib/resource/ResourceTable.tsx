@@ -1,9 +1,10 @@
 'use client'
+
 import {
   DataGrid,
+  DataGridProps,
   GridColDef,
   GridColType,
-  DataGridProps,
 } from '@mui/x-data-grid'
 import { FieldType } from '@prisma/client'
 import { Chip, IconButton } from '@mui/material'
@@ -15,27 +16,19 @@ import { deleteResource } from './actions'
 import { Resource } from '@/domain/resource/types'
 import { Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
-import { updateValue, UpdateValueDto } from '@/domain/resource/fields/actions'
 
 type Props = {
   schema: Schema
   resources: Resource[]
-  isEditable?: boolean
 } & Partial<DataGridProps>
 
-export default function ResourceTable({
-  schema,
-  resources,
-  isEditable,
-  ...props
-}: Props) {
+export default function ResourceTable({ schema, resources, ...props }: Props) {
   const columns = useMemo<GridColDef<Resource>[]>(
     () => [
       {
         field: 'key',
         headerName: 'ID',
         type: 'number',
-        editable: false,
       },
       ...selectFields(schema).map<GridColDef<Resource>>((field) => ({
         field: field.id,
@@ -55,76 +48,9 @@ export default function ResourceTable({
           .with('Text', () => 'string')
           .with('User', () => 'custom')
           .exhaustive(),
-        editable: field.name !== 'Total Cost' && isEditable,
-        valueSetter: (value, row: Resource) => {
-          const getFieldId = (name: string) =>
-            selectFields(schema).find((field) => field.name === name)?.id
-
-          const quantityFieldId = getFieldId('Quantity')
-          const unitCostFieldId = getFieldId('Unit Cost')
-          const totalCostFieldId = getFieldId('Total Cost')
-          const updatedFields = row.fields.map((f) => {
-            if (value !== undefined && f.fieldId === field.id) {
-              const updatedValue = match<FieldType>(field.type)
-                .with('Checkbox', () => ({ ...f.value, boolean: value }))
-                .with('Contact', () => ({ ...f.value, contact: value.contact }))
-                .with('Date', () => ({
-                  ...f.value,
-                  date: !isNaN(Date.parse(value))
-                    ? new Date(value)
-                    : f.value.date,
-                }))
-                .with('File', () => ({ ...f.value, file: value.file }))
-                .with('Money', () => ({ ...f.value, number: value }))
-                .with('Number', () => ({ ...f.value, number: value }))
-                .with('MultiSelect', () => ({
-                  ...f.value,
-                  options: value.options,
-                }))
-                .with('Text', () => ({ ...f.value, string: value }))
-                .with('Textarea', () => ({ ...f.value, string: value }))
-                .with('Select', () => ({
-                  ...f.value,
-                  optionIds: value.option ? [value.option.id] : [],
-                }))
-                .with('User', () => ({ ...f.value, user: value.user }))
-                .with('Resource', () => ({
-                  ...f.value,
-                  resource: value.resource,
-                }))
-                .exhaustive()
-              return {
-                ...f,
-                value: updatedValue,
-              }
-            }
-
-            return f
-          })
-          const getField = (id: string | undefined) =>
-            updatedFields.find((f) => f.fieldId === id)?.value.number ?? null
-          const quantity = getField(quantityFieldId)
-          const unitCost = getField(unitCostFieldId)
-          if (quantity !== null && unitCost !== null) {
-            const totalCost = quantity * unitCost
-            const totalCostFieldIndex = updatedFields.findIndex(
-              (f) => f.fieldId === totalCostFieldId,
-            )
-            if (totalCostFieldIndex !== -1) {
-              updatedFields[totalCostFieldIndex] = {
-                ...updatedFields[totalCostFieldIndex],
-                value: {
-                  ...updatedFields[totalCostFieldIndex].value,
-                  number: totalCost,
-                },
-              }
-            }
-          }
-
-          return { ...row, fields: updatedFields }
-        },
         valueGetter: (_, row) => {
           const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
+
           type Primitive = string | number | boolean | null | undefined
 
           return match<FieldType, Primitive>(field.type)
@@ -200,38 +126,19 @@ export default function ResourceTable({
         ),
       },
     ],
-    [schema, isEditable],
+    [schema],
   )
-
-  const handleProcessRowUpdate = async (newRow: Resource) => {
-    // TODO: use single `updateResource` function
-    await Promise.all(
-      newRow.fields.map((field) =>
-        updateValue({
-          resourceId: newRow.id,
-          fieldId: field.fieldId,
-          value: field.value as UpdateValueDto['value'],
-        }),
-      ),
-    )
-    return newRow
-  }
 
   return (
     <DataGrid<Resource>
       columns={columns}
       rows={resources}
       rowSelection={false}
-      editMode="row"
       autoHeight
       onRowClick={({ row: { type, key } }) => {
         if (type === 'Line') return
 
         window.location.href = `/${type.toLowerCase()}s/${key}`
-      }}
-      processRowUpdate={(newRow: Resource) => handleProcessRowUpdate(newRow)}
-      onProcessRowUpdateError={(error) => {
-        console.error('Error updating row:', error)
       }}
       {...props}
     />

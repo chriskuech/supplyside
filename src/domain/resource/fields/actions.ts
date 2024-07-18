@@ -26,21 +26,6 @@ export const updateValue = async ({
   fieldId,
   value,
 }: UpdateValueDto) => {
-  const data: Prisma.ValueUncheckedCreateInput = {
-    boolean: value.boolean,
-    date: value.date,
-    number: value.number,
-    string: value.string,
-    userId: value.userId,
-    optionId: value.optionId,
-    resourceId: value.resourceId,
-    ValueOption: value.optionIds
-      ? {
-          create: value.optionIds.map((optionId) => ({ optionId })),
-        }
-      : undefined,
-  }
-
   await prisma().resourceField.upsert({
     where: {
       resourceId_fieldId: {
@@ -59,10 +44,10 @@ export const updateValue = async ({
           id: fieldId,
         },
       },
-      Value: { create: data },
+      Value: { create: value },
     },
     update: {
-      Value: { update: data },
+      Value: { update: value },
     },
   })
 
