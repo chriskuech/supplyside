@@ -16,7 +16,6 @@ export default function CancelButton({ resourceId }: Props) {
         onClick={() =>
           transitionStatus(resourceId, orderStatusOptions.canceled)
         }
-        color="error"
         sx={{ '.MuiButtonBase-root': { m: 0, p: 0 } }}
       >
         <CancelOutlined fontSize="large" />

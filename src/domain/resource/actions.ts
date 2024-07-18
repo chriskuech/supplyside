@@ -1,5 +1,6 @@
 'use server'
 
+import { fail } from 'assert'
 import {
   ResourceType,
   Resource as ResourceModel,
@@ -14,7 +15,7 @@ import {
   Contact,
   Field as FieldModel,
 } from '@prisma/client'
-import { revalidatePath } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { P, match } from 'ts-pattern'
 import { Ajv } from 'ajv'
 import { omit } from 'remeda'
@@ -24,6 +25,7 @@ import { Field } from '../schema/types'
 import { Data, Resource } from './types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
+import { copyLinkedResourceFields } from './fields/actions'
 import prisma from '@/lib/prisma'
 
 const ajv = new Ajv()
@@ -58,16 +60,16 @@ export const createResource = async ({
     },
   })
 
-  revalidatePath('resource')
+  revalidateTag('resource')
 
-  return await prisma().resource.create({
+  const resource = await prisma().resource.create({
     data: {
       accountId,
       type,
       key: (key ?? 0) + 1,
       revision: 0,
       ResourceField: {
-        create: schema.fields.map((f) => ({
+        create: schema.allFields.map((f) => ({
           Field: {
             connect: {
               id: f.id,
@@ -162,7 +164,22 @@ export const createResource = async ({
         })),
       },
     },
+    include,
   })
+
+  await Promise.all(
+    resource.ResourceField.filter(
+      (rf) => rf.Field.resourceType && rf.Value.resourceId,
+    ).map((rf) =>
+      copyLinkedResourceFields(
+        rf.resourceId,
+        rf.fieldId,
+        rf.Value.resourceId ?? fail(),
+      ),
+    ),
+  )
+
+  return resource
 }
 
 export type ReadResourceParams = {
@@ -194,7 +211,7 @@ export const readResource = async ({
     include,
   })
 
-  revalidatePath('resource')
+  revalidateTag('resource')
 
   return mapResource(model)
 }
@@ -228,7 +245,7 @@ export const readResources = async ({
     include,
   })
 
-  revalidatePath('resource')
+  revalidateTag('resource')
 
   return models.map(mapResource)
 }
@@ -249,7 +266,7 @@ export const deleteResource = async ({
     },
   })
 
-  revalidatePath('resource')
+  revalidateTag('resource')
 }
 
 const include = {

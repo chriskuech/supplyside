@@ -12,7 +12,7 @@ export const getInvalidVars = ({
   where?: Where
   orderBy?: OrderBy[]
 }): string[] => {
-  const expected = new Set(schema.fields.map((f) => f.name))
+  const expected = new Set(schema.allFields.map((f) => f.name))
 
   return pipe(
     [],

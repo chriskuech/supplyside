@@ -1,10 +1,12 @@
 'use server'
 
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { Prisma } from '@prisma/client'
+import { omit } from 'remeda'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
 import { createBlob } from '@/domain/blobs/actions'
+import { readSchema } from '@/lib/schema/actions'
 
 export type UpdateValueDto = {
   resourceId: string
@@ -26,32 +28,37 @@ export const updateValue = async ({
   fieldId,
   value,
 }: UpdateValueDto) => {
-  await prisma().resourceField.upsert({
-    where: {
-      resourceId_fieldId: {
-        resourceId,
-        fieldId,
-      },
-    },
-    create: {
-      Resource: {
-        connect: {
-          id: resourceId,
+  await Promise.all([
+    prisma().resourceField.upsert({
+      where: {
+        resourceId_fieldId: {
+          resourceId,
+          fieldId,
         },
       },
-      Field: {
-        connect: {
-          id: fieldId,
+      create: {
+        Resource: {
+          connect: {
+            id: resourceId,
+          },
         },
+        Field: {
+          connect: {
+            id: fieldId,
+          },
+        },
+        Value: { create: value },
       },
-      Value: { create: value },
-    },
-    update: {
-      Value: { update: value },
-    },
-  })
+      update: {
+        Value: { update: value },
+      },
+    }),
+    ...(value.resourceId
+      ? [copyLinkedResourceFields(resourceId, fieldId, value.resourceId)]
+      : []),
+  ])
 
-  revalidatePath('resource')
+  revalidateTag('resource')
 }
 
 export const uploadFile = async (
@@ -110,7 +117,7 @@ export const uploadFile = async (
     },
   })
 
-  revalidatePath('resource')
+  revalidateTag('resource')
 }
 
 export type UpdateContactDto = {
@@ -193,4 +200,172 @@ export const updateContact = async (
       },
     })
   }
+}
+
+export const copyLinkedResourceFields = async (
+  resourceId: string,
+  fieldId: string,
+  linkedResourceId: string,
+) => {
+  const { resourceType: linkedResourceType } =
+    await prisma().field.findUniqueOrThrow({
+      where: { id: fieldId },
+    })
+
+  if (!linkedResourceType || !linkedResourceId) return
+
+  const { type: thisResourceType } = await prisma().resource.findUniqueOrThrow({
+    where: { id: resourceId },
+  })
+
+  const [thisSchema, linkedSchema] = await Promise.all([
+    readSchema({ resourceType: thisResourceType }),
+    readSchema({ resourceType: linkedResourceType }),
+  ])
+
+  const thisFieldIds = thisSchema.allFields.map(({ id }) => id)
+  const linkedFieldIds = linkedSchema.allFields.map(({ id }) => id)
+
+  await Promise.all(
+    linkedFieldIds
+      .filter((fieldId) => thisFieldIds.includes(fieldId))
+      .map((fieldId) => copyField(linkedResourceId, resourceId, fieldId)),
+  )
+}
+
+export const copyField = async (
+  fromResourceId: string,
+  toResourceId: string,
+  fieldId: string,
+) => {
+  const rf = await prisma().resourceField.findUniqueOrThrow({
+    where: {
+      resourceId_fieldId: { resourceId: fromResourceId, fieldId },
+    },
+    include: {
+      Value: {
+        include: {
+          Contact: true,
+          ValueOption: true,
+        },
+      },
+    },
+  })
+
+  if (!rf.Value) return
+
+  await prisma().resourceField.upsert({
+    where: {
+      resourceId_fieldId: {
+        resourceId: toResourceId,
+        fieldId,
+      },
+    },
+    create: {
+      Resource: {
+        connect: {
+          id: toResourceId,
+        },
+      },
+      Field: {
+        connect: {
+          id: fieldId,
+        },
+      },
+      Value: {
+        create: {
+          boolean: rf.Value.boolean,
+          date: rf.Value.date,
+          number: rf.Value.number,
+          string: rf.Value.string,
+          Contact: rf.Value.Contact
+            ? {
+                create: omit(rf.Value.Contact, ['valueId']),
+              }
+            : undefined,
+          Option: rf.Value.optionId
+            ? {
+                connect: {
+                  id: rf.Value.optionId,
+                },
+              }
+            : undefined,
+          File: rf.Value.fileId
+            ? {
+                connect: {
+                  id: rf.Value.fileId,
+                },
+              }
+            : undefined,
+          Resource: rf.Value.resourceId
+            ? {
+                connect: {
+                  id: rf.Value.resourceId,
+                },
+              }
+            : undefined,
+          User: rf.Value.userId
+            ? {
+                connect: {
+                  id: rf.Value.userId,
+                },
+              }
+            : undefined,
+          ValueOption: {
+            create: rf.Value.ValueOption.map(({ optionId }) => ({
+              optionId,
+            })),
+          },
+        },
+      },
+    },
+    update: {
+      Value: {
+        update: {
+          boolean: rf.Value.boolean,
+          date: rf.Value.date,
+          number: rf.Value.number,
+          string: rf.Value.string,
+          Contact: rf.Value.Contact
+            ? {
+                create: omit(rf.Value.Contact, ['valueId']),
+              }
+            : undefined,
+          Option: rf.Value.optionId
+            ? {
+                connect: {
+                  id: rf.Value.optionId,
+                },
+              }
+            : undefined,
+          File: rf.Value.fileId
+            ? {
+                connect: {
+                  id: rf.Value.fileId,
+                },
+              }
+            : undefined,
+          Resource: rf.Value.resourceId
+            ? {
+                connect: {
+                  id: rf.Value.resourceId,
+                },
+              }
+            : undefined,
+          User: rf.Value.userId
+            ? {
+                connect: {
+                  id: rf.Value.userId,
+                },
+              }
+            : undefined,
+          ValueOption: {
+            create: rf.Value.ValueOption.map(({ optionId }) => ({
+              optionId,
+            })),
+          },
+        },
+      },
+    },
+  })
 }
