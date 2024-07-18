@@ -38,9 +38,9 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
     PoDocument(),
     PoDocumentFooter(),
   ])
-
+  page.setDefaultNavigationTimeout(10000)
   await page.setContent(ReactDom.renderToString(main), {
-    timeout: 300,
+    timeout: 60000,
     waitUntil: 'domcontentloaded',
   })
 
