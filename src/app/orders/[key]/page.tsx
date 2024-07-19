@@ -169,7 +169,14 @@ export default async function OrderDetail({
         </Stack>
       </Container>
 
-      <Stack sx={{ pt: 5, backgroundColor: 'rgb(65 154 248 / 21%)' }}>
+      <Stack
+        sx={{
+          pt: 5,
+          backgroundImage:
+            'linear-gradient(0.25turn, rgb(65 154 248 / 80%) -50%, rgb(65 154 248 / 21%) 50%, rgb(65 154 248 / 80%) 150%)',
+          boxShadow: '0px 0px 5px 0px rgb(0 0 0 / 30%) inset',
+        }}
+      >
         <Stack direction={'row'} height={100}>
           <Box
             flexGrow={1}
