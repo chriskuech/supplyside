@@ -5,6 +5,7 @@ import {
   ResourceType,
   User,
   Contact,
+  FieldType,
 } from '@prisma/client'
 import { Option } from '../schema/types'
 
@@ -17,6 +18,7 @@ export type Resource = {
 
 export type ResourceField = {
   fieldId: string
+  fieldType: FieldType
   templateId: string | null
   value: Value
 }

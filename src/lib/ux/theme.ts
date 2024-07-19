@@ -260,6 +260,13 @@ const themes = {
           },
         },
       },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            boxShadow: 'rgba(0, 0, 0, 0.05) 0px 20px 27px 0px',
+          },
+        },
+      },
       MuiButton: {
         variants: [
           {
@@ -342,6 +349,13 @@ const themes = {
             },
           },
         ],
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            boxShadow: 'rgba(0, 0, 0, 0.5) 0px 20px 27px 0px',
+          },
+        },
       },
       MuiDataGrid: {
         styleOverrides: {
