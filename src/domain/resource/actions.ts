@@ -22,6 +22,7 @@ import { omit } from 'remeda'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { Field } from '../schema/types'
+import { fields } from '../schema/template/system-fields'
 import { Data, Resource } from './types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
@@ -288,7 +289,23 @@ const include = {
               Option: true,
             },
           },
-          Resource: true,
+          Resource: {
+            include: {
+              ResourceField: {
+                where: {
+                  Field: {
+                    templateId: {
+                      in: [fields.name.templateId, fields.number.templateId],
+                    },
+                  },
+                },
+                include: {
+                  Field: true,
+                  Value: true,
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -305,7 +322,14 @@ const mapResource = (
         Option: Option | null
         User: User | null
         ValueOption: (ValueOption & { Option: Option })[]
-        Resource: ResourceModel | null
+        Resource:
+          | (ResourceModel & {
+              ResourceField: (ResourceField & {
+                Field: FieldModel
+                Value: Value
+              })[]
+            })
+          | null
       }
     })[]
   },
@@ -325,7 +349,18 @@ const mapResource = (
       option: rf.Value.Option,
       options: rf.Value.ValueOption.map((vo) => vo.Option),
       user: rf.Value.User,
-      resource: rf.Value.Resource,
+      resource: rf.Value.Resource && {
+        id: rf.Value.Resource.id,
+        key: rf.Value.Resource.key,
+        name:
+          rf.Value.Resource.ResourceField.find(
+            (rf) =>
+              rf.Field.templateId &&
+              (
+                [fields.name.templateId, fields.number.templateId] as string[]
+              ).includes(rf.Field.templateId),
+          )?.Value.string ?? '',
+      },
       file: rf.Value.File,
     },
   })),

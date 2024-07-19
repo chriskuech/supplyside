@@ -31,9 +31,16 @@ type Props = {
   resourceId: string
   field: FieldModel
   value: Value | undefined
+  isReadOnly?: boolean // TODO: finish plumbing
 }
 
-export default function Field({ inputId, resourceId, field, value }: Props) {
+export default function Field({
+  inputId,
+  resourceId,
+  field,
+  value,
+  isReadOnly,
+}: Props) {
   const theme = useTheme()
 
   const handleChange = async (value: UpdateValueDto['value']) =>
@@ -152,16 +159,10 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
     ))
     .with('Resource', () => (
       <ResourceField
-        value={
-          value?.resource
-            ? {
-                id: value.resource.id,
-                name: value.resource.key.toString(),
-              }
-            : null
-        }
+        value={value?.resource ? value.resource : null}
         onChange={(resourceId) => handleChange({ resourceId })}
         resourceType={field.resourceType ?? fail()}
+        isReadOnly={isReadOnly}
       />
     ))
     .exhaustive()

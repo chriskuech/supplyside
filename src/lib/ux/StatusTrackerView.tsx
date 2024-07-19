@@ -67,8 +67,8 @@ export default function StatusTrackerView({ steps }: Props) {
                 >
                   <defs>
                     <linearGradient id={`bg-${i + 1}`}>
-                      <stop offset="0%" stop-color={nextColorShaded} />
-                      <stop offset="100%" stop-color={nextColor} />
+                      <stop offset="0%" stopColor={nextColorShaded} />
+                      <stop offset="100%" stopColor={nextColor} />
                     </linearGradient>
                   </defs>
                   <rect
