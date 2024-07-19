@@ -1,4 +1,11 @@
-import { Blob, File, ResourceType, User, Contact } from '@prisma/client'
+import {
+  Blob,
+  File,
+  ResourceType,
+  User,
+  Contact,
+  FieldType,
+} from '@prisma/client'
 import { Option } from '../schema/types'
 
 export type Resource = {
@@ -10,6 +17,7 @@ export type Resource = {
 
 export type ResourceField = {
   fieldId: string
+  fieldType: FieldType
   templateId: string | null
   value: Value
 }

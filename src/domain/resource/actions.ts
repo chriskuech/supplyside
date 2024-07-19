@@ -94,18 +94,14 @@ export const createResource = async ({
                     )
                     .with(
                       [{ type: 'Checkbox' }, P.union(P.boolean, null)],
-                      ([, val]) => ({
-                        boolean: val,
-                      }),
+                      ([, val]) => ({ boolean: val }),
                     )
                     .with(
                       [
                         { type: P.union('Text', 'Textarea') },
                         P.union(P.string, null),
                       ],
-                      ([, val]) => ({
-                        string: val,
-                      }),
+                      ([, val]) => ({ string: val }),
                     )
                     .with(
                       [
@@ -339,6 +335,7 @@ const mapResource = (
   type: model.type,
   fields: model.ResourceField.map((rf) => ({
     fieldId: rf.fieldId,
+    fieldType: rf.Field.type,
     templateId: rf.Field.templateId,
     value: {
       boolean: rf.Value.boolean,
