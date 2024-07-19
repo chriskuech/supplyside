@@ -38,7 +38,7 @@ export default async function ResourceFieldsControl({
     return (
       <Card variant="elevation">
         <CardContent>
-          <Stack direction={'row'} spacing={5}>
+          <Stack direction={'row'} spacing={5} overflow={'hidden'}>
             {chunkByN(
               [...systemSchema.sections, ...customSchema.sections],
               3,
@@ -107,7 +107,13 @@ export default async function ResourceFieldsControl({
                             .with(
                               { fieldType: 'Textarea' },
                               ({ value: { string } }) =>
-                                string ? <pre>{string}</pre> : '-',
+                                string ? (
+                                  <Typography whiteSpace={'pre-wrap'}>
+                                    {string}
+                                  </Typography>
+                                ) : (
+                                  '-'
+                                ),
                             )
                             .with(
                               { fieldType: 'Select' },
