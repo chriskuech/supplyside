@@ -1,6 +1,6 @@
 'use server'
 
-import { fail } from 'assert'
+import assert, { fail } from 'assert'
 import {
   Accordion,
   AccordionDetails,
@@ -13,12 +13,14 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { chunk, range } from 'remeda'
+import { range } from 'remeda'
 import { Check, Clear, ExpandMore } from '@mui/icons-material'
 import { match } from 'ts-pattern'
+import dynamic from 'next/dynamic'
 import { readSchema } from '../schema/actions'
-import Field from './fields/Field'
 import { Resource } from '@/domain/resource/types'
+
+const Field = dynamic(() => import('./fields/Field'))
 
 type Props = {
   resource: Resource
@@ -199,9 +201,20 @@ export default async function ResourceFieldsControl({
   )
 }
 
+/**
+ * Breaks up an array into n smaller arrays such
+ *  - the last arrays have m elements
+ *  - the first arrays have m+1 elements
+ *  - the order of elements is preserved
+ * @param arr the array to break up into chunks
+ * @param n the number of chunks to break the array into
+ * @returns an array of arrays with the elements of the original array
+ */
 const chunkByN = <T,>(arr: T[], n: number): T[][] => {
-  const chunks = chunk(arr, Math.floor(arr.length / n))
-  const fill = range(chunks.length, n).map(() => [])
-
-  return [...chunks, ...fill]
+  assert(n > 0)
+  const m = Math.floor(arr.length / n)
+  const r = arr.length % n
+  return range(0, n).map((i) =>
+    arr.slice(i * m + Math.min(i, r), (i + 1) * m + Math.min(i + 1, r)),
+  )
 }

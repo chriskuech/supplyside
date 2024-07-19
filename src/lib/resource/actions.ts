@@ -6,8 +6,7 @@ import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
 import { requireSession } from '../session'
 import * as domain from '@/domain/resource/actions'
-import { Resource } from '@/domain/resource/types'
-import { Option } from '@/domain/schema/types'
+import { Resource, ValueResource } from '@/domain/resource/types'
 import prisma from '@/lib/prisma'
 import * as resources from '@/domain/resource/actions'
 import * as fields from '@/domain/resource/fields/actions'
@@ -61,13 +60,14 @@ export type FindResourcesParams = {
 export const findResources = async ({
   resourceType,
   input,
-}: FindResourcesParams): Promise<Option[]> => {
+}: FindResourcesParams): Promise<ValueResource[]> => {
   const { accountId } = await requireSession()
 
   const results = await prisma().$queryRaw`
     WITH "View" AS (
       SELECT
         "Resource"."id" AS "id",
+        "Resource"."key" AS "key",
         "Value"."string" AS "name"
       FROM "Resource"
       LEFT JOIN "ResourceField" ON "Resource".id = "ResourceField"."resourceId"
@@ -79,7 +79,7 @@ export const findResources = async ({
         AND "Value"."string" <> ''
         AND "Value"."string" IS NOT NULL
     )
-    SELECT "id", "name"
+    SELECT "id", "key", "name"
     FROM "View"
     WHERE "name" % ${input}  -- % operator uses pg_trgm for similarity matching
     ORDER BY similarity("name", ${input}) DESC
@@ -88,7 +88,10 @@ export const findResources = async ({
 
   revalidateTag('resource')
 
-  return z.object({ id: z.string(), name: z.string() }).array().parse(results)
+  return z
+    .object({ id: z.string(), name: z.string(), key: z.number() })
+    .array()
+    .parse(results)
 }
 
 export const transitionStatus = async (

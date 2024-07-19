@@ -103,6 +103,8 @@ export default async function OrderDetail({
     (f) => f.templateId === fields.orderStatus.templateId,
   )?.value.option
 
+  const isDraft = status?.templateId === orderStatusOptions.draft.templateId
+
   const statusColorStart = match(status?.templateId)
     .with(orderStatusOptions.draft.templateId, () => yellow[600])
     .with(orderStatusOptions.received.templateId, () => green[900])
@@ -136,7 +138,7 @@ export default async function OrderDetail({
               />
             </Stack>
 
-            {status?.templateId !== orderStatusOptions.draft.templateId && (
+            {!isDraft && (
               <Box height={'min-content'}>
                 <EditButton resourceId={resource.id} />
               </Box>
@@ -157,6 +159,7 @@ export default async function OrderDetail({
             <ResourceFieldControl
               resource={resource}
               fieldTemplateId={fields.vendor.templateId}
+              isReadOnly={!isDraft}
             />
           </Stack>
           <Stack flexGrow={1}>
@@ -164,6 +167,7 @@ export default async function OrderDetail({
             <ResourceFieldControl
               resource={resource}
               fieldTemplateId={fields.description.templateId}
+              isReadOnly={!isDraft}
             />
           </Stack>
         </Stack>
@@ -217,7 +221,7 @@ export default async function OrderDetail({
             spacing={2}
             p={7}
           >
-            {status?.templateId === orderStatusOptions.draft.templateId && (
+            {isDraft && (
               <StatusTransitionButton
                 resourceId={resource.id}
                 statusOption={orderStatusOptions.submitted}
@@ -252,12 +256,7 @@ export default async function OrderDetail({
 
       <Container sx={{ py: 5 }}>
         <Stack spacing={5}>
-          <ResourceFieldsControl
-            resource={resource}
-            isReadOnly={
-              status?.templateId !== orderStatusOptions.draft.templateId
-            }
-          />
+          <ResourceFieldsControl resource={resource} isReadOnly={!isDraft} />
           <Stack spacing={2}>
             <Stack direction={'row'} alignItems={'end'}>
               <Typography variant="h4" flexGrow={1}>
