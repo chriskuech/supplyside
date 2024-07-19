@@ -151,7 +151,7 @@ export default async function ResourceFieldsControl({
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Stack spacing={2} direction={'row'}>
+            <Stack spacing={3} direction={'row'}>
               {s.fields.length === 1 && s.fields.at(0)?.name === s.name ? (
                 <Field
                   inputId={`rf-${s.fields.at(0)?.id}`}
@@ -165,10 +165,12 @@ export default async function ResourceFieldsControl({
                 />
               ) : (
                 chunkByN(s.fields, 3).map((fs, i) => (
-                  <Stack key={i} spacing={2} flex={1}>
+                  <Stack key={i} spacing={3} flex={1}>
                     {fs.map((f) => (
                       <Box key={f.id}>
-                        <Typography fontWeight={'bold'}>{f.name}</Typography>
+                        <Typography fontWeight={'bold'} gutterBottom>
+                          {f.name}
+                        </Typography>
                         <Field
                           inputId={`rf-${f.id}`}
                           resourceId={resource.id}
