@@ -146,11 +146,12 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   ])
 
   const poRecipient = order.fields.find(
-    (f) => f.fieldId === fields.poRecipient.templateId,
+    (f) => f.templateId === fields.poRecipient.templateId,
   )?.value.contact
 
-  const po = order.fields.find((f) => f.fieldId === fields.document.templateId)
-    ?.value.file
+  const po = order.fields.find(
+    (f) => f.templateId === fields.document.templateId,
+  )?.value.file
 
   if (!po || !poRecipient?.email) return
 

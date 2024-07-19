@@ -1,17 +1,21 @@
 'use server'
 
+import dynamic from 'next/dynamic'
 import { readSchema } from '../schema/actions'
-import Field from './fields/Field'
 import { Resource } from '@/domain/resource/types'
+
+const Field = dynamic(() => import('./fields/Field'))
 
 type Props = {
   resource: Resource
   fieldTemplateId: string
+  isReadOnly?: boolean
 }
 
 export default async function ResourceFieldControl({
   resource,
   fieldTemplateId,
+  isReadOnly,
 }: Props) {
   const systemSchema = await readSchema({
     resourceType: resource.type,
@@ -32,6 +36,7 @@ export default async function ResourceFieldControl({
       resourceId={resource.id}
       field={field}
       value={resource.fields.find((rf) => rf.fieldId === field.id)?.value}
+      isReadOnly={isReadOnly}
     />
   )
 }
