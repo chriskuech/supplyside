@@ -18,6 +18,7 @@ import { Check, Clear, ExpandMore } from '@mui/icons-material'
 import { match } from 'ts-pattern'
 import dynamic from 'next/dynamic'
 import { readSchema } from '../schema/actions'
+import ReadonlyTextarea from './fields/ReadonlyTextarea'
 import { Resource } from '@/domain/resource/types'
 
 const Field = dynamic(() => import('./fields/Field'))
@@ -110,9 +111,7 @@ export default async function ResourceFieldsControl({
                               { fieldType: 'Textarea' },
                               ({ value: { string } }) =>
                                 string ? (
-                                  <Typography whiteSpace={'pre-wrap'}>
-                                    {string}
-                                  </Typography>
+                                  <ReadonlyTextarea value={string} />
                                 ) : (
                                   '-'
                                 ),
