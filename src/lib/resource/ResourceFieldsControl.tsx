@@ -58,83 +58,87 @@ export default async function ResourceFieldsControl({
                           <Typography variant="overline">
                             {field.name}
                           </Typography>
-                          {match(
-                            resource.fields.find(
-                              (rf) => rf.fieldId === field.id,
-                            ),
-                          )
-                            .with(
-                              { fieldType: 'Checkbox' },
-                              ({ value: { boolean } }) =>
-                                boolean ? <Check /> : <Clear />,
+                          <Box>
+                            {match(
+                              resource.fields.find(
+                                (rf) => rf.fieldId === field.id,
+                              ),
                             )
-                            .with(
-                              { fieldType: 'Contact' },
-                              ({ value: { contact } }) => contact?.email ?? '-', // TODO: show contact name
-                            )
-                            .with(
-                              { fieldType: 'Date' },
-                              ({ value: { date } }) =>
-                                date?.toLocaleDateString() ?? '-',
-                            )
-                            .with(
-                              { fieldType: 'File' },
-                              ({ value: { file } }) => file?.name ?? '-',
-                            )
-                            .with(
-                              { fieldType: 'Money' },
-                              ({ value: { number } }) =>
-                                number?.toLocaleString('en-US', {
-                                  style: 'currency',
-                                  currency: 'USD',
-                                }),
-                            )
-                            .with(
-                              { fieldType: 'MultiSelect' },
-                              ({ value: { options } }) =>
-                                options
-                                  ?.map((o) => (
-                                    <Chip key={o.id} label={o.name} />
-                                  ))
-                                  .join(' ') ?? '-',
-                            )
-                            .with(
-                              { fieldType: 'Number' },
-                              ({ value: { number } }) =>
-                                number?.toString() ?? '-',
-                            )
-                            .with(
-                              { fieldType: 'Text' },
-                              ({ value: { string } }) => string || '-',
-                            )
-                            .with(
-                              { fieldType: 'Textarea' },
-                              ({ value: { string } }) =>
-                                string ? (
-                                  <ReadonlyTextarea value={string} />
-                                ) : (
-                                  '-'
-                                ),
-                            )
-                            .with(
-                              { fieldType: 'Select' },
-                              ({ value: { option } }) =>
-                                option?.name ? (
-                                  <Chip label={option.name} />
-                                ) : (
-                                  '-'
-                                ),
-                            )
-                            .with(
-                              { fieldType: 'User' },
-                              ({ value: { user } }) => user?.email ?? '-', // TODO: show user name
-                            )
-                            .with(
-                              { fieldType: 'Resource' },
-                              ({ value: { resource } }) => resource?.key ?? '-',
-                            )
-                            .with(undefined, () => '-')
-                            .exhaustive()}
+                              .with(
+                                { fieldType: 'Checkbox' },
+                                ({ value: { boolean } }) =>
+                                  boolean ? <Check /> : <Clear />,
+                              )
+                              .with(
+                                { fieldType: 'Contact' },
+                                ({ value: { contact } }) =>
+                                  contact?.email ?? '-', // TODO: show contact name
+                              )
+                              .with(
+                                { fieldType: 'Date' },
+                                ({ value: { date } }) =>
+                                  date?.toLocaleDateString() ?? '-',
+                              )
+                              .with(
+                                { fieldType: 'File' },
+                                ({ value: { file } }) => file?.name ?? '-',
+                              )
+                              .with(
+                                { fieldType: 'Money' },
+                                ({ value: { number } }) =>
+                                  number?.toLocaleString('en-US', {
+                                    style: 'currency',
+                                    currency: 'USD',
+                                  }),
+                              )
+                              .with(
+                                { fieldType: 'MultiSelect' },
+                                ({ value: { options } }) =>
+                                  options
+                                    ?.map((o) => (
+                                      <Chip key={o.id} label={o.name} />
+                                    ))
+                                    .join(' ') ?? '-',
+                              )
+                              .with(
+                                { fieldType: 'Number' },
+                                ({ value: { number } }) =>
+                                  number?.toString() ?? '-',
+                              )
+                              .with(
+                                { fieldType: 'Text' },
+                                ({ value: { string } }) => string || '-',
+                              )
+                              .with(
+                                { fieldType: 'Textarea' },
+                                ({ value: { string } }) =>
+                                  string ? (
+                                    <ReadonlyTextarea value={string} />
+                                  ) : (
+                                    '-'
+                                  ),
+                              )
+                              .with(
+                                { fieldType: 'Select' },
+                                ({ value: { option } }) =>
+                                  option?.name ? (
+                                    <Chip label={option.name} />
+                                  ) : (
+                                    '-'
+                                  ),
+                              )
+                              .with(
+                                { fieldType: 'User' },
+                                ({ value: { user } }) => user?.email ?? '-', // TODO: show user name
+                              )
+                              .with(
+                                { fieldType: 'Resource' },
+                                ({ value: { resource } }) =>
+                                  resource?.key ?? '-',
+                              )
+                              .with(undefined, () => '-')
+                              .exhaustive()}
+                          </Box>
                         </Stack>
                       ))}
                     </Stack>
