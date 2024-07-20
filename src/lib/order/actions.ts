@@ -2,18 +2,19 @@
 
 import { requireSession } from '../session'
 import { transitionStatus } from '../resource/actions'
-import * as order from '@/domain/order/createPo'
 import { orderStatusOptions } from '@/domain/schema/template/system-fields'
+import { sendPo as domainSendPo } from '@/domain/order/sendPo'
+import { createPo as domainCreatePo } from '@/domain/order/createPo'
 
 export const createPo = async (resourceId: string) => {
   const { accountId } = await requireSession()
 
-  return order.createPo({ accountId, resourceId })
+  return domainCreatePo({ accountId, resourceId })
 }
 
 export const sendPo = async (resourceId: string) => {
   const { accountId } = await requireSession()
 
-  await order.sendPo({ accountId, resourceId })
+  await domainSendPo({ accountId, resourceId })
   await transitionStatus(resourceId, orderStatusOptions.ordered)
 }
