@@ -115,10 +115,10 @@ export default async function OrderDetail({
             </Box>
           )}
           <Box height={'min-content'}>
-            <AssigneeControl schema={schema} resource={resource} />
+            <CancelButton resourceId={resource.id} />
           </Box>
           <Box height={'min-content'}>
-            <CancelButton resourceId={resource.id} />
+            <AssigneeControl schema={schema} resource={resource} />
           </Box>
         </Stack>
       </Container>
@@ -187,6 +187,13 @@ export default async function OrderDetail({
                   statusOption={orderStatusOptions.received}
                   label={'Confirm Receipt'}
                 />
+              )}
+              {(status?.templateId === orderStatusOptions.received.templateId ||
+                status?.templateId ===
+                  orderStatusOptions.canceled.templateId) && (
+                <Typography sx={{ opacity: 0.5 }}>
+                  No further action required
+                </Typography>
               )}
             </Stack>
           </Stack>
