@@ -11,9 +11,7 @@ type Props = {
 export default function PreviewPoButton({ resourceId }: Props) {
   return (
     <Button
-      onClick={() => {
-        alert(`not yet implemented\n\n{${resourceId}}`)
-      }}
+      onClick={() => window.open('/api/preview-po?resourceId=' + resourceId)}
       endIcon={<Visibility />}
       sx={{ height: 'fit-content', fontSize: '1.2em' }}
       size="large"
