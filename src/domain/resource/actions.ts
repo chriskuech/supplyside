@@ -23,6 +23,7 @@ import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { Field } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
+import { getDownloadPath } from '../blobs/utils'
 import { Data, Resource } from './types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
@@ -279,7 +280,11 @@ const include = {
             },
           },
           Option: true,
-          User: true,
+          User: {
+            include: {
+              ImageBlob: true,
+            },
+          },
           ValueOption: {
             include: {
               Option: true,
@@ -297,7 +302,15 @@ const include = {
                 },
                 include: {
                   Field: true,
-                  Value: true,
+                  Value: {
+                    include: {
+                      User: {
+                        include: {
+                          ImageBlob: true,
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -316,7 +329,7 @@ const mapResource = (
         Contact: Contact | null
         File: (File & { Blob: Blob }) | null
         Option: Option | null
-        User: User | null
+        User: (User & { ImageBlob: Blob | null }) | null
         ValueOption: (ValueOption & { Option: Option })[]
         Resource:
           | (ResourceModel & {
@@ -345,7 +358,20 @@ const mapResource = (
       number: rf.Value.number,
       option: rf.Value.Option,
       options: rf.Value.ValueOption.map((vo) => vo.Option),
-      user: rf.Value.User,
+      user: rf.Value.User && {
+        email: rf.Value.User.email,
+        firstName: rf.Value.User.firstName,
+        fullName: `${rf.Value.User.firstName} ${rf.Value.User.lastName}`,
+        id: rf.Value.User.id,
+        lastName: rf.Value.User.lastName,
+        profilePicPath:
+          rf.Value.User.ImageBlob &&
+          getDownloadPath({
+            blobId: rf.Value.User.ImageBlob.id,
+            mimeType: rf.Value.User.ImageBlob.mimeType,
+            fileName: 'profile-pic',
+          }),
+      },
       resource: rf.Value.Resource && {
         id: rf.Value.Resource.id,
         key: rf.Value.Resource.key,

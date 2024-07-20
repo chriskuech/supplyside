@@ -1,12 +1,6 @@
-import {
-  Blob,
-  File,
-  ResourceType,
-  User,
-  Contact,
-  FieldType,
-} from '@prisma/client'
+import { Blob, File, ResourceType, Contact, FieldType } from '@prisma/client'
 import { Option } from '../schema/types'
+import { User } from '@/domain/iam/types'
 
 export type Resource = {
   id: string

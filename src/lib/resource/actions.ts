@@ -113,7 +113,7 @@ export const transitionStatus = async (
       (field) => field.templateId === systemFields.orderStatus.templateId,
     ) ?? fail('Order status field not found')
 
-  return fields.updateValue({
+  await fields.updateValue({
     resourceId,
     fieldId: field.id,
     value: {

@@ -51,7 +51,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
             labelId="field-type-label"
             fullWidth
             label="Type"
-            value={type}
+            value={type ?? ''}
             onChange={(e) => setType(e.target.value as FieldType | undefined)}
           >
             <MenuItem value={undefined}>&nbsp;</MenuItem>
