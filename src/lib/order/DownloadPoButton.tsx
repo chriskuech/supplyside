@@ -1,3 +1,5 @@
+'use client'
+
 import { Download } from '@mui/icons-material'
 import { Tooltip, IconButton } from '@mui/material'
 import { getDownloadPath } from '@/domain/blobs/utils'
@@ -18,7 +20,7 @@ export default function DownloadPoButton({ resource }: Props) {
   if (!file) return null
 
   return (
-    <Tooltip title="Download File">
+    <Tooltip title="Download Purchase Order file">
       <IconButton
         onClick={() =>
           window.open(
@@ -30,7 +32,7 @@ export default function DownloadPoButton({ resource }: Props) {
           )
         }
       >
-        <Download />
+        <Download fontSize="large" />
       </IconButton>
     </Tooltip>
   )
