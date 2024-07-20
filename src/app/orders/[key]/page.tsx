@@ -14,6 +14,7 @@ import {
 import OrderStatusTracker from '@/lib/order/OrderStatusTracker'
 import { readUser } from '@/lib/iam/actions'
 import ApproveButton from '@/lib/order/ApproveButton'
+import DownloadPoButton from '@/lib/order/DownloadPoButton'
 
 const AssigneeControl = dynamic(() => import('@/lib/order/AssigneeControl'), {
   ssr: false,
@@ -105,6 +106,7 @@ export default async function OrderDetail({
 
           <Box flexGrow={1} />
 
+          <DownloadPoButton schema={schema} resource={resource} />
           {!isDraft && (
             <Box height={'min-content'}>
               <EditButton resourceId={resource.id} />
