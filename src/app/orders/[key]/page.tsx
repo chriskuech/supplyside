@@ -106,7 +106,9 @@ export default async function OrderDetail({
 
           <Box flexGrow={1} />
 
-          <DownloadPoButton schema={schema} resource={resource} />
+          <Box height={'min-content'}>
+            <DownloadPoButton schema={schema} resource={resource} />
+          </Box>
           {!isDraft && (
             <Box height={'min-content'}>
               <EditButton resourceId={resource.id} />
