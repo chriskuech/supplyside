@@ -23,7 +23,7 @@ type Props = {
 
 export default function StatusTrackerView({ steps }: Props) {
   return (
-    <Stack direction={'row'} height={100}>
+    <Stack direction={'row'} height={70}>
       {steps.map(({ label, status, isActive }, i) => {
         const next = steps[i + 1]
         const currentColor = color(status)[isActive ? '500' : '800']
@@ -45,13 +45,13 @@ export default function StatusTrackerView({ steps }: Props) {
               }}
               color={!isActive ? 'rgba(255, 255, 255, 0.6)' : 'white'}
               fontWeight={'bold'}
-              fontSize={'1.3em'}
+              fontSize={'1.2em'}
               overflow={'visible'}
-              height={100}
+              height={70}
             >
               <Box
-                ml={i > 0 ? -4 : 4}
-                mr={!next ? 4 : undefined}
+                ml={i > 0 ? -2 : 4}
+                pr={!next ? 3 : 1}
                 sx={{ textShadow: '0 1px 5px rgba(0, 0, 0, 0.2)' }}
                 width={'fit-content'}
               >

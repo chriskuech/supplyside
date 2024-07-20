@@ -1,34 +1,25 @@
-'use server'
-
 import dynamic from 'next/dynamic'
-import { readSchema } from '../schema/actions'
 import { Resource } from '@/domain/resource/types'
+import { Schema } from '@/domain/schema/types'
 
 const Field = dynamic(() => import('./fields/Field'))
 
 type Props = {
   resource: Resource
+  schema: Schema
   fieldTemplateId: string
   isReadOnly?: boolean
 }
 
-export default async function ResourceFieldControl({
+export default function ResourceFieldControl({
+  schema,
   resource,
   fieldTemplateId,
   isReadOnly,
 }: Props) {
-  const systemSchema = await readSchema({
-    resourceType: resource.type,
-    isSystem: true,
-  })
+  const field = schema.allFields.find((f) => f.templateId === fieldTemplateId)
 
-  const field = systemSchema.allFields.find(
-    (f) => f.templateId === fieldTemplateId,
-  )
-
-  if (!field) {
-    return '❌ Field not found'
-  }
+  if (!field) return '❌ Field not found'
 
   return (
     <Field
