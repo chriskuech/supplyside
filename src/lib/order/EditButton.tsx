@@ -11,7 +11,7 @@ type Props = {
 
 export default function EditButton({ resourceId }: Props) {
   return (
-    <Tooltip title="Transition back to Draft">
+    <Tooltip title="Transition back to Draft for editing">
       <IconButton
         onClick={() => transitionStatus(resourceId, orderStatusOptions.draft)}
         sx={{ '.MuiButtonBase-root': { m: 0, p: 0 } }}

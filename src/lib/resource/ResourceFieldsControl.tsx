@@ -178,15 +178,17 @@ export default async function ResourceFieldsControl({
                         <Typography fontWeight={'bold'} gutterBottom>
                           {f.name}
                         </Typography>
-                        <Field
-                          inputId={`rf-${f.id}`}
-                          resourceId={resource.id}
-                          field={f}
-                          value={
-                            resource.fields.find((rf) => rf.fieldId === f.id)
-                              ?.value
-                          }
-                        />
+                        <Box>
+                          <Field
+                            inputId={`rf-${f.id}`}
+                            resourceId={resource.id}
+                            field={f}
+                            value={
+                              resource.fields.find((rf) => rf.fieldId === f.id)
+                                ?.value
+                            }
+                          />
+                        </Box>
                       </Box>
                     ))}
                   </Stack>

@@ -1,7 +1,8 @@
-import { Box, Container, Stack, Typography } from '@mui/material'
+import { Box, Chip, Container, Stack, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
+import { LocalShipping } from '@mui/icons-material'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import ResourceTable from '@/lib/resource/ResourceTable'
@@ -106,6 +107,14 @@ export default async function OrderDetail({
 
           <Box flexGrow={1} />
 
+          {/* POC of where to put a little shipping widget built on 17track */}
+          <Box height={'min-content'} display={'none'}>
+            <Chip icon={<LocalShipping />} label="Add Tracking" />
+            <Chip
+              icon={<LocalShipping />}
+              label={`Eta. ${'Today between 3-5pm'}`}
+            />
+          </Box>
           <Box height={'min-content'}>
             <DownloadPoButton schema={schema} resource={resource} />
           </Box>
