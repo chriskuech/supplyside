@@ -260,6 +260,16 @@ const themes = {
           },
         },
       },
+      MuiCard: {
+        variants: [
+          {
+            props: { variant: 'elevation' },
+            style: {
+              boxShadow: 'rgba(0, 0, 0, 0.05) 0px 20px 27px 0px',
+            },
+          },
+        ],
+      },
       MuiButton: {
         variants: [
           {
@@ -339,6 +349,16 @@ const themes = {
               '&:hover:not(.MuiButton-disableElevation)': {
                 boxShadow: 'rgba(0, 0, 0, 1) 0px 2px 3px 0px',
               },
+            },
+          },
+        ],
+      },
+      MuiCard: {
+        variants: [
+          {
+            props: { variant: 'elevation' },
+            style: {
+              boxShadow: 'rgba(0, 0, 0, 0.5) 0px 20px 27px 0px',
             },
           },
         ],

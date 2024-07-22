@@ -9,6 +9,7 @@ import {
   Select,
   TextField,
   TextareaAutosize,
+  Typography,
   useTheme,
 } from '@mui/material'
 import { match } from 'ts-pattern'
@@ -31,9 +32,16 @@ type Props = {
   resourceId: string
   field: FieldModel
   value: Value | undefined
+  isReadOnly?: boolean // TODO: finish plumbing
 }
 
-export default function Field({ inputId, resourceId, field, value }: Props) {
+export default function Field({
+  inputId,
+  resourceId,
+  field,
+  value,
+  isReadOnly,
+}: Props) {
   const theme = useTheme()
 
   const handleChange = async (value: UpdateValueDto['value']) =>
@@ -123,26 +131,30 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
         onChange={(e) => handleChange({ string: e.target.value })}
       />
     ))
-    .with('Textarea', () => (
-      <TextareaAutosize
-        id={inputId}
-        minRows={3}
-        defaultValue={value?.string ?? ''}
-        onChange={(e) => handleChange({ string: e.target.value })}
-        style={{
-          width: '100%',
-          border: '1px solid',
-          borderRadius: 8,
-          padding: 8,
-          backgroundColor: theme.palette.background.paper,
-          color: theme.palette.text.primary,
-          ...match(theme.palette.mode)
-            .with('dark', () => ({ borderColor: '#333' }))
-            .with('light', () => ({ borderColor: '#ccc' }))
-            .exhaustive(),
-        }}
-      />
-    ))
+    .with('Textarea', () =>
+      isReadOnly ? (
+        <Typography whiteSpace={'pre'}>{value?.string}</Typography>
+      ) : (
+        <TextareaAutosize
+          id={inputId}
+          minRows={3}
+          defaultValue={value?.string ?? ''}
+          onChange={(e) => handleChange({ string: e.target.value })}
+          style={{
+            width: '100%',
+            border: '1px solid',
+            borderRadius: 8,
+            padding: 8,
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            ...match(theme.palette.mode)
+              .with('dark', () => ({ borderColor: '#333' }))
+              .with('light', () => ({ borderColor: '#ccc' }))
+              .exhaustive(),
+          }}
+        />
+      ),
+    )
     .with('User', () => (
       <UserField
         inputId={inputId}
@@ -152,16 +164,10 @@ export default function Field({ inputId, resourceId, field, value }: Props) {
     ))
     .with('Resource', () => (
       <ResourceField
-        value={
-          value?.resource
-            ? {
-                id: value.resource.id,
-                name: value.resource.key.toString(),
-              }
-            : null
-        }
+        value={value?.resource ? value.resource : null}
         onChange={(resourceId) => handleChange({ resourceId })}
         resourceType={field.resourceType ?? fail()}
+        isReadOnly={isReadOnly}
       />
     ))
     .exhaustive()

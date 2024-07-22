@@ -48,14 +48,14 @@ export const schemas: SchemaTemplate[] = [
     fields: [
       fields.orderStatus,
       fields.number,
-      fields.vendor,
-      fields.description,
       fields.assignee,
+      fields.document,
+      fields.totalCost,
     ],
     sections: [
       {
         name: 'Order Info',
-        fields: [fields.issuedDate, fields.document, fields.totalCost],
+        fields: [fields.vendor, fields.description, fields.issuedDate],
       },
       {
         name: 'Payment Info',

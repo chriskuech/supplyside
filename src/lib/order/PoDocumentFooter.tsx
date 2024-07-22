@@ -1,7 +1,16 @@
 'use server'
 
-import { ReactNode } from 'react'
+type Props = {
+  accountId: string
+  resourceId: string
+}
 
-export default async function PoDocumentFooter(): Promise<ReactNode> {
-  return <div style={{ fontSize: '30px' }}>Purchase Order Footer!</div>
+export default async function PoDocumentFooter(props: Props) {
+  return (
+    <div style={{ fontSize: '30px' }}>
+      Purchase Order Footer!
+      <br />
+      {JSON.stringify(props, null, 4)}
+    </div>
+  )
 }

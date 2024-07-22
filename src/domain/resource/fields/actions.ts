@@ -2,7 +2,7 @@
 
 import { revalidateTag } from 'next/cache'
 import { Prisma } from '@prisma/client'
-import { omit } from 'remeda'
+import { pick } from 'remeda'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
 import { createBlob } from '@/domain/blobs/actions'
@@ -280,7 +280,12 @@ export const copyField = async (
           string: rf.Value.string,
           Contact: rf.Value.Contact
             ? {
-                create: omit(rf.Value.Contact, ['valueId']),
+                create: pick(rf.Value.Contact, [
+                  'name',
+                  'title',
+                  'email',
+                  'phone',
+                ]),
               }
             : undefined,
           Option: rf.Value.optionId
@@ -328,7 +333,12 @@ export const copyField = async (
           string: rf.Value.string,
           Contact: rf.Value.Contact
             ? {
-                create: omit(rf.Value.Contact, ['valueId']),
+                create: pick(rf.Value.Contact, [
+                  'name',
+                  'title',
+                  'email',
+                  'phone',
+                ]),
               }
             : undefined,
           Option: rf.Value.optionId
