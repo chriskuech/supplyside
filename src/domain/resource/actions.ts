@@ -23,6 +23,8 @@ import { omit } from 'remeda'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { Field } from '../schema/types'
+import { fields } from '../schema/template/system-fields'
+import { getDownloadPath } from '../blobs/utils'
 import { Data, Resource } from './types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
@@ -94,18 +96,14 @@ export const createResource = async ({
                     )
                     .with(
                       [{ type: 'Checkbox' }, P.union(P.boolean, null)],
-                      ([, val]) => ({
-                        boolean: val,
-                      }),
+                      ([, val]) => ({ boolean: val }),
                     )
                     .with(
                       [
                         { type: P.union('Text', 'Textarea') },
                         P.union(P.string, null),
                       ],
-                      ([, val]) => ({
-                        string: val,
-                      }),
+                      ([, val]) => ({ string: val }),
                     )
                     .with(
                       [
@@ -286,13 +284,41 @@ const include = {
             },
           },
           Option: true,
-          User: true,
+          User: {
+            include: {
+              ImageBlob: true,
+            },
+          },
           ValueOption: {
             include: {
               Option: true,
             },
           },
-          Resource: true,
+          Resource: {
+            include: {
+              ResourceField: {
+                where: {
+                  Field: {
+                    templateId: {
+                      in: [fields.name.templateId, fields.number.templateId],
+                    },
+                  },
+                },
+                include: {
+                  Field: true,
+                  Value: {
+                    include: {
+                      User: {
+                        include: {
+                          ImageBlob: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -308,9 +334,16 @@ const mapResource = (
         Contact: Contact | null
         File: (File & { Blob: Blob }) | null
         Option: Option | null
-        User: User | null
+        User: (User & { ImageBlob: Blob | null }) | null
         ValueOption: (ValueOption & { Option: Option })[]
-        Resource: ResourceModel | null
+        Resource:
+          | (ResourceModel & {
+              ResourceField: (ResourceField & {
+                Field: FieldModel
+                Value: Value
+              })[]
+            })
+          | null
       }
     })[]
   },
@@ -320,6 +353,7 @@ const mapResource = (
   type: model.type,
   fields: model.ResourceField.map((rf) => ({
     fieldId: rf.fieldId,
+    fieldType: rf.Field.type,
     templateId: rf.Field.templateId,
     value: {
       boolean: rf.Value.boolean,
@@ -329,8 +363,32 @@ const mapResource = (
       number: rf.Value.number,
       option: rf.Value.Option,
       options: rf.Value.ValueOption.map((vo) => vo.Option),
-      user: rf.Value.User,
-      resource: rf.Value.Resource,
+      user: rf.Value.User && {
+        email: rf.Value.User.email,
+        firstName: rf.Value.User.firstName,
+        fullName: `${rf.Value.User.firstName} ${rf.Value.User.lastName}`,
+        id: rf.Value.User.id,
+        lastName: rf.Value.User.lastName,
+        profilePicPath:
+          rf.Value.User.ImageBlob &&
+          getDownloadPath({
+            blobId: rf.Value.User.ImageBlob.id,
+            mimeType: rf.Value.User.ImageBlob.mimeType,
+            fileName: 'profile-pic',
+          }),
+      },
+      resource: rf.Value.Resource && {
+        id: rf.Value.Resource.id,
+        key: rf.Value.Resource.key,
+        name:
+          rf.Value.Resource.ResourceField.find(
+            (rf) =>
+              rf.Field.templateId &&
+              (
+                [fields.name.templateId, fields.number.templateId] as string[]
+              ).includes(rf.Field.templateId),
+          )?.Value.string ?? '',
+      },
       file: rf.Value.File,
     },
   })),

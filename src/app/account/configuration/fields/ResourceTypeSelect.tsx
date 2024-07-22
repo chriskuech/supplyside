@@ -16,7 +16,7 @@ export default function ResourceTypeSelect({
       labelId="field-resource-type-label"
       fullWidth
       label="Resource Type"
-      value={resourceType}
+      value={resourceType ?? ''}
       disabled={!setResourceType}
       onChange={(e) =>
         setResourceType?.(e.target.value as ResourceType | undefined)

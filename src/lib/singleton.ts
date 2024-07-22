@@ -12,7 +12,7 @@ const singleton = <T>(key: string, fn: (clear: () => void) => T): (() => T) => {
   const gany = global as any
 
   return () => {
-    if (!(nsKey in gany)) {
+    if (!gany[nsKey]) {
       gany[nsKey] = fn(() => (gany[nsKey] = undefined))
     }
 

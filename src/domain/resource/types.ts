@@ -1,13 +1,13 @@
 import {
-  Resource as ResourceModel,
   Blob,
   File,
   ResourceType,
-  User,
   Contact,
+  FieldType,
   Cost,
 } from '@prisma/client'
 import { Option } from '../schema/types'
+import { User } from '@/domain/iam/types'
 
 export type Resource = {
   id: string
@@ -19,8 +19,15 @@ export type Resource = {
 
 export type ResourceField = {
   fieldId: string
+  fieldType: FieldType
   templateId: string | null
   value: Value
+}
+
+export type ValueResource = {
+  id: string
+  name: string
+  key: number
 }
 
 export type Value = {
@@ -33,7 +40,7 @@ export type Value = {
   string: string | null
   user: User | null
   file: (File & { Blob: Blob }) | null
-  resource: ResourceModel | null
+  resource: ValueResource | null
 }
 
 export type Data = Record<string, string[] | string | number | boolean | null>
