@@ -2,25 +2,20 @@
 
 import { Add } from '@mui/icons-material'
 import { Button } from '@mui/material'
-import { Cost } from '@prisma/client'
 import { createCost } from '@/domain/cost/actions'
 
 type Props = {
-  newCost?: Cost
-  fetchData: () => Promise<boolean>
+  resourceId: string
 }
 
-export default function CreateCostButton({ newCost, fetchData }: Props) {
+export default function CreateCostButton({ resourceId }: Props) {
   return (
     <Button
       size="small"
-      onClick={async () => {
-        if (newCost) {
-          await createCost(newCost)
-          fetchData()
-        }
+      onClick={() => {
+        createCost(resourceId)
       }}
-      endIcon={<Add />}
+      startIcon={<Add />}
     >
       Create Itemized cost
     </Button>

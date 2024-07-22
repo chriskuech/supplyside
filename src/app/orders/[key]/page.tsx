@@ -100,19 +100,6 @@ export default async function OrderDetail({
     }),
   ])
 
-  const subTotalFields = lineResources.flatMap((item) =>
-    item.fields.filter(
-      (field) => field.templateId === fields.totalCost.templateId,
-    ),
-  )
-  const subTotal = subTotalFields.reduce((acc, field) => {
-    if (field.value.number !== null && field.value.number !== undefined) {
-      return acc + field.value.number
-    }
-
-    return acc
-  }, 0)
-
   const status = resource.fields.find(
     (f) => f.templateId === fields.orderStatus.templateId,
   )?.value.option
@@ -271,7 +258,10 @@ export default async function OrderDetail({
               />
             </Stack>
             <ResourceTable schema={lineSchema} resources={lineResources} />
-            <ItemizedCostLines resource={resource} subTotal={subTotal} />
+            <ItemizedCostLines
+              resource={resource}
+              lineResource={lineResources}
+            />
           </Stack>
         </Stack>
       </Container>

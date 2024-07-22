@@ -5,6 +5,7 @@ import {
   ResourceType,
   User,
   Contact,
+  Cost,
 } from '@prisma/client'
 import { Option } from '../schema/types'
 
@@ -13,6 +14,7 @@ export type Resource = {
   type: ResourceType
   key: number
   fields: ResourceField[]
+  costs: Cost[]
 }
 
 export type ResourceField = {

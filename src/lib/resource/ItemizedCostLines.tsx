@@ -1,178 +1,251 @@
 'use client'
-import { Cost as BaseCost } from '@prisma/client'
-import { IconButton, Stack, Typography } from '@mui/material'
-import { v4 as uuidv4 } from 'uuid'
-import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  IconButton,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material'
+import { useEffect, useMemo } from 'react'
 import { Clear } from '@mui/icons-material'
 import CreateCostButton from '../cost/CreateCostButton'
 import { Resource } from '@/domain/resource/types'
-import { deleteCost, readCosts, updateCost } from '@/domain/cost/actions'
+import { deleteCost, updateCost } from '@/domain/cost/actions'
+import { fields } from '@/domain/schema/template/system-fields'
+import { updateValue } from '@/domain/resource/fields/actions'
 
 type Props = {
   resource: Resource
-  subTotal: number
+  lineResource: Resource[]
 }
 
-interface Cost extends BaseCost {
-  subTotal?: number
-}
-
-export default function ItemizedCostLines({ resource, subTotal }: Props) {
-  const [costData, setCostData] = useState<Cost[]>([])
-
-  const fetchData = useCallback(async () => {
-    if (resource.id) {
-      const costs: Cost[] = await readCosts(resource.id)
-      setCostData(costs)
-      return true
-    }
-
-    return false
-  }, [resource.id])
-
-  const itemizedTotal = useMemo(
-    () =>
-      costData.reduce(
-        (acc, cost) =>
-          acc +
-          (cost.isPercentage ? (cost.value * subTotal) / 100 : cost.value),
-        0,
+const calculateSubTotal = (lineResource: Resource[]) =>
+  lineResource
+    .flatMap((lines) =>
+      lines.fields.find(
+        (field) => field.templateId === fields.totalCost.templateId,
       ),
-    [costData, subTotal],
+    )
+    .reduce((sum, obj) => (obj?.value?.number ?? 0) + sum, 0)
+
+const calculateItemizedTotal = (costs: Resource['costs'], subTotal: number) =>
+  costs.reduce(
+    (acc, cost) =>
+      acc + (cost.isPercentage ? (cost.value * subTotal) / 100 : cost.value),
+    0,
   )
 
+const updateField = async (
+  resource: Resource,
+  templateId: string,
+  value: number,
+) => {
+  const field = resource.fields.find((field) => field.templateId === templateId)
+  if (field) {
+    await updateValue({
+      resourceId: resource.id,
+      fieldId: field.fieldId,
+      value: { number: value },
+    })
+  }
+}
+
+export default function ItemizedCostLines({ resource, lineResource }: Props) {
+  const subTotal = useMemo(
+    () => calculateSubTotal(lineResource),
+    [lineResource],
+  )
+  const itemizedTotal = useMemo(
+    () => calculateItemizedTotal(resource.costs, subTotal),
+    [resource.costs, subTotal],
+  )
   const grandTotal = subTotal + itemizedTotal
 
-  const columns = useMemo<GridColDef<Cost>[]>(
-    () => [
-      {
-        field: 'lineNo',
-        headerName: '#',
-        filterable: false,
-        editable: false,
-        type: 'number',
-        renderCell: (params: GridRenderCellParams) =>
-          params.api.getRowIndexRelativeToVisibleRows(params.row.id) + 1,
-      },
-      { field: 'name', headerName: 'Name', editable: true, type: 'string' },
-      {
-        field: 'isPercentage',
-        headerName: 'Is Percentage',
-        type: 'singleSelect',
-        valueOptions: [
-          { value: false, label: '$' },
-          { value: true, label: '%' },
-        ],
-        editable: true,
-      },
-      { field: 'value', headerName: 'Value', editable: true, type: 'number' },
-      {
-        field: 'total',
-        headerName: 'Total',
-        type: 'number',
-        valueGetter: (value: number, row: Cost) => {
-          if (!row.value) {
-            return 0
-          }
-
-          if (row.isPercentage) return (row.value * subTotal) / 100
-          else return row.value
-        },
-        valueFormatter: (value: number) =>
-          value?.toLocaleString('en-US', {
-            style: 'currency',
-            currency: 'USD',
-          }),
-      },
-      {
-        field: '_delete',
-        headerName: 'Delete',
-        renderCell: (params: GridRenderCellParams<Cost>) => (
-          <IconButton
-            onClick={async () => {
-              await deleteCost(String(params.row.id))
-              await fetchData()
-            }}
-          >
-            <Clear />
-          </IconButton>
-        ),
-      },
-    ],
-    [fetchData, subTotal],
-  )
-
   useEffect(() => {
-    if (resource.id) fetchData()
-  }, [fetchData, resource.id])
+    const updateTotals = async () => {
+      await Promise.all([
+        updateField(resource, fields.subtotalCost.templateId, subTotal),
+        updateField(resource, fields.itemizedCosts.templateId, itemizedTotal),
+        updateField(resource, fields.totalCost.templateId, grandTotal),
+      ])
+    }
 
-  const handleProcessRowUpdate = async (newRow: Cost) => {
-    try {
-      const updatedCost = await updateCost(newRow.id, {
-        name: newRow.name,
-        isPercentage: newRow.isPercentage,
-        value: newRow.value,
+    updateTotals()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subTotal, itemizedTotal, grandTotal, resource.id])
+
+  const handleFieldChange = async (
+    id: string,
+    field: string,
+    value: unknown,
+  ) => {
+    const updatedRow = resource.costs.find((cost) => cost.id === id)
+    if (updatedRow) {
+      await updateCost(id, {
+        ...updatedRow,
+        [field]: value,
       })
-      fetchData()
-      return updatedCost
-    } catch (error) {
-      console.error('Error updating row:', error)
-      throw error
     }
   }
 
-  const newCost: Cost = {
-    id: uuidv4(),
-    resourceId: resource.id,
-    name: '',
-    isPercentage: false,
-    value: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+  const handleDelete = async (id: string) => {
+    await deleteCost(id)
   }
 
   return (
-    <>
-      <Typography variant="h6" align="right" fontSize="1.1rem">
-        Subtotal:{' '}
-        {subTotal.toLocaleString('en-US', {
-          style: 'currency',
-          currency: 'USD',
-        })}
-      </Typography>
+    <Stack spacing={2} sx={{ p: 2 }}>
       <Stack direction="row" alignItems="end" sx={{ p: 1 }}>
-        <Typography variant="h6" flexGrow={1}>
+        <Typography
+          variant="h6"
+          flexGrow={1}
+          style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+        >
           Itemized Costs
         </Typography>
-        <CreateCostButton newCost={newCost} fetchData={fetchData} />
+        <CreateCostButton resourceId={resource.id} />
       </Stack>
-      <DataGrid
-        columns={columns}
-        rows={costData}
-        rowSelection={false}
-        slots={{ columnHeaders: () => null }}
-        editMode="row"
-        autoHeight
-        processRowUpdate={handleProcessRowUpdate}
-        onProcessRowUpdateError={(error) =>
-          console.error('Error updating row:', error)
-        }
-      />
-      <Typography variant="h6" align="right" fontSize="1.1rem">
-        Itemized Total:{' '}
-        {itemizedTotal.toLocaleString('en-US', {
-          style: 'currency',
-          currency: 'USD',
-        })}
-      </Typography>
-      <Typography variant="h6" align="right">
-        Grand Total:{' '}
-        {grandTotal.toLocaleString('en-US', {
-          style: 'currency',
-          currency: 'USD',
-        })}
-      </Typography>
-    </>
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableBody>
+            {resource.fields.map((field) => {
+              if (field.templateId === fields.subtotalCost.templateId) {
+                return (
+                  <TableRow
+                    key={field.fieldId}
+                    sx={{ backgroundColor: 'grey.200' }}
+                  >
+                    <TableCell
+                      colSpan={2}
+                      style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+                    >
+                      Subtotal
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+                    >
+                      {field.value.number?.toFixed(2) || subTotal.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                )
+              }
+
+              return null
+            })}
+            {resource.costs.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell>
+                  <TextField
+                    defaultValue={row.name}
+                    onChange={(e) =>
+                      handleFieldChange(row.id, 'name', e.target.value)
+                    }
+                    placeholder="Enter Itemized cost ..."
+                    size="small"
+                    sx={{ width: '50%' }}
+                  />
+                </TableCell>
+                <TableCell align="right">
+                  <Select
+                    defaultValue={row.isPercentage ? '%' : '$'}
+                    onChange={(e) =>
+                      handleFieldChange(
+                        row.id,
+                        'isPercentage',
+                        e.target.value === '%',
+                      )
+                    }
+                    size="small"
+                  >
+                    <MenuItem value="$">$</MenuItem>
+                    <MenuItem value="%">%</MenuItem>
+                  </Select>
+                  <TextField
+                    defaultValue={row.value}
+                    onChange={(e) =>
+                      handleFieldChange(row.id, 'value', Number(e.target.value))
+                    }
+                    type="number"
+                    InputProps={{
+                      startAdornment: row.isPercentage ? null : <span>$</span>,
+                      endAdornment: row.isPercentage ? <span>%</span> : null,
+                    }}
+                    size="small"
+                    style={{ width: 100, marginLeft: 10 }}
+                  />
+                </TableCell>
+                <TableCell align="right">
+                  {(row.isPercentage
+                    ? (row.value * subTotal) / 100
+                    : row.value
+                  ).toLocaleString('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                  })}
+                </TableCell>
+                <TableCell>
+                  <IconButton onClick={() => handleDelete(row.id)}>
+                    <Clear />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+            {resource.fields.map((field) => {
+              if (field.templateId === fields.itemizedCosts.templateId) {
+                return (
+                  <TableRow key={field.fieldId}>
+                    <TableCell
+                      colSpan={2}
+                      style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+                    >
+                      Itemized Cost
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+                    >
+                      {field.value.number?.toFixed(2) ||
+                        itemizedTotal.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                )
+              }
+
+              if (field.templateId === fields.totalCost.templateId) {
+                return (
+                  <TableRow
+                    key={field.fieldId}
+                    sx={{ backgroundColor: '#D5E7EE' }}
+                  >
+                    <TableCell
+                      colSpan={2}
+                      style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+                    >
+                      Total
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+                    >
+                      {field.value.number?.toFixed(2) || grandTotal.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                )
+              }
+
+              return null
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Stack>
   )
 }
