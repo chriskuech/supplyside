@@ -14,29 +14,53 @@ import * as schemas from '@/domain/schema/actions'
 import { fields as systemFields } from '@/domain/schema/template/system-fields'
 import { OptionTemplate } from '@/domain/schema/template/types'
 
+type CreateResourceParams = Omit<domain.CreateResourceParams, 'accountId'>
+
 export const createResource = async (
-  params: Omit<domain.CreateResourceParams, 'accountId'>,
+  params: CreateResourceParams,
 ): Promise<ResourceModel> => {
   const { accountId } = await requireSession()
 
   return domain.createResource({ ...params, accountId })
 }
 
-type ReadResourceParams = {
-  type?: ResourceType
-  key?: number
-  id?: string
-} & ({ type: ResourceType; key: number } | { id: string })
+type CreateResourceVersionParams = Omit<
+  domain.CreateResourceParams,
+  'accountId'
+>
 
-export const readResource = async (
-  params: ReadResourceParams,
+export const createResourceVersion = async (
+  params: CreateResourceVersionParams,
+): Promise<ResourceModel> => {
+  const { accountId } = await requireSession()
+
+  return domain.createResource({ ...params, accountId })
+}
+
+type CloneResourceParams = {
+  resourceId: string
+}
+
+export const cloneResource = async (
+  params: CloneResourceParams,
+): Promise<Resource> => {
+  throw new Error('Not implemented')
+}
+
+type ReadResourceLatestRevisionParams = {
+  type: ResourceType
+  key: number
+}
+
+export const readResourceLatestRevision = async (
+  params: ReadResourceLatestRevisionParams,
 ): Promise<Resource> => {
   const { accountId } = await requireSession()
 
-  return domain.readResource({ ...params, accountId })
+  return domain.readResourceLatestRevision({ ...params, accountId })
 }
 
-export const readResources = async (
+export const readLatestResources = async (
   params: Omit<domain.ReadResourcesParams, 'accountId'>,
 ): Promise<Resource[]> => {
   const { accountId } = await requireSession()
@@ -99,8 +123,7 @@ export const transitionStatus = async (
   status: OptionTemplate,
 ) => {
   const { accountId } = await requireSession()
-  const { type: resourceType } = await resources.readResource({
-    accountId,
+  const { type: resourceType } = await resources.readResourceById({
     id: resourceId,
   })
   const schema = await schemas.readSchema({
@@ -122,4 +145,29 @@ export const transitionStatus = async (
         fail('Option not found'),
     },
   })
+}
+
+export const startEdit = async (resource: Resource) => {
+  const { accountId } = await requireSession()
+
+  await domain.cloneResource({
+    accountId,
+    type: ResourceType.Draft,
+    key: 0,
+  })
+}
+
+export const cancelEdit = async (resourceId: string) =>
+  deleteResource({ id: resourceId })
+
+export const readRevisions = async (type: ResourceType, key: number) => {
+  const { accountId } = await requireSession()
+
+  return domain.readResourceVersions({ accountId, type, key })
+}
+
+export const setActiveRevision = async (resourceId: string) => {
+  const { accountId } = await requireSession()
+
+  return domain.setActiveRevision({ accountId, resourceId })
 }

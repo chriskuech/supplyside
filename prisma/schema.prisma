@@ -78,6 +78,7 @@ model Resource {
   type      ResourceType
   key       Int          @db.Integer
   revision  Int          @db.Integer
+  isActive  Boolean      @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

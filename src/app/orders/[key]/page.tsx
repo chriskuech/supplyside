@@ -6,8 +6,11 @@ import { LocalShipping } from '@mui/icons-material'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import ResourceTable from '@/lib/resource/ResourceTable'
-import { readResource, readResources } from '@/lib/resource/actions'
-import { readSchema } from '@/lib/schema/actions'
+import {
+  readResourceLatestRevision,
+  readResources,
+} from '@/domain/resource/actions'
+import { readSchema } from '@/domain/schema/actions'
 import {
   fields,
   orderStatusOptions,
@@ -16,6 +19,9 @@ import OrderStatusTracker from '@/lib/order/OrderStatusTracker'
 import { readUser } from '@/lib/iam/actions'
 import ApproveButton from '@/lib/order/ApproveButton'
 import DownloadPoButton from '@/lib/order/DownloadPoButton'
+import CancelEditButton from '@/lib/order/CancelEditButton'
+import SubmitButton from '@/lib/order/SubmitButton'
+import DuplicateButton from '@/lib/order/DuplicateButton'
 
 const AssigneeControl = dynamic(() => import('@/lib/order/AssigneeControl'), {
   ssr: false,
@@ -58,19 +64,18 @@ export default async function OrderDetail({
 }: {
   params: { key: string }
 }) {
-  await requireSessionWithRedirect()
+  const { accountId } = await requireSessionWithRedirect()
 
   const [user, schema, resource] = await Promise.all([
     readUser(),
-    readSchema({ resourceType: 'Order' }),
-    readResource({ type: 'Order', key: Number(key) }),
+    readSchema({ accountId, resourceType: 'Order' }),
+    readResourceLatestRevision({ accountId, type: 'Order', key: Number(key) }),
   ])
 
   const [lineSchema, lineResources] = await Promise.all([
-    readSchema({
-      resourceType: 'Line',
-    }),
+    readSchema({ accountId, resourceType: 'Line' }),
     readResources({
+      accountId,
       type: 'Line',
       where: {
         '==': [{ var: 'Order' }, resource.id],
@@ -103,6 +108,11 @@ export default async function OrderDetail({
           <Typography variant="h3">
             <span style={{ fontWeight: 100, opacity: 0.75 }}>Order #</span>
             <span style={{ fontWeight: 700 }}>{key}</span>
+            {resource.rev && (
+              <span style={{ fontWeight: 100, opacity: 0.75 }}>
+                r{resource.rev}
+              </span>
+            )}
           </Typography>
 
           <Box flexGrow={1} />
@@ -118,9 +128,17 @@ export default async function OrderDetail({
           <Box height={'min-content'}>
             <DownloadPoButton schema={schema} resource={resource} />
           </Box>
+          <Box height={'min-content'}>
+            <DuplicateButton resourceId={resource.id} />
+          </Box>
           {!isDraft && (
             <Box height={'min-content'}>
               <EditButton resourceId={resource.id} />
+            </Box>
+          )}
+          {isDraft && resource.rev > 0 && (
+            <Box height={'min-content'}>
+              <CancelEditButton resourceId={resource.id} />
             </Box>
           )}
           <Box height={'min-content'}>
@@ -166,11 +184,7 @@ export default async function OrderDetail({
               {isDraft && (
                 <>
                   <PreviewPoButton resourceId={resource.id} />
-                  <StatusTransitionButton
-                    resourceId={resource.id}
-                    statusOption={orderStatusOptions.submitted}
-                    label={'Submit'}
-                  />
+                  <SubmitButton resourceId={resource.id} />
                 </>
               )}
               {status?.templateId ===

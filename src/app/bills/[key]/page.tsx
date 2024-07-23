@@ -1,15 +1,20 @@
 import { Container, Stack, Typography } from '@mui/material'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
-import { readResource } from '@/lib/resource/actions'
+import { readResourceLatestRevision } from '@/domain/resource/actions'
 
 export default async function BillsDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
-  await requireSessionWithRedirect()
-  const resource = await readResource({ type: 'Bill', key: Number(key) })
+  const { accountId } = await requireSessionWithRedirect()
+
+  const resource = await readResourceLatestRevision({
+    accountId,
+    type: 'Bill',
+    key: Number(key),
+  })
 
   return (
     <Container sx={{ my: 5 }}>

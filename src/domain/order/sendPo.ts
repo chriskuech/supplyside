@@ -1,6 +1,6 @@
 import { readBlob } from '../blobs/actions'
-import { readResource } from '../resource/actions'
 import { fields } from '../schema/template/system-fields'
+import { readResourceById } from '../resource/actions'
 import smtp from '@/lib/smtp'
 import prisma from '@/lib/prisma'
 
@@ -11,11 +11,7 @@ type SendPoParams = {
 
 export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   const [order, account] = await Promise.all([
-    readResource({
-      type: 'Order',
-      id: resourceId,
-      accountId,
-    }),
+    readResourceById({ id: resourceId }),
     prisma().account.findUniqueOrThrow({
       where: {
         id: accountId,

@@ -2,18 +2,18 @@
 
 import { IconButton, Tooltip } from '@mui/material'
 import { Edit } from '@mui/icons-material'
-import { transitionStatus } from '../resource/actions'
-import { orderStatusOptions } from '@/domain/schema/template/system-fields'
+import { startEdit } from '../resource/actions'
+import { Resource } from '@/domain/resource/types'
 
 type Props = {
-  resourceId: string
+  resource: Resource
 }
 
-export default function EditButton({ resourceId }: Props) {
+export default function EditButton({ resource }: Props) {
   return (
     <Tooltip title="Transition back to Draft for editing">
       <IconButton
-        onClick={() => transitionStatus(resourceId, orderStatusOptions.draft)}
+        onClick={() => startEdit(resource)}
         sx={{ '.MuiButtonBase-root': { m: 0, p: 0 } }}
       >
         <Edit fontSize="large" />

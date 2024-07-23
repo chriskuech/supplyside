@@ -6,6 +6,9 @@ export type Resource = {
   id: string
   type: ResourceType
   key: number
+  rev: number
+  isActive: boolean
+  createdAt: Date
   fields: ResourceField[]
 }
 

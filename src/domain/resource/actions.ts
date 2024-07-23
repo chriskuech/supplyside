@@ -1,20 +1,7 @@
 'use server'
 
 import { fail } from 'assert'
-import {
-  ResourceType,
-  Resource as ResourceModel,
-  ResourceField,
-  ValueOption,
-  Option,
-  Value,
-  User,
-  Prisma,
-  File,
-  Blob,
-  Contact,
-  Field as FieldModel,
-} from '@prisma/client'
+import { ResourceType, Resource as ResourceModel, Prisma } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
 import { P, match } from 'ts-pattern'
 import { Ajv } from 'ajv'
@@ -22,12 +9,11 @@ import { omit } from 'remeda'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { Field } from '../schema/types'
-import { fields } from '../schema/template/system-fields'
-import { getDownloadPath } from '../blobs/utils'
 import { Data, Resource } from './types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
 import { copyLinkedResourceFields } from './fields/actions'
+import { include, mapResource } from './mappers'
 import prisma from '@/lib/prisma'
 
 const ajv = new Ajv()
@@ -36,12 +22,14 @@ export type CreateResourceParams = {
   accountId: string
   type: ResourceType
   data?: Record<string, string | number | boolean | string[] | null>
+  revision?: number
 }
 
 export const createResource = async ({
   accountId,
   type,
   data,
+  revision = 1,
 }: CreateResourceParams): Promise<ResourceModel> => {
   const schema = await readSchema({ accountId, resourceType: type })
   const jsonSchema = mapSchemaToJsonSchema(schema)
@@ -69,7 +57,7 @@ export const createResource = async ({
       accountId,
       type,
       key: (key ?? 0) + 1,
-      revision: 0,
+      revision,
       ResourceField: {
         create: schema.allFields.map((f) => ({
           Field: {
@@ -180,38 +168,87 @@ export const createResource = async ({
   return resource
 }
 
-export type ReadResourceParams = {
+export type ReadResourceActiveRevisionParams = {
   accountId: string
-  type?: ResourceType
-  key?: number
-  id?: string
-} & ({ type: ResourceType; key: number } | { id: string })
+  type: ResourceType
+  key: number
+}
 
-export const readResource = async ({
+export const readResourceActiveRevision = async ({
   accountId,
-  type,
   key,
-  id,
-}: ReadResourceParams): Promise<Resource> => {
-  const model = await prisma().resource.findUniqueOrThrow({
-    where: {
-      id,
-      accountId_type_key_revision:
-        type && key
-          ? {
-              accountId,
-              type,
-              key,
-              revision: 0,
-            }
-          : undefined,
-    },
+  type,
+}: ReadResourceActiveRevisionParams): Promise<Resource> => {
+  const model = await prisma().resource.findFirstOrThrow({
+    where: { accountId, key, type, isActive: true },
+    orderBy: [{ createdAt: 'desc' }],
     include,
   })
 
   revalidateTag('resource')
 
   return mapResource(model)
+}
+
+export type ReadResourceLatestRevisionParams = {
+  accountId: string
+  type: ResourceType
+  key: number
+}
+
+export const readResourceLatestRevision = async ({
+  accountId,
+  key,
+  type,
+}: ReadResourceLatestRevisionParams): Promise<Resource> => {
+  const model = await prisma().resource.findFirstOrThrow({
+    where: { accountId, key, type },
+    orderBy: [{ createdAt: 'desc' }],
+    include,
+  })
+
+  revalidateTag('resource')
+
+  return mapResource(model)
+}
+
+export type ReadResourceByIdParams = {
+  id: string
+}
+
+export const readResourceById = async ({
+  id,
+}: ReadResourceByIdParams): Promise<Resource> => {
+  const model = await prisma().resource.findUniqueOrThrow({
+    where: { id },
+    include,
+  })
+
+  revalidateTag('resource')
+
+  return mapResource(model)
+}
+
+export type ReadResourceVersions = {
+  accountId: string
+  type: ResourceType
+  key: number
+}
+
+export const readResourceVersions = async ({
+  accountId,
+  type,
+  key,
+}: ReadResourceVersions): Promise<Resource[]> => {
+  const models = await prisma().resource.findMany({
+    where: { accountId, type, key },
+    include,
+    orderBy: [{ createdAt: 'desc' }],
+  })
+
+  revalidateTag('resource')
+
+  return models.map(mapResource)
 }
 
 export type ReadResourcesParams = {
@@ -239,6 +276,7 @@ export const readResources = async ({
       id: {
         in: results.map((row) => row._id),
       },
+      isActive: true,
     },
     include,
   })
@@ -257,134 +295,59 @@ export const deleteResource = async ({
   accountId,
   id,
 }: DeleteResourceParams): Promise<void> => {
-  await prisma().resource.delete({
+  const resource = await prisma().resource.delete({
     where: {
       accountId,
       id,
     },
   })
 
+  if (resource.isActive) {
+    await prisma().resource.update({
+      where: {
+        accountId_type_key_revision: {
+          accountId,
+          type: resource.type,
+          key: resource.key,
+          revision: resource.revision + 1,
+        },
+      },
+      data: {
+        isActive: true,
+      },
+    })
+  }
+
   revalidateTag('resource')
 }
 
-const include = {
-  ResourceField: {
-    include: {
-      Field: true,
-      Value: {
-        include: {
-          Contact: true,
-          File: {
-            include: {
-              Blob: true,
-            },
-          },
-          Option: true,
-          User: {
-            include: {
-              ImageBlob: true,
-            },
-          },
-          ValueOption: {
-            include: {
-              Option: true,
-            },
-          },
-          Resource: {
-            include: {
-              ResourceField: {
-                where: {
-                  Field: {
-                    templateId: {
-                      in: [fields.name.templateId, fields.number.templateId],
-                    },
-                  },
-                },
-                include: {
-                  Field: true,
-                  Value: {
-                    include: {
-                      User: {
-                        include: {
-                          ImageBlob: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-} satisfies Prisma.ResourceInclude
+export type SetActiveRevisionParams = {
+  accountId: string
+  resourceId: string
+}
 
-const mapResource = (
-  model: ResourceModel & {
-    ResourceField: (ResourceField & {
-      Field: FieldModel
-      Value: Value & {
-        Contact: Contact | null
-        File: (File & { Blob: Blob }) | null
-        Option: Option | null
-        User: (User & { ImageBlob: Blob | null }) | null
-        ValueOption: (ValueOption & { Option: Option })[]
-        Resource:
-          | (ResourceModel & {
-              ResourceField: (ResourceField & {
-                Field: FieldModel
-                Value: Value
-              })[]
-            })
-          | null
-      }
-    })[]
-  },
-): Resource => ({
-  id: model.id,
-  key: model.key,
-  type: model.type,
-  fields: model.ResourceField.map((rf) => ({
-    fieldId: rf.fieldId,
-    fieldType: rf.Field.type,
-    templateId: rf.Field.templateId,
-    value: {
-      boolean: rf.Value.boolean,
-      contact: rf.Value.Contact,
-      date: rf.Value.date,
-      string: rf.Value.string,
-      number: rf.Value.number,
-      option: rf.Value.Option,
-      options: rf.Value.ValueOption.map((vo) => vo.Option),
-      user: rf.Value.User && {
-        email: rf.Value.User.email,
-        firstName: rf.Value.User.firstName,
-        fullName: `${rf.Value.User.firstName} ${rf.Value.User.lastName}`,
-        id: rf.Value.User.id,
-        lastName: rf.Value.User.lastName,
-        profilePicPath:
-          rf.Value.User.ImageBlob &&
-          getDownloadPath({
-            blobId: rf.Value.User.ImageBlob.id,
-            mimeType: rf.Value.User.ImageBlob.mimeType,
-            fileName: 'profile-pic',
-          }),
-      },
-      resource: rf.Value.Resource && {
-        id: rf.Value.Resource.id,
-        key: rf.Value.Resource.key,
-        name:
-          rf.Value.Resource.ResourceField.find(
-            (rf) =>
-              rf.Field.templateId &&
-              (
-                [fields.name.templateId, fields.number.templateId] as string[]
-              ).includes(rf.Field.templateId),
-          )?.Value.string ?? '',
-      },
-      file: rf.Value.File,
+export const setActiveRevision = async ({
+  accountId,
+  resourceId,
+}: SetActiveRevisionParams): Promise<void> => {
+  const resource = await prisma().resource.update({
+    where: { accountId, id: resourceId },
+    data: {
+      isActive: true,
     },
-  })),
-})
+  })
+
+  await prisma().resource.updateMany({
+    where: {
+      accountId,
+      type: resource.type,
+      key: resource.key,
+      id: { not: resourceId },
+    },
+    data: {
+      isActive: false,
+    },
+  })
+
+  revalidateTag('resource')
+}

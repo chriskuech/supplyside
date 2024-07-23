@@ -4,7 +4,7 @@ import { Box, Container, Stack, Typography } from '@mui/material'
 import dynamic from 'next/dynamic'
 import { ResourceType } from '@prisma/client'
 import { readSchema } from '../schema/actions'
-import { readResources } from './actions'
+import { readLatestResources } from './actions'
 import { requireSessionWithRedirect } from '@/lib/session'
 
 const ResourceTable = dynamic(() => import('./ResourceTable'), {
@@ -24,7 +24,7 @@ export default async function ListPage({ resourceType }: Props) {
 
   const [schema, resources] = await Promise.all([
     readSchema({ resourceType }),
-    readResources({ type: resourceType }),
+    readLatestResources({ type: resourceType }),
   ])
 
   return (
