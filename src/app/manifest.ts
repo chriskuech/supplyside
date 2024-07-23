@@ -4,8 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "SupplySide",
     short_name: "SupplySide",
-    description:
-      "Direct and indirect purchasing, in one place, so you can run your business better.",
+    description: "Software for the supply side of your business",
     start_url: "/",
     display: "standalone",
     background_color: "#f8f9fa",
