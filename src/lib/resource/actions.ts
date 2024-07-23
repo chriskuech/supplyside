@@ -44,7 +44,9 @@ type CloneResourceParams = {
 export const cloneResource = async (
   params: CloneResourceParams,
 ): Promise<Resource> => {
-  throw new Error('Not implemented')
+  const { accountId } = await requireSession()
+
+  return domain.cloneResource({ ...params, accountId })
 }
 
 type ReadResourceLatestRevisionParams = {
