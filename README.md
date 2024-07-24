@@ -26,7 +26,7 @@
    ```
 2. Copy `.env.template` to `.env`
 3. Modify the section of your `.env` file marked "ADD YOUR INFORMATION HERE" to seed your developer credentials.
-4. Start the dependencies
+4. Start the dependencies - The containers are using `Host network mode` which is currently a Beta feature in Docker desktop so you may need to activate it first, more info [Here](https://docs.docker.com/network/drivers/host/)
    ```bash
    docker compose up
    ```

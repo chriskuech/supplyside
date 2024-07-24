@@ -1,6 +1,6 @@
 import { LogoutForm } from './LogoutForm'
-import { handleLoout } from './actions'
+import { handleLogout } from './actions'
 
 export default async function Logout() {
-  return <LogoutForm onLogout={handleLoout} />
+  return <LogoutForm onLogout={handleLogout} />
 }
