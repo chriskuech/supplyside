@@ -18,7 +18,7 @@
     "@emotion/styled": "^11.11.5",
     "@faker-js/faker": "^8.4.1",
     "@mui/icons-material": "^5.16.4",
-    "@mui/material": "^5.15.20",
+    "@mui/material": "^5.16.4",
     "@mui/material-nextjs": "^5.15.11",
     "@mui/x-data-grid": "^7.8.0",
     "@mui/x-data-grid-pro": "^7.8.0",
