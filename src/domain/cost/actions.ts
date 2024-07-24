@@ -1,20 +1,8 @@
 'use server'
 
-import { Cost, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
 import prisma from '@/lib/prisma'
-
-export const readCosts = async (resourceId: string): Promise<Cost[]> => {
-  revalidateTag('resource')
-  return await prisma().cost.findMany({
-    where: {
-      resourceId,
-    },
-    orderBy: {
-      createdAt: 'asc',
-    },
-  })
-}
 
 export const updateCost = async (id: string, data: Prisma.CostUpdateInput) => {
   revalidateTag('resource')

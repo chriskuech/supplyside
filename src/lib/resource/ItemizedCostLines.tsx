@@ -1,4 +1,5 @@
 'use client'
+
 import {
   IconButton,
   MenuItem,
@@ -81,24 +82,18 @@ export default function ItemizedCostLines({ resource, lineResource }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subTotal, itemizedTotal, grandTotal, resource.id])
 
-  const handleFieldChange = async (
-    id: string,
-    field: string,
-    value: unknown,
-  ) => {
-    const updatedRow = resource.costs.find((cost) => cost.id === id)
-    if (updatedRow) {
-      await updateCost(id, {
-        ...updatedRow,
-        [field]: value,
-      })
-    }
-  }
+  const { fields: resourceFields } = resource
+  const { subtotalCost, totalCost, itemizedCosts } = fields
 
-  const handleDelete = async (id: string) => {
-    await deleteCost(id)
-  }
-
+  const subtotalField = resourceFields.find(
+    ({ templateId }) => templateId === subtotalCost.templateId,
+  )
+  const totalCostField = resourceFields.find(
+    ({ templateId }) => templateId === totalCost.templateId,
+  )
+  const itemizedCostField = resourceFields.find(
+    ({ templateId }) => templateId === itemizedCosts.templateId,
+  )
   return (
     <Stack spacing={2} sx={{ p: 2 }}>
       <Stack direction="row" alignItems="end" sx={{ p: 1 }}>
@@ -115,38 +110,28 @@ export default function ItemizedCostLines({ resource, lineResource }: Props) {
       <TableContainer component={Paper}>
         <Table>
           <TableBody>
-            {resource.fields.map((field) => {
-              if (field.templateId === fields.subtotalCost.templateId) {
-                return (
-                  <TableRow
-                    key={field.fieldId}
-                    sx={{ backgroundColor: 'grey.200' }}
-                  >
-                    <TableCell
-                      colSpan={2}
-                      style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
-                    >
-                      Subtotal
-                    </TableCell>
-                    <TableCell
-                      align="right"
-                      style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
-                    >
-                      {field.value.number?.toFixed(2) || subTotal.toFixed(2)}
-                    </TableCell>
-                  </TableRow>
-                )
-              }
+            <TableRow sx={{ backgroundColor: 'grey.200' }}>
+              <TableCell
+                colSpan={2}
+                style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+              >
+                Subtotal
+              </TableCell>
+              <TableCell
+                align="right"
+                style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+              >
+                {subtotalField?.value.number?.toFixed(2)}
+              </TableCell>
+            </TableRow>
 
-              return null
-            })}
             {resource.costs.map((row) => (
               <TableRow key={row.id}>
                 <TableCell>
                   <TextField
                     defaultValue={row.name}
                     onChange={(e) =>
-                      handleFieldChange(row.id, 'name', e.target.value)
+                      updateCost(row.id, { name: e.target.value })
                     }
                     placeholder="Enter Itemized cost ..."
                     size="small"
@@ -157,11 +142,9 @@ export default function ItemizedCostLines({ resource, lineResource }: Props) {
                   <Select
                     defaultValue={row.isPercentage ? '%' : '$'}
                     onChange={(e) =>
-                      handleFieldChange(
-                        row.id,
-                        'isPercentage',
-                        e.target.value === '%',
-                      )
+                      updateCost(row.id, {
+                        isPercentage: e.target.value === '%',
+                      })
                     }
                     size="small"
                   >
@@ -171,7 +154,7 @@ export default function ItemizedCostLines({ resource, lineResource }: Props) {
                   <TextField
                     defaultValue={row.value}
                     onChange={(e) =>
-                      handleFieldChange(row.id, 'value', Number(e.target.value))
+                      updateCost(row.id, { value: Number(e.target.value) })
                     }
                     type="number"
                     InputProps={{
@@ -192,57 +175,42 @@ export default function ItemizedCostLines({ resource, lineResource }: Props) {
                   })}
                 </TableCell>
                 <TableCell>
-                  <IconButton onClick={() => handleDelete(row.id)}>
+                  <IconButton onClick={() => deleteCost(row.id)}>
                     <Clear />
                   </IconButton>
                 </TableCell>
               </TableRow>
             ))}
-            {resource.fields.map((field) => {
-              if (field.templateId === fields.itemizedCosts.templateId) {
-                return (
-                  <TableRow key={field.fieldId}>
-                    <TableCell
-                      colSpan={2}
-                      style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
-                    >
-                      Itemized Cost
-                    </TableCell>
-                    <TableCell
-                      align="right"
-                      style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
-                    >
-                      {field.value.number?.toFixed(2) ||
-                        itemizedTotal.toFixed(2)}
-                    </TableCell>
-                  </TableRow>
-                )
-              }
 
-              if (field.templateId === fields.totalCost.templateId) {
-                return (
-                  <TableRow
-                    key={field.fieldId}
-                    sx={{ backgroundColor: '#D5E7EE' }}
-                  >
-                    <TableCell
-                      colSpan={2}
-                      style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
-                    >
-                      Total
-                    </TableCell>
-                    <TableCell
-                      align="right"
-                      style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
-                    >
-                      {field.value.number?.toFixed(2) || grandTotal.toFixed(2)}
-                    </TableCell>
-                  </TableRow>
-                )
-              }
+            <TableRow>
+              <TableCell
+                colSpan={2}
+                style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+              >
+                Itemized Cost
+              </TableCell>
+              <TableCell
+                align="right"
+                style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+              >
+                {itemizedCostField?.value.number?.toFixed(2)}
+              </TableCell>
+            </TableRow>
 
-              return null
-            })}
+            <TableRow sx={{ backgroundColor: '#D5E7EE' }}>
+              <TableCell
+                colSpan={2}
+                style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+              >
+                Total
+              </TableCell>
+              <TableCell
+                align="right"
+                style={{ fontWeight: 'bold', fontSize: '1.15rem' }}
+              >
+                {totalCostField?.value.number?.toFixed(2)}
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </TableContainer>
