@@ -6,6 +6,8 @@ import { readResource } from '@/domain/resource/actions'
 import { Resource } from '@/domain/resource/types'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readAccount } from '@/domain/iam/account'
+import prisma from '../prisma'
+import { readBlob } from '@/domain/blobs/actions'
 
 type Props = {
   accountId: string
@@ -27,8 +29,9 @@ export default async function PoDocument({
     (f) => f.templateId === fields.poRecipient.templateId,
   )?.value.contact
 
-  const account = await readAccount(accountId)
-  // const blob = await readBlob({ accountId, blobId: account?.logoPath })
+  const account = await prisma().account.findUniqueOrThrow({where: {id:accountId}})
+
+  // const blob = await readBlob({ accountId, blobId: account?.logoBlobId })
 
   const issuedDateField = resource.fields.find(
     (field) => field.fieldType === 'Date' && field.value.date,
@@ -216,8 +219,8 @@ export default async function PoDocument({
                           (f) => f.templateId === fields.taxable.templateId,
                         )?.value.boolean,
                       )
-                        ? '✔️'
-                        : '❌'}
+                        ? 'Yes'
+                        : 'No'}
                     </td>
                   </tr>
                 </tbody>
