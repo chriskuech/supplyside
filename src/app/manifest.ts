@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+import { colors } from '../lib/ux/theme'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -7,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Software for the supply side of your business',
     start_url: '/',
     display: 'standalone',
-    background_color: '#f8f9fa',
-    theme_color: '#603f8a',
+    background_color: colors.lightBackground,
+    theme_color: colors.brandBlue,
     icons: [
       {
         src: '/icon-192.png',

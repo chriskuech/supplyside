@@ -62,7 +62,9 @@ const opensans = Open_Sans({
   preload: true,
 })
 
-const colors = {
+export const colors = {
+  lightBackground: 'rgb(248, 249, 250)',
+  darkBackground: '#111111',
   brandBlue: 'rgb(65, 154, 248)',
   brandCyan: 'rgb(95, 207, 216)',
   brandPurple: 'rgb(96, 63, 138)',
@@ -248,7 +250,7 @@ const themes = {
     palette: {
       mode: 'light',
       background: {
-        default: 'rgb(248, 249, 250)',
+        default: colors.lightBackground,
         paper: '#ffffff',
       },
     },
@@ -326,7 +328,7 @@ const themes = {
     palette: {
       mode: 'dark',
       background: {
-        default: '#111111',
+        default: colors.darkBackground,
         paper: colors.black,
       },
     },
