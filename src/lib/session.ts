@@ -32,12 +32,6 @@ export const requireSessionWithRedirect = async () => {
   return session
 }
 
-export const requireNoSessionWithRedirect = async () => {
-  const session = await readSession()
-
-  if (session) redirect('/', RedirectType.replace)
-}
-
 export const createSession = async (email: string, password: string) => {
   const passwordHash = await hash(password, config().SALT)
 
