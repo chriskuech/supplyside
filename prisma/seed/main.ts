@@ -5,6 +5,7 @@ import { expand as expandDotenv } from 'dotenv-expand'
 import { ResourceType } from '@prisma/client'
 import { ImportMock } from 'ts-mock-imports'
 import nextCache from 'next/cache'
+import { faker } from '@faker-js/faker'
 import { systemAccountId } from '@/lib/const'
 import prisma from '@/lib/prisma'
 import { applyTemplate } from '@/domain/schema/template/actions'
@@ -31,6 +32,7 @@ async function main() {
   await prisma().account.create({
     data: {
       id: systemAccountId,
+      key: 'system',
       name: 'SYSTEM',
     },
   })
@@ -50,6 +52,7 @@ async function main() {
   const { id: accountId } = await prisma().account.create({
     data: {
       id: testId,
+      key: faker.string.alpha({ casing: 'lower', length: 5 }),
       name: `${config.DEV_FIRST_NAME}'s Test Company`,
     },
   })
