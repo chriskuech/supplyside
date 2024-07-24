@@ -1,6 +1,7 @@
 import { Open_Sans, Ubuntu } from 'next/font/google'
 import { Theme, createTheme as createThemeInner } from '@mui/material/styles'
 import { Components, Mixins, PaletteMode, ThemeOptions } from '@mui/material'
+import { colors } from '@/lib/ux/colors'
 
 // TODO:
 //  - I think the gradients can be replaced with `elevation` and custom shadows
@@ -61,17 +62,6 @@ const opensans = Open_Sans({
   display: 'swap',
   preload: true,
 })
-
-const colors = {
-  brandBlue: 'rgb(65, 154, 248)',
-  brandCyan: 'rgb(95, 207, 216)',
-  brandPurple: 'rgb(96, 63, 138)',
-  accentMagenta: 'rgb(151, 31, 160)',
-  accentOrange: 'rgb(237, 115, 72)',
-  black: '#000000',
-  white: '#ffffff',
-  red: '#D32F2F',
-} as const
 
 const fonts = {
   display: ubuntu,
@@ -248,7 +238,7 @@ const themes = {
     palette: {
       mode: 'light',
       background: {
-        default: 'rgb(248, 249, 250)',
+        default: colors.lightBackground,
         paper: '#ffffff',
       },
     },
@@ -326,7 +316,7 @@ const themes = {
     palette: {
       mode: 'dark',
       background: {
-        default: '#111111',
+        default: colors.darkBackground,
         paper: colors.black,
       },
     },
