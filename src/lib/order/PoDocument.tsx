@@ -4,6 +4,8 @@
 import { ReactNode } from 'react'
 import { readResource } from '@/domain/resource/actions'
 import { Resource } from '@/domain/resource/types'
+import { fields } from '@/domain/schema/template/system-fields'
+import { readAccount } from '@/domain/iam/account'
 
 type Props = {
   accountId: string
@@ -20,6 +22,13 @@ export default async function PoDocument({
     id: resourceId,
     type: 'Order',
   })) as Resource
+
+  const poRecipient = resource.fields.find(
+    (f) => f.templateId === fields.poRecipient.templateId,
+  )?.value.contact
+
+  const account = await readAccount(accountId)
+  // const blob = await readBlob({ accountId, blobId: account?.logoPath })
 
   const issuedDateField = resource.fields.find(
     (field) => field.fieldType === 'Date' && field.value.date,
@@ -101,7 +110,7 @@ export default async function PoDocument({
                   padding: 8px;
               }
               .terms-conditions td {
-                min-height: 200px; 
+                min-height: 400px; 
                 line-height: 36px;
               }
               .reference-number td {
@@ -135,9 +144,9 @@ export default async function PoDocument({
             </div>
           </div>
           <div className="AccNo">
-            Example Account Name
+            {account?.name}
             <br />
-            1234 Street Address, City, State, Zip
+            [Account Address]
           </div>
           <div className="content">
             <div
@@ -180,15 +189,36 @@ export default async function PoDocument({
                 <tbody>
                   <tr>
                     <td>Currency</td>
-                    <td>USD</td>
+                    <td>
+                      {String(
+                        resource.fields.find(
+                          (f) => f.templateId === fields.currency.templateId,
+                        )?.value.option?.name,
+                      )}
+                    </td>
                   </tr>
                   <tr>
                     <td>Payment Terms</td>
-                    <td>Net 30</td>
+                    <td>
+                      {String(
+                        resource.fields.find(
+                          (f) =>
+                            f.templateId === fields.paymentTerms.templateId,
+                        )?.value.option?.name,
+                      )}
+                    </td>
                   </tr>
                   <tr>
                     <td>Taxable</td>
-                    <td>Yes</td>
+                    <td>
+                      {String(
+                        resource.fields.find(
+                          (f) => f.templateId === fields.taxable.templateId,
+                        )?.value.boolean,
+                      )
+                        ? '✔️'
+                        : '❌'}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -242,11 +272,17 @@ export default async function PoDocument({
                     <td style={{ width: '50%' }}>
                       <strong>Shipping Address:</strong>
                       <br />
-                      [shipping address field]
+                      {String(
+                        resource.fields.find(
+                          (f) =>
+                            f.templateId === fields.shippingAddress.templateId,
+                        )?.value.string,
+                      )}
                       <br />
                       <strong>c/o:</strong>
                       <br />
-                      [recipient field contact info]
+                      name: {poRecipient?.name}
+                      email: {poRecipient?.email} <br />
                     </td>
                     <td style={{ width: '50%' }}>
                       <table style={{ width: '100%', border: '0' }}>
@@ -256,7 +292,13 @@ export default async function PoDocument({
                               <strong>Method</strong>
                             </td>
                             <td style={{ padding: '2px', border: '0' }}>
-                              [method field]
+                              {String(
+                                resource.fields.find(
+                                  (f) =>
+                                    f.templateId ===
+                                    fields.shippingMethod.templateId,
+                                )?.value.option?.name,
+                              )}
                             </td>
                           </tr>
                           <tr>
@@ -264,7 +306,13 @@ export default async function PoDocument({
                               <strong>Account #</strong>
                             </td>
                             <td style={{ padding: '2px', border: '0' }}>
-                              [account field]
+                              {String(
+                                resource.fields.find(
+                                  (f) =>
+                                    f.templateId ===
+                                    fields.shippingAccountNumber.templateId,
+                                )?.value.option?.name,
+                              )}
                             </td>
                           </tr>
                           <tr>
@@ -272,7 +320,13 @@ export default async function PoDocument({
                               <strong>Incoterms</strong>
                             </td>
                             <td style={{ padding: '2px', border: '0' }}>
-                              [incoterms field]
+                              {String(
+                                resource.fields.find(
+                                  (f) =>
+                                    f.templateId ===
+                                    fields.incoterms.templateId,
+                                )?.value.option?.name,
+                              )}
                             </td>
                           </tr>
                           <tr>
@@ -280,7 +334,13 @@ export default async function PoDocument({
                               <strong>Shipping Notes</strong>
                             </td>
                             <td style={{ padding: '2px', border: '0' }}>
-                              [shipping notes field]
+                              {String(
+                                resource.fields.find(
+                                  (f) =>
+                                    f.templateId ===
+                                    fields.shippingNotes.templateId,
+                                )?.value.string,
+                              )}
                             </td>
                           </tr>
                         </tbody>
@@ -342,7 +402,10 @@ export default async function PoDocument({
                     <td>$110.00</td>
                   </tr>
                   <tr>
-                    <td colSpan={5} style={{ fontWeight: 'bold' }}>
+                    <td
+                      colSpan={5}
+                      style={{ fontWeight: 'bold', backgroundColor: '#C7E1F2' }}
+                    >
                       TOTAL
                     </td>
                     <td>$1,210.00</td>
@@ -359,22 +422,15 @@ export default async function PoDocument({
                 </thead>
                 <tbody>
                   <tr>
-                    <td>[Terms and Conditions field]</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div className="reference-number">
-              <table>
-                <thead>
-                  <tr style={{ backgroundColor: '#CCCCCC' }}>
-                    <th>Reference Number</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>[Reference Number field]</td>
+                    <td>
+                      {String(
+                        resource.fields.find(
+                          (f) =>
+                            f.templateId ===
+                            fields.termsAndConditions.templateId,
+                        )?.value.string,
+                      )}
+                    </td>
                   </tr>
                 </tbody>
               </table>
