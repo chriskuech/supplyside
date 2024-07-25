@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidateTag } from 'next/cache'
+import { faker } from '@faker-js/faker'
 import { applyTemplate } from '../schema/template/actions'
 import { getDownloadPath } from '../blobs/utils'
 import { inviteUser } from './user'
@@ -10,6 +11,7 @@ import prisma from '@/lib/prisma'
 export const inviteAccount = async (email: string): Promise<void> => {
   const { id: accountId } = await prisma().account.create({
     data: {
+      key: faker.string.alpha({ casing: 'lower', length: 5 }),
       name: `${email}'s Account`,
     },
   })
@@ -48,7 +50,9 @@ export const readAccount = async (
 
   return {
     id: account.id,
+    key: account.key,
     name: account.name,
+    address: account.address,
     logoPath,
   }
 }

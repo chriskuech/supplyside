@@ -138,9 +138,9 @@ export default function Field({
             padding: 8,
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
-            ...match(theme.palette.mode)
-              .with('dark', () => ({ borderColor: '#333' }))
-              .with('light', () => ({ borderColor: '#ccc' }))
+            borderColor: match(theme.palette.mode)
+              .with('dark', () => '#333')
+              .with('light', () => '#ccc')
               .exhaustive(),
           }}
         />

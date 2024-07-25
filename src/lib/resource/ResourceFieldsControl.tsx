@@ -179,7 +179,7 @@ export default async function ResourceFieldsControl({
                   <Stack key={i} spacing={3} flex={1}>
                     {fs.map((f) => (
                       <Box key={f.id}>
-                        <Typography fontWeight={'bold'} gutterBottom>
+                        <Typography variant="overline" gutterBottom>
                           {f.name}
                         </Typography>
                         <Box>

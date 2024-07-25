@@ -25,29 +25,27 @@ export default async function InfoPage() {
         </Typography>
       </Box>
       <form action={handleSaveSettings}>
-        <Stack spacing={2} direction={'column'}>
-          {account?.logoPath && (
-            <Stack direction={'row'} justifyContent={'center'}>
-              <Image
-                src={account.logoPath}
-                alt="Logo"
-                style={{ borderRadius: '50%' }}
-                width={300}
-                height={300}
-              />
-            </Stack>
-          )}
+        <Stack spacing={4} direction={'column'} alignItems={'center'}>
+          <Stack spacing={2} alignItems={'center'}>
+            <Image
+              src={account?.logoPath ?? ''}
+              alt="Logo"
+              style={{ borderRadius: '50%', background: 'gray' }}
+              width={300}
+              height={300}
+            />
 
-          <Stack direction={'row'} justifyContent={'center'}>
-            <Button component="label" startIcon={<CloudUpload />}>
-              Upload Logo
-              <input
-                style={{ display: 'none' }}
-                type="file"
-                name="file"
-                accept="image/*"
-              />
-            </Button>
+            <Box>
+              <Button component="label" startIcon={<CloudUpload />}>
+                Upload Logo
+                <input
+                  style={{ display: 'none' }}
+                  type="file"
+                  name="file"
+                  accept="image/*"
+                />
+              </Button>
+            </Box>
           </Stack>
 
           <TextField
@@ -60,9 +58,30 @@ export default async function InfoPage() {
             defaultValue={account?.name}
           />
 
-          <Stack direction={'row'} justifyContent={'center'}>
+          <TextField
+            label={'Company ID'}
+            variant={'outlined'}
+            required
+            margin={'normal'}
+            name="key"
+            defaultValue={account?.key}
+          />
+
+          <TextField
+            label={'Company Address'}
+            variant={'outlined'}
+            fullWidth
+            multiline
+            minRows={3}
+            required
+            margin={'normal'}
+            name="address"
+            defaultValue={account?.address}
+          />
+
+          <Box>
             <Button type="submit">Save</Button>
-          </Stack>
+          </Box>
         </Stack>
       </form>
     </Stack>

@@ -28,6 +28,7 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'Line',
+    fields: [fields.totalCost],
     sections: [
       {
         name: 'Summary',
@@ -38,7 +39,6 @@ export const schemas: SchemaTemplate[] = [
           fields.order,
           fields.bill,
           fields.item,
-          fields.totalCost,
         ],
       },
     ],
@@ -51,6 +51,8 @@ export const schemas: SchemaTemplate[] = [
       fields.assignee,
       fields.document,
       fields.totalCost,
+      fields.subtotalCost,
+      fields.itemizedCosts,
     ],
     sections: [
       {

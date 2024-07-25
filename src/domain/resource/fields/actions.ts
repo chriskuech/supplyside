@@ -1,12 +1,16 @@
 'use server'
 
+import { fail } from 'assert'
 import { revalidateTag } from 'next/cache'
 import { Prisma } from '@prisma/client'
-import { pick } from 'remeda'
+import { map, pick, pipe, sum } from 'remeda'
+import { readResource, readResources } from '../actions'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
 import { createBlob } from '@/domain/blobs/actions'
-import { readSchema } from '@/lib/schema/actions'
+import { fields } from '@/domain/schema/template/system-fields'
+import { readSchema } from '@/domain/schema/actions'
+import { recalculateItemizedCosts } from '@/domain/cost/actions'
 
 export type UpdateValueDto = {
   resourceId: string
@@ -29,7 +33,7 @@ export const updateValue = async ({
   value,
 }: UpdateValueDto) => {
   //TODO:  check if value object is correct for each fieldType
-  await Promise.all([
+  const [rf] = await Promise.all([
     prisma().resourceField.upsert({
       where: {
         resourceId_fieldId: {
@@ -53,11 +57,155 @@ export const updateValue = async ({
       update: {
         Value: { update: value },
       },
+      include: {
+        Resource: true,
+        Field: true,
+      },
     }),
     ...(value.resourceId
       ? [copyLinkedResourceFields(resourceId, fieldId, value.resourceId)]
       : []),
   ])
+
+  // Update Line."Total Cost"
+  if (
+    rf.Resource.type === 'Line' &&
+    (rf.Field.templateId === fields.unitCost.templateId ||
+      rf.Field.templateId === fields.quantity.templateId)
+  ) {
+    const [resource, schema] = await Promise.all([
+      readResource({
+        accountId: rf.Resource.accountId,
+        id: resourceId,
+      }),
+      readSchema({
+        accountId: rf.Resource.accountId,
+        resourceType: 'Line',
+        isSystem: true,
+      }),
+    ])
+
+    const totalCostFieldId =
+      schema.allFields.find(
+        (field) => field.templateId === fields.totalCost.templateId,
+      )?.id ?? fail()
+
+    const unitCost =
+      resource.fields.find(
+        (field) => field.templateId === fields.unitCost.templateId,
+      )?.value.number ?? 0
+    const quantity =
+      resource.fields.find(
+        (field) => field.templateId === fields.quantity.templateId,
+      )?.value.number ?? 0
+
+    await updateValue({
+      fieldId: totalCostFieldId,
+      resourceId: rf.Resource.id,
+      value: {
+        number: unitCost * quantity,
+      },
+    })
+  }
+
+  // Update Order."Subtotal Cost"
+  if (
+    rf.Resource.type === 'Line' &&
+    rf.Field.templateId === fields.totalCost.templateId
+  ) {
+    const line = await readResource({
+      accountId: rf.Resource.accountId,
+      id: resourceId,
+    })
+
+    const order =
+      line.fields.find((field) => field.templateId === fields.order.templateId)
+        ?.value.resource ?? null
+
+    if (order) {
+      const orderSchema = await readSchema({
+        accountId: rf.Resource.accountId,
+        resourceType: 'Order',
+        isSystem: true,
+      })
+
+      const lines = await readResources({
+        accountId: rf.Resource.accountId,
+        type: 'Line',
+        where: {
+          '==': [{ var: 'Order' }, order?.id],
+        },
+      })
+
+      const subTotal = pipe(
+        lines,
+        map(
+          (line) =>
+            line.fields.find(
+              (field) => field.templateId === fields.totalCost.templateId,
+            )?.value.number ?? 0,
+        ),
+        sum(),
+      )
+
+      await updateValue({
+        fieldId:
+          orderSchema.allFields.find(
+            (field) => field.templateId === fields.subtotalCost.templateId,
+          )?.id ?? fail(),
+        resourceId: order.id,
+        value: {
+          number: subTotal,
+        },
+      })
+    }
+  }
+
+  // Update Order."Itemized Costs"
+  if (
+    rf.Resource.type === 'Order' &&
+    rf.Field.templateId === fields.subtotalCost.templateId
+  ) {
+    await recalculateItemizedCosts(rf.Resource.accountId, resourceId)
+  }
+
+  // Update Order."Total Cost"
+  if (
+    rf.Resource.type === 'Order' &&
+    (rf.Field.templateId === fields.subtotalCost.templateId ||
+      rf.Field.templateId === fields.itemizedCosts.templateId)
+  ) {
+    const order = await readResource({
+      accountId: rf.Resource.accountId,
+      id: resourceId,
+    })
+
+    const orderSchema = await readSchema({
+      accountId: rf.Resource.accountId,
+      resourceType: 'Order',
+      isSystem: true,
+    })
+
+    const itemizedCosts =
+      order.fields.find(
+        (field) => field.templateId === fields.itemizedCosts.templateId,
+      )?.value.number ?? 0
+    const subtotalCost =
+      order.fields.find(
+        (field) => field.templateId === fields.subtotalCost.templateId,
+      )?.value.number ?? 0
+
+    await updateValue({
+      fieldId:
+        orderSchema.allFields.find(
+          (field) => field.templateId === fields.totalCost.templateId,
+        )?.id ?? fail(),
+      resourceId: order.id,
+      value: {
+        number: itemizedCosts + subtotalCost,
+      },
+    })
+  }
 
   revalidateTag('resource')
 }
@@ -215,13 +363,14 @@ export const copyLinkedResourceFields = async (
 
   if (!linkedResourceType || !linkedResourceId) return
 
-  const { type: thisResourceType } = await prisma().resource.findUniqueOrThrow({
-    where: { id: resourceId },
-  })
+  const { accountId, type: thisResourceType } =
+    await prisma().resource.findUniqueOrThrow({
+      where: { id: resourceId },
+    })
 
   const [thisSchema, linkedSchema] = await Promise.all([
-    readSchema({ resourceType: thisResourceType }),
-    readSchema({ resourceType: linkedResourceType }),
+    readSchema({ accountId, resourceType: thisResourceType }),
+    readSchema({ accountId, resourceType: linkedResourceType }),
   ])
 
   const thisFieldIds = thisSchema.allFields.map(({ id }) => id)
