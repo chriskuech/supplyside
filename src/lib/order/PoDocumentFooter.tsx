@@ -13,20 +13,18 @@ export default async function PoDocumentFooter({
   resourceId,
 }: Props): Promise<ReactNode> {
   const resource = await readResource({
-    accountId: accountId,
+    accountId,
     id: resourceId,
     type: 'Order',
   })
 
-  const issuedDateField = resource.fields.find(
-    (field) => field.fieldType === 'Date' && field.value.date,
-  )
+  const issuedDate =
+    resource.fields.find((field) => field.fieldType === 'Date')?.value.date ??
+    null
 
-  const issuedDate = issuedDateField ? issuedDateField.value.date : null
-  let formattedDate = 'N/A'
-  if (issuedDate) {
-    formattedDate = new Date(issuedDate).toLocaleDateString()
-  }
+  const formattedDate = issuedDate
+    ? new Date(issuedDate).toLocaleDateString()
+    : 'N/A'
 
   return (
     <div

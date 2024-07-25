@@ -57,7 +57,12 @@ export const schemas: SchemaTemplate[] = [
     sections: [
       {
         name: 'Order Info',
-        fields: [fields.vendor, fields.description, fields.issuedDate, fields.orderNotes],
+        fields: [
+          fields.vendor,
+          fields.description,
+          fields.issuedDate,
+          fields.orderNotes,
+        ],
       },
       {
         name: 'Payment Info',
