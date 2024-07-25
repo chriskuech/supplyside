@@ -20,19 +20,16 @@ import UserField from './UserField'
 import ResourceField from './ResourceField'
 import ContactField from './ContactField'
 import { Value } from '@/domain/resource/types'
-import {
-  UpdateValueDto,
-  updateContact,
-  updateValue,
-} from '@/domain/resource/fields/actions'
+import { UpdateValueDto, updateContact } from '@/domain/resource/fields/actions'
 import { Field as FieldModel } from '@/domain/schema/types'
 
-type Props = {
+export type Props = {
   inputId: string
   resourceId: string
   field: FieldModel
   value: Value | undefined
   isReadOnly?: boolean // TODO: finish plumbing
+  onChange: (value: UpdateValueDto['value']) => void
 }
 
 export default function Field({
@@ -41,22 +38,16 @@ export default function Field({
   field,
   value,
   isReadOnly,
+  onChange,
 }: Props) {
   const theme = useTheme()
-
-  const handleChange = async (value: UpdateValueDto['value']) =>
-    updateValue({
-      resourceId,
-      fieldId: field.id,
-      value,
-    })
 
   return match(field.type)
     .with('Checkbox', () => (
       <Checkbox
         id={inputId}
         defaultChecked={value?.boolean ?? false}
-        onChange={(e) => handleChange({ boolean: e.target.checked })}
+        onChange={(e) => onChange({ boolean: e.target.checked })}
       />
     ))
     .with('Contact', () => (
@@ -69,7 +60,7 @@ export default function Field({
       <DatePicker
         sx={{ width: '100%' }}
         defaultValue={dayjs(value?.date)}
-        onChange={(value) => handleChange({ date: value?.toDate() ?? null })}
+        onChange={(value) => onChange({ date: value?.toDate() ?? null })}
       />
     ))
     .with('File', () => (
@@ -81,7 +72,7 @@ export default function Field({
         fullWidth
         type="number"
         defaultValue={value?.number}
-        onChange={(e) => handleChange({ number: parseFloat(e.target.value) })}
+        onChange={(e) => onChange({ number: parseFloat(e.target.value) })}
         InputProps={{
           startAdornment: <InputAdornment position="start">$</InputAdornment>,
         }}
@@ -97,7 +88,7 @@ export default function Field({
         options={field.options}
         defaultValue={value?.options}
         onChange={(e, options) =>
-          handleChange({ optionIds: options.map((o) => o.id) })
+          onChange({ optionIds: options.map((o) => o.id) })
         }
       />
     ))
@@ -106,7 +97,7 @@ export default function Field({
         id={inputId}
         type="number"
         defaultValue={value?.number}
-        onChange={(e) => handleChange({ number: parseFloat(e.target.value) })}
+        onChange={(e) => onChange({ number: parseFloat(e.target.value) })}
       />
     ))
     .with('Select', () => (
@@ -114,7 +105,7 @@ export default function Field({
         id={inputId}
         fullWidth
         defaultValue={value?.option?.id ?? ''}
-        onChange={(e) => handleChange({ optionId: e.target.value })}
+        onChange={(e) => onChange({ optionId: e.target.value })}
       >
         {field.options.map((o) => (
           <MenuItem key={o.id} value={o.id}>
@@ -128,7 +119,7 @@ export default function Field({
         id={inputId}
         fullWidth
         defaultValue={value?.string}
-        onChange={(e) => handleChange({ string: e.target.value })}
+        onChange={(e) => onChange({ string: e.target.value })}
       />
     ))
     .with('Textarea', () =>
@@ -139,7 +130,7 @@ export default function Field({
           id={inputId}
           minRows={3}
           defaultValue={value?.string ?? ''}
-          onChange={(e) => handleChange({ string: e.target.value })}
+          onChange={(e) => onChange({ string: e.target.value })}
           style={{
             width: '100%',
             border: '1px solid',
@@ -159,13 +150,13 @@ export default function Field({
       <UserField
         inputId={inputId}
         userId={value?.user?.id}
-        onChange={(userId) => handleChange({ userId })}
+        onChange={(userId) => onChange({ userId })}
       />
     ))
     .with('Resource', () => (
       <ResourceField
         value={value?.resource ? value.resource : null}
-        onChange={(resourceId) => handleChange({ resourceId })}
+        onChange={(resourceId) => onChange({ resourceId })}
         resourceType={field.resourceType ?? fail()}
         isReadOnly={isReadOnly}
       />

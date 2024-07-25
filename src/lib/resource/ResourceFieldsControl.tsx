@@ -21,7 +21,7 @@ import { readSchema } from '../schema/actions'
 import ReadonlyTextarea from './fields/ReadonlyTextarea'
 import { Resource } from '@/domain/resource/types'
 
-const Field = dynamic(() => import('./fields/Field'))
+const FieldControl = dynamic(() => import('./fields/FieldControl'))
 
 type Props = {
   resource: Resource
@@ -164,7 +164,7 @@ export default async function ResourceFieldsControl({
           <AccordionDetails>
             <Stack spacing={3} direction={'row'}>
               {s.fields.length === 1 && s.fields.at(0)?.name === s.name ? (
-                <Field
+                <FieldControl
                   inputId={`rf-${s.fields.at(0)?.id}`}
                   resourceId={resource.id}
                   field={s.fields.at(0) ?? fail()}
@@ -183,7 +183,7 @@ export default async function ResourceFieldsControl({
                           {f.name}
                         </Typography>
                         <Box>
-                          <Field
+                          <FieldControl
                             inputId={`rf-${f.id}`}
                             resourceId={resource.id}
                             field={f}

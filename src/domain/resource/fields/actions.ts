@@ -28,6 +28,7 @@ export const updateValue = async ({
   fieldId,
   value,
 }: UpdateValueDto) => {
+  //TODO:  check if value object is correct for each fieldType
   await Promise.all([
     prisma().resourceField.upsert({
       where: {
