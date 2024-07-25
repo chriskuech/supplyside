@@ -14,6 +14,7 @@ import {
   Blob,
   Contact,
   Field as FieldModel,
+  Cost,
 } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
 import { P, match } from 'ts-pattern'
@@ -70,6 +71,13 @@ export const createResource = async ({
       type,
       key: (key ?? 0) + 1,
       revision: 0,
+      Cost: {
+        create: {
+          name: 'Taxes',
+          isPercentage: true,
+          value: 0,
+        },
+      },
       ResourceField: {
         create: schema.allFields.map((f) => ({
           Field: {
@@ -268,6 +276,9 @@ export const deleteResource = async ({
 }
 
 const include = {
+  Cost: {
+    orderBy: { createdAt: 'asc' },
+  },
   ResourceField: {
     include: {
       Field: true,
@@ -323,6 +334,7 @@ const include = {
 
 const mapResource = (
   model: ResourceModel & {
+    Cost: Cost[]
     ResourceField: (ResourceField & {
       Field: FieldModel
       Value: Value & {
@@ -387,4 +399,5 @@ const mapResource = (
       file: rf.Value.File,
     },
   })),
+  costs: model.Cost,
 })

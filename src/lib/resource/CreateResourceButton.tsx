@@ -28,7 +28,8 @@ export default function CreateResourceButton({
           }
         })
       }
-      endIcon={<Add />}
+      startIcon={!shouldRedirect && <Add />}
+      endIcon={shouldRedirect && <Add />}
       {...buttonProps}
     >
       Create {type}
