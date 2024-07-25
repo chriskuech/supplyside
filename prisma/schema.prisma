@@ -12,7 +12,9 @@ datasource db {
 
 model Account {
   id         String  @id @default(uuid()) @db.Uuid
-  name       String
+  key        String  @unique
+  name       String  @unique
+  address    String  @default("")
   logoBlobId String? @unique @db.Uuid
 
   createdAt DateTime @default(now())

@@ -73,6 +73,11 @@ export const fields = {
     type: 'Resource',
     resourceType: 'Item',
   },
+  itemizedCosts: {
+    templateId: '25a46eb4-2eca-40a8-9596-cda2a524facd',
+    name: 'Itemized Costs',
+    type: 'Money',
+  },
   line: {
     templateId: '30fba00b-ca2f-48d1-a795-77e5843880ce',
     name: 'Line',

@@ -14,6 +14,7 @@ import {
 } from '@/domain/schema/template/system-fields'
 import OrderStatusTracker from '@/lib/order/OrderStatusTracker'
 import { readUser } from '@/lib/iam/actions'
+import ItemizedCostLines from '@/lib/resource/ItemizedCostLines'
 import ApproveButton from '@/lib/order/ApproveButton'
 import DownloadPoButton from '@/lib/order/DownloadPoButton'
 
@@ -224,6 +225,11 @@ export default async function OrderDetail({
               />
             </Stack>
             <ResourceTable schema={lineSchema} resources={lineResources} />
+            <Stack direction={'row'} justifyContent={'end'}>
+              <Box width={'60%'}>
+                <ItemizedCostLines resource={resource} />
+              </Box>
+            </Stack>
           </Stack>
         </Stack>
       </Container>
