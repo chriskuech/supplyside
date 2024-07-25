@@ -12,22 +12,6 @@ import { fields } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
 import { recalculateItemizedCosts } from '@/domain/cost/actions'
 
-// const calculateSubTotal = (lineResource: Resource[]) =>
-//   lineResource
-//     .flatMap((lines) =>
-//       lines.fields.find(
-//         (field) => field.templateId === fields.totalCost.templateId,
-//       ),
-//     )
-//     .reduce((sum, obj) => (obj?.value?.number ?? 0) + sum, 0)
-
-// const calculateItemizedTotal = (costs: Resource['costs'], subTotal: number) =>
-//   costs.reduce(
-//     (acc, cost) =>
-//       acc + (cost.isPercentage ? (cost.value * subTotal) / 100 : cost.value),
-//     0,
-//   )
-
 export type UpdateValueDto = {
   resourceId: string
   fieldId: string
