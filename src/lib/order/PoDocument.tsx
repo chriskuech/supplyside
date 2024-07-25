@@ -34,8 +34,6 @@ export default async function PoDocument({
     where: { id: accountId },
   })
 
-  console.log('acc ', account)
-
   const base64Url = account?.logoBlobId
     ? `data:image/png;base64,${(await readBlob({ accountId, blobId: account.logoBlobId }))?.buffer.toString('base64')}`
     : undefined
@@ -155,7 +153,7 @@ export default async function PoDocument({
         <div className="AccNo">
           {account?.name}
           <br />
-          [Account Address]
+          {account?.address}
         </div>
         <div className="content">
           <div
