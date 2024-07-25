@@ -6,7 +6,7 @@ import { createBlob } from '@/domain/blobs/actions'
 import prisma from '@/lib/prisma'
 import { createResource } from '@/domain/resource/actions'
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   const body: Message = await req.json()
 
   const accountKey = body.To?.split('@').shift()
