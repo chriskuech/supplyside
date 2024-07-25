@@ -37,7 +37,7 @@ async function main() {
     },
   })
 
-  await prisma().user.create({
+  const user = await prisma().user.create({
     data: {
       id: systemAccountId,
       accountId: systemAccountId,
@@ -63,6 +63,7 @@ async function main() {
     accountId,
     type: ResourceType.Order,
     data: {
+      Assignee: user.id,
       Number: '42',
     },
   })

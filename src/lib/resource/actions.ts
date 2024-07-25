@@ -17,7 +17,11 @@ import { OptionTemplate } from '@/domain/schema/template/types'
 export const createResource = async (
   params: Omit<domain.CreateResourceParams, 'accountId'>,
 ): Promise<ResourceModel> => {
-  const { accountId } = await requireSession()
+  const { accountId, userId } = await requireSession()
+
+  if (params.type === 'Order') {
+    params.data = { ...params.data, Assignee: userId }
+  }
 
   return domain.createResource({ ...params, accountId })
 }
