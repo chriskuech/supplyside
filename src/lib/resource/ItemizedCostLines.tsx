@@ -35,7 +35,7 @@ export default function ItemizedCostLines({ resource }: Props) {
   return (
     <Stack spacing={2}>
       <Card variant="elevation">
-        <Table>
+        <Table size="small">
           <TableBody>
             <TableRow sx={{ backgroundColor: 'grey.200' }}>
               <TableCell
