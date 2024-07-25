@@ -225,10 +225,11 @@ export default async function OrderDetail({
               />
             </Stack>
             <ResourceTable schema={lineSchema} resources={lineResources} />
-            <ItemizedCostLines
-              resource={resource}
-              lineResource={lineResources}
-            />
+            <Stack direction={'row'} justifyContent={'end'}>
+              <Box width={'60%'}>
+                <ItemizedCostLines resource={resource} />
+              </Box>
+            </Stack>
           </Stack>
         </Stack>
       </Container>

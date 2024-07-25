@@ -71,6 +71,13 @@ export const createResource = async ({
       type,
       key: (key ?? 0) + 1,
       revision: 0,
+      Cost: {
+        create: {
+          name: 'Taxes',
+          isPercentage: true,
+          value: 0,
+        },
+      },
       ResourceField: {
         create: schema.allFields.map((f) => ({
           Field: {
