@@ -4,6 +4,7 @@
 'use server'
 
 import { ReactNode } from 'react'
+import { Cost } from '@prisma/client'
 import prisma from '../prisma'
 import { readResource, readResources } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
@@ -38,9 +39,9 @@ export default async function PoDocument({
     ? `data:image/png;base64,${(await readBlob({ accountId, blobId: account.logoBlobId }))?.buffer.toString('base64')}`
     : undefined
 
-  const issuedDate =
-    resource.fields.find((field) => field.fieldType === 'Date')?.value.date ??
-    null
+  const issuedDate = resource.fields.find(
+    (f) => f.templateId === fields.issuedDate.templateId,
+  )?.value.date
 
   const formattedDate = issuedDate
     ? new Date(issuedDate).toLocaleDateString()
@@ -418,11 +419,23 @@ export default async function PoDocument({
                   <td colSpan={5} style={{ fontWeight: 'bold' }}>
                     SUBTOTAL
                   </td>
-                  <td>$1,100.00</td>
+                  <td style={{ fontWeight: 'bold' }}>
+                    $
+                    {
+                      resource.fields.find(
+                        (rf) =>
+                          rf.templateId === fields.subtotalCost.templateId,
+                      )?.value.number
+                    }
+                  </td>
                 </tr>
                 <tr>
-                  <td colSpan={5}>Tax</td>
-                  <td>$110.00</td>
+                  {resource.costs.map((item: Cost, index: number) => (
+                    <tr key={index}>
+                      <td colSpan={5}>{item.name}</td>
+                      <td>${item.value}</td>
+                    </tr>
+                  ))}
                 </tr>
                 <tr>
                   <td
@@ -431,7 +444,14 @@ export default async function PoDocument({
                   >
                     TOTAL
                   </td>
-                  <td>$1,210.00</td>
+                  <td style={{ fontWeight: 'bold' }}>
+                    $
+                    {
+                      resource.fields.find(
+                        (rf) => rf.templateId === fields.totalCost.templateId,
+                      )?.value.number
+                    }
+                  </td>
                 </tr>
               </tbody>
             </table>

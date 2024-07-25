@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react'
 import { readResource } from '@/domain/resource/actions'
+import { fields } from '@/domain/schema/template/system-fields'
 
 type Props = {
   accountId: string
@@ -18,9 +19,9 @@ export default async function PoDocumentFooter({
     type: 'Order',
   })
 
-  const issuedDate =
-    resource.fields.find((field) => field.fieldType === 'Date')?.value.date ??
-    null
+  const issuedDate = resource.fields.find(
+    (f) => f.templateId === fields.issuedDate.templateId,
+  )?.value.date
 
   const formattedDate = issuedDate
     ? new Date(issuedDate).toLocaleDateString()
@@ -29,15 +30,24 @@ export default async function PoDocumentFooter({
   return (
     <div
       style={{
-        fontSize: '20px',
+        fontSize: '16px',
         textAlign: 'center',
-        padding: '20px',
+        padding: '25px',
         backgroundColor: '#f0f0f0',
-        gap: '40px',
+        width: '100%',
+        fontWeight: 'normal',
       }}
     >
-      <span style={{ paddingRight: '30px' }}>order-{resource.key} </span>
-      <span>issued date - {formattedDate}</span>
+      <p style={{ float: 'left' }}>
+        <span style={{ paddingRight: '30px' }}>order-{resource.key} </span>
+        <span>issued date - {formattedDate}</span>
+      </p>
+
+      <p style={{ float: 'right', textAlign: 'right' }}>
+        {' '}
+        Page <span className="pageNumber"></span> of{' '}
+        <span className="totalPages"></span>
+      </p>
     </div>
   )
 }
