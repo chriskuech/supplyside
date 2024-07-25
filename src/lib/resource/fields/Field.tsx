@@ -8,9 +8,7 @@ import {
   MenuItem,
   Select,
   TextField,
-  TextareaAutosize,
   Typography,
-  useTheme,
 } from '@mui/material'
 import { match } from 'ts-pattern'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -42,8 +40,6 @@ export default function Field({
   value,
   isReadOnly,
 }: Props) {
-  const theme = useTheme()
-
   const handleChange = async (value: UpdateValueDto['value']) =>
     updateValue({
       resourceId,
@@ -135,23 +131,13 @@ export default function Field({
       isReadOnly ? (
         <Typography whiteSpace={'pre'}>{value?.string}</Typography>
       ) : (
-        <TextareaAutosize
+        <TextField
           id={inputId}
+          multiline
           minRows={3}
+          fullWidth
           defaultValue={value?.string ?? ''}
           onChange={(e) => handleChange({ string: e.target.value })}
-          style={{
-            width: '100%',
-            border: '1px solid',
-            borderRadius: 8,
-            padding: 8,
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            borderColor: match(theme.palette.mode)
-              .with('dark', () => '#333')
-              .with('light', () => '#ccc')
-              .exhaustive(),
-          }}
         />
       ),
     )
