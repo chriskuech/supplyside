@@ -1,6 +1,6 @@
 'use client'
 
-import { Checkbox, Select, TextareaAutosize, useTheme } from '@mui/material'
+import { Checkbox, Select, TextField } from '@mui/material'
 import { match } from 'ts-pattern'
 import { useEffect, useState } from 'react'
 import { Value } from '@prisma/client'
@@ -19,7 +19,6 @@ export default function DefaultValueControl({
   onChange,
 }: Props) {
   const [value, setValue] = useState<Value | null>(null)
-  const theme = useTheme()
 
   useEffect(() => {
     if (defaultValueId) {
@@ -63,7 +62,7 @@ export default function DefaultValueControl({
       </Select>
     ))
     .with('Textarea', () => (
-      <TextareaAutosize
+      <TextField
         id="default-field-value-control"
         defaultValue={value?.string ?? ''}
         onBlur={async (e) => {
@@ -73,19 +72,9 @@ export default function DefaultValueControl({
 
           onChange(valueId)
         }}
+        multiline
+        fullWidth
         minRows={3}
-        style={{
-          width: '100%',
-          border: '1px solid',
-          borderRadius: 8,
-          padding: 8,
-          backgroundColor: theme.palette.background.paper,
-          color: theme.palette.text.primary,
-          ...match(theme.palette.mode)
-            .with('dark', () => ({ borderColor: '#333' }))
-            .with('light', () => ({ borderColor: '#ccc' }))
-            .exhaustive(),
-        }}
       />
     ))
     .otherwise(() => 'NYI')
