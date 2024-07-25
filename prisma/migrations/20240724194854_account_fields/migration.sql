@@ -8,12 +8,14 @@
 */
 -- AlterTable
 ALTER TABLE "Account" ADD COLUMN     "address" TEXT NOT NULL DEFAULT '',
-ADD COLUMN     "key" TEXT NOT NULL;
+ADD COLUMN     "key" TEXT;
 
-UPDATE "Account" SET "key" = "id";
-UPDATE "Account" SET "key" = "chris" WHERE "name" LIKE "Chris%";
-UPDATE "Account" SET "key" = "matt" WHERE "name" LIKE "Matt%";
-UPDATE "Account" SET "key" = "system" WHERE "name" = "SYSTEM";
+UPDATE "Account" SET "key" = 'id';
+UPDATE "Account" SET "key" = 'chris' WHERE "name" LIKE 'Chris%';
+UPDATE "Account" SET "key" = 'matt' WHERE "name" LIKE 'Matt%';
+UPDATE "Account" SET "key" = 'system' WHERE "name" = 'SYSTEM';
+
+ALTER TABLE "Account" ALTER COLUMN "key" SET NOT NULL;
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_key_key" ON "Account"("key");
