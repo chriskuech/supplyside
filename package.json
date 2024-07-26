@@ -22,7 +22,7 @@
     "@mui/material-nextjs": "^5.16.4",
     "@mui/x-data-grid": "^7.8.0",
     "@mui/x-data-grid-pro": "^7.11.0",
-    "@mui/x-date-pickers": "^7.11.0",
+    "@mui/x-date-pickers": "^7.11.1",
     "@prisma/client": "^5.17.0",
     "@types/json-schema": "^7.0.15",
     "ajv": "^8.17.1",
