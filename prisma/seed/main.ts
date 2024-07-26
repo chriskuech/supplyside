@@ -59,12 +59,21 @@ async function main() {
 
   await applyTemplate(accountId)
 
+  const vendor = await createResource({
+    accountId,
+    type: ResourceType.Vendor,
+    data: {
+      Name: 'ACME Supplies',
+    },
+  })
+
   await createResource({
     accountId,
     type: ResourceType.Order,
     data: {
       Assignee: user.id,
       Number: '42',
+      Vendor: vendor.id,
     },
   })
 }
