@@ -2,7 +2,7 @@
 
 import { DataGrid, DataGridProps, GridColDef } from '@mui/x-data-grid'
 import { FieldType } from '@prisma/client'
-import { Chip, IconButton } from '@mui/material'
+import { Chip, IconButton, Stack } from '@mui/material'
 import { Check, Clear } from '@mui/icons-material'
 import { P, match } from 'ts-pattern'
 import { useMemo } from 'react'
@@ -156,7 +156,10 @@ export default function ResourceTable({
             .with('Checkbox', () => value?.boolean && <Check />)
             .with(
               'Contact',
-              () => value?.contact && <ContactCard contact={value?.contact} />,
+              () =>
+                value?.contact && (
+                  <ContactCard contact={value?.contact} inline />
+                ),
             )
             .with(
               'File',
@@ -171,9 +174,11 @@ export default function ResourceTable({
                   />
                 ),
             )
-            .with('MultiSelect', () =>
-              value?.options?.map((o) => <Chip key={o.id} label={o.name} />),
-            )
+            .with('MultiSelect', () => (
+              <Stack gap={1} direction="row">
+                {value?.options?.map((o) => <Chip key={o.id} label={o.name} />)}
+              </Stack>
+            ))
             .with('Select', () => {
               const name = field.options?.find(
                 (o) => o.id === value?.option?.id,

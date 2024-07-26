@@ -10,6 +10,7 @@ import {
   InputAdornment,
   Stack,
   TextField,
+  Typography,
 } from '@mui/material'
 import { Contact } from '@prisma/client'
 import { FC, useEffect, useState } from 'react'
@@ -19,9 +20,14 @@ import { UpdateContactDto } from '@/domain/resource/fields/actions'
 export type ContactFieldProps = {
   contact: Contact | null
   onChange: (contact: UpdateContactDto | null) => void
+  inline?: boolean
 }
 
-export default function ContactField({ contact, onChange }: ContactFieldProps) {
+export default function ContactField({
+  contact,
+  onChange,
+  inline,
+}: ContactFieldProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -41,8 +47,19 @@ export default function ContactField({ contact, onChange }: ContactFieldProps) {
       </Dialog>
       {contact ? (
         <Stack spacing={1}>
-          <ContactCard contact={contact} />
-          <Stack spacing={1} direction={'row'} justifyContent={'end'}>
+          {!inline && <ContactCard contact={contact} />}
+          <Stack
+            spacing={1}
+            direction={'row'}
+            justifyContent={'end'}
+            alignItems="center"
+          >
+            {inline && (
+              <>
+                <Person />
+                <Typography>{contact.name}</Typography>
+              </>
+            )}
             <IconButton size="small" onClick={() => setIsOpen(true)}>
               <Edit />
             </IconButton>

@@ -30,6 +30,7 @@ export type Props = {
   value: Value | undefined
   isReadOnly?: boolean // TODO: finish plumbing
   onChange: (value: UpdateValueDto['value']) => void
+  inline?: boolean
 }
 
 export default function Field({
@@ -39,6 +40,7 @@ export default function Field({
   value,
   isReadOnly,
   onChange,
+  inline,
 }: Props) {
   const theme = useTheme()
 
@@ -54,6 +56,7 @@ export default function Field({
       <ContactField
         contact={value?.contact ?? null}
         onChange={(contact) => updateContact(resourceId, field.id, contact)}
+        inline={inline}
       />
     ))
     .with('Date', () => (

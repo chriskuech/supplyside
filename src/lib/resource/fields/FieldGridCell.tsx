@@ -37,6 +37,7 @@ export default function FieldGridCell({ cellParams, field }: Props) {
       onChange={handleChange}
       resourceId={resourceId}
       value={value}
+      inline
     />
   )
 }
