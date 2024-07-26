@@ -31,6 +31,7 @@
     "inversify": "^6.0.2",
     "next": "14.2.5",
     "next-auth": "^4.24.7",
+    "openai": "^4.53.1",
     "postmark": "^4.0.4",
     "prisma": "^5.17.0",
     "puppeteer": "^22.13.1",

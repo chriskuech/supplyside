@@ -111,7 +111,7 @@ enum FieldType {
   Checkbox
   Contact
   Date
-  File
+  Files
   Money
   MultiSelect
   Number
