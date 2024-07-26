@@ -270,12 +270,13 @@ export default function ResourceTable({
       .exhaustive()
 
     try {
-      updateValue({
+      await updateValue({
         resourceId: newRow.id,
         fieldId: editedField.fieldId,
         value: newValue,
       })
     } catch {
+      //TODO: add error toast
       return oldRow
     }
 

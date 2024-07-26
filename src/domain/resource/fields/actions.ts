@@ -32,9 +32,6 @@ export const updateValue = async ({
   fieldId,
   value,
 }: UpdateValueDto) => {
-  if (value.number) {
-    throw new Error('asd')
-  }
   //TODO:  check if value object is correct for each fieldType
 
   const { optionIds, ...rest } = value
