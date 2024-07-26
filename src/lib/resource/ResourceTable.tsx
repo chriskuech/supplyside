@@ -10,7 +10,8 @@ import { difference } from 'remeda'
 import ContactCard from './fields/ContactCard'
 import { deleteResource } from './actions'
 import FieldGridCell from './fields/FieldGridCell'
-import { Resource } from '@/domain/resource/types'
+import FieldControl from './fields/FieldControl'
+import { Resource, Value } from '@/domain/resource/types'
 import { Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
 import { updateValue, UpdateValueDto } from '@/domain/resource/fields/actions'
@@ -56,40 +57,70 @@ export default function ResourceTable({
         //   .with('User', () => 'custom')
         //   .exhaustive(),
         type: 'custom',
-        valueGetter: (_, row) => {
-          const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
+        // valueGetter: (_, row) => {
+        //   const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
 
-          type Primitive = string | number | boolean | null | undefined
+        //   type Primitive = string | number | boolean | null | undefined
 
-          return match<FieldType, Primitive>(field.type)
-            .with('Checkbox', () => value?.boolean)
-            .with('Contact', () => value?.contact?.name)
-            .with('Date', () => value?.date?.toISOString())
-            .with('File', () => !!value?.file)
-            .with(P.union('Money', 'Number'), () => value?.number)
-            .with('MultiSelect', () =>
-              value?.options?.map((o) => o.name).join(' '),
-            )
-            .with(P.union('Text', 'Textarea'), () => value?.string)
-            .with(
-              'Select',
-              () =>
-                field.options?.find((o) => o.id === value?.option?.id)?.name,
-            )
-            .with(
-              'User',
-              () =>
-                value?.user &&
-                `${value.user.firstName} ${value.user.firstName}`,
-            )
-            .with('Resource', () => value?.resource?.name)
-            .exhaustive()
-        },
+        //   return match<FieldType, Primitive>(field.type)
+        //     .with('Checkbox', () => value?.boolean)
+        //     .with('Contact', () => value?.contact?.name)
+        //     .with('Date', () => value?.date?.toISOString())
+        //     .with('File', () => !!value?.file)
+        //     .with(P.union('Money', 'Number'), () => value?.number)
+        //     .with('MultiSelect', () =>
+        //       value?.options?.map((o) => o.name).join(' '),
+        //     )
+        //     .with(P.union('Text', 'Textarea'), () => value?.string)
+        //     .with(
+        //       'Select',
+        //       () =>
+        //         // field.options?.find((o) => o.id === value?.option?.id)?.name,
+        //         undefined,
+        //     )
+        //     .with(
+        //       'User',
+        //       () =>
+        //         value?.user &&
+        //         `${value.user.firstName} ${value.user.firstName}`,
+        //     )
+        //     .with('Resource', () => value?.resource?.name)
+        //     .exhaustive()
+        // },
         valueSetter: (value, row: Resource) => {
+          if (!value) return row
           const updatedFields = row.fields.map((f) => ({
             ...f,
-            value: f.fieldId === field.id ? { ...f.value, ...value } : f.value,
+            value:
+              f.fieldId === field.id
+                ? match<FieldType, Value>(f.fieldType)
+                    .with('Select', () => ({
+                      ...f.value,
+                      option: value?.optionId
+                        ? {
+                            id: value.optionId,
+                            name:
+                              field.options.find(
+                                (option) => option.id === value.optionId,
+                              )?.name ?? '',
+                          }
+                        : null,
+                    }))
+                    .with('MultiSelect', () => ({
+                      ...f.value,
+                      options: value?.optionIds
+                        ? value.optionIds.map((id: string) => ({
+                            id,
+                            name:
+                              field.options.find((option) => option.id === id)
+                                ?.name ?? '',
+                          }))
+                        : null,
+                    }))
+                    .otherwise(() => ({ ...f.value, ...value }))
+                : f.value,
           }))
+
           return {
             ...row,
             fields: updatedFields,
@@ -99,6 +130,9 @@ export default function ResourceTable({
           const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
 
           return match<FieldType>(field.type)
+            .with('Number', () => value?.number)
+            .with('Text', () => value?.string)
+            .with('Textarea', () => value?.string)
             .with('Date', () => value?.date?.toLocaleDateString())
             .with('Money', () =>
               value?.number?.toLocaleString('en-US', {
@@ -124,7 +158,19 @@ export default function ResourceTable({
               'Contact',
               () => value?.contact && <ContactCard contact={value?.contact} />,
             )
-            .with('File', () => value?.file && <Check />)
+            .with(
+              'File',
+              () =>
+                value?.file && (
+                  <FieldControl
+                    field={field}
+                    inputId={`${params.row.id}${field.id}`}
+                    resourceId={params.row.id}
+                    value={value}
+                    isReadOnly
+                  />
+                ),
+            )
             .with('MultiSelect', () =>
               value?.options?.map((o) => <Chip key={o.id} label={o.name} />),
             )
@@ -218,11 +264,15 @@ export default function ResourceTable({
       .with(P.union('Contact', 'File'), () => ({}))
       .exhaustive()
 
-    updateValue({
-      resourceId: newRow.id,
-      fieldId: editedField.fieldId,
-      value: newValue,
-    })
+    try {
+      updateValue({
+        resourceId: newRow.id,
+        fieldId: editedField.fieldId,
+        value: newValue,
+      })
+    } catch {
+      return oldRow
+    }
 
     return newRow
   }

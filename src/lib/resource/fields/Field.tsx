@@ -64,7 +64,12 @@ export default function Field({
       />
     ))
     .with('File', () => (
-      <FileField resourceId={resourceId} value={value} field={field} />
+      <FileField
+        resourceId={resourceId}
+        value={value}
+        field={field}
+        isReadOnly={isReadOnly}
+      />
     ))
     .with('Money', () => (
       <TextField
@@ -84,9 +89,12 @@ export default function Field({
         multiple
         fullWidth
         getOptionLabel={(o) => o.name}
+        getOptionKey={(o) => o.id}
         renderInput={(props) => <TextField {...props} />}
         options={field.options}
-        defaultValue={value?.options}
+        defaultValue={field.options.filter((option) =>
+          value?.options?.some((valueOption) => valueOption.id === option.id),
+        )}
         onChange={(e, options) =>
           onChange({ optionIds: options.map((o) => o.id) })
         }

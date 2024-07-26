@@ -12,9 +12,15 @@ type Props = {
   resourceId: string
   field: Field
   value: Value | undefined
+  isReadOnly?: boolean
 }
 
-export default function FileField({ resourceId, field, value }: Props) {
+export default function FileField({
+  resourceId,
+  field,
+  value,
+  isReadOnly,
+}: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   return (
@@ -52,11 +58,13 @@ export default function FileField({ resourceId, field, value }: Props) {
           </IconButton>
         </Tooltip>
       )}
-      <Tooltip title="Upload File">
-        <IconButton onClick={() => fileInputRef.current?.click()}>
-          <UploadFile />
-        </IconButton>
-      </Tooltip>
+      {!isReadOnly && (
+        <Tooltip title="Upload File">
+          <IconButton onClick={() => fileInputRef.current?.click()}>
+            <UploadFile />
+          </IconButton>
+        </Tooltip>
+      )}
     </Stack>
   )
 }
