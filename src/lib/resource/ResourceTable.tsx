@@ -2,7 +2,7 @@
 
 import { DataGrid, DataGridProps, GridColDef } from '@mui/x-data-grid'
 import { FieldType } from '@prisma/client'
-import { Chip, IconButton, Stack } from '@mui/material'
+import { Box, Chip, IconButton, Stack } from '@mui/material'
 import { Check, Clear } from '@mui/icons-material'
 import { P, match } from 'ts-pattern'
 import { useMemo } from 'react'
@@ -152,7 +152,7 @@ export default function ResourceTable({
 
           const { value } = currentField
 
-          return match<FieldType>(field.type)
+          const content = match<FieldType>(field.type)
             .with('Checkbox', () => value?.boolean && <Check />)
             .with(
               'Contact',
@@ -193,6 +193,19 @@ export default function ResourceTable({
                 `${value.user.firstName} ${value.user.firstName}`,
             )
             .otherwise(() => undefined)
+
+          return (
+            content && (
+              <Box
+                display="flex"
+                alignItems="center"
+                height="100%"
+                width="100%"
+              >
+                {content}
+              </Box>
+            )
+          )
         },
         renderEditCell: (params) => {
           const currentField = params.row.fields.find(
@@ -200,7 +213,12 @@ export default function ResourceTable({
           )
 
           if (!currentField) return
-          return <FieldGridCell cellParams={params} field={field} />
+
+          return (
+            <Box display="flex" alignItems="center" height="100%" width="100%">
+              <FieldGridCell cellParams={params} field={field} />
+            </Box>
+          )
         },
       })),
       {
