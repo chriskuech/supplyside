@@ -106,6 +106,18 @@ export const createResource = async ({
                       ([, val]) => ({ boolean: val }),
                     )
                     .with(
+                      [{ type: 'File' }, P.union(P.string, null)],
+                      ([, val]) => ({
+                        File: val
+                          ? {
+                              connect: {
+                                id: val,
+                              },
+                            }
+                          : undefined,
+                      }),
+                    )
+                    .with(
                       [
                         { type: P.union('Text', 'Textarea') },
                         P.union(P.string, null),
