@@ -6,7 +6,7 @@
 import { ReactNode } from 'react'
 import { Cost } from '@prisma/client'
 import prisma from '../prisma'
-import { readResource, readResources } from '@/domain/resource/actions'
+import { readResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readBlob } from '@/domain/blobs/actions'
 
@@ -26,8 +26,10 @@ export default async function PoDocument({
     type: 'Order',
   })
 
-  const [vendor] = await readResources({
+  const vendor = await readResource({
     accountId,
+    id: resource.fields.find((f) => f.templateId === fields.vendor.templateId)
+      ?.value.resource?.id as string,
     type: 'Vendor',
   })
 
@@ -49,9 +51,8 @@ export default async function PoDocument({
 
   return (
     <div>
-      <html>
-        <style>
-          {`
+      <style>
+        {`
               body {
                 font-family: Arial, sans-serif;
                 margin: 0;
@@ -78,6 +79,9 @@ export default async function PoDocument({
                   border: 1px solid black;
                   padding: 8px;
                   text-align: left;
+              }
+              th {
+                padding: 4px 8px;
               }
               .terms-conditions {
                 page-break-before: always;
@@ -124,361 +128,515 @@ export default async function PoDocument({
                 line-height: 36px;
               }
             `}
-        </style>
-        <div className="header1" style={{ padding: '20px' }}>
-          <div
-            style={{
-              display: 'inline-block',
-              verticalAlign: 'top',
-              width: '25%',
-            }}
-          >
-            <img
-              src={base64Url}
-              alt="Logo"
-              style={{ height: '100px', width: '100px' }}
-            />
-          </div>
-          <div
-            style={{
-              display: 'inline-block',
-              verticalAlign: 'top',
-              width: '70%',
-              textAlign: 'right',
-            }}
-          >
-            <h1 style={{ margin: '0' }}>PURCHASE ORDER</h1>
-            Order #{resource.key} | {formattedDate}
-          </div>
+      </style>
+      <div className="header1" style={{ padding: '20px' }}>
+        <div
+          style={{
+            display: 'inline-block',
+            verticalAlign: 'top',
+            width: '25%',
+          }}
+        >
+          <img
+            src={base64Url}
+            alt="Logo"
+            style={{ height: '100px', width: '100px' }}
+          />
         </div>
-        <div className="AccNo">
-          {account?.name}
-          <br />
-          {account?.address}
+        <div
+          style={{
+            display: 'inline-block',
+            verticalAlign: 'top',
+            width: '70%',
+            textAlign: 'right',
+          }}
+        >
+          <h1 style={{ margin: '0', fontWeight: '600' }}>PURCHASE ORDER</h1>
+          Order #{resource.key} | {formattedDate}
         </div>
-        <div className="content">
-          <div
-            className="notes"
-            style={{
-              display: 'inline-block',
-              maxWidth: '60%',
-              verticalAlign: 'top',
-            }}
-          >
-            <table>
-              <thead>
-                <tr style={{ backgroundColor: '#CCCCCC' }}>
-                  <th>Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    {
-                      resource.fields.find(
-                        (f) => f.templateId === fields.orderNotes.templateId,
-                      )?.value.string
-                    }
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div
-            className="payment-terms"
-            style={{
-              display: 'inline-block',
-              maxWidth: '35%',
-              verticalAlign: 'top',
-              minWidth: '35%',
-              marginLeft: '20px',
-            }}
-          >
-            <table>
-              <thead>
-                <tr style={{ backgroundColor: '#CCCCCC' }}>
-                  <th colSpan={3}>Payment Terms</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Currency</td>
-                  <td>
-                    {
-                      resource.fields.find(
-                        (f) => f.templateId === fields.currency.templateId,
-                      )?.value.option?.name
-                    }
-                  </td>
-                </tr>
-                <tr>
-                  <td>Payment Terms</td>
-                  <td>
-                    {
-                      resource.fields.find(
-                        (f) => f.templateId === fields.paymentTerms.templateId,
-                      )?.value.option?.name
-                    }
-                  </td>
-                </tr>
-                <tr>
-                  <td>Taxable</td>
-                  <td>
-                    {resource.fields.find(
-                      (f) => f.templateId === fields.taxable.templateId,
-                    )?.value.boolean
-                      ? 'Yes'
-                      : 'No'}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div
-            className="vendor"
-            style={{
-              display: 'inline-block',
-              maxWidth: '29%',
-              verticalAlign: 'top',
-              minWidth: '29%',
-            }}
-          >
-            <table>
-              <thead>
-                <tr style={{ backgroundColor: '#CCCCCC' }}>
-                  <th colSpan={2}>Vendor</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    {
-                      vendor.fields.find(
-                        (f) => f.templateId === fields.name.templateId,
-                      )?.value.string
-                    }
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    {
-                      vendor.fields.find(
-                        (f) =>
-                          f.templateId === fields.primaryAddress.templateId,
-                      )?.value.string
-                    }
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    {
-                      vendor.fields.find(
-                        (f) => f.templateId === fields.poRecipient.templateId,
-                      )?.value.contact?.title
-                    }
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div
-            className="shipping"
-            style={{
-              display: 'inline-block',
-              maxWidth: '68%',
-              verticalAlign: 'top',
-              minWidth: '68%',
-              marginLeft: '20px',
-            }}
-          >
-            <table>
-              <thead>
-                <tr style={{ backgroundColor: '#CCCCCC' }}>
-                  <th colSpan={2}>Shipping</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style={{ width: '50%' }}>
-                    <strong>Shipping Address:</strong>
-                    <br />
-                    {
-                      resource.fields.find(
-                        (f) =>
-                          f.templateId === fields.shippingAddress.templateId,
-                      )?.value.string
-                    }
-                  </td>
-                  <td style={{ width: '50%' }}>
-                    <table style={{ width: '100%', border: '0' }}>
-                      <tbody>
-                        <tr>
-                          <td style={{ padding: '2px', border: '0' }}>
-                            <strong>Method</strong>
-                          </td>
-                          <td style={{ padding: '2px', border: '0' }}>
-                            {
-                              resource.fields.find(
-                                (f) =>
-                                  f.templateId ===
-                                  fields.shippingMethod.templateId,
-                              )?.value.option?.name
-                            }
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style={{ padding: '2px', border: '0' }}>
-                            <strong>Account #</strong>
-                          </td>
-                          <td style={{ padding: '2px', border: '0' }}>
-                            {
-                              resource.fields.find(
-                                (f) =>
-                                  f.templateId ===
-                                  fields.shippingAccountNumber.templateId,
-                              )?.value.option?.name
-                            }
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style={{ padding: '2px', border: '0' }}>
-                            <strong>Incoterms</strong>
-                          </td>
-                          <td style={{ padding: '2px', border: '0' }}>
-                            {
-                              resource.fields.find(
-                                (f) =>
-                                  f.templateId === fields.incoterms.templateId,
-                              )?.value.option?.name
-                            }
-                          </td>
-                        </tr>
-                        <tr>
-                          <td style={{ padding: '2px', border: '0' }}>
-                            <strong>Shipping Notes</strong>
-                          </td>
-                          <td style={{ padding: '2px', border: '0' }}>
-                            {
-                              resource.fields.find(
-                                (f) =>
-                                  f.templateId ===
-                                  fields.shippingNotes.templateId,
-                              )?.value.string
-                            }
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div className="items">
-            <table>
-              <thead>
-                <tr style={{ backgroundColor: '#CCCCCC' }}>
-                  <th>#</th>
-                  <th>Item</th>
-                  <th>Unit</th>
-                  <th>Qty</th>
-                  <th>Unit Price</th>
-                  <th>Total Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>1</td>
-                  <td style={{ fontWeight: 'bold' }}>
-                    Widget A
-                    <br />
-                    High-quality widget for industrial use.
-                    <br />
-                    Serial: 123-ABC
-                  </td>
-                  <td>pcs</td>
-                  <td>10</td>
-                  <td>$50.00</td>
-                  <td>$500.00</td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td style={{ fontWeight: 'bold' }}>
-                    Widget B
-                    <br />
-                    Standard widget for general use.
-                    <br />
-                    Serial: 456-DEF
-                  </td>
-                  <td>pcs</td>
-                  <td>20</td>
-                  <td>$30.00</td>
-                  <td>$600.00</td>
-                </tr>
-                <tr>
-                  <td colSpan={5} style={{ fontWeight: 'bold' }}>
-                    SUBTOTAL
-                  </td>
-                  <td style={{ fontWeight: 'bold' }}>
-                    $
-                    {
-                      resource.fields.find(
-                        (rf) =>
-                          rf.templateId === fields.subtotalCost.templateId,
-                      )?.value.number
-                    }
-                  </td>
-                </tr>
-                <tr>
-                  {resource.costs.map((item: Cost, index: number) => (
-                    <tr key={index}>
-                      <td colSpan={5}>{item.name}</td>
-                      <td>${item.value}</td>
-                    </tr>
-                  ))}
-                </tr>
-                <tr>
-                  <td
-                    colSpan={5}
-                    style={{ fontWeight: 'bold', backgroundColor: '#C7E1F2' }}
+      </div>
+      <div className="AccNo">
+        <span style={{ fontWeight: 600 }}>{account?.name}</span>
+        <br />
+        <span>{account?.address}</span>
+      </div>
+      <div className="content">
+        <div
+          className="notes"
+          style={{
+            display: 'inline-block',
+            maxWidth: '60%',
+            verticalAlign: 'top',
+          }}
+        >
+          <table style={{ border: '1px solid', minHeight: '100px' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#CCCCCC' }}>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowSpan={3}>
+                  {
+                    resource.fields.find(
+                      (f) => f.templateId === fields.orderNotes.templateId,
+                    )?.value.string
+                  }
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div
+          className="payment-terms"
+          style={{
+            display: 'inline-block',
+            maxWidth: '37%',
+            verticalAlign: 'top',
+            minWidth: '37%',
+            marginLeft: '20px',
+          }}
+        >
+          <table style={{ border: '1px solid', minHeight: '100px' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#CCCCCC' }}>
+                <th colSpan={3}>Payment Terms</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ border: 0, padding: '2px', fontWeight: '600' }}>
+                  Currency
+                </td>
+                <td style={{ border: 0, padding: '2px' }}>
+                  {
+                    resource.fields.find(
+                      (f) => f.templateId === fields.currency.templateId,
+                    )?.value.option?.name
+                  }
+                </td>
+              </tr>
+              <tr>
+                <td style={{ border: 0, padding: '2px', fontWeight: '600' }}>
+                  Payment Terms
+                </td>
+                <td style={{ border: 0, padding: '2px' }}>
+                  {
+                    resource.fields.find(
+                      (f) => f.templateId === fields.paymentTerms.templateId,
+                    )?.value.option?.name
+                  }
+                </td>
+              </tr>
+              <tr>
+                <td style={{ border: 0, padding: '2px', fontWeight: '600' }}>
+                  Taxable
+                </td>
+                <td style={{ border: 0, padding: '2px' }}>
+                  {resource.fields.find(
+                    (f) => f.templateId === fields.taxable.templateId,
+                  )?.value.boolean
+                    ? 'Yes'
+                    : 'No'}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div
+          className="vendor"
+          style={{
+            display: 'inline-block',
+            maxWidth: '29%',
+            verticalAlign: 'top',
+            minWidth: '29%',
+          }}
+        >
+          <table style={{ border: '1px solid', minHeight: '170px' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#CCCCCC' }}>
+                <th style={{ fontWeight: '600' }}>Vendor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ border: 0, padding: '2px' }}>
+                  {
+                    vendor.fields.find(
+                      (f) => f.templateId === fields.name.templateId,
+                    )?.value.string
+                  }
+                </td>
+              </tr>
+              <tr>
+                <td style={{ border: 0, padding: '2px' }}>
+                  {
+                    vendor.fields.find(
+                      (f) => f.templateId === fields.primaryAddress.templateId,
+                    )?.value.string
+                  }
+                </td>
+              </tr>
+              <tr>
+                <td rowSpan={4} style={{ border: 0, padding: '2px' }}>
+                  <br />
+                  <u>
+                    <b>c/o:</b>
+                  </u>
+                  <br />
+                  {
+                    vendor.fields.find(
+                      (f) => f.templateId === fields.poRecipient.templateId,
+                    )?.value.contact?.title
+                  }
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div
+          className="shipping"
+          style={{
+            display: 'inline-block',
+            maxWidth: '68%',
+            verticalAlign: 'top',
+            minWidth: '68%',
+            marginLeft: '20px',
+          }}
+        >
+          <table style={{ border: '1px solid', minHeight: '170px' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#CCCCCC' }}>
+                <th colSpan={2}>Shipping</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td
+                  style={{ width: '50%', verticalAlign: 'top', padding: '5px' }}
+                >
+                  {
+                    resource.fields.find(
+                      (f) => f.templateId === fields.shippingAddress.templateId,
+                    )?.value.string
+                  }
+                </td>
+                <td style={{ width: '50%', padding: 0 }}>
+                  <table style={{ width: '100%', border: '0', margin: 0 }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ padding: '2px', border: '0' }}>
+                          <strong>Method</strong>
+                        </td>
+                        <td style={{ padding: '2px', border: '0' }}>
+                          {
+                            resource.fields.find(
+                              (f) =>
+                                f.templateId ===
+                                fields.shippingMethod.templateId,
+                            )?.value.option?.name
+                          }
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '2px', border: '0' }}>
+                          <strong>Account #</strong>
+                        </td>
+                        <td style={{ padding: '2px', border: '0' }}>
+                          {
+                            resource.fields.find(
+                              (f) =>
+                                f.templateId ===
+                                fields.shippingAccountNumber.templateId,
+                            )?.value.option?.name
+                          }
+                        </td>
+                      </tr>
+                      <tr>
+                        <td
+                          style={{
+                            padding: '2px',
+                            border: '0',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          Incoterms
+                        </td>
+                        <td style={{ padding: '2px', border: '0' }}>
+                          {
+                            resource.fields.find(
+                              (f) =>
+                                f.templateId === fields.incoterms.templateId,
+                            )?.value.option?.name
+                          }
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td
+                  colSpan={2}
+                  style={{ padding: 0, border: '0', verticalAlign: 'top' }}
+                >
+                  <p
+                    style={{
+                      margin: 0,
+                      padding: '2px 5px',
+                      fontWeight: 600,
+                      textDecoration: 'underline',
+                    }}
                   >
-                    TOTAL
-                  </td>
-                  <td style={{ fontWeight: 'bold' }}>
-                    $
+                    Shipping Notes
+                  </p>
+                  <p
+                    style={{
+                      margin: 0,
+                      padding: '2px 5px',
+                    }}
+                  >
                     {
                       resource.fields.find(
-                        (rf) => rf.templateId === fields.totalCost.templateId,
-                      )?.value.number
-                    }
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div className="terms-conditions">
-            <table>
-              <thead>
-                <tr style={{ backgroundColor: '#CCCCCC' }}>
-                  <th>Terms and Conditions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    {
-                      resource.fields.find(
-                        (f) =>
-                          f.templateId === fields.termsAndConditions.templateId,
+                        (f) => f.templateId === fields.shippingNotes.templateId,
                       )?.value.string
                     }
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                  </p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </html>
+        <div className="items">
+          <table>
+            <thead>
+              <tr style={{ backgroundColor: '#CCCCCC' }}>
+                <th style={{ borderRight: 0 }}>#</th>
+                <th style={{ borderRight: 0, borderLeft: 0 }}>Item</th>
+                <th style={{ borderRight: 0, borderLeft: 0 }}>Unit</th>
+                <th style={{ borderRight: 0, borderLeft: 0 }}>Qty</th>
+                <th style={{ borderRight: 0, borderLeft: 0 }}>Unit Price</th>
+                <th style={{ borderLeft: 0 }}>Total Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowSpan={2} style={{ borderRight: 0, fontWeight: 'bold' }}>
+                  1
+                </td>
+                <td
+                  rowSpan={2}
+                  style={{ fontWeight: 'bold', borderRight: 0, borderLeft: 0 }}
+                >
+                  [item name]
+                  <br />
+                  [item decsription]
+                </td>
+                <td style={{ border: 0 }}>[item oum]</td>
+                <td style={{ border: 0 }}>[qty]</td>
+                <td style={{ border: 0 }}>[unit]</td>
+                <td style={{ borderLeft: 0 }}>[total]</td>
+              </tr>
+              <tr>
+                <td colSpan={4} style={{ padding: 0 }}>
+                  <table style={{ border: 0, margin: 0 }}>
+                    <tr>
+                      <td
+                        style={{
+                          border: 0,
+                          padding: '2px 5px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        [custom field]
+                      </td>
+                      <td style={{ border: 0, padding: '2px 5px' }}>
+                        [custom field value]
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style={{
+                          border: 0,
+                          padding: '2px 5px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        [custom field]
+                      </td>
+                      <td style={{ border: 0, padding: '2px 5px' }}>
+                        [custom field value]
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+              <tr>
+                <td rowSpan={2} style={{ borderRight: 0, fontWeight: 'bold' }}>
+                  2
+                </td>
+                <td
+                  rowSpan={2}
+                  style={{ fontWeight: 'bold', borderRight: 0, borderLeft: 0 }}
+                >
+                  [item name]
+                  <br />
+                  [item decsription]
+                </td>
+                <td style={{ border: 0 }}>[item oum]</td>
+                <td style={{ border: 0 }}>[qty]</td>
+                <td style={{ border: 0 }}>[unit]</td>
+                <td style={{ borderLeft: 0 }}>[total]</td>
+              </tr>
+              <tr>
+                <td colSpan={4} style={{ padding: 0 }}>
+                  <table style={{ border: 0, margin: 0 }}>
+                    <tr>
+                      <td
+                        style={{
+                          border: 0,
+                          padding: '2px 5px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        [custom field]
+                      </td>
+                      <td style={{ border: 0, padding: '2px 5px' }}>
+                        [custom field value]
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style={{
+                          border: 0,
+                          padding: '2px 5px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        [custom field]
+                      </td>
+                      <td style={{ border: 0, padding: '2px 5px' }}>
+                        [custom field value]
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td
+                  colSpan={2}
+                  style={{ border: 0, margin: 0, padding: 0 }}
+                ></td>
+                <td colSpan={4} style={{ border: 0, margin: 0, padding: 0 }}>
+                  <table width={'100%'} style={{ border: 0, margin: 0 }}>
+                    <tr>
+                      <td
+                        colSpan={5}
+                        style={{
+                          fontWeight: 'bold',
+                          borderBottom: 0,
+                          borderTop: 0,
+                          padding: '2px 5px',
+                        }}
+                      >
+                        SUBTOTAL
+                      </td>
+                      <td
+                        style={{
+                          fontWeight: 'bold',
+                          borderBottom: 0,
+                          borderTop: 0,
+                          padding: '2px 5px',
+                        }}
+                      >
+                        $
+                        {resource.fields.find(
+                          (rf) =>
+                            rf.templateId === fields.subtotalCost.templateId,
+                        )?.value.number || 0}
+                      </td>
+                    </tr>
+                    <tr>
+                      {resource.costs.map((item: Cost, index: number) => (
+                        <tr key={index}>
+                          <td
+                            style={{
+                              borderBottom: 0,
+                              borderTop: 0,
+                              padding: '2px 5px',
+                            }}
+                            colSpan={5}
+                          >
+                            {item.name}
+                          </td>
+                          <td
+                            style={{
+                              borderBottom: 0,
+                              borderTop: 0,
+                              padding: '2px 5px',
+                            }}
+                          >
+                            ${item.value}
+                          </td>
+                        </tr>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td
+                        colSpan={5}
+                        style={{
+                          fontWeight: 'bold',
+                          backgroundColor: '#C7E1F2',
+                          borderTop: 0,
+                          padding: '2px 5px',
+                        }}
+                      >
+                        TOTAL
+                      </td>
+                      <td
+                        style={{
+                          fontWeight: 'bold',
+                          backgroundColor: '#C7E1F2',
+                          borderTop: 0,
+                          padding: '2px 5px',
+                        }}
+                      >
+                        $
+                        {resource.fields.find(
+                          (rf) => rf.templateId === fields.totalCost.templateId,
+                        )?.value.number || 0}
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="terms-conditions">
+          <table>
+            <thead>
+              <tr style={{ backgroundColor: '#CCCCCC' }}>
+                <th>Terms and Conditions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  {
+                    resource.fields.find(
+                      (f) =>
+                        f.templateId === fields.termsAndConditions.templateId,
+                    )?.value.string
+                  }
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   )
 }
