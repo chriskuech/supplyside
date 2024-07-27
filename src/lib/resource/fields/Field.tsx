@@ -109,9 +109,11 @@ export default function Field({
       <Select
         id={inputId}
         fullWidth
+        displayEmpty
         value={value?.option?.id ?? ''}
-        onChange={(e) => handleChange({ optionId: e.target.value })}
+        onChange={(e) => handleChange({ optionId: e.target.value || null })}
       >
+        <MenuItem value="">-</MenuItem>
         {field.options.map((o) => (
           <MenuItem key={o.id} value={o.id}>
             {o.name}
