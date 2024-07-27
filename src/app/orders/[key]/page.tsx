@@ -106,7 +106,7 @@ export default async function OrderDetail({
       <Container sx={{ py: 5 }}>
         <Stack direction={'row'} alignItems={'center'} spacing={1}>
           <Typography variant="h3">
-            <span style={{ fontWeight: 100, opacity: 0.75 }}>Order #</span>
+            <span style={{ opacity: 0.5 }}>Order #</span>
             <span style={{ fontWeight: 700 }}>{key}</span>
           </Typography>
 
