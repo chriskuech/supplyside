@@ -135,12 +135,8 @@ export default function ItemizedCostLines({ resource }: Props) {
       </Card>
 
       <Stack direction={'row'} justifyContent={'end'}>
-        <Button
-          size="small"
-          onClick={() => createCost(resource.id)}
-          startIcon={<Add />}
-        >
-          Add Itemized Cost
+        <Button onClick={() => createCost(resource.id)} startIcon={<Add />}>
+          Itemized Cost
         </Button>
       </Stack>
     </Stack>
