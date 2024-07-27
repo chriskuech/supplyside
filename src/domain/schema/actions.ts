@@ -64,6 +64,9 @@ export const readSchema = async ({
             },
           },
         },
+        orderBy: {
+          order: 'asc',
+        },
       },
     },
   })
