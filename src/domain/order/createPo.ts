@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
 import { createBlob } from '../blobs/actions'
 import { fields } from '../schema/template/system-fields'
+import { readResource } from '../resource/actions'
 import { renderPo } from './renderPo'
 import prisma from '@/lib/prisma'
 
@@ -15,7 +16,7 @@ type CreatePoParams = {
 export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   const buffer = await renderPo({ accountId, resourceId })
 
-  const [blob, field] = await Promise.all([
+  const [blob, field, resource] = await Promise.all([
     createBlob({
       accountId,
       buffer,
@@ -32,12 +33,23 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
         id: true,
       },
     }),
+    readResource({ accountId, id: resourceId }),
   ])
+
+  const vendorName = resource?.fields.find(
+    (f) => f.templateId === fields.vendor.templateId,
+  )?.value?.resource?.name
+  const issuedDate = resource?.fields.find(
+    (f) => f.templateId === fields.issuedDate.templateId,
+  )?.value?.date
+  const number = resource?.fields.find(
+    (f) => f.templateId === fields.number.templateId,
+  )?.value?.string
 
   const input: Prisma.ValueCreateInput = {
     File: {
       create: {
-        name: 'po.pdf',
+        name: `Order #${number} - ${issuedDate?.toDateString()} - ${vendorName}.pdf`,
         Account: {
           connect: {
             id: accountId,
