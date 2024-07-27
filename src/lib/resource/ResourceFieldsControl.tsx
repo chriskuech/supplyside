@@ -163,17 +163,24 @@ export default async function ResourceFieldsControl({
           </AccordionSummary>
           <AccordionDetails>
             <Stack spacing={3} direction={'row'}>
-              {s.fields.length === 1 && s.fields.at(0)?.name === s.name ? (
-                <Field
-                  inputId={`rf-${s.fields.at(0)?.id}`}
-                  resourceId={resource.id}
-                  field={s.fields.at(0) ?? fail()}
-                  value={
-                    resource.fields.find(
-                      (rf) => rf.fieldId === s.fields.at(0)?.id,
-                    )?.value
-                  }
-                />
+              {s.fields.length === 1 && s.fields.at(0)?.type === 'Textarea' ? (
+                <Box>
+                  {s.fields.at(0)?.name !== s.name && (
+                    <Typography variant="overline" gutterBottom>
+                      {s.fields.at(0)?.name}
+                    </Typography>
+                  )}
+                  <Field
+                    inputId={`rf-${s.fields.at(0)?.id}`}
+                    resourceId={resource.id}
+                    field={s.fields.at(0) ?? fail()}
+                    value={
+                      resource.fields.find(
+                        (rf) => rf.fieldId === s.fields.at(0)?.id,
+                      )?.value
+                    }
+                  />
+                </Box>
               ) : (
                 chunkByN(s.fields, 3).map((fs, i) => (
                   <Stack key={i} spacing={3} flex={1}>
