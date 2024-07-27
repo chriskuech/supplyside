@@ -70,6 +70,7 @@ export default function ItemizedCostLines({ resource }: Props) {
                 </TableCell>
                 <TableCell align="right">
                   <Select
+                    sx={{ width: '4rem', textAlign: 'left' }}
                     defaultValue={row.isPercentage ? '%' : '$'}
                     onChange={(e) =>
                       updateCost(row.id, {
