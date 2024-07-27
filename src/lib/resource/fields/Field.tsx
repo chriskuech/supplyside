@@ -64,7 +64,13 @@ export default function Field({
     .with('Date', () => (
       <DatePicker
         sx={{ width: '100%' }}
-        defaultValue={dayjs(value?.date)}
+        slotProps={{
+          field: {
+            clearable: true,
+            onClear: () => handleChange({ date: null }),
+          },
+        }}
+        defaultValue={value?.date && dayjs(value.date)}
         onChange={(value) => handleChange({ date: value?.toDate() ?? null })}
       />
     ))
