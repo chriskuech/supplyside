@@ -70,6 +70,7 @@ export default function ItemizedCostLines({ resource }: Props) {
                 </TableCell>
                 <TableCell align="right">
                   <Select
+                    sx={{ width: '4rem', textAlign: 'left' }}
                     defaultValue={row.isPercentage ? '%' : '$'}
                     onChange={(e) =>
                       updateCost(row.id, {
@@ -135,12 +136,8 @@ export default function ItemizedCostLines({ resource }: Props) {
       </Card>
 
       <Stack direction={'row'} justifyContent={'end'}>
-        <Button
-          size="small"
-          onClick={() => createCost(resource.id)}
-          startIcon={<Add />}
-        >
-          Add Itemized Cost
+        <Button onClick={() => createCost(resource.id)} startIcon={<Add />}>
+          Itemized Cost
         </Button>
       </Stack>
     </Stack>
