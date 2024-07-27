@@ -48,7 +48,7 @@ export const renderPo = async (params: RenderPoParams) => {
       left: '15px',
       right: '15px',
     },
-    printBackground: true,
+    printBackground: params.isPreview,
   })
 
   page.close()

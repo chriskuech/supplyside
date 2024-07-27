@@ -17,6 +17,7 @@ import { readUser } from '@/lib/iam/actions'
 import ItemizedCostLines from '@/lib/resource/ItemizedCostLines'
 import ApproveButton from '@/lib/order/ApproveButton'
 import DownloadPoButton from '@/lib/order/DownloadPoButton'
+import PreviewPoButton from '@/lib/order/PreviewPoButton'
 
 const AssigneeControl = dynamic(() => import('@/lib/order/AssigneeControl'), {
   ssr: false,
@@ -31,9 +32,12 @@ const CreateResourceButton = dynamic(
   { ssr: false },
 )
 
-const PreviewPoButton = dynamic(() => import('@/lib/order/PreviewPoButton'), {
-  ssr: false,
-})
+const PreviewDraftPoButton = dynamic(
+  () => import('@/lib/order/PreviewDraftPoButton'),
+  {
+    ssr: false,
+  },
+)
 
 const EditButton = dynamic(() => import('@/lib/order/EditButton'), {
   ssr: false,
@@ -117,6 +121,9 @@ export default async function OrderDetail({
             />
           </Box>
           <Box height={'min-content'}>
+            <PreviewPoButton schema={schema} resource={resource} />
+          </Box>
+          <Box height={'min-content'}>
             <DownloadPoButton schema={schema} resource={resource} />
           </Box>
           {!isDraft && (
@@ -166,7 +173,7 @@ export default async function OrderDetail({
             >
               {isDraft && (
                 <>
-                  <PreviewPoButton resourceId={resource.id} />
+                  <PreviewDraftPoButton resourceId={resource.id} />
                   <StatusTransitionButton
                     resourceId={resource.id}
                     statusOption={orderStatusOptions.submitted}
@@ -177,7 +184,7 @@ export default async function OrderDetail({
               {status?.templateId ===
                 orderStatusOptions.submitted.templateId && (
                 <>
-                  <PreviewPoButton resourceId={resource.id} />
+                  <PreviewDraftPoButton resourceId={resource.id} />
                   <ApproveButton
                     resourceId={resource.id}
                     isDisabled={user.isApprover}

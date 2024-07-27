@@ -109,7 +109,7 @@ export default function Field({
       <Select
         id={inputId}
         fullWidth
-        defaultValue={value?.option?.id ?? ''}
+        value={value?.option?.id ?? ''}
         onChange={(e) => handleChange({ optionId: e.target.value })}
       >
         {field.options.map((o) => (
