@@ -6,4 +6,4 @@ export type Params = {
 }
 
 export const getDownloadPath = (params: Params): string =>
-  `/api/download/${encodeURIComponent(params.fileName)}.${params.mimeType.toLowerCase().split('/').pop()}?blobId=${params.blobId}${params.isPreview ? '&preview' : ''}`
+  `/api/download/${encodeURIComponent(params.fileName)}?blobId=${params.blobId}${params.isPreview ? '&preview' : ''}`
