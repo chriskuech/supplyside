@@ -28,7 +28,7 @@ import { getDownloadPath } from '../blobs/utils'
 import { Data, Resource } from './types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
-import { copyLinkedResourceFields } from './fields/actions'
+import { copyLinkedResourceFields, updateValue } from './fields/actions'
 import prisma from '@/lib/prisma'
 
 const ajv = new Ajv()
@@ -196,6 +196,16 @@ export const createResource = async ({
       ),
     ),
   )
+
+  if (type === 'Order') {
+    await updateValue({
+      resourceId: resource.id,
+      fieldId:
+        schema.allFields.find((f) => f.templateId === fields.number.templateId)
+          ?.id ?? fail(),
+      value: { string: resource.key.toString() },
+    })
+  }
 
   return resource
 }

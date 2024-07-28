@@ -19,6 +19,7 @@ import { match } from 'ts-pattern'
 import dynamic from 'next/dynamic'
 import { readSchema } from '../schema/actions'
 import ReadonlyTextarea from './fields/ReadonlyTextarea'
+import ResourceField from './fields/ResourceField'
 import { Resource } from '@/domain/resource/types'
 
 const Field = dynamic(() => import('./fields/Field'))
@@ -133,8 +134,13 @@ export default async function ResourceFieldsControl({
                               )
                               .with(
                                 { fieldType: 'Resource' },
-                                ({ value: { resource } }) =>
-                                  resource?.key ?? '-',
+                                ({ value: { resource } }) => (
+                                  <ResourceField
+                                    value={resource}
+                                    resourceType={field.resourceType ?? fail()}
+                                    isReadOnly
+                                  />
+                                ),
                               )
                               .with(undefined, () => '-')
                               .exhaustive()}

@@ -61,7 +61,6 @@ const htmlDocument = (content: string) => `
   <html lang="en">
     <head>
       <meta charset="UTF-8">
-      <title>PO</title>
       <style>
         body {
           background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(watermark)}');

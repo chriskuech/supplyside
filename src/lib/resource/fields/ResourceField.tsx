@@ -1,5 +1,6 @@
 'use client'
 
+import assert from 'assert'
 import {
   Autocomplete,
   Drawer,
@@ -20,7 +21,7 @@ import { ValueResource } from '@/domain/resource/types'
 
 type Props = {
   value: ValueResource | null
-  onChange: (resourceId: string | null) => void
+  onChange?: (resourceId: string | null) => void
   resourceType: ResourceType
   isReadOnly?: boolean
 }
@@ -45,7 +46,7 @@ export default function ResourceField({
         }))
         .exhaustive(),
     }).then(({ id }) => {
-      onChange(id)
+      onChange?.(id)
       setOpen(true)
     })
 
@@ -78,7 +79,7 @@ export default function ResourceField({
           </Tooltip>
           {!isReadOnly && (
             <Tooltip title={`Clear the selected ${resourceType}`}>
-              <IconButton onClick={() => onChange(null)} size="small">
+              <IconButton onClick={() => onChange?.(null)} size="small">
                 <Clear fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -90,6 +91,8 @@ export default function ResourceField({
       </>
     )
   }
+
+  assert(onChange)
 
   return (
     <EditableResourceField
