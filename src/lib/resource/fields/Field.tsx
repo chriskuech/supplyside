@@ -64,7 +64,13 @@ export default function Field({
     .with('Date', () => (
       <DatePicker
         sx={{ width: '100%' }}
-        defaultValue={dayjs(value?.date)}
+        slotProps={{
+          field: {
+            clearable: true,
+            onClear: () => handleChange({ date: null }),
+          },
+        }}
+        defaultValue={value?.date && dayjs(value.date)}
         onChange={(value) => handleChange({ date: value?.toDate() ?? null })}
       />
     ))
@@ -109,9 +115,11 @@ export default function Field({
       <Select
         id={inputId}
         fullWidth
-        defaultValue={value?.option?.id ?? ''}
-        onChange={(e) => handleChange({ optionId: e.target.value })}
+        displayEmpty
+        value={value?.option?.id ?? ''}
+        onChange={(e) => handleChange({ optionId: e.target.value || null })}
       >
+        <MenuItem value="">-</MenuItem>
         {field.options.map((o) => (
           <MenuItem key={o.id} value={o.id}>
             {o.name}

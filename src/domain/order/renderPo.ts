@@ -48,7 +48,7 @@ export const renderPo = async (params: RenderPoParams) => {
       left: '15px',
       right: '15px',
     },
-    printBackground: true,
+    printBackground: params.isPreview,
   })
 
   page.close()
@@ -61,7 +61,7 @@ const htmlDocument = (content: string) => `
   <html lang="en">
     <head>
       <meta charset="UTF-8">
-      <title>PO</title>
+      <title>Purchase Order</title>
       <style>
         body {
           background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(watermark)}');
@@ -77,6 +77,6 @@ const htmlDocument = (content: string) => `
 const watermark = `
   <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="none"/>
-    <text x="100" y="100" font-family="sans-serif" font-size="40" fill="rgba(0,0,0,0.3)" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(-27 100 100)">PREVIEW</text>
+    <text x="100" y="100" font-family="sans-serif" font-size="40" fill="rgba(0,0,0,0.2)" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(-27 100 100)">PREVIEW</text>
   </svg>
 `

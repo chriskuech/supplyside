@@ -85,7 +85,7 @@ export const findResources = async ({
     )
     SELECT "id", "key", "name"
     FROM "View"
-    -- WHERE "name" % ${input}  -- % operator uses pg_trgm for similarity matching
+    WHERE "name" ILIKE '%' || ${input} || '%' OR "name" % ${input} -- % operator uses pg_trgm for similarity matching
     ORDER BY similarity("name", ${input}) DESC
     LIMIT 15
   `

@@ -6,7 +6,7 @@ import { readSession } from '@/lib/session'
 import prisma from '@/lib/prisma'
 
 /**
- * /api/download/[filename]?blobId=<blobId>[&no-impersonation]
+ * /api/download/[filename]?blobId=<blobId>[&no-impersonation][&preview]
  */
 export async function GET(
   req: NextRequest,
@@ -39,7 +39,9 @@ export async function GET(
   return new NextResponse(blob.buffer, {
     headers: {
       'Content-Type': blob.mimeType,
-      'Content-Disposition': `attachment; filename=${filename}`,
+      ...(query.get('preview') === null
+        ? { 'Content-Disposition': `attachment; filename=${filename}` }
+        : undefined),
     },
   })
 }

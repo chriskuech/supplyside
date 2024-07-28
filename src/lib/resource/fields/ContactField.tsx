@@ -127,7 +127,7 @@ const ContactForm: FC<ContactFormProps> = ({ contact, onChange, onCancel }) => {
         label="Phone"
         defaultValue={contact?.phone}
         onChange={({ target: { value } }) =>
-          setDto((prev) => ({ ...prev, name: value }))
+          setDto((prev) => ({ ...prev, phone: value }))
         }
         InputProps={{
           startAdornment: (
