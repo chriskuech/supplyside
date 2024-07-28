@@ -1,3 +1,4 @@
+
 services:
   postgres:
     network_mode: "host"
@@ -33,4 +34,5 @@ services:
 
 volumes:
   postgres_data:
-  azurite_data: # redis_data:
+  azurite_data:
+  # redis_data:
