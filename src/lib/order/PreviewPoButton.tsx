@@ -20,7 +20,7 @@ export default function PreviewPoButton({ resource }: Props) {
   if (!file) return null
 
   return (
-    <Tooltip title="Download Purchase Order file">
+    <Tooltip title="Preview Purchase Order file">
       <IconButton
         onClick={() =>
           window.open(
