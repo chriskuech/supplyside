@@ -6,6 +6,13 @@
 import { ReactNode } from 'react'
 import { Cost } from '@prisma/client'
 import prisma from '../prisma'
+import {
+  BgColorHeader,
+  Border0Padding,
+  CurrencyPadding,
+  PoDocumentStyles,
+  RemovePaddingAndBorder,
+} from './PoDocumentStyles'
 import { readResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readBlob } from '@/domain/blobs/actions'
@@ -51,84 +58,11 @@ export default async function PoDocument({
 
   return (
     <div>
-      <style>
-        {`
-              body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-              }
-              .header, .section {
-                width: 100%;
-                margin-bottom: 30px;
-              }
-              .header {
-                text-align: center;
-                padding: 20px;
-                overflow: hidden;
-              }
-              .content {
-                padding: 20px;
-              }
-              table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-bottom: 10px;
-              }
-              th, td {
-                  border: 1px solid black;
-                  padding: 8px;
-                  text-align: left;
-              }
-              th {
-                padding: 4px 8px;
-              }
-              .terms-conditions {
-                page-break-before: always;
-               }
-              .notes, .payment-terms, .vendor, .shipping, .items {
-                margin-bottom: 20px;
-              }
-              .notes, .payment-terms, .vendor, .shipping {
-                width: 48%;
-                display: inline-block;
-                vertical-align: top;
-              }
-              .notes {
-                width: 100%;
-              }
-              .items {
-                width: 100%;
-              }
-              .terms-conditions, .reference-number {
-                  margin: 20px 0;
-                  padding: 10px; 
-                  border-radius: 4px; 
-              }
-
-              .terms-conditions table, .reference-number table {
-                  width: 100%; 
-                  border-collapse: collapse;
-              }
-
-              .terms-conditions th, .reference-number th {
-                  padding: 10px; 
-                  background-color: #CCCCCC;
-              }
-
-              .terms-conditions td, .reference-number td {
-                  padding: 8px;
-              }
-              .terms-conditions td {
-                min-height: 400px; 
-                line-height: 36px;
-              }
-              .reference-number td {
-                min-height: 200px; 
-                line-height: 36px;
-              }
-            `}
-      </style>
+      <PoDocumentStyles />
+      <Border0Padding />
+      <CurrencyPadding />
+      <RemovePaddingAndBorder />
+      <BgColorHeader />
       <div className="header1" style={{ padding: '20px' }}>
         <div
           style={{
@@ -171,7 +105,7 @@ export default async function PoDocument({
         >
           <table style={{ border: '1px solid', minHeight: '100px' }}>
             <thead>
-              <tr style={{ backgroundColor: '#CCCCCC' }}>
+              <tr className="bg-color-header">
                 <th>Notes</th>
               </tr>
             </thead>
@@ -200,7 +134,7 @@ export default async function PoDocument({
         >
           <table style={{ border: '1px solid', minHeight: '100px' }}>
             <thead>
-              <tr style={{ backgroundColor: '#CCCCCC' }}>
+              <tr className="bg-color-header">
                 <th colSpan={3}>Payment Terms</th>
               </tr>
             </thead>
@@ -209,7 +143,7 @@ export default async function PoDocument({
                 <td style={{ border: 0, padding: '2px', fontWeight: '600' }}>
                   Currency
                 </td>
-                <td style={{ border: 0, padding: '2px' }}>
+                <td className="border-0-padding">
                   {
                     resource.fields.find(
                       (f) => f.templateId === fields.currency.templateId,
@@ -221,7 +155,7 @@ export default async function PoDocument({
                 <td style={{ border: 0, padding: '2px', fontWeight: '600' }}>
                   Payment Terms
                 </td>
-                <td style={{ border: 0, padding: '2px' }}>
+                <td className="border-0-padding">
                   {
                     resource.fields.find(
                       (f) => f.templateId === fields.paymentTerms.templateId,
@@ -233,7 +167,7 @@ export default async function PoDocument({
                 <td style={{ border: 0, padding: '2px', fontWeight: '600' }}>
                   Taxable
                 </td>
-                <td style={{ border: 0, padding: '2px' }}>
+                <td className="border-0-padding">
                   {resource.fields.find(
                     (f) => f.templateId === fields.taxable.templateId,
                   )?.value.boolean
@@ -255,13 +189,13 @@ export default async function PoDocument({
         >
           <table style={{ border: '1px solid', minHeight: '170px' }}>
             <thead>
-              <tr style={{ backgroundColor: '#CCCCCC' }}>
+              <tr className="bg-color-header">
                 <th style={{ fontWeight: '600' }}>Vendor</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ border: 0, padding: '2px' }}>
+                <td className="border-0-padding">
                   {
                     vendor.fields.find(
                       (f) => f.templateId === fields.name.templateId,
@@ -270,7 +204,7 @@ export default async function PoDocument({
                 </td>
               </tr>
               <tr>
-                <td style={{ border: 0, padding: '2px' }}>
+                <td className="border-0-padding">
                   {
                     vendor.fields.find(
                       (f) => f.templateId === fields.primaryAddress.templateId,
@@ -279,7 +213,7 @@ export default async function PoDocument({
                 </td>
               </tr>
               <tr>
-                <td rowSpan={4} style={{ border: 0, padding: '2px' }}>
+                <td rowSpan={4} className="border-0-padding">
                   <br />
                   <u>
                     <b>c/o:</b>
@@ -307,7 +241,7 @@ export default async function PoDocument({
         >
           <table style={{ border: '1px solid', minHeight: '170px' }}>
             <thead>
-              <tr style={{ backgroundColor: '#CCCCCC' }}>
+              <tr className="bg-color-header">
                 <th colSpan={2}>Shipping</th>
               </tr>
             </thead>
@@ -326,10 +260,10 @@ export default async function PoDocument({
                   <table style={{ width: '100%', border: '0', margin: 0 }}>
                     <tbody>
                       <tr>
-                        <td style={{ padding: '2px', border: '0' }}>
+                        <td className="border-0-padding">
                           <strong>Method</strong>
                         </td>
-                        <td style={{ padding: '2px', border: '0' }}>
+                        <td className="border-0-padding">
                           {
                             resource.fields.find(
                               (f) =>
@@ -340,10 +274,10 @@ export default async function PoDocument({
                         </td>
                       </tr>
                       <tr>
-                        <td style={{ padding: '2px', border: '0' }}>
+                        <td className="border-0-padding">
                           <strong>Account #</strong>
                         </td>
-                        <td style={{ padding: '2px', border: '0' }}>
+                        <td className="border-0-padding">
                           {
                             resource.fields.find(
                               (f) =>
@@ -363,7 +297,7 @@ export default async function PoDocument({
                         >
                           Incoterms
                         </td>
-                        <td style={{ padding: '2px', border: '0' }}>
+                        <td className="border-0-padding">
                           {
                             resource.fields.find(
                               (f) =>
@@ -411,12 +345,12 @@ export default async function PoDocument({
         <div className="items">
           <table>
             <thead>
-              <tr style={{ backgroundColor: '#CCCCCC' }}>
+              <tr className="bg-color-header">
                 <th style={{ borderRight: 0 }}>#</th>
-                <th style={{ borderRight: 0, borderLeft: 0 }}>Item</th>
-                <th style={{ borderRight: 0, borderLeft: 0 }}>Unit</th>
-                <th style={{ borderRight: 0, borderLeft: 0 }}>Qty</th>
-                <th style={{ borderRight: 0, borderLeft: 0 }}>Unit Price</th>
+                <th className="remove-padding-border">Item</th>
+                <th className="remove-padding-border">Unit</th>
+                <th className="remove-padding-border">Qty</th>
+                <th className="remove-padding-border">Unit Price</th>
                 <th style={{ borderLeft: 0 }}>Total Price</th>
               </tr>
             </thead>
@@ -436,7 +370,7 @@ export default async function PoDocument({
                 <td style={{ border: 0 }}>[item oum]</td>
                 <td style={{ border: 0 }}>[qty]</td>
                 <td style={{ border: 0 }}>[unit]</td>
-                <td style={{ borderLeft: 0 }}>[total]</td>
+                <td style={{ borderLeft: 0, textAlign: 'right' }}>[total]</td>
               </tr>
               <tr>
                 <td colSpan={4} style={{ padding: 0 }}>
@@ -488,7 +422,7 @@ export default async function PoDocument({
                 <td style={{ border: 0 }}>[item oum]</td>
                 <td style={{ border: 0 }}>[qty]</td>
                 <td style={{ border: 0 }}>[unit]</td>
-                <td style={{ borderLeft: 0 }}>[total]</td>
+                <td style={{ borderLeft: 0, textAlign: 'right' }}>[total]</td>
               </tr>
               <tr>
                 <td colSpan={4} style={{ padding: 0 }}>
@@ -526,10 +460,10 @@ export default async function PoDocument({
               </tr>
               <tr>
                 <td
-                  colSpan={2}
+                  colSpan={3}
                   style={{ border: 0, margin: 0, padding: 0 }}
                 ></td>
-                <td colSpan={4} style={{ border: 0, margin: 0, padding: 0 }}>
+                <td colSpan={3} style={{ border: 0, margin: 0, padding: 0 }}>
                   <table width={'100%'} style={{ border: 0, margin: 0 }}>
                     <tr>
                       <td
@@ -549,6 +483,7 @@ export default async function PoDocument({
                           borderBottom: 0,
                           borderTop: 0,
                           padding: '2px 5px',
+                          textAlign: 'right',
                         }}
                       >
                         $
@@ -576,6 +511,7 @@ export default async function PoDocument({
                               borderBottom: 0,
                               borderTop: 0,
                               padding: '2px 5px',
+                              textAlign: 'right',
                             }}
                           >
                             ${item.value}
@@ -601,6 +537,7 @@ export default async function PoDocument({
                           backgroundColor: '#C7E1F2',
                           borderTop: 0,
                           padding: '2px 5px',
+                          textAlign: 'right',
                         }}
                       >
                         $
@@ -618,7 +555,7 @@ export default async function PoDocument({
         <div className="terms-conditions">
           <table>
             <thead>
-              <tr style={{ backgroundColor: '#CCCCCC' }}>
+              <tr className="bg-color-header">
                 <th>Terms and Conditions</th>
               </tr>
             </thead>
