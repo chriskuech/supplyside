@@ -44,6 +44,8 @@ export default function Field({
 }: Props) {
   const theme = useTheme()
 
+  //TODO: add debouncer
+
   return match(field.type)
     .with('Checkbox', () => (
       <Checkbox
@@ -166,7 +168,7 @@ export default function Field({
     ))
     .with('Resource', () => (
       <ResourceField
-        value={value?.resource ? value.resource : null}
+        value={value?.resource ?? null}
         onChange={(resourceId) => onChange({ resourceId })}
         resourceType={field.resourceType ?? fail()}
         isReadOnly={isReadOnly}
