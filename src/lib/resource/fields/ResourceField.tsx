@@ -51,12 +51,12 @@ export default function ResourceField({
   }, [resourceType])
 
   useEffect(() => {
-    if (value?.id) {
-      readResource({ id: value.id }).then(setResource)
-    } else {
+    if (!value?.id) {
       setResource(null)
+    } else if (value.id !== resource?.id) {
+      readResource({ id: value.id }).then(setResource)
     }
-  }, [value, resourceType])
+  }, [resource?.id, value?.id])
 
   const handleCreate = (name: string) =>
     createResource({
