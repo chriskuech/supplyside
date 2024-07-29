@@ -220,7 +220,11 @@ export default async function OrderDetail({
 
       <Container sx={{ py: 5 }}>
         <Stack spacing={5}>
-          <ResourceFieldsControl resource={resource} isReadOnly={!isDraft} />
+          <ResourceFieldsControl
+            schema={schema}
+            resource={resource}
+            isReadOnly={!isDraft}
+          />
           <Stack spacing={2}>
             <Stack direction={'row'} alignItems={'end'}>
               <Typography variant="h4" flexGrow={1}>

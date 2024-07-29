@@ -1,5 +1,3 @@
-'use server'
-
 import assert, { fail } from 'assert'
 import {
   Accordion,
@@ -17,36 +15,34 @@ import { range } from 'remeda'
 import { Check, Clear, ExpandMore } from '@mui/icons-material'
 import { match } from 'ts-pattern'
 import dynamic from 'next/dynamic'
-import { readSchema } from '../schema/actions'
 import ReadonlyTextarea from './fields/ReadonlyTextarea'
 import ResourceField from './fields/ResourceField'
 import { Resource } from '@/domain/resource/types'
+import { Schema } from '@/domain/schema/types'
 
 const FieldControl = dynamic(() => import('./fields/FieldControl'))
 
 type Props = {
+  schema: Schema
   resource: Resource
   isReadOnly?: boolean
+  singleColumn?: boolean
 }
 
-export default async function ResourceFieldsControl({
+export default function ResourceFieldsControl({
+  schema,
   resource,
   isReadOnly,
+  singleColumn,
 }: Props) {
-  const [systemSchema, customSchema] = await Promise.all([
-    readSchema({ resourceType: resource.type, isSystem: true }),
-    readSchema({ resourceType: resource.type, isSystem: false }),
-  ])
+  const columns = singleColumn ? 1 : 3
 
   if (isReadOnly) {
     return (
       <Card variant="elevation">
         <CardContent>
           <Stack direction={'row'} spacing={5} overflow={'hidden'}>
-            {chunkByN(
-              [...systemSchema.sections, ...customSchema.sections],
-              3,
-            ).map((sections, i) => (
+            {chunkByN(schema.sections, columns).map((sections, i) => (
               <Stack key={i} flex={1} divider={<Divider />} spacing={2}>
                 {sections.map((section) => (
                   <Stack key={section.id}>
@@ -160,7 +156,7 @@ export default async function ResourceFieldsControl({
 
   return (
     <Box>
-      {[...systemSchema.sections, ...customSchema.sections].map((s, i) => (
+      {schema.sections.map((s, i) => (
         <Accordion key={s.id} defaultExpanded={i === 0} variant="outlined">
           <AccordionSummary expandIcon={<ExpandMore />}>
             <Typography variant="h6" fontWeight={'bold'}>
@@ -188,7 +184,7 @@ export default async function ResourceFieldsControl({
               </Box>
             ) : (
               <Stack spacing={3} direction={'row'}>
-                {chunkByN(s.fields, 3).map((fs, i) => (
+                {chunkByN(s.fields, columns).map((fs, i) => (
                   <Stack key={i} spacing={3} flex={1}>
                     {fs.map((f) => (
                       <Box key={f.id}>
