@@ -41,52 +41,8 @@ export default function ResourceTable({
         headerName: field.name,
         width: 300,
         editable: isEditable,
-        //TODO: check if we should we use the default types for sorting?
-        // type: match<FieldType, GridColType>(field.type)
-        //   .with('Checkbox', () => 'boolean')
-        //   .with('Contact', () => 'custom')
-        //   .with('Date', () => 'date')
-        //   .with('File', () => 'boolean')
-        //   .with('Money', () => 'number')
-        //   .with('MultiSelect', () => 'custom')
-        //   .with('Number', () => 'number')
-        //   .with('Resource', () => 'custom')
-        //   .with('Textarea', () => 'string')
-        //   .with('Select', () => 'singleSelect')
-        //   .with('Text', () => 'string')
-        //   .with('User', () => 'custom')
-        //   .exhaustive(),
+        //TODO: check if we should we use the generic mui types for sorting or some other grid feature
         type: 'custom',
-        // valueGetter: (_, row) => {
-        //   const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
-
-        //   type Primitive = string | number | boolean | null | undefined
-
-        //   return match<FieldType, Primitive>(field.type)
-        //     .with('Checkbox', () => value?.boolean)
-        //     .with('Contact', () => value?.contact?.name)
-        //     .with('Date', () => value?.date?.toISOString())
-        //     .with('File', () => !!value?.file)
-        //     .with(P.union('Money', 'Number'), () => value?.number)
-        //     .with('MultiSelect', () =>
-        //       value?.options?.map((o) => o.name).join(' '),
-        //     )
-        //     .with(P.union('Text', 'Textarea'), () => value?.string)
-        //     .with(
-        //       'Select',
-        //       () =>
-        //         // field.options?.find((o) => o.id === value?.option?.id)?.name,
-        //         undefined,
-        //     )
-        //     .with(
-        //       'User',
-        //       () =>
-        //         value?.user &&
-        //         `${value.user.firstName} ${value.user.firstName}`,
-        //     )
-        //     .with('Resource', () => value?.resource?.name)
-        //     .exhaustive()
-        // },
         valueSetter: (value, row: Resource) => {
           if (!value) return row
           const updatedFields = row.fields.map((f) => ({
@@ -116,6 +72,18 @@ export default function ResourceTable({
                                 ?.name ?? '',
                           }))
                         : null,
+                    }))
+                    //TODO: get user information
+                    .with('User', () => ({
+                      ...f.value,
+                      user: {
+                        id: value.userId,
+                        email: '...',
+                        firstName: '...',
+                        fullName: '...',
+                        lastName: '...',
+                        profilePicPath: null,
+                      },
                     }))
                     .otherwise(() => ({ ...f.value, ...value }))
                 : f.value,
@@ -278,12 +246,12 @@ export default function ResourceTable({
       .with('Money', () => ({ number: value.number }))
       .with('Text', () => ({ string: value.string }))
       .with('Textarea', () => ({ string: value.string }))
-      .with('Select', () => ({ optionId: value.option?.id }))
+      .with('Select', () => ({ optionId: value.option?.id ?? null }))
       .with('MultiSelect', () => ({
-        optionIds: value.options?.map((option) => option.id),
+        optionIds: value.options?.map((option) => option.id) ?? null,
       }))
-      .with('User', () => ({ userId: value.user?.id }))
-      .with('Resource', () => ({ resourceId: value.resource?.id }))
+      .with('User', () => ({ userId: value.user?.id ?? null }))
+      .with('Resource', () => ({ resourceId: value.resource?.id ?? null }))
       .with(P.union('Contact', 'File'), () => ({}))
       .exhaustive()
 
