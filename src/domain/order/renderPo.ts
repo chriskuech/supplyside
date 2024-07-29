@@ -65,6 +65,9 @@ const htmlDocument = (content: string) => `
       <style>
         body {
           background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(watermark)}');
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
         }
       </style>
     </head>

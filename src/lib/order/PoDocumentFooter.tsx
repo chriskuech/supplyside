@@ -1,6 +1,7 @@
 'use server'
 
 import { ReactNode } from 'react'
+import { styles } from './PoDocumentStyles'
 import { readResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 
@@ -28,26 +29,16 @@ export default async function PoDocumentFooter({
     : 'N/A'
 
   return (
-    <div
-      style={{
-        fontSize: '16px',
-        textAlign: 'center',
-        padding: '25px',
-        backgroundColor: '#f0f0f0',
-        width: '100%',
-        fontWeight: 'normal',
-      }}
-    >
-      <p style={{ float: 'left' }}>
-        <span style={{ paddingRight: '30px' }}>order-{resource.key} </span>
+    <div style={styles.FooterClass}>
+      <div style={{ paddingRight: '30px', flex: 1 }}>
+        <span>order-{resource.key} </span>
         <span>issued date - {formattedDate}</span>
-      </p>
+      </div>
 
-      <p style={{ float: 'right', textAlign: 'right' }}>
-        {' '}
+      <div>
         Page <span className="pageNumber"></span> of{' '}
         <span className="totalPages"></span>
-      </p>
+      </div>
     </div>
   )
 }

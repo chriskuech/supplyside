@@ -1,25 +1,9 @@
 import React from 'react'
+import { CSSProperties } from 'react'
 
 export const PoDocumentStyles: React.FC = () => (
   <style>
     {`
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-      }
-      .header, .section {
-        width: 100%;
-        margin-bottom: 30px;
-      }
-      .header {
-        text-align: center;
-        padding: 20px;
-        overflow: hidden;
-      }
-      .content {
-        padding: 20px;
-      }
       table {
         width: 100%;
         border-collapse: collapse;
@@ -33,66 +17,88 @@ export const PoDocumentStyles: React.FC = () => (
       th {
         padding: 4px 8px;
       }
-      .terms-conditions {
-        page-break-before: always;
-      }
-      .notes, .payment-terms, .vendor, .shipping, .items {
-        margin-bottom: 20px;
-      }
-      .notes, .payment-terms, .vendor, .shipping {
-        width: 48%;
-        display: inline-block;
-        vertical-align: top;
-      }
-      .notes {
-        width: 100%;
-      }
-      .items {
-        width: 100%;
-      }
-      .terms-conditions, .reference-number {
-        margin: 20px 0;
-        padding: 10px; 
-        border-radius: 4px; 
-      }
-      .terms-conditions table, .reference-number table {
-        width: 100%; 
-        border-collapse: collapse;
-      }
-      .terms-conditions th, .reference-number th {
-        padding: 10px; 
-        background-color: #CCCCCC;
-      }
-      .terms-conditions td, .reference-number td {
-        padding: 8px;
-      }
-      .terms-conditions td {
-        min-height: 400px; 
-        line-height: 36px;
-      }
-      .reference-number td {
-        min-height: 200px; 
-        line-height: 36px;
-      }
-      .table-header-bg {
-        background-color: #CCCCCC;
-      }  
     `}
   </style>
 )
 
-export const Border0Padding: React.FC = () => (
-  <style>{`.border-0-padding { border: 0; padding: 2px; }`}</style>
-)
+export const Border0Padding: CSSProperties = {
+  border: '0px',
+  padding: '2px',
+  paddingLeft: '8px',
+  paddingRight: '8px',
+}
 
-export const CurrencyPadding: React.FC = () => (
-  <style>{`.border-padding-currency { border: '0px', padding: '2px', fontWeight: '600' }`}</style>
-)
+export const RemovePaddingAndBorder: CSSProperties = {
+  borderRight: 0,
+  borderLeft: 0,
+}
 
-export const RemovePaddingAndBorder: React.FC = () => (
-  <style>{`.remove-padding-border { border-right: 0; border-left: 0; }`}</style>
-)
+export const BgColorHeader: CSSProperties = {
+  backgroundColor: '#CCCCCC',
+}
 
-export const BgColorHeader: React.FC = () => (
-  <style>{`.bg-color-header { background-color: #CCCCCC; }`}</style>
-)
+const TextAlignRightClass: CSSProperties = {
+  textAlign: 'right',
+  padding: '2px 8px',
+}
+
+const PaymentPadding: CSSProperties = {
+  ...Border0Padding,
+  ...TextAlignRightClass,
+}
+
+const FontSize: CSSProperties = {
+  fontWeight: '600',
+}
+
+const ShippingCss: CSSProperties = {
+  ...FontSize,
+  ...Border0Padding,
+}
+
+const UnitPriceCSS: CSSProperties = {
+  ...TextAlignRightClass,
+  ...RemovePaddingAndBorder,
+}
+
+const FooterClass: CSSProperties = {
+  fontSize: '16px',
+  fontFamily: 'Arial, sans-serif',
+  padding: '25px',
+  alignItems: 'center',
+  display: 'flex',
+  flexGrow: 1,
+}
+
+const HeaderCssClass: CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'start',
+}
+
+const TotalAndSubtotalCssClass: CSSProperties = {
+  borderRight: 0,
+  fontWeight: 'bold',
+  verticalAlign: 'top',
+}
+
+const PaddingAndBorderTopClass: CSSProperties = {
+  borderTop: 0,
+  borderBottom: 0,
+  padding: '5px 8px',
+}
+
+export const styles = {
+  TotalAndSubtotalCssClass,
+  PaddingAndBorderTopClass,
+  RemovePaddingAndBorder,
+  Border0Padding,
+  BgColorHeader,
+  TextAlignRightClass,
+  PaymentPadding,
+  FontSize,
+  ShippingCss,
+  UnitPriceCSS,
+  FooterClass,
+  HeaderCssClass,
+}
