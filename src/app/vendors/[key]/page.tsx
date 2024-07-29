@@ -1,20 +1,20 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
-import { readResource } from '@/lib/resource/actions'
 import ResourceFieldControl from '@/lib/resource/ResourceFieldControl'
 import { fields } from '@/domain/schema/template/system-fields'
-import { readSchema } from '@/lib/schema/actions'
+import { readResource } from '@/domain/resource/actions'
+import { readSchema } from '@/domain/schema/actions'
 
 export default async function VendorDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
-  await requireSessionWithRedirect()
-  const [schema, resource] = await Promise.all([
-    readSchema({ resourceType: 'Vendor' }),
-    readResource({ type: 'Vendor', key: Number(key) }),
+  const { accountId } = await requireSessionWithRedirect()
+  const [resource, schema] = await Promise.all([
+    readResource({ accountId, type: 'Vendor', key: Number(key) }),
+    readSchema({ accountId, resourceType: 'Vendor' }),
   ])
 
   return (
@@ -34,7 +34,7 @@ export default async function VendorDetail({
               />
             </Box>
           </Stack>
-          <ResourceFieldsControl resource={resource} />
+          <ResourceFieldsControl resource={resource} schema={schema} />
         </Stack>
       </Stack>
     </Container>
