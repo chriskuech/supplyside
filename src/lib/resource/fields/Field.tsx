@@ -52,7 +52,7 @@ export default function Field({
       <Checkbox
         id={inputId}
         defaultChecked={value?.boolean ?? false}
-        onChange={(e) => debouncedOnChange({ boolean: e.target.checked })}
+        onChange={(e) => onChange({ boolean: e.target.checked })}
       />
     ))
     .with('Contact', () => (
@@ -132,9 +132,7 @@ export default function Field({
         fullWidth
         displayEmpty
         value={value?.option?.id ?? ''}
-        onChange={(e) =>
-          debouncedOnChange({ optionId: e.target.value || null })
-        }
+        onChange={(e) => onChange({ optionId: e.target.value || null })}
       >
         <MenuItem value="">-</MenuItem>
         {field.options.map((o) => (
@@ -170,7 +168,7 @@ export default function Field({
       <UserField
         inputId={inputId}
         userId={value?.user?.id}
-        onChange={(userId) => debouncedOnChange({ userId })}
+        onChange={(userId) => onChange({ userId })}
       />
     ))
     .with('Resource', () => (
