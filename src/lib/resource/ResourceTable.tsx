@@ -1,6 +1,11 @@
 'use client'
 
-import { DataGrid, DataGridProps, GridColDef } from '@mui/x-data-grid'
+import {
+  DataGrid,
+  DataGridProps,
+  GridColDef,
+  GridColType,
+} from '@mui/x-data-grid'
 import { FieldType } from '@prisma/client'
 import { Box, Chip, IconButton, Stack } from '@mui/material'
 import { Check, Clear } from '@mui/icons-material'
@@ -12,7 +17,7 @@ import { deleteResource } from './actions'
 import FieldGridCell from './fields/FieldGridCell'
 import FieldControl from './fields/FieldControl'
 import { Resource, Value } from '@/domain/resource/types'
-import { Schema } from '@/domain/schema/types'
+import { Option, Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
 import { updateValue, UpdateValueDto } from '@/domain/resource/fields/actions'
 
@@ -41,8 +46,57 @@ export default function ResourceTable({
         headerName: field.name,
         width: 300,
         editable: isEditable,
-        //TODO: check if we should we use the generic mui types for sorting or some other grid feature
-        type: 'custom',
+        valueOptions: match(field.type)
+          .with('Select', () => field.options)
+          .otherwise(() => undefined),
+        getOptionLabel: (option: Option) =>
+          match(field.type)
+            .with('Select', () => option.name)
+            .otherwise(() => undefined),
+        getOptionValue: (option: Option) =>
+          match(field.type)
+            .with('Select', () => option.id)
+            .otherwise(() => undefined),
+        type: match<FieldType, GridColType>(field.type)
+          .with('Textarea', () => 'string')
+          .with('Text', () => 'string')
+          .with('Money', () => 'number')
+          .with('Number', () => 'number')
+          .with('Checkbox', () => 'boolean')
+          .with('File', () => 'boolean')
+          .with('Date', () => 'date')
+          .with('Select', () => 'singleSelect')
+          .with('Contact', () => 'custom')
+          .with('MultiSelect', () => 'custom')
+          .with('Resource', () => 'custom')
+          .with('User', () => 'custom')
+          .exhaustive(),
+        valueGetter: (_, row) => {
+          const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
+
+          type Primitive = string | number | boolean | null | undefined
+
+          return match<FieldType, Primitive>(field.type)
+            .with('Checkbox', () => value?.boolean)
+            .with('Contact', () => value?.contact?.name)
+            .with('Date', () => value?.date?.toISOString())
+            .with('File', () => !!value?.file)
+            .with(P.union('Money', 'Number'), () => value?.number)
+            .with('MultiSelect', () =>
+              value?.options?.map((o) => o.name).join(' '),
+            )
+            .with(P.union('Text', 'Textarea'), () => value?.string)
+            .with('Select', () => value?.option?.id)
+            .with(
+              'User',
+              () =>
+                value?.user &&
+                `${value.user.firstName} ${value.user.firstName}`,
+            )
+            .with('Resource', () => value?.resource?.name)
+            .exhaustive()
+        },
+        valueParser: (value) => value,
         valueSetter: (value, row: Resource) => {
           if (!value) return row
           const updatedFields = row.fields.map((f) => ({
