@@ -19,6 +19,7 @@ import { match } from 'ts-pattern'
 import dynamic from 'next/dynamic'
 import { readSchema } from '../schema/actions'
 import ReadonlyTextarea from './fields/ReadonlyTextarea'
+import ResourceField from './fields/ResourceField'
 import { Resource } from '@/domain/resource/types'
 
 const FieldControl = dynamic(() => import('./fields/FieldControl'))
@@ -133,8 +134,13 @@ export default async function ResourceFieldsControl({
                               )
                               .with(
                                 { fieldType: 'Resource' },
-                                ({ value: { resource } }) =>
-                                  resource?.key ?? '-',
+                                ({ value: { resource } }) => (
+                                  <ResourceField
+                                    value={resource}
+                                    resourceType={field.resourceType ?? fail()}
+                                    isReadOnly
+                                  />
+                                ),
                               )
                               .with(undefined, () => '-')
                               .exhaustive()}
@@ -162,8 +168,13 @@ export default async function ResourceFieldsControl({
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Stack spacing={3} direction={'row'}>
-              {s.fields.length === 1 && s.fields.at(0)?.name === s.name ? (
+            {s.fields.length === 1 && s.fields.at(0)?.type === 'Textarea' ? (
+              <Box>
+                {s.fields.at(0)?.name !== s.name && (
+                  <Typography variant="overline" gutterBottom>
+                    {s.fields.at(0)?.name}
+                  </Typography>
+                )}
                 <FieldControl
                   inputId={`rf-${s.fields.at(0)?.id}`}
                   resourceId={resource.id}
@@ -174,8 +185,10 @@ export default async function ResourceFieldsControl({
                     )?.value
                   }
                 />
-              ) : (
-                chunkByN(s.fields, 3).map((fs, i) => (
+              </Box>
+            ) : (
+              <Stack spacing={3} direction={'row'}>
+                {chunkByN(s.fields, 3).map((fs, i) => (
                   <Stack key={i} spacing={3} flex={1}>
                     {fs.map((f) => (
                       <Box key={f.id}>
@@ -196,9 +209,9 @@ export default async function ResourceFieldsControl({
                       </Box>
                     ))}
                   </Stack>
-                ))
-              )}
-            </Stack>
+                ))}
+              </Stack>
+            )}
           </AccordionDetails>
         </Accordion>
       ))}

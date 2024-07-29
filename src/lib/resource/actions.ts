@@ -17,7 +17,11 @@ import { OptionTemplate } from '@/domain/schema/template/types'
 export const createResource = async (
   params: Omit<domain.CreateResourceParams, 'accountId'>,
 ): Promise<ResourceModel> => {
-  const { accountId } = await requireSession()
+  const { accountId, userId } = await requireSession()
+
+  if (params.type === 'Order') {
+    params.data = { ...params.data, Assignee: userId }
+  }
 
   return domain.createResource({ ...params, accountId })
 }
@@ -81,7 +85,7 @@ export const findResources = async ({
     )
     SELECT "id", "key", "name"
     FROM "View"
-    -- WHERE "name" % ${input}  -- % operator uses pg_trgm for similarity matching
+    WHERE "name" ILIKE '%' || ${input} || '%' OR "name" % ${input} -- % operator uses pg_trgm for similarity matching
     ORDER BY similarity("name", ${input}) DESC
     LIMIT 15
   `

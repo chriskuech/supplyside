@@ -37,7 +37,7 @@ async function main() {
     },
   })
 
-  await prisma().user.create({
+  const user = await prisma().user.create({
     data: {
       id: systemAccountId,
       accountId: systemAccountId,
@@ -59,11 +59,21 @@ async function main() {
 
   await applyTemplate(accountId)
 
+  const vendor = await createResource({
+    accountId,
+    type: ResourceType.Vendor,
+    data: {
+      Name: 'ACME Supplies',
+    },
+  })
+
   await createResource({
     accountId,
     type: ResourceType.Order,
     data: {
+      Assignee: user.id,
       Number: '42',
+      Vendor: vendor.id,
     },
   })
 }

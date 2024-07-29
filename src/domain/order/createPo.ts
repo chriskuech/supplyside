@@ -1,9 +1,13 @@
 'use server'
 
+import { fail } from 'assert'
 import { Prisma } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
 import { createBlob } from '../blobs/actions'
 import { fields } from '../schema/template/system-fields'
+import { readResource } from '../resource/actions'
+import { updateValue } from '../resource/fields/actions'
+import { readSchema } from '../schema/actions'
 import { renderPo } from './renderPo'
 import prisma from '@/lib/prisma'
 
@@ -13,31 +17,46 @@ type CreatePoParams = {
 }
 
 export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
+  const schema = await readSchema({ accountId, resourceType: 'Order' })
+
+  const documentFieldId =
+    schema.allFields.find((f) => f.templateId === fields.document.templateId)
+      ?.id ?? fail()
+  const issuedDateFieldId =
+    schema.allFields.find((f) => f.templateId === fields.issuedDate.templateId)
+      ?.id ?? fail()
+
+  await updateValue({
+    resourceId,
+    fieldId: issuedDateFieldId,
+    value: { date: new Date() },
+  })
+
   const buffer = await renderPo({ accountId, resourceId })
 
-  const [blob, field] = await Promise.all([
+  const [blob, resource] = await Promise.all([
     createBlob({
       accountId,
       buffer,
       type: 'application/pdf',
     }),
-    prisma().field.findUniqueOrThrow({
-      where: {
-        accountId_templateId: {
-          accountId,
-          templateId: fields.document.templateId,
-        },
-      },
-      select: {
-        id: true,
-      },
-    }),
+    readResource({ accountId, id: resourceId }),
   ])
+
+  const vendorName = resource?.fields.find(
+    (f) => f.templateId === fields.vendor.templateId,
+  )?.value?.resource?.name
+  const issuedDate = resource?.fields.find(
+    (f) => f.templateId === fields.issuedDate.templateId,
+  )?.value?.date
+  const number = resource?.fields.find(
+    (f) => f.templateId === fields.number.templateId,
+  )?.value?.string
 
   const input: Prisma.ValueCreateInput = {
     File: {
       create: {
-        name: 'po.pdf',
+        name: `Order #${number} - ${issuedDate?.toDateString()} - ${vendorName}.pdf`,
         Account: {
           connect: {
             id: accountId,
@@ -59,7 +78,7 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
       },
       resourceId_fieldId: {
         resourceId,
-        fieldId: field.id,
+        fieldId: documentFieldId,
       },
     },
     create: {
@@ -70,7 +89,7 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
       },
       Field: {
         connect: {
-          id: field.id,
+          id: documentFieldId,
         },
       },
       Value: { create: input },

@@ -8,9 +8,7 @@ import {
   MenuItem,
   Select,
   TextField,
-  TextareaAutosize,
   Typography,
-  useTheme,
 } from '@mui/material'
 import { match } from 'ts-pattern'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -44,8 +42,6 @@ export default function Field({
   onChange,
   inline,
 }: Props) {
-  const theme = useTheme()
-
   const debouncedOnChange = useMemo(
     () => debounce(onChange, { waitMs: 200 }).call,
     [onChange],
@@ -69,7 +65,13 @@ export default function Field({
     .with('Date', () => (
       <DatePicker
         sx={{ width: '100%' }}
-        defaultValue={dayjs(value?.date)}
+        slotProps={{
+          field: {
+            clearable: true,
+            onClear: () => debouncedOnChange({ date: null }),
+          },
+        }}
+        defaultValue={value?.date && dayjs(value.date)}
         onChange={(value) =>
           debouncedOnChange({ date: value?.toDate() ?? null })
         }
@@ -128,9 +130,13 @@ export default function Field({
       <Select
         id={inputId}
         fullWidth
-        defaultValue={value?.option?.id ?? ''}
-        onChange={(e) => debouncedOnChange({ optionId: e.target.value })}
+        displayEmpty
+        value={value?.option?.id ?? ''}
+        onChange={(e) =>
+          debouncedOnChange({ optionId: e.target.value || null })
+        }
       >
+        <MenuItem value="">-</MenuItem>
         {field.options.map((o) => (
           <MenuItem key={o.id} value={o.id}>
             {o.name}
@@ -150,23 +156,13 @@ export default function Field({
       isReadOnly ? (
         <Typography whiteSpace={'pre'}>{value?.string}</Typography>
       ) : (
-        <TextareaAutosize
+        <TextField
           id={inputId}
+          multiline
           minRows={3}
+          fullWidth
           defaultValue={value?.string ?? ''}
           onChange={(e) => debouncedOnChange({ string: e.target.value })}
-          style={{
-            width: '100%',
-            border: '1px solid',
-            borderRadius: 8,
-            padding: 8,
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            borderColor: match(theme.palette.mode)
-              .with('dark', () => '#333')
-              .with('light', () => '#ccc')
-              .exhaustive(),
-          }}
         />
       ),
     )
