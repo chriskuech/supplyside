@@ -15,6 +15,8 @@ import {
 import { match } from 'ts-pattern'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
+import { debounce } from 'remeda'
+import { useMemo } from 'react'
 import FileField from './FileField'
 import UserField from './UserField'
 import ResourceField from './ResourceField'
@@ -44,14 +46,17 @@ export default function Field({
 }: Props) {
   const theme = useTheme()
 
-  //TODO: add debouncer
+  const debouncedOnChange = useMemo(
+    () => debounce(onChange, { waitMs: 200 }).call,
+    [onChange],
+  )
 
   return match(field.type)
     .with('Checkbox', () => (
       <Checkbox
         id={inputId}
         defaultChecked={value?.boolean ?? false}
-        onChange={(e) => onChange({ boolean: e.target.checked })}
+        onChange={(e) => debouncedOnChange({ boolean: e.target.checked })}
       />
     ))
     .with('Contact', () => (
@@ -65,7 +70,9 @@ export default function Field({
       <DatePicker
         sx={{ width: '100%' }}
         defaultValue={dayjs(value?.date)}
-        onChange={(value) => onChange({ date: value?.toDate() ?? null })}
+        onChange={(value) =>
+          debouncedOnChange({ date: value?.toDate() ?? null })
+        }
       />
     ))
     .with('File', () => (
@@ -82,7 +89,9 @@ export default function Field({
         fullWidth
         type="number"
         defaultValue={value?.number}
-        onChange={(e) => onChange({ number: parseFloat(e.target.value) })}
+        onChange={(e) =>
+          debouncedOnChange({ number: parseFloat(e.target.value) })
+        }
         InputProps={{
           startAdornment: <InputAdornment position="start">$</InputAdornment>,
         }}
@@ -101,7 +110,7 @@ export default function Field({
           value?.options?.some((valueOption) => valueOption.id === option.id),
         )}
         onChange={(e, options) =>
-          onChange({ optionIds: options.map((o) => o.id) })
+          debouncedOnChange({ optionIds: options.map((o) => o.id) })
         }
       />
     ))
@@ -110,7 +119,9 @@ export default function Field({
         id={inputId}
         type="number"
         defaultValue={value?.number}
-        onChange={(e) => onChange({ number: parseFloat(e.target.value) })}
+        onChange={(e) =>
+          debouncedOnChange({ number: parseFloat(e.target.value) })
+        }
       />
     ))
     .with('Select', () => (
@@ -118,7 +129,7 @@ export default function Field({
         id={inputId}
         fullWidth
         defaultValue={value?.option?.id ?? ''}
-        onChange={(e) => onChange({ optionId: e.target.value })}
+        onChange={(e) => debouncedOnChange({ optionId: e.target.value })}
       >
         {field.options.map((o) => (
           <MenuItem key={o.id} value={o.id}>
@@ -132,7 +143,7 @@ export default function Field({
         id={inputId}
         fullWidth
         defaultValue={value?.string}
-        onChange={(e) => onChange({ string: e.target.value })}
+        onChange={(e) => debouncedOnChange({ string: e.target.value })}
       />
     ))
     .with('Textarea', () =>
@@ -143,7 +154,7 @@ export default function Field({
           id={inputId}
           minRows={3}
           defaultValue={value?.string ?? ''}
-          onChange={(e) => onChange({ string: e.target.value })}
+          onChange={(e) => debouncedOnChange({ string: e.target.value })}
           style={{
             width: '100%',
             border: '1px solid',
@@ -163,13 +174,13 @@ export default function Field({
       <UserField
         inputId={inputId}
         userId={value?.user?.id}
-        onChange={(userId) => onChange({ userId })}
+        onChange={(userId) => debouncedOnChange({ userId })}
       />
     ))
     .with('Resource', () => (
       <ResourceField
         value={value?.resource ?? null}
-        onChange={(resourceId) => onChange({ resourceId })}
+        onChange={(resourceId) => debouncedOnChange({ resourceId })}
         resourceType={field.resourceType ?? fail()}
         isReadOnly={isReadOnly}
       />
