@@ -1,16 +1,44 @@
 'use server'
 
+import { ReactNode } from 'react'
+import { styles } from './PoDocumentStyles'
+import { readResource } from '@/domain/resource/actions'
+import { fields } from '@/domain/schema/template/system-fields'
+
 type Props = {
   accountId: string
   resourceId: string
 }
 
-export default async function PoDocumentFooter(props: Props) {
+export default async function PoDocumentFooter({
+  accountId,
+  resourceId,
+}: Props): Promise<ReactNode> {
+  const resource = await readResource({
+    accountId,
+    id: resourceId,
+    type: 'Order',
+  })
+
+  const issuedDate = resource.fields.find(
+    (f) => f.templateId === fields.issuedDate.templateId,
+  )?.value.date
+
+  const formattedDate = issuedDate
+    ? new Date(issuedDate).toLocaleDateString()
+    : 'N/A'
+
   return (
-    <div style={{ fontSize: '30px' }}>
-      Purchase Order Footer!
-      <br />
-      {JSON.stringify(props, null, 4)}
+    <div style={styles.FooterClass}>
+      <div style={{ paddingRight: '30px', flex: 1 }}>
+        <span>order-{resource.key} </span>
+        <span>issued date - {formattedDate}</span>
+      </div>
+
+      <div>
+        Page <span className="pageNumber"></span> of{' '}
+        <span className="totalPages"></span>
+      </div>
     </div>
   )
 }

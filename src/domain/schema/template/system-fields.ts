@@ -105,6 +105,11 @@ export const fields = {
     type: 'Resource',
     resourceType: 'Order',
   },
+  orderNotes: {
+    templateId: '3749e137-c1d8-474a-9539-ba9b82cd6e94',
+    name: 'Order Notes',
+    type: 'Textarea',
+  },
   orderStatus: {
     templateId: 'd51e1004-c999-4ac1-8692-ff3d966c5dc3',
     name: 'Order Status',
