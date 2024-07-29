@@ -1,4 +1,4 @@
-import { Badge, Person, Email, Phone } from '@mui/icons-material'
+import { Badge, Person, Email, Phone, Visibility } from '@mui/icons-material'
 import {
   Card,
   ListItemButton,
@@ -6,14 +6,20 @@ import {
   ListItemText,
   List,
   ListItem,
+  Typography,
+  Stack,
+  Dialog,
+  IconButton,
 } from '@mui/material'
 import { Contact } from '@prisma/client'
+import { useState } from 'react'
 
 type Props = {
   contact: Contact
+  inline?: boolean
 }
 
-export default function ContactCard({ contact }: Props) {
+function FullContactCard({ contact }: Props) {
   return (
     <Card variant="outlined">
       <List disablePadding dense>
@@ -63,5 +69,36 @@ export default function ContactCard({ contact }: Props) {
         </ListItemButton>
       </List>
     </Card>
+  )
+}
+
+function InlineContact({ contact }: Props) {
+  const [isOpen, setIsOpen] = useState(false)
+  return (
+    <>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+        <FullContactCard contact={contact} />
+      </Dialog>
+      <Card variant="outlined">
+        <Stack direction="row" paddingX={1} alignItems="center" spacing={1}>
+          <Person />
+          <Typography flexGrow={1}>{contact.name}</Typography>
+          <IconButton
+            style={{ justifySelf: 'flex-end' }}
+            onClick={() => setIsOpen(true)}
+          >
+            <Visibility />
+          </IconButton>
+        </Stack>
+      </Card>
+    </>
+  )
+}
+
+export default function ContactCard(props: Props) {
+  return props.inline ? (
+    <InlineContact {...props} />
+  ) : (
+    <FullContactCard {...props} />
   )
 }

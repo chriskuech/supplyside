@@ -231,7 +231,11 @@ export default async function OrderDetail({
                 data={{ Order: resource.id }}
               />
             </Stack>
-            <ResourceTable schema={lineSchema} resources={lineResources} />
+            <ResourceTable
+              schema={lineSchema}
+              resources={lineResources}
+              isEditable
+            />
             <Stack direction={'row'} justifyContent={'end'}>
               <Box width={'60%'}>
                 <ItemizedCostLines resource={resource} />

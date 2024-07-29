@@ -32,6 +32,22 @@ export const updateValue = async ({
   fieldId,
   value,
 }: UpdateValueDto) => {
+  //TODO:  check if value object is correct for each fieldType
+
+  const { optionIds, ...rest } = value
+  const data = {
+    ...rest,
+    ValueOption: optionIds
+      ? {
+          create: optionIds.map((optionId) => ({ optionId })),
+        }
+      : undefined,
+  }
+
+  await prisma().valueOption.deleteMany({
+    where: { Value: { ResourceFieldValue: { every: { fieldId } } } },
+  })
+
   const [rf] = await Promise.all([
     prisma().resourceField.upsert({
       where: {
@@ -51,10 +67,10 @@ export const updateValue = async ({
             id: fieldId,
           },
         },
-        Value: { create: value },
+        Value: { create: data },
       },
       update: {
-        Value: { update: value },
+        Value: { update: data },
       },
       include: {
         Resource: true,
