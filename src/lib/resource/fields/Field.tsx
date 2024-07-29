@@ -13,24 +13,24 @@ import {
 import { match } from 'ts-pattern'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
+import { debounce } from 'remeda'
+import { useMemo } from 'react'
 import FileField from './FileField'
 import UserField from './UserField'
 import ResourceField from './ResourceField'
 import ContactField from './ContactField'
 import { Value } from '@/domain/resource/types'
-import {
-  UpdateValueDto,
-  updateContact,
-  updateValue,
-} from '@/domain/resource/fields/actions'
+import { UpdateValueDto, updateContact } from '@/domain/resource/fields/actions'
 import { Field as FieldModel } from '@/domain/schema/types'
 
-type Props = {
+export type Props = {
   inputId: string
   resourceId: string
   field: FieldModel
   value: Value | undefined
   isReadOnly?: boolean // TODO: finish plumbing
+  onChange: (value: UpdateValueDto['value']) => void
+  inline?: boolean
 }
 
 export default function Field({
@@ -39,26 +39,27 @@ export default function Field({
   field,
   value,
   isReadOnly,
+  onChange,
+  inline,
 }: Props) {
-  const handleChange = async (value: UpdateValueDto['value']) =>
-    updateValue({
-      resourceId,
-      fieldId: field.id,
-      value,
-    })
+  const debouncedOnChange = useMemo(
+    () => debounce(onChange, { waitMs: 200 }).call,
+    [onChange],
+  )
 
   return match(field.type)
     .with('Checkbox', () => (
       <Checkbox
         id={inputId}
         defaultChecked={value?.boolean ?? false}
-        onChange={(e) => handleChange({ boolean: e.target.checked })}
+        onChange={(e) => onChange({ boolean: e.target.checked })}
       />
     ))
     .with('Contact', () => (
       <ContactField
         contact={value?.contact ?? null}
         onChange={(contact) => updateContact(resourceId, field.id, contact)}
+        inline={inline}
       />
     ))
     .with('Date', () => (
@@ -67,15 +68,22 @@ export default function Field({
         slotProps={{
           field: {
             clearable: true,
-            onClear: () => handleChange({ date: null }),
+            onClear: () => debouncedOnChange({ date: null }),
           },
         }}
         defaultValue={value?.date && dayjs(value.date)}
-        onChange={(value) => handleChange({ date: value?.toDate() ?? null })}
+        onChange={(value) =>
+          debouncedOnChange({ date: value?.toDate() ?? null })
+        }
       />
     ))
     .with('File', () => (
-      <FileField resourceId={resourceId} value={value} field={field} />
+      <FileField
+        resourceId={resourceId}
+        value={value}
+        field={field}
+        isReadOnly={isReadOnly}
+      />
     ))
     .with('Money', () => (
       <TextField
@@ -83,7 +91,9 @@ export default function Field({
         fullWidth
         type="number"
         defaultValue={value?.number}
-        onChange={(e) => handleChange({ number: parseFloat(e.target.value) })}
+        onChange={(e) =>
+          debouncedOnChange({ number: parseFloat(e.target.value) })
+        }
         InputProps={{
           startAdornment: <InputAdornment position="start">$</InputAdornment>,
         }}
@@ -95,11 +105,14 @@ export default function Field({
         multiple
         fullWidth
         getOptionLabel={(o) => o.name}
+        getOptionKey={(o) => o.id}
         renderInput={(props) => <TextField {...props} />}
         options={field.options}
-        defaultValue={value?.options}
+        defaultValue={field.options.filter((option) =>
+          value?.options?.some((valueOption) => valueOption.id === option.id),
+        )}
         onChange={(e, options) =>
-          handleChange({ optionIds: options.map((o) => o.id) })
+          debouncedOnChange({ optionIds: options.map((o) => o.id) })
         }
       />
     ))
@@ -108,7 +121,9 @@ export default function Field({
         id={inputId}
         type="number"
         defaultValue={value?.number}
-        onChange={(e) => handleChange({ number: parseFloat(e.target.value) })}
+        onChange={(e) =>
+          debouncedOnChange({ number: parseFloat(e.target.value) })
+        }
       />
     ))
     .with('Select', () => (
@@ -117,7 +132,7 @@ export default function Field({
         fullWidth
         displayEmpty
         value={value?.option?.id ?? ''}
-        onChange={(e) => handleChange({ optionId: e.target.value || null })}
+        onChange={(e) => onChange({ optionId: e.target.value || null })}
       >
         <MenuItem value="">-</MenuItem>
         {field.options.map((o) => (
@@ -132,7 +147,7 @@ export default function Field({
         id={inputId}
         fullWidth
         defaultValue={value?.string}
-        onChange={(e) => handleChange({ string: e.target.value })}
+        onChange={(e) => debouncedOnChange({ string: e.target.value })}
       />
     ))
     .with('Textarea', () =>
@@ -145,7 +160,7 @@ export default function Field({
           minRows={3}
           fullWidth
           defaultValue={value?.string ?? ''}
-          onChange={(e) => handleChange({ string: e.target.value })}
+          onChange={(e) => debouncedOnChange({ string: e.target.value })}
         />
       ),
     )
@@ -153,13 +168,13 @@ export default function Field({
       <UserField
         inputId={inputId}
         userId={value?.user?.id}
-        onChange={(userId) => handleChange({ userId })}
+        onChange={(userId) => onChange({ userId })}
       />
     ))
     .with('Resource', () => (
       <ResourceField
-        value={value?.resource ? value.resource : null}
-        onChange={(resourceId) => handleChange({ resourceId })}
+        value={value?.resource ?? null}
+        onChange={(resourceId) => debouncedOnChange({ resourceId })}
         resourceType={field.resourceType ?? fail()}
         isReadOnly={isReadOnly}
       />

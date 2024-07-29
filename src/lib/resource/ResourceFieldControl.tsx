@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic'
 import { Resource } from '@/domain/resource/types'
 import { Schema } from '@/domain/schema/types'
 
-const Field = dynamic(() => import('./fields/Field'))
+const FieldControl = dynamic(() => import('./fields/FieldControl'))
 
 type Props = {
   resource: Resource
@@ -22,7 +22,7 @@ export default function ResourceFieldControl({
   if (!field) return '❌ Field not found'
 
   return (
-    <Field
+    <FieldControl
       inputId={`rf-${field.id}`}
       resourceId={resource.id}
       field={field}

@@ -22,7 +22,7 @@ import ReadonlyTextarea from './fields/ReadonlyTextarea'
 import ResourceField from './fields/ResourceField'
 import { Resource } from '@/domain/resource/types'
 
-const Field = dynamic(() => import('./fields/Field'))
+const FieldControl = dynamic(() => import('./fields/FieldControl'))
 
 type Props = {
   resource: Resource
@@ -175,7 +175,7 @@ export default async function ResourceFieldsControl({
                     {s.fields.at(0)?.name}
                   </Typography>
                 )}
-                <Field
+                <FieldControl
                   inputId={`rf-${s.fields.at(0)?.id}`}
                   resourceId={resource.id}
                   field={s.fields.at(0) ?? fail()}
@@ -196,7 +196,7 @@ export default async function ResourceFieldsControl({
                           {f.name}
                         </Typography>
                         <Box>
-                          <Field
+                          <FieldControl
                             inputId={`rf-${f.id}`}
                             resourceId={resource.id}
                             field={f}

@@ -4,6 +4,7 @@
     "ms-azuretools.vscode-docker",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "ruschaaf.extended-embedded-languages"
+    "ruschaaf.extended-embedded-languages",
+    "yoavbls.pretty-ts-errors"
   ]
 }
