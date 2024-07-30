@@ -7,7 +7,7 @@ import { ReactNode } from 'react'
 import { Cost } from '@prisma/client'
 import prisma from '../prisma'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
-import { readResource } from '@/domain/resource/actions'
+import { readResource, readResources } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readBlob } from '@/domain/blobs/actions'
 
@@ -38,6 +38,14 @@ export default async function PoDocument({
       })
     : undefined
 
+  const lines = await readResources({
+    accountId,
+    type: 'Line',
+    where: {
+      '==': [{ var: 'Order' }, resource?.id],
+    },
+  })
+
   const account = await prisma().account.findUniqueOrThrow({
     where: { id: accountId },
   })
@@ -64,7 +72,7 @@ export default async function PoDocument({
   return (
     <div>
       <PoDocumentStyles />
-      <div style={{ ...styles.HeaderCssClass, padding: '20px' }}>
+      <div style={{ ...styles.HeaderCssClass, padding: '0px 20px' }}>
         <div style={{ flex: '1' }}>
           <img
             src={base64Url}
@@ -78,7 +86,8 @@ export default async function PoDocument({
           }}
         >
           <h1 style={{ margin: '0', fontWeight: '600' }}>PURCHASE ORDER</h1>
-          Order #{resource.key} | {formattedDate}
+          Order #{resource.key} <span style={{ margin: '0px 5px' }}>|</span>{' '}
+          {formattedDate}
         </div>
       </div>
       <div style={{ padding: '0px 20px' }}>
@@ -87,7 +96,7 @@ export default async function PoDocument({
       </div>
       <div style={{ padding: '20px' }}>
         <div style={styles.HeaderCssClass}>
-          <div style={{ flex: '1', marginBottom: '20px' }}>
+          <div style={{ flex: '1', marginBottom: '10px' }}>
             <table
               style={{
                 border: '1px solid',
@@ -101,7 +110,10 @@ export default async function PoDocument({
               </thead>
               <tbody>
                 <tr>
-                  <td rowSpan={3} style={{ verticalAlign: 'top' }}>
+                  <td
+                    rowSpan={3}
+                    style={{ verticalAlign: 'top', whiteSpace: 'pre-wrap' }}
+                  >
                     {
                       resource.fields.find(
                         (f) => f.templateId === fields.orderNotes.templateId,
@@ -186,7 +198,7 @@ export default async function PoDocument({
               style={{
                 border: '1px solid',
                 minHeight: '170px',
-                marginBottom: '25px',
+                marginBottom: '20px',
               }}
             >
               <thead>
@@ -205,7 +217,9 @@ export default async function PoDocument({
                   </td>
                 </tr>
                 <tr>
-                  <td style={styles.Border0Padding}>
+                  <td
+                    style={{ ...styles.Border0Padding, whiteSpace: 'pre-wrap' }}
+                  >
                     {
                       vendor?.fields.find(
                         (f) =>
@@ -255,6 +269,7 @@ export default async function PoDocument({
                       width: '200px',
                       verticalAlign: 'top',
                       padding: '5px 8px',
+                      whiteSpace: 'pre-wrap',
                     }}
                   >
                     {
@@ -356,124 +371,87 @@ export default async function PoDocument({
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td rowSpan={2} style={styles.TotalAndSubtotalCssClass}>
-                  1
-                </td>
-                <td
-                  rowSpan={2}
-                  style={{
-                    ...styles.TotalAndSubtotalCssClass,
-                    borderLeft: 0,
-                    minWidth: '245px',
-                  }}
-                >
-                  [item name]
-                  <br />
-                  [item decsription]
-                </td>
-                <td style={{ border: 0, width: '200px' }}>[item oum]</td>
-                <td style={{ border: 0, textAlign: 'right' }}>[qty]</td>
-                <td style={{ border: 0, textAlign: 'right' }}>[unit]</td>
-                <td
-                  style={{
-                    borderLeft: 0,
-                    textAlign: 'right',
-                  }}
-                >
-                  [total]
-                </td>
-              </tr>
-              <tr>
-                <td colSpan={4} style={{ padding: 0 }}>
-                  <table style={{ border: 0, margin: 0 }}>
-                    <tr>
-                      <td
-                        style={{
-                          border: 0,
-                          padding: '5px 8px',
-                          fontWeight: 600,
-                          width: '150px',
-                        }}
-                      >
-                        [custom field]
-                      </td>
-                      <td style={{ border: 0, padding: '5px 8px' }}>
-                        [custom field value]
-                      </td>
-                    </tr>
-                    <tr>
-                      <td
-                        style={{
-                          border: 0,
-                          padding: '5px 8px',
-                          fontWeight: 600,
-                          width: '150px',
-                        }}
-                      >
-                        [custom field]
-                      </td>
-                      <td style={{ border: 0, padding: '5px 8px' }}>
-                        [custom field value]
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
+              {lines.map((line, index) => (
+                <>
+                  <tr>
+                    <td rowSpan={2} style={styles.TotalAndSubtotalCssClass}>
+                      {index + 1}
+                    </td>
+                    <td
+                      rowSpan={2}
+                      style={{
+                        ...styles.TotalAndSubtotalCssClass,
+                        borderLeft: 0,
+                        minWidth: '275px',
+                      }}
+                    >
+                      [item name]
+                      <br />
+                      <span style={{ fontWeight: 'normal', color: '#575656' }}>
+                        [item decsription]
+                      </span>
+                    </td>
+                    <td style={{ border: 0, width: '100px' }}>[unit]</td>
+                    <td style={{ border: 0, textAlign: 'right' }}>
+                      {
+                        line.fields.find(
+                          (f) => f.templateId === fields.quantity.templateId,
+                        )?.value.number
+                      }
+                    </td>
+                    <td
+                      style={{ border: 0, textAlign: 'right', width: '100px' }}
+                    >
+                      {(
+                        line.fields.find(
+                          (f) => f.templateId === fields.unitCost.templateId,
+                        )?.value.number || 0
+                      ).toLocaleString('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                      })}
+                    </td>
+                    <td
+                      style={{
+                        borderLeft: 0,
+                        textAlign: 'right',
+                        width: '100px',
+                      }}
+                    >
+                      {(
+                        line.fields.find(
+                          (f) => f.templateId === fields.totalCost.templateId,
+                        )?.value.number || 0
+                      ).toLocaleString('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                      })}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan={4} style={{ padding: 0 }}>
+                      <table style={{ border: 0, margin: 0 }}>
+                        <tr>
+                          <td
+                            style={{
+                              border: 0,
+                              padding: '5px 8px',
+                              fontWeight: 600,
+                              width: '150px',
+                            }}
+                          >
+                            [custom field]
+                          </td>
+                          <td style={{ border: 0, padding: '5px 8px' }}>
+                            [custom field value]
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </>
+              ))}
 
-              <tr>
-                <td rowSpan={2} style={styles.TotalAndSubtotalCssClass}>
-                  2
-                </td>
-                <td
-                  rowSpan={2}
-                  style={{ ...styles.TotalAndSubtotalCssClass, borderLeft: 0 }}
-                >
-                  [item name]
-                  <br />
-                  [item decsription]
-                </td>
-                <td style={{ border: 0, width: '200px' }}>[item oum]</td>
-                <td style={{ border: 0, textAlign: 'right' }}>[qty]</td>
-                <td style={{ border: 0, textAlign: 'right' }}>[unit]</td>
-                <td style={{ borderLeft: 0, textAlign: 'right' }}>[total]</td>
-              </tr>
-              <tr>
-                <td colSpan={4} style={{ padding: 0 }}>
-                  <table style={{ border: 0, margin: 0 }}>
-                    <tr>
-                      <td
-                        style={{
-                          border: 0,
-                          padding: '5px 8px',
-                          fontWeight: 600,
-                          width: '150px',
-                        }}
-                      >
-                        [custom field]
-                      </td>
-                      <td style={{ border: 0, padding: '5px 8px' }}>
-                        [custom field value]
-                      </td>
-                    </tr>
-                    <tr>
-                      <td
-                        style={{
-                          border: 0,
-                          padding: '5px 8px',
-                          fontWeight: 600,
-                          width: '150px',
-                        }}
-                      >
-                        [custom field]
-                      </td>
-                      <td style={{ border: 0, padding: '5px 8px' }}>
-                        [custom field value]
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
               <tr>
                 <td
                   colSpan={2}
@@ -495,6 +473,7 @@ export default async function PoDocument({
                         style={{
                           ...styles.PaddingAndBorderTopClass,
                           fontWeight: 'bold',
+                          ...styles.BgColorHeader,
                         }}
                       >
                         SUBTOTAL
@@ -502,6 +481,7 @@ export default async function PoDocument({
                       <td
                         style={{
                           ...styles.PaddingAndBorderTopClass,
+                          ...styles.BgColorHeader,
                           fontWeight: 'bold',
                           textAlign: 'right',
                         }}
@@ -579,7 +559,7 @@ export default async function PoDocument({
           </table>
         </div>
         <div style={{ pageBreakBefore: 'always' }}>
-          <table style={{ minHeight: '200px' }}>
+          <table style={{ minHeight: '200px', marginTop: '20px' }}>
             <thead>
               <tr style={styles.BgColorHeader}>
                 <th>Terms and Conditions</th>

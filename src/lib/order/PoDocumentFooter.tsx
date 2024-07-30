@@ -31,8 +31,9 @@ export default async function PoDocumentFooter({
   return (
     <div style={styles.FooterClass}>
       <div style={{ paddingRight: '30px', flex: 1 }}>
-        <span>order-{resource.key} </span>
-        <span>issued date - {formattedDate}</span>
+        <span>Order #{resource.key} </span>
+        <span style={{ margin: '0px 5px' }}>| </span>
+        {formattedDate}
       </div>
 
       <div>

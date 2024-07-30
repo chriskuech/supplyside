@@ -43,8 +43,8 @@ export const renderPo = async (params: RenderPoParams) => {
     footerTemplate: ReactDom.renderToString(footer),
     displayHeaderFooter: true,
     margin: {
-      top: '15px',
-      bottom: '15px',
+      top: '33px',
+      bottom: '33px',
       left: '15px',
       right: '15px',
     },

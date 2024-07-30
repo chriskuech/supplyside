@@ -64,7 +64,7 @@ const UnitPriceCSS: CSSProperties = {
 const FooterClass: CSSProperties = {
   fontSize: '16px',
   fontFamily: 'Arial, sans-serif',
-  padding: '25px',
+  padding: '25px 30px',
   alignItems: 'center',
   display: 'flex',
   flexGrow: 1,
