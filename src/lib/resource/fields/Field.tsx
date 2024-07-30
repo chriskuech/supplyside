@@ -52,7 +52,7 @@ export default function Field({
     ))
     .with('Contact', () =>
       isReadOnly ? (
-        <ContactCard contact={value?.contact} inline={inline} />
+        <ContactCard contact={value?.contact ?? null} inline={inline} />
       ) : (
         <ContactField
           contact={value?.contact ?? null}

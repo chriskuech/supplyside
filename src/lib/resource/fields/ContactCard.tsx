@@ -15,12 +15,12 @@ import { Contact } from '@prisma/client'
 import { useState } from 'react'
 
 type Props = {
-  contact?: Contact | null
+  contact: Contact | null
   inline?: boolean
 }
 
 type ContactProp = {
-  contact: NonNullable<Props['contact']>
+  contact: Contact
 }
 
 function FullContactCard({ contact }: ContactProp) {
