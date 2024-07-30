@@ -15,11 +15,15 @@ import { Contact } from '@prisma/client'
 import { useState } from 'react'
 
 type Props = {
-  contact: Contact
+  contact: Contact | null
   inline?: boolean
 }
 
-function FullContactCard({ contact }: Props) {
+type ContactProp = {
+  contact: Contact
+}
+
+function FullContactCard({ contact }: ContactProp) {
   return (
     <Card variant="outlined">
       <List disablePadding dense>
@@ -72,7 +76,7 @@ function FullContactCard({ contact }: Props) {
   )
 }
 
-function InlineContact({ contact }: Props) {
+function InlineContact({ contact }: ContactProp) {
   const [isOpen, setIsOpen] = useState(false)
   return (
     <>
@@ -96,9 +100,13 @@ function InlineContact({ contact }: Props) {
 }
 
 export default function ContactCard(props: Props) {
+  if (!props.contact) {
+    return <Typography>No contact</Typography>
+  }
+
   return props.inline ? (
-    <InlineContact {...props} />
+    <InlineContact contact={props.contact} />
   ) : (
-    <FullContactCard {...props} />
+    <FullContactCard contact={props.contact} />
   )
 }
