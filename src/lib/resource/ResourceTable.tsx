@@ -180,7 +180,7 @@ export default function ResourceTable({
               'Contact',
               () =>
                 value?.contact && (
-                  <ContactCard contact={value?.contact} inline />
+                  <ContactCard contact={value.contact} inline />
                 ),
             )
             .with(
@@ -329,7 +329,7 @@ export default function ResourceTable({
       rows={resources}
       rowSelection={false}
       autoHeight
-      rowHeight={70}
+      density="standard"
       processRowUpdate={handleProcessRowUpdate}
       onRowClick={({ row: { type, key } }) => {
         if (type === 'Line') return

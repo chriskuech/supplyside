@@ -16,6 +16,7 @@ export default function FieldGridCell({ cellParams, field }: Props) {
     (rf) => rf.fieldId === cellParams.field,
   )
   const apiRef = useGridApiContext()
+  //TODO: focus input on mount to prevent additional click to edit
 
   if (!currentField) return
   const { value, fieldId } = currentField
@@ -27,6 +28,7 @@ export default function FieldGridCell({ cellParams, field }: Props) {
       id: cellParams.id,
       field: cellParams.field,
       value,
+      debounceMs: 200,
     })
   }
 
@@ -38,6 +40,7 @@ export default function FieldGridCell({ cellParams, field }: Props) {
       resourceId={resourceId}
       value={value}
       inline
+      isReadOnly
     />
   )
 }
