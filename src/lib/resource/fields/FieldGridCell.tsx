@@ -40,7 +40,6 @@ export default function FieldGridCell({ cellParams, field }: Props) {
       resourceId={resourceId}
       value={value}
       inline
-      isReadOnly
     />
   )
 }
