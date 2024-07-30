@@ -12,6 +12,7 @@ import { Check, Clear } from '@mui/icons-material'
 import { P, match } from 'ts-pattern'
 import { useMemo } from 'react'
 import { difference } from 'remeda'
+import { useSnackbar } from 'notistack'
 import ContactCard from './fields/ContactCard'
 import { deleteResource } from './actions'
 import FieldGridCell from './fields/FieldGridCell'
@@ -33,6 +34,7 @@ export default function ResourceTable({
   isEditable,
   ...props
 }: Props) {
+  const { enqueueSnackbar } = useSnackbar()
   const columns = useMemo<GridColDef<Resource>[]>(
     () => [
       {
@@ -316,7 +318,9 @@ export default function ResourceTable({
         value: newValue,
       })
     } catch {
-      //TODO: add error toast
+      enqueueSnackbar('There was an error updating the field', {
+        variant: 'error',
+      })
       return oldRow
     }
 
