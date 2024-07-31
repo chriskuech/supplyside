@@ -101,8 +101,8 @@ export default function ResourceTable({
         valueParser: (value) => value,
         valueSetter: (value, row: Resource) => {
           console.log(value)
-          if (typeof value !== 'object') return row //TODO: check why value is not an object when entering edit mode
-          const baseValue = {
+          if (typeof value !== 'object') return row //TODO: check why value is the raw value 'example' instead of an object {string: 'example'} or similar for other field types when entering edit mode
+          const emptyValue: Value = {
             boolean: null,
             contact: null,
             date: null,
@@ -116,7 +116,7 @@ export default function ResourceTable({
 
           const updatedValue = match<FieldType, Value>(field.type)
             .with('Select', () => ({
-              ...baseValue,
+              ...emptyValue,
               option: value?.optionId
                 ? {
                     id: value.optionId,
@@ -128,7 +128,7 @@ export default function ResourceTable({
                 : null,
             }))
             .with('MultiSelect', () => ({
-              ...baseValue,
+              ...emptyValue,
               options: value?.optionIds
                 ? value.optionIds.map((id: string) => ({
                     id,
@@ -140,7 +140,7 @@ export default function ResourceTable({
             }))
             //TODO: get user information
             .with('User', () => ({
-              ...baseValue,
+              ...emptyValue,
               user: {
                 id: value.userId,
                 email: '...',
@@ -150,7 +150,7 @@ export default function ResourceTable({
                 profilePicPath: null,
               },
             }))
-            .otherwise(() => ({ ...baseValue, ...value }))
+            .otherwise(() => ({ ...emptyValue, ...value }))
 
           const editedField = row.fields.find((f) => f.fieldId === field.id)
           if (!editedField) {
