@@ -15,9 +15,9 @@ import { difference } from 'remeda'
 import { useSnackbar } from 'notistack'
 import ContactCard from './fields/ContactCard'
 import { deleteResource } from './actions'
-import FieldGridCell from './fields/FieldGridCell'
+import FieldGridEditCell from './fields/FieldGridEditCell'
 import FieldControl from './fields/FieldControl'
-import { Resource, Value } from '@/domain/resource/types'
+import { Resource, ResourceField, Value } from '@/domain/resource/types'
 import { Option, Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
 import { updateValue, UpdateValueDto } from '@/domain/resource/fields/actions'
@@ -100,54 +100,76 @@ export default function ResourceTable({
         },
         valueParser: (value) => value,
         valueSetter: (value, row: Resource) => {
-          if (!value) return row
-          const updatedFields = row.fields.map((f) => ({
-            ...f,
-            value:
-              f.fieldId === field.id
-                ? match<FieldType, Value>(f.fieldType)
-                    .with('Select', () => ({
-                      ...f.value,
-                      option: value?.optionId
-                        ? {
-                            id: value.optionId,
-                            name:
-                              field.options.find(
-                                (option) => option.id === value.optionId,
-                              )?.name ?? '',
-                          }
-                        : null,
-                    }))
-                    .with('MultiSelect', () => ({
-                      ...f.value,
-                      options: value?.optionIds
-                        ? value.optionIds.map((id: string) => ({
-                            id,
-                            name:
-                              field.options.find((option) => option.id === id)
-                                ?.name ?? '',
-                          }))
-                        : null,
-                    }))
-                    //TODO: get user information
-                    .with('User', () => ({
-                      ...f.value,
-                      user: {
-                        id: value.userId,
-                        email: '...',
-                        firstName: '...',
-                        fullName: '...',
-                        lastName: '...',
-                        profilePicPath: null,
-                      },
-                    }))
-                    .otherwise(() => ({ ...f.value, ...value }))
-                : f.value,
-          }))
+          if (typeof value !== 'object') return row //TODO: check why value is the raw value 'example' instead of an object {string: 'example'} or similar for other field types when entering edit mode
+          const emptyValue: Value = {
+            boolean: null,
+            contact: null,
+            date: null,
+            file: null,
+            number: null,
+            option: null,
+            resource: null,
+            string: null,
+            user: null,
+          }
 
-          return {
-            ...row,
-            fields: updatedFields,
+          const updatedValue = match<FieldType, Value>(field.type)
+            .with('Select', () => ({
+              ...emptyValue,
+              option: value?.optionId
+                ? {
+                    id: value.optionId,
+                    name:
+                      field.options.find(
+                        (option) => option.id === value.optionId,
+                      )?.name ?? '',
+                  }
+                : null,
+            }))
+            .with('MultiSelect', () => ({
+              ...emptyValue,
+              options: value?.optionIds
+                ? value.optionIds.map((id: string) => ({
+                    id,
+                    name:
+                      field.options.find((option) => option.id === id)?.name ??
+                      '',
+                  }))
+                : null,
+            }))
+            //TODO: get user information
+            .with('User', () => ({
+              ...emptyValue,
+              user: {
+                id: value.userId,
+                email: '...',
+                firstName: '...',
+                fullName: '...',
+                lastName: '...',
+                profilePicPath: null,
+              },
+            }))
+            .otherwise(() => ({ ...emptyValue, ...value }))
+
+          const editedField = row.fields.find((f) => f.fieldId === field.id)
+          if (!editedField) {
+            const newField: ResourceField = {
+              fieldId: field.id,
+              fieldType: field.type,
+              templateId: field.templateId,
+              value: updatedValue,
+            }
+
+            return { ...row, fields: [...row.fields, newField] }
+          } else {
+            const otherFields = row.fields.filter((f) => f.fieldId !== field.id)
+
+            const updatedField = { ...editedField, value: updatedValue }
+
+            return {
+              ...row,
+              fields: [...otherFields, updatedField],
+            }
           }
         },
         valueFormatter: (_, row) => {
@@ -231,19 +253,11 @@ export default function ResourceTable({
             )
           )
         },
-        renderEditCell: (params) => {
-          const currentField = params.row.fields.find(
-            (rf) => rf.fieldId === field.id,
-          )
-
-          if (!currentField) return
-
-          return (
-            <Box display="flex" alignItems="center" height="100%" width="100%">
-              <FieldGridCell cellParams={params} field={field} />
-            </Box>
-          )
-        },
+        renderEditCell: (params) => (
+          <Box display="flex" alignItems="center" height="100%" width="100%">
+            <FieldGridEditCell cellParams={params} field={field} />
+          </Box>
+        ),
       })),
       {
         field: '_delete',

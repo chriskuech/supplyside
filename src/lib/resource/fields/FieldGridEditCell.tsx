@@ -11,17 +11,12 @@ type Props = {
   field: FieldModel
 }
 
-export default function FieldGridCell({ cellParams, field }: Props) {
+export default function FieldGridEditCell({ cellParams, field }: Props) {
   const currentField = cellParams.row.fields.find(
     (rf) => rf.fieldId === cellParams.field,
   )
   const apiRef = useGridApiContext()
   //TODO: focus input on mount to prevent additional click to edit
-
-  if (!currentField) return
-  const { value, fieldId } = currentField
-  const resourceId = cellParams.row.id
-  const inputId = `${cellParams.row.id}${fieldId}`
 
   const handleChange = (value: UpdateValueDto['value']) => {
     apiRef.current.setEditCellValue({
@@ -35,10 +30,10 @@ export default function FieldGridCell({ cellParams, field }: Props) {
   return (
     <Field
       field={field}
-      inputId={inputId}
+      inputId={`${cellParams.row.id}${field.id}`}
       onChange={handleChange}
-      resourceId={resourceId}
-      value={value}
+      resourceId={cellParams.row.id}
+      value={currentField?.value}
       inline
     />
   )
