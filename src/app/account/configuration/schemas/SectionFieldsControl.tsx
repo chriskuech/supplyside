@@ -25,10 +25,11 @@ import { Box, Stack, TextField } from '@mui/material'
 import { FC } from 'react'
 import { z } from 'zod'
 import { isPlainObject } from 'remeda'
+import { Field as FullField } from '../fields/actions'
 import { Field, Section } from './actions'
 
 type Props = {
-  fields: Field[]
+  fields: FullField[]
   section: Section
   onChange: (fieldIds: string[]) => void
 }
@@ -86,6 +87,7 @@ const SortableChip: FC<{
       <Chip
         key={field.id}
         label={field.name}
+        disabled={!!field.templateId}
         onDelete={() => onRemove(field.id)}
       />
     </Box>
