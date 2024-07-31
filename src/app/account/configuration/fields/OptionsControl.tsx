@@ -31,14 +31,20 @@ import { OptionPatch } from './actions'
 type Props = {
   values: OptionPatch[]
   onChange: (values: OptionPatch[]) => void
+  isDisabled?: boolean
 }
 
-export default function OptionsControl({ values, onChange }: Props) {
+export default function OptionsControl({
+  values,
+  onChange,
+  isDisabled,
+}: Props) {
   const optionNames = new Set(...values.map((v) => v.name))
 
   return (
     <Autocomplete<OptionPatch, true, boolean, true>
       multiple
+      disabled={isDisabled}
       freeSolo
       options={[]}
       value={values}
@@ -79,7 +85,11 @@ export default function OptionsControl({ values, onChange }: Props) {
           .otherwise(() => {})
       }
       renderTags={(values) => (
-        <SortableChips values={values} onChange={onChange} />
+        <SortableChips
+          values={values}
+          onChange={onChange}
+          isDisabled={isDisabled}
+        />
       )}
       renderInput={(params: AutocompleteRenderInputParams) => {
         const invalid =
@@ -107,7 +117,8 @@ export default function OptionsControl({ values, onChange }: Props) {
 const SortableChip: FC<{
   value: OptionPatch
   onRemove: (op: OptionPatch) => void
-}> = ({ value, onRemove }) => {
+  isDisabled?: boolean
+}> = ({ value, onRemove, isDisabled }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: value.id })
 
@@ -125,6 +136,7 @@ const SortableChip: FC<{
       <Chip
         key={value.id}
         label={value.name}
+        disabled={isDisabled}
         onDelete={() => onRemove(value)}
       />
     </Box>
@@ -134,7 +146,8 @@ const SortableChip: FC<{
 const SortableChips: FC<{
   values: OptionPatch[]
   onChange: (values: OptionPatch[]) => void
-}> = ({ values, onChange }) => {
+  isDisabled?: boolean
+}> = ({ values, onChange, isDisabled }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -179,6 +192,7 @@ const SortableChips: FC<{
               <SortableChip
                 key={value.id}
                 value={value}
+                isDisabled={isDisabled}
                 onRemove={(value) =>
                   onChange([
                     ...values.filter((v) => v.id !== value.id),

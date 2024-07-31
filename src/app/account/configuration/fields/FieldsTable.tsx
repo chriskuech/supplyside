@@ -66,7 +66,7 @@ export default function FieldsTable({ fields, onUpdate, onDelete }: Props) {
         columns={columns}
         rows={fields}
         rowSelection={false}
-        onRowClick={({ row }) => !row.templateId && setField(row)}
+        onRowClick={({ row }) => setField(row)}
       />
       <FieldModal
         field={field}
