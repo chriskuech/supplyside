@@ -100,7 +100,6 @@ export default function ResourceTable({
         },
         valueParser: (value) => value,
         valueSetter: (value, row: Resource) => {
-          console.log(value)
           if (typeof value !== 'object') return row //TODO: check why value is the raw value 'example' instead of an object {string: 'example'} or similar for other field types when entering edit mode
           const emptyValue: Value = {
             boolean: null,
