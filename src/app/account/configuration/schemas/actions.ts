@@ -8,6 +8,7 @@ import prisma from '@/lib/prisma'
 export type Field = {
   id: string
   name: string
+  templateId: string | null
 }
 
 export type Section = {
@@ -40,6 +41,7 @@ export const readSchemas = async (): Promise<Schema[]> => {
                 select: {
                   id: true,
                   name: true,
+                  templateId: true,
                 },
               },
             },

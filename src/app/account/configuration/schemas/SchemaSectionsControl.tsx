@@ -28,7 +28,8 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { z } from 'zod'
-import { Field, Schema, Section } from './actions'
+import { Field } from '../fields/actions'
+import { Schema, Section } from './actions'
 import SectionFieldsControl from './SectionFieldsControl'
 
 type Props = {
@@ -136,7 +137,13 @@ const SortableRow: FC<{
       {...attributes}
       {...listeners}
       secondaryAction={
-        <IconButton edge="end" onClick={() => onRemove(section.id)}>
+        <IconButton
+          edge="end"
+          onClick={() => onRemove(section.id)}
+          disabled={section.SectionField.some(
+            (field) => !!field.Field.templateId,
+          )}
+        >
           <Clear />
         </IconButton>
       }

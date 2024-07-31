@@ -28,6 +28,7 @@ export type Field = {
   isVersioned: boolean
   Option: Option[]
   DefaultValue: Value | null
+  templateId: string | null
 }
 
 export type CreateFieldParams = {
@@ -69,6 +70,7 @@ export const readFields = async (): Promise<Field[]> => {
     },
     select: {
       id: true,
+      templateId: true,
       isVersioned: true,
       type: true,
       name: true,

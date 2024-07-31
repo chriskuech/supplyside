@@ -50,7 +50,10 @@ export default function FieldsTable({ fields, onUpdate, onDelete }: Props) {
       sortable: false,
       disableColumnMenu: true,
       renderCell: ({ row }) => (
-        <IconButton onClick={() => onDelete(row.id)}>
+        <IconButton
+          onClick={() => onDelete(row.id)}
+          disabled={!!row.templateId}
+        >
           <Clear />
         </IconButton>
       ),
@@ -59,7 +62,7 @@ export default function FieldsTable({ fields, onUpdate, onDelete }: Props) {
 
   return (
     <>
-      <DataGrid
+      <DataGrid<Field>
         columns={columns}
         rows={fields}
         rowSelection={false}
