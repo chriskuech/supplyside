@@ -10,6 +10,7 @@ import { PoDocumentStyles, styles } from './PoDocumentStyles'
 import { readResource, readResources } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readBlob } from '@/domain/blobs/actions'
+import { readSchema } from '@/domain/schema/actions'
 
 type Props = {
   accountId: string
@@ -44,6 +45,22 @@ export default async function PoDocument({
     where: {
       '==': [{ var: 'Order' }, resource?.id],
     },
+  })
+
+  const lineSchema = await readSchema({ accountId, resourceType: 'Line' })
+
+  const customFields = lineSchema.allFields.filter((field) => {
+    const excludedFields: (string | null)[] = [
+      fields.totalCost.templateId,
+      fields.unitOfMeasure.templateId,
+      fields.unitCost.templateId,
+      fields.quantity.templateId,
+    ]
+    return (
+      field.templateId !== null &&
+      !excludedFields.includes(field.templateId) &&
+      field.type !== 'Resource'
+    )
   })
 
   const account = await prisma().account.findUniqueOrThrow({
@@ -112,7 +129,11 @@ export default async function PoDocument({
                 <tr>
                   <td
                     rowSpan={3}
-                    style={{ verticalAlign: 'top', whiteSpace: 'pre-wrap' }}
+                    style={{
+                      verticalAlign: 'top',
+                      whiteSpace: 'pre-wrap',
+                      ...styles.TopMarginClass,
+                    }}
                   >
                     {
                       resource.fields.find(
@@ -208,7 +229,13 @@ export default async function PoDocument({
               </thead>
               <tbody>
                 <tr>
-                  <td style={styles.Border0Padding}>
+                  <td
+                    style={{
+                      ...styles.Border0Padding,
+                      ...styles.TopMarginClass,
+                      verticalAlign: 'top',
+                    }}
+                  >
                     {
                       vendor?.fields?.find(
                         (f) => f.templateId === fields.name.templateId,
@@ -284,7 +311,12 @@ export default async function PoDocument({
                       <tbody>
                         <tr>
                           <td style={styles.ShippingCss}>Method</td>
-                          <td style={styles.PaymentPadding}>
+                          <td
+                            style={{
+                              ...styles.PaymentPadding,
+                              verticalAlign: 'top',
+                            }}
+                          >
                             {
                               resource.fields.find(
                                 (f) =>
@@ -296,7 +328,12 @@ export default async function PoDocument({
                         </tr>
                         <tr>
                           <td style={styles.ShippingCss}>Account #</td>
-                          <td style={styles.PaymentPadding}>
+                          <td
+                            style={{
+                              ...styles.PaymentPadding,
+                              verticalAlign: 'top',
+                            }}
+                          >
                             {
                               resource.fields.find(
                                 (f) =>
@@ -308,7 +345,12 @@ export default async function PoDocument({
                         </tr>
                         <tr>
                           <td style={styles.ShippingCss}>Incoterms</td>
-                          <td style={styles.PaymentPadding}>
+                          <td
+                            style={{
+                              ...styles.PaymentPadding,
+                              verticalAlign: 'top',
+                            }}
+                          >
                             {
                               resource.fields.find(
                                 (f) =>
@@ -339,7 +381,7 @@ export default async function PoDocument({
                     <p
                       style={{
                         margin: 0,
-                        padding: '5px 8px',
+                        padding: '0px 5px 8px',
                       }}
                     >
                       {
@@ -371,86 +413,130 @@ export default async function PoDocument({
               </tr>
             </thead>
             <tbody>
-              {lines.map((line, index) => (
-                <>
-                  <tr>
-                    <td rowSpan={2} style={styles.TotalAndSubtotalCssClass}>
-                      {index + 1}
-                    </td>
-                    <td
-                      rowSpan={2}
-                      style={{
-                        ...styles.TotalAndSubtotalCssClass,
-                        borderLeft: 0,
-                        minWidth: '275px',
-                      }}
-                    >
-                      [item name]
-                      <br />
-                      <span style={{ fontWeight: 'normal', color: '#575656' }}>
-                        [item decsription]
-                      </span>
-                    </td>
-                    <td style={{ border: 0, width: '100px' }}>[unit]</td>
-                    <td style={{ border: 0, textAlign: 'right' }}>
-                      {
-                        line.fields.find(
-                          (f) => f.templateId === fields.quantity.templateId,
-                        )?.value.number
-                      }
-                    </td>
-                    <td
-                      style={{ border: 0, textAlign: 'right', width: '100px' }}
-                    >
-                      {(
-                        line.fields.find(
-                          (f) => f.templateId === fields.unitCost.templateId,
-                        )?.value.number || 0
-                      ).toLocaleString('en-US', {
-                        style: 'currency',
-                        currency: 'USD',
-                      })}
-                    </td>
-                    <td
-                      style={{
-                        borderLeft: 0,
-                        textAlign: 'right',
-                        width: '100px',
-                      }}
-                    >
-                      {(
-                        line.fields.find(
-                          (f) => f.templateId === fields.totalCost.templateId,
-                        )?.value.number || 0
-                      ).toLocaleString('en-US', {
-                        style: 'currency',
-                        currency: 'USD',
-                      })}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colSpan={4} style={{ padding: 0 }}>
-                      <table style={{ border: 0, margin: 0 }}>
-                        <tr>
-                          <td
-                            style={{
-                              border: 0,
-                              padding: '5px 8px',
-                              fontWeight: 600,
-                              width: '150px',
-                            }}
+              {await Promise.all(
+                lines.map(async (line, index) => {
+                  const itemId = line.fields.find(
+                    (f) => f.templateId === fields.item.templateId,
+                  )?.value?.resource?.id
+                  const item = itemId
+                    ? await readResource({
+                        accountId,
+                        id: itemId,
+                        type: 'Item',
+                      })
+                    : undefined
+                  return (
+                    <>
+                      <tr>
+                        <td rowSpan={2} style={styles.TotalAndSubtotalCssClass}>
+                          {index + 1}
+                        </td>
+                        <td
+                          rowSpan={2}
+                          style={{
+                            ...styles.TotalAndSubtotalCssClass,
+                            borderLeft: 0,
+                            minWidth: '275px',
+                          }}
+                        >
+                          {
+                            line.fields.find(
+                              (f) => f.templateId === fields.item.templateId,
+                            )?.value?.resource?.name
+                          }{' '}
+                          <br />
+                          <span
+                            style={{ fontWeight: 'normal', color: '#575656' }}
                           >
-                            [custom field]
-                          </td>
-                          <td style={{ border: 0, padding: '5px 8px' }}>
-                            [custom field value]
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </>
-              ))}
+                            {
+                              item?.fields.find(
+                                (f) =>
+                                  f.templateId ===
+                                  fields.description.templateId,
+                              )?.value.string
+                            }
+                          </span>
+                        </td>
+                        <td style={{ border: 0, width: '100px' }}>
+                          {
+                            item?.fields.find(
+                              (f) =>
+                                f.templateId ===
+                                fields.unitOfMeasure.templateId,
+                            )?.value.option?.name
+                          }
+                        </td>
+
+                        <td style={{ border: 0, textAlign: 'right' }}>
+                          {
+                            line.fields.find(
+                              (f) =>
+                                f.templateId === fields.quantity.templateId,
+                            )?.value.number
+                          }
+                        </td>
+                        <td
+                          style={{
+                            border: 0,
+                            textAlign: 'right',
+                            width: '100px',
+                          }}
+                        >
+                          {(
+                            line.fields.find(
+                              (f) =>
+                                f.templateId === fields.unitCost.templateId,
+                            )?.value.number || 0
+                          ).toLocaleString('en-US', {
+                            style: 'currency',
+                            currency: 'USD',
+                          })}
+                        </td>
+                        <td
+                          style={{
+                            borderLeft: 0,
+                            textAlign: 'right',
+                            width: '100px',
+                          }}
+                        >
+                          {(
+                            line.fields.find(
+                              (f) =>
+                                f.templateId === fields.totalCost.templateId,
+                            )?.value.number || 0
+                          ).toLocaleString('en-US', {
+                            style: 'currency',
+                            currency: 'USD',
+                          })}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={4} style={{ padding: 0 }}>
+                          <table style={{ border: 0, margin: 0 }}>
+                            {customFields.map((customField) => (
+                              <tr key={customField.id}>
+                                <td
+                                  style={{
+                                    border: 0,
+                                    padding: '5px 8px',
+                                    fontWeight: 600,
+                                    width: '150px',
+                                  }}
+                                >
+                                  {customField.name}
+                                </td>
+                                <td style={{ border: 0, padding: '5px 8px' }}>
+                                  [custom field value]
+                                </td>
+                              </tr>
+                            ))}
+                          </table>
+                        </td>
+                      </tr>
+                    </>
+                  )
+                }),
+              )}
 
               <tr>
                 <td

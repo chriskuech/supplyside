@@ -54,6 +54,7 @@ const FontSize: CSSProperties = {
 const ShippingCss: CSSProperties = {
   ...FontSize,
   ...Border0Padding,
+  verticalAlign: 'top',
 }
 
 const UnitPriceCSS: CSSProperties = {
@@ -88,10 +89,15 @@ const PaddingAndBorderTopClass: CSSProperties = {
   padding: '5px 8px',
 }
 
+const TopMarginClass: CSSProperties = {
+  padding: '5px 8px',
+}
+
 export const styles = {
   TotalAndSubtotalCssClass,
   PaddingAndBorderTopClass,
   RemovePaddingAndBorder,
+  TopMarginClass,
   Border0Padding,
   BgColorHeader,
   TextAlignRightClass,
