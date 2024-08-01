@@ -4,7 +4,8 @@
 'use server'
 
 import { ReactNode } from 'react'
-import { Cost } from '@prisma/client'
+import { Cost, FieldType } from '@prisma/client'
+import { match } from 'ts-pattern'
 import prisma from '../prisma'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
 import { readResource, readResources } from '@/domain/resource/actions'
@@ -165,7 +166,11 @@ export default async function PoDocument({
               <tbody>
                 <tr>
                   <td
-                    style={{ border: 0, padding: '2px 8px', fontWeight: '600' }}
+                    style={{
+                      border: 0,
+                      padding: '3px 8px 2px',
+                      fontWeight: '600',
+                    }}
                   >
                     Currency
                   </td>
@@ -306,7 +311,7 @@ export default async function PoDocument({
                       )?.value.string
                     }
                   </td>
-                  <td style={{ padding: '0px' }}>
+                  <td style={{ padding: '3px 0px' }}>
                     <table style={{ border: '0', margin: 0 }}>
                       <tbody>
                         <tr>
@@ -381,7 +386,7 @@ export default async function PoDocument({
                     <p
                       style={{
                         margin: 0,
-                        padding: '0px 5px 8px',
+                        padding: '0px 8px 5px',
                       }}
                     >
                       {
@@ -444,9 +449,13 @@ export default async function PoDocument({
                               (f) => f.templateId === fields.item.templateId,
                             )?.value?.resource?.name
                           }{' '}
-                          <br />
                           <span
-                            style={{ fontWeight: 'normal', color: '#575656' }}
+                            style={{
+                              fontWeight: 'normal',
+                              color: '#575656',
+                              marginTop: '10px',
+                              display: 'block',
+                            }}
                           >
                             {
                               item?.fields.find(
@@ -513,23 +522,100 @@ export default async function PoDocument({
                       <tr>
                         <td colSpan={4} style={{ padding: 0 }}>
                           <table style={{ border: 0, margin: 0 }}>
-                            {customFields.map((customField) => (
-                              <tr key={customField.id}>
-                                <td
-                                  style={{
-                                    border: 0,
-                                    padding: '5px 8px',
-                                    fontWeight: 600,
-                                    width: '150px',
-                                  }}
-                                >
-                                  {customField.name}
-                                </td>
-                                <td style={{ border: 0, padding: '5px 8px' }}>
-                                  [custom field value]
-                                </td>
-                              </tr>
-                            ))}
+                            {customFields.map((customField) => {
+                              const fieldValue = line.fields.find(
+                                (f) => f.templateId === customField.templateId,
+                              )?.value
+
+                              type Primitive =
+                                | string
+                                | number
+                                | boolean
+                                | null
+                                | undefined
+
+                              const renderFieldValue = match<
+                                FieldType,
+                                Primitive
+                              >(customField.type)
+                                .with('Checkbox', () =>
+                                  fieldValue?.boolean ? 'Yes' : 'No',
+                                )
+                                .with(
+                                  'Contact',
+                                  () => fieldValue?.contact?.name || '',
+                                )
+                                .with('Date', () =>
+                                  fieldValue?.date
+                                    ? new Date(
+                                        fieldValue.date,
+                                      ).toLocaleDateString()
+                                    : '',
+                                )
+                                .with('File', () =>
+                                  fieldValue?.file
+                                    ? 'File Attached'
+                                    : 'No File',
+                                )
+                                .with('Money', () =>
+                                  fieldValue?.number
+                                    ? fieldValue.number.toLocaleString(
+                                        'en-US',
+                                        {
+                                          style: 'currency',
+                                          currency: 'USD',
+                                        },
+                                      )
+                                    : '',
+                                )
+                                .with('Number', () => fieldValue?.number || '')
+                                .with(
+                                  'MultiSelect',
+                                  () =>
+                                    fieldValue?.options
+                                      ?.map((o) => o.name)
+                                      .join(' ') || '',
+                                )
+                                .with('Text', () => fieldValue?.string || '')
+                                .with(
+                                  'Textarea',
+                                  () => fieldValue?.string || '',
+                                )
+                                .with(
+                                  'Select',
+                                  () => fieldValue?.option?.id || '',
+                                )
+                                .with('User', () =>
+                                  fieldValue?.user
+                                    ? `${fieldValue.user.firstName} ${fieldValue.user.lastName}`
+                                    : '',
+                                )
+                                .otherwise(() => '')
+
+                              return (
+                                <tr key={customField.id}>
+                                  <td
+                                    style={{
+                                      border: 0,
+                                      padding: '5px 8px',
+                                      fontWeight: 600,
+                                      width: '100px',
+                                    }}
+                                  >
+                                    {customField.name}
+                                  </td>
+                                  <td
+                                    style={{
+                                      border: 0,
+                                      padding: '5px 8px',
+                                      textAlign: 'left',
+                                    }}
+                                  >
+                                    {renderFieldValue}
+                                  </td>
+                                </tr>
+                              )
+                            })}
                           </table>
                         </td>
                       </tr>
@@ -549,7 +635,7 @@ export default async function PoDocument({
                     border: 0,
                     margin: 0,
                     padding: 0,
-                    paddingLeft: '170px',
+                    paddingLeft: '105px',
                   }}
                 >
                   <table style={{ border: 0, margin: 0 }}>
@@ -583,8 +669,18 @@ export default async function PoDocument({
                         })}
                       </td>
                     </tr>
-                    <tr>
-                      {resource.costs.map((item: Cost, index: number) => (
+                    {resource.costs.map((item: Cost, index: number) => {
+                      const subtotal =
+                        resource.fields.find(
+                          (rf) =>
+                            rf.templateId === fields.subtotalCost.templateId,
+                        )?.value.number || 0
+
+                      const costValue = item.isPercentage
+                        ? subtotal * (item.value / 100)
+                        : item.value
+
+                      return (
                         <tr key={index}>
                           <td
                             style={styles.PaddingAndBorderTopClass}
@@ -598,22 +694,22 @@ export default async function PoDocument({
                               textAlign: 'right',
                             }}
                           >
-                            {(item.value || 0).toLocaleString('en-US', {
+                            {costValue.toLocaleString('en-US', {
                               style: 'currency',
                               currency: 'USD',
                             })}
                           </td>
                         </tr>
-                      ))}
-                    </tr>
+                      )
+                    })}
                     <tr>
                       <td
                         colSpan={5}
                         style={{
                           fontWeight: 'bold',
-                          backgroundColor: '#C7E1F2',
                           borderTop: 0,
                           padding: '5px 8px',
+                          ...styles.SubtotalAndTotalClass,
                         }}
                       >
                         TOTAL
@@ -621,10 +717,10 @@ export default async function PoDocument({
                       <td
                         style={{
                           fontWeight: 'bold',
-                          backgroundColor: '#C7E1F2',
                           borderTop: 0,
                           padding: '5px 8px',
                           textAlign: 'right',
+                          ...styles.SubtotalAndTotalClass,
                         }}
                       >
                         {(
@@ -645,15 +741,15 @@ export default async function PoDocument({
           </table>
         </div>
         <div style={{ pageBreakBefore: 'always' }}>
-          <table style={{ minHeight: '200px', marginTop: '20px' }}>
+          <table style={{ minHeight: '170px', marginTop: '20px' }}>
             <thead>
               <tr style={styles.BgColorHeader}>
-                <th>Terms and Conditions</th>
+                <th>Terms & Conditions</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ verticalAlign: 'top' }}>
+                <td style={{ verticalAlign: 'top', textAlign: 'justify' }}>
                   {
                     resource.fields.find(
                       (f) =>

@@ -93,10 +93,15 @@ const TopMarginClass: CSSProperties = {
   padding: '5px 8px',
 }
 
+const SubtotalAndTotalClass: CSSProperties = {
+  backgroundColor: '#C7E1F2',
+}
+
 export const styles = {
   TotalAndSubtotalCssClass,
   PaddingAndBorderTopClass,
   RemovePaddingAndBorder,
+  SubtotalAndTotalClass,
   TopMarginClass,
   Border0Padding,
   BgColorHeader,
