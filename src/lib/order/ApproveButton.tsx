@@ -1,10 +1,12 @@
 'use client'
 
 import { ArrowRight } from '@mui/icons-material'
-import { Button } from '@mui/material'
-import { transitionStatus } from '../resource/actions'
+import { transitionStatus as transitionStatusAction } from '../resource/actions'
+import { useAsyncCallback } from '../hooks/useAsyncCallback'
+import LoadingButton from '../ux/LoadingButton'
 import { createPo } from './actions'
 import { orderStatusOptions } from '@/domain/schema/template/system-fields'
+import { OptionTemplate } from '@/domain/schema/template/types'
 
 type Props = {
   resourceId: string
@@ -12,21 +14,24 @@ type Props = {
 }
 
 export default function ApproveButton({ resourceId, isDisabled }: Props) {
+  const callback = (resourceId: string, status: OptionTemplate) =>
+    transitionStatusAction(resourceId, status).then(() => createPo(resourceId))
+
+  const [status, transitionStatus] = useAsyncCallback(callback)
+
   return (
-    <Button
+    <LoadingButton
       onClick={() =>
-        !isDisabled &&
-        transitionStatus(resourceId, orderStatusOptions.approved).then(() =>
-          createPo(resourceId),
-        )
+        !isDisabled && transitionStatus(resourceId, orderStatusOptions.approved)
       }
       endIcon={<ArrowRight />}
       sx={{ height: 'fit-content', fontSize: '1.2em' }}
       size="large"
       color="secondary"
       disabled={isDisabled}
+      isLoading={status.isLoading}
     >
       Approve
-    </Button>
+    </LoadingButton>
   )
 }
