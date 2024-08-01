@@ -10,6 +10,7 @@ import { systemAccountId } from '@/lib/const'
 import prisma from '@/lib/prisma'
 import { applyTemplate } from '@/domain/schema/template/actions'
 import { createResource } from '@/domain/resource/actions'
+import { fields } from '@/domain/schema/template/system-fields'
 
 ImportMock.mockFunction(nextCache, 'revalidatePath', () => {})
 ImportMock.mockFunction(nextCache, 'revalidateTag', () => {})
@@ -59,6 +60,21 @@ async function main() {
 
   await applyTemplate(accountId)
 
+  const unitOfMeasureOption = await prisma().option.create({
+    data: {
+      order: 0,
+      name: 'My UNIT',
+      Field: {
+        connect: {
+          accountId_templateId: {
+            accountId,
+            templateId: fields.unitOfMeasure.templateId,
+          },
+        },
+      },
+    },
+  })
+
   const vendor = await createResource({
     accountId,
     type: ResourceType.Vendor,
@@ -67,13 +83,51 @@ async function main() {
     },
   })
 
-  await createResource({
+  const order = await createResource({
     accountId,
     type: ResourceType.Order,
     data: {
       Assignee: user.id,
       Number: '42',
       Vendor: vendor.id,
+    },
+  })
+
+  const item1 = await createResource({
+    accountId,
+    type: ResourceType.Item,
+    data: {
+      Name: 'Line Name',
+      Description: 'Line Description',
+      [fields.unitOfMeasure.name]: unitOfMeasureOption.id,
+    },
+  })
+
+  await createResource({
+    accountId,
+    type: ResourceType.Line,
+    data: {
+      Order: order.id,
+      Item: item1.id,
+    },
+  })
+
+  const item2 = await createResource({
+    accountId,
+    type: ResourceType.Item,
+    data: {
+      Name: 'Line Name 2',
+      Description: 'Line Desc 2',
+      [fields.unitOfMeasure.name]: unitOfMeasureOption.id,
+    },
+  })
+
+  await createResource({
+    accountId,
+    type: ResourceType.Line,
+    data: {
+      Order: order.id,
+      Item: item2.id,
     },
   })
 }
