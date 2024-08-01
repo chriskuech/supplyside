@@ -8,8 +8,9 @@ import {
 } from '@mui/material'
 import { FC } from 'react'
 import { ExpandMore } from '@mui/icons-material'
+import { Field } from '../fields/actions'
 import AddSectionControl from './AddSectionControl'
-import { Field, Schema } from './actions'
+import { Schema } from './actions'
 import SchemaSectionsControl from './SchemaSectionsControl'
 
 type Props = {

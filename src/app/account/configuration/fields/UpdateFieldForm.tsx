@@ -38,6 +38,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
   )
 
   const isValid = !!name
+  const isDisabled = !!field.templateId
 
   return (
     <Stack spacing={2} width={'fit-content'}>
@@ -47,6 +48,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
           label="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          disabled={isDisabled}
         />
 
         <FormControl sx={{ width: 150 }}>
@@ -68,7 +70,11 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
       </Stack>
 
       {(field.type === 'MultiSelect' || field.type === 'Select') && (
-        <OptionsControl values={options} onChange={setOptions} />
+        <OptionsControl
+          values={options}
+          onChange={setOptions}
+          isDisabled={isDisabled}
+        />
       )}
 
       <Stack direction={'row'} spacing={1} flexWrap={'wrap'}>
