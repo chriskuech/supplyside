@@ -54,6 +54,7 @@ const FontSize: CSSProperties = {
 const ShippingCss: CSSProperties = {
   ...FontSize,
   ...Border0Padding,
+  verticalAlign: 'top',
 }
 
 const UnitPriceCSS: CSSProperties = {
@@ -64,7 +65,7 @@ const UnitPriceCSS: CSSProperties = {
 const FooterClass: CSSProperties = {
   fontSize: '16px',
   fontFamily: 'Arial, sans-serif',
-  padding: '25px',
+  padding: '25px 30px',
   alignItems: 'center',
   display: 'flex',
   flexGrow: 1,
@@ -88,10 +89,20 @@ const PaddingAndBorderTopClass: CSSProperties = {
   padding: '5px 8px',
 }
 
+const TopMarginClass: CSSProperties = {
+  padding: '5px 8px',
+}
+
+const SubtotalAndTotalClass: CSSProperties = {
+  backgroundColor: '#C7E1F2',
+}
+
 export const styles = {
   TotalAndSubtotalCssClass,
   PaddingAndBorderTopClass,
   RemovePaddingAndBorder,
+  SubtotalAndTotalClass,
+  TopMarginClass,
   Border0Padding,
   BgColorHeader,
   TextAlignRightClass,
