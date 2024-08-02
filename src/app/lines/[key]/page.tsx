@@ -20,8 +20,8 @@ export default async function LinesDetail({
       <Stack spacing={5}>
         <Stack spacing={2}>
           <Typography variant="h3">
-            <span style={{ fontWeight: 100 }}>Line #</span>
-            <span style={{ fontWeight: 700 }}>{key}</span>
+            <span style={{ opacity: 0.5 }}>Line #</span>
+            <span>{key}</span>
           </Typography>
           <ResourceFieldsControl resource={resource} schema={schema} />
         </Stack>
