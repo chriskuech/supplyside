@@ -447,7 +447,7 @@ export default async function PoDocument({
                     : undefined
                   return (
                     <>
-                      <tr>
+                      <tr style={{ pageBreakInside: 'avoid' }}>
                         <td rowSpan={2} style={styles.TotalAndSubtotalCssClass}>
                           {index + 1}
                         </td>
