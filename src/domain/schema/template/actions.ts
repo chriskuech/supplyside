@@ -32,9 +32,15 @@ const applyFields = async (accountId: string) =>
             templateId,
             isVersioned: false,
             isEditable: true,
-            ...field,
+            name: field.name,
+            type: field.type,
+            resourceType: field.resourceType,
           },
-          update: field,
+          update: {
+            name: field.name,
+            type: field.type,
+            resourceType: field.resourceType,
+          },
         })
 
         const upsertingOptions = options?.map(
