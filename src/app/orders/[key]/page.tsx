@@ -107,7 +107,7 @@ export default async function OrderDetail({
         <Stack direction={'row'} alignItems={'center'} spacing={1}>
           <Typography variant="h3">
             <span style={{ opacity: 0.5 }}>Order #</span>
-            <span style={{ fontWeight: 700 }}>{key}</span>
+            <span>{key}</span>
           </Typography>
 
           <Box flexGrow={1} />

@@ -4,13 +4,9 @@ import { Button, Card, CardContent, Modal, Typography } from '@mui/material'
 import { ReactNode, useState } from 'react'
 import { Add } from '@mui/icons-material'
 import CreateFieldForm from './CreateFieldForm'
-import { CreateFieldParams } from './actions'
+import { createField } from './actions'
 
-type Props = {
-  onSubmit: (params: CreateFieldParams) => void
-}
-
-export default function AddFieldButton({ onSubmit }: Props): ReactNode {
+export default function AddFieldButton(): ReactNode {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -38,7 +34,7 @@ export default function AddFieldButton({ onSubmit }: Props): ReactNode {
             </Typography>
             <CreateFieldForm
               onSubmit={(params) => {
-                onSubmit(params)
+                createField(params)
                 setIsOpen(false)
               }}
             />

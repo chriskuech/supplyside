@@ -8,15 +8,13 @@ import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 import { FC, useState } from 'react'
 import UpdateFieldForm from './UpdateFieldForm'
-import { Field, UpdateFieldDto } from './actions'
+import { Field, UpdateFieldDto, deleteField, updateField } from './actions'
 
 type Props = {
   fields: Field[]
-  onUpdate: (dto: UpdateFieldDto) => void
-  onDelete: (fieldId: string) => void
 }
 
-export default function FieldsTable({ fields, onUpdate, onDelete }: Props) {
+export default function FieldsTable({ fields }: Props) {
   const [field, setField] = useState<Field>()
   const columns: GridColDef<Field>[] = [
     {
@@ -51,7 +49,7 @@ export default function FieldsTable({ fields, onUpdate, onDelete }: Props) {
       disableColumnMenu: true,
       renderCell: ({ row }) => (
         <IconButton
-          onClick={() => onDelete(row.id)}
+          onClick={() => deleteField(row.id)}
           disabled={!!row.templateId}
         >
           <Clear />
@@ -70,7 +68,7 @@ export default function FieldsTable({ fields, onUpdate, onDelete }: Props) {
       />
       <FieldModal
         field={field}
-        onUpdate={onUpdate}
+        onUpdate={updateField}
         onClose={() => setField(undefined)}
       />
     </>
