@@ -58,7 +58,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "reflect-metadata": "^0.2.2",
     "ts-mock-imports": "^1.3.16",
-    "tsx": "^4.16.4",
+    "tsx": "^4.16.5",
     "typescript": "^5"
   },
   "prisma": {
