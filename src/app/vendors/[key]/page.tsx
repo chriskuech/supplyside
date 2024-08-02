@@ -1,8 +1,6 @@
-import { Box, Container, Stack, Typography } from '@mui/material'
+import { Container, Stack, Typography } from '@mui/material'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
-import ResourceFieldControl from '@/lib/resource/ResourceFieldControl'
-import { fields } from '@/domain/schema/template/system-fields'
 import { readResource } from '@/domain/resource/actions'
 import { readSchema } from '@/domain/schema/actions'
 
@@ -21,19 +19,10 @@ export default async function VendorDetail({
     <Container sx={{ my: 5 }}>
       <Stack spacing={5}>
         <Stack spacing={2}>
-          <Stack>
-            <Typography variant="overline">
-              <span style={{ opacity: 0.5 }}>Vendor #</span>
-              <span>{key}</span>
-            </Typography>
-            <Box width={400}>
-              <ResourceFieldControl
-                schema={schema}
-                resource={resource}
-                fieldTemplateId={fields.name.templateId}
-              />
-            </Box>
-          </Stack>
+          <Typography variant="h3">
+            <span style={{ opacity: 0.5 }}>Vendor #</span>
+            <span>{key}</span>
+          </Typography>
           <ResourceFieldsControl resource={resource} schema={schema} />
         </Stack>
       </Stack>
