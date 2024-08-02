@@ -23,8 +23,8 @@ export default async function VendorDetail({
         <Stack spacing={2}>
           <Stack>
             <Typography variant="overline">
-              <span style={{ fontWeight: 100 }}>Vendor #</span>
-              <span style={{ fontWeight: 700 }}>{key}</span>
+              <span style={{ opacity: 0.5 }}>Vendor #</span>
+              <span>{key}</span>
             </Typography>
             <Box width={400}>
               <ResourceFieldControl
