@@ -7,7 +7,7 @@ export const PoDocumentStyles: React.FC = () => (
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 10px;
+        margin-bottom: 0px;
       }
       th, td {
         border: 1px solid black;
@@ -97,11 +97,16 @@ const SubtotalAndTotalClass: CSSProperties = {
   backgroundColor: '#C7E1F2',
 }
 
+const MarginBottomForTable: CSSProperties = {
+  marginBottom: '20px',
+}
+
 export const styles = {
   TotalAndSubtotalCssClass,
   PaddingAndBorderTopClass,
   RemovePaddingAndBorder,
   SubtotalAndTotalClass,
+  MarginBottomForTable,
   TopMarginClass,
   Border0Padding,
   BgColorHeader,
