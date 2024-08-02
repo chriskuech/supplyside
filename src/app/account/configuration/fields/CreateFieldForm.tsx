@@ -2,9 +2,7 @@
 
 import {
   Button,
-  Checkbox,
   FormControl,
-  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -76,7 +74,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
         </Button>
       </Stack>
       <Stack direction={'row'} spacing={2}>
-        <FormControlLabel
+        {/* <FormControlLabel
           control={
             <Checkbox
               value={isVersioned}
@@ -84,7 +82,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
             />
           }
           label="Versioned"
-        />
+        /> */}
 
         {type === 'Resource' && (
           <FormControl sx={{ width: 150 }}>

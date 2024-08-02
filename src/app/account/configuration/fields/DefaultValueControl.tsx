@@ -1,6 +1,6 @@
 'use client'
 
-import { Checkbox, Select, TextField } from '@mui/material'
+import { Checkbox, MenuItem, Select, TextField } from '@mui/material'
 import { match } from 'ts-pattern'
 import { useEffect, useState } from 'react'
 import { Value } from '@prisma/client'
@@ -55,9 +55,9 @@ export default function DefaultValueControl({
         }}
       >
         {field.Option.map((option) => (
-          <option key={option.id} value={option.id}>
+          <MenuItem key={option.id} value={option.id}>
             {option.name}
-          </option>
+          </MenuItem>
         ))}
       </Select>
     ))

@@ -29,28 +29,21 @@ import {
 } from '@dnd-kit/core'
 import { z } from 'zod'
 import { Field } from '../fields/actions'
-import { Schema, Section } from './actions'
+import {
+  Schema,
+  Section,
+  deleteSection,
+  updateSchema,
+  updateSection,
+} from './actions'
 import SectionFieldsControl from './SectionFieldsControl'
 
 type Props = {
   fields: Field[]
   schema: Schema
-  onUpdateSchema: (dto: { schemaId: string; sectionIds: string[] }) => void
-  onUpdateSection: (dto: {
-    sectionId: string
-    name: string
-    fieldIds: string[]
-  }) => void
-  onDeleteSection: (sectionId: string) => void
 }
 
-export default function SchemaSectionsControl({
-  fields,
-  schema,
-  onUpdateSchema,
-  onUpdateSection,
-  onDeleteSection,
-}: Props) {
+export default function SchemaSectionsControl({ fields, schema }: Props) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -86,7 +79,7 @@ export default function SchemaSectionsControl({
           )
           const i = sectionIds.findIndex((sectionId) => sectionId === over.id)
 
-          onUpdateSchema({
+          updateSchema({
             schemaId: schema.id,
             sectionIds: [...removed.slice(0, i), activeId, ...removed.slice(i)],
           })
@@ -96,13 +89,7 @@ export default function SchemaSectionsControl({
           {schema.Section.map((section) => (
             <Fragment key={section.id}>
               <Divider variant="fullWidth" />
-              <SortableRow
-                key={section.id}
-                fields={fields}
-                section={section}
-                onUpdate={onUpdateSection}
-                onRemove={onDeleteSection}
-              />
+              <SortableRow key={section.id} fields={fields} section={section} />
             </Fragment>
           ))}
         </SortableContext>
@@ -114,13 +101,7 @@ export default function SchemaSectionsControl({
 const SortableRow: FC<{
   fields: Field[]
   section: Section
-  onUpdate: (dto: {
-    sectionId: string
-    name: string
-    fieldIds: string[]
-  }) => void
-  onRemove: (sectionId: string) => void
-}> = ({ fields, section, onUpdate, onRemove }) => {
+}> = ({ fields, section }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: section.id })
 
@@ -139,7 +120,7 @@ const SortableRow: FC<{
       secondaryAction={
         <IconButton
           edge="end"
-          onClick={() => onRemove(section.id)}
+          onClick={() => deleteSection(section.id)}
           disabled={section.SectionField.some(
             (field) => !!field.Field.templateId,
           )}
@@ -155,7 +136,7 @@ const SortableRow: FC<{
         section={section}
         fields={fields}
         onChange={(fieldIds) => {
-          onUpdate({
+          updateSection({
             sectionId: section.id,
             name: section.name,
             fieldIds,
