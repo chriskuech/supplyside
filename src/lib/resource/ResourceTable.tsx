@@ -231,12 +231,7 @@ export default function ResourceTable({
 
               return name ? <Chip label={name} /> : undefined
             })
-            .with(
-              'User',
-              () =>
-                value?.user &&
-                `${value.user.firstName} ${value.user.firstName}`,
-            )
+            .with('User', () => value?.user?.fullName)
             .otherwise(() => undefined)
 
           return (
