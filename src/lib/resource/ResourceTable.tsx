@@ -132,7 +132,7 @@ export default function ResourceTable({
                   }))
                 : null,
             }))
-            //TODO: get user information
+            //TODO: get user information to show while refetching data
             .with('User', () => ({
               ...emptyValue,
               user: {
@@ -142,6 +142,15 @@ export default function ResourceTable({
                 fullName: '...',
                 lastName: '...',
                 profilePicPath: null,
+              },
+            }))
+            //TODO: get resource information to show while refetching data
+            .with('Resource', () => ({
+              ...emptyValue,
+              resource: {
+                id: value.resourceId,
+                key: 0,
+                name: '...',
               },
             }))
             .otherwise(() => ({ ...emptyValue, ...value }))

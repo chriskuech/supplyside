@@ -1,6 +1,7 @@
 'use client'
 
 import { GridRenderEditCellParams, useGridApiContext } from '@mui/x-data-grid'
+import { FieldType } from '@prisma/client'
 import Field from './Field'
 import { UpdateValueDto } from '@/domain/resource/fields/actions'
 import { Field as FieldModel } from '@/domain/schema/types'
@@ -10,6 +11,7 @@ type Props = {
   cellParams: GridRenderEditCellParams<Resource>
   field: FieldModel
 }
+const AUTO_STOP_FIELD_TYPES: FieldType[] = ['Select', 'Resource', 'User']
 
 export default function FieldGridEditCell({ cellParams, field }: Props) {
   const currentField = cellParams.row.fields.find(
@@ -25,6 +27,13 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
       value,
       debounceMs: 200,
     })
+
+    if (AUTO_STOP_FIELD_TYPES.includes(field.type)) {
+      apiRef.current.stopCellEditMode({
+        id: cellParams.id,
+        field: cellParams.field,
+      })
+    }
   }
 
   return (
