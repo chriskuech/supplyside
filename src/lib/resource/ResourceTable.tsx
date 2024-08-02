@@ -92,8 +92,7 @@ export default function ResourceTable({
             .with(
               'User',
               () =>
-                value?.user &&
-                `${value.user.firstName} ${value.user.firstName}`,
+                value?.user && `${value.user.firstName} ${value.user.lastName}`,
             )
             .with('Resource', () => value?.resource?.name)
             .exhaustive()
