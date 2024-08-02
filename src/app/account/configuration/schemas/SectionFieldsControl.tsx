@@ -44,6 +44,9 @@ export default function SectionFieldsControl({
   return (
     <Autocomplete<Field, true, boolean, true>
       multiple
+      disableClearable={fields
+        .filter((f) => fieldIds.has(f.id))
+        .some((f) => !!f.templateId)}
       options={fields.filter((f) => !fieldIds.has(f.id))}
       value={section.SectionField.map((sf) => sf.Field)}
       getOptionLabel={(o) => (typeof o === 'string' ? o : o.name)}
@@ -87,8 +90,7 @@ const SortableChip: FC<{
       <Chip
         key={field.id}
         label={field.name}
-        disabled={!!field.templateId}
-        onDelete={() => onRemove(field.id)}
+        onDelete={!!field.templateId ? undefined : () => onRemove(field.id)}
       />
     </Box>
   )

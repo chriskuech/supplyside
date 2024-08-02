@@ -12,6 +12,7 @@ type Options = {
   showGenericError: boolean
 }
 
+// TODO: Consider: looking at the major utility hook libraries. check how to integrate with nextJS as it already handles caching
 export function useAsyncCallback<Args extends unknown[], ResolvedType>(
   callback: (...args: Args) => Promise<ResolvedType>,
   { showGenericError }: Options = { showGenericError: true },

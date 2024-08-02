@@ -19,6 +19,7 @@ type Props = {
   onClose: () => void
 }
 
+//TODO: refactor for using with a useConfirmation hook
 export default function ConfirmationDialog({
   isOpen,
   content,
