@@ -1,5 +1,3 @@
-'use client'
-
 import { Button, ButtonProps, CircularProgress } from '@mui/material'
 import { match, P } from 'ts-pattern'
 
