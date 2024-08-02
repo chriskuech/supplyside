@@ -33,23 +33,26 @@ export const renderPo = async (params: RenderPoParams) => {
     PoDocumentFooter(params),
   ])
 
-  await page.setContent(htmlDocument(ReactDom.renderToString(main)), {
-    timeout: 300,
-    waitUntil: 'domcontentloaded',
-  })
+  await page.setContent(
+    htmlDocument(ReactDom.renderToString(main), params.isPreview),
+    {
+      timeout: 300,
+      waitUntil: 'domcontentloaded',
+    },
+  )
 
   const buffer = await page.pdf({
     format: 'letter',
-    footerTemplate: ReactDom.renderToString(footer),
     headerTemplate: '<div></div>',
+    footerTemplate: ReactDom.renderToString(footer),
     displayHeaderFooter: true,
     margin: {
       top: '35px',
-      bottom: '100px',
+      bottom: '15px',
       left: '15px',
       right: '15px',
     },
-    printBackground: params.isPreview,
+    printBackground: true,
   })
 
   page.close()
@@ -57,7 +60,7 @@ export const renderPo = async (params: RenderPoParams) => {
   return buffer
 }
 
-const htmlDocument = (content: string) => `
+const htmlDocument = (content: string, isPreview?: boolean) => `
   <!DOCTYPE html>
   <html lang="en">
     <head>
@@ -65,7 +68,7 @@ const htmlDocument = (content: string) => `
       <title>Purchase Order</title>
       <style>
         body {
-          background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(watermark)}');
+          ${isPreview ? `background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(watermark)}');` : ''}
           font-family: Arial, sans-serif;
           margin: 0;
           padding: 0;

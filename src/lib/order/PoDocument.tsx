@@ -12,6 +12,7 @@ import { readResource, readResources } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readBlob } from '@/domain/blobs/actions'
 import { readSchema } from '@/domain/schema/actions'
+import { selectValue } from '@/domain/resource/types'
 
 type Props = {
   accountId: string
@@ -29,9 +30,8 @@ export default async function PoDocument({
     type: 'Order',
   })
 
-  const vendorId = resource.fields.find(
-    (f) => f.templateId === fields.vendor.templateId,
-  )?.value.resource?.id
+  const vendorId = selectValue(resource, fields.vendor)?.resource?.id
+
   const vendor = vendorId
     ? await readResource({
         accountId,
@@ -50,19 +50,17 @@ export default async function PoDocument({
 
   const lineSchema = await readSchema({ accountId, resourceType: 'Line' })
 
-  const customFields = lineSchema.allFields.filter((field) => {
-    const excludedFields: (string | null)[] = [
-      fields.totalCost.templateId,
-      fields.unitOfMeasure.templateId,
-      fields.unitCost.templateId,
-      fields.quantity.templateId,
-    ]
-    return (
+  const customFields = lineSchema.allFields.filter(
+    (field) =>
       field.templateId !== null &&
-      !excludedFields.includes(field.templateId) &&
-      field.type !== 'Resource'
-    )
-  })
+      ![
+        fields.totalCost.templateId,
+        fields.unitOfMeasure.templateId,
+        fields.unitCost.templateId,
+        fields.quantity.templateId,
+      ].includes(field.templateId) &&
+      field.type !== 'Resource',
+  )
 
   const account = await prisma().account.findUniqueOrThrow({
     where: { id: accountId },
@@ -79,9 +77,7 @@ export default async function PoDocument({
     ? `data:${blob?.mimeType};base64,${blob?.buffer.toString('base64')}`
     : undefined
 
-  const issuedDate = resource.fields.find(
-    (f) => f.templateId === fields.issuedDate.templateId,
-  )?.value.date
+  const issuedDate = selectValue(resource, fields.issuedDate)?.date
 
   const formattedDate = issuedDate
     ? new Date(issuedDate).toLocaleDateString()
@@ -145,11 +141,7 @@ export default async function PoDocument({
                       ...styles.TopMarginClass,
                     }}
                   >
-                    {
-                      resource.fields.find(
-                        (f) => f.templateId === fields.orderNotes.templateId,
-                      )?.value.string
-                    }
+                    {selectValue(resource, fields.orderNotes)?.string}
                   </td>
                 </tr>
               </tbody>
@@ -185,11 +177,7 @@ export default async function PoDocument({
                     Currency
                   </td>
                   <td style={styles.PaymentPadding}>
-                    {
-                      resource.fields.find(
-                        (f) => f.templateId === fields.currency.templateId,
-                      )?.value.option?.name
-                    }
+                    {selectValue(resource, fields.currency)?.option?.name}
                   </td>
                 </tr>
                 <tr>
@@ -199,11 +187,7 @@ export default async function PoDocument({
                     Payment Terms
                   </td>
                   <td style={styles.PaymentPadding}>
-                    {
-                      resource.fields.find(
-                        (f) => f.templateId === fields.paymentTerms.templateId,
-                      )?.value.option?.name
-                    }
+                    {selectValue(resource, fields.paymentTerms)?.option?.name}
                   </td>
                 </tr>
                 <tr>
@@ -213,9 +197,7 @@ export default async function PoDocument({
                     Taxable
                   </td>
                   <td style={styles.PaymentPadding}>
-                    {resource.fields.find(
-                      (f) => f.templateId === fields.taxable.templateId,
-                    )?.value.boolean
+                    {selectValue(resource, fields.taxable)?.boolean
                       ? 'Yes'
                       : 'No'}
                   </td>
@@ -253,11 +235,7 @@ export default async function PoDocument({
                       paddingBottom: '0px',
                     }}
                   >
-                    {
-                      vendor?.fields?.find(
-                        (f) => f.templateId === fields.name.templateId,
-                      )?.value.string
-                    }
+                    {selectValue(resource, fields.vendor)?.resource?.name}
                     <span
                       style={{
                         whiteSpace: 'pre-wrap',
@@ -266,12 +244,8 @@ export default async function PoDocument({
                         fontWeight: 'normal',
                       }}
                     >
-                      {
-                        vendor?.fields.find(
-                          (f) =>
-                            f.templateId === fields.primaryAddress.templateId,
-                        )?.value.string
-                      }
+                      {vendor &&
+                        selectValue(vendor, fields.primaryAddress)?.string}
                     </span>
                   </td>
                 </tr>
@@ -280,11 +254,8 @@ export default async function PoDocument({
                     <u style={{ display: 'block', margin: '5px 0px' }}>
                       <b>c/o:</b>
                     </u>
-                    {
-                      vendor?.fields.find(
-                        (f) => f.templateId === fields.poRecipient.templateId,
-                      )?.value.contact?.name
-                    }
+                    {vendor &&
+                      selectValue(vendor, fields.poRecipient)?.contact?.name}
                   </td>
                 </tr>
               </tbody>
@@ -318,12 +289,7 @@ export default async function PoDocument({
                       whiteSpace: 'pre-wrap',
                     }}
                   >
-                    {
-                      resource.fields.find(
-                        (f) =>
-                          f.templateId === fields.shippingAddress.templateId,
-                      )?.value.string
-                    }
+                    {selectValue(resource, fields.shippingAddress)?.string}
                   </td>
                   <td style={{ padding: '3px 0px', verticalAlign: 'top' }}>
                     <table style={{ border: '0', margin: 0 }}>
@@ -337,11 +303,8 @@ export default async function PoDocument({
                             }}
                           >
                             {
-                              resource.fields.find(
-                                (f) =>
-                                  f.templateId ===
-                                  fields.shippingMethod.templateId,
-                              )?.value.option?.name
+                              selectValue(resource, fields.shippingMethod)
+                                ?.option?.name
                             }
                           </td>
                         </tr>
@@ -354,11 +317,10 @@ export default async function PoDocument({
                             }}
                           >
                             {
-                              resource.fields.find(
-                                (f) =>
-                                  f.templateId ===
-                                  fields.shippingAccountNumber.templateId,
-                              )?.value.option?.name
+                              selectValue(
+                                resource,
+                                fields.shippingAccountNumber,
+                              )?.option?.name
                             }
                           </td>
                         </tr>
@@ -371,10 +333,8 @@ export default async function PoDocument({
                             }}
                           >
                             {
-                              resource.fields.find(
-                                (f) =>
-                                  f.templateId === fields.incoterms.templateId,
-                              )?.value.option?.name
+                              selectValue(resource, fields.incoterms)?.option
+                                ?.name
                             }
                           </td>
                         </tr>
@@ -404,12 +364,7 @@ export default async function PoDocument({
                         whiteSpace: 'pre-wrap',
                       }}
                     >
-                      {
-                        resource.fields.find(
-                          (f) =>
-                            f.templateId === fields.shippingNotes.templateId,
-                        )?.value.string
-                      }
+                      {selectValue(resource, fields.shippingNotes)?.string}
                     </p>
                   </td>
                 </tr>
@@ -435,9 +390,7 @@ export default async function PoDocument({
             <tbody>
               {await Promise.all(
                 lines.map(async (line, index) => {
-                  const itemId = line.fields.find(
-                    (f) => f.templateId === fields.item.templateId,
-                  )?.value?.resource?.id
+                  const itemId = selectValue(line, fields.item)?.resource?.id
                   const item = itemId
                     ? await readResource({
                         accountId,
@@ -460,11 +413,7 @@ export default async function PoDocument({
                             verticalAlign: 'top',
                           }}
                         >
-                          {
-                            line.fields.find(
-                              (f) => f.templateId === fields.item.templateId,
-                            )?.value?.resource?.name
-                          }{' '}
+                          {selectValue(line, fields.item)?.resource?.name}{' '}
                           <span
                             style={{
                               fontWeight: 'normal',
@@ -474,13 +423,7 @@ export default async function PoDocument({
                               whiteSpace: 'pre-wrap',
                             }}
                           >
-                            {
-                              item?.fields.find(
-                                (f) =>
-                                  f.templateId ===
-                                  fields.description.templateId,
-                              )?.value.string
-                            }
+                            {selectValue(line, fields.description)?.string}
                           </span>
                         </td>
                         <td
@@ -490,13 +433,9 @@ export default async function PoDocument({
                             verticalAlign: 'top',
                           }}
                         >
-                          {
-                            item?.fields.find(
-                              (f) =>
-                                f.templateId ===
-                                fields.unitOfMeasure.templateId,
-                            )?.value.option?.name
-                          }
+                          {item &&
+                            selectValue(item, fields.unitOfMeasure)?.option
+                              ?.name}
                         </td>
 
                         <td
@@ -506,12 +445,7 @@ export default async function PoDocument({
                             verticalAlign: 'top',
                           }}
                         >
-                          {
-                            line.fields.find(
-                              (f) =>
-                                f.templateId === fields.quantity.templateId,
-                            )?.value.number
-                          }
+                          {selectValue(line, fields.quantity)?.number}
                         </td>
                         <td
                           style={{
@@ -521,12 +455,10 @@ export default async function PoDocument({
                             verticalAlign: 'top',
                           }}
                         >
-                          {(
-                            line.fields.find(
-                              (f) =>
-                                f.templateId === fields.unitCost.templateId,
-                            )?.value.number || 0
-                          ).toLocaleString('en-US', {
+                          {selectValue(
+                            line,
+                            fields.unitCost,
+                          )?.number?.toLocaleString('en-US', {
                             style: 'currency',
                             currency: 'USD',
                           })}
@@ -539,12 +471,10 @@ export default async function PoDocument({
                             verticalAlign: 'top',
                           }}
                         >
-                          {(
-                            line.fields.find(
-                              (f) =>
-                                f.templateId === fields.totalCost.templateId,
-                            )?.value.number || 0
-                          ).toLocaleString('en-US', {
+                          {selectValue(
+                            line,
+                            fields.totalCost,
+                          )?.number?.toLocaleString('en-US', {
                             style: 'currency',
                             currency: 'USD',
                           })}
@@ -707,10 +637,7 @@ export default async function PoDocument({
                     </tr>
                     {resource.costs.map((item: Cost, index: number) => {
                       const subtotal =
-                        resource.fields.find(
-                          (rf) =>
-                            rf.templateId === fields.subtotalCost.templateId,
-                        )?.value.number || 0
+                        selectValue(resource, fields.subtotalCost)?.number || 0
 
                       const costValue = item.isPercentage
                         ? subtotal * (item.value / 100)
@@ -759,12 +686,10 @@ export default async function PoDocument({
                           ...styles.SubtotalAndTotalClass,
                         }}
                       >
-                        {(
-                          resource.fields.find(
-                            (rf) =>
-                              rf.templateId === fields.totalCost.templateId,
-                          )?.value.number || 0
-                        ).toLocaleString('en-US', {
+                        {selectValue(
+                          resource,
+                          fields.totalCost,
+                        )?.number?.toLocaleString('en-US', {
                           style: 'currency',
                           currency: 'USD',
                         })}
@@ -776,35 +701,32 @@ export default async function PoDocument({
             </tbody>
           </table>
         </div>
-        <div
-          style={{ pageBreakBefore: 'always', ...styles.MarginBottomForTable }}
+        <table
+          style={{
+            pageBreakInside: 'avoid',
+            ...styles.MarginBottomForTable,
+            minHeight: '170px',
+          }}
         >
-          <table style={{ minHeight: '170px' }}>
-            <thead>
-              <tr style={styles.BgColorHeader}>
-                <th>Terms & Conditions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td
-                  style={{
-                    verticalAlign: 'top',
-                    textAlign: 'justify',
-                    whiteSpace: 'pre-wrap',
-                  }}
-                >
-                  {
-                    resource.fields.find(
-                      (f) =>
-                        f.templateId === fields.termsAndConditions.templateId,
-                    )?.value.string
-                  }
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <thead>
+            <tr style={styles.BgColorHeader}>
+              <th>Terms & Conditions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td
+                style={{
+                  verticalAlign: 'top',
+                  textAlign: 'justify',
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
+                {selectValue(resource, fields.termsAndConditions)?.string}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   )

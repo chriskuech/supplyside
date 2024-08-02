@@ -7,6 +7,7 @@ import {
   Cost,
 } from '@prisma/client'
 import { Option } from '../schema/types'
+import { FieldTemplate } from '../schema/template/types'
 import { User } from '@/domain/iam/types'
 
 export type Resource = {
@@ -44,3 +45,15 @@ export type Value = {
 }
 
 export type Data = Record<string, string[] | string | number | boolean | null>
+
+export const selectValue = (
+  resource: Resource,
+  fieldTemplateOrTemplateId: FieldTemplate | string,
+) =>
+  resource.fields.find(
+    (field) =>
+      field.templateId ===
+      (typeof fieldTemplateOrTemplateId === 'string'
+        ? fieldTemplateOrTemplateId
+        : fieldTemplateOrTemplateId.templateId),
+  )?.value

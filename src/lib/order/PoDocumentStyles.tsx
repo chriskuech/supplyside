@@ -62,15 +62,6 @@ const UnitPriceCSS: CSSProperties = {
   ...RemovePaddingAndBorder,
 }
 
-const FooterClass: CSSProperties = {
-  fontSize: '16px',
-  fontFamily: 'Arial, sans-serif',
-  padding: '25px 30px',
-  alignItems: 'center',
-  display: 'flex',
-  flexGrow: 1,
-}
-
 const HeaderCssClass: CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
@@ -115,6 +106,5 @@ export const styles = {
   FontSize,
   ShippingCss,
   UnitPriceCSS,
-  FooterClass,
   HeaderCssClass,
 }
