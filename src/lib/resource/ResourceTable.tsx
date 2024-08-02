@@ -89,12 +89,7 @@ export default function ResourceTable({
             )
             .with(P.union('Text', 'Textarea'), () => value?.string)
             .with('Select', () => value?.option?.id)
-            .with(
-              'User',
-              () =>
-                value?.user &&
-                `${value.user.firstName} ${value.user.firstName}`,
-            )
+            .with('User', () => value?.user?.fullName)
             .with('Resource', () => value?.resource?.name)
             .exhaustive()
         },
@@ -232,12 +227,7 @@ export default function ResourceTable({
 
               return name ? <Chip label={name} /> : undefined
             })
-            .with(
-              'User',
-              () =>
-                value?.user &&
-                `${value.user.firstName} ${value.user.firstName}`,
-            )
+            .with('User', () => value?.user?.fullName)
             .otherwise(() => undefined)
 
           return (

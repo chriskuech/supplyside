@@ -41,9 +41,10 @@ export const renderPo = async (params: RenderPoParams) => {
   const buffer = await page.pdf({
     format: 'letter',
     footerTemplate: ReactDom.renderToString(footer),
+    headerTemplate: '<div></div>',
     displayHeaderFooter: true,
     margin: {
-      top: '33px',
+      top: '35px',
       bottom: '100px',
       left: '15px',
       right: '15px',
