@@ -21,6 +21,7 @@ import { Resource, ResourceField, Value } from '@/domain/resource/types'
 import { Option, Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
 import { updateValue, UpdateValueDto } from '@/domain/resource/fields/actions'
+import { findField } from '@/domain/schema/template/system-fields'
 
 type Props = {
   schema: Schema
@@ -47,7 +48,7 @@ export default function ResourceTable({
         field: field.id,
         headerName: field.name,
         width: 300,
-        editable: isEditable,
+        editable: isEditable && findField(field.templateId)?.isDerived,
         valueOptions: match(field.type)
           .with('Select', () => field.options)
           .otherwise(() => undefined),

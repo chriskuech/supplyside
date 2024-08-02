@@ -15,7 +15,7 @@ import OptionsControl from './OptionsControl'
 import { Field, OptionPatch, UpdateFieldDto } from './actions'
 import ResourceTypeSelect from './ResourceTypeSelect'
 import DefaultValueControl from './DefaultValueControl'
-import { fields } from '@/domain/schema/template/system-fields'
+import { findField } from '@/domain/schema/template/system-fields'
 
 type Props = {
   field: Field
@@ -74,9 +74,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         <OptionsControl
           values={options}
           onChange={setOptions}
-          isDisabled={Object.values(fields).some(
-            (f) => f.templateId === field.templateId && f.options,
-          )}
+          isDisabled={!!findField(field.templateId)?.options}
         />
       )}
 
@@ -102,9 +100,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
           </FormControl>
         )}
       </Stack>
-      {Object.values(fields).some(
-        (f) => field.templateId === f.templateId && !f.defaultValue,
-      ) && (
+      {findField(field.templateId)?.defaultValue && (
         <FormControl fullWidth>
           <InputLabel htmlFor="default-field-value-control">
             Default Value

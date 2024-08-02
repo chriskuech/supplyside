@@ -77,6 +77,7 @@ const _fields = {
     templateId: '25a46eb4-2eca-40a8-9596-cda2a524facd',
     name: 'Itemized Costs',
     type: 'Money',
+    isDerived: true,
   },
   line: {
     templateId: '30fba00b-ca2f-48d1-a795-77e5843880ce',
@@ -168,6 +169,7 @@ const _fields = {
     templateId: '3234298a-d186-424e-a4b4-7678b4eec7d0',
     name: 'Subtotal Cost',
     type: 'Money',
+    isDerived: true,
   },
   taxable: {
     templateId: '8e61b78c-6e8c-4863-a7fd-af55fa66503f',
@@ -183,6 +185,7 @@ const _fields = {
     templateId: '507b8699-64af-4f8f-9319-b63c48827c61',
     name: 'Total Cost',
     type: 'Money',
+    isDerived: true,
   },
   unitOfMeasure: {
     templateId: 'a5c3e3a8-6a0b-4b6d-9b3a-7a5f1f3f3d2e',
@@ -203,3 +206,8 @@ const _fields = {
 } satisfies Record<string, FieldTemplate>
 
 export const fields: Record<keyof typeof _fields, FieldTemplate> = _fields
+
+export const findField = (templateId: string | null | undefined) =>
+  templateId
+    ? Object.values(fields).find((field) => field.templateId === templateId)
+    : undefined

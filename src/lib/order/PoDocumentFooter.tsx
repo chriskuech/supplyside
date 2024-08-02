@@ -1,9 +1,9 @@
 'use server'
 
 import { ReactNode } from 'react'
-import { styles } from './PoDocumentStyles'
 import { readResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
+import { selectValue } from '@/domain/resource/types'
 
 type Props = {
   accountId: string
@@ -20,17 +20,24 @@ export default async function PoDocumentFooter({
     type: 'Order',
   })
 
-  const issuedDate = resource.fields.find(
-    (f) => f.templateId === fields.issuedDate.templateId,
-  )?.value.date
+  const issuedDate = selectValue(resource, fields.issuedDate)?.date
 
   const formattedDate = issuedDate
     ? new Date(issuedDate).toLocaleDateString()
     : 'N/A'
 
   return (
-    <div style={styles.FooterClass}>
-      <div style={{ paddingRight: '30px', flex: 1 }}>
+    <div
+      style={{
+        fontSize: '16px',
+        fontFamily: 'Arial, sans-serif',
+        padding: '0 30px',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
+      <div style={{ flexGrow: 1 }}>
         <span>Order #{resource.key} </span>
         <span style={{ margin: '0px 5px' }}>| </span>
         {formattedDate}
