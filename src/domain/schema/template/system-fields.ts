@@ -30,7 +30,7 @@ export const orderStatusOptions = {
   },
 }
 
-export const fields = {
+const _fields = {
   assignee: {
     templateId: '726e01bc-66cb-4114-b900-10102f9c081c',
     name: 'Assignee',
@@ -200,4 +200,6 @@ export const fields = {
     type: 'Resource',
     resourceType: 'Vendor',
   },
-} as const satisfies Record<string, FieldTemplate>
+} satisfies Record<string, FieldTemplate>
+
+export const fields: Record<keyof typeof _fields, FieldTemplate> = _fields

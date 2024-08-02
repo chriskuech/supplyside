@@ -15,6 +15,7 @@ import OptionsControl from './OptionsControl'
 import { Field, OptionPatch, UpdateFieldDto } from './actions'
 import ResourceTypeSelect from './ResourceTypeSelect'
 import DefaultValueControl from './DefaultValueControl'
+import { fields } from '@/domain/schema/template/system-fields'
 
 type Props = {
   field: Field
@@ -73,7 +74,9 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         <OptionsControl
           values={options}
           onChange={setOptions}
-          isDisabled={isDisabled}
+          isDisabled={Object.values(fields).some(
+            (f) => f.templateId === field.templateId && f.options,
+          )}
         />
       )}
 
@@ -99,17 +102,20 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
           </FormControl>
         )}
       </Stack>
-      <FormControl fullWidth>
-        <InputLabel htmlFor="default-field-value-control">
-          Default Value
-        </InputLabel>
-
-        <DefaultValueControl
-          field={field}
-          defaultValueId={defaultValueId}
-          onChange={setDefaultValueId}
-        />
-      </FormControl>
+      {Object.values(fields).some(
+        (f) => field.templateId === f.templateId && !f.defaultValue,
+      ) && (
+        <FormControl fullWidth>
+          <InputLabel htmlFor="default-field-value-control">
+            Default Value
+          </InputLabel>
+          <DefaultValueControl
+            field={field}
+            defaultValueId={defaultValueId}
+            onChange={setDefaultValueId}
+          />
+        </FormControl>
+      )}
 
       <Stack justifyContent={'end'} direction={'row'} spacing={1}>
         <Button variant="text" onClick={onCancel}>
