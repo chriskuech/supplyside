@@ -1,9 +1,16 @@
 'use client'
 
-import { Checkbox, MenuItem, Select, TextField } from '@mui/material'
+import {
+  Checkbox,
+  IconButton,
+  MenuItem,
+  Select,
+  TextField,
+} from '@mui/material'
 import { match } from 'ts-pattern'
 import { useEffect, useState } from 'react'
 import { Value } from '@prisma/client'
+import { Close } from '@mui/icons-material'
 import { Field } from './actions'
 import { createValue, readValue } from '@/lib/value/actions'
 
@@ -24,9 +31,9 @@ export default function DefaultValueControl({
     if (defaultValueId) {
       readValue(defaultValueId).then(setValue)
     } else {
-      setValue(null)
+      createValue({}).then(({ id }) => onChange(id))
     }
-  }, [defaultValueId])
+  }, [defaultValueId, onChange])
 
   return match(field.type)
     .with('Checkbox', () => (
@@ -53,6 +60,19 @@ export default function DefaultValueControl({
 
           onChange(valueId)
         }}
+        endAdornment={
+          value?.optionId && (
+            <IconButton
+              onClick={async () => {
+                const { id: valueId } = await createValue({})
+
+                onChange(valueId)
+              }}
+            >
+              <Close fontSize="small" />
+            </IconButton>
+          )
+        }
       >
         {field.Option.map((option) => (
           <MenuItem key={option.id} value={option.id}>
