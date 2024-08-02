@@ -4,6 +4,7 @@ import { fail } from 'assert'
 import {
   Autocomplete,
   Checkbox,
+  IconButton,
   InputAdornment,
   MenuItem,
   Select,
@@ -13,6 +14,7 @@ import {
 import { match } from 'ts-pattern'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
+import { Close } from '@mui/icons-material'
 import FileField from './FileField'
 import UserField from './UserField'
 import ResourceField from './ResourceField'
@@ -137,6 +139,13 @@ export default function Field({
         readOnly={isReadOnly}
         value={value?.option?.id ?? ''}
         onChange={(e) => onChange({ optionId: e.target.value || null })}
+        endAdornment={
+          value?.option && (
+            <IconButton onClick={() => onChange({ optionId: null })}>
+              <Close fontSize="small" />
+            </IconButton>
+          )
+        }
       >
         <MenuItem value="">-</MenuItem>
         {field.options.map((o) => (

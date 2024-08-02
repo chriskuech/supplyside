@@ -110,7 +110,7 @@ export default function ResourceField({
           )}
         </Stack>
         <Drawer open={open} onClose={() => setOpen(false)} anchor="right">
-          <Box p={2}>
+          <Box p={2} minWidth={500}>
             <Typography variant="h5" sx={{ p: 2 }} gutterBottom>
               {resourceType} details
             </Typography>
