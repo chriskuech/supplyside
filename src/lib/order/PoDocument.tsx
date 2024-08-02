@@ -103,7 +103,16 @@ export default async function PoDocument({
             textAlign: 'right',
           }}
         >
-          <h1 style={{ margin: '0', fontWeight: '600' }}>PURCHASE ORDER</h1>
+          <h1
+            style={{
+              margin: '0',
+              fontWeight: '600',
+              lineHeight: '30px',
+              marginBottom: '5px',
+            }}
+          >
+            PURCHASE ORDER
+          </h1>
           Order #{resource.key} <span style={{ margin: '0px 5px' }}>|</span>{' '}
           {formattedDate}
         </div>
@@ -114,7 +123,7 @@ export default async function PoDocument({
       </div>
       <div style={{ padding: '20px' }}>
         <div style={styles.HeaderCssClass}>
-          <div style={{ flex: '1', marginBottom: '10px' }}>
+          <div style={{ flex: '1', ...styles.MarginBottomForTable }}>
             <table
               style={{
                 border: '1px solid',
@@ -150,6 +159,7 @@ export default async function PoDocument({
             style={{
               minWidth: '260px',
               marginLeft: '20px',
+              ...styles.MarginBottomForTable,
             }}
           >
             <table
@@ -218,13 +228,13 @@ export default async function PoDocument({
           <div
             style={{
               minWidth: '250px',
+              ...styles.MarginBottomForTable,
             }}
           >
             <table
               style={{
                 border: '1px solid',
                 minHeight: '170px',
-                marginBottom: '20px',
               }}
             >
               <thead>
@@ -239,6 +249,8 @@ export default async function PoDocument({
                       ...styles.Border0Padding,
                       ...styles.TopMarginClass,
                       verticalAlign: 'top',
+                      fontWeight: 'bold',
+                      paddingBottom: '0px',
                     }}
                   >
                     {
@@ -246,31 +258,32 @@ export default async function PoDocument({
                         (f) => f.templateId === fields.name.templateId,
                       )?.value.string
                     }
+                    <span
+                      style={{
+                        whiteSpace: 'pre-wrap',
+                        padding: '0px',
+                        display: 'block',
+                        fontWeight: 'normal',
+                      }}
+                    >
+                      {
+                        vendor?.fields.find(
+                          (f) =>
+                            f.templateId === fields.primaryAddress.templateId,
+                        )?.value.string
+                      }
+                    </span>
                   </td>
                 </tr>
                 <tr>
-                  <td
-                    style={{ ...styles.Border0Padding, whiteSpace: 'pre-wrap' }}
-                  >
-                    {
-                      vendor?.fields.find(
-                        (f) =>
-                          f.templateId === fields.primaryAddress.templateId,
-                      )?.value.string
-                    }
-                  </td>
-                </tr>
-                <tr>
-                  <td rowSpan={4} style={styles.Border0Padding}>
-                    <br />
-                    <u>
+                  <td rowSpan={5} style={styles.Border0Padding}>
+                    <u style={{ display: 'block', margin: '5px 0px' }}>
                       <b>c/o:</b>
                     </u>
-                    <br />
                     {
                       vendor?.fields.find(
                         (f) => f.templateId === fields.poRecipient.templateId,
-                      )?.value.contact?.title
+                      )?.value.contact?.name
                     }
                   </td>
                 </tr>
@@ -281,6 +294,7 @@ export default async function PoDocument({
             style={{
               flex: '1',
               marginLeft: '20px',
+              ...styles.MarginBottomForTable,
             }}
           >
             <table
@@ -311,7 +325,7 @@ export default async function PoDocument({
                       )?.value.string
                     }
                   </td>
-                  <td style={{ padding: '3px 0px' }}>
+                  <td style={{ padding: '3px 0px', verticalAlign: 'top' }}>
                     <table style={{ border: '0', margin: 0 }}>
                       <tbody>
                         <tr>
@@ -387,6 +401,7 @@ export default async function PoDocument({
                       style={{
                         margin: 0,
                         padding: '0px 8px 5px',
+                        whiteSpace: 'pre-wrap',
                       }}
                     >
                       {
@@ -403,7 +418,7 @@ export default async function PoDocument({
           </div>
         </div>
 
-        <div className="items">
+        <div style={styles.MarginBottomForTable}>
           <table>
             <thead>
               <tr style={styles.BgColorHeader}>
@@ -442,6 +457,7 @@ export default async function PoDocument({
                             ...styles.TotalAndSubtotalCssClass,
                             borderLeft: 0,
                             minWidth: '275px',
+                            verticalAlign: 'top',
                           }}
                         >
                           {
@@ -453,8 +469,9 @@ export default async function PoDocument({
                             style={{
                               fontWeight: 'normal',
                               color: '#575656',
-                              marginTop: '10px',
+                              marginTop: '13px',
                               display: 'block',
+                              whiteSpace: 'pre-wrap',
                             }}
                           >
                             {
@@ -466,7 +483,13 @@ export default async function PoDocument({
                             }
                           </span>
                         </td>
-                        <td style={{ border: 0, width: '100px' }}>
+                        <td
+                          style={{
+                            border: 0,
+                            width: '100px',
+                            verticalAlign: 'top',
+                          }}
+                        >
                           {
                             item?.fields.find(
                               (f) =>
@@ -476,7 +499,13 @@ export default async function PoDocument({
                           }
                         </td>
 
-                        <td style={{ border: 0, textAlign: 'right' }}>
+                        <td
+                          style={{
+                            border: 0,
+                            textAlign: 'right',
+                            verticalAlign: 'top',
+                          }}
+                        >
                           {
                             line.fields.find(
                               (f) =>
@@ -489,6 +518,7 @@ export default async function PoDocument({
                             border: 0,
                             textAlign: 'right',
                             width: '100px',
+                            verticalAlign: 'top',
                           }}
                         >
                           {(
@@ -506,6 +536,7 @@ export default async function PoDocument({
                             borderLeft: 0,
                             textAlign: 'right',
                             width: '100px',
+                            verticalAlign: 'top',
                           }}
                         >
                           {(
@@ -520,7 +551,10 @@ export default async function PoDocument({
                         </td>
                       </tr>
                       <tr>
-                        <td colSpan={4} style={{ padding: 0 }}>
+                        <td
+                          colSpan={4}
+                          style={{ padding: 0, verticalAlign: 'top' }}
+                        >
                           <table style={{ border: 0, margin: 0 }}>
                             {customFields.map((customField) => {
                               const fieldValue = line.fields.find(
@@ -599,7 +633,8 @@ export default async function PoDocument({
                                       border: 0,
                                       padding: '5px 8px',
                                       fontWeight: 600,
-                                      width: '100px',
+                                      width: '50%',
+                                      verticalAlign: 'top',
                                     }}
                                   >
                                     {customField.name}
@@ -609,6 +644,7 @@ export default async function PoDocument({
                                       border: 0,
                                       padding: '5px 8px',
                                       textAlign: 'left',
+                                      verticalAlign: 'top',
                                     }}
                                   >
                                     {renderFieldValue}
@@ -740,8 +776,10 @@ export default async function PoDocument({
             </tbody>
           </table>
         </div>
-        <div style={{ pageBreakBefore: 'always' }}>
-          <table style={{ minHeight: '170px', marginTop: '20px' }}>
+        <div
+          style={{ pageBreakBefore: 'always', ...styles.MarginBottomForTable }}
+        >
+          <table style={{ minHeight: '170px' }}>
             <thead>
               <tr style={styles.BgColorHeader}>
                 <th>Terms & Conditions</th>
@@ -749,7 +787,13 @@ export default async function PoDocument({
             </thead>
             <tbody>
               <tr>
-                <td style={{ verticalAlign: 'top', textAlign: 'justify' }}>
+                <td
+                  style={{
+                    verticalAlign: 'top',
+                    textAlign: 'justify',
+                    whiteSpace: 'pre-wrap',
+                  }}
+                >
                   {
                     resource.fields.find(
                       (f) =>
