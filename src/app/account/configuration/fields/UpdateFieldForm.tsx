@@ -103,7 +103,6 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         <InputLabel htmlFor="default-field-value-control">
           Default Value
         </InputLabel>
-
         <DefaultValueControl
           field={field}
           defaultValueId={defaultValueId}
