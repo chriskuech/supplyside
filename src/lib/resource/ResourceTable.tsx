@@ -48,7 +48,7 @@ export default function ResourceTable({
         field: field.id,
         headerName: field.name,
         width: 300,
-        editable: isEditable && findField(field.templateId)?.isDerived,
+        editable: isEditable && !findField(field.templateId)?.isDerived,
         valueOptions: match(field.type)
           .with('Select', () => field.options)
           .otherwise(() => undefined),
