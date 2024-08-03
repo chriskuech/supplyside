@@ -141,7 +141,10 @@ export default function Field({
         onChange={(e) => onChange({ optionId: e.target.value || null })}
         endAdornment={
           value?.option && (
-            <IconButton onClick={() => onChange({ optionId: null })}>
+            <IconButton
+              onClick={() => onChange({ optionId: null })}
+              sx={{ marginRight: 2 }}
+            >
               <Close fontSize="small" />
             </IconButton>
           )
