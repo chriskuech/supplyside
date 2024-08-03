@@ -2,6 +2,7 @@
 
 import { GridRenderEditCellParams, useGridApiContext } from '@mui/x-data-grid'
 import { FieldType } from '@prisma/client'
+import { Box } from '@mui/material'
 import Field from './Field'
 import { UpdateValueDto } from '@/domain/resource/fields/actions'
 import { Field as FieldModel } from '@/domain/schema/types'
@@ -37,13 +38,15 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
   }
 
   return (
-    <Field
-      field={field}
-      inputId={`${cellParams.row.id}${field.id}`}
-      onChange={handleChange}
-      resourceId={cellParams.row.id}
-      value={currentField?.value}
-      inline
-    />
+    <Box width="100%">
+      <Field
+        field={field}
+        inputId={`${cellParams.row.id}${field.id}`}
+        onChange={handleChange}
+        resourceId={cellParams.row.id}
+        value={currentField?.value}
+        inline
+      />
+    </Box>
   )
 }
