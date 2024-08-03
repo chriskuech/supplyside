@@ -47,12 +47,8 @@ const PaymentPadding: CSSProperties = {
   ...TextAlignRightClass,
 }
 
-const FontSize: CSSProperties = {
-  fontWeight: '600',
-}
-
 const ShippingCss: CSSProperties = {
-  ...FontSize,
+  fontWeight: '600',
   ...Border0Padding,
   verticalAlign: 'top',
 }
@@ -68,24 +64,8 @@ const HeaderCssClass: CSSProperties = {
   alignItems: 'start',
 }
 
-const TotalAndSubtotalCssClass: CSSProperties = {
-  borderRight: 0,
-  fontWeight: 'bold',
-  verticalAlign: 'top',
-}
-
-const PaddingAndBorderTopClass: CSSProperties = {
-  borderTop: 0,
-  borderBottom: 0,
-  padding: '5px 8px',
-}
-
 const TopMarginClass: CSSProperties = {
   padding: '5px 8px',
-}
-
-const SubtotalAndTotalClass: CSSProperties = {
-  backgroundColor: '#C7E1F2',
 }
 
 const MarginBottomForTable: CSSProperties = {
@@ -93,17 +73,12 @@ const MarginBottomForTable: CSSProperties = {
 }
 
 export const styles = {
-  TotalAndSubtotalCssClass,
-  PaddingAndBorderTopClass,
   RemovePaddingAndBorder,
-  SubtotalAndTotalClass,
   MarginBottomForTable,
   TopMarginClass,
   Border0Padding,
   BgColorHeader,
-  TextAlignRightClass,
   PaymentPadding,
-  FontSize,
   ShippingCss,
   UnitPriceCSS,
   HeaderCssClass,

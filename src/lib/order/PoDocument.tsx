@@ -6,6 +6,7 @@
 import { ReactNode } from 'react'
 import { Cost, FieldType } from '@prisma/client'
 import { P, match } from 'ts-pattern'
+import { isTruthy } from 'remeda'
 import prisma from '../prisma'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
 import { readResource, readResources } from '@/domain/resource/actions'
@@ -50,7 +51,7 @@ export default async function PoDocument({
 
   const lineSchema = await readSchema({ accountId, resourceType: 'Line' })
 
-  const customFields = lineSchema.allFields.filter(
+  const lineAdditionalFields = lineSchema.allFields.filter(
     (field) =>
       field.templateId !== null &&
       ![
@@ -373,8 +374,15 @@ export default async function PoDocument({
           </div>
         </div>
 
+        {/* -- BEGIN: Lines + Cost -- */}
         <div style={styles.MarginBottomForTable}>
-          <table>
+          {/* -- BEGIN: Lines -- */}
+          <table
+            style={{
+              border: '1px solid black',
+              borderCollapse: 'collapse',
+            }}
+          >
             <thead>
               <tr style={styles.BgColorHeader}>
                 <th style={{ borderRight: 0 }}>#</th>
@@ -398,19 +406,124 @@ export default async function PoDocument({
                         type: 'Item',
                       })
                     : undefined
+
+                  const lineAdditionalFieldsRows = lineAdditionalFields
+                    .map((lineAdditionalField) => {
+                      const fieldValue = line.fields.find(
+                        (f) => f.fieldId === lineAdditionalField.id,
+                      )?.value
+
+                      const renderFieldValue = match<FieldType, string | null>(
+                        lineAdditionalField.type,
+                      )
+                        .with('Checkbox', () =>
+                          match(fieldValue?.boolean)
+                            .with(true, () => 'Yes')
+                            .with(false, () => 'No')
+                            .with(P.nullish, () => null)
+                            .exhaustive(),
+                        )
+                        .with(
+                          'Contact',
+                          () => fieldValue?.contact?.name || null,
+                        )
+                        .with('Date', () =>
+                          fieldValue?.date
+                            ? new Date(fieldValue.date).toLocaleDateString()
+                            : null,
+                        )
+                        .with('File', () =>
+                          fieldValue?.file ? 'File Attached' : null,
+                        )
+                        .with(
+                          'Money',
+                          () =>
+                            fieldValue?.number?.toLocaleString('en-US', {
+                              style: 'currency',
+                              currency: 'USD',
+                            }) ?? null,
+                        )
+                        .with(
+                          'Number',
+                          () => fieldValue?.number?.toString() ?? null,
+                        )
+                        .with(
+                          'MultiSelect',
+                          () =>
+                            fieldValue?.options
+                              ?.map((o) => o.name)
+                              .join(', ') ?? null,
+                        )
+                        .with('Text', () => fieldValue?.string || null)
+                        .with('Textarea', () => fieldValue?.string || null)
+                        .with('Select', () => fieldValue?.option?.id ?? null)
+                        .with('User', () => fieldValue?.user?.fullName ?? null)
+                        .with('Resource', () => null)
+                        .exhaustive()
+
+                      if (renderFieldValue === null) return null
+
+                      return (
+                        <tr key={lineAdditionalField.id}>
+                          <td
+                            style={{
+                              border: 0,
+                              padding: '5px 8px',
+                              fontWeight: 600,
+                              width: '50%',
+                              verticalAlign: 'top',
+                            }}
+                          >
+                            {lineAdditionalField.name}
+                          </td>
+                          <td
+                            style={{
+                              border: 0,
+                              padding: '5px 8px',
+                              textAlign: 'left',
+                              verticalAlign: 'top',
+                            }}
+                          >
+                            {renderFieldValue}
+                          </td>
+                        </tr>
+                      )
+                    })
+                    .filter(isTruthy)
+
+                  const tdStyle = {
+                    border: 0,
+                    textAlign: 'right',
+                    width: '100px',
+                    verticalAlign: 'top',
+                  } as const
+
                   return (
                     <>
-                      <tr style={{ pageBreakInside: 'avoid' }}>
-                        <td rowSpan={2} style={styles.TotalAndSubtotalCssClass}>
+                      <tr
+                        style={{
+                          pageBreakInside: 'avoid',
+                          borderTop: '1px solid black',
+                        }}
+                      >
+                        <td
+                          rowSpan={2}
+                          style={{
+                            borderRight: 0,
+                            fontWeight: 'bold',
+                            verticalAlign: 'top',
+                          }}
+                        >
                           {index + 1}
                         </td>
                         <td
                           rowSpan={2}
                           style={{
-                            ...styles.TotalAndSubtotalCssClass,
+                            borderRight: 0,
+                            fontWeight: 'bold',
+                            verticalAlign: 'top',
                             borderLeft: 0,
                             minWidth: '275px',
-                            verticalAlign: 'top',
                           }}
                         >
                           {selectValue(line, fields.item)?.resource?.name}{' '}
@@ -426,35 +539,16 @@ export default async function PoDocument({
                             {selectValue(line, fields.description)?.string}
                           </span>
                         </td>
-                        <td
-                          style={{
-                            border: 0,
-                            width: '100px',
-                            verticalAlign: 'top',
-                          }}
-                        >
+                        <td style={tdStyle}>
                           {item &&
                             selectValue(item, fields.unitOfMeasure)?.option
                               ?.name}
                         </td>
 
-                        <td
-                          style={{
-                            border: 0,
-                            textAlign: 'right',
-                            verticalAlign: 'top',
-                          }}
-                        >
+                        <td style={tdStyle}>
                           {selectValue(line, fields.quantity)?.number}
                         </td>
-                        <td
-                          style={{
-                            border: 0,
-                            textAlign: 'right',
-                            width: '100px',
-                            verticalAlign: 'top',
-                          }}
-                        >
+                        <td style={tdStyle}>
                           {selectValue(
                             line,
                             fields.unitCost,
@@ -463,14 +557,7 @@ export default async function PoDocument({
                             currency: 'USD',
                           })}
                         </td>
-                        <td
-                          style={{
-                            borderLeft: 0,
-                            textAlign: 'right',
-                            width: '100px',
-                            verticalAlign: 'top',
-                          }}
-                        >
+                        <td style={tdStyle}>
                           {selectValue(
                             line,
                             fields.totalCost,
@@ -483,222 +570,144 @@ export default async function PoDocument({
                       <tr>
                         <td
                           colSpan={4}
-                          style={{ padding: 0, verticalAlign: 'top' }}
+                          style={{
+                            padding: 0,
+                            verticalAlign: 'top',
+                            border: 0,
+                          }}
                         >
-                          <table style={{ border: 0, margin: 0 }}>
-                            {customFields.map((customField) => {
-                              const fieldValue = line.fields.find(
-                                (f) => f.fieldId === customField.id,
-                              )?.value
-
-                              const renderFieldValue = match<
-                                FieldType,
-                                string | null
-                              >(customField.type)
-                                .with('Checkbox', () =>
-                                  match(fieldValue?.boolean)
-                                    .with(true, () => 'Yes')
-                                    .with(false, () => 'No')
-                                    .with(P.nullish, () => null)
-                                    .exhaustive(),
-                                )
-                                .with(
-                                  'Contact',
-                                  () => fieldValue?.contact?.name || null,
-                                )
-                                .with('Date', () =>
-                                  fieldValue?.date
-                                    ? new Date(
-                                        fieldValue.date,
-                                      ).toLocaleDateString()
-                                    : null,
-                                )
-                                .with('File', () =>
-                                  fieldValue?.file ? 'File Attached' : null,
-                                )
-                                .with('Money', () =>
-                                  fieldValue?.number
-                                    ? fieldValue.number.toLocaleString(
-                                        'en-US',
-                                        {
-                                          style: 'currency',
-                                          currency: 'USD',
-                                        },
-                                      )
-                                    : null,
-                                )
-                                .with(
-                                  'Number',
-                                  () => fieldValue?.number?.toString() ?? null,
-                                )
-                                .with(
-                                  'MultiSelect',
-                                  () =>
-                                    fieldValue?.options
-                                      ?.map((o) => o.name)
-                                      .join(', ') ?? null,
-                                )
-                                .with('Text', () => fieldValue?.string || null)
-                                .with(
-                                  'Textarea',
-                                  () => fieldValue?.string || null,
-                                )
-                                .with(
-                                  'Select',
-                                  () => fieldValue?.option?.id ?? null,
-                                )
-                                .with(
-                                  'User',
-                                  () => fieldValue?.user?.fullName ?? null,
-                                )
-                                .with('Resource', () => null)
-                                .exhaustive()
-
-                              if (renderFieldValue === null) return null
-
-                              return (
-                                <tr key={customField.id}>
-                                  <td
-                                    style={{
-                                      border: 0,
-                                      padding: '5px 8px',
-                                      fontWeight: 600,
-                                      width: '50%',
-                                      verticalAlign: 'top',
-                                    }}
-                                  >
-                                    {customField.name}
-                                  </td>
-                                  <td
-                                    style={{
-                                      border: 0,
-                                      padding: '5px 8px',
-                                      textAlign: 'left',
-                                      verticalAlign: 'top',
-                                    }}
-                                  >
-                                    {renderFieldValue}
-                                  </td>
-                                </tr>
-                              )
-                            })}
-                          </table>
+                          {!!lineAdditionalFieldsRows.length && (
+                            <table
+                              id="line-additional-fields"
+                              style={{
+                                border: 'solid black',
+                                borderWidth: '1px 0px 0px 1px',
+                                margin: 0,
+                              }}
+                            >
+                              {lineAdditionalFieldsRows}
+                            </table>
+                          )}
                         </td>
                       </tr>
                     </>
                   )
                 }),
               )}
-
-              <tr>
-                <td
-                  colSpan={2}
-                  style={{ border: 0, margin: 0, padding: 0 }}
-                ></td>
-                <td
-                  colSpan={4}
-                  style={{
-                    border: 0,
-                    margin: 0,
-                    padding: 0,
-                    paddingLeft: '105px',
-                  }}
-                >
-                  <table style={{ border: 0, margin: 0 }}>
-                    <tr>
-                      <td
-                        colSpan={5}
-                        style={{
-                          ...styles.PaddingAndBorderTopClass,
-                          fontWeight: 'bold',
-                          ...styles.BgColorHeader,
-                        }}
-                      >
-                        SUBTOTAL
-                      </td>
-                      <td
-                        style={{
-                          ...styles.PaddingAndBorderTopClass,
-                          ...styles.BgColorHeader,
-                          fontWeight: 'bold',
-                          textAlign: 'right',
-                        }}
-                      >
-                        {(
-                          selectValue(resource, fields.subtotalCost)?.number ||
-                          0
-                        ).toLocaleString('en-US', {
-                          style: 'currency',
-                          currency: 'USD',
-                        })}
-                      </td>
-                    </tr>
-                    {resource.costs.map((item: Cost, index: number) => {
-                      const subtotal =
-                        selectValue(resource, fields.subtotalCost)?.number || 0
-
-                      const costValue = item.isPercentage
-                        ? subtotal * (item.value / 100)
-                        : item.value
-
-                      return (
-                        <tr key={index}>
-                          <td
-                            style={styles.PaddingAndBorderTopClass}
-                            colSpan={5}
-                          >
-                            {item.name}
-                          </td>
-                          <td
-                            style={{
-                              ...styles.PaddingAndBorderTopClass,
-                              textAlign: 'right',
-                            }}
-                          >
-                            {costValue.toLocaleString('en-US', {
-                              style: 'currency',
-                              currency: 'USD',
-                            })}
-                          </td>
-                        </tr>
-                      )
-                    })}
-                    <tr>
-                      <td
-                        colSpan={5}
-                        style={{
-                          fontWeight: 'bold',
-                          borderTop: 0,
-                          padding: '5px 8px',
-                          ...styles.SubtotalAndTotalClass,
-                        }}
-                      >
-                        TOTAL
-                      </td>
-                      <td
-                        style={{
-                          fontWeight: 'bold',
-                          borderTop: 0,
-                          padding: '5px 8px',
-                          textAlign: 'right',
-                          ...styles.SubtotalAndTotalClass,
-                        }}
-                      >
-                        {selectValue(
-                          resource,
-                          fields.totalCost,
-                        )?.number?.toLocaleString('en-US', {
-                          style: 'currency',
-                          currency: 'USD',
-                        })}
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
             </tbody>
           </table>
+          {/* -- BEGIN: Lines -- */}
+
+          {/* -- BEGIN: Costs -- */}
+          <div
+            id="cost-aggregation-table"
+            style={{ display: 'flex', justifyContent: 'end' }}
+          >
+            <div style={{ flexGrow: 1 }} />
+            <div>
+              <table
+                style={{ border: '1px solid black', borderTop: 0, margin: 0 }}
+              >
+                <tr style={{ backgroundColor: '#CCCCCC', fontWeight: 'bold' }}>
+                  <td
+                    style={{
+                      width: '150px',
+                      borderTop: 0,
+                      borderBottom: 0,
+                      padding: '5px 8px',
+                    }}
+                  >
+                    SUBTOTAL
+                  </td>
+                  <td
+                    style={{
+                      borderTop: 0,
+                      borderBottom: 0,
+                      padding: '5px 8px',
+                      width: '100px',
+                      textAlign: 'right',
+                    }}
+                  >
+                    {(
+                      selectValue(resource, fields.subtotalCost)?.number || 0
+                    ).toLocaleString('en-US', {
+                      style: 'currency',
+                      currency: 'USD',
+                    })}
+                  </td>
+                </tr>
+                {resource.costs.map((item: Cost, index: number) => {
+                  const subtotal =
+                    selectValue(resource, fields.subtotalCost)?.number || 0
+
+                  const costValue = item.isPercentage
+                    ? subtotal * (item.value / 100)
+                    : item.value
+
+                  return (
+                    <tr key={index}>
+                      <td
+                        style={{
+                          borderTop: 0,
+                          borderBottom: 0,
+                          padding: '5px 8px',
+                        }}
+                      >
+                        {item.name}
+                      </td>
+                      <td
+                        style={{
+                          borderTop: 0,
+                          borderBottom: 0,
+                          padding: '5px 8px',
+                          textAlign: 'right',
+                        }}
+                      >
+                        {costValue.toLocaleString('en-US', {
+                          style: 'currency',
+                          currency: 'USD',
+                        })}
+                      </td>
+                    </tr>
+                  )
+                })}
+                <tr style={{ backgroundColor: '#C7E1F2' }}>
+                  <td
+                    style={{
+                      fontWeight: 'bold',
+                      border: 0,
+                      borderLeft: '1px solid black',
+                      padding: '5px 8px',
+                    }}
+                  >
+                    TOTAL
+                  </td>
+                  <td
+                    style={{
+                      fontWeight: 'bold',
+                      border: 0,
+                      borderLeft: '1px solid black',
+                      padding: '5px 8px',
+                      textAlign: 'right',
+                    }}
+                  >
+                    {selectValue(
+                      resource,
+                      fields.totalCost,
+                    )?.number?.toLocaleString('en-US', {
+                      style: 'currency',
+                      currency: 'USD',
+                    })}
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          {/* -- END: Costs -- */}
         </div>
+        {/* -- END: Lines + Cost -- */}
+
+        {/* -- BEGIN: Ts & Cs -- */}
         <table
           style={{
             pageBreakInside: 'avoid',
@@ -725,6 +734,7 @@ export default async function PoDocument({
             </tr>
           </tbody>
         </table>
+        {/* -- END Ts & Cs -- */}
       </div>
     </div>
   )
