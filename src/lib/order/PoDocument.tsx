@@ -536,7 +536,7 @@ export default async function PoDocument({
                                   () =>
                                     fieldValue?.options
                                       ?.map((o) => o.name)
-                                      .join(' ') || null,
+                                      .join(', ') ?? null,
                                 )
                                 .with('Text', () => fieldValue?.string || null)
                                 .with(
@@ -547,10 +547,9 @@ export default async function PoDocument({
                                   'Select',
                                   () => fieldValue?.option?.id ?? null,
                                 )
-                                .with('User', () =>
-                                  fieldValue?.user
-                                    ? `${fieldValue.user.firstName} ${fieldValue.user.lastName}`
-                                    : null,
+                                .with(
+                                  'User',
+                                  () => fieldValue?.user?.fullName ?? null,
                                 )
                                 .with('Resource', () => null)
                                 .exhaustive()
