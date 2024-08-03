@@ -5,7 +5,7 @@
 
 import { ReactNode } from 'react'
 import { Cost, FieldType } from '@prisma/client'
-import { match } from 'ts-pattern'
+import { P, match } from 'ts-pattern'
 import prisma from '../prisma'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
 import { readResource, readResources } from '@/domain/resource/actions'
@@ -491,35 +491,30 @@ export default async function PoDocument({
                                 (f) => f.fieldId === customField.id,
                               )?.value
 
-                              type Primitive =
-                                | string
-                                | number
-                                | boolean
-                                | null
-                                | undefined
-
                               const renderFieldValue = match<
                                 FieldType,
-                                Primitive
+                                string | null
                               >(customField.type)
                                 .with('Checkbox', () =>
-                                  fieldValue?.boolean ? 'Yes' : 'No',
+                                  match(fieldValue?.boolean)
+                                    .with(true, () => 'Yes')
+                                    .with(false, () => 'No')
+                                    .with(P.nullish, () => null)
+                                    .exhaustive(),
                                 )
                                 .with(
                                   'Contact',
-                                  () => fieldValue?.contact?.name || '',
+                                  () => fieldValue?.contact?.name || null,
                                 )
                                 .with('Date', () =>
                                   fieldValue?.date
                                     ? new Date(
                                         fieldValue.date,
                                       ).toLocaleDateString()
-                                    : '',
+                                    : null,
                                 )
                                 .with('File', () =>
-                                  fieldValue?.file
-                                    ? 'File Attached'
-                                    : 'No File',
+                                  fieldValue?.file ? 'File Attached' : null,
                                 )
                                 .with('Money', () =>
                                   fieldValue?.number
@@ -530,31 +525,37 @@ export default async function PoDocument({
                                           currency: 'USD',
                                         },
                                       )
-                                    : '',
+                                    : null,
                                 )
-                                .with('Number', () => fieldValue?.number || '')
+                                .with(
+                                  'Number',
+                                  () => fieldValue?.number?.toString() ?? null,
+                                )
                                 .with(
                                   'MultiSelect',
                                   () =>
                                     fieldValue?.options
                                       ?.map((o) => o.name)
-                                      .join(' ') || '',
+                                      .join(' ') || null,
                                 )
-                                .with('Text', () => fieldValue?.string || '')
+                                .with('Text', () => fieldValue?.string || null)
                                 .with(
                                   'Textarea',
-                                  () => fieldValue?.string || '',
+                                  () => fieldValue?.string || null,
                                 )
                                 .with(
                                   'Select',
-                                  () => fieldValue?.option?.id || '',
+                                  () => fieldValue?.option?.id ?? null,
                                 )
                                 .with('User', () =>
                                   fieldValue?.user
                                     ? `${fieldValue.user.firstName} ${fieldValue.user.lastName}`
-                                    : '',
+                                    : null,
                                 )
-                                .otherwise(() => '')
+                                .with('Resource', () => null)
+                                .exhaustive()
+
+                              if (renderFieldValue === null) return null
 
                               return (
                                 <tr key={customField.id}>
