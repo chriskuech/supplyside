@@ -1,6 +1,7 @@
 import { readBlob } from '../blobs/actions'
 import { readResource } from '../resource/actions'
 import { fields } from '../schema/template/system-fields'
+import { selectValue } from '../resource/types'
 import smtp from '@/lib/smtp'
 import prisma from '@/lib/prisma'
 
@@ -23,13 +24,8 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
     }),
   ])
 
-  const poRecipient = order.fields.find(
-    (f) => f.templateId === fields.poRecipient.templateId,
-  )?.value.contact
-
-  const po = order.fields.find(
-    (f) => f.templateId === fields.document.templateId,
-  )?.value.file
+  const poRecipient = selectValue(order, fields.poRecipient)?.contact
+  const po = selectValue(order, fields.document)?.file
 
   if (!po || !poRecipient?.email) return
 

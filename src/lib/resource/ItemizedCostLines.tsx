@@ -14,7 +14,7 @@ import {
   TextField,
 } from '@mui/material'
 import { Add, Clear } from '@mui/icons-material'
-import { Resource } from '@/domain/resource/types'
+import { Resource, selectValue } from '@/domain/resource/types'
 import { createCost, deleteCost, updateCost } from '@/domain/cost/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 
@@ -23,14 +23,8 @@ type Props = {
 }
 
 export default function ItemizedCostLines({ resource }: Props) {
-  const subtotalCost =
-    resource.fields.find(
-      (rf) => rf.templateId === fields.subtotalCost.templateId,
-    )?.value.number ?? 0
-
-  const totalCost =
-    resource.fields.find((rf) => rf.templateId === fields.totalCost.templateId)
-      ?.value.number ?? 0
+  const subtotalCost = selectValue(resource, fields.subtotalCost)?.number ?? 0
+  const totalCost = selectValue(resource, fields.totalCost)?.number ?? 0
 
   return (
     <Stack spacing={2}>

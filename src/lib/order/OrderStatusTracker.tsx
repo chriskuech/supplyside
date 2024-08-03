@@ -1,7 +1,7 @@
 import { match } from 'ts-pattern'
 import StatusTrackerView from '../ux/StatusTrackerView'
-import { Resource } from '@/domain/resource/types'
-import { Schema } from '@/domain/schema/types'
+import { Resource, selectValue } from '@/domain/resource/types'
+import { fields } from '@/domain/schema/template/system-fields'
 
 const happyPath: string[] = [
   'Draft',
@@ -21,23 +21,10 @@ const sadPath: string[] = [
 
 type Props = {
   resource: Resource
-  schema: Schema
-  fieldTemplateId: string
 }
 
-export default function OrderStatusTracker({
-  resource,
-  schema,
-  fieldTemplateId,
-}: Props) {
-  const field = schema.allFields.find(
-    (field) => field.templateId === fieldTemplateId,
-  )
-
-  if (!field) return '❌ Field not found'
-
-  const value = resource.fields.find((f) => f.fieldId === field.id)?.value
-    .option
+export default function OrderStatusTracker({ resource }: Props) {
+  const value = selectValue(resource, fields.orderStatus)?.option
 
   if (!value) return '❌ Field value not found'
 

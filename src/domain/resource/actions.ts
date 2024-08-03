@@ -22,7 +22,7 @@ import { Ajv } from 'ajv'
 import { omit } from 'remeda'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
-import { Field } from '../schema/types'
+import { Field, selectField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
 import { getDownloadPath } from '../blobs/utils'
 import { Data, Resource } from './types'
@@ -200,9 +200,7 @@ export const createResource = async ({
   if (type === 'Order') {
     await updateValue({
       resourceId: resource.id,
-      fieldId:
-        schema.allFields.find((f) => f.templateId === fields.number.templateId)
-          ?.id ?? fail(),
+      fieldId: selectField(schema, fields.number)?.id ?? fail(),
       value: { string: resource.key.toString() },
     })
   }

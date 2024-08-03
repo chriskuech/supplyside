@@ -18,6 +18,7 @@ import ItemizedCostLines from '@/lib/resource/ItemizedCostLines'
 import ApproveButton from '@/lib/order/ApproveButton'
 import DownloadPoButton from '@/lib/order/DownloadPoButton'
 import PreviewPoButton from '@/lib/order/PreviewPoButton'
+import { selectValue } from '@/domain/resource/types'
 
 const AssigneeControl = dynamic(() => import('@/lib/order/AssigneeControl'), {
   ssr: false,
@@ -83,9 +84,7 @@ export default async function OrderDetail({
     }),
   ])
 
-  const status = resource.fields.find(
-    (f) => f.templateId === fields.orderStatus.templateId,
-  )?.value.option
+  const status = selectValue(resource, fields.orderStatus)?.option
 
   const isDraft = status?.templateId === orderStatusOptions.draft.templateId
 
@@ -156,11 +155,7 @@ export default async function OrderDetail({
             alignItems={'center'}
           >
             <Box sx={{ borderRadius: 10, flexGrow: 1 }}>
-              <OrderStatusTracker
-                resource={resource}
-                schema={schema}
-                fieldTemplateId={fields.orderStatus.templateId}
-              />
+              <OrderStatusTracker resource={resource} />
             </Box>
             <Stack
               width={400}

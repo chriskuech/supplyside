@@ -3,7 +3,7 @@
 import { Download } from '@mui/icons-material'
 import { Tooltip, IconButton } from '@mui/material'
 import { getDownloadPath } from '@/domain/blobs/utils'
-import { Resource } from '@/domain/resource/types'
+import { Resource, selectValue } from '@/domain/resource/types'
 import { fields } from '@/domain/schema/template/system-fields'
 import { Schema } from '@/domain/schema/types'
 
@@ -13,9 +13,7 @@ type Props = {
 }
 
 export default function DownloadPoButton({ resource }: Props) {
-  const file = resource.fields.find(
-    (f) => f.templateId === fields.document.templateId,
-  )?.value.file
+  const file = selectValue(resource, fields.document)?.file
 
   if (!file) return null
 

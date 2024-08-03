@@ -1,4 +1,5 @@
 import { FieldType, ResourceType, Value } from '@prisma/client'
+import { FieldTemplate } from './template/types'
 
 export type Schema = {
   resourceType: ResourceType
@@ -27,3 +28,15 @@ export type Option = {
   name: string
   templateId?: string | null
 }
+
+export const selectField = (
+  schema: Schema,
+  fieldTemplateOrTemplateId: FieldTemplate | string,
+) =>
+  schema.allFields?.find(
+    (field) =>
+      field.templateId ===
+      (typeof fieldTemplateOrTemplateId === 'string'
+        ? fieldTemplateOrTemplateId
+        : fieldTemplateOrTemplateId.templateId),
+  )

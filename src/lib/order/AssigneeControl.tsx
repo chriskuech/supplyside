@@ -14,7 +14,7 @@ import {
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'
 import { useState } from 'react'
 import ResourceFieldControl from '../resource/ResourceFieldControl'
-import { Resource } from '@/domain/resource/types'
+import { Resource, selectValue } from '@/domain/resource/types'
 import { fields } from '@/domain/schema/template/system-fields'
 import { Schema } from '@/domain/schema/types'
 
@@ -26,9 +26,7 @@ type Props = {
 export default function AssigneeControl({ schema, resource }: Props) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const assignee = resource.fields.find(
-    (f) => f.templateId === fields.assignee.templateId,
-  )?.value.user
+  const assignee = selectValue(resource, fields.assignee)?.user
 
   return (
     <>

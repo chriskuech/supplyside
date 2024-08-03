@@ -488,7 +488,7 @@ export default async function PoDocument({
                           <table style={{ border: 0, margin: 0 }}>
                             {customFields.map((customField) => {
                               const fieldValue = line.fields.find(
-                                (f) => f.templateId === customField.templateId,
+                                (f) => f.fieldId === customField.id,
                               )?.value
 
                               type Primitive =
@@ -625,10 +625,8 @@ export default async function PoDocument({
                         }}
                       >
                         {(
-                          resource.fields.find(
-                            (rf) =>
-                              rf.templateId === fields.subtotalCost.templateId,
-                          )?.value.number || 0
+                          selectValue(resource, fields.subtotalCost)?.number ||
+                          0
                         ).toLocaleString('en-US', {
                           style: 'currency',
                           currency: 'USD',
