@@ -205,13 +205,13 @@ export default function ResourceTable({
 
           const content = match<FieldType>(field.type)
             .with('Checkbox', () => value?.boolean && <Check />)
-            .with(
-              'Contact',
-              () =>
-                value?.contact && (
+            .with('Contact', () => (
+              <Box onClick={(e) => e.stopPropagation()}>
+                {value?.contact && (
                   <ContactCard contact={value.contact} inline />
-                ),
-            )
+                )}
+              </Box>
+            ))
             .with(
               'File',
               () =>
