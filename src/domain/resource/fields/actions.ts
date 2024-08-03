@@ -34,6 +34,8 @@ export const updateValue = async ({
   fieldId,
   value,
 }: UpdateValueDto) => {
+  revalidateTag('resource')
+
   //TODO:  check if value object is correct for each fieldType
 
   const { optionIds, ...rest } = value
@@ -84,7 +86,8 @@ export const updateValue = async ({
       : []),
   ])
 
-  // Update Line."Total Cost"
+  // When the Line."Unit Cost" or Line."Quantity" field is updated,
+  // Then update Line."Total Cost"
   if (
     rf.Resource.type === 'Line' &&
     (rf.Field.templateId === fields.unitCost.templateId ||
@@ -115,7 +118,8 @@ export const updateValue = async ({
     })
   }
 
-  // Update Order."Subtotal Cost"
+  // When the Line."Total Cost" field is updated,
+  // Then update the Order."Subtotal Cost" field
   if (
     rf.Resource.type === 'Line' &&
     rf.Field.templateId === fields.totalCost.templateId
@@ -158,7 +162,8 @@ export const updateValue = async ({
     }
   }
 
-  // Update Order."Itemized Costs"
+  // When the Order."Subtotal Cost" field is updated,
+  // Then recalculate the Order."Itemized Costs" field
   if (
     rf.Resource.type === 'Order' &&
     rf.Field.templateId === fields.subtotalCost.templateId
@@ -166,7 +171,8 @@ export const updateValue = async ({
     await recalculateItemizedCosts(rf.Resource.accountId, resourceId)
   }
 
-  // Update Order."Total Cost"
+  // When the Order."Itemized Costs" or Order."Subtotal Cost" field is updated,
+  // Then update Order."Total Cost"
   if (
     rf.Resource.type === 'Order' &&
     (rf.Field.templateId === fields.subtotalCost.templateId ||
@@ -194,8 +200,6 @@ export const updateValue = async ({
       },
     })
   }
-
-  revalidateTag('resource')
 }
 
 export const uploadFile = async (
