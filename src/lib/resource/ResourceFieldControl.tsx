@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic'
 import { Resource } from '@/domain/resource/types'
-import { Schema } from '@/domain/schema/types'
+import { Schema, selectField } from '@/domain/schema/types'
 
 const FieldControl = dynamic(() => import('./fields/FieldControl'))
 
@@ -17,7 +17,7 @@ export default function ResourceFieldControl({
   fieldTemplateId,
   isReadOnly,
 }: Props) {
-  const field = schema.allFields.find((f) => f.templateId === fieldTemplateId)
+  const field = selectField(schema, fieldTemplateId)
 
   if (!field) return '❌ Field not found'
 

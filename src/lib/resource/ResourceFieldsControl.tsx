@@ -17,7 +17,7 @@ import { match } from 'ts-pattern'
 import dynamic from 'next/dynamic'
 import ReadonlyTextarea from './fields/ReadonlyTextarea'
 import ResourceField from './fields/ResourceField'
-import { Resource } from '@/domain/resource/types'
+import { Resource, selectValue } from '@/domain/resource/types'
 import { Schema } from '@/domain/schema/types'
 
 const FieldControl = dynamic(() => import('./fields/FieldControl'))
@@ -175,11 +175,7 @@ export default function ResourceFieldsControl({
                   inputId={`rf-${s.fields.at(0)?.id}`}
                   resourceId={resource.id}
                   field={s.fields.at(0) ?? fail()}
-                  value={
-                    resource.fields.find(
-                      (rf) => rf.fieldId === s.fields.at(0)?.id,
-                    )?.value
-                  }
+                  value={selectValue(resource, s.fields.at(0)?.id ?? fail())}
                 />
               </Box>
             ) : (

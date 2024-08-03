@@ -8,6 +8,8 @@ import { fields } from '../schema/template/system-fields'
 import { updateValue } from '../resource/fields/actions'
 import { readResource } from '../resource/actions'
 import { readSchema } from '../schema/actions'
+import { selectValue } from '../resource/types'
+import { selectField } from '../schema/types'
 import prisma from '@/lib/prisma'
 
 export const createCost = async (resourceId: string): Promise<void> => {
@@ -55,17 +57,11 @@ export const recalculateItemizedCosts = async (
     where: { resourceId },
   })
 
-  const subtotal =
-    resource.fields.find(
-      (rf) => rf.templateId === fields.subtotalCost.templateId,
-    )?.value.number ?? 0
+  const subtotal = selectValue(resource, fields.subtotalCost)?.number ?? 0
 
   await updateValue({
     resourceId,
-    fieldId:
-      schema.allFields.find(
-        (f) => f.templateId === fields.itemizedCosts.templateId,
-      )?.id ?? fail(),
+    fieldId: selectField(schema, fields.itemizedCosts)?.id ?? fail(),
     value: {
       number: pipe(
         costs,

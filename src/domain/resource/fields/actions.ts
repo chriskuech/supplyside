@@ -5,12 +5,14 @@ import { revalidateTag } from 'next/cache'
 import { Prisma } from '@prisma/client'
 import { map, pick, pipe, sum } from 'remeda'
 import { readResource, readResources } from '../actions'
+import { selectValue } from '../types'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
 import { createBlob } from '@/domain/blobs/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
 import { recalculateItemizedCosts } from '@/domain/cost/actions'
+import { selectField } from '@/domain/schema/types'
 
 export type UpdateValueDto = {
   resourceId: string
@@ -100,19 +102,9 @@ export const updateValue = async ({
       }),
     ])
 
-    const totalCostFieldId =
-      schema.allFields.find(
-        (field) => field.templateId === fields.totalCost.templateId,
-      )?.id ?? fail()
-
-    const unitCost =
-      resource.fields.find(
-        (field) => field.templateId === fields.unitCost.templateId,
-      )?.value.number ?? 0
-    const quantity =
-      resource.fields.find(
-        (field) => field.templateId === fields.quantity.templateId,
-      )?.value.number ?? 0
+    const totalCostFieldId = selectField(schema, fields.totalCost)?.id ?? fail()
+    const unitCost = selectValue(resource, fields.unitCost)?.number ?? 0
+    const quantity = selectValue(resource, fields.quantity)?.number ?? 0
 
     await updateValue({
       fieldId: totalCostFieldId,
@@ -133,9 +125,7 @@ export const updateValue = async ({
       id: resourceId,
     })
 
-    const order =
-      line.fields.find((field) => field.templateId === fields.order.templateId)
-        ?.value.resource ?? null
+    const order = selectValue(line, fields.order)?.resource
 
     if (order) {
       const orderSchema = await readSchema({
@@ -154,20 +144,12 @@ export const updateValue = async ({
 
       const subTotal = pipe(
         lines,
-        map(
-          (line) =>
-            line.fields.find(
-              (field) => field.templateId === fields.totalCost.templateId,
-            )?.value.number ?? 0,
-        ),
+        map((line) => selectValue(line, fields.totalCost)?.number ?? 0),
         sum(),
       )
 
       await updateValue({
-        fieldId:
-          orderSchema.allFields.find(
-            (field) => field.templateId === fields.subtotalCost.templateId,
-          )?.id ?? fail(),
+        fieldId: selectField(orderSchema, fields.subtotalCost)?.id ?? fail(),
         resourceId: order.id,
         value: {
           number: subTotal,
@@ -201,20 +183,11 @@ export const updateValue = async ({
       isSystem: true,
     })
 
-    const itemizedCosts =
-      order.fields.find(
-        (field) => field.templateId === fields.itemizedCosts.templateId,
-      )?.value.number ?? 0
-    const subtotalCost =
-      order.fields.find(
-        (field) => field.templateId === fields.subtotalCost.templateId,
-      )?.value.number ?? 0
+    const itemizedCosts = selectValue(order, fields.itemizedCosts)?.number ?? 0
+    const subtotalCost = selectValue(order, fields.subtotalCost)?.number ?? 0
 
     await updateValue({
-      fieldId:
-        orderSchema.allFields.find(
-          (field) => field.templateId === fields.totalCost.templateId,
-        )?.id ?? fail(),
+      fieldId: selectField(orderSchema, fields.totalCost)?.id ?? fail(),
       resourceId: order.id,
       value: {
         number: itemizedCosts + subtotalCost,

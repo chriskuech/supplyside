@@ -13,6 +13,7 @@ import * as fields from '@/domain/resource/fields/actions'
 import * as schemas from '@/domain/schema/actions'
 import { fields as systemFields } from '@/domain/schema/template/system-fields'
 import { OptionTemplate } from '@/domain/schema/template/types'
+import { selectField } from '@/domain/schema/types'
 
 export const createResource = async (
   params: Omit<domain.CreateResourceParams, 'accountId'>,
@@ -113,9 +114,7 @@ export const transitionStatus = async (
     isSystem: true,
   })
   const field =
-    schema.allFields.find(
-      (field) => field.templateId === systemFields.orderStatus.templateId,
-    ) ?? fail('Order status field not found')
+    selectField(schema, systemFields.orderStatus) ?? fail('Field not found')
 
   await fields.updateValue({
     resourceId,

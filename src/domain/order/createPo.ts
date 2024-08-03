@@ -8,6 +8,8 @@ import { fields } from '../schema/template/system-fields'
 import { readResource } from '../resource/actions'
 import { updateValue } from '../resource/fields/actions'
 import { readSchema } from '../schema/actions'
+import { selectField } from '../schema/types'
+import { selectValue } from '../resource/types'
 import { renderPo } from './renderPo'
 import prisma from '@/lib/prisma'
 
@@ -19,12 +21,8 @@ type CreatePoParams = {
 export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   const schema = await readSchema({ accountId, resourceType: 'Order' })
 
-  const documentFieldId =
-    schema.allFields.find((f) => f.templateId === fields.document.templateId)
-      ?.id ?? fail()
-  const issuedDateFieldId =
-    schema.allFields.find((f) => f.templateId === fields.issuedDate.templateId)
-      ?.id ?? fail()
+  const documentFieldId = selectField(schema, fields.document)?.id ?? fail()
+  const issuedDateFieldId = selectField(schema, fields.issuedDate)?.id ?? fail()
 
   await updateValue({
     resourceId,
@@ -43,15 +41,9 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
     readResource({ accountId, id: resourceId }),
   ])
 
-  const vendorName = resource?.fields.find(
-    (f) => f.templateId === fields.vendor.templateId,
-  )?.value?.resource?.name
-  const issuedDate = resource?.fields.find(
-    (f) => f.templateId === fields.issuedDate.templateId,
-  )?.value?.date
-  const number = resource?.fields.find(
-    (f) => f.templateId === fields.number.templateId,
-  )?.value?.string
+  const vendorName = selectValue(resource, fields.vendor)?.resource?.name
+  const issuedDate = selectValue(resource, fields.issuedDate)?.date
+  const number = selectValue(resource, fields.number)?.string
 
   const input: Prisma.ValueCreateInput = {
     File: {
