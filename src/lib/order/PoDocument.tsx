@@ -53,14 +53,12 @@ export default async function PoDocument({
 
   const lineAdditionalFields = lineSchema.allFields.filter(
     (field) =>
-      field.templateId !== null &&
       ![
         fields.totalCost.templateId,
         fields.unitOfMeasure.templateId,
         fields.unitCost.templateId,
         fields.quantity.templateId,
-      ].includes(field.templateId) &&
-      field.type !== 'Resource',
+      ].includes(field.templateId as string),
   )
 
   const account = await prisma().account.findUniqueOrThrow({
