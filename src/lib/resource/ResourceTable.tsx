@@ -263,7 +263,12 @@ export default function ResourceTable({
         field: '_delete',
         headerName: 'Delete',
         renderCell: ({ row: { id } }) => (
-          <IconButton onClick={() => deleteResource({ id })}>
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation()
+              deleteResource({ id })
+            }}
+          >
             <Clear />
           </IconButton>
         ),
