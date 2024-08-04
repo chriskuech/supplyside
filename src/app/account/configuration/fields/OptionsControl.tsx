@@ -29,17 +29,18 @@ import { P, match } from 'ts-pattern'
 import { OptionPatch } from './actions'
 
 type Props = {
-  values: OptionPatch[]
+  options: OptionPatch[]
   onChange: (values: OptionPatch[]) => void
   isDisabled?: boolean
 }
 
 export default function OptionsControl({
-  values,
+  options,
   onChange,
   isDisabled,
 }: Props) {
-  const optionNames = new Set(...values.map((v) => v.name))
+  // I think this is wrong considering a option { op: 'remove' } will still show up here
+  const optionNames = new Set(options.map((v) => v.name))
 
   return (
     <Autocomplete<OptionPatch, true, boolean, true>
@@ -47,7 +48,7 @@ export default function OptionsControl({
       disabled={isDisabled}
       freeSolo
       options={[]}
-      value={values}
+      value={options}
       getOptionLabel={(o) => (typeof o === 'string' ? o : o.name)}
       onChange={(e, nameOrValues, reason) =>
         match(reason)
@@ -67,7 +68,7 @@ export default function OptionsControl({
           )
           .with('clear', () => {
             onChange(
-              values.flatMap((value) =>
+              options.flatMap((value) =>
                 match<OptionPatch, OptionPatch[]>(value)
                   .with({ op: 'add' }, () => [])
                   .with(P.any, (o) => [

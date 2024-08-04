@@ -1,7 +1,8 @@
 'use server'
 
-import { ResourceType } from '@prisma/client'
+import { Prisma, ResourceType } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
+import { difference } from 'remeda'
 import { requireSession } from '@/lib/session'
 import prisma from '@/lib/prisma'
 
@@ -26,8 +27,31 @@ export type Schema = {
 export const readSchemas = async (): Promise<Schema[]> => {
   const { accountId } = await requireSession()
 
+  const existingSchemas = await prisma().schema.findMany({
+    where: { accountId, isSystem: false },
+    select: {
+      resourceType: true,
+    },
+  })
+
+  const missingResourceTypes = difference(
+    Object.values(ResourceType),
+    existingSchemas.map((schema) => schema.resourceType),
+  )
+
+  missingResourceTypes.length &&
+    (await prisma().schema.createMany({
+      data: missingResourceTypes.map<Prisma.SchemaCreateManyInput>(
+        (resourceType) => ({
+          accountId,
+          resourceType,
+          isSystem: false,
+        }),
+      ),
+    }))
+
   return await prisma().schema.findMany({
-    where: { accountId },
+    where: { accountId, isSystem: false },
     select: {
       id: true,
       resourceType: true,

@@ -72,7 +72,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
 
       {(field.type === 'MultiSelect' || field.type === 'Select') && (
         <OptionsControl
-          values={options}
+          options={options}
           onChange={setOptions}
           isDisabled={!!findField(field.templateId)?.options}
         />
@@ -100,7 +100,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
           </FormControl>
         )}
       </Stack>
-      {findField(field.templateId)?.defaultValue && (
+      {!findField(field.templateId)?.defaultValue && (
         <FormControl fullWidth>
           <InputLabel htmlFor="default-field-value-control">
             Default Value
