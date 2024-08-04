@@ -454,7 +454,7 @@ export default async function PoDocument({
                         )
                         .with('Text', () => fieldValue?.string || null)
                         .with('Textarea', () => fieldValue?.string || null)
-                        .with('Select', () => fieldValue?.option?.id ?? null)
+                        .with('Select', () => fieldValue?.option?.name ?? null)
                         .with('User', () => fieldValue?.user?.fullName ?? null)
                         .with('Resource', () => null)
                         .exhaustive()
