@@ -105,6 +105,10 @@ export const createResource = async ({
                   typeof dataValue === 'string' && f.type === 'Resource'
                     ? { connect: { id: dataValue } }
                     : undefined,
+                Option:
+                  typeof dataValue === 'string' && f.type === 'Select'
+                    ? { connect: { id: dataValue } }
+                    : undefined,
               } satisfies Prisma.ValueCreateWithoutResourceFieldValueInput,
             },
           }
