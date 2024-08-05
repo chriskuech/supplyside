@@ -9,10 +9,10 @@ import { selectValue } from '../types'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
 import { createBlob } from '@/domain/blobs/actions'
-import { fields } from '@/domain/schema/template/system-fields'
+import { fields, findField } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
 import { recalculateItemizedCosts } from '@/domain/cost/actions'
-import { selectField } from '@/domain/schema/types'
+import { Field, selectField } from '@/domain/schema/types'
 
 export type UpdateValueDto = {
   resourceId: string
@@ -365,8 +365,15 @@ export const copyLinkedResourceFields = async (
     readSchema({ accountId, resourceType: linkedResourceType }),
   ])
 
-  const thisFieldIds = thisSchema.allFields.map(({ id }) => id)
-  const linkedFieldIds = linkedSchema.allFields.map(({ id }) => id)
+  const excludeDerivedFields = (f: Field) =>
+    !f.templateId || !findField(f.templateId)?.isDerived
+
+  const thisFieldIds = thisSchema.allFields
+    .filter(excludeDerivedFields)
+    .map(({ id }) => id)
+  const linkedFieldIds = linkedSchema.allFields
+    .filter(excludeDerivedFields)
+    .map(({ id }) => id)
 
   await Promise.all(
     linkedFieldIds
