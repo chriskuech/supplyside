@@ -273,34 +273,38 @@ export default function ResourceTable({
 
   const handleProcessRowUpdate = async (newRow: Resource, oldRow: Resource) => {
     // find which cell has been updated
-    const editedField = newRow.fields.find(({ fieldId, fieldType, value }) => {
-      const oldField = oldRow.fields.find((f) => f.fieldId === fieldId)
-      if (!oldField) return
-      const { value: oldValue } = oldField
-      const hasNewValue = match(fieldType)
-        .with('Checkbox', () => oldValue.boolean !== value.boolean)
-        .with('Number', () => oldValue.number !== value.number)
-        .with('Date', () => oldValue.date !== value.date)
-        .with('Money', () => oldValue.number !== value.number)
-        .with('Text', () => oldValue.string !== value.string)
-        .with('Textarea', () => oldValue.string !== value.string)
-        .with('Select', () => oldValue.option?.id !== value.option?.id)
-        .with('MultiSelect', () => {
-          const newIds = value.options?.map((option) => option.id) ?? []
-          const oldIds = oldValue.options?.map((option) => option.id) ?? []
+    const editedField = newRow.fields.find(
+      ({ fieldId, fieldType, value: newValue }) => {
+        const oldValue = oldRow.fields.find((f) => f.fieldId === fieldId)?.value
 
-          return (
-            !!difference(newIds, oldIds).length ||
-            !!difference(oldIds, newIds).length
+        if (!oldValue) return !!newValue
+
+        return match<FieldType, boolean>(fieldType)
+          .with('Checkbox', () => oldValue.boolean !== newValue.boolean)
+          .with('Number', () => oldValue.number !== newValue.number)
+          .with('Date', () => oldValue.date !== newValue.date)
+          .with('Money', () => oldValue.number !== newValue.number)
+          .with('Text', () => oldValue.string !== newValue.string)
+          .with('Textarea', () => oldValue.string !== newValue.string)
+          .with('Select', () => oldValue.option?.id !== newValue.option?.id)
+          .with('MultiSelect', () => {
+            const newIds = newValue.options?.map((option) => option.id) ?? []
+            const oldIds = oldValue.options?.map((option) => option.id) ?? []
+
+            return (
+              !!difference(newIds, oldIds).length ||
+              !!difference(oldIds, newIds).length
+            )
+          })
+          .with('User', () => oldValue.user?.id !== newValue.user?.id)
+          .with(
+            'Resource',
+            () => oldValue.resource?.id !== newValue.resource?.id,
           )
-        })
-        .with('User', () => oldValue.user?.id !== value.user?.id)
-        .with('Resource', () => oldValue.resource?.id !== value.resource?.id)
-        .with(P.union('Contact', 'File'), () => false) //These updates are being handled by the components
-        .exhaustive()
-
-      return hasNewValue
-    })
+          .with(P.union('Contact', 'File'), () => false) //These updates are being handled by the components
+          .exhaustive()
+      },
+    )
 
     if (!editedField) return newRow
 
