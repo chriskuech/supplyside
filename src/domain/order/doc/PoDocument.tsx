@@ -604,7 +604,12 @@ export default async function PoDocument({
             <div style={{ flexGrow: 1 }} />
             <div>
               <table
-                style={{ border: '1px solid black', borderTop: 0, margin: 0 }}
+                style={{
+                  border: '1px solid black',
+                  borderTop: 0,
+                  margin: 0,
+                  breakInside: 'avoid',
+                }}
               >
                 <tr style={{ backgroundColor: '#CCCCCC', fontWeight: 'bold' }}>
                   <td
