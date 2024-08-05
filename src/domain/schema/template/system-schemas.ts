@@ -28,19 +28,14 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'Line',
-    fields: [fields.totalCost],
-    sections: [
-      {
-        name: 'Summary',
-        fields: [
-          fields.quantity,
-          fields.unitCost,
-          fields.needDate,
-          fields.order,
-          fields.bill,
-          fields.item,
-        ],
-      },
+    fields: [
+      fields.item,
+      fields.quantity,
+      fields.unitCost,
+      fields.totalCost,
+      fields.needDate,
+      fields.order,
+      fields.bill,
     ],
   },
   {
