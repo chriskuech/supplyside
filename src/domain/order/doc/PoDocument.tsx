@@ -518,24 +518,25 @@ export default async function PoDocument({
                           rowSpan={2}
                           style={{
                             borderRight: 0,
-                            fontWeight: 'bold',
                             verticalAlign: 'top',
                             borderLeft: 0,
                             minWidth: '275px',
                           }}
                         >
-                          {selectValue(line, fields.item)?.resource?.name}{' '}
-                          <span
+                          <div style={{ fontWeight: 'bold' }}>
+                            {item && selectValue(item, fields.name)?.string}
+                          </div>
+                          <div
                             style={{
                               fontWeight: 'normal',
                               color: '#575656',
                               marginTop: '13px',
-                              display: 'block',
                               whiteSpace: 'pre-wrap',
                             }}
                           >
-                            {selectValue(line, fields.description)?.string}
-                          </span>
+                            {item &&
+                              selectValue(item, fields.description)?.string}
+                          </div>
                         </td>
                         <td style={tdStyle}>
                           {item &&
