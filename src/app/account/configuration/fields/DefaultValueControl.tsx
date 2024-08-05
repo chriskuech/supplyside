@@ -47,7 +47,7 @@ export default function DefaultValueControl({
         }
       >
         {options.map(({ id, name }) => (
-          <MenuItem key={id} defaultValue={id}>
+          <MenuItem key={id} value={id}>
             {name}
           </MenuItem>
         ))}
@@ -97,5 +97,5 @@ export default function DefaultValueControl({
         onChange={(value) => onChange({ date: value?.toDate() ?? null })}
       />
     ))
-    .otherwise(() => 'Coming Soon')
+    .otherwise(() => 'Not Supported')
 }

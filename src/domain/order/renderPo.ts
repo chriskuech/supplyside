@@ -5,8 +5,8 @@ import puppeteer from 'puppeteer'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 /* @ts-expect-error */
 import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.browser.production'
-import PoDocument from '@/lib/order/PoDocument'
-import PoDocumentFooter from '@/lib/order/PoDocumentFooter'
+import PoDocument from './doc/PoDocument'
+import PoDocumentFooter from '@/domain/order/doc/PoDocumentFooter'
 import singleton from '@/lib/singleton'
 
 const browser = singleton('browser', async (clear) => {
