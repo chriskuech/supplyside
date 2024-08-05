@@ -36,6 +36,8 @@ export default function ResourceTable({
   isEditable,
   ...props
 }: Props) {
+  console.log('ResourceTable', resources)
+
   const { enqueueSnackbar } = useSnackbar()
   const columns = useMemo<GridColDef<Resource>[]>(
     () => [
@@ -75,8 +77,10 @@ export default function ResourceTable({
           .with('Resource', () => 'custom')
           .with('User', () => 'custom')
           .exhaustive(),
-        valueGetter: (_, row) => {
-          const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
+        valueGetter: (_, resource) => {
+          const value = resource.fields.find(
+            (rf) => rf.fieldId === field.id,
+          )?.value
 
           type Primitive = string | number | boolean | null | undefined
 
@@ -172,8 +176,10 @@ export default function ResourceTable({
             }
           }
         },
-        valueFormatter: (_, row) => {
-          const value = row.fields.find((rf) => rf.fieldId === field.id)?.value
+        valueFormatter: (_, resource) => {
+          const value = resource.fields.find(
+            (rf) => rf.fieldId === field.id,
+          )?.value
 
           return match<FieldType>(field.type)
             .with('Number', () => value?.number)
@@ -189,14 +195,12 @@ export default function ResourceTable({
             .with('Resource', () => value?.resource?.name)
             .otherwise(() => undefined)
         },
-        renderCell: (params) => {
-          const currentField = params.row.fields.find(
+        renderCell: ({ row: resource }) => {
+          const value = resource.fields.find(
             (rf) => rf.fieldId === field.id,
-          )
+          )?.value
 
-          if (!currentField) return
-
-          const { value } = currentField
+          if (!value) return
 
           const content = match<FieldType>(field.type)
             .with('Checkbox', () => value?.boolean && <Check />)
@@ -213,8 +217,8 @@ export default function ResourceTable({
                 value?.file && (
                   <FieldControl
                     field={field}
-                    inputId={`${params.row.id}${field.id}`}
-                    resourceId={params.row.id}
+                    inputId={resource.id + field.id}
+                    resourceId={resource.id}
                     value={value}
                     isReadOnly
                   />
@@ -235,17 +239,12 @@ export default function ResourceTable({
             .with('User', () => value?.user?.fullName)
             .otherwise(() => undefined)
 
+          if (!content) return
+
           return (
-            content && (
-              <Box
-                display="flex"
-                alignItems="center"
-                height="100%"
-                width="100%"
-              >
-                {content}
-              </Box>
-            )
+            <Box display="flex" alignItems="center" height="100%" width="100%">
+              {content}
+            </Box>
           )
         },
         renderEditCell: (params) => (

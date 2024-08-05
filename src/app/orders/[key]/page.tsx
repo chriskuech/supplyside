@@ -19,6 +19,7 @@ import ApproveButton from '@/lib/order/ApproveButton'
 import DownloadPoButton from '@/lib/order/DownloadPoButton'
 import PreviewPoButton from '@/lib/order/PreviewPoButton'
 import { selectValue } from '@/domain/resource/types'
+import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 
 const AssigneeControl = dynamic(() => import('@/lib/order/AssigneeControl'), {
   ssr: false,
@@ -27,11 +28,6 @@ const AssigneeControl = dynamic(() => import('@/lib/order/AssigneeControl'), {
 const CancelButton = dynamic(() => import('@/lib/order/CancelButton'), {
   ssr: false,
 })
-
-const CreateResourceButton = dynamic(
-  () => import('@/lib/resource/CreateResourceButton'),
-  { ssr: false },
-)
 
 const PreviewDraftPoButton = dynamic(
   () => import('@/lib/order/PreviewDraftPoButton'),

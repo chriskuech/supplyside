@@ -1,19 +1,12 @@
 'use server'
 
 import { Box, Container, Stack, Typography } from '@mui/material'
-import dynamic from 'next/dynamic'
 import { ResourceType } from '@prisma/client'
 import { readSchema } from '../schema/actions'
 import { readResources } from './actions'
+import CreateResourceButton from './CreateResourceButton'
+import ResourceTable from './ResourceTable'
 import { requireSessionWithRedirect } from '@/lib/session'
-
-const ResourceTable = dynamic(() => import('./ResourceTable'), {
-  ssr: false,
-})
-
-const CreateResourceButton = dynamic(() => import('./CreateResourceButton'), {
-  ssr: false,
-})
 
 type Props = {
   resourceType: ResourceType
