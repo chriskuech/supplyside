@@ -11,122 +11,138 @@ export const applyTemplate = async (accountId: string) => {
   await applySchemas(accountId)
 }
 
-const applyFields = async (accountId: string) =>
-  await Promise.all(
-    Object.values(fields).map(
-      async ({
-        templateId,
-        options,
-        defaultValue,
-        name,
-        type,
-        resourceType,
-      }: FieldTemplate) => {
-        const { id: fieldId } = await prisma().field.upsert({
-          where: {
-            accountId_templateId: {
-              accountId,
-              templateId,
-            },
-          },
-          create: {
-            Account: {
-              connect: {
-                id: accountId,
+const applyFields = async (accountId: string) => {
+  await prisma().$transaction((trx) =>
+    Promise.all([
+      trx.field.deleteMany({
+        where: {
+          accountId,
+          AND: [
+            { templateId: { not: null } },
+            {
+              templateId: {
+                notIn: Object.values(fields).map((f) => f.templateId),
               },
             },
-            DefaultValue: {
-              create: {},
+          ],
+        },
+      }),
+      ...Object.values(fields).map(
+        async ({
+          templateId,
+          options,
+          defaultValue,
+          name,
+          type,
+          resourceType,
+        }: FieldTemplate) => {
+          const { id: fieldId } = await trx.field.upsert({
+            where: {
+              accountId_templateId: {
+                accountId,
+                templateId,
+              },
             },
-            templateId,
-            name,
-            type,
-            resourceType,
-          },
-          update: {
-            name,
-            type,
-            resourceType,
-          },
-        })
+            create: {
+              Account: {
+                connect: {
+                  id: accountId,
+                },
+              },
+              DefaultValue: {
+                create: {},
+              },
+              templateId,
+              name,
+              type,
+              resourceType,
+            },
+            update: {
+              name,
+              type,
+              resourceType,
+            },
+          })
 
-        const upsertingOptions = options?.map(
-          ({ templateId, ...option }, order) =>
-            prisma().option.upsert({
-              where: {
-                fieldId_templateId: {
+          const upsertingOptions = options?.map(
+            ({ templateId, ...option }, order) =>
+              trx.option.upsert({
+                where: {
+                  fieldId_templateId: {
+                    fieldId,
+                    templateId,
+                  },
+                },
+                create: {
                   fieldId,
                   templateId,
+                  order,
+                  name: option.name,
                 },
-              },
-              create: {
+                update: {
+                  order,
+                  name: option.name,
+                },
+              }),
+          )
+
+          const cleaningOptions =
+            options &&
+            trx.option.deleteMany({
+              where: {
                 fieldId,
-                templateId,
-                order,
-                name: option.name,
-              },
-              update: {
-                order,
-                name: option.name,
-              },
-            }),
-        )
-
-        const cleaningOptions =
-          options &&
-          prisma().option.deleteMany({
-            where: {
-              fieldId,
-              templateId: { not: null },
-              NOT: {
-                templateId: {
-                  in: options?.map(({ templateId }) => templateId),
+                templateId: { not: null },
+                NOT: {
+                  templateId: {
+                    in: options?.map(({ templateId }) => templateId),
+                  },
                 },
               },
-            },
-          })
+            })
 
-        await Promise.all([cleaningOptions, ...(upsertingOptions ?? [])])
+          await Promise.all([cleaningOptions, ...(upsertingOptions ?? [])])
 
-        if (defaultValue?.optionId) {
-          const templateId =
-            options?.find(
-              ({ templateId }) => templateId === defaultValue?.optionId,
-            )?.templateId ?? fail()
+          if (defaultValue?.optionId) {
+            const templateId =
+              options?.find(
+                ({ templateId }) => templateId === defaultValue?.optionId,
+              )?.templateId ?? fail()
 
-          await prisma().field.update({
-            where: { id: fieldId },
-            data: {
-              DefaultValue: {
-                upsert: {
-                  create: {
-                    Option: {
-                      connect: {
-                        fieldId_templateId: {
-                          fieldId,
-                          templateId,
+            await trx.field.update({
+              where: { id: fieldId },
+              data: {
+                DefaultValue: {
+                  upsert: {
+                    create: {
+                      Option: {
+                        connect: {
+                          fieldId_templateId: {
+                            fieldId,
+                            templateId,
+                          },
                         },
                       },
                     },
-                  },
-                  update: {
-                    Option: {
-                      connect: {
-                        fieldId_templateId: {
-                          fieldId,
-                          templateId,
+                    update: {
+                      Option: {
+                        connect: {
+                          fieldId_templateId: {
+                            fieldId,
+                            templateId,
+                          },
                         },
                       },
                     },
                   },
                 },
               },
-            },
-          })
-        }
-      },
-    ),
+            })
+          }
+        },
+      ),
+    ]),
   )
+}
 
 const applySchemas = async (accountId: string) => {
   await prisma().schema.deleteMany({
