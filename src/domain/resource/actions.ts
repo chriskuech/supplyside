@@ -10,14 +10,12 @@ import {
   Cost,
 } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
-import { P, match } from 'ts-pattern'
 import { Ajv } from 'ajv'
-import { omit } from 'remeda'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
-import { Field, selectField } from '../schema/types'
+import { selectField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
-import { Data, Resource } from './types'
+import { Resource } from './types'
 import { valueInclude } from './values/types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
@@ -74,107 +72,43 @@ export const createResource = async ({
         },
       },
       ResourceField: {
-        create: schema.allFields.map((f) => ({
-          Field: {
-            connect: {
-              id: f.id,
+        create: schema.allFields.map((f) => {
+          const dataValue = data?.[f.name]
+
+          return {
+            Field: {
+              connect: {
+                id: f.id,
+              },
             },
-          },
-          Value:
-            f.defaultValue && !data?.[f.name]
-              ? {
-                  connect: {
-                    id: f.defaultValue.id,
-                  },
-                }
-              : {
-                  create: match<
-                    [Field, Data[string] | undefined],
-                    Prisma.ValueCreateWithoutResourceFieldValueInput
-                  >([f, data?.[f.name]])
-                    .with(
-                      [{ defaultValue: P.not(P.nullish) }, P.nullish],
-                      ([{ defaultValue }]) => omit(defaultValue, ['id']),
-                    )
-                    .with(
-                      [{ type: 'Checkbox' }, P.union(P.boolean, null)],
-                      ([, val]) => ({ boolean: val }),
-                    )
-                    .with(
-                      [{ type: 'File' }, P.union(P.string, null)],
-                      ([, val]) => ({
-                        File: val
-                          ? {
-                              connect: {
-                                id: val,
-                              },
-                            }
-                          : undefined,
-                      }),
-                    )
-                    .with(
-                      [
-                        { type: P.union('Text', 'Textarea') },
-                        P.union(P.string, null),
-                      ],
-                      ([, val]) => ({ string: val }),
-                    )
-                    .with(
-                      [
-                        { type: 'MultiSelect' },
-                        P.union(P.array(P.string), null),
-                      ],
-                      ([, vals]) => ({
-                        ValueOption: vals
-                          ? {
-                              createMany: {
-                                data: vals.map((optionId) => ({
-                                  optionId,
-                                })),
-                              },
-                            }
-                          : undefined,
-                      }),
-                    )
-                    .with(
-                      [{ type: 'Resource' }, P.union(P.string, null)],
-                      ([, val]) => ({
-                        Resource: val
-                          ? {
-                              connect: {
-                                id: val,
-                              },
-                            }
-                          : undefined,
-                      }),
-                    )
-                    .with(
-                      [{ type: 'Select' }, P.union(P.string, null)],
-                      ([, val]) => ({
-                        Option: val
-                          ? {
-                              connect: {
-                                id: val,
-                              },
-                            }
-                          : undefined,
-                      }),
-                    )
-                    .with(
-                      [{ type: 'User' }, P.union(P.string, null)],
-                      ([, val]) => ({
-                        User: val
-                          ? {
-                              connect: {
-                                id: val,
-                              },
-                            }
-                          : undefined,
-                      }),
-                    )
-                    .otherwise(() => ({})),
-                },
-        })),
+            Value: {
+              create: {
+                boolean:
+                  typeof dataValue === 'boolean' && f.type === 'Checkbox'
+                    ? dataValue
+                    : f.defaultValue?.boolean ?? null,
+                date:
+                  typeof dataValue === 'string' && f.type === 'Date'
+                    ? dataValue
+                    : f.defaultValue?.date ?? null,
+                number:
+                  typeof dataValue === 'number' &&
+                  ['Number', 'Money'].includes(f.type)
+                    ? dataValue
+                    : f.defaultValue?.number ?? null,
+                string:
+                  typeof dataValue === 'string' &&
+                  ['Text', 'Textarea'].includes(f.type)
+                    ? dataValue
+                    : f.defaultValue?.string ?? null,
+                Resource:
+                  typeof dataValue === 'string' && f.type === 'Resource'
+                    ? { connect: { id: dataValue } }
+                    : undefined,
+              } satisfies Prisma.ValueCreateWithoutResourceFieldValueInput,
+            },
+          }
+        }),
       },
     },
     include,
