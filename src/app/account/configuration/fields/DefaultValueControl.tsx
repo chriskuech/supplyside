@@ -8,94 +8,94 @@ import {
   TextField,
 } from '@mui/material'
 import { match } from 'ts-pattern'
-import { useEffect, useState } from 'react'
-import { Value } from '@prisma/client'
 import { Close } from '@mui/icons-material'
+import dayjs from 'dayjs'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { Field } from './actions'
-import { createValue, readValue } from '@/lib/value/actions'
+import { ValueInput } from '@/domain/resource/values/types'
 
 type Props = {
   field: Field
-  defaultValueId: string | null
-  onChange: (valueId: string) => void
+  defaultValue: ValueInput
+  onChange: (dto: ValueInput) => void
 }
 
 export default function DefaultValueControl({
-  field,
-  defaultValueId,
+  field: { type, Option: options },
+  defaultValue,
   onChange,
 }: Props) {
-  const [value, setValue] = useState<Value | null>(null)
-
-  useEffect(() => {
-    if (defaultValueId) {
-      readValue(defaultValueId).then(setValue)
-    } else {
-      createValue({}).then(({ id }) => onChange(id))
-    }
-  }, [defaultValueId, onChange])
-
-  return match(field.type)
+  return match(type)
     .with('Checkbox', () => (
       <Checkbox
-        id="default-field-value-control"
-        checked={value?.boolean ?? false}
-        onChange={async (e) => {
-          const { id: valueId } = await createValue({
-            boolean: e.target.checked,
-          })
-
-          onChange(valueId)
-        }}
+        id="default-field-defaultValue-control"
+        checked={defaultValue?.boolean ?? false}
+        onChange={(e) => onChange({ boolean: e.target.checked })}
       />
     ))
     .with('Select', () => (
       <Select
-        id="default-field-value-control"
-        value={value?.optionId ?? ''}
-        onChange={async (e) => {
-          const { id: valueId } = await createValue({
-            optionId: e.target.value,
-          })
-
-          onChange(valueId)
-        }}
+        id="default-field-defaultValue-control"
+        value={defaultValue?.optionId ?? ''}
+        onChange={(e) => onChange({ optionId: e.target.value })}
         endAdornment={
-          value?.optionId && (
-            <IconButton
-              onClick={async () => {
-                const { id: valueId } = await createValue({})
-
-                onChange(valueId)
-              }}
-            >
+          defaultValue?.optionId && (
+            <IconButton onClick={() => onChange({ optionId: null })}>
               <Close fontSize="small" />
             </IconButton>
           )
         }
       >
-        {field.Option.map((option) => (
-          <MenuItem key={option.id} value={option.id}>
-            {option.name}
+        {options.map(({ id, name }) => (
+          <MenuItem key={id} defaultValue={id}>
+            {name}
           </MenuItem>
         ))}
       </Select>
     ))
     .with('Textarea', () => (
       <TextField
-        id="default-field-value-control"
-        defaultValue={value?.string ?? ''}
-        onBlur={async (e) => {
-          const { id: valueId } = await createValue({
-            string: e.target.value,
-          })
-
-          onChange(valueId)
-        }}
+        id="default-field-defaultValue-control"
+        value={defaultValue?.string ?? ''}
+        onChange={(e) => onChange({ string: e.target.value })}
         multiline
         fullWidth
         minRows={3}
       />
     ))
-    .otherwise(() => 'NYI')
+    .with('Text', () => (
+      <TextField
+        id="default-field-defaultValue-control"
+        value={defaultValue?.string ?? ''}
+        onChange={(e) => onChange({ string: e.target.value })}
+      />
+    ))
+    .with('Number', () => (
+      <TextField
+        id="default-field-defaultValue-control"
+        value={defaultValue?.number ?? ''}
+        onChange={(e) => onChange({ number: parseInt(e.target.value) })}
+        type="number"
+      />
+    ))
+    .with('Date', () => (
+      // <TextField
+      //   id="default-field-defaultValue-control"
+      //   value={defaultValue?.date ?? ''}
+      //   onChange={(e) => onChange({ date: e.target.value })}
+      //   type="date"
+      // />
+      <DatePicker
+        sx={{ width: '100%' }}
+        slotProps={{
+          field: {
+            clearable: true,
+            onClear: () => onChange({ date: null }),
+          },
+        }}
+        value={defaultValue?.date && dayjs(defaultValue.date)}
+        onChange={(value) => onChange({ date: value?.toDate() ?? null })}
+      />
+    ))
+    .otherwise(() => 'Coming Soon')
 }

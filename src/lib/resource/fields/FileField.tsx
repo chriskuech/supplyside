@@ -4,9 +4,9 @@ import { Download, UploadFile } from '@mui/icons-material'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useRef } from 'react'
 import { getDownloadPath } from '@/domain/blobs/utils'
-import { Value } from '@/domain/resource/types'
 import { Field } from '@/domain/schema/types'
 import { uploadFile } from '@/domain/resource/fields/actions'
+import { Value } from '@/domain/resource/values/types'
 
 type Props = {
   resourceId: string

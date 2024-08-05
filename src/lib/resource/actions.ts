@@ -6,7 +6,7 @@ import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
 import { requireSession } from '../session'
 import * as domain from '@/domain/resource/actions'
-import { Resource, ValueResource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/types'
 import prisma from '@/lib/prisma'
 import * as resources from '@/domain/resource/actions'
 import * as fields from '@/domain/resource/fields/actions'
@@ -14,6 +14,7 @@ import * as schemas from '@/domain/schema/actions'
 import { fields as systemFields } from '@/domain/schema/template/system-fields'
 import { OptionTemplate } from '@/domain/schema/template/types'
 import { selectField } from '@/domain/schema/types'
+import { ValueResource } from '@/domain/resource/values/types'
 
 export const createResource = async (
   params: Omit<domain.CreateResourceParams, 'accountId'>,

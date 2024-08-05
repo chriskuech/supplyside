@@ -18,7 +18,9 @@ const applyFields = async (accountId: string) =>
         templateId,
         options,
         defaultValue,
-        ...field
+        name,
+        type,
+        resourceType,
       }: FieldTemplate) => {
         const { id: fieldId } = await prisma().field.upsert({
           where: {
@@ -28,18 +30,23 @@ const applyFields = async (accountId: string) =>
             },
           },
           create: {
-            accountId,
+            Account: {
+              connect: {
+                id: accountId,
+              },
+            },
+            DefaultValue: {
+              create: {},
+            },
             templateId,
-            isVersioned: false,
-            isEditable: true,
-            name: field.name,
-            type: field.type,
-            resourceType: field.resourceType,
+            name,
+            type,
+            resourceType,
           },
           update: {
-            name: field.name,
-            type: field.type,
-            resourceType: field.resourceType,
+            name,
+            type,
+            resourceType,
           },
         })
 

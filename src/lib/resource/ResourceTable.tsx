@@ -17,11 +17,12 @@ import ContactCard from './fields/ContactCard'
 import { deleteResource } from './actions'
 import FieldGridEditCell from './fields/FieldGridEditCell'
 import FieldControl from './fields/FieldControl'
-import { Resource, ResourceField, Value } from '@/domain/resource/types'
+import { Resource, ResourceField } from '@/domain/resource/types'
 import { Option, Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
 import { updateValue, UpdateValueDto } from '@/domain/resource/fields/actions'
 import { findField } from '@/domain/schema/template/system-fields'
+import { Value } from '@/domain/resource/values/types'
 
 type Props = {
   schema: Schema
@@ -112,15 +113,9 @@ export default function ResourceTable({
           const updatedValue = match<FieldType, Value>(field.type)
             .with('Select', () => ({
               ...emptyValue,
-              option: value?.optionId
-                ? {
-                    id: value.optionId,
-                    name:
-                      field.options.find(
-                        (option) => option.id === value.optionId,
-                      )?.name ?? '',
-                  }
-                : null,
+              option:
+                field.options.find((option) => option.id === value.optionId) ??
+                null,
             }))
             .with('MultiSelect', () => ({
               ...emptyValue,

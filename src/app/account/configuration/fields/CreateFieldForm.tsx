@@ -22,13 +22,11 @@ export default function CreateFieldForm({ onSubmit }: Props) {
   const [name, setName] = useState<string>()
   const [type, setType] = useState<FieldType>()
   const [resourceType, setResourceType] = useState<ResourceType>()
-  const [isVersioned, setIsVersioned] = useState<boolean>(false)
 
   const clear = () => {
     setName(undefined)
     setType(undefined)
     setResourceType(undefined)
-    setIsVersioned(false)
   }
 
   const isValid = !!name && !!type && (type !== 'Resource' || !!resourceType)
@@ -66,7 +64,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
           onClick={() => {
             if (!name || !type) return
 
-            onSubmit({ name, type, resourceType, isVersioned })
+            onSubmit({ name, type, resourceType })
             clear()
           }}
         >
@@ -74,16 +72,6 @@ export default function CreateFieldForm({ onSubmit }: Props) {
         </Button>
       </Stack>
       <Stack direction={'row'} spacing={2}>
-        {/* <FormControlLabel
-          control={
-            <Checkbox
-              value={isVersioned}
-              onChange={(e) => setIsVersioned(e.target.checked)}
-            />
-          }
-          label="Versioned"
-        /> */}
-
         {type === 'Resource' && (
           <FormControl sx={{ width: 150 }}>
             <InputLabel id="field-resource-type-label">

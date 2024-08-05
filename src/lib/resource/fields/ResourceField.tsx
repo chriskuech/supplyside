@@ -24,10 +24,11 @@ import {
   readResource,
 } from '../actions'
 import ResourceFieldsControl from '../ResourceFieldsControl'
-import { Resource, ValueResource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/types'
 import { readSchema } from '@/lib/schema/actions'
 import { Schema } from '@/domain/schema/types'
 import Loading from '@/app/loading'
+import { ValueResource } from '@/domain/resource/values/types'
 
 type Props = {
   value: ValueResource | null

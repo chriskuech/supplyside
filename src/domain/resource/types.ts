@@ -1,14 +1,6 @@
-import {
-  Blob,
-  File,
-  ResourceType,
-  Contact,
-  FieldType,
-  Cost,
-} from '@prisma/client'
-import { Option } from '../schema/types'
+import { ResourceType, FieldType, Cost } from '@prisma/client'
 import { FieldTemplate } from '../schema/template/types'
-import { User } from '@/domain/iam/types'
+import { Value } from './values/types'
 
 export type Resource = {
   id: string
@@ -25,25 +17,6 @@ export type ResourceField = {
   value: Value
 }
 
-export type ValueResource = {
-  id: string
-  name: string
-  key: number
-}
-
-export type Value = {
-  boolean: boolean | null
-  contact: Contact | null
-  date: Date | null
-  number: number | null
-  option: Option | null
-  options?: Option[]
-  string: string | null
-  user: User | null
-  file: (File & { Blob: Blob }) | null
-  resource: ValueResource | null
-}
-
 export type Data = Record<string, string[] | string | number | boolean | null>
 
 export const selectValue = (
@@ -57,3 +30,15 @@ export const selectValue = (
         ? fieldTemplateOrTemplateId
         : fieldTemplateOrTemplateId.templateId),
   )?.value
+
+export const emptyValue = {
+  boolean: null,
+  contact: null,
+  date: null,
+  number: null,
+  option: null,
+  string: null,
+  user: null,
+  file: null,
+  resource: null,
+} as const satisfies Value

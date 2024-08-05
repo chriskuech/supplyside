@@ -16,6 +16,8 @@ import { Field, OptionPatch, UpdateFieldDto } from './actions'
 import ResourceTypeSelect from './ResourceTypeSelect'
 import DefaultValueControl from './DefaultValueControl'
 import { findField } from '@/domain/schema/template/system-fields'
+import { mapValueToInput } from '@/domain/resource/values/mappers'
+import { ValueInput } from '@/domain/resource/values/types'
 
 type Props = {
   field: Field
@@ -24,11 +26,7 @@ type Props = {
 }
 
 export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
-  const [defaultValueId, setDefaultValueId] = useState<string | null>(
-    field.DefaultValue?.id ?? null,
-  )
   const [name, setName] = useState<string>(field.name)
-  // const [isVersioned, setIsVersioned] = useState<boolean>(field.isVersioned)
   const [options, setOptions] = useState<OptionPatch[]>(
     field.Option.map((o) => ({
       id: o.id,
@@ -36,6 +34,9 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
       optionId: o.id,
       op: 'update',
     })),
+  )
+  const [defaultValue, setDefaultValue] = useState<ValueInput>(
+    mapValueToInput(field.defaultValue),
   )
 
   const isValid = !!name
@@ -79,16 +80,6 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
       )}
 
       <Stack direction={'row'} spacing={1} flexWrap={'wrap'}>
-        {/* <FormControlLabel
-          label="Versioned"
-          control={
-            <Checkbox
-              value={isVersioned}
-              onChange={(e) => setIsVersioned(e.target.checked)}
-            />
-          }
-        /> */}
-
         {field.type === 'Resource' && (
           <FormControl sx={{ width: 150 }}>
             <InputLabel id="field-resource-type-label">
@@ -107,8 +98,8 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
           </InputLabel>
           <DefaultValueControl
             field={field}
-            defaultValueId={defaultValueId}
-            onChange={setDefaultValueId}
+            defaultValue={defaultValue}
+            onChange={setDefaultValue}
           />
         </FormControl>
       )}
@@ -124,9 +115,8 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
             onSubmit({
               id: field.id,
               name,
-              isVersioned: false, // commented it all out
               options,
-              defaultValueId,
+              defaultValue,
             })
           }
         >

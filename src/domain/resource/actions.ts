@@ -5,14 +5,7 @@ import {
   ResourceType,
   Resource as ResourceModel,
   ResourceField,
-  ValueOption,
-  Option,
-  Value,
-  User,
   Prisma,
-  File,
-  Blob,
-  Contact,
   Field as FieldModel,
   Cost,
 } from '@prisma/client'
@@ -24,11 +17,13 @@ import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { Field, selectField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
-import { getDownloadPath } from '../blobs/utils'
 import { Data, Resource } from './types'
+import { valueInclude } from './values/types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
 import { copyLinkedResourceFields, updateValue } from './fields/actions'
+import { ValueModel } from './values/model'
+import { mapValueFromModel } from './values/mappers'
 import prisma from '@/lib/prisma'
 
 const ajv = new Ajv()
@@ -303,50 +298,7 @@ const include = {
     include: {
       Field: true,
       Value: {
-        include: {
-          Contact: true,
-          File: {
-            include: {
-              Blob: true,
-            },
-          },
-          Option: true,
-          User: {
-            include: {
-              ImageBlob: true,
-            },
-          },
-          ValueOption: {
-            include: {
-              Option: true,
-            },
-          },
-          Resource: {
-            include: {
-              ResourceField: {
-                where: {
-                  Field: {
-                    templateId: {
-                      in: [fields.name.templateId, fields.number.templateId],
-                    },
-                  },
-                },
-                include: {
-                  Field: true,
-                  Value: {
-                    include: {
-                      User: {
-                        include: {
-                          ImageBlob: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
+        include: valueInclude,
       },
     },
   },
@@ -357,21 +309,7 @@ const mapResource = (
     Cost: Cost[]
     ResourceField: (ResourceField & {
       Field: FieldModel
-      Value: Value & {
-        Contact: Contact | null
-        File: (File & { Blob: Blob }) | null
-        Option: Option | null
-        User: (User & { ImageBlob: Blob | null }) | null
-        ValueOption: (ValueOption & { Option: Option })[]
-        Resource:
-          | (ResourceModel & {
-              ResourceField: (ResourceField & {
-                Field: FieldModel
-                Value: Value
-              })[]
-            })
-          | null
-      }
+      Value: ValueModel
     })[]
   },
 ): Resource => ({
@@ -382,42 +320,7 @@ const mapResource = (
     fieldId: rf.fieldId,
     fieldType: rf.Field.type,
     templateId: rf.Field.templateId,
-    value: {
-      boolean: rf.Value.boolean,
-      contact: rf.Value.Contact,
-      date: rf.Value.date,
-      string: rf.Value.string,
-      number: rf.Value.number,
-      option: rf.Value.Option,
-      options: rf.Value.ValueOption.map((vo) => vo.Option),
-      user: rf.Value.User && {
-        email: rf.Value.User.email,
-        firstName: rf.Value.User.firstName,
-        fullName: `${rf.Value.User.firstName} ${rf.Value.User.lastName}`,
-        id: rf.Value.User.id,
-        lastName: rf.Value.User.lastName,
-        profilePicPath:
-          rf.Value.User.ImageBlob &&
-          getDownloadPath({
-            blobId: rf.Value.User.ImageBlob.id,
-            mimeType: rf.Value.User.ImageBlob.mimeType,
-            fileName: 'profile-pic',
-          }),
-      },
-      resource: rf.Value.Resource && {
-        id: rf.Value.Resource.id,
-        key: rf.Value.Resource.key,
-        name:
-          rf.Value.Resource.ResourceField.find(
-            (rf) =>
-              rf.Field.templateId &&
-              (
-                [fields.name.templateId, fields.number.templateId] as string[]
-              ).includes(rf.Field.templateId),
-          )?.Value.string ?? '',
-      },
-      file: rf.Value.File,
-    },
+    value: mapValueFromModel(rf.Value),
   })),
   costs: model.Cost,
 })

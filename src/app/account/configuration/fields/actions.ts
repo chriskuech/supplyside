@@ -1,10 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { FieldType, ResourceType, Value } from '@prisma/client'
-import { match } from 'ts-pattern'
+import { FieldType, ResourceType } from '@prisma/client'
+import { P, match } from 'ts-pattern'
 import { requireSession } from '@/lib/session'
 import prisma from '@/lib/prisma'
+import { Value, ValueInput, valueInclude } from '@/domain/resource/values/types'
+import { mapValueFromModel } from '@/domain/resource/values/mappers'
 
 export type OptionPatch = {
   id: string // patch ID -- must be `id` to work with mui
@@ -25,16 +27,14 @@ export type Field = {
   name: string
   type: FieldType
   resourceType: ResourceType | null
-  isVersioned: boolean
   Option: Option[]
-  DefaultValue: Value | null
+  defaultValue: Value
   templateId: string | null
 }
 
 export type CreateFieldParams = {
   name: string
   type: FieldType
-  isVersioned: boolean
   resourceType?: ResourceType
 }
 
@@ -43,9 +43,14 @@ export const createField = async (params: CreateFieldParams) => {
 
   await prisma().field.create({
     data: {
-      accountId: session.accountId,
-      isVersioned: params.isVersioned,
-      isEditable: true,
+      Account: {
+        connect: {
+          id: session.accountId,
+        },
+      },
+      DefaultValue: {
+        create: {},
+      },
       name: sanitizeColumnName(params.name),
       type: params.type,
       resourceType: params.resourceType,
@@ -60,10 +65,9 @@ export const readFields = async (): Promise<Field[]> => {
 
   revalidatePath('.')
 
-  return await prisma().field.findMany({
+  const fields = await prisma().field.findMany({
     where: {
       accountId: session.accountId,
-      isEditable: true,
     },
     orderBy: {
       name: 'asc',
@@ -71,11 +75,12 @@ export const readFields = async (): Promise<Field[]> => {
     select: {
       id: true,
       templateId: true,
-      isVersioned: true,
       type: true,
       name: true,
       resourceType: true,
-      DefaultValue: true,
+      DefaultValue: {
+        include: valueInclude,
+      },
       Option: {
         orderBy: {
           order: 'asc',
@@ -83,14 +88,18 @@ export const readFields = async (): Promise<Field[]> => {
       },
     },
   })
+
+  return fields.map((f) => ({
+    ...f,
+    defaultValue: mapValueFromModel(f.DefaultValue),
+  }))
 }
 
 export type UpdateFieldDto = {
   id: string
   name: string
-  isVersioned: boolean
   options: OptionPatch[]
-  defaultValueId: string | null
+  defaultValue: ValueInput
 }
 
 export const updateField = async (dto: UpdateFieldDto) => {
@@ -104,8 +113,28 @@ export const updateField = async (dto: UpdateFieldDto) => {
       },
       data: {
         name: sanitizeColumnName(dto.name),
-        isVersioned: dto.isVersioned,
-        defaultValueId: dto.defaultValueId,
+        DefaultValue: {
+          update: {
+            boolean: dto.defaultValue.boolean,
+            string: dto.defaultValue.string,
+            date: dto.defaultValue.date,
+            optionId: dto.defaultValue.optionId,
+            number: dto.defaultValue.number,
+            fileId: dto.defaultValue.fileId,
+            Contact: match(dto.defaultValue.contact)
+              .with(null, () => ({ disconnect: true }))
+              .with(undefined, () => undefined)
+              .with(P.any, (c) => ({
+                upsert: {
+                  create: c,
+                  update: c,
+                },
+              }))
+              .exhaustive(),
+            userId: dto.defaultValue.userId,
+            resourceId: dto.defaultValue.resourceId,
+          },
+        },
       },
     }),
     ...dto.options.map((o, i) =>

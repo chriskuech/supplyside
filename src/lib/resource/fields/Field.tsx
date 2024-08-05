@@ -20,9 +20,9 @@ import UserField from './UserField'
 import ResourceField from './ResourceField'
 import ContactField from './ContactField'
 import ContactCard from './ContactCard'
-import { Value } from '@/domain/resource/types'
 import { UpdateValueDto, updateContact } from '@/domain/resource/fields/actions'
 import { Field as FieldModel } from '@/domain/schema/types'
+import { Value } from '@/domain/resource/values/types'
 
 export type Props = {
   inputId: string

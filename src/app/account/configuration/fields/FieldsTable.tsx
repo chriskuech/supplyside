@@ -16,6 +16,7 @@ type Props = {
 
 export default function FieldsTable({ fields }: Props) {
   const [field, setField] = useState<Field>()
+
   const columns: GridColDef<Field>[] = [
     {
       field: 'name',
@@ -32,10 +33,9 @@ export default function FieldsTable({ fields }: Props) {
       editable: false,
     },
     {
-      field: 'versioned',
-      headerName: 'Versioned',
-      description:
-        'Versioned fields require reapproval to be modified and are saved in version history.',
+      field: 'templateId',
+      headerName: 'Template',
+      description: 'This field is part of a template and cannot be deleted.',
       type: 'boolean',
       width: 100,
       editable: false,
