@@ -539,9 +539,10 @@ export default async function PoDocument({
                           </div>
                         </td>
                         <td style={tdStyle}>
-                          {item &&
-                            selectValue(item, fields.unitOfMeasure)?.option
-                              ?.name}
+                          {
+                            selectValue(line, fields.unitOfMeasure)?.option
+                              ?.name
+                          }
                         </td>
 
                         <td style={tdStyle}>
