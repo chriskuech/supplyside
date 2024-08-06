@@ -102,10 +102,10 @@ const applyFields = async (accountId: string) => {
 
           await Promise.all([cleaningOptions, ...(upsertingOptions ?? [])])
 
-          if (defaultValue?.optionId) {
+          if (defaultValue?.optionTemplateId) {
             const templateId =
               options?.find(
-                ({ templateId }) => templateId === defaultValue?.optionId,
+                (o) => o.templateId === defaultValue?.optionTemplateId,
               )?.templateId ?? fail()
 
             await trx.field.update({

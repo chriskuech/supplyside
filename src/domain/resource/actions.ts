@@ -15,7 +15,8 @@ import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { selectField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
-import { Resource } from './types'
+import { recalculateSubtotalCostForOrder } from '../cost/actions'
+import { Resource, selectValue } from './types'
 import { valueInclude } from './values/types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
@@ -220,12 +221,18 @@ export const deleteResource = async ({
   accountId,
   id,
 }: DeleteResourceParams): Promise<void> => {
-  await prisma().resource.delete({
-    where: {
-      accountId,
-      id,
-    },
+  const model = await prisma().resource.delete({
+    where: { id, accountId },
+    include,
   })
+
+  const entity = mapResource(model)
+  if (entity.type === 'Line') {
+    const orderId = selectValue(entity, fields.order)?.resource?.id
+    if (orderId) {
+      await recalculateSubtotalCostForOrder(accountId, orderId)
+    }
+  }
 
   revalidateTag('resource')
 }

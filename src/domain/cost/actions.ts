@@ -6,7 +6,7 @@ import { revalidateTag } from 'next/cache'
 import { map, pipe, sum } from 'remeda'
 import { fields } from '../schema/template/system-fields'
 import { updateValue } from '../resource/fields/actions'
-import { readResource } from '../resource/actions'
+import { readResource, readResources } from '../resource/actions'
 import { readSchema } from '../schema/actions'
 import { selectValue } from '../resource/types'
 import { selectField } from '../schema/types'
@@ -70,6 +70,39 @@ export const recalculateItemizedCosts = async (
         ),
         sum(),
       ),
+    },
+  })
+}
+
+export const recalculateSubtotalCostForOrder = async (
+  accountId: string,
+  orderId: string,
+) => {
+  const orderSchema = await readSchema({
+    accountId,
+    resourceType: 'Order',
+    isSystem: true,
+  })
+
+  const lines = await readResources({
+    accountId,
+    type: 'Line',
+    where: {
+      '==': [{ var: 'Order' }, orderId],
+    },
+  })
+
+  const subTotal = pipe(
+    lines,
+    map((line) => selectValue(line, fields.totalCost)?.number ?? 0),
+    sum(),
+  )
+
+  await updateValue({
+    fieldId: selectField(orderSchema, fields.subtotalCost)?.id ?? fail(),
+    resourceId: orderId,
+    value: {
+      number: subTotal,
     },
   })
 }

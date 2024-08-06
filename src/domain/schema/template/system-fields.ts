@@ -117,7 +117,7 @@ const _fields = {
     type: 'Select',
     options: Object.values(orderStatusOptions),
     defaultValue: {
-      optionId: orderStatusOptions.draft.templateId,
+      optionTemplateId: orderStatusOptions.draft.templateId,
     },
   },
   paymentTerms: {

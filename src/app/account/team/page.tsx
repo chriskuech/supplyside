@@ -1,12 +1,7 @@
-import dynamic from 'next/dynamic'
 import { Box, Container, Stack, Typography } from '@mui/material'
+import UsersTable from './UsersTable'
 import { readUsers, readUser } from '@/lib/iam/actions'
-
-const UsersTable = dynamic(() => import('./UsersTable'), { ssr: false })
-
-const InviteUserControl = dynamic(() => import('@/lib/iam/InviteUserControl'), {
-  ssr: false,
-})
+import InviteUserControl from '@/lib/iam/InviteUserControl'
 
 export default async function Team() {
   const [users, user] = await Promise.all([readUsers(), readUser()])

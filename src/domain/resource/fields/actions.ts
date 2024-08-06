@@ -3,15 +3,18 @@
 import { fail } from 'assert'
 import { revalidateTag } from 'next/cache'
 import { Prisma } from '@prisma/client'
-import { map, pick, pipe, sum } from 'remeda'
-import { readResource, readResources } from '../actions'
+import { pick } from 'remeda'
+import { readResource } from '../actions'
 import { selectValue } from '../types'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
 import { createBlob } from '@/domain/blobs/actions'
 import { fields, findField } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
-import { recalculateItemizedCosts } from '@/domain/cost/actions'
+import {
+  recalculateItemizedCosts,
+  recalculateSubtotalCostForOrder,
+} from '@/domain/cost/actions'
 import { Field, selectField } from '@/domain/schema/types'
 
 export type UpdateValueDto = {
@@ -126,39 +129,12 @@ export const updateValue = async ({
   ) {
     const line = await readResource({
       accountId: rf.Resource.accountId,
-      id: resourceId,
+      id: rf.Resource.id,
     })
 
-    const order = selectValue(line, fields.order)?.resource
-
-    if (order) {
-      const orderSchema = await readSchema({
-        accountId: rf.Resource.accountId,
-        resourceType: 'Order',
-        isSystem: true,
-      })
-
-      const lines = await readResources({
-        accountId: rf.Resource.accountId,
-        type: 'Line',
-        where: {
-          '==': [{ var: 'Order' }, order?.id],
-        },
-      })
-
-      const subTotal = pipe(
-        lines,
-        map((line) => selectValue(line, fields.totalCost)?.number ?? 0),
-        sum(),
-      )
-
-      await updateValue({
-        fieldId: selectField(orderSchema, fields.subtotalCost)?.id ?? fail(),
-        resourceId: order.id,
-        value: {
-          number: subTotal,
-        },
-      })
+    const orderId = selectValue(line, fields.order)?.resource?.id
+    if (orderId) {
+      await recalculateSubtotalCostForOrder(rf.Resource.accountId, orderId)
     }
   }
 

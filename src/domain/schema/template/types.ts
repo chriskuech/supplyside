@@ -18,7 +18,7 @@ export type FieldTemplate = {
   resourceType?: ResourceType
   options?: OptionTemplate[]
   defaultValue?: {
-    optionId: string
+    optionTemplateId: string
   }
   isDerived?: boolean
 }
