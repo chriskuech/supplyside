@@ -205,6 +205,7 @@ export const readResources = async ({
       },
     },
     include,
+    orderBy: [{ key: 'desc' }],
   })
 
   revalidateTag('resource')
