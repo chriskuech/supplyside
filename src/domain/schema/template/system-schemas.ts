@@ -4,27 +4,36 @@ import { SchemaTemplate } from './types'
 export const schemas: SchemaTemplate[] = [
   {
     resourceType: 'Bill',
+    fields: [fields.itemizedCosts, fields.subtotalCost, fields.totalCost],
     sections: [
       {
-        name: 'Summary',
+        name: 'Bill Info',
         fields: [
-          fields.number,
           fields.document,
-          fields.order,
           fields.vendor,
-          fields.issuedDate,
+          fields.invoiceNumber,
+          fields.invoiceDate,
+          fields.order,
         ],
+      },
+      {
+        name: 'Payment Info',
+        fields: [
+          fields.paymentTerms,
+          fields.paymentDueDate,
+          fields.paymentMethod,
+          fields.currency,
+        ],
+      },
+      {
+        name: fields.termsAndConditions.name,
+        fields: [fields.termsAndConditions],
       },
     ],
   },
   {
     resourceType: 'Item',
-    sections: [
-      {
-        name: 'Summary',
-        fields: [fields.name, fields.description, fields.unitOfMeasure],
-      },
-    ],
+    fields: [fields.name, fields.description, fields.unitOfMeasure],
   },
   {
     resourceType: 'Line',
@@ -75,7 +84,7 @@ export const schemas: SchemaTemplate[] = [
         ],
       },
       {
-        name: 'Terms & Conditions',
+        name: fields.termsAndConditions.name,
         fields: [fields.termsAndConditions],
       },
     ],

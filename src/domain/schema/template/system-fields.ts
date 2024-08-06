@@ -62,6 +62,16 @@ const _fields = {
     name: 'Incoterms',
     type: 'Select',
   },
+  invoiceDate: {
+    templateId: 'c2b2f1b5-7d2f-4b3b-9d8e-4a8f9e3c0b7b',
+    name: 'Invoice Date',
+    type: 'Date',
+  },
+  invoiceNumber: {
+    templateId: 'f4d0d4a0-7f2b-4e0c-8f6a-8c6d4e0b7f2b',
+    name: 'Invoice Number',
+    type: 'Text',
+  },
   issuedDate: {
     templateId: '6c2f58e8-2f6e-47cc-b109-904e74d1067b',
     name: 'Issued Date',
@@ -119,6 +129,16 @@ const _fields = {
     defaultValue: {
       optionTemplateId: orderStatusOptions.draft.templateId,
     },
+  },
+  paymentDueDate: {
+    templateId: 'e2c3b1b2-180c-4a8f-9e3c-0b7bcb4a0c88',
+    name: 'Payment Due Date',
+    type: 'Date',
+  },
+  paymentMethod: {
+    templateId: '6afca34e-8501-4dfe-bb6b-2b1028999a08',
+    name: 'Payment Method',
+    type: 'Select',
   },
   paymentTerms: {
     templateId: '8a9c85a4-1aea-4c0c-9cd2-51c6943aaaf7',
