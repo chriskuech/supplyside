@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic'
 import { Box, Container, Stack, Typography } from '@mui/material'
-import { inviteUserToAccount, readUsers, readUser } from '@/lib/iam/actions'
+import { readUsers, readUser } from '@/lib/iam/actions'
 
 const UsersTable = dynamic(() => import('./UsersTable'), { ssr: false })
 
@@ -18,7 +18,7 @@ export default async function Team() {
           Team
         </Typography>
         <Box width={300}>
-          <InviteUserControl onSubmit={inviteUserToAccount} />
+          <InviteUserControl />
         </Box>
         <UsersTable currentUser={user} users={users} />
       </Stack>

@@ -4,7 +4,7 @@ import { Send } from '@mui/icons-material'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
 import { FC, useState } from 'react'
 import { z } from 'zod'
-import { inviteAccount } from '@/app/accounts/actions'
+import { inviteUserToAccount } from './actions'
 
 const InviteUserControl: FC = () => {
   const [email, setEmail] = useState('')
@@ -25,7 +25,7 @@ const InviteUserControl: FC = () => {
           <InputAdornment position="end">
             <IconButton
               onClick={() => {
-                inviteAccount(email)
+                inviteUserToAccount(email)
                 setEmail('')
               }}
               disabled={!isValid}
