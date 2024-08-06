@@ -34,11 +34,16 @@ export async function inviteUser({
     },
   })
 
-  await smtp().sendEmail({
+  await smtp().sendEmailWithTemplate({
     From: 'bot@supplyside.io',
     To: email,
-    Subject: 'Hello from SupplySide',
-    HtmlBody: renderInviteTemplate({ email, password }),
+    TemplateAlias: 'user-invitation',
+    TemplateModel: {
+      invite_email: email,
+      invite_password: password,
+      action_url: `${config().BASE_URL}${loginPath}`,
+      product_url: config().BASE_URL,
+    },
     MessageStream: 'outbound',
   })
 
@@ -108,24 +113,6 @@ export async function readUsers({
       }),
   }))
 }
-
-const renderInviteTemplate = (d: { email: string; password: string }) => `
-  <h3>Welcome to SupplySide!<h3>
-
-  <p>Use the temporary email and password below to log into <a href="${config().BASE_URL}${loginPath}">${config().BASE_URL}${loginPath}</a>.</p>
-
-  <h5>Credentials</h5>
-  <table>
-    <tr>
-      <th>Email</th>
-      <td>${d.email}</td>
-    </tr>
-    <tr>
-      <th>Password</th>
-      <td><code>${d.password}</code></td>
-    </tr>
-  </table>
-`
 
 type DeleteUserParams = { accountId: string; userId: string }
 
