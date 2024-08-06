@@ -5,13 +5,13 @@ import MAppBar from '@mui/material/AppBar'
 import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 import Link from 'next/link'
-import Image from 'next/image'
 import { readSession } from '../session'
 import { systemAccountId } from '../const'
 import ImpersonationControl from '../iam/ImpersonationControl'
 import { UserMenu } from './UserMenu'
 import { AccountMenu } from './AccountMenu'
 import { NavMenu } from './NavMenu'
+import Logo from './Logo'
 import { readUser } from '@/domain/iam/user'
 
 export default async function AppBar() {
@@ -24,14 +24,14 @@ export default async function AppBar() {
         <Toolbar disableGutters>
           {session && (
             <>
-              <Link href="/">
-                <Image
-                  src={'/logo.png'}
-                  alt="SupplySide"
-                  width={200}
-                  height={45}
-                />
-              </Link>
+              <Stack
+                justifyContent={'center'}
+                height={'100%'}
+                component={Link}
+                href={'/'}
+              >
+                <Logo />
+              </Stack>
 
               <Stack
                 flexGrow={1}
