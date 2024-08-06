@@ -35,7 +35,7 @@ export async function inviteUser({
   })
 
   await smtp().sendEmailWithTemplate({
-    From: 'bot@supplyside.io',
+    From: 'SupplySide <bot@supplyside.io>',
     To: email,
     TemplateAlias: 'user-invitation',
     TemplateModel: {
