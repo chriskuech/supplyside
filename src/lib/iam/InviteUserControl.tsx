@@ -4,12 +4,9 @@ import { Send } from '@mui/icons-material'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
 import { FC, useState } from 'react'
 import { z } from 'zod'
+import { inviteAccount } from '@/app/accounts/actions'
 
-type Props = {
-  onSubmit: (email: string) => void
-}
-
-const InviteUserControl: FC<Props> = ({ onSubmit }) => {
+const InviteUserControl: FC = () => {
   const [email, setEmail] = useState('')
 
   const isValid = z.string().email().safeParse(email).success
@@ -28,7 +25,7 @@ const InviteUserControl: FC<Props> = ({ onSubmit }) => {
           <InputAdornment position="end">
             <IconButton
               onClick={() => {
-                onSubmit(email)
+                inviteAccount(email)
                 setEmail('')
               }}
               disabled={!isValid}

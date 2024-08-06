@@ -1,22 +1,9 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
-import dynamic from 'next/dynamic'
-import {
-  refreshAccount,
-  deleteAccount,
-  impersonateAccount,
-  inviteAccount,
-} from './actions'
+import AccountsTable from './AccountsTable'
 import prisma from '@/lib/prisma'
 import { requireSessionWithRedirect } from '@/lib/session'
 import { systemAccountId } from '@/lib/const'
-
-const InviteUserControl = dynamic(() => import('@/lib/iam/InviteUserControl'), {
-  ssr: false,
-})
-
-const AccountsTable = dynamic(() => import('./AccountsTable'), {
-  ssr: false,
-})
+import InviteUserControl from '@/lib/iam/InviteUserControl'
 
 export default async function AdminPage() {
   const { accountId } = await requireSessionWithRedirect()
@@ -34,14 +21,9 @@ export default async function AdminPage() {
       <Stack spacing={2}>
         <Typography variant="h4">Accounts</Typography>
         <Box width={400}>
-          <InviteUserControl onSubmit={inviteAccount} />
+          <InviteUserControl />
         </Box>
-        <AccountsTable
-          accounts={accounts}
-          onRowClick={impersonateAccount}
-          onDelete={deleteAccount}
-          onRefresh={refreshAccount}
-        />
+        <AccountsTable accounts={accounts} />
       </Stack>
     </Container>
   )

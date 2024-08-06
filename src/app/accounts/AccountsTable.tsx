@@ -4,21 +4,15 @@ import { Clear, Sync } from '@mui/icons-material'
 import { IconButton } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { Account } from '@prisma/client'
+import { closeSnackbar, enqueueSnackbar } from 'notistack'
+import { deleteAccount, impersonateAccount, refreshAccount } from './actions'
 import { systemAccountId } from '@/lib/const'
 
 type Props = {
   accounts: Account[]
-  onRowClick: (accountId: string) => void
-  onDelete: (accountId: string) => void
-  onRefresh: (accountId: string) => void
 }
 
-export default function AccountsTable({
-  accounts,
-  onRowClick,
-  onDelete,
-  onRefresh,
-}: Props) {
+export default function AccountsTable({ accounts }: Props) {
   return (
     <DataGrid
       columns={[
@@ -48,10 +42,33 @@ export default function AccountsTable({
           getActions: ({ row: { id: accountId } }) =>
             accountId !== systemAccountId
               ? [
-                  <IconButton key="sync" onClick={() => onRefresh(accountId)}>
+                  <IconButton
+                    key="sync"
+                    onClick={() => {
+                      const key = enqueueSnackbar('Applying the template...')
+                      refreshAccount(accountId)
+                        .then(() => {
+                          closeSnackbar(key)
+                          enqueueSnackbar('Template successfully applied', {
+                            variant: 'success',
+                          })
+                        })
+                        .catch((error) => {
+                          console.error(error)
+                          closeSnackbar(key)
+                          enqueueSnackbar(
+                            'There was an error applying the template',
+                            { variant: 'error' },
+                          )
+                        })
+                    }}
+                  >
                     <Sync />
                   </IconButton>,
-                  <IconButton key="delete" onClick={() => onDelete(accountId)}>
+                  <IconButton
+                    key="delete"
+                    onClick={() => deleteAccount(accountId)}
+                  >
                     <Clear />
                   </IconButton>,
                 ]
@@ -60,7 +77,7 @@ export default function AccountsTable({
       ]}
       rows={accounts}
       rowSelection={false}
-      onRowClick={({ row: { id } }) => onRowClick(id)}
+      onRowClick={({ row: { id } }) => impersonateAccount(id)}
     />
   )
 }
