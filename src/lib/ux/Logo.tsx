@@ -11,8 +11,8 @@ export default function Logo(props: LogoProps) {
   const theme = useTheme()
 
   const source = match(theme.palette.mode)
-    .with('light', () => 'supplyside_logo.png')
-    .with('dark', () => 'supplyside_logo_reversed.png')
+    .with('light', () => 'supplyside_logo.svg')
+    .with('dark', () => 'supplyside_logo_reversed.svg')
     .exhaustive()
 
   return (
