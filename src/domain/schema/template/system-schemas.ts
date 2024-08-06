@@ -33,7 +33,12 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'Item',
-    fields: [fields.name, fields.description, fields.unitOfMeasure],
+    sections: [
+      {
+        name: 'Summary',
+        fields: [fields.name, fields.description, fields.unitOfMeasure],
+      },
+    ],
   },
   {
     resourceType: 'Line',

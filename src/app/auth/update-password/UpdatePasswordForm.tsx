@@ -2,12 +2,9 @@
 
 import { Button, Stack, TextField } from '@mui/material'
 import { FC, useState } from 'react'
+import { updatePassword } from './actions'
 
-type Props = {
-  onSubmit: (password: string) => void
-}
-
-const UpdatePasswordForm: FC<Props> = ({ onSubmit }) => {
+const UpdatePasswordForm: FC = () => {
   const [password, setPassword] = useState<string>('')
 
   return (
@@ -19,7 +16,7 @@ const UpdatePasswordForm: FC<Props> = ({ onSubmit }) => {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <Button onClick={() => onSubmit(password)} disabled={!password}>
+      <Button onClick={() => updatePassword(password)} disabled={!password}>
         Save
       </Button>
     </Stack>

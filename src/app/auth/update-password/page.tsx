@@ -1,10 +1,5 @@
 import { Box } from '@mui/material'
-import dynamic from 'next/dynamic'
-import { updatePassword } from './actions'
-
-const UpdatePasswordForm = dynamic(() => import('./UpdatePasswordForm'), {
-  ssr: false,
-})
+import UpdatePasswordForm from './UpdatePasswordForm'
 
 export default function UpdatePassword() {
   return (
@@ -17,7 +12,7 @@ export default function UpdatePassword() {
       flexDirection={'column'}
     >
       <Box width={500}>
-        <UpdatePasswordForm onSubmit={updatePassword} />
+        <UpdatePasswordForm />
       </Box>
     </Box>
   )
