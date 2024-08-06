@@ -45,6 +45,7 @@ export const schemas: SchemaTemplate[] = [
     fields: [
       fields.item,
       fields.quantity,
+      fields.unitOfMeasure,
       fields.unitCost,
       fields.totalCost,
       fields.needDate,
