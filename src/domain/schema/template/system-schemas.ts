@@ -36,7 +36,7 @@ export const schemas: SchemaTemplate[] = [
     sections: [
       {
         name: 'Summary',
-        fields: [fields.name, fields.description, fields.unitOfMeasure],
+        fields: [fields.name, fields.itemDescription, fields.unitOfMeasure],
       },
     ],
   },
@@ -69,7 +69,7 @@ export const schemas: SchemaTemplate[] = [
         name: 'Order Info',
         fields: [
           fields.vendor,
-          fields.description,
+          fields.orderDescription,
           fields.issuedDate,
           fields.orderNotes,
         ],
@@ -101,7 +101,7 @@ export const schemas: SchemaTemplate[] = [
     sections: [
       {
         name: 'Summary',
-        fields: [fields.name, fields.description, fields.primaryAddress],
+        fields: [fields.name, fields.vendorDescription, fields.primaryAddress],
       },
       {
         name: 'Contacts',

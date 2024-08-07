@@ -535,7 +535,7 @@ export default async function PoDocument({
                             }}
                           >
                             {item &&
-                              selectValue(item, fields.description)?.string}
+                              selectValue(item, fields.itemDescription)?.string}
                           </div>
                         </td>
                         <td style={tdStyle}>

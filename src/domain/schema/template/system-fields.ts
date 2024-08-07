@@ -47,11 +47,6 @@ const _fields = {
     name: 'Currency',
     type: 'Select',
   },
-  description: {
-    templateId: '70b02f35-f631-4da1-a506-6b8d4635e9b5',
-    name: 'Description',
-    type: 'Textarea',
-  },
   document: {
     templateId: 'cb4a0c88-df20-485d-9881-e2c3b1b2b180',
     name: 'Document',
@@ -82,6 +77,11 @@ const _fields = {
     name: 'Item',
     type: 'Resource',
     resourceType: 'Item',
+  },
+  itemDescription: {
+    templateId: 'f7b4e0f7-e1e7-4e1e-8f7b-4e0f7e1e7e5d',
+    name: 'Description',
+    type: 'Textarea',
   },
   itemizedCosts: {
     templateId: '25a46eb4-2eca-40a8-9596-cda2a524facd',
@@ -115,6 +115,11 @@ const _fields = {
     name: 'Order',
     type: 'Resource',
     resourceType: 'Order',
+  },
+  orderDescription: {
+    templateId: 'f7b4e0f7-e1e7-4e1e-8f7b-4e0f7e1e7e5d',
+    name: 'Description',
+    type: 'Textarea',
   },
   orderNotes: {
     templateId: '3749e137-c1d8-474a-9539-ba9b82cd6e94',
@@ -222,6 +227,11 @@ const _fields = {
     name: 'Vendor',
     type: 'Resource',
     resourceType: 'Vendor',
+  },
+  vendorDescription: {
+    templateId: 'f7b4e0f7-e1e7-4e1e-8f7b-4e0f7e1e7e5d',
+    name: 'Description',
+    type: 'Textarea',
   },
 } satisfies Record<string, FieldTemplate>
 
