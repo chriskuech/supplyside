@@ -6,6 +6,7 @@ import { Message } from 'postmark'
 import { createBlob } from '@/domain/blobs/actions'
 import prisma from '@/lib/prisma'
 import { createResource } from '@/domain/resource/actions'
+import { fields } from '@/domain/schema/template/system-fields'
 // import smtp from '@/lib/smtp'
 
 type FileParam = {
@@ -45,7 +46,7 @@ const createBill = async (params: Params) => {
     accountId: params.accountId,
     type: 'Bill',
     data: {
-      'Bill Files': fileIds,
+      [fields.billFiles.name]: fileIds,
     },
   })
 }
