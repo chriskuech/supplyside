@@ -23,7 +23,7 @@ export default async function VendorDetail({
             <span style={{ opacity: 0.5 }}>Vendor #</span>
             <span>{key}</span>
           </Typography>
-          <ResourceFieldsControl resource={resource} schema={schema} />
+          <ResourceFieldsControl resourceId={resource.id} schema={schema} />
         </Stack>
       </Stack>
     </Container>

@@ -1,3 +1,5 @@
+'use client'
+
 import assert, { fail } from 'assert'
 import {
   Accordion,
@@ -14,28 +16,44 @@ import {
 import { range } from 'remeda'
 import { Check, Clear, ExpandMore } from '@mui/icons-material'
 import { match } from 'ts-pattern'
-import dynamic from 'next/dynamic'
+import { useCallback, useEffect, useState } from 'react'
 import ReadonlyTextarea from './fields/ReadonlyTextarea'
 import ResourceField from './fields/ResourceField'
-import { Resource } from '@/domain/resource/types'
+import FieldControl from './fields/FieldControl'
+import { readResource } from './actions'
 import { Schema } from '@/domain/schema/types'
-
-const FieldControl = dynamic(() => import('./fields/FieldControl'))
+import { Resource } from '@/domain/resource/types'
+import Loading from '@/app/loading'
 
 type Props = {
   schema: Schema
-  resource: Resource
+  resourceId: string
   isReadOnly?: boolean
   singleColumn?: boolean
 }
 
 export default function ResourceFieldsControl({
   schema,
-  resource,
+  resourceId,
   isReadOnly,
   singleColumn,
 }: Props) {
+  const [resource, setResource] = useState<Resource>()
+
   const columns = singleColumn ? 1 : 3
+
+  const refresh = useCallback(
+    () => readResource({ id: resourceId }).then(setResource),
+    [resourceId],
+  )
+
+  useEffect(() => {
+    refresh()
+  }, [refresh])
+
+  if (!resource) {
+    return <Loading />
+  }
 
   if (isReadOnly) {
     return (
@@ -180,6 +198,7 @@ export default function ResourceFieldsControl({
                       (rf) => rf.fieldId === s.fields.at(0)?.id,
                     )?.value
                   }
+                  onChange={refresh}
                 />
               </Box>
             ) : (
@@ -200,6 +219,7 @@ export default function ResourceFieldsControl({
                               resource.fields.find((rf) => rf.fieldId === f.id)
                                 ?.value
                             }
+                            onChange={refresh}
                           />
                         </Box>
                       </Box>

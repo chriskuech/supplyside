@@ -118,7 +118,7 @@ export default function ResourceField({
             {schema && resource ? (
               <ResourceFieldsControl
                 schema={schema}
-                resource={resource}
+                resourceId={resource.id}
                 singleColumn
               />
             ) : (

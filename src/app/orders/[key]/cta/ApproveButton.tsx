@@ -1,10 +1,10 @@
 'use client'
 
 import { ArrowRight } from '@mui/icons-material'
-import { transitionStatus as transitionStatusAction } from '../resource/actions'
-import { useAsyncCallback } from '../hooks/useAsyncCallback'
-import LoadingButton from '../ux/LoadingButton'
-import { createPo } from './actions'
+import { createPo } from '../actions'
+import { transitionStatus as transitionStatusAction } from '@/lib/resource/actions'
+import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
+import LoadingButton from '@/lib/ux/LoadingButton'
 import { orderStatusOptions } from '@/domain/schema/template/system-fields'
 import { OptionTemplate } from '@/domain/schema/template/types'
 

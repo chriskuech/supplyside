@@ -2,11 +2,11 @@
 
 import { Send } from '@mui/icons-material'
 import React from 'react'
-import LoadingButton from '../ux/LoadingButton'
-import { useAsyncCallback } from '../hooks/useAsyncCallback'
-import ConfirmationDialog from '../ux/ConfirmationDialog'
-import { useDisclosure } from '../hooks/useDisclosure'
-import { sendPo as sendPoAction } from './actions'
+import { sendPo as sendPoAction } from '../actions'
+import LoadingButton from '@/lib/ux/LoadingButton'
+import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
+import ConfirmationDialog from '@/lib/ux/ConfirmationDialog'
+import { useDisclosure } from '@/lib/hooks/useDisclosure'
 
 type Props = {
   resourceId: string

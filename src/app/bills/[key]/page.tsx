@@ -38,7 +38,7 @@ export default async function BillsDetail({
             <span style={{ opacity: 0.5 }}>Bill #</span>
             <span>{key}</span>
           </Typography>
-          <ResourceFieldsControl schema={schema} resource={resource} />
+          <ResourceFieldsControl schema={schema} resourceId={resource.id} />
         </Stack>
         <Stack spacing={2}>
           <Stack direction={'row'} alignItems={'end'}>

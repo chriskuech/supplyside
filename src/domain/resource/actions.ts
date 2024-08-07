@@ -9,7 +9,6 @@ import {
   Field as FieldModel,
   Cost,
 } from '@prisma/client'
-import { revalidateTag } from 'next/cache'
 import { Ajv } from 'ajv'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
@@ -56,8 +55,6 @@ export const createResource = async ({
       key: true,
     },
   })
-
-  revalidateTag('resource')
 
   const resource = await prisma().resource.create({
     data: {
@@ -173,8 +170,6 @@ export const readResource = async ({
     include,
   })
 
-  revalidateTag('resource')
-
   return mapResource(model)
 }
 
@@ -208,8 +203,6 @@ export const readResources = async ({
     orderBy: [{ key: 'desc' }],
   })
 
-  revalidateTag('resource')
-
   return models.map(mapResource)
 }
 
@@ -234,8 +227,6 @@ export const deleteResource = async ({
       await recalculateSubtotalCostForOrder(accountId, orderId)
     }
   }
-
-  revalidateTag('resource')
 }
 
 const include = {

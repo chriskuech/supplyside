@@ -1,7 +1,6 @@
 'use server'
 
 import { fail } from 'assert'
-import { revalidateTag } from 'next/cache'
 import { Prisma } from '@prisma/client'
 import { pick } from 'remeda'
 import { readResource } from '../actions'
@@ -37,8 +36,6 @@ export const updateValue = async ({
   fieldId,
   value,
 }: UpdateValueDto) => {
-  revalidateTag('resource')
-
   //TODO:  check if value object is correct for each fieldType
 
   const { optionIds, ...rest } = value
@@ -233,8 +230,6 @@ export const uploadFile = async (
       Value: { update: input },
     },
   })
-
-  revalidateTag('resource')
 }
 
 export type UpdateContactDto = {
@@ -249,8 +244,6 @@ export const updateContact = async (
   fieldId: string,
   dto: UpdateContactDto | null,
 ) => {
-  revalidateTag('resource')
-
   if (!dto) {
     await prisma().resourceField.update({
       where: {
