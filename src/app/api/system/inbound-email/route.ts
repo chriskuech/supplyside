@@ -68,6 +68,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       To: body.From,
       Subject: "We couldn't process your email",
       Attachments: body.Attachments,
+      TextBody: `The account with key ${accountKey} does not exist.`,
     })
 
     return NextResponse.json({ error: 'Account does not exist' })
