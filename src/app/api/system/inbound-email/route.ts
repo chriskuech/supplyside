@@ -56,7 +56,8 @@ const createBill = async (params: Params) => {
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const body: Message = await req.json()
 
-  const accountKey = body.To?.split('@').shift() ?? fail()
+  // for some reason this is (sometimes?) wrapped in quotes
+  const accountKey = body.To?.split('@').shift()?.replace(/^"/, '') ?? fail()
 
   const account = await prisma().account.findUnique({
     where: { key: accountKey },
