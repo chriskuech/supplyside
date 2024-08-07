@@ -8,40 +8,44 @@ import prisma from '@/lib/prisma'
 import { createResource } from '@/domain/resource/actions'
 // import smtp from '@/lib/smtp'
 
-type Params = {
-  accountId: string
+type FileParam = {
   content: string
   encoding: BufferEncoding
   contentType: `${string}/${string}`
   fileName: string
 }
 
-const createBill = async ({
-  accountId,
-  content,
-  encoding,
-  contentType,
-  fileName,
-}: Params) => {
-  const blob = await createBlob({
-    accountId,
-    buffer: Buffer.from(content, encoding),
-    type: contentType,
-  })
+type Params = {
+  accountId: string
+  files: FileParam[]
+}
 
-  const file = await prisma().file.create({
-    data: {
-      accountId,
-      name: fileName,
-      blobId: blob.id,
-    },
-  })
+const createBill = async (params: Params) => {
+  const fileIds = await Promise.all(
+    params.files.map(async (file) => {
+      const blob = await createBlob({
+        accountId: params.accountId,
+        buffer: Buffer.from(file.content, file.encoding),
+        type: file.contentType,
+      })
+
+      const { id: fileId } = await prisma().file.create({
+        data: {
+          accountId: params.accountId,
+          name: file.fileName,
+          blobId: blob.id,
+        },
+      })
+
+      return fileId
+    }),
+  )
 
   return await createResource({
-    accountId,
+    accountId: params.accountId,
     type: 'Bill',
     data: {
-      Document: file.id,
+      'Bill Files': fileIds,
     },
   })
 }
@@ -66,41 +70,36 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const { id: accountId } = account
-  const attachment = body.Attachments?.find(
-    (a) => a.ContentType === 'application/pdf',
+
+  const attachments: FileParam[] | undefined = body.Attachments?.map(
+    (attachment) => ({
+      content: attachment.Content,
+      encoding: 'base64',
+      contentType: 'application/pdf',
+      fileName: attachment.Name,
+    }),
   )
 
-  const params: Params | null = attachment
+  const email: FileParam | null = body.HtmlBody
     ? {
-        accountId,
-        content: attachment.Content,
-        encoding: 'base64',
-        contentType: 'application/pdf',
-        fileName: attachment.Name,
+        content: body.HtmlBody,
+        encoding: 'utf-8',
+        contentType: 'text/html',
+        fileName: 'email.html',
       }
-    : body.HtmlBody
+    : body.TextBody
       ? {
-          accountId,
-          content: body.HtmlBody,
+          content: body.TextBody,
           encoding: 'utf-8',
-          contentType: 'text/html',
-          fileName: 'email.html',
+          contentType: 'text/plain',
+          fileName: 'email.txt',
         }
-      : body.TextBody
-        ? {
-            accountId,
-            content: body.TextBody,
-            encoding: 'utf-8',
-            contentType: 'text/plain',
-            fileName: 'email.txt',
-          }
-        : null
+      : null
 
-  if (!params) {
-    return NextResponse.json({ error: 'Failed to infer the type' })
-  }
-
-  const bill = await createBill(params)
+  const bill = await createBill({
+    accountId,
+    files: [...(email ? [email] : []), ...(attachments ?? [])],
+  })
 
   return NextResponse.json({ success: true, bill })
 }

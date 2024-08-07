@@ -10,6 +10,7 @@ import {
   Cost,
 } from '@prisma/client'
 import { Ajv } from 'ajv'
+import { isArray } from 'remeda'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { selectField } from '../schema/types'
@@ -109,6 +110,12 @@ export const createResource = async ({
                     : f.defaultValue?.optionId
                       ? { connect: { id: f.defaultValue.optionId } }
                       : undefined,
+                Files:
+                  isArray(dataValue) &&
+                  typeof dataValue[0] === 'string' &&
+                  f.type === 'Files'
+                    ? { create: dataValue.map((fileId) => ({ fileId })) }
+                    : undefined,
               } satisfies Prisma.ValueCreateWithoutResourceFieldValueInput,
             },
           }
