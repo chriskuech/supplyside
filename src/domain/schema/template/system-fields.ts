@@ -1,7 +1,32 @@
+import { deepStrictEqual } from 'assert'
+import { entries, filter, flatMap, groupBy, map, mapValues, pipe } from 'remeda'
 import { FieldTemplate } from './types'
 
 // Define a templateId on macOS with
 //   `uuidgen | awk '{print tolower($0)}'`
+
+export const billStatusOptions = {
+  draft: {
+    templateId: 'abababbb-3f5e-4d2d-8f0f-3e8f2c4c4b5c',
+    name: 'Draft',
+  },
+  submitted: {
+    templateId: '45b2ab63-6c20-4548-aafa-027286d03759',
+    name: 'Submitted',
+  },
+  approved: {
+    templateId: 'd4c4b6f7-4e1e-4e1e-8f7b-4e0f7e1e7e5d',
+    name: 'Approved',
+  },
+  paid: {
+    templateId: 'd4c4b6f7-4e2e-4e1e-8f7a-ae0f7e1e7e5d',
+    name: 'Paid',
+  },
+  canceled: {
+    templateId: 'e8b7c2c8-0b7b-4e9a-8e8d-7b2fffff6f4e',
+    name: 'Canceled',
+  },
+}
 
 export const orderStatusOptions = {
   draft: {
@@ -47,6 +72,15 @@ const _fields = {
     name: 'Bill Files',
     type: 'Files',
   },
+  billStatus: {
+    templateId: 'f2b7c7b4-3f5e-4d2d-8f0f-3e8f2c4c4b5c',
+    name: 'Bill Status',
+    type: 'Select',
+    options: Object.values(billStatusOptions),
+    defaultValue: {
+      optionTemplateId: billStatusOptions.draft.templateId,
+    },
+  },
   currency: {
     templateId: '52b10289-99a0-4dfe-bb6b-6afca34e8501',
     name: 'Currency',
@@ -84,8 +118,8 @@ const _fields = {
     resourceType: 'Item',
   },
   itemDescription: {
-    templateId: 'f7b4e0f7-e1e7-4e1e-8f7b-4e0f7e1e7e5d',
-    name: 'Description',
+    templateId: 'f7b4e0f7-a1b1-4e1e-8f7b-4e0f7e1e7e5d',
+    name: 'Item Description',
     type: 'Textarea',
   },
   itemizedCosts: {
@@ -122,8 +156,8 @@ const _fields = {
     resourceType: 'Order',
   },
   orderDescription: {
-    templateId: 'f7b4e0f7-e1e7-4e1e-8f7b-4e0f7e1e7e5d',
-    name: 'Description',
+    templateId: 'f7b4e0f7-e1e7-4e1e-abad-4e0f7e1e7e5d',
+    name: 'Order Description',
     type: 'Textarea',
   },
   orderNotes: {
@@ -235,7 +269,7 @@ const _fields = {
   },
   vendorDescription: {
     templateId: 'f7b4e0f7-e1e7-4e1e-8f7b-4e0f7e1e7e5d',
-    name: 'Description',
+    name: 'Vendor Description',
     type: 'Textarea',
   },
 } satisfies Record<string, FieldTemplate>
@@ -246,3 +280,32 @@ export const findField = (templateId: string | null | undefined) =>
   templateId
     ? Object.values(fields).find((field) => field.templateId === templateId)
     : undefined
+
+// Ensure that the templateIds are unique
+deepStrictEqual(
+  pipe(
+    [fields, billStatusOptions, orderStatusOptions],
+    flatMap((e) => Object.values(e)),
+    map((e) => e.templateId),
+    groupBy((e) => e),
+    mapValues((group) => group.length),
+    entries(),
+    filter(([, count]) => count > 1),
+    map(([templateId]) => templateId),
+  ),
+  [],
+)
+
+// Ensure that the field names are unique
+deepStrictEqual(
+  pipe(
+    Object.values(fields),
+    map((e) => e.name),
+    groupBy((e) => e),
+    mapValues((group) => group.length),
+    entries(),
+    filter(([, count]) => count > 1),
+    map(([templateId]) => templateId),
+  ),
+  [],
+)

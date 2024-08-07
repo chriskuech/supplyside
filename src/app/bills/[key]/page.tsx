@@ -1,4 +1,5 @@
-import { Box, Container, Stack, Typography } from '@mui/material'
+import { Box, Button, Container, Link, Stack, Typography } from '@mui/material'
+import { ArrowRight } from '@mui/icons-material'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import { readResource } from '@/domain/resource/actions'
@@ -40,6 +41,23 @@ export default async function BillsDetail({
           </Typography>
           <ResourceFieldsControl schema={schema} resourceId={resource.id} />
         </Stack>
+        <Box sx={{ outline: '1px solid lime', p: 4 }}>
+          <Box color={'lime'}>Call To Action</Box>
+          <Box>
+            <Button color="secondary" endIcon={<Link />}>
+              Match Order
+            </Button>
+            <Button color="secondary" endIcon={<ArrowRight />}>
+              Submit
+            </Button>
+            <Button color="secondary" endIcon={<ArrowRight />}>
+              Approve
+            </Button>
+            <Button color="secondary" endIcon={<ArrowRight />}>
+              Confirm Payment
+            </Button>
+          </Box>
+        </Box>
         <Stack spacing={2}>
           <Stack direction={'row'} alignItems={'end'}>
             <Typography variant="h4" flexGrow={1}>
