@@ -2,7 +2,7 @@
 
 import { ArrowRight } from '@mui/icons-material'
 import { createPo } from '../actions'
-import { transitionStatus as transitionStatusAction } from '@/lib/resource/actions'
+import { transitionStatus as transitionStatusAction } from '../actions'
 import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
 import LoadingButton from '@/lib/ux/LoadingButton'
 import { orderStatusOptions } from '@/domain/schema/template/system-fields'

@@ -2,7 +2,7 @@
 
 import { Button, Tooltip } from '@mui/material'
 import { ArrowRight } from '@mui/icons-material'
-import { transitionStatus } from '@/lib/resource/actions'
+import { transitionStatus } from '../actions'
 import { orderStatusOptions } from '@/domain/schema/template/system-fields'
 
 type Props = {

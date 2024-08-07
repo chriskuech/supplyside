@@ -25,7 +25,8 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import { Field, Schema, selectField } from '@/domain/schema/types'
 import { Resource, selectValue } from '@/domain/resource/types'
-import { readResource, transitionStatus } from '@/lib/resource/actions'
+import { readResource } from '@/lib/resource/actions'
+import { transitionStatus } from './actions'
 import {
   fields,
   orderStatusOptions,

@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowRight } from '@mui/icons-material'
-import { transitionStatus as transitionStatusAction } from '@/lib/resource/actions'
+import { transitionStatus as transitionStatusAction } from '../actions'
 import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
 import LoadingButton from '@/lib/ux/LoadingButton'
 import { OptionTemplate } from '@/domain/schema/template/types'
