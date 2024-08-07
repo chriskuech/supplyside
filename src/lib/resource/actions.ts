@@ -21,6 +21,8 @@ export const createResource = async (
 ): Promise<ResourceModel> => {
   const { accountId, userId } = await requireSession()
 
+  revalidatePath('.')
+
   if (params.type === 'Order') {
     params.data = { ...params.data, Assignee: userId }
   }
@@ -54,6 +56,8 @@ export const deleteResource = async (
   params: Omit<domain.DeleteResourceParams, 'accountId'>,
 ): Promise<void> => {
   const { accountId } = await requireSession()
+
+  revalidatePath('.')
 
   return domain.deleteResource({ ...params, accountId })
 }

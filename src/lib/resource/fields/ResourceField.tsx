@@ -59,15 +59,15 @@ export default function ResourceField({
     }
   }, [resource?.id, value?.id])
 
-  const handleCreate = (name: string) =>
+  const handleCreate = (nameOrNumber: string) =>
     createResource({
       type: resourceType,
       data: match(resourceType)
         .with(P.union('Vendor', 'Item'), () => ({
-          Name: name,
+          Name: nameOrNumber,
         }))
         .with(P.union('Bill', 'Order', 'Line'), () => ({
-          Number: name,
+          Number: nameOrNumber,
         }))
         .exhaustive(),
     }).then(({ id }) => {
