@@ -1,7 +1,7 @@
 'use server'
 
-import { requireSession } from '../session'
-import { transitionStatus } from '../resource/actions'
+import { requireSession } from '@/lib/session'
+import { transitionStatus } from '@/lib/resource/actions'
 import { orderStatusOptions } from '@/domain/schema/template/system-fields'
 import { sendPo as domainSendPo } from '@/domain/order/sendPo'
 import { createPo as domainCreatePo } from '@/domain/order/createPo'

@@ -36,8 +36,6 @@ export default function ResourceTable({
   isEditable,
   ...props
 }: Props) {
-  console.log('ResourceTable', resources)
-
   const { enqueueSnackbar } = useSnackbar()
   const columns = useMemo<GridColDef<Resource>[]>(
     () => [

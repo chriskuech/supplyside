@@ -1,5 +1,5 @@
 import { match } from 'ts-pattern'
-import StatusTrackerView from '../ux/StatusTrackerView'
+import StatusTrackerView from '@/lib/ux/StatusTrackerView'
 import { Resource, selectValue } from '@/domain/resource/types'
 import { fields } from '@/domain/schema/template/system-fields'
 

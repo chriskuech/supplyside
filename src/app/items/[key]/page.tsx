@@ -23,7 +23,7 @@ export default async function ItemsDetail({
             <span style={{ opacity: 0.5 }}>Item #</span>
             <span>{key}</span>
           </Typography>
-          <ResourceFieldsControl resource={resource} schema={schema} />
+          <ResourceFieldsControl resourceId={resource.id} schema={schema} />
         </Stack>
       </Stack>
     </Container>

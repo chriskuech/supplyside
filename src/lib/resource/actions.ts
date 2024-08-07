@@ -2,8 +2,8 @@
 
 import { fail } from 'assert'
 import { Resource as ResourceModel, ResourceType } from '@prisma/client'
-import { revalidateTag } from 'next/cache'
 import { z } from 'zod'
+import { revalidatePath } from 'next/cache'
 import { requireSession } from '../session'
 import * as domain from '@/domain/resource/actions'
 import { Resource } from '@/domain/resource/types'
@@ -92,8 +92,6 @@ export const findResources = async ({
     LIMIT 15
   `
 
-  revalidateTag('resource')
-
   return z
     .object({ id: z.string(), name: z.string(), key: z.number() })
     .array()
@@ -126,4 +124,6 @@ export const transitionStatus = async (
         fail('Option not found'),
     },
   })
+
+  revalidatePath('.')
 }

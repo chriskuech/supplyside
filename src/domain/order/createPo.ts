@@ -2,7 +2,6 @@
 
 import { fail } from 'assert'
 import { Prisma } from '@prisma/client'
-import { revalidateTag } from 'next/cache'
 import { createBlob } from '../blobs/actions'
 import { fields } from '../schema/template/system-fields'
 import { readResource } from '../resource/actions'
@@ -90,6 +89,4 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
       Value: { update: input },
     },
   })
-
-  revalidateTag('resource')
 }

@@ -2,7 +2,6 @@
 
 import { fail } from 'assert'
 import { Prisma } from '@prisma/client'
-import { revalidateTag } from 'next/cache'
 import { map, pipe, sum } from 'remeda'
 import { fields } from '../schema/template/system-fields'
 import { updateValue } from '../resource/fields/actions'
@@ -13,16 +12,12 @@ import { selectField } from '../schema/types'
 import prisma from '@/lib/prisma'
 
 export const createCost = async (resourceId: string): Promise<void> => {
-  revalidateTag('resource')
-
   await prisma().cost.create({
     data: { resourceId },
   })
 }
 
 export const updateCost = async (id: string, data: Prisma.CostUpdateInput) => {
-  revalidateTag('resource')
-
   const cost = await prisma().cost.update({
     where: { id },
     data,
@@ -35,8 +30,6 @@ export const updateCost = async (id: string, data: Prisma.CostUpdateInput) => {
 }
 
 export const deleteCost = async (id: string): Promise<void> => {
-  revalidateTag('resource')
-
   const cost = await prisma().cost.delete({
     where: { id },
     include: {

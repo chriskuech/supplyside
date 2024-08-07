@@ -1,8 +1,13 @@
-import { Box, Chip, Container, Stack, Typography } from '@mui/material'
-import dynamic from 'next/dynamic'
+import { fail } from 'assert'
+import { Box, Container, Stack, Typography } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
-import { LocalShipping } from '@mui/icons-material'
+import OrderStatusTracker from './OrderStatusTracker'
+import ApproveButton from './cta/ApproveButton'
+import SkipButton from './cta/SkipButton'
+import StatusTransitionButton from './cta/StatusTransitionButton'
+import SendPoButton from './cta/SendPoButton'
+import Toolbar from './toolbar/Toolbar'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import ResourceTable from '@/lib/resource/ResourceTable'
@@ -12,48 +17,11 @@ import {
   fields,
   orderStatusOptions,
 } from '@/domain/schema/template/system-fields'
-import OrderStatusTracker from '@/lib/order/OrderStatusTracker'
 import { readUser } from '@/lib/iam/actions'
 import ItemizedCostLines from '@/lib/resource/ItemizedCostLines'
-import ApproveButton from '@/lib/order/ApproveButton'
-import DownloadPoButton from '@/lib/order/DownloadPoButton'
-import PreviewPoButton from '@/lib/order/PreviewPoButton'
 import { selectValue } from '@/domain/resource/types'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
-
-const AssigneeControl = dynamic(() => import('@/lib/order/AssigneeControl'), {
-  ssr: false,
-})
-
-const CancelButton = dynamic(() => import('@/lib/order/CancelButton'), {
-  ssr: false,
-})
-
-const PreviewDraftPoButton = dynamic(
-  () => import('@/lib/order/PreviewDraftPoButton'),
-  {
-    ssr: false,
-  },
-)
-
-const EditButton = dynamic(() => import('@/lib/order/EditButton'), {
-  ssr: false,
-})
-
-const SkipButton = dynamic(() => import('@/lib/order/SkipButton'), {
-  ssr: false,
-})
-
-const StatusTransitionButton = dynamic(
-  () => import('@/lib/order/StatusTransitionButton'),
-  {
-    ssr: false,
-  },
-)
-
-const SendPoButton = dynamic(() => import('@/lib/order/SendPoButton'), {
-  ssr: false,
-})
+import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 
 export default async function OrderDetail({
   params: { key },
@@ -80,7 +48,9 @@ export default async function OrderDetail({
     }),
   ])
 
-  const status = selectValue(resource, fields.orderStatus)?.option
+  const status =
+    selectValue(resource, fields.orderStatus)?.option ??
+    fail('Status not found')
 
   const isDraft = status?.templateId === orderStatusOptions.draft.templateId
 
@@ -107,31 +77,7 @@ export default async function OrderDetail({
 
           <Box flexGrow={1} />
 
-          {/* POC of where to put a little shipping widget built on 17track */}
-          <Box height={'min-content'} display={'none'}>
-            <Chip icon={<LocalShipping />} label="Add Tracking" />
-            <Chip
-              icon={<LocalShipping />}
-              label={`Eta. ${'Today between 3-5pm'}`}
-            />
-          </Box>
-          <Box height={'min-content'}>
-            <PreviewPoButton schema={schema} resource={resource} />
-          </Box>
-          <Box height={'min-content'}>
-            <DownloadPoButton schema={schema} resource={resource} />
-          </Box>
-          {!isDraft && (
-            <Box height={'min-content'}>
-              <EditButton resourceId={resource.id} />
-            </Box>
-          )}
-          <Box height={'min-content'}>
-            <CancelButton resourceId={resource.id} />
-          </Box>
-          <Box height={'min-content'}>
-            <AssigneeControl schema={schema} resource={resource} />
-          </Box>
+          <Toolbar resourceId={resource.id} schema={schema} isDraft={isDraft} />
         </Stack>
       </Container>
 
@@ -212,8 +158,9 @@ export default async function OrderDetail({
       <Container sx={{ py: 5 }}>
         <Stack spacing={5}>
           <ResourceFieldsControl
+            key={status.id}
             schema={schema}
-            resource={resource}
+            resourceId={resource.id}
             isReadOnly={!isDraft}
           />
           <Stack spacing={2}>
