@@ -433,6 +433,9 @@ export default async function PoDocument({
                         .with('File', () =>
                           fieldValue?.file ? 'File Attached' : null,
                         )
+                        .with('Files', () =>
+                          fieldValue?.files?.length ? 'Files Attached' : null,
+                        )
                         .with(
                           'Money',
                           () =>

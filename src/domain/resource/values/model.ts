@@ -16,6 +16,7 @@ export type ValueModel = Value & {
   File: (File & { Blob: Blob }) | null
   Option: Option | null
   User: (User & { ImageBlob: Blob | null }) | null
+  Files: { File: File & { Blob: Blob } }[]
   ValueOption: (ValueOption & { Option: Option })[]
   Resource:
     | (Resource & {

@@ -42,6 +42,11 @@ const _fields = {
     type: 'Resource',
     resourceType: 'Bill',
   },
+  billFiles: {
+    templateId: 'b4c4a6e9-6b7a-4f8b-92f4-a9264d0fa6e9',
+    name: 'Bill Files',
+    type: 'Files',
+  },
   currency: {
     templateId: '52b10289-99a0-4dfe-bb6b-6afca34e8501',
     name: 'Currency',

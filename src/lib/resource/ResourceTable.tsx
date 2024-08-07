@@ -68,6 +68,7 @@ export default function ResourceTable({
           .with('Number', () => 'number')
           .with('Checkbox', () => 'boolean')
           .with('File', () => 'boolean')
+          .with('Files', () => 'boolean')
           .with('Date', () => 'date')
           .with('Select', () => 'singleSelect')
           .with('Contact', () => 'custom')
@@ -95,6 +96,7 @@ export default function ResourceTable({
             .with('Select', () => value?.option?.id)
             .with('User', () => value?.user?.fullName)
             .with('Resource', () => value?.resource?.name)
+            .with('Files', () => !!value?.files?.length)
             .exhaustive()
         },
         valueParser: (value) => value,
@@ -299,7 +301,7 @@ export default function ResourceTable({
             'Resource',
             () => oldValue.resource?.id !== newValue.resource?.id,
           )
-          .with(P.union('Contact', 'File'), () => false) //These updates are being handled by the components
+          .with(P.union('Contact', 'File', 'Files'), () => false) //These updates are being handled by the components
           .exhaustive()
       },
     )
@@ -323,7 +325,7 @@ export default function ResourceTable({
       }))
       .with('User', () => ({ userId: value.user?.id ?? null }))
       .with('Resource', () => ({ resourceId: value.resource?.id ?? null }))
-      .with(P.union('Contact', 'File'), () => ({}))
+      .with(P.union('Contact', 'File', 'Files'), () => ({}))
       .exhaustive()
 
     try {

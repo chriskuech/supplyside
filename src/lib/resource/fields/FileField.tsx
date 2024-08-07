@@ -13,6 +13,7 @@ type Props = {
   field: Field
   value: Value | undefined
   isReadOnly?: boolean
+  onChange?: () => void
 }
 
 export default function FileField({
@@ -20,6 +21,7 @@ export default function FileField({
   field,
   value,
   isReadOnly,
+  onChange,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -36,7 +38,7 @@ export default function FileField({
           const formData = new FormData()
           formData.append('file', file)
 
-          uploadFile(resourceId, field.id, formData)
+          uploadFile(resourceId, field.id, formData).then(() => onChange?.())
         }}
       />
       <Typography flexGrow={1}>{value?.file?.name ?? '-'}</Typography>

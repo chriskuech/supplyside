@@ -21,6 +21,7 @@ export default function Logo(props: LogoProps) {
       alt="SupplySide"
       width={200}
       height={45}
+      priority
       {...props}
     />
   )

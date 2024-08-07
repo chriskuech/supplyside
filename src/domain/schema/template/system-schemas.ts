@@ -9,7 +9,7 @@ export const schemas: SchemaTemplate[] = [
       {
         name: 'Bill Info',
         fields: [
-          fields.document,
+          fields.billFiles,
           fields.vendor,
           fields.invoiceNumber,
           fields.invoiceDate,
