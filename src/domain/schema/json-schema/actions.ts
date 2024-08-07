@@ -35,6 +35,10 @@ export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
         type: ['string', 'null'],
         pattern: uuidPattern,
       }))
+      .with({ type: 'Files' }, () => ({
+        type: ['array', 'null'],
+        items: { type: 'string', pattern: uuidPattern },
+      }))
       .with({ type: P.union('Number', 'Money') }, () => ({
         type: ['number', 'null'],
       }))

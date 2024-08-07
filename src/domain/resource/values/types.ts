@@ -31,6 +31,7 @@ export type Value = {
   string: string | null
   user: User | null
   file: (File & { Blob: Blob }) | null
+  files?: (File & { Blob: Blob })[]
   resource: ValueResource | null
 }
 
@@ -45,6 +46,15 @@ export const valueInclude = {
   File: {
     include: {
       Blob: true,
+    },
+  },
+  Files: {
+    include: {
+      File: {
+        include: {
+          Blob: true,
+        },
+      },
     },
   },
   Option: true,

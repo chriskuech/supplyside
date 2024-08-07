@@ -2,7 +2,7 @@
 
 import { fail } from 'assert'
 import { Prisma } from '@prisma/client'
-import { pick } from 'remeda'
+import { isString, pick } from 'remeda'
 import { readResource } from '../actions'
 import { selectValue } from '../types'
 import prisma from '@/lib/prisma'
@@ -22,12 +22,13 @@ export type UpdateValueDto = {
   value: {
     boolean?: boolean | null | undefined
     date?: Date | null | undefined
+    fileIds?: string[] | null | undefined
     number?: number | null | undefined
-    string?: string | null | undefined
-    userId?: string | null | undefined
     optionId?: string | null | undefined
     optionIds?: string[] | null | undefined
     resourceId?: string | null | undefined
+    string?: string | null | undefined
+    userId?: string | null | undefined
   }
 }
 
@@ -38,12 +39,22 @@ export const updateValue = async ({
 }: UpdateValueDto) => {
   //TODO:  check if value object is correct for each fieldType
 
-  const { optionIds, ...rest } = value
-  const data = {
+  const { fileIds, optionIds, ...rest } = value
+  const data: Prisma.ValueCreateInput & Prisma.ValueUpdateInput = {
     ...rest,
     ValueOption: optionIds
       ? {
           create: optionIds.map((optionId) => ({ optionId })),
+        }
+      : undefined,
+    Files: fileIds
+      ? {
+          createMany: {
+            data: fileIds.map((fileId) => ({
+              fileId,
+            })),
+            skipDuplicates: true,
+          },
         }
       : undefined,
   }
@@ -83,6 +94,13 @@ export const updateValue = async ({
     }),
     ...(value.resourceId
       ? [copyLinkedResourceFields(resourceId, fieldId, value.resourceId)]
+      : []),
+    ...(fileIds
+      ? [
+          prisma().valueFile.deleteMany({
+            where: { fileId: { notIn: fileIds } },
+          }),
+        ]
       : []),
   ])
 
@@ -203,6 +221,75 @@ export const uploadFile = async (
           },
         },
       },
+    },
+  }
+
+  await prisma().resourceField.upsert({
+    where: {
+      resourceId_fieldId: {
+        resourceId,
+        fieldId,
+      },
+    },
+    create: {
+      Resource: {
+        connect: {
+          id: resourceId,
+        },
+      },
+      Field: {
+        connect: {
+          id: fieldId,
+        },
+      },
+      Value: { create: input },
+    },
+    update: {
+      Value: { update: input },
+    },
+  })
+}
+
+export const uploadFiles = async (
+  resourceId: string,
+  fieldId: string,
+  formData: FormData,
+) => {
+  const { accountId } = await requireSession()
+
+  const files = formData.getAll('files')
+
+  if (files.length === 0) return
+
+  const input: Prisma.ValueCreateWithoutResourceFieldValueInput = {
+    Files: {
+      create: await Promise.all(
+        files
+          .filter(
+            (file): file is Exclude<FormDataEntryValue, string> =>
+              !isString(file),
+          )
+          .map(async (file) => {
+            const blob = await createBlob({ accountId, file })
+            return {
+              File: {
+                create: {
+                  name: file.name,
+                  Account: {
+                    connect: {
+                      id: accountId,
+                    },
+                  },
+                  Blob: {
+                    connect: {
+                      id: blob.id,
+                    },
+                  },
+                },
+              },
+            }
+          }),
+      ),
     },
   }
 

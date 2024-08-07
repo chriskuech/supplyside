@@ -99,6 +99,16 @@ export default function ResourceFieldsControl({
                                 ({ value: { file } }) => file?.name ?? '-',
                               )
                               .with(
+                                { fieldType: 'Files' },
+                                ({ value: { files } }) => {
+                                  const fileNames = files?.map((f) => f.name)
+
+                                  if (!fileNames?.length) return '-'
+
+                                  return fileNames.join(', ')
+                                },
+                              )
+                              .with(
                                 { fieldType: 'Money' },
                                 ({ value: { number } }) =>
                                   number?.toLocaleString('en-US', {

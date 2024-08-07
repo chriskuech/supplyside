@@ -25,5 +25,11 @@ export default function FieldControl({ onChange, ...props }: Props) {
     [handleChange],
   )
 
-  return <Field {...props} onChange={debouncedOnChange} />
+  return (
+    <Field
+      {...props}
+      onChange={debouncedOnChange}
+      onUncontrolledChange={onChange}
+    />
+  )
 }

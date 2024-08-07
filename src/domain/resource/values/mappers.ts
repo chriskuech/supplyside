@@ -54,4 +54,5 @@ export const mapValueFromModel = (model: ValueModel): Value => ({
       )?.Value.string ?? '',
   },
   file: model.File,
+  files: model.Files.map(({ File: file }) => file),
 })

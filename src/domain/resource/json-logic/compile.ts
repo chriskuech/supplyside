@@ -67,6 +67,16 @@ const createPropertySubquery = (field: Field) =>
       `,
     )
     .with(
+      'Files',
+      () => /*sql*/ `
+        SELECT array_agg("ValueFile"."fileId")
+        FROM "ResourceField"
+        LEFT JOIN "ValueFile" ON "ValueFile"."valueId" = "ResourceField"."valueId"
+        WHERE "Resource"."id" = "ResourceField"."resourceId"
+          AND "ResourceField"."fieldId" = '${field.id}'
+      `,
+    )
+    .with(
       'MultiSelect',
       () => /*sql*/ `
         SELECT array_agg("ValueOption"."optionId")
@@ -88,7 +98,10 @@ const createPropertySubquery = (field: Field) =>
     )
     .exhaustive()
 
-type PrimitiveFieldType = Exclude<FieldType, 'Contact' | 'MultiSelect'>
+type PrimitiveFieldType = Exclude<
+  FieldType,
+  'Contact' | 'Files' | 'MultiSelect'
+>
 
 const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
   match<PrimitiveFieldType, keyof Value>(t)

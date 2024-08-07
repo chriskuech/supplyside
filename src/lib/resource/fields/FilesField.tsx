@@ -1,0 +1,116 @@
+'use client'
+
+import { Close, Download, UploadFile } from '@mui/icons-material'
+import {
+  Box,
+  Button,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
+import { useRef } from 'react'
+import { getDownloadPath } from '@/domain/blobs/utils'
+import { Field } from '@/domain/schema/types'
+import { updateValue, uploadFiles } from '@/domain/resource/fields/actions'
+import { Value } from '@/domain/resource/values/types'
+
+type Props = {
+  resourceId: string
+  field: Field
+  value: Value | undefined
+  isReadOnly?: boolean
+  onChange?: () => void
+}
+
+export default function FilesField({
+  resourceId,
+  field,
+  value,
+  isReadOnly,
+  onChange,
+}: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  return (
+    <>
+      <Stack>
+        {value?.files?.map((file) => (
+          <Stack key={file.id} direction={'row'} alignItems={'center'}>
+            <Typography flexGrow={1}>{file.name ?? '-'}</Typography>
+            <Tooltip title="Download File">
+              <IconButton
+                onClick={() =>
+                  window.open(
+                    getDownloadPath({
+                      blobId: file.blobId,
+                      fileName: file.name,
+                      mimeType: file.Blob.mimeType,
+                    }),
+                  )
+                }
+              >
+                <Download />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete File">
+              <IconButton
+                onClick={() => {
+                  console.log('deleting')
+                  updateValue({
+                    resourceId,
+                    fieldId: field.id,
+                    value: {
+                      fileIds: value?.files
+                        ?.map((f) => f.id)
+                        .filter((fileId) => fileId !== file.id),
+                    },
+                  })
+                    .then(() => onChange?.())
+                    .then(() => console.log('deleted'))
+                  // deleteFile(resourceId, field.id, file.id)
+                  //   .then(() => onChange?.())
+                  //   .then(() => console.log('deleted'))
+                }}
+              >
+                <Close />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        ))}
+        {!isReadOnly && (
+          <Box>
+            <Tooltip title="Upload File">
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                endIcon={<UploadFile />}
+                variant="text"
+              >
+                Upload File
+              </Button>
+            </Tooltip>
+          </Box>
+        )}
+        <input
+          style={{ display: 'none' }}
+          type="file"
+          ref={fileInputRef}
+          onChange={({ target: { files } }) => {
+            if (!files?.length) return
+
+            const formData = new FormData()
+            for (const file of files) {
+              formData.append('files', file)
+            }
+
+            console.log('uploading')
+            uploadFiles(resourceId, field.id, formData)
+              .then(() => onChange?.())
+              .then(() => console.log('uploaded'))
+          }}
+          multiple
+        />
+      </Stack>
+    </>
+  )
+}

@@ -20,6 +20,7 @@ import UserField from './UserField'
 import ResourceField from './ResourceField'
 import ContactField from './ContactField'
 import ContactCard from './ContactCard'
+import FilesField from './FilesField'
 import { UpdateValueDto, updateContact } from '@/domain/resource/fields/actions'
 import { Field as FieldModel } from '@/domain/schema/types'
 import { Value } from '@/domain/resource/values/types'
@@ -31,6 +32,7 @@ export type Props = {
   value: Value | undefined
   isReadOnly?: boolean
   onChange: (value: UpdateValueDto['value']) => void
+  onUncontrolledChange?: () => void
   inline?: boolean
 }
 
@@ -41,6 +43,7 @@ export default function Field({
   value,
   isReadOnly,
   onChange,
+  onUncontrolledChange,
   inline,
 }: Props) {
   return match(field.type)
@@ -83,6 +86,16 @@ export default function Field({
         value={value}
         field={field}
         isReadOnly={isReadOnly}
+        onChange={onUncontrolledChange}
+      />
+    ))
+    .with('Files', () => (
+      <FilesField
+        resourceId={resourceId}
+        value={value}
+        field={field}
+        isReadOnly={isReadOnly}
+        onChange={onUncontrolledChange}
       />
     ))
     .with('Money', () =>
