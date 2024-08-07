@@ -48,7 +48,6 @@ export default function ResourceFieldsControl({
   )
 
   useEffect(() => {
-    console.log('refreshing')
     refresh()
   }, [refresh])
 
