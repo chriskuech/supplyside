@@ -7,12 +7,12 @@ import { createBlob } from '@/domain/blobs/actions'
 import prisma from '@/lib/prisma'
 import { createResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
-// import smtp from '@/lib/smtp'
+import smtp from '@/lib/smtp'
 
 type FileParam = {
   content: string
   encoding: BufferEncoding
-  contentType: `${string}/${string}`
+  contentType: string
   fileName: string
 }
 
@@ -24,7 +24,7 @@ type Params = {
 const createBill = async (params: Params) => {
   const fileIds = await Promise.all(
     params.files.map(async (file) => {
-      const blob = await createBlob({
+      const { id: blobId } = await createBlob({
         accountId: params.accountId,
         buffer: Buffer.from(file.content, file.encoding),
         type: file.contentType,
@@ -34,13 +34,15 @@ const createBill = async (params: Params) => {
         data: {
           accountId: params.accountId,
           name: file.fileName,
-          blobId: blob.id,
+          blobId,
         },
       })
 
       return fileId
     }),
   )
+
+  console.log('Creating Bill', fileIds)
 
   return await createResource({
     accountId: params.accountId,
@@ -61,12 +63,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   })
 
   if (!account) {
-    // await smtp().sendEmailWithTemplate({
-    //   From: 'bot@supplyside.io',
-    //   To: body.From,
-    //   Subject: "We couldn't process your email",
-    //   Attachments: body.Attachments,
-    // })
+    await smtp().sendEmail({
+      From: 'SupplySide <bot@supplyside.io>',
+      To: body.From,
+      Subject: "We couldn't process your email",
+      Attachments: body.Attachments,
+    })
+
     return NextResponse.json({ error: 'Account does not exist' })
   }
 
@@ -76,7 +79,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     (attachment) => ({
       content: attachment.Content,
       encoding: 'base64',
-      contentType: 'application/pdf',
+      contentType: attachment.ContentType,
       fileName: attachment.Name,
     }),
   )
