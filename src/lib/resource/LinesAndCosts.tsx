@@ -34,6 +34,10 @@ export default function LinesAndCosts({
           sx={{
             borderBottomLeftRadius: 0,
           }}
+          disableColumnFilter
+          disableColumnResize
+          disableColumnMenu
+          hideFooter
         />
         <Box width={'60%'}>
           <ItemizedCostLines resource={resource} />
