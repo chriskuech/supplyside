@@ -10,6 +10,7 @@ import {
 import { match } from 'ts-pattern'
 import { Close } from '@mui/icons-material'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { Field } from './actions'
 import { ValueInput } from '@/domain/resource/values/types'
@@ -25,6 +26,8 @@ export default function DefaultValueControl({
   defaultValue,
   onChange,
 }: Props) {
+  dayjs.extend(utc)
+
   return match(type)
     .with('Checkbox', () => (
       <Checkbox
@@ -93,7 +96,7 @@ export default function DefaultValueControl({
             onClear: () => onChange({ date: null }),
           },
         }}
-        value={defaultValue?.date && dayjs(defaultValue.date)}
+        defaultValue={defaultValue?.date && dayjs.utc(defaultValue.date)}
         onChange={(value) => onChange({ date: value?.toDate() ?? null })}
       />
     ))

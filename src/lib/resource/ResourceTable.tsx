@@ -13,6 +13,7 @@ import { P, match } from 'ts-pattern'
 import { useMemo } from 'react'
 import { difference } from 'remeda'
 import { useSnackbar } from 'notistack'
+import { formatDate } from '../formatDate'
 import ContactCard from './fields/ContactCard'
 import { deleteResource } from './actions'
 import FieldGridEditCell from './fields/FieldGridEditCell'
@@ -185,7 +186,7 @@ export default function ResourceTable({
             .with('Number', () => value?.number)
             .with('Text', () => value?.string)
             .with('Textarea', () => value?.string)
-            .with('Date', () => value?.date?.toLocaleDateString())
+            .with('Date', () => formatDate(value?.date))
             .with('Money', () =>
               value?.number?.toLocaleString('en-US', {
                 style: 'currency',
