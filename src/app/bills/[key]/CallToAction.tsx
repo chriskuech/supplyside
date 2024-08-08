@@ -75,7 +75,6 @@ export default function CallToAction({ user, schema, resourceId }: Props) {
             size="large"
             sx={{ height: 'fit-content', fontSize: '1.2em' }}
             endIcon={<ArrowRight />}
-            disabled={!order}
             onClick={() =>
               transitionStatus(
                 resource.id,
