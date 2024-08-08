@@ -79,7 +79,7 @@ async function main() {
     accountId,
     type: ResourceType.Vendor,
     data: {
-      Name: 'ACME Supplies',
+      [fields.name.name]: 'ACME Supplies',
     },
   })
 
@@ -87,9 +87,9 @@ async function main() {
     accountId,
     type: ResourceType.Order,
     data: {
-      Assignee: user.id,
-      Number: '42',
-      Vendor: vendor.id,
+      [fields.assignee.name]: user.id,
+      [fields.number.name]: '42',
+      [fields.vendor.name]: vendor.id,
     },
   })
 
@@ -97,8 +97,8 @@ async function main() {
     accountId,
     type: ResourceType.Item,
     data: {
-      Name: 'Line Name',
-      Description: 'Line Description',
+      [fields.name.name]: 'Item Name 1',
+      [fields.itemDescription.name]: 'Item Desc 1',
       [fields.unitOfMeasure.name]: unitOfMeasureOption.id,
     },
   })
@@ -107,8 +107,8 @@ async function main() {
     accountId,
     type: ResourceType.Line,
     data: {
-      Order: order.id,
-      Item: item1.id,
+      [fields.order.name]: order.id,
+      [fields.item.name]: item1.id,
     },
   })
 
@@ -116,8 +116,8 @@ async function main() {
     accountId,
     type: ResourceType.Item,
     data: {
-      Name: 'Line Name 2',
-      Description: 'Line Desc 2',
+      [fields.name.name]: 'Item Name 2',
+      [fields.itemDescription.name]: 'Item Desc 2',
       [fields.unitOfMeasure.name]: unitOfMeasureOption.id,
     },
   })
@@ -126,8 +126,8 @@ async function main() {
     accountId,
     type: ResourceType.Line,
     data: {
-      Order: order.id,
-      Item: item2.id,
+      [fields.order.name]: order.id,
+      [fields.item.name]: item2.id,
     },
   })
 }
