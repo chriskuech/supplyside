@@ -61,7 +61,10 @@ export default function Field({
       ) : (
         <ContactField
           contact={value?.contact ?? null}
-          onChange={(contact) => updateContact(resourceId, field.id, contact)}
+          onChange={(contact) => {
+            updateContact(resourceId, field.id, contact)
+            onUncontrolledChange?.()
+          }}
           inline={inline}
         />
       ),
