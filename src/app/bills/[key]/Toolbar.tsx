@@ -56,9 +56,10 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
   return (
     <>
       {order && (
-        <Box height={'min-content'} display={'none'}>
+        <Box height={'min-content'}>
           <Chip
-            icon={<LinkIcon />}
+            sx={{ fontSize: '1.5em', py: 2, cursor: 'pointer' }}
+            icon={<LinkIcon fontSize="large" />}
             component={Link}
             href={`/orders/${order.key}`}
             label={
@@ -88,7 +89,7 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
         </Box>
       )}
       <Box height={'min-content'}>
-        <Tooltip title="Cancel Order">
+        <Tooltip title="Cancel Bill">
           <IconButton
             onClick={() =>
               transitionStatus(
@@ -140,7 +141,7 @@ function AssigneeControl({
         title={
           assignee
             ? `Assigned to ${assignee?.fullName}`
-            : `Assign the Order to a user`
+            : `Assign the Bill to a user`
         }
       >
         <IconButton onClick={() => setIsOpen(true)}>

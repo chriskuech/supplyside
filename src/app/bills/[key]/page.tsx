@@ -66,7 +66,12 @@ export default async function BillsDetail({
             <span style={{ opacity: 0.5 }}>Bill #</span>
             <span>{key}</span>
           </Typography>
-          <Toolbar schema={schema} resourceId={resource.id} isDraft={isDraft} />
+          <Toolbar
+            key={status?.id}
+            schema={schema}
+            resourceId={resource.id}
+            isDraft={isDraft}
+          />
         </Stack>
       </Container>
 

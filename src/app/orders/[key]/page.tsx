@@ -75,7 +75,12 @@ export default async function OrderDetail({
 
           <Box flexGrow={1} />
 
-          <Toolbar resourceId={resource.id} schema={schema} isDraft={isDraft} />
+          <Toolbar
+            key={status?.id}
+            resourceId={resource.id}
+            schema={schema}
+            isDraft={isDraft}
+          />
         </Stack>
       </Container>
 
