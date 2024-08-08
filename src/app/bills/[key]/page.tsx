@@ -1,6 +1,10 @@
-import { Box, Button, Container, Stack, Typography } from '@mui/material'
-import { AddLink, ArrowRight } from '@mui/icons-material'
+import { fail } from 'assert'
+import { Box, Container, Stack, Typography } from '@mui/material'
+import { match } from 'ts-pattern'
+import { green, red, yellow } from '@mui/material/colors'
 import Toolbar from './Toolbar'
+import BillStatusTracker from './BillStatusTracker'
+import CallToAction from './CallToAction'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import { readResource } from '@/domain/resource/actions'
@@ -12,6 +16,7 @@ import {
   fields,
 } from '@/domain/schema/template/system-fields'
 import { selectValue } from '@/domain/resource/types'
+import { readUser } from '@/lib/iam/actions'
 
 export default async function BillsDetail({
   params: { key },
@@ -19,7 +24,8 @@ export default async function BillsDetail({
   params: { key: string }
 }) {
   const { accountId } = await requireSessionWithRedirect()
-  const [resource, schema] = await Promise.all([
+  const [user, resource, schema] = await Promise.all([
+    readUser(),
     readResource({ accountId, type: 'Bill', key: Number(key) }),
     readSchema({ accountId, resourceType: 'Bill' }),
   ])
@@ -35,72 +41,87 @@ export default async function BillsDetail({
     }),
   ])
 
-  const status = selectValue(resource, fields.billStatus)?.option
+  const status =
+    selectValue(resource, fields.billStatus)?.option ?? fail('Status not found')
+
   const isDraft = status?.templateId === billStatusOptions.draft.templateId
 
+  const statusColorStart = match(status?.templateId)
+    .with(billStatusOptions.draft.templateId, () => yellow[600])
+    .with(billStatusOptions.paid.templateId, () => green[900])
+    .with(billStatusOptions.canceled.templateId, () => red[900])
+    .otherwise(() => yellow[900])
+
+  const statusColorEnd = match(status?.templateId)
+    .with(billStatusOptions.draft.templateId, () => yellow[500])
+    .with(billStatusOptions.paid.templateId, () => green[800])
+    .with(billStatusOptions.canceled.templateId, () => red[800])
+    .otherwise(() => yellow[800])
+
   return (
-    <Container sx={{ my: 5 }}>
-      <Stack spacing={5}>
-        <Stack spacing={2}>
-          <Stack direction="row" spacing={2} alignItems={'center'}>
-            <Typography variant="h3" flexGrow={1}>
-              <span style={{ opacity: 0.5 }}>Bill #</span>
-              <span>{key}</span>
-            </Typography>
-            <Toolbar
-              schema={schema}
-              resourceId={resource.id}
-              isDraft={isDraft}
-            />
-          </Stack>
+    <Stack>
+      <Container sx={{ py: 5 }}>
+        <Stack direction="row" spacing={2} alignItems={'center'}>
+          <Typography variant="h3" flexGrow={1}>
+            <span style={{ opacity: 0.5 }}>Bill #</span>
+            <span>{key}</span>
+          </Typography>
+          <Toolbar schema={schema} resourceId={resource.id} isDraft={isDraft} />
         </Stack>
-        <Box sx={{ outline: '1px solid lime', p: 4 }}>
-          <Box color={'lime'}>Call To Action</Box>
-          <Box>
-            <Button
-              color="secondary"
-              size="large"
-              sx={{ height: 'fit-content', fontSize: '1.2em' }}
-              endIcon={<AddLink />}
-            >
-              Match Order
-            </Button>
-            <Button
-              color="secondary"
-              size="large"
-              sx={{ height: 'fit-content', fontSize: '1.2em' }}
-              endIcon={<ArrowRight />}
-            >
-              Submit
-            </Button>
-            <Button
-              color="secondary"
-              size="large"
-              sx={{ height: 'fit-content', fontSize: '1.2em' }}
-              endIcon={<ArrowRight />}
-            >
-              Approve
-            </Button>
-            <Button
-              color="secondary"
-              size="large"
-              sx={{ height: 'fit-content', fontSize: '1.2em' }}
-              endIcon={<ArrowRight />}
-            >
-              Confirm Payment
-            </Button>
-          </Box>
-        </Box>
-        <ResourceFieldsControl schema={schema} resourceId={resource.id} />
-        <LinesAndCosts
-          resource={resource}
-          lineSchema={lineSchema}
-          lines={lineResources}
-          newLineInitialData={{
-            [fields.bill.name]: resource.id,
+      </Container>
+
+      <Stack direction={'row'} height={100}>
+        <Box
+          flexGrow={1}
+          height={70}
+          my={'15px'}
+          sx={{
+            background: `linear-gradient(90deg, ${statusColorStart} 0%, ${statusColorEnd} 100%)`,
           }}
         />
+        <Container sx={{ flexShrink: 0 }} disableGutters>
+          <Stack
+            direction={'row'}
+            sx={{ overflowX: 'hidden', height: 100 }}
+            alignItems={'center'}
+          >
+            <Box sx={{ borderRadius: 10, flexGrow: 1 }}>
+              <BillStatusTracker resource={resource} />
+            </Box>
+            <Stack
+              width={400}
+              flexShrink={0}
+              direction={'row'}
+              justifyContent={'end'}
+              alignItems={'center'}
+              spacing={2}
+              mr={3}
+            >
+              <CallToAction
+                key={selectValue(resource, fields.billStatus)?.option?.id}
+                schema={schema}
+                user={user}
+                resourceId={resource.id}
+              />
+            </Stack>
+          </Stack>
+        </Container>
+        <Box flexGrow={1} bgcolor={'transparent'} />
       </Stack>
-    </Container>
+
+      <Container sx={{ py: 5 }}>
+        <Stack spacing={5}>
+          <ResourceFieldsControl schema={schema} resourceId={resource.id} />
+          <LinesAndCosts
+            resource={resource}
+            lineSchema={lineSchema}
+            lines={lineResources}
+            newLineInitialData={{
+              [fields.bill.name]: resource.id,
+            }}
+          />
+        </Stack>
+      </Container>
+    </Stack>
   )
 }
