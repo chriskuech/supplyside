@@ -68,7 +68,7 @@ export default function CallToAction({ user, schema, resourceId }: Props) {
             endIcon={order ? <Link /> : <AddLink />}
             onClick={open}
           >
-            Match Order
+            {order ? 'Order Matched' : 'Match Order'}
           </Button>
           <Button
             color="secondary"

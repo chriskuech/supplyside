@@ -5,6 +5,7 @@ export const schemas: SchemaTemplate[] = [
   {
     resourceType: 'Bill',
     fields: [
+      fields.order,
       fields.billStatus,
       fields.itemizedCosts,
       fields.subtotalCost,
@@ -19,7 +20,6 @@ export const schemas: SchemaTemplate[] = [
           fields.vendor,
           fields.invoiceNumber,
           fields.invoiceDate,
-          fields.order,
         ],
       },
       {
