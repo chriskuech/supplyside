@@ -1,13 +1,17 @@
 import { Box, Button, Container, Stack, Typography } from '@mui/material'
 import { AddLink, ArrowRight } from '@mui/icons-material'
+import Toolbar from './Toolbar'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import { readResource } from '@/domain/resource/actions'
 import { readSchema } from '@/domain/schema/actions'
-import CreateResourceButton from '@/lib/resource/CreateResourceButton'
-import ResourceTable from '@/lib/resource/ResourceTable'
-import ItemizedCostLines from '@/lib/resource/ItemizedCostLines'
 import { readResources } from '@/domain/resource/actions'
+import LinesAndCosts from '@/lib/resource/LinesAndCosts'
+import {
+  billStatusOptions,
+  fields,
+} from '@/domain/schema/template/system-fields'
+import { selectValue } from '@/domain/resource/types'
 
 export default async function BillsDetail({
   params: { key },
@@ -31,15 +35,24 @@ export default async function BillsDetail({
     }),
   ])
 
+  const status = selectValue(resource, fields.billStatus)?.option
+  const isDraft = status?.templateId === billStatusOptions.draft.templateId
+
   return (
     <Container sx={{ my: 5 }}>
       <Stack spacing={5}>
         <Stack spacing={2}>
-          <Typography variant="h3">
-            <span style={{ opacity: 0.5 }}>Bill #</span>
-            <span>{key}</span>
-          </Typography>
-          <ResourceFieldsControl schema={schema} resourceId={resource.id} />
+          <Stack direction="row" spacing={2} alignItems={'center'}>
+            <Typography variant="h3" flexGrow={1}>
+              <span style={{ opacity: 0.5 }}>Bill #</span>
+              <span>{key}</span>
+            </Typography>
+            <Toolbar
+              schema={schema}
+              resourceId={resource.id}
+              isDraft={isDraft}
+            />
+          </Stack>
         </Stack>
         <Box sx={{ outline: '1px solid lime', p: 4 }}>
           <Box color={'lime'}>Call To Action</Box>
@@ -78,24 +91,15 @@ export default async function BillsDetail({
             </Button>
           </Box>
         </Box>
-        <Stack spacing={2}>
-          <Stack direction={'row'} alignItems={'end'}>
-            <Typography variant="h4" flexGrow={1}>
-              Lines
-            </Typography>
-            <CreateResourceButton type={'Line'} data={{ Bill: resource.id }} />
-          </Stack>
-          <ResourceTable
-            schema={lineSchema}
-            resources={lineResources}
-            isEditable
-          />
-          <Stack direction={'row'} justifyContent={'end'}>
-            <Box width={'60%'}>
-              <ItemizedCostLines resource={resource} />
-            </Box>
-          </Stack>
-        </Stack>
+        <ResourceFieldsControl schema={schema} resourceId={resource.id} />
+        <LinesAndCosts
+          resource={resource}
+          lineSchema={lineSchema}
+          lines={lineResources}
+          newLineInitialData={{
+            [fields.bill.name]: resource.id,
+          }}
+        />
       </Stack>
     </Container>
   )

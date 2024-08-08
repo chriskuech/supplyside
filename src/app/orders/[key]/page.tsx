@@ -2,6 +2,7 @@ import { fail } from 'assert'
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
+import LinesAndCosts from '../../../lib/resource/LinesAndCosts'
 import OrderStatusTracker from './OrderStatusTracker'
 import ApproveButton from './cta/ApproveButton'
 import SkipButton from './cta/SkipButton'
@@ -10,7 +11,6 @@ import SendPoButton from './cta/SendPoButton'
 import Toolbar from './Toolbar'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
-import ResourceTable from '@/lib/resource/ResourceTable'
 import { readResource, readResources } from '@/lib/resource/actions'
 import { readSchema } from '@/lib/schema/actions'
 import {
@@ -18,9 +18,7 @@ import {
   orderStatusOptions,
 } from '@/domain/schema/template/system-fields'
 import { readUser } from '@/lib/iam/actions'
-import ItemizedCostLines from '@/lib/resource/ItemizedCostLines'
 import { selectValue } from '@/domain/resource/types'
-import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 
 export default async function OrderDetail({
@@ -163,27 +161,14 @@ export default async function OrderDetail({
             resourceId={resource.id}
             isReadOnly={!isDraft}
           />
-          <Stack spacing={2}>
-            <Stack direction={'row'} alignItems={'end'}>
-              <Typography variant="h4" flexGrow={1}>
-                Lines
-              </Typography>
-              <CreateResourceButton
-                type={'Line'}
-                data={{ Order: resource.id }}
-              />
-            </Stack>
-            <ResourceTable
-              schema={lineSchema}
-              resources={lineResources}
-              isEditable
-            />
-            <Stack direction={'row'} justifyContent={'end'}>
-              <Box width={'60%'}>
-                <ItemizedCostLines resource={resource} />
-              </Box>
-            </Stack>
-          </Stack>
+          <LinesAndCosts
+            resource={resource}
+            lineSchema={lineSchema}
+            lines={lineResources}
+            newLineInitialData={{
+              [fields.order.name]: resource.id,
+            }}
+          />
         </Stack>
       </Container>
     </Stack>

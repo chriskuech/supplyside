@@ -4,7 +4,13 @@ import { SchemaTemplate } from './types'
 export const schemas: SchemaTemplate[] = [
   {
     resourceType: 'Bill',
-    fields: [fields.itemizedCosts, fields.subtotalCost, fields.totalCost],
+    fields: [
+      fields.billStatus,
+      fields.itemizedCosts,
+      fields.subtotalCost,
+      fields.totalCost,
+      fields.assignee,
+    ],
     sections: [
       {
         name: 'Bill Info',

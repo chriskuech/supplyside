@@ -1,13 +1,18 @@
 'use server'
 
+import { fail } from 'assert'
 import { Resource as ResourceModel, ResourceType } from '@prisma/client'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { requireSession } from '../session'
+import { readSchema } from '../schema/actions'
 import * as domain from '@/domain/resource/actions'
 import { Resource } from '@/domain/resource/types'
 import prisma from '@/lib/prisma'
 import { ValueResource } from '@/domain/resource/values/types'
+import { updateValue } from '@/domain/resource/fields/actions'
+import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
+import { selectField } from '@/domain/schema/types'
 
 export const createResource = async (
   params: Omit<domain.CreateResourceParams, 'accountId'>,
@@ -93,4 +98,31 @@ export const findResources = async ({
     .object({ id: z.string(), name: z.string(), key: z.number() })
     .array()
     .parse(results)
+}
+
+export const transitionStatus = async (
+  resourceId: string,
+  fieldTemplate: FieldTemplate,
+  statusTemplate: OptionTemplate,
+) => {
+  const { type: resourceType } = await readResource({
+    id: resourceId,
+  })
+  const schema = await readSchema({
+    resourceType,
+    isSystem: true,
+  })
+  const field = selectField(schema, fieldTemplate) ?? fail('Field not found')
+
+  await updateValue({
+    resourceId,
+    fieldId: field.id,
+    value: {
+      optionId:
+        field.options.find((o) => o.templateId === statusTemplate.templateId)
+          ?.id ?? fail('Option not found'),
+    },
+  })
+
+  revalidatePath('.')
 }
