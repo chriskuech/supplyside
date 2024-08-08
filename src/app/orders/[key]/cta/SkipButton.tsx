@@ -2,8 +2,11 @@
 
 import { Button, Tooltip } from '@mui/material'
 import { ArrowRight } from '@mui/icons-material'
-import { transitionStatus } from '../actions'
-import { orderStatusOptions } from '@/domain/schema/template/system-fields'
+import {
+  fields,
+  orderStatusOptions,
+} from '@/domain/schema/template/system-fields'
+import { transitionStatus } from '@/lib/resource/actions'
 
 type Props = {
   resourceId: string
@@ -16,7 +19,13 @@ export default function SkipButton({ resourceId }: Props) {
         sx={{ fontSize: '1.2em' }}
         endIcon={<ArrowRight />}
         variant={'text'}
-        onClick={() => transitionStatus(resourceId, orderStatusOptions.ordered)}
+        onClick={() =>
+          transitionStatus(
+            resourceId,
+            fields.orderStatus,
+            orderStatusOptions.ordered,
+          )
+        }
       >
         Skip
       </Button>

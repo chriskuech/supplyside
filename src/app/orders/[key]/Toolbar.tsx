@@ -25,8 +25,7 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import { Field, Schema, selectField } from '@/domain/schema/types'
 import { Resource, selectValue } from '@/domain/resource/types'
-import { readResource } from '@/lib/resource/actions'
-import { transitionStatus } from './actions'
+import { readResource, transitionStatus } from '@/lib/resource/actions'
 import {
   fields,
   orderStatusOptions,
@@ -110,7 +109,11 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
           <Tooltip title="Transition back to Draft for editing">
             <IconButton
               onClick={() =>
-                transitionStatus(resourceId, orderStatusOptions.draft)
+                transitionStatus(
+                  resourceId,
+                  fields.orderStatus,
+                  orderStatusOptions.draft,
+                )
               }
               sx={{ '.MuiButtonBase-root': { m: 0, p: 0 } }}
             >
@@ -123,7 +126,11 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
         <Tooltip title="Cancel Order">
           <IconButton
             onClick={() =>
-              transitionStatus(resourceId, orderStatusOptions.canceled)
+              transitionStatus(
+                resourceId,
+                fields.orderStatus,
+                orderStatusOptions.canceled,
+              )
             }
             sx={{ '.MuiButtonBase-root': { m: 0, p: 0 } }}
           >

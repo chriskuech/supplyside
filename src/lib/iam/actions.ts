@@ -1,5 +1,6 @@
 'use server'
 
+import { systemAccountId } from '../const'
 import { User } from './types'
 import { inviteUser } from '@/domain/iam/user'
 import prisma from '@/lib/prisma'
@@ -19,7 +20,7 @@ export const updateUser = async ({ id, ...params }: UpdateUserParams) => {
 export const readUser = async (): Promise<User> => {
   const { userId } = await requireSession()
 
-  return prisma().user.findUniqueOrThrow({
+  const user = await prisma().user.findUniqueOrThrow({
     where: { id: userId },
     select: {
       id: true,
@@ -31,12 +32,17 @@ export const readUser = async (): Promise<User> => {
       isApprover: true,
     },
   })
+
+  return {
+    ...user,
+    isGlobalAdmin: user.accountId === systemAccountId,
+  }
 }
 
 export const readUsers = async (): Promise<User[]> => {
   const { accountId } = await requireSession()
 
-  return prisma().user.findMany({
+  const users = await prisma().user.findMany({
     where: { accountId },
     orderBy: { email: 'asc' },
     select: {
@@ -49,6 +55,11 @@ export const readUsers = async (): Promise<User[]> => {
       isApprover: true,
     },
   })
+
+  return users.map((user) => ({
+    ...user,
+    isGlobalAdmin: user.accountId === systemAccountId,
+  }))
 }
 
 export const inviteUserToAccount = async (email: string) => {

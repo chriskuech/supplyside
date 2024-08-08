@@ -9,4 +9,6 @@ export type User = Pick<
   | 'lastName'
   | 'isApprover'
   | 'isAdmin'
->
+> & {
+  isGlobalAdmin: boolean
+}

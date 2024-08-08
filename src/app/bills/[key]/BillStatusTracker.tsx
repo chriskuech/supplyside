@@ -2,37 +2,35 @@ import { match } from 'ts-pattern'
 import StatusTrackerView from '@/lib/ux/StatusTrackerView'
 import { Resource, selectValue } from '@/domain/resource/types'
 import {
+  billStatusOptions,
   fields,
-  orderStatusOptions,
 } from '@/domain/schema/template/system-fields'
 
 const happyPath: string[] = [
-  orderStatusOptions.draft.name,
-  orderStatusOptions.submitted.name,
-  orderStatusOptions.approved.name,
-  orderStatusOptions.ordered.name,
-  orderStatusOptions.received.name,
+  billStatusOptions.draft.name,
+  billStatusOptions.submitted.name,
+  billStatusOptions.approved.name,
+  billStatusOptions.paid.name,
 ]
 
 const sadPath: string[] = [
-  orderStatusOptions.draft.name,
-  orderStatusOptions.submitted.name,
-  orderStatusOptions.approved.name,
-  orderStatusOptions.ordered.name,
-  orderStatusOptions.canceled.name,
+  billStatusOptions.draft.name,
+  billStatusOptions.submitted.name,
+  billStatusOptions.approved.name,
+  billStatusOptions.canceled.name,
 ]
 
 type Props = {
   resource: Resource
 }
 
-export default function OrderStatusTracker({ resource }: Props) {
-  const value = selectValue(resource, fields.orderStatus)?.option
+export default function BillStatusTracker({ resource }: Props) {
+  const value = selectValue(resource, fields.billStatus)?.option
 
   if (!value) return '❌ Field value not found'
 
   return match(value.name)
-    .with('Canceled', () => (
+    .with(billStatusOptions.canceled.name, () => (
       <StatusTrackerView
         steps={sadPath.map((label, i) => ({
           label,
@@ -41,7 +39,7 @@ export default function OrderStatusTracker({ resource }: Props) {
         }))}
       />
     ))
-    .with('Received', () => (
+    .with(billStatusOptions.paid.name, () => (
       <StatusTrackerView
         steps={happyPath.map((label, i) => ({
           label,
