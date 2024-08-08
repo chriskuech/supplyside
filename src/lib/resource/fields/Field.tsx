@@ -14,6 +14,7 @@ import {
 import { match } from 'ts-pattern'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import { Close } from '@mui/icons-material'
 import FileField from './FileField'
 import UserField from './UserField'
@@ -46,6 +47,8 @@ export default function Field({
   onUncontrolledChange,
   inline,
 }: Props) {
+  dayjs.extend(utc)
+
   return match(field.type)
     .with('Checkbox', () => (
       <Checkbox
@@ -79,7 +82,7 @@ export default function Field({
           },
         }}
         readOnly={isReadOnly}
-        defaultValue={value?.date && dayjs(value.date)}
+        defaultValue={value?.date && dayjs.utc(value.date)}
         onChange={(value) => onChange({ date: value?.toDate() ?? null })}
       />
     ))
