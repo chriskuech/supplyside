@@ -29,6 +29,9 @@ export const requireSessionWithRedirect = async () => {
   if (user.requirePasswordReset)
     redirect('/auth/update-password', RedirectType.replace)
 
+  if (user.tsAndCsSignedAt === null)
+    redirect('/auth/terms-and-conditions', RedirectType.replace)
+
   return session
 }
 
