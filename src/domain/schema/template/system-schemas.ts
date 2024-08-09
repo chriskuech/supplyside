@@ -50,8 +50,8 @@ export const schemas: SchemaTemplate[] = [
     resourceType: 'Line',
     fields: [
       fields.item,
-      fields.quantity,
       fields.unitOfMeasure,
+      fields.quantity,
       fields.unitCost,
       fields.totalCost,
       fields.needDate,
