@@ -2,16 +2,16 @@ import { fail } from 'assert'
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
-import LinesAndCosts from '../../../lib/resource/LinesAndCosts'
 import OrderStatusTracker from './OrderStatusTracker'
 import ApproveButton from './cta/ApproveButton'
 import SkipButton from './cta/SkipButton'
 import StatusTransitionButton from './cta/StatusTransitionButton'
 import SendPoButton from './cta/SendPoButton'
 import Toolbar from './Toolbar'
+import LinesAndCosts from '@/lib/resource/LinesAndCosts'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
-import { readResource, readResources } from '@/lib/resource/actions'
+import { readResource } from '@/lib/resource/actions'
 import { readSchema } from '@/lib/schema/actions'
 import {
   fields,
@@ -32,18 +32,6 @@ export default async function OrderDetail({
     readUser(),
     readSchema({ resourceType: 'Order' }),
     readResource({ type: 'Order', key: Number(key) }),
-  ])
-
-  const [lineSchema, lineResources] = await Promise.all([
-    readSchema({
-      resourceType: 'Line',
-    }),
-    readResources({
-      type: 'Line',
-      where: {
-        '==': [{ var: 'Order' }, resource.id],
-      },
-    }),
   ])
 
   const status =
@@ -167,9 +155,10 @@ export default async function OrderDetail({
             isReadOnly={!isDraft}
           />
           <LinesAndCosts
-            resource={resource}
-            lineSchema={lineSchema}
-            lines={lineResources}
+            resourceId={resource.id}
+            lineQuery={{
+              '==': [{ var: 'Order' }, resource.id],
+            }}
             newLineInitialData={{
               [fields.order.name]: resource.id,
             }}

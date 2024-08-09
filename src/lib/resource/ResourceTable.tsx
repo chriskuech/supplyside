@@ -29,12 +29,14 @@ type Props = {
   schema: Schema
   resources: Resource[]
   isEditable?: boolean
+  onChange?: () => void
 } & Partial<DataGridProps>
 
 export default function ResourceTable({
   schema,
   resources,
   isEditable,
+  onChange,
   ...props
 }: Props) {
   const { enqueueSnackbar } = useSnackbar()
@@ -335,6 +337,7 @@ export default function ResourceTable({
         fieldId: editedField.fieldId,
         value: newValue,
       })
+      onChange?.()
     } catch {
       enqueueSnackbar('There was an error updating the field', {
         variant: 'error',

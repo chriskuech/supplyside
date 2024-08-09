@@ -9,7 +9,6 @@ import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import { readResource } from '@/domain/resource/actions'
 import { readSchema } from '@/domain/schema/actions'
-import { readResources } from '@/domain/resource/actions'
 import LinesAndCosts from '@/lib/resource/LinesAndCosts'
 import {
   billStatusOptions,
@@ -28,17 +27,6 @@ export default async function BillsDetail({
     readUser(),
     readResource({ accountId, type: 'Bill', key: Number(key) }),
     readSchema({ accountId, resourceType: 'Bill' }),
-  ])
-
-  const [lineSchema, lineResources] = await Promise.all([
-    readSchema({ accountId, resourceType: 'Line' }),
-    readResources({
-      accountId,
-      type: 'Line',
-      where: {
-        '==': [{ var: 'Bill' }, resource.id],
-      },
-    }),
   ])
 
   const status =
@@ -118,9 +106,8 @@ export default async function BillsDetail({
         <Stack spacing={5}>
           <ResourceFieldsControl schema={schema} resourceId={resource.id} />
           <LinesAndCosts
-            resource={resource}
-            lineSchema={lineSchema}
-            lines={lineResources}
+            lineQuery={{ '==': [{ var: 'Bill' }, resource.id] }}
+            resourceId={resource.id}
             newLineInitialData={{
               [fields.bill.name]: resource.id,
             }}

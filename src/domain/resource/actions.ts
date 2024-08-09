@@ -15,7 +15,7 @@ import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { selectField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
-import { recalculateSubtotalCostForOrder } from '../cost/actions'
+import { recalculateSubtotalCost } from '../cost/actions'
 import { Resource, selectValue } from './types'
 import { valueInclude } from './values/types'
 import { createSql } from './json-logic/compile'
@@ -231,7 +231,12 @@ export const deleteResource = async ({
   if (entity.type === 'Line') {
     const orderId = selectValue(entity, fields.order)?.resource?.id
     if (orderId) {
-      await recalculateSubtotalCostForOrder(accountId, orderId)
+      await recalculateSubtotalCost(accountId, 'Order', orderId)
+    }
+
+    const billId = selectValue(entity, fields.bill)?.resource?.id
+    if (billId) {
+      await recalculateSubtotalCost(accountId, 'Bill', billId)
     }
   }
 }

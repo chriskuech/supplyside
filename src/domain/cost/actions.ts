@@ -1,7 +1,7 @@
 'use server'
 
 import { fail } from 'assert'
-import { Prisma } from '@prisma/client'
+import { Prisma, ResourceType } from '@prisma/client'
 import { map, pipe, sum } from 'remeda'
 import { fields } from '../schema/template/system-fields'
 import { updateValue } from '../resource/fields/actions'
@@ -67,13 +67,14 @@ export const recalculateItemizedCosts = async (
   })
 }
 
-export const recalculateSubtotalCostForOrder = async (
+export const recalculateSubtotalCost = async (
   accountId: string,
-  orderId: string,
+  resourceType: ResourceType,
+  resourceId: string,
 ) => {
-  const orderSchema = await readSchema({
+  const schema = await readSchema({
     accountId,
-    resourceType: 'Order',
+    resourceType,
     isSystem: true,
   })
 
@@ -81,7 +82,7 @@ export const recalculateSubtotalCostForOrder = async (
     accountId,
     type: 'Line',
     where: {
-      '==': [{ var: 'Order' }, orderId],
+      '==': [{ var: resourceType }, resourceId],
     },
   })
 
@@ -92,8 +93,8 @@ export const recalculateSubtotalCostForOrder = async (
   )
 
   await updateValue({
-    fieldId: selectField(orderSchema, fields.subtotalCost)?.id ?? fail(),
-    resourceId: orderId,
+    fieldId: selectField(schema, fields.subtotalCost)?.id ?? fail(),
+    resourceId,
     value: {
       number: subTotal,
     },

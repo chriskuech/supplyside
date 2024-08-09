@@ -12,7 +12,7 @@ import { fields, findField } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
 import {
   recalculateItemizedCosts,
-  recalculateSubtotalCostForOrder,
+  recalculateSubtotalCost,
 } from '@/domain/cost/actions'
 import { Field, selectField } from '@/domain/schema/types'
 
@@ -137,7 +137,7 @@ export const updateValue = async ({
   }
 
   // When the Line."Total Cost" field is updated,
-  // Then update the Order."Subtotal Cost" field
+  // Then update the {Bill|Order}."Subtotal Cost" field
   if (
     rf.Resource.type === 'Line' &&
     rf.Field.templateId === fields.totalCost.templateId
@@ -149,43 +149,49 @@ export const updateValue = async ({
 
     const orderId = selectValue(line, fields.order)?.resource?.id
     if (orderId) {
-      await recalculateSubtotalCostForOrder(rf.Resource.accountId, orderId)
+      await recalculateSubtotalCost(rf.Resource.accountId, 'Order', orderId)
+    }
+
+    const billId = selectValue(line, fields.bill)?.resource?.id
+    if (billId) {
+      await recalculateSubtotalCost(rf.Resource.accountId, 'Bill', billId)
     }
   }
 
-  // When the Order."Subtotal Cost" field is updated,
-  // Then recalculate the Order."Itemized Costs" field
+  // When the {Bill|Order}."Subtotal Cost" field is updated,
+  // Then recalculate the {Bill|Order}."Itemized Costs" field
   if (
-    rf.Resource.type === 'Order' &&
+    ['Bill', 'Order'].includes(rf.Resource.type) &&
     rf.Field.templateId === fields.subtotalCost.templateId
   ) {
     await recalculateItemizedCosts(rf.Resource.accountId, resourceId)
   }
 
-  // When the Order."Itemized Costs" or Order."Subtotal Cost" field is updated,
-  // Then update Order."Total Cost"
+  // When the {Bill|Order}."Itemized Costs" or {Bill|Order}."Subtotal Cost" field is updated,
+  // Then update {Bill|Order}."Total Cost"
   if (
-    rf.Resource.type === 'Order' &&
+    ['Bill', 'Order'].includes(rf.Resource.type) &&
     (rf.Field.templateId === fields.subtotalCost.templateId ||
       rf.Field.templateId === fields.itemizedCosts.templateId)
   ) {
-    const order = await readResource({
+    const resource = await readResource({
       accountId: rf.Resource.accountId,
       id: resourceId,
     })
 
-    const orderSchema = await readSchema({
+    const schema = await readSchema({
       accountId: rf.Resource.accountId,
-      resourceType: 'Order',
+      resourceType: rf.Resource.type,
       isSystem: true,
     })
 
-    const itemizedCosts = selectValue(order, fields.itemizedCosts)?.number ?? 0
-    const subtotalCost = selectValue(order, fields.subtotalCost)?.number ?? 0
+    const itemizedCosts =
+      selectValue(resource, fields.itemizedCosts)?.number ?? 0
+    const subtotalCost = selectValue(resource, fields.subtotalCost)?.number ?? 0
 
     await updateValue({
-      fieldId: selectField(orderSchema, fields.totalCost)?.id ?? fail(),
-      resourceId: order.id,
+      fieldId: selectField(schema, fields.totalCost)?.id ?? fail(),
+      resourceId: resource.id,
       value: {
         number: itemizedCosts + subtotalCost,
       },
