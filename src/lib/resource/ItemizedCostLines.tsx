@@ -12,8 +12,10 @@ import {
   TableCell,
   TableRow,
   TextField,
+  useTheme,
 } from '@mui/material'
 import { Add, Clear } from '@mui/icons-material'
+import { match } from 'ts-pattern'
 import { Resource, selectValue } from '@/domain/resource/types'
 import { createCost, deleteCost, updateCost } from '@/domain/cost/actions'
 import { fields } from '@/domain/schema/template/system-fields'
@@ -23,6 +25,8 @@ type Props = {
 }
 
 export default function ItemizedCostLines({ resource }: Props) {
+  const theme = useTheme()
+
   const subtotalCost = selectValue(resource, fields.subtotalCost)?.number ?? 0
   const totalCost = selectValue(resource, fields.totalCost)?.number ?? 0
 
@@ -34,23 +38,30 @@ export default function ItemizedCostLines({ resource }: Props) {
       >
         <Table size="small">
           <TableBody>
-            <TableRow sx={{ backgroundColor: 'grey.200' }}>
+            <TableRow
+              sx={{
+                backgroundColor: match(theme.palette.mode)
+                  .with('light', () => 'rgba(0 0 0 / 0.2)')
+                  .with('dark', () => 'rgba(255 255 255 / 0.2)')
+                  .exhaustive(),
+              }}
+            >
               <TableCell
                 colSpan={2}
-                style={{ fontWeight: 'bold', fontSize: '1em' }}
+                style={{ fontWeight: 'bold', fontSize: '1em', border: 'none' }}
               >
                 Subtotal
               </TableCell>
               <TableCell
                 align="right"
-                style={{ fontWeight: 'bold', fontSize: '1em' }}
+                style={{ fontWeight: 'bold', fontSize: '1em', border: 'none' }}
               >
                 {subtotalCost.toLocaleString('en-US', {
                   style: 'currency',
                   currency: 'USD',
                 })}
               </TableCell>
-              <TableCell />
+              <TableCell sx={{ border: 'none' }} />
             </TableRow>
 
             {resource.costs.map((row) => (
@@ -110,23 +121,23 @@ export default function ItemizedCostLines({ resource }: Props) {
               </TableRow>
             ))}
 
-            <TableRow sx={{ backgroundColor: '#D5E7EE' }}>
+            <TableRow sx={{ backgroundColor: 'rgba(0 127 255 / 0.3)' }}>
               <TableCell
                 colSpan={2}
-                style={{ fontWeight: 'bold', fontSize: '1em' }}
+                style={{ fontWeight: 'bold', fontSize: '1em', border: 'none' }}
               >
                 Total
               </TableCell>
               <TableCell
                 align="right"
-                style={{ fontWeight: 'bold', fontSize: '1em' }}
+                style={{ fontWeight: 'bold', fontSize: '1em', border: 'none' }}
               >
                 {totalCost.toLocaleString('en-US', {
                   style: 'currency',
                   currency: 'USD',
                 })}
               </TableCell>
-              <TableCell />
+              <TableCell sx={{ border: 'none' }} />
             </TableRow>
           </TableBody>
         </Table>
