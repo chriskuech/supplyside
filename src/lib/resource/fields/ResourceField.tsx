@@ -13,7 +13,7 @@ import {
   Typography,
 } from '@mui/material'
 import { Clear, Link as LinkIcon, ViewSidebar } from '@mui/icons-material'
-import { FC, useEffect, useMemo, useState } from 'react'
+import { ForwardedRef, forwardRef, useEffect, useMemo, useState } from 'react'
 import { debounce } from 'remeda'
 import { ResourceType } from '@prisma/client'
 import NextLink from 'next/link'
@@ -37,12 +37,10 @@ type Props = {
   isReadOnly?: boolean
 }
 
-export default function ResourceField({
-  resourceType,
-  value,
-  onChange,
-  isReadOnly,
-}: Props) {
+function ResourceField(
+  { resourceType, value, onChange, isReadOnly }: Props,
+  ref: ForwardedRef<HTMLInputElement>,
+) {
   const [open, setOpen] = useState(false)
   const [resource, setResource] = useState<Resource | null>(null)
   const [schema, setSchema] = useState<Schema | null>(null)
@@ -137,6 +135,7 @@ export default function ResourceField({
       resourceType={resourceType}
       onCreate={handleCreate}
       onUpdate={onChange}
+      ref={ref}
     />
   )
 }
@@ -147,11 +146,10 @@ type EditableResourceFieldProps = {
   resourceType: ResourceType
 }
 
-const EditableResourceField: FC<EditableResourceFieldProps> = ({
-  resourceType,
-  onCreate,
-  onUpdate,
-}) => {
+const BaseEditableResourceField = (
+  { resourceType, onCreate, onUpdate }: EditableResourceFieldProps,
+  ref: ForwardedRef<HTMLInputElement>,
+) => {
   const [options, setOptions] = useState<ValueResource[]>([])
   const [input, setInput] = useState<string>('')
 
@@ -188,8 +186,16 @@ const EditableResourceField: FC<EditableResourceFieldProps> = ({
       }
       onInputChange={(event, newInputValue) => setInput(newInputValue)}
       renderInput={(params) => (
-        <TextField {...params} placeholder={`Enter a name/number`} />
+        <TextField
+          {...params}
+          placeholder={`Enter a name/number`}
+          inputRef={ref}
+        />
       )}
     />
   )
 }
+
+const EditableResourceField = forwardRef(BaseEditableResourceField)
+
+export default forwardRef(ResourceField)

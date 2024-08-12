@@ -1,7 +1,7 @@
 'use client'
 
 import { MenuItem, Select } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { ForwardedRef, forwardRef, useEffect, useState } from 'react'
 import { Option } from '@/domain/schema/types'
 import { readUsers } from '@/lib/schema/field-meta'
 
@@ -11,7 +11,10 @@ type Props = {
   onChange: (userId: string) => void
 }
 
-export default function UserField({ userId, inputId, onChange }: Props) {
+function UserField(
+  { userId, inputId, onChange }: Props,
+  ref: ForwardedRef<HTMLInputElement>,
+) {
   const [users, setUsers] = useState<Option[]>([])
 
   useEffect(() => {
@@ -20,6 +23,7 @@ export default function UserField({ userId, inputId, onChange }: Props) {
 
   return (
     <Select
+      inputRef={ref}
       id={inputId}
       fullWidth
       value={userId ?? ''}
@@ -33,3 +37,5 @@ export default function UserField({ userId, inputId, onChange }: Props) {
     </Select>
   )
 }
+
+export default forwardRef(UserField)

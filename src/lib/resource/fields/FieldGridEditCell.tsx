@@ -3,6 +3,7 @@
 import { GridRenderEditCellParams, useGridApiContext } from '@mui/x-data-grid'
 import { FieldType } from '@prisma/client'
 import { Box } from '@mui/material'
+import { useLayoutEffect, useRef } from 'react'
 import Field from './Field'
 import { UpdateValueDto } from '@/domain/resource/fields/actions'
 import { Field as FieldModel } from '@/domain/schema/types'
@@ -15,11 +16,17 @@ type Props = {
 const AUTO_STOP_FIELD_TYPES: FieldType[] = ['Select', 'Resource', 'User']
 
 export default function FieldGridEditCell({ cellParams, field }: Props) {
+  const inputRef = useRef<HTMLInputElement>(null)
   const currentField = cellParams.row.fields.find(
     (rf) => rf.fieldId === cellParams.field,
   )
   const apiRef = useGridApiContext()
-  //TODO: focus input on mount to prevent additional click to edit
+
+  useLayoutEffect(() => {
+    if (cellParams.hasFocus) {
+      inputRef.current?.focus()
+    }
+  }, [cellParams.hasFocus])
 
   const handleChange = (value: UpdateValueDto['value']) => {
     apiRef.current.setEditCellValue({
@@ -40,6 +47,7 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
   return (
     <Box width="100%">
       <Field
+        ref={inputRef}
         field={field}
         inputId={`${cellParams.row.id}${field.id}`}
         onChange={handleChange}
