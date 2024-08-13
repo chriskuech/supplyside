@@ -1,7 +1,6 @@
-import { Box, Button, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Link, Stack, TextField, Typography } from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
 import Image from 'next/image'
-import Link from 'next/link'
 import { handleSaveSettings, readUser } from './actions'
 import { privacyPolicyUrl, termsOfServiceUrl } from '@/lib/const'
 
