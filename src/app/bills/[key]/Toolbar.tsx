@@ -19,6 +19,7 @@ import {
   DialogTitle,
   IconButton,
   Tooltip,
+  Typography,
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -58,14 +59,14 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
       {order && (
         <Box height={'min-content'}>
           <Chip
-            sx={{ fontSize: '1.5em', py: 2, cursor: 'pointer' }}
+            sx={{ py: 2, cursor: 'pointer' }}
             icon={<LinkIcon fontSize="large" />}
             component={Link}
             href={`/orders/${order.key}`}
             label={
-              <>
+              <Typography sx={{ opacity: 0.8 }}>
                 Order #<strong>{order.key}</strong>
-              </>
+              </Typography>
             }
           />
         </Box>

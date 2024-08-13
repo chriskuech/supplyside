@@ -3,7 +3,7 @@ import { Options, useAsyncCallback, UseAsyncState } from './useAsyncCallback'
 
 type Props<Args extends unknown[], ResolvedType> = {
   deps: Args
-  fn: (deps: Args) => Promise<ResolvedType>
+  fn: (...deps: Args) => Promise<ResolvedType>
 }
 export function useAsyncQuery<const Args extends unknown[], ResolvedType>(
   { fn, deps }: Props<Args, ResolvedType>,
@@ -13,7 +13,7 @@ export function useAsyncQuery<const Args extends unknown[], ResolvedType>(
     showGenericError,
   })
 
-  const memoizedCallback = useCallback(() => triggerCallback(deps), deps)
+  const memoizedCallback = useCallback(() => triggerCallback(...deps), deps)
 
   useEffect(() => {
     memoizedCallback()

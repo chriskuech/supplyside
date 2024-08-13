@@ -1,5 +1,5 @@
 import { pick } from 'remeda'
-import { Value, ValueInput } from './types'
+import { Value, ValueInput, ValueResource } from './types'
 import { ResourceValueModel, ValueModel } from './model'
 import { fields } from '@/domain/schema/template/system-fields'
 import { getDownloadPath } from '@/domain/blobs/utils'
@@ -46,7 +46,9 @@ export const mapValueFromModel = (model: ValueModel): Value => ({
   files: model.Files.map(({ File: file }) => file),
 })
 
-export const mapValueFromResource = (resource: ResourceValueModel) => ({
+export const mapValueFromResource = (
+  resource: ResourceValueModel,
+): ValueResource => ({
   id: resource.id,
   key: resource.key,
   name:

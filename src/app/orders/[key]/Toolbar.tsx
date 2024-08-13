@@ -22,6 +22,7 @@ import {
   DialogTitle,
   IconButton,
   Tooltip,
+  Typography,
 } from '@mui/material'
 import { useState } from 'react'
 import Link from 'next/link'
@@ -46,11 +47,11 @@ type Props = {
 
 export default function Toolbar({ schema, resourceId, isDraft }: Props) {
   const { data: resource, refetch } = useAsyncQuery({
-    fn: ([resourceId]) => readResource({ id: resourceId }),
+    fn: (resourceId) => readResource({ id: resourceId }),
     deps: [resourceId],
   })
   const { data: bills } = useAsyncQuery({
-    fn: ([resourceId]) => findOrderBills(resourceId),
+    fn: findOrderBills,
     deps: [resourceId],
   })
 
@@ -71,14 +72,14 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
       {bills?.map((bill) => (
         <Box height={'min-content'} key={bill.id}>
           <Chip
-            sx={{ fontSize: '1.5em', py: 2, cursor: 'pointer' }}
+            sx={{ py: 2, cursor: 'pointer' }}
             icon={<LinkIcon fontSize="large" />}
             component={Link}
             href={`/bills/${bill.key}`}
             label={
-              <>
+              <Typography sx={{ opacity: 0.8 }}>
                 Bill #<strong>{bill.key}</strong>
-              </>
+              </Typography>
             }
           />
         </Box>
