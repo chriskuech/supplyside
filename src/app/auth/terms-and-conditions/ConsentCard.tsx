@@ -13,29 +13,30 @@ import {
 } from '@mui/material'
 import { FC, useState } from 'react'
 import { acceptTermsAndConditions } from './actions'
+import { privacyPolicyUrl, termsOfServiceUrl } from '@/lib/const'
 
 const ConsentCard: FC = () => {
   const [checked, setChecked] = useState<boolean>(false)
 
   return (
     <Card>
-      <CardHeader title={'Terms & Conditions'} />
+      <CardHeader title={'Terms of service'} />
       <CardContent>
         <Stack spacing={4}>
           <Typography>
-            Please accept our Terms &amp; Conditions and Privacy Policy to
-            continue.
+            Please read and accept our Privacy Policy and Terms & Conditions to
+            continue to your account
           </Typography>
           <FormControlLabel
             control={<Checkbox checked={checked} />}
             label={
               <>
                 Accept{' '}
-                <Link href={'https://www.supplyside.io/privacy'}>
+                <Link href={privacyPolicyUrl} target="_blank">
                   Privacy Policy
                 </Link>{' '}
                 and{' '}
-                <Link href={'https://www.supplyside.io/terms-of-service'}>
+                <Link href={termsOfServiceUrl} target="_blank">
                   Terms &amp; Conditions
                 </Link>
               </>

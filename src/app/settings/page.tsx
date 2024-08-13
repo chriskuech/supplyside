@@ -1,7 +1,9 @@
 import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
 import Image from 'next/image'
+import Link from 'next/link'
 import { handleSaveSettings, readUser } from './actions'
+import { privacyPolicyUrl, termsOfServiceUrl } from '@/lib/const'
 
 export default async function SettingsPage() {
   const user = await readUser()
@@ -65,6 +67,15 @@ export default async function SettingsPage() {
           </Stack>
         </Stack>
       </form>
+      <Typography variant={'h5'} pt={4}>
+        More information
+      </Typography>
+      <Link href={privacyPolicyUrl} target="_blank">
+        Privacy Policy
+      </Link>
+      <Link href={termsOfServiceUrl} target="_blank">
+        Terms &amp; Conditions
+      </Link>
     </Stack>
   )
 }
