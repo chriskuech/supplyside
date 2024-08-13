@@ -35,7 +35,7 @@ const ConsentCard: FC = () => {
                   Privacy Policy
                 </Link>{' '}
                 and{' '}
-                <Link href={'https://www.supplyside.io/terms'}>
+                <Link href={'https://www.supplyside.io/terms-of-service'}>
                   Terms &amp; Conditions
                 </Link>
               </>
