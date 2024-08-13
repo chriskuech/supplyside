@@ -1,6 +1,6 @@
 import { pick } from 'remeda'
 import { Value, ValueInput } from './types'
-import { ValueModel } from './model'
+import { ResourceValueModel, ValueModel } from './model'
 import { fields } from '@/domain/schema/template/system-fields'
 import { getDownloadPath } from '@/domain/blobs/utils'
 
@@ -41,18 +41,20 @@ export const mapValueFromModel = (model: ValueModel): Value => ({
         fileName: 'profile-pic',
       }),
   },
-  resource: model.Resource && {
-    id: model.Resource.id,
-    key: model.Resource.key,
-    name:
-      model.Resource.ResourceField.find(
-        (rf) =>
-          rf.Field.templateId &&
-          (
-            [fields.name.templateId, fields.number.templateId] as string[]
-          ).includes(rf.Field.templateId),
-      )?.Value.string ?? '',
-  },
+  resource: model.Resource && mapValueFromResource(model.Resource),
   file: model.File,
   files: model.Files.map(({ File: file }) => file),
+})
+
+export const mapValueFromResource = (resource: ResourceValueModel) => ({
+  id: resource.id,
+  key: resource.key,
+  name:
+    resource.ResourceField.find(
+      (rf) =>
+        rf.Field.templateId &&
+        (
+          [fields.name.templateId, fields.number.templateId] as string[]
+        ).includes(rf.Field.templateId),
+    )?.Value.string ?? '',
 })

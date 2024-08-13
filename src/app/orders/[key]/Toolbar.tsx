@@ -8,6 +8,7 @@ import {
   Edit,
   LocalShipping,
   Visibility,
+  Link as LinkIcon,
 } from '@mui/icons-material'
 import {
   Avatar,
@@ -22,9 +23,11 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
+import Link from 'next/link'
+import { findOrderBills } from './actions'
 import { Field, Schema, selectField } from '@/domain/schema/types'
-import { Resource, selectValue } from '@/domain/resource/types'
+import { selectValue } from '@/domain/resource/types'
 import { readResource, transitionStatus } from '@/lib/resource/actions'
 import {
   fields,
@@ -33,6 +36,7 @@ import {
 import { getDownloadPath } from '@/domain/blobs/utils'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { Value } from '@/domain/resource/values/types'
+import { useAsyncQuery } from '@/lib/hooks/useAsyncQuery'
 
 type Props = {
   schema: Schema
@@ -41,15 +45,14 @@ type Props = {
 }
 
 export default function Toolbar({ schema, resourceId, isDraft }: Props) {
-  const [resource, setResource] = useState<Resource>()
-
-  const refresh = useCallback(() => {
-    readResource({ id: resourceId }).then(setResource)
-  }, [resourceId])
-
-  useEffect(() => {
-    refresh()
-  }, [refresh])
+  const { data: resource, refetch } = useAsyncQuery({
+    fn: ([resourceId]) => readResource({ id: resourceId }),
+    deps: [resourceId],
+  })
+  const { data: bills } = useAsyncQuery({
+    fn: ([resourceId]) => findOrderBills(resourceId),
+    deps: [resourceId],
+  })
 
   if (!resource) return
 
@@ -65,6 +68,21 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
           label={`Eta. ${'Today between 3-5pm'}`}
         />
       </Box>
+      {bills?.map((bill) => (
+        <Box height={'min-content'} key={bill.id}>
+          <Chip
+            sx={{ fontSize: '1.5em', py: 2, cursor: 'pointer' }}
+            icon={<LinkIcon fontSize="large" />}
+            component={Link}
+            href={`/bills/${bill.key}`}
+            label={
+              <>
+                Bill #<strong>{bill.key}</strong>
+              </>
+            }
+          />
+        </Box>
+      ))}
       {file && (
         <Box height={'min-content'}>
           <Tooltip title="Preview Purchase Order file">
@@ -147,7 +165,8 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
           value={
             selectValue(resource, fields.assignee) ?? fail('Value not found')
           }
-          onChange={refresh}
+          //TODO: find a way to revalidate cache instead of refetching
+          onChange={refetch}
         />
       </Box>
     </>

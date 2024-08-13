@@ -8,7 +8,7 @@ export type UseAsyncState<T> = {
   isLoading: boolean
 }
 
-type Options = {
+export type Options = {
   showGenericError: boolean
 }
 
