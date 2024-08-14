@@ -293,7 +293,7 @@ export default function ResourceTable({
 
   const handleProcessRowUpdate = async (newRow: Resource, oldRow: Resource) => {
     // find which cell has been updated
-    const editedField = newRow.fields.find(
+    const editedFields = newRow.fields.filter(
       ({ fieldId, fieldType, value: newValue }) => {
         const oldValue = oldRow.fields.find((f) => f.fieldId === fieldId)?.value
 
@@ -326,37 +326,42 @@ export default function ResourceTable({
       },
     )
 
-    if (!editedField) return newRow
-
-    const { value } = editedField
-
-    const newValue = match<FieldType, UpdateValueDto['value']>(
-      editedField.fieldType,
-    )
-      .with('Checkbox', () => ({ boolean: value.boolean }))
-      .with('Number', () => ({ number: value.number }))
-      .with('Date', () => ({ date: value.date }))
-      .with('Money', () => ({ number: value.number }))
-      .with('Text', () => ({ string: value.string }))
-      .with('Textarea', () => ({ string: value.string }))
-      .with('Select', () => ({ optionId: value.option?.id ?? null }))
-      .with('MultiSelect', () => ({
-        optionIds: value.options?.map((option) => option.id) ?? null,
-      }))
-      .with('User', () => ({ userId: value.user?.id ?? null }))
-      .with('Resource', () => ({ resourceId: value.resource?.id ?? null }))
-      .with(P.union('Contact', 'File', 'Files'), () => ({}))
-      .exhaustive()
+    if (!editedFields.length) return newRow
 
     try {
-      await updateValue({
-        resourceId: newRow.id,
-        fieldId: editedField.fieldId,
-        value: newValue,
-      })
-      onChange?.()
+      await Promise.all(
+        editedFields.map(async (editedField) => {
+          const { value } = editedField
+
+          const newValue = match<FieldType, UpdateValueDto['value']>(
+            editedField.fieldType,
+          )
+            .with('Checkbox', () => ({ boolean: value.boolean }))
+            .with('Number', () => ({ number: value.number }))
+            .with('Date', () => ({ date: value.date }))
+            .with('Money', () => ({ number: value.number }))
+            .with('Text', () => ({ string: value.string }))
+            .with('Textarea', () => ({ string: value.string }))
+            .with('Select', () => ({ optionId: value.option?.id ?? null }))
+            .with('MultiSelect', () => ({
+              optionIds: value.options?.map((option) => option.id) ?? null,
+            }))
+            .with('User', () => ({ userId: value.user?.id ?? null }))
+            .with('Resource', () => ({
+              resourceId: value.resource?.id ?? null,
+            }))
+            .with(P.union('Contact', 'File', 'Files'), () => ({}))
+            .exhaustive()
+
+          await updateValue({
+            resourceId: newRow.id,
+            fieldId: editedField.fieldId,
+            value: newValue,
+          })
+        }),
+      )
     } catch {
-      enqueueSnackbar('There was an error updating the field', {
+      enqueueSnackbar('There was an error updating the fields', {
         variant: 'error',
       })
       return oldRow
@@ -369,6 +374,7 @@ export default function ResourceTable({
     <DataGrid<Resource>
       columns={columns}
       rows={resources}
+      editMode="row"
       rowSelection={false}
       autoHeight
       density="standard"
