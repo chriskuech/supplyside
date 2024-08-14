@@ -15,6 +15,7 @@ const browser = singleton('browser', async (clear) => {
   browser.once('disconnected', () => {
     browser.close()
     clear()
+    console.error('Puppeteer browser disconnected')
   })
 
   return browser
@@ -53,6 +54,7 @@ export const renderPo = async (params: RenderPoParams) => {
       right: '15px',
     },
     printBackground: true,
+    timeout: 5_000,
   })
 
   page.close()
