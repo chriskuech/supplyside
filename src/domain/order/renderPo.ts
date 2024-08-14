@@ -28,38 +28,38 @@ type RenderPoParams = {
 }
 
 export const renderPo = async (params: RenderPoParams) => {
-  const [page, main, footer] = await Promise.all([
-    (await browser()).newPage(),
+  const [main, footer] = await Promise.all([
     PoDocument(params),
     PoDocumentFooter(params),
   ])
 
-  await page.setContent(
-    htmlDocument(ReactDom.renderToString(main), params.isPreview),
-    {
-      timeout: 300,
-      waitUntil: 'domcontentloaded',
-    },
-  )
+  const page = await (await browser()).newPage()
 
-  const buffer = await page.pdf({
-    format: 'letter',
-    headerTemplate: '<div></div>',
-    footerTemplate: ReactDom.renderToString(footer),
-    displayHeaderFooter: true,
-    margin: {
-      top: '35px',
-      bottom: '15px',
-      left: '15px',
-      right: '15px',
-    },
-    printBackground: true,
-    timeout: 5_000,
-  })
+  try {
+    await page.setContent(
+      htmlDocument(ReactDom.renderToString(main), params.isPreview),
+      { timeout: 300 },
+    )
 
-  page.close()
+    const buffer = await page.pdf({
+      format: 'letter',
+      headerTemplate: '<div></div>',
+      footerTemplate: ReactDom.renderToString(footer),
+      displayHeaderFooter: true,
+      margin: {
+        top: '35px',
+        bottom: '15px',
+        left: '15px',
+        right: '15px',
+      },
+      printBackground: true,
+      timeout: 5_000,
+    })
 
-  return buffer
+    return buffer
+  } finally {
+    page.close()
+  }
 }
 
 const htmlDocument = (content: string, isPreview?: boolean) => `
