@@ -48,14 +48,19 @@ export default function ItemizedCostLines({ resource, onChange }: Props) {
               }}
             >
               <TableCell
-                colSpan={2}
+                colSpan={3}
                 style={{ fontWeight: 'bold', fontSize: '1em', border: 'none' }}
               >
                 Subtotal
               </TableCell>
               <TableCell
                 align="right"
-                style={{ fontWeight: 'bold', fontSize: '1em', border: 'none' }}
+                sx={{
+                  fontWeight: 'bold',
+                  fontSize: '1em',
+                  border: 'none',
+                  paddingX: '10px',
+                }}
               >
                 {subtotalCost.toLocaleString('en-US', {
                   style: 'currency',
@@ -67,7 +72,7 @@ export default function ItemizedCostLines({ resource, onChange }: Props) {
 
             {resource.costs.map((row) => (
               <TableRow key={row.id}>
-                <TableCell>
+                <TableCell width={400} sx={{ paddingX: '10px' }}>
                   <TextField
                     defaultValue={row.name}
                     onChange={(e) =>
@@ -79,9 +84,9 @@ export default function ItemizedCostLines({ resource, onChange }: Props) {
                     size="small"
                   />
                 </TableCell>
-                <TableCell align="right">
+                <TableCell width={100} sx={{ paddingX: '10px' }}>
                   <Select
-                    sx={{ width: '4rem', textAlign: 'left' }}
+                    sx={{ width: '100%', textAlign: 'left' }}
                     defaultValue={row.isPercentage ? '%' : '$'}
                     onChange={(e) =>
                       updateCost(row.id, {
@@ -93,6 +98,8 @@ export default function ItemizedCostLines({ resource, onChange }: Props) {
                     <MenuItem value="$">$</MenuItem>
                     <MenuItem value="%">%</MenuItem>
                   </Select>
+                </TableCell>
+                <TableCell width={120} sx={{ paddingX: '10px' }}>
                   <TextField
                     defaultValue={row.value}
                     onChange={(e) =>
@@ -106,10 +113,9 @@ export default function ItemizedCostLines({ resource, onChange }: Props) {
                       endAdornment: row.isPercentage && <span>%</span>,
                     }}
                     size="small"
-                    style={{ width: 100, marginLeft: 10 }}
                   />
                 </TableCell>
-                <TableCell align="right">
+                <TableCell align="right" sx={{ paddingX: '10px' }}>
                   {(row.isPercentage
                     ? (row.value * (subtotalCost ?? 0)) / 100
                     : row.value
@@ -130,14 +136,19 @@ export default function ItemizedCostLines({ resource, onChange }: Props) {
 
             <TableRow sx={{ backgroundColor: 'rgba(0 127 255 / 0.3)' }}>
               <TableCell
-                colSpan={2}
+                colSpan={3}
                 style={{ fontWeight: 'bold', fontSize: '1em', border: 'none' }}
               >
                 Total
               </TableCell>
               <TableCell
                 align="right"
-                style={{ fontWeight: 'bold', fontSize: '1em', border: 'none' }}
+                sx={{
+                  fontWeight: 'bold',
+                  fontSize: '1em',
+                  border: 'none',
+                  paddingX: '10px',
+                }}
               >
                 {totalCost.toLocaleString('en-US', {
                   style: 'currency',

@@ -51,7 +51,24 @@ export default function ResourceTable({
       ...selectFields(schema).map<GridColDef<Resource>>((field) => ({
         field: field.id,
         headerName: field.name,
-        width: 300,
+        headerAlign: match(field.type)
+          .with(P.union('Number', 'Money', 'Checkbox'), () => 'right' as const)
+          .otherwise(() => 'left' as const),
+        align: match(field.type)
+          .with(P.union('Number', 'Money', 'Checkbox'), () => 'right' as const)
+          .otherwise(() => 'left' as const),
+        width: match(field.type)
+          .with('Resource', () => 390)
+          .with(P.union('Select', 'MultiSelect'), () => 200)
+          .with(P.union('Number', 'Money'), () => 130)
+          .with('Date', () => 150)
+          .with('Checkbox', () => 100)
+          .with(P.union('File', 'Files'), () => 150)
+          .with('Contact', () => 300)
+          .with('Text', () => 300)
+          .with('Textarea', () => 300)
+          .with('User', () => 150)
+          .exhaustive(),
         editable: isEditable && !findField(field.templateId)?.isDerived,
         valueOptions: match(field.type)
           .with('Select', () => field.options)

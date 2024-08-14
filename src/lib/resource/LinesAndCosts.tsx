@@ -62,7 +62,7 @@ export default function LinesAndCosts({
           hideFooter
           onChange={refresh}
         />
-        <Box width={'60%'}>
+        <Box alignSelf="flex-end">
           <ItemizedCostLines resource={resource} onChange={refresh} />
         </Box>
       </Stack>
