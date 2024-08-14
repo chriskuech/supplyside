@@ -367,6 +367,7 @@ export default function ResourceTable({
       return oldRow
     }
 
+    onChange?.()
     return newRow
   }
 
