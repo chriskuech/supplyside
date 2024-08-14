@@ -15,7 +15,7 @@ type CreateBlobParams = { accountId: string } & (
     }
   | {
       file?: undefined
-      buffer: Buffer
+      buffer: Uint8Array
       type: string
     }
 )
