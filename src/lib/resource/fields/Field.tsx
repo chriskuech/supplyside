@@ -16,6 +16,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { Close } from '@mui/icons-material'
+import { ForwardedRef, forwardRef } from 'react'
 import FileField from './FileField'
 import UserField from './UserField'
 import ResourceField from './ResourceField'
@@ -37,21 +38,25 @@ export type Props = {
   inline?: boolean
 }
 
-export default function Field({
-  inputId,
-  resourceId,
-  field,
-  value,
-  isReadOnly,
-  onChange,
-  onUncontrolledChange,
-  inline,
-}: Props) {
+function Field(
+  {
+    inputId,
+    resourceId,
+    field,
+    value,
+    isReadOnly,
+    onChange,
+    onUncontrolledChange,
+    inline,
+  }: Props,
+  ref: ForwardedRef<HTMLInputElement>,
+) {
   dayjs.extend(utc)
 
   return match(field.type)
     .with('Checkbox', () => (
       <Checkbox
+        inputRef={ref}
         id={inputId}
         readOnly={isReadOnly}
         defaultChecked={value?.boolean ?? false}
@@ -74,6 +79,7 @@ export default function Field({
     )
     .with('Date', () => (
       <DatePicker
+        inputRef={ref}
         sx={{ width: '100%' }}
         slotProps={{
           field: {
@@ -109,6 +115,7 @@ export default function Field({
         <Typography>{value?.number}</Typography>
       ) : (
         <TextField
+          inputRef={ref}
           id={inputId}
           fullWidth
           type="number"
@@ -128,7 +135,7 @@ export default function Field({
         fullWidth
         getOptionLabel={(o) => o.name}
         getOptionKey={(o) => o.id}
-        renderInput={(props) => <TextField {...props} />}
+        renderInput={(props) => <TextField inputRef={ref} {...props} />}
         options={field.options}
         defaultValue={field.options.filter((option) =>
           value?.options?.some((valueOption) => valueOption.id === option.id),
@@ -143,6 +150,7 @@ export default function Field({
         <Typography>{value?.number}</Typography>
       ) : (
         <TextField
+          inputRef={ref}
           id={inputId}
           type="number"
           defaultValue={value?.number}
@@ -152,6 +160,7 @@ export default function Field({
     )
     .with('Select', () => (
       <Select
+        inputRef={ref}
         id={inputId}
         fullWidth
         displayEmpty
@@ -182,6 +191,7 @@ export default function Field({
         <Typography>{value?.string}</Typography>
       ) : (
         <TextField
+          inputRef={ref}
           id={inputId}
           fullWidth
           defaultValue={value?.string}
@@ -194,6 +204,7 @@ export default function Field({
         <Typography whiteSpace={'pre'}>{value?.string}</Typography>
       ) : (
         <TextField
+          inputRef={ref}
           id={inputId}
           multiline
           minRows={inline ? 1 : 3}
@@ -208,6 +219,7 @@ export default function Field({
         <Typography>{value?.user && value.user.fullName}</Typography>
       ) : (
         <UserField
+          ref={ref}
           inputId={inputId}
           userId={value?.user?.id}
           onChange={(userId) => onChange({ userId })}
@@ -216,6 +228,7 @@ export default function Field({
     )
     .with('Resource', () => (
       <ResourceField
+        ref={ref}
         value={value?.resource ?? null}
         onChange={(resourceId) => onChange({ resourceId })}
         resourceType={field.resourceType ?? fail()}
@@ -224,3 +237,5 @@ export default function Field({
     ))
     .exhaustive()
 }
+
+export default forwardRef(Field)
