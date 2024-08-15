@@ -98,7 +98,26 @@ jobs:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
       - name: Run Prisma migrations
-        run: npx prisma migrate deploy
+        run: |
+          #!/bin/bash
+
+          # Example DATABASE_URL
+          DATABASE_URL="postgresql://username:password@host:port/database"
+
+          # Parse the components from the DATABASE_URL
+          USER=$(echo $DATABASE_URL | sed -r 's|postgresql://([^:]+):.*|\1|')
+          PASSWORD=$(echo $DATABASE_URL | sed -r 's|postgresql://[^:]+:([^@]+)@.*|\1|')
+          HOST=$(echo $DATABASE_URL | sed -r 's|postgresql://[^@]+@([^:]+):.*|\1|')
+          PORT=$(echo $DATABASE_URL | sed -r 's|postgresql://[^@]+@[^:]+:([^/]+)/.*|\1|')
+          DBNAME=$(echo $DATABASE_URL | sed -r 's|postgresql://[^/]+/(.+)|\1|')
+
+          # Export the password so psql can use it
+          export PGPASSWORD=$PASSWORD
+
+          # Execute the SQL query
+          psql -U $USER -h $HOST -p $PORT -d $DBNAME -c "SELECT * FROM _prisma_migrations"
+
+          npx prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.DB_SERVER_URL }}/postgres
 
