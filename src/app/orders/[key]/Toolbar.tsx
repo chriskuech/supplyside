@@ -244,7 +244,7 @@ function TrackingControl({
   value,
   onChange,
 }: TrackingControlProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const { isOpen, open, close } = useDisclosure()
 
   const { string: trackingNumber } = value
 
@@ -254,13 +254,13 @@ function TrackingControl({
         title={trackingNumber ? `View tracking status` : `Add tracking number`}
       >
         <Chip
-          onClick={() => setIsOpen(true)}
+          onClick={open}
           icon={<LocalShipping />}
           label={trackingNumber ? `View` : 'Add'}
         />
       </Tooltip>
 
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+      <Dialog open={isOpen} onClose={close}>
         <DialogTitle>Tracking</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -286,7 +286,7 @@ function TrackingControl({
           </Button>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsOpen(false)}>Close</Button>
+          <Button onClick={close}>Close</Button>
         </DialogActions>
       </Dialog>
     </>
