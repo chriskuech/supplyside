@@ -95,10 +95,10 @@ jobs:
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
-      # - name: Run Prisma migrations
-      #   run: npx prisma migrate deploy
-      #   env:
-      #     DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Run Prisma migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DB_SERVER_URL }}/postgres
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
