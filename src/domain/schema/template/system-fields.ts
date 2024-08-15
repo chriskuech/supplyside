@@ -67,6 +67,11 @@ const _fields = {
     type: 'Resource',
     resourceType: 'Bill',
   },
+  billDescription: {
+    templateId: 'cd1c7d34-57bf-43ad-8b32-a90081cde55b',
+    name: 'Bill Description',
+    type: 'Textarea',
+  },
   billFiles: {
     templateId: 'b4c4a6e9-6b7a-4f8b-92f4-a9264d0fa6e9',
     name: 'Bill Files',
@@ -250,6 +255,11 @@ const _fields = {
     name: 'Total Cost',
     type: 'Money',
     isDerived: true,
+  },
+  trackingNumber: {
+    templateId: 'b34ecc5f-fad2-4cff-b4a5-1d14244c60c6',
+    name: 'Tracking Number',
+    type: 'Text',
   },
   unitOfMeasure: {
     templateId: 'a5c3e3a8-6a0b-4b6d-9b3a-7a5f1f3f3d2e',

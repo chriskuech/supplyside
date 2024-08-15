@@ -9,6 +9,7 @@ import {
   LocalShipping,
   Visibility,
   Link as LinkIcon,
+  ArrowRight,
 } from '@mui/icons-material'
 import {
   Avatar,
@@ -28,7 +29,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { findOrderBills } from './actions'
 import { Field, Schema, selectField } from '@/domain/schema/types'
-import { selectValue } from '@/domain/resource/types'
+import { emptyValue, selectValue } from '@/domain/resource/types'
 import { readResource, transitionStatus } from '@/lib/resource/actions'
 import {
   fields,
@@ -61,12 +62,15 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
 
   return (
     <>
-      {/* POC of where to put a little shipping widget built on 17track */}
-      <Box height={'min-content'} display={'none'}>
-        <Chip icon={<LocalShipping />} label="Add Tracking" />
-        <Chip
-          icon={<LocalShipping />}
-          label={`Eta. ${'Today between 3-5pm'}`}
+      <Box height={'min-content'}>
+        <TrackingControl
+          resourceId={resourceId}
+          field={
+            selectField(schema, fields.trackingNumber) ??
+            fail('Field not found')
+          }
+          value={selectValue(resource, fields.trackingNumber) ?? emptyValue}
+          onChange={refetch}
         />
       </Box>
       {bills?.map((bill) => (
@@ -163,9 +167,7 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
           field={
             selectField(schema, fields.assignee) ?? fail('Field not found')
           }
-          value={
-            selectValue(resource, fields.assignee) ?? fail('Value not found')
-          }
+          value={selectValue(resource, fields.assignee) ?? emptyValue}
           //TODO: find a way to revalidate cache instead of refetching
           onChange={refetch}
         />
@@ -220,6 +222,67 @@ function AssigneeControl({
             value={value}
             onChange={onChange}
           />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  )
+}
+
+type TrackingControlProps = {
+  resourceId: string
+  field: Field
+  value: Value
+  onChange: () => void
+}
+
+function TrackingControl({
+  resourceId,
+  field,
+  value,
+  onChange,
+}: TrackingControlProps) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const { string: trackingNumber } = value
+
+  return (
+    <>
+      <Tooltip
+        title={trackingNumber ? `View tracking status` : `Add tracking number`}
+      >
+        <Chip
+          onClick={() => setIsOpen(true)}
+          icon={<LocalShipping />}
+          label={trackingNumber ? `View` : 'Add'}
+        />
+      </Tooltip>
+
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+        <DialogTitle>Tracking</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Set the assignee for this order, responsible for its completion.
+          </DialogContentText>
+          <FieldControl
+            inputId={`rf-${field.id}`}
+            resourceId={resourceId}
+            field={field}
+            value={value}
+            onChange={onChange}
+          />
+        </DialogContent>
+        <DialogContent>
+          <Button
+            endIcon={<ArrowRight />}
+            href={'https://parcelsapp.com/en/tracking/' + trackingNumber}
+            target="_blank"
+            disabled={!trackingNumber}
+          >
+            View Tracking
+          </Button>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsOpen(false)}>Close</Button>
