@@ -279,6 +279,7 @@ function TrackingControl({
             endIcon={<ArrowRight />}
             href={'https://parcelsapp.com/en/tracking/' + trackingNumber}
             target="_blank"
+            rel="noopener noreferrer"
             disabled={!trackingNumber}
           >
             View Tracking
