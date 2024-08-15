@@ -81,14 +81,14 @@ function InlineContact({ contact }: ContactProp) {
 
   return (
     <>
-      <Dialog open={isOpen} onClose={open}>
+      <Dialog open={isOpen} onClose={close}>
         <FullContactCard contact={contact} />
       </Dialog>
       <Card variant="outlined">
         <Stack direction="row" paddingX={1} alignItems="center" spacing={1}>
           <Person />
           <Typography flexGrow={1}>{contact.name}</Typography>
-          <IconButton style={{ justifySelf: 'flex-end' }} onClick={close}>
+          <IconButton style={{ justifySelf: 'flex-end' }} onClick={open}>
             <Visibility />
           </IconButton>
         </Stack>
