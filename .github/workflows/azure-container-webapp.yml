@@ -26,9 +26,6 @@
 
 name: Build and deploy a container to an Azure Web App
 
-env:
-  AZURE_WEBAPP_NAME: supplyside # set this to the name of your Azure Web App
-
 on:
   pull_request:
     branches: ["main"]
@@ -107,7 +104,6 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          app-name: supplyside/integration
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_INTEGRATION }}
           images: "ghcr.io/${{ env.REPO }}:${{ github.sha }}"
-          slot-name: supplyside-integration
