@@ -20,6 +20,7 @@ export const schemas: SchemaTemplate[] = [
           fields.vendor,
           fields.invoiceNumber,
           fields.invoiceDate,
+          fields.billDescription,
         ],
       },
       {
@@ -69,6 +70,7 @@ export const schemas: SchemaTemplate[] = [
       fields.totalCost,
       fields.subtotalCost,
       fields.itemizedCosts,
+      fields.trackingNumber,
     ],
     sections: [
       {
