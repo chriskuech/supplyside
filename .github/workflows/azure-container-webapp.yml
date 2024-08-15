@@ -90,6 +90,8 @@ jobs:
       - name: Lowercase the repo name and username
         run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
+      - uses: actions/checkout@v4
+
       - name: Setup Tailscale
         uses: tailscale/github-action@main
         with:
