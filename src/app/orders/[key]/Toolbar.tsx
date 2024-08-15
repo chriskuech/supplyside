@@ -264,7 +264,7 @@ function TrackingControl({
         <DialogTitle>Tracking</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Set the assignee for this order, responsible for its completion.
+            Set the tracking number for this order.
           </DialogContentText>
           <FieldControl
             inputId={`rf-${field.id}`}
