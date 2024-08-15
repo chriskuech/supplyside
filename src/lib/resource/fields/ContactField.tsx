@@ -16,6 +16,7 @@ import { Contact } from '@prisma/client'
 import { FC, useEffect, useState } from 'react'
 import ContactCard from './ContactCard'
 import { UpdateContactDto } from '@/domain/resource/fields/actions'
+import { useDisclosure } from '@/lib/hooks/useDisclosure'
 
 export type ContactFieldProps = {
   contact: Contact | null
@@ -28,20 +29,20 @@ export default function ContactField({
   onChange,
   inline,
 }: ContactFieldProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const { isOpen, open, close } = useDisclosure()
 
   return (
     <>
-      <Dialog onClose={() => setIsOpen(false)} open={isOpen}>
+      <Dialog onClose={close} open={isOpen}>
         <DialogTitle>Edit Contact</DialogTitle>
         <DialogContent>
           <ContactForm
             contact={contact}
             onChange={(dto) => {
-              setIsOpen(false)
+              close()
               onChange(dto)
             }}
-            onCancel={() => setIsOpen(false)}
+            onCancel={close}
           />
         </DialogContent>
       </Dialog>
@@ -60,7 +61,7 @@ export default function ContactField({
                 <Typography>{contact.name}</Typography>
               </>
             )}
-            <IconButton size="small" onClick={() => setIsOpen(true)}>
+            <IconButton size="small" onClick={open}>
               <Edit />
             </IconButton>
             <IconButton size="small" onClick={() => onChange(null)}>
@@ -69,7 +70,7 @@ export default function ContactField({
           </Stack>
         </Stack>
       ) : (
-        <Button variant="text" onClick={() => setIsOpen(true)}>
+        <Button variant="text" onClick={open}>
           Add Contact
         </Button>
       )}
