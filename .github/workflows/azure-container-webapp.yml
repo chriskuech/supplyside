@@ -34,6 +34,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
+          registry: supplyside.azurecr.io
           username: supplyside-github-actions
           password: ${{ secrets.ACR_TOKEN }}
 
@@ -88,6 +89,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
+          registry: supplyside.azurecr.io
           username: supplyside-github-actions
           password: ${{ secrets.ACR_TOKEN }}
 
