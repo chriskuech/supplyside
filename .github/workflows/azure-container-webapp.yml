@@ -111,6 +111,7 @@ jobs:
           QUERY="SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NULL ORDER BY started_at LIMIT 1;"
           FAILED_MIGRATION_NAME=$(psql -U $USER -h $HOST -p $PORT -d $DBNAME -c "$QUERY" | xargs)
           if [ -n "$FAILED_MIGRATION_NAME" ]; then
+            echo "Rolling back failed migration: $FAILED_MIGRATION_NAME"
             npx prisma migrate resolve --rolled-back $FAILED_MIGRATION_NAME
           fi
 
