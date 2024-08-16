@@ -12,7 +12,7 @@ import {
   IconButton,
 } from '@mui/material'
 import { Contact } from '@prisma/client'
-import { useState } from 'react'
+import { useDisclosure } from '@/lib/hooks/useDisclosure'
 
 type Props = {
   contact: Contact | null
@@ -77,20 +77,18 @@ function FullContactCard({ contact }: ContactProp) {
 }
 
 function InlineContact({ contact }: ContactProp) {
-  const [isOpen, setIsOpen] = useState(false)
+  const { isOpen, open, close } = useDisclosure()
+
   return (
     <>
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+      <Dialog open={isOpen} onClose={close}>
         <FullContactCard contact={contact} />
       </Dialog>
       <Card variant="outlined">
         <Stack direction="row" paddingX={1} alignItems="center" spacing={1}>
           <Person />
           <Typography flexGrow={1}>{contact.name}</Typography>
-          <IconButton
-            style={{ justifySelf: 'flex-end' }}
-            onClick={() => setIsOpen(true)}
-          >
+          <IconButton style={{ justifySelf: 'flex-end' }} onClick={open}>
             <Visibility />
           </IconButton>
         </Stack>

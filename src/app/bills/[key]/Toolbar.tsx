@@ -32,6 +32,7 @@ import {
 } from '@/domain/schema/template/system-fields'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { Value } from '@/domain/resource/values/types'
+import { useDisclosure } from '@/lib/hooks/useDisclosure'
 
 type Props = {
   schema: Schema
@@ -132,7 +133,7 @@ function AssigneeControl({
   value,
   onChange,
 }: AssigneeControlProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const { isOpen, open, close } = useDisclosure()
 
   const assignee = value?.user
 
@@ -145,14 +146,14 @@ function AssigneeControl({
             : `Assign the Bill to a user`
         }
       >
-        <IconButton onClick={() => setIsOpen(true)}>
+        <IconButton onClick={open}>
           <Avatar alt={assignee?.fullName} src={assignee?.profilePicPath ?? ''}>
             {!assignee && <AssignmentInd />}
           </Avatar>
         </IconButton>
       </Tooltip>
 
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+      <Dialog open={isOpen} onClose={close}>
         <DialogTitle>Assignee</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -167,7 +168,7 @@ function AssigneeControl({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsOpen(false)}>Close</Button>
+          <Button onClick={close}>Close</Button>
         </DialogActions>
       </Dialog>
     </>

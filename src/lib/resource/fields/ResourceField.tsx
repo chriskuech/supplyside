@@ -29,6 +29,7 @@ import { readSchema } from '@/lib/schema/actions'
 import { Schema } from '@/domain/schema/types'
 import Loading from '@/app/loading'
 import { ValueResource } from '@/domain/resource/values/types'
+import { useDisclosure } from '@/lib/hooks/useDisclosure'
 
 type Props = {
   value: ValueResource | null
@@ -41,7 +42,7 @@ function ResourceField(
   { resourceType, value, onChange, isReadOnly }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
-  const [open, setOpen] = useState(false)
+  const { isOpen, open, close } = useDisclosure()
   const [resource, setResource] = useState<Resource | null>(null)
   const [schema, setSchema] = useState<Schema | null>(null)
 
@@ -70,7 +71,7 @@ function ResourceField(
         .exhaustive(),
     }).then(({ id }) => {
       onChange?.(id)
-      setOpen(true)
+      open()
     })
 
   if (isReadOnly || value) {
@@ -79,11 +80,7 @@ function ResourceField(
     return (
       <>
         <Stack direction={'row'} alignItems={'center'}>
-          <Link
-            onClick={() => setOpen(true)}
-            flexGrow={1}
-            sx={{ cursor: 'pointer' }}
-          >
+          <Link onClick={open} flexGrow={1} sx={{ cursor: 'pointer' }}>
             {value.name}
           </Link>
           <Tooltip title={`Open ${resourceType} page`}>
@@ -96,7 +93,7 @@ function ResourceField(
             </IconButton>
           </Tooltip>
           <Tooltip title={`Open ${resourceType} drawer`}>
-            <IconButton onClick={() => setOpen(true)} size="small">
+            <IconButton onClick={open} size="small">
               <ViewSidebar fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -108,7 +105,7 @@ function ResourceField(
             </Tooltip>
           )}
         </Stack>
-        <Drawer open={open} onClose={() => setOpen(false)} anchor="right">
+        <Drawer open={isOpen} onClose={close} anchor="right">
           <Box p={2} minWidth={500}>
             <Typography variant="h5" sx={{ p: 2 }} gutterBottom>
               {resourceType} details

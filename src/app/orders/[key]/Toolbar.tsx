@@ -25,7 +25,6 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
 import Link from 'next/link'
 import { findOrderBills } from './actions'
 import { Field, Schema, selectField } from '@/domain/schema/types'
@@ -39,6 +38,7 @@ import { getDownloadPath } from '@/domain/blobs/utils'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { Value } from '@/domain/resource/values/types'
 import { useAsyncQuery } from '@/lib/hooks/useAsyncQuery'
+import { useDisclosure } from '@/lib/hooks/useDisclosure'
 
 type Props = {
   schema: Schema
@@ -189,7 +189,7 @@ function AssigneeControl({
   value,
   onChange,
 }: AssigneeControlProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const { isOpen, open, close } = useDisclosure()
 
   const assignee = value.user
 
@@ -202,14 +202,14 @@ function AssigneeControl({
             : `Assign the Order to a user`
         }
       >
-        <IconButton onClick={() => setIsOpen(true)}>
+        <IconButton onClick={open}>
           <Avatar alt={assignee?.fullName} src={assignee?.profilePicPath ?? ''}>
             {!assignee && <AssignmentInd />}
           </Avatar>
         </IconButton>
       </Tooltip>
 
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+      <Dialog open={isOpen} onClose={close}>
         <DialogTitle>Assignee</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -224,7 +224,7 @@ function AssigneeControl({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsOpen(false)}>Close</Button>
+          <Button onClick={close}>Close</Button>
         </DialogActions>
       </Dialog>
     </>
@@ -244,7 +244,7 @@ function TrackingControl({
   value,
   onChange,
 }: TrackingControlProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const { isOpen, open, close } = useDisclosure()
 
   const { string: trackingNumber } = value
 
@@ -254,13 +254,13 @@ function TrackingControl({
         title={trackingNumber ? `View tracking status` : `Add tracking number`}
       >
         <Chip
-          onClick={() => setIsOpen(true)}
+          onClick={open}
           icon={<LocalShipping />}
           label={trackingNumber ? `View` : 'Add'}
         />
       </Tooltip>
 
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+      <Dialog open={isOpen} onClose={close}>
         <DialogTitle>Tracking</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -286,7 +286,7 @@ function TrackingControl({
           </Button>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsOpen(false)}>Close</Button>
+          <Button onClick={close}>Close</Button>
         </DialogActions>
       </Dialog>
     </>

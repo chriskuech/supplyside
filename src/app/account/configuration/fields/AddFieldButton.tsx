@@ -1,22 +1,23 @@
 'use client'
 
 import { Button, Card, CardContent, Modal, Typography } from '@mui/material'
-import { ReactNode, useState } from 'react'
+import { ReactNode } from 'react'
 import { Add } from '@mui/icons-material'
 import CreateFieldForm from './CreateFieldForm'
 import { createField } from './actions'
+import { useDisclosure } from '@/lib/hooks/useDisclosure'
 
 export default function AddFieldButton(): ReactNode {
-  const [isOpen, setIsOpen] = useState(false)
+  const { isOpen, close, open } = useDisclosure()
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} endIcon={<Add />}>
+      <Button onClick={open} endIcon={<Add />}>
         Add Field
       </Button>
       <Modal
         open={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={close}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
         sx={{
@@ -35,7 +36,7 @@ export default function AddFieldButton(): ReactNode {
             <CreateFieldForm
               onSubmit={(params) => {
                 createField(params)
-                setIsOpen(false)
+                close()
               }}
             />
           </CardContent>
