@@ -30,7 +30,7 @@ type Props = {
 }
 
 const UsersTable: FC<Props> = ({ currentUser, users }) => {
-  const editable: boolean = currentUser?.isAdmin || currentUser?.isGlobalAdmin
+  const editable = currentUser.isAdmin || currentUser.isGlobalAdmin
 
   const columns: GridColDef<User>[] = [
     {
