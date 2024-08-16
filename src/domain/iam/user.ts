@@ -28,7 +28,7 @@ export async function inviteUser({
     data: {
       email,
       accountId,
-      passwordHash: await hash(password, config().SALT),
+      passwordHash: await hash(password, 12),
       requirePasswordReset: true,
       isAdmin,
     },
