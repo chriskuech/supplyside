@@ -21,7 +21,6 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
 import Link from 'next/link'
 import { Field, Schema, selectField } from '@/domain/schema/types'
 import { Resource, selectValue } from '@/domain/resource/types'
@@ -32,6 +31,7 @@ import {
 } from '@/domain/schema/template/system-fields'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { Value } from '@/domain/resource/values/types'
+import { useDisclosure } from '@/lib/hooks/useDisclosure'
 
 type Props = {
   schema: Schema
@@ -115,7 +115,7 @@ type AssigneeControlProps = {
 }
 
 function AssigneeControl({ resourceId, field, value }: AssigneeControlProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const { isOpen, open, close } = useDisclosure()
 
   const assignee = value?.user
 
@@ -128,14 +128,14 @@ function AssigneeControl({ resourceId, field, value }: AssigneeControlProps) {
             : `Assign the Bill to a user`
         }
       >
-        <IconButton onClick={() => setIsOpen(true)}>
+        <IconButton onClick={open}>
           <Avatar alt={assignee?.fullName} src={assignee?.profilePicPath ?? ''}>
             {!assignee && <AssignmentInd />}
           </Avatar>
         </IconButton>
       </Tooltip>
 
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+      <Dialog open={isOpen} onClose={close}>
         <DialogTitle>Assignee</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -149,7 +149,7 @@ function AssigneeControl({ resourceId, field, value }: AssigneeControlProps) {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setIsOpen(false)}>Close</Button>
+          <Button onClick={close}>Close</Button>
         </DialogActions>
       </Dialog>
     </>
