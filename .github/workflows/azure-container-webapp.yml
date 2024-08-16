@@ -99,20 +99,22 @@ jobs:
 
       - name: Run Prisma migrations
         run: |
-          #!/bin/bash
-
+          # Extract database connection details from DATABASE_URL
           USER=$(echo $DATABASE_URL | sed -r 's|postgresql://([^:]+):.*|\1|')
-          PGPASSWORD=$(echo $DATABASE_URL | sed -r 's|postgresql://[^:]+:([^@]+)@.*|\1|')
+          PASSWORD=$(echo $DATABASE_URL | sed -r 's|postgresql://[^:]+:([^@]+)@.*|\1|')
           HOST=$(echo $DATABASE_URL | sed -r 's|postgresql://[^@]+@([^:]+):.*|\1|')
           PORT=$(echo $DATABASE_URL | sed -r 's|postgresql://[^@]+@[^:]+:([^/]+)/.*|\1|')
           DBNAME=$(echo $DATABASE_URL | sed -r 's|postgresql://[^/]+/(.+)|\1|')
-          QUERY="SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NULL ORDER BY started_at LIMIT 1;"
+          export PGPASSWORD=$PASSWORD
 
+          # Rollback failed migration if any
+          QUERY="SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NULL ORDER BY started_at LIMIT 1;"
           FAILED_MIGRATION_NAME=$(psql -U $USER -h $HOST -p $PORT -d $DBNAME -c $QUERY | xargs)
           if [ -n "$FAILED_MIGRATION_NAME" ]; then
             npx prisma migrate resolve --rolled_back $FAILED_MIGRATION_NAME
           fi
 
+          # Deploy new migration
           npx prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.DB_SERVER_URL }}/postgres
