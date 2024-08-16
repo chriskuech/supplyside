@@ -4,6 +4,7 @@ import assert from 'assert'
 import {
   Autocomplete,
   Box,
+  CircularProgress,
   Drawer,
   IconButton,
   Link,
@@ -119,7 +120,7 @@ function ResourceField(
                 singleColumn
               />
             ) : (
-              <></>
+              <CircularProgress />
             )}
           </Box>
         </Drawer>
