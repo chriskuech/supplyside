@@ -1,44 +1,27 @@
-'use client'
-
-import { Stack, Typography, Box, CircularProgress } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
+import { Stack, Typography, Box } from '@mui/material'
 import { readSchema } from '../schema/actions'
-import { readResource, readResources } from './actions'
+import { readResources } from './actions'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import ItemizedCostLines from '@/lib/resource/ItemizedCostLines'
 import ResourceTable from '@/lib/resource/ResourceTable'
 import { Data, Resource } from '@/domain/resource/types'
-import { Schema } from '@/domain/schema/types'
 import { Where } from '@/domain/resource/json-logic/types'
 
 type Props = {
-  resourceId: string
+  resource: Resource
   lineQuery: Where
   newLineInitialData: Data
 }
 
-export default function LinesAndCosts({
-  resourceId,
+export default async function LinesAndCosts({
+  resource,
   lineQuery,
   newLineInitialData,
 }: Props) {
-  const [resource, setResource] = useState<Resource>()
-  const [lineSchema, setLineSchema] = useState<Schema>()
-  const [lines, setLines] = useState<Resource[]>()
-
-  const refresh = useCallback(() => {
-    readResource({ id: resourceId }).then(setResource)
-    readSchema({ resourceType: 'Line' }).then(setLineSchema)
-    readResources({ type: 'Line', where: lineQuery }).then(setLines)
-  }, [resourceId, lineQuery])
-
-  useEffect(() => {
-    refresh()
-  }, [refresh])
-
-  if (!resource || !lineSchema || !lines) {
-    return <CircularProgress />
-  }
+  const [lines, lineSchema] = await Promise.all([
+    readResources({ type: 'Line', where: lineQuery }),
+    readSchema({ resourceType: 'Line' }),
+  ])
 
   return (
     <Stack spacing={2}>
@@ -60,10 +43,9 @@ export default function LinesAndCosts({
           disableColumnResize
           disableColumnMenu
           hideFooter
-          onChange={refresh}
         />
         <Box alignSelf="flex-end">
-          <ItemizedCostLines resource={resource} onChange={refresh} />
+          <ItemizedCostLines resource={resource} />
         </Box>
       </Stack>
     </Stack>

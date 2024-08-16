@@ -23,7 +23,7 @@ export default async function LinesDetail({
             <span style={{ opacity: 0.5 }}>Line #</span>
             <span>{key}</span>
           </Typography>
-          <ResourceFieldsControl resourceId={resource.id} schema={schema} />
+          <ResourceFieldsControl resource={resource} schema={schema} />
         </Stack>
       </Stack>
     </Container>
