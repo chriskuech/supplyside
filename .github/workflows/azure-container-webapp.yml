@@ -101,20 +101,17 @@ jobs:
         run: |
           #!/bin/bash
 
-          # Parse the components from the DATABASE_URL
           USER=$(echo $DATABASE_URL | sed -r 's|postgresql://([^:]+):.*|\1|')
-          PASSWORD=$(echo $DATABASE_URL | sed -r 's|postgresql://[^:]+:([^@]+)@.*|\1|')
+          PGPASSWORD=$(echo $DATABASE_URL | sed -r 's|postgresql://[^:]+:([^@]+)@.*|\1|')
           HOST=$(echo $DATABASE_URL | sed -r 's|postgresql://[^@]+@([^:]+):.*|\1|')
           PORT=$(echo $DATABASE_URL | sed -r 's|postgresql://[^@]+@[^:]+:([^/]+)/.*|\1|')
           DBNAME=$(echo $DATABASE_URL | sed -r 's|postgresql://[^/]+/(.+)|\1|')
+          QUERY="SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NULL ORDER BY started_at LIMIT 1;"
 
-          # Export the password so psql can use it
-          export PGPASSWORD=$PASSWORD
-
-          echo "Querying: USER '$USER', HOST '$HOST', PORT '$PORT', DBNAME '$DBNAME'"
-
-          # Execute the SQL query
-          psql -U $USER -h $HOST -p $PORT -d $DBNAME -c "SELECT * FROM _prisma_migrations"
+          FAILED_MIGRATION_NAME=$(psql -U $USER -h $HOST -p $PORT -d $DBNAME -c $QUERY | xargs)
+          if [ -n "$FAILED_MIGRATION_NAME" ]; then
+            npx prisma migrate resolve --rolled_back $FAILED_MIGRATION_NAME
+          fi
 
           npx prisma migrate deploy
         env:
