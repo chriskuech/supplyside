@@ -114,6 +114,8 @@ jobs:
           # Export the password so psql can use it
           export PGPASSWORD=$PASSWORD
 
+          echo "Querying: USER '$USER', HOST '$HOST', PORT '$PORT', DBNAME '$DBNAME'"
+
           # Execute the SQL query
           psql -U $USER -h $HOST -p $PORT -d $DBNAME -c "SELECT * FROM _prisma_migrations"
 
