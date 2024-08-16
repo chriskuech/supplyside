@@ -95,5 +95,6 @@ jobs:
 
       - name: Push the Docker image to Docker Hub
         run: |
+          docker pull supplyside.azurecr.io/app:${{ github.sha }}
           docker tag supplyside.azurecr.io/app:${{ github.sha }} supplyside.azurecr.io/app:integration
           docker push supplyside.azurecr.io/app:integration
