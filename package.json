@@ -29,7 +29,6 @@
     "bcrypt": "^5.1.1",
     "dayjs": "^1.11.12",
     "inversify": "^6.0.2",
-    "jose": "^5.6.3",
     "next": "14.2.5",
     "next-auth": "^4.24.7",
     "notistack": "^3.0.1",
