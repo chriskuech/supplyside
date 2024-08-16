@@ -8,12 +8,13 @@ import { Cost, FieldType } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { isTruthy } from 'remeda'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
-import prisma from '@/lib/prisma'
 import { readResource, readResources } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readBlob } from '@/domain/blobs/actions'
 import { readSchema } from '@/domain/schema/actions'
 import { selectValue } from '@/domain/resource/types'
+import { allValues } from '@/lib/allValues'
+import { readAccount } from '@/domain/iam/account'
 
 type Props = {
   accountId: string
@@ -25,24 +26,21 @@ export default async function PoDocument({
   accountId,
   resourceId,
 }: Props): Promise<ReactNode> {
-  const [order, lines, lineSchema, account] = await Promise.all([
-    readResource({
+  const { order, lines, lineSchema, account } = await allValues({
+    order: readResource({
       accountId,
       id: resourceId,
-      type: 'Order',
     }),
-    readResources({
+    lines: readResources({
       accountId,
       type: 'Line',
       where: {
         '==': [{ var: 'Order' }, resourceId],
       },
     }),
-    readSchema({ accountId, resourceType: 'Line' }),
-    prisma().account.findUniqueOrThrow({
-      where: { id: accountId },
-    }),
-  ])
+    lineSchema: readSchema({ accountId, resourceType: 'Line' }),
+    account: readAccount(accountId),
+  })
 
   const vendorId = selectValue(order, fields.vendor)?.resource?.id
 

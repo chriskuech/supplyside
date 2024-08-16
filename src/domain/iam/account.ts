@@ -13,6 +13,7 @@ export type Account = {
   name: string
   address: string
   logoPath: string | null
+  logoBlobId: string | null
 }
 
 export type AccountModel = AccountCoreModel & {
@@ -35,6 +36,7 @@ export const mapAccountModel = (model: AccountModel): Account => ({
       mimeType: model.LogoBlob.mimeType,
       fileName: 'logo',
     }),
+  logoBlobId: model.LogoBlob?.id ?? null,
 })
 
 export const createAccount = async (): Promise<void> => {
