@@ -3,11 +3,56 @@
 import { faker } from '@faker-js/faker'
 import { hash } from 'bcrypt'
 import { revalidatePath } from 'next/cache'
+import { Blob, Prisma, User as UserCoreModel } from '@prisma/client'
 import { getDownloadPath } from '../blobs/utils'
-import { User } from './types'
 import smtp from '@/lib/smtp'
 import config from '@/lib/config'
 import prisma from '@/lib/prisma'
+import { systemAccountId } from '@/lib/const'
+
+export const userInclude = {
+  ImageBlob: true,
+} satisfies Prisma.UserInclude
+
+export type User = {
+  id: string
+  accountId: string
+  firstName: string | null
+  lastName: string | null
+  fullName: string
+  email: string
+  profilePicPath: string | null
+  requirePasswordReset: boolean
+  tsAndCsSignedAt: Date | null
+  isApprover: boolean
+  isAdmin: boolean
+  isGlobalAdmin: boolean
+}
+
+export type UserModel = UserCoreModel & {
+  ImageBlob: Blob | null
+}
+
+export const mapUserModel = (model: UserModel): User => ({
+  id: model.id,
+  accountId: model.accountId,
+  firstName: model.firstName,
+  lastName: model.lastName,
+  fullName: `${model.firstName} ${model.lastName}`,
+  email: model.email,
+  profilePicPath:
+    model.ImageBlob &&
+    getDownloadPath({
+      blobId: model.ImageBlob.id,
+      mimeType: model.ImageBlob.mimeType,
+      fileName: 'profile-pic',
+    }),
+  requirePasswordReset: model.requirePasswordReset,
+  tsAndCsSignedAt: model.tsAndCsSignedAt,
+  isAdmin: model.isAdmin,
+  isApprover: model.isApprover,
+  isGlobalAdmin: model.accountId === systemAccountId,
+})
 
 const loginPath = '/auth/login'
 
@@ -59,27 +104,10 @@ export async function readUser({ userId }: ReadUserParams): Promise<User> {
 
   const user = await prisma().user.findUniqueOrThrow({
     where: { id: userId },
-    include: {
-      ImageBlob: true,
-    },
+    include: userInclude,
   })
 
-  const profilePicPath =
-    user.ImageBlob &&
-    getDownloadPath({
-      blobId: user.ImageBlob.id,
-      mimeType: user.ImageBlob.mimeType,
-      fileName: 'profile-pic',
-    })
-
-  return {
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    fullName: `${user.firstName} ${user.lastName}`,
-    email: user.email,
-    profilePicPath,
-  }
+  return mapUserModel(user)
 }
 
 type ReadUsersParams = { accountId: string }
@@ -98,20 +126,7 @@ export async function readUsers({
     },
   })
 
-  return users.map((user) => ({
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    fullName: `${user.firstName} ${user.lastName}`,
-    email: user.email,
-    profilePicPath:
-      user.ImageBlob &&
-      getDownloadPath({
-        blobId: user.ImageBlob.id,
-        mimeType: user.ImageBlob.mimeType,
-        fileName: 'profile-pic',
-      }),
-  }))
+  return users.map(mapUserModel)
 }
 
 type DeleteUserParams = { accountId: string; userId: string }

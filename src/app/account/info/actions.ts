@@ -5,15 +5,15 @@ import { isEmpty } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import prisma from '@/lib/prisma'
-import { requireSession } from '@/lib/session'
 import { createBlob } from '@/domain/blobs/actions'
+import { readSession } from '@/lib/iam/session'
 
 type ClientErrors = Record<string, string[]>
 
 export const handleSaveSettings = async (
   formData: FormData,
 ): Promise<ClientErrors | undefined> => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   const result = z
     .object({

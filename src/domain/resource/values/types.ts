@@ -1,7 +1,7 @@
 import { Blob, Contact, File, Prisma } from '@prisma/client'
 import { fields } from '@/domain/schema/template/system-fields'
-import { User } from '@/domain/iam/types'
 import { Option } from '@/domain/schema/types'
+import { User } from '@/domain/iam/user'
 
 export type ValueInput = {
   boolean?: boolean

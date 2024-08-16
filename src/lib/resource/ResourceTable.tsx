@@ -157,11 +157,17 @@ export default function ResourceTable({
               ...emptyValue,
               user: {
                 id: value.userId,
+                accountId: '...',
                 email: '...',
                 firstName: '...',
                 fullName: '...',
                 lastName: '...',
                 profilePicPath: null,
+                requirePasswordReset: false,
+                tsAndCsSignedAt: null,
+                isAdmin: false,
+                isApprover: false,
+                isGlobalAdmin: false,
               },
             }))
             //TODO: get resource information to show while refetching data

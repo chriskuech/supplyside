@@ -1,9 +1,9 @@
 'use server'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { readSession } from '@/lib/session'
 import { renderPo } from '@/domain/order/renderPo'
 import prisma from '@/lib/prisma'
+import { readSession } from '@/lib/iam/session'
 
 /**
  * /api/preview-po?resourceId=<resourceId>
@@ -12,9 +12,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const query = new URL(req.url).searchParams
 
   const session = await readSession()
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
 
   const { accountId } = session
 

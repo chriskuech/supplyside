@@ -6,15 +6,12 @@ import { readSchema } from '../schema/actions'
 import { readResources } from './actions'
 import CreateResourceButton from './CreateResourceButton'
 import ResourceTable from './ResourceTable'
-import { requireSessionWithRedirect } from '@/lib/session'
 
 type Props = {
   resourceType: ResourceType
 }
 
 export default async function ListPage({ resourceType }: Props) {
-  await requireSessionWithRedirect()
-
   const [schema, resources] = await Promise.all([
     readSchema({ resourceType }),
     readResources({ type: resourceType }),

@@ -5,9 +5,8 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { IconButton } from '@mui/material'
 import { Clear } from '@mui/icons-material'
 import { filter, fromEntries, keys, map, pipe } from 'remeda'
-import { deleteUser, updateUser } from '../../../lib/iam/actions'
-import { User } from '../../../lib/iam/types'
-import { systemAccountId } from '@/lib/const'
+import { deleteUser, updateUser } from './actions'
+import { User } from '@/domain/iam/user'
 
 /**
  * @param oldObj
@@ -31,8 +30,7 @@ type Props = {
 }
 
 const UsersTable: FC<Props> = ({ currentUser, users }) => {
-  const editable: boolean =
-    currentUser?.isAdmin || currentUser?.accountId === systemAccountId
+  const editable: boolean = currentUser?.isAdmin || currentUser?.isGlobalAdmin
 
   const columns: GridColDef<User>[] = [
     {

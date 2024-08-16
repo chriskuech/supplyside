@@ -2,59 +2,67 @@
 
 import { revalidatePath } from 'next/cache'
 import { faker } from '@faker-js/faker'
+import { Account as AccountCoreModel, Blob, Prisma } from '@prisma/client'
 import { applyTemplate } from '../schema/template/actions'
 import { getDownloadPath } from '../blobs/utils'
-import { inviteUser } from './user'
-import { Account } from './types'
 import prisma from '@/lib/prisma'
 
-export const inviteAccount = async (email: string): Promise<void> => {
+export type Account = {
+  id: string
+  key: string
+  name: string
+  address: string
+  logoPath: string | null
+}
+
+export type AccountModel = AccountCoreModel & {
+  LogoBlob: Blob | null
+}
+
+export const accountInclude = {
+  LogoBlob: true,
+} satisfies Prisma.AccountInclude
+
+export const mapAccountModel = (model: AccountModel): Account => ({
+  id: model.id,
+  key: model.key,
+  name: model.name,
+  address: model.address,
+  logoPath:
+    model.LogoBlob &&
+    getDownloadPath({
+      blobId: model.LogoBlob.id,
+      mimeType: model.LogoBlob.mimeType,
+      fileName: 'logo',
+    }),
+})
+
+export const createAccount = async (): Promise<void> => {
+  const temporaryKey = faker.string.alpha({ casing: 'lower', length: 5 })
+
   const { id: accountId } = await prisma().account.create({
     data: {
-      key: faker.string.alpha({ casing: 'lower', length: 5 }),
-      name: `${email}'s Account`,
+      key: temporaryKey,
+      name: 'New Account - ' + temporaryKey,
     },
   })
 
-  await Promise.all([
-    inviteUser({ accountId, email, isAdmin: true }),
-    applyTemplate(accountId),
-  ])
+  await applyTemplate(accountId)
 
   revalidatePath('')
 }
 
-export const readAccount = async (
-  accountId: string,
-): Promise<Account | undefined> => {
-  const account = await prisma().account.findUnique({
+export const readAccount = async (accountId: string): Promise<Account> => {
+  const model = await prisma().account.findUniqueOrThrow({
     where: {
       id: accountId,
     },
-    include: {
-      LogoBlob: true,
-    },
+    include: accountInclude,
   })
-
-  if (!account) return
-
-  const logoPath =
-    account.LogoBlob &&
-    getDownloadPath({
-      blobId: account.LogoBlob.id,
-      mimeType: account.LogoBlob.mimeType,
-      fileName: 'logo',
-    })
 
   revalidatePath('')
 
-  return {
-    id: account.id,
-    key: account.key,
-    name: account.name,
-    address: account.address,
-    logoPath,
-  }
+  return mapAccountModel(model)
 }
 
 export const deleteAccount = async (accountId: string): Promise<void> => {

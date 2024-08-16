@@ -18,10 +18,10 @@ import {
   fields,
 } from '@/domain/schema/template/system-fields'
 import { transitionStatus } from '@/lib/resource/actions'
-import { User } from '@/lib/iam/types'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { Schema, selectField } from '@/domain/schema/types'
 import FieldControl from '@/lib/resource/fields/FieldControl'
+import { User } from '@/domain/iam/user'
 
 type Props = {
   user: User

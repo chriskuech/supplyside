@@ -1,18 +1,14 @@
 'use client'
 
 import { Autocomplete, TextField } from '@mui/material'
+import { impersonate } from '@/domain/iam/session'
 
 type Props = {
   account: { id: string; name: string }
   accounts: { id: string; name: string }[]
-  onChange: (accountId: string) => void
 }
 
-export default function ImpersonationClientControl({
-  account,
-  accounts,
-  onChange,
-}: Props) {
+export default function ImpersonationControl({ account, accounts }: Props) {
   return (
     <Autocomplete
       fullWidth
@@ -23,7 +19,7 @@ export default function ImpersonationClientControl({
       isOptionEqualToValue={(o, v) => o.id === v.id}
       options={accounts}
       value={account}
-      onChange={(e, value) => onChange(value.id)}
+      onChange={(e, value) => impersonate(value.id)}
     />
   )
 }

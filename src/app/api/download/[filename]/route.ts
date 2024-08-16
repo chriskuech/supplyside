@@ -2,8 +2,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { readBlob } from '@/domain/blobs/actions'
-import { readSession } from '@/lib/session'
 import prisma from '@/lib/prisma'
+import { readSession } from '@/lib/iam/session'
 
 /**
  * /api/download/[filename]?blobId=<blobId>[&no-impersonation][&preview]
@@ -20,9 +20,6 @@ export async function GET(
   }
 
   const session = await readSession()
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
 
   const { accountId } =
     query.get('no-impersonation') !== null

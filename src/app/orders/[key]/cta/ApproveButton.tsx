@@ -2,6 +2,7 @@
 
 import { ArrowRight } from '@mui/icons-material'
 import { createPo } from '../actions'
+import OrderDetail from '../page'
 import { transitionStatus as transitionStatusAction } from '@/lib/resource/actions'
 import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
 import LoadingButton from '@/lib/ux/LoadingButton'
@@ -23,6 +24,14 @@ export default function ApproveButton({ resourceId, isDisabled }: Props) {
     )
 
   const [status, transitionStatus] = useAsyncCallback(callback)
+
+  return (
+    <OrderDetail
+      params={{
+        key: '34',
+      }}
+    />
+  )
 
   return (
     <LoadingButton

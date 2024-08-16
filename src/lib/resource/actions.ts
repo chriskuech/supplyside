@@ -4,8 +4,8 @@ import { fail } from 'assert'
 import { Resource as ResourceModel, ResourceType } from '@prisma/client'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { requireSession } from '../session'
 import { readSchema } from '../schema/actions'
+import { readSession } from '@/lib/iam/session'
 import * as domain from '@/domain/resource/actions'
 import { Resource } from '@/domain/resource/types'
 import prisma from '@/lib/prisma'
@@ -17,7 +17,7 @@ import { selectField } from '@/domain/schema/types'
 export const createResource = async (
   params: Omit<domain.CreateResourceParams, 'accountId'>,
 ): Promise<ResourceModel> => {
-  const { accountId, userId } = await requireSession()
+  const { accountId, userId } = await readSession()
 
   if (params.type === 'Order') {
     params.data = { ...params.data, Assignee: userId }
@@ -36,7 +36,7 @@ type ReadResourceParams = {
 export const readResource = async (
   params: ReadResourceParams,
 ): Promise<Resource> => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   return domain.readResource({ ...params, accountId })
 }
@@ -44,7 +44,7 @@ export const readResource = async (
 export const readResources = async (
   params: Omit<domain.ReadResourcesParams, 'accountId'>,
 ): Promise<Resource[]> => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   return domain.readResources({ ...params, accountId })
 }
@@ -52,7 +52,7 @@ export const readResources = async (
 export const deleteResource = async (
   params: Omit<domain.DeleteResourceParams, 'accountId'>,
 ): Promise<void> => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   revalidatePath('')
   return domain.deleteResource({ ...params, accountId })
@@ -67,7 +67,7 @@ export const findResources = async ({
   resourceType,
   input,
 }: FindResourcesParams): Promise<ValueResource[]> => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   const results = await prisma().$queryRaw`
     WITH "View" AS (

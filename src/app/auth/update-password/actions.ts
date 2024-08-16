@@ -3,10 +3,10 @@
 import { hash } from 'bcrypt'
 import { RedirectType, redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
-import { requireSession } from '@/lib/session'
+import { readSession } from '@/lib/iam/session'
 
 export const updatePassword = async (password: string) => {
-  const { userId } = await requireSession()
+  const { userId } = await readSession()
 
   await prisma().user.update({
     where: { id: userId },

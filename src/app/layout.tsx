@@ -2,12 +2,8 @@ import { Box, CssBaseline } from '@mui/material'
 import type { Metadata } from 'next'
 import { PropsWithChildren } from 'react'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
-import dynamic from 'next/dynamic'
-import AppBar from '@/lib/ux/AppBar'
-
-const RootProvider = dynamic(() => import('@/lib/ux/RootProvider'), {
-  ssr: false,
-})
+import AppBar from '@/lib/ux/appbar/AppBar'
+import RootProvider from '@/lib/ux/RootProvider'
 
 export const metadata: Metadata = {
   title: 'SupplySide',

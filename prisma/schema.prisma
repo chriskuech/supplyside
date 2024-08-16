@@ -10,6 +10,17 @@ datasource db {
   extensions = [pg_trgm, uuidOssp(map: "uuid-ossp")]
 }
 
+model Session {
+  id        String    @id @default(uuid()) @db.Uuid
+  accountId String
+  userId    String
+  expiresAt DateTime  @db.Timestamp()
+  revokedAt DateTime? @db.Timestamp()
+
+  Account Account @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  User    User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
 model Account {
   id         String  @id @default(uuid()) @db.Uuid
   key        String  @unique
@@ -28,6 +39,7 @@ model Account {
   Schema   Schema[]
   Blob     Blob[]     @relation(name: "owner")
   File     File[]
+  Session  Session[]
 }
 
 model Blob {
@@ -61,9 +73,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  ImageBlob Blob?   @relation(fields: [imageBlobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  Account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ImageBlob Blob?     @relation(fields: [imageBlobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   Value     Value[]
+  Session   Session[]
 }
 
 enum ResourceType {
