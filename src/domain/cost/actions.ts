@@ -16,7 +16,7 @@ export const createCost = async (resourceId: string): Promise<void> => {
   await prisma().cost.create({
     data: { resourceId },
   })
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 export const updateCost = async (id: string, data: Prisma.CostUpdateInput) => {
@@ -30,7 +30,7 @@ export const updateCost = async (id: string, data: Prisma.CostUpdateInput) => {
 
   await recalculateItemizedCosts(cost.Resource.accountId, cost.resourceId)
 
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 export const deleteCost = async (id: string): Promise<void> => {
@@ -42,7 +42,7 @@ export const deleteCost = async (id: string): Promise<void> => {
   })
 
   await recalculateItemizedCosts(cost.Resource.accountId, cost.resourceId)
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 export const recalculateItemizedCosts = async (
@@ -70,7 +70,7 @@ export const recalculateItemizedCosts = async (
       ),
     },
   })
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 export const recalculateSubtotalCost = async (
@@ -105,5 +105,5 @@ export const recalculateSubtotalCost = async (
       number: subTotal,
     },
   })
-  revalidatePath('.')
+  revalidatePath('')
 }

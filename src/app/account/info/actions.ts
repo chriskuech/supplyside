@@ -2,7 +2,7 @@
 
 import { Prisma } from '@prisma/client'
 import { isEmpty } from 'remeda'
-import { revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
@@ -46,6 +46,6 @@ export const handleSaveSettings = async (
       data,
     })
 
-    revalidateTag('iam')
+    revalidatePath('')
   }
 }

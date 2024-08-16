@@ -2,7 +2,7 @@
 
 import { Prisma } from '@prisma/client'
 import { isEmpty } from 'remeda'
-import { revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 import prisma from '@/lib/prisma'
 import { requireSession } from '@/lib/session'
 import { createBlob } from '@/domain/blobs/actions'
@@ -55,7 +55,7 @@ export const handleSaveSettings = async (
       data: update,
     })
 
-    revalidateTag('iam')
+    revalidatePath('')
   } else {
     return errors
   }

@@ -56,7 +56,7 @@ export const createField = async (params: CreateFieldParams) => {
       resourceType: params.resourceType,
     },
   })
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 export const readFields = async (): Promise<Field[]> => {
@@ -180,7 +180,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
     ),
   ])
 
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 export const deleteField = async (fieldId: string) => {
@@ -192,7 +192,7 @@ export const deleteField = async (fieldId: string) => {
       id: fieldId,
     },
   })
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 const sanitizeColumnName = (name: string) => name.replace('"', '')

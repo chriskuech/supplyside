@@ -110,7 +110,7 @@ export const updateSchema = async (dto: {
     },
   })
 
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 export const createSection = async (dto: {
@@ -125,7 +125,7 @@ export const createSection = async (dto: {
     },
   })
 
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 export const updateSection = async (dto: {
@@ -174,7 +174,7 @@ export const updateSection = async (dto: {
     }),
   ])
 
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 export const deleteSection = async (sectionId: string) => {
@@ -189,5 +189,5 @@ export const deleteSection = async (sectionId: string) => {
     },
   })
 
-  revalidatePath('.')
+  revalidatePath('')
 }

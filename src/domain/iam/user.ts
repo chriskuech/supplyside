@@ -2,7 +2,7 @@
 
 import { faker } from '@faker-js/faker'
 import { hash } from 'bcrypt'
-import { revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 import { getDownloadPath } from '../blobs/utils'
 import { User } from './types'
 import smtp from '@/lib/smtp'
@@ -47,7 +47,7 @@ export async function inviteUser({
     MessageStream: 'outbound',
   })
 
-  revalidateTag('iam')
+  revalidatePath('')
 }
 
 type ReadUserParams = {
@@ -55,7 +55,7 @@ type ReadUserParams = {
 }
 
 export async function readUser({ userId }: ReadUserParams): Promise<User> {
-  revalidateTag('iam')
+  revalidatePath('')
 
   const user = await prisma().user.findUniqueOrThrow({
     where: { id: userId },
@@ -87,7 +87,7 @@ type ReadUsersParams = { accountId: string }
 export async function readUsers({
   accountId,
 }: ReadUsersParams): Promise<User[]> {
-  revalidateTag('iam')
+  revalidatePath('')
 
   const users = await prisma().user.findMany({
     where: {
@@ -127,5 +127,5 @@ export async function deleteUser({
     },
   })
 
-  revalidateTag('iam')
+  revalidatePath('')
 }

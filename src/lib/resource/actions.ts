@@ -23,7 +23,7 @@ export const createResource = async (
     params.data = { ...params.data, Assignee: userId }
   }
 
-  revalidatePath('.')
+  revalidatePath('')
   return domain.createResource({ ...params, accountId })
 }
 
@@ -54,7 +54,7 @@ export const deleteResource = async (
 ): Promise<void> => {
   const { accountId } = await requireSession()
 
-  revalidatePath('.')
+  revalidatePath('')
   return domain.deleteResource({ ...params, accountId })
 }
 
@@ -121,5 +121,5 @@ export const transitionStatus = async (
           ?.id ?? fail('Option not found'),
     },
   })
-  revalidatePath('.')
+  revalidatePath('')
 }

@@ -146,7 +146,7 @@ export const createResource = async ({
     })
   }
 
-  revalidatePath('.')
+  revalidatePath('')
   return resource
 }
 
@@ -242,7 +242,7 @@ export const deleteResource = async ({
     }
   }
 
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 const include = {

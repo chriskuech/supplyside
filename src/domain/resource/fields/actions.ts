@@ -38,7 +38,7 @@ export const updateValue = async ({
   fieldId,
   value,
 }: UpdateValueDto) => {
-  revalidatePath('.')
+  revalidatePath('')
   //TODO:  check if value object is correct for each fieldType
 
   const { fileIds, optionIds, ...rest } = value
@@ -206,7 +206,7 @@ export const uploadFile = async (
   fieldId: string,
   formData: FormData,
 ) => {
-  revalidatePath('.')
+  revalidatePath('')
   const { accountId } = await requireSession()
 
   const file = formData.get('file')
@@ -264,7 +264,7 @@ export const uploadFiles = async (
   fieldId: string,
   formData: FormData,
 ) => {
-  revalidatePath('.')
+  revalidatePath('')
   const { accountId } = await requireSession()
 
   const files = formData.getAll('files')
@@ -408,7 +408,7 @@ export const updateContact = async (
     })
   }
 
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 export const copyLinkedResourceFields = async (
@@ -459,7 +459,7 @@ export const copyLinkedResourceFields = async (
     //TODO: Copy line items
   }
 
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 export const copyResourceCosts = async (
@@ -512,7 +512,7 @@ export const copyResourceCosts = async (
     }),
   )
 
-  revalidatePath('.')
+  revalidatePath('')
 }
 
 export const copyField = async (
@@ -660,5 +660,5 @@ export const copyField = async (
       },
     },
   })
-  revalidatePath('.')
+  revalidatePath('')
 }
