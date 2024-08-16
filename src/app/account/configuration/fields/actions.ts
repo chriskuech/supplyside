@@ -56,14 +56,11 @@ export const createField = async (params: CreateFieldParams) => {
       resourceType: params.resourceType,
     },
   })
-
   revalidatePath('.')
 }
 
 export const readFields = async (): Promise<Field[]> => {
   const session = await requireSession()
-
-  revalidatePath('.')
 
   const fields = await prisma().field.findMany({
     where: {
@@ -195,7 +192,6 @@ export const deleteField = async (fieldId: string) => {
       id: fieldId,
     },
   })
-
   revalidatePath('.')
 }
 

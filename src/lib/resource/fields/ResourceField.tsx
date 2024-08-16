@@ -27,7 +27,7 @@ import ResourceFieldsControl from '../ResourceFieldsControl'
 import { Resource } from '@/domain/resource/types'
 import { readSchema } from '@/lib/schema/actions'
 import { Schema } from '@/domain/schema/types'
-import Loading from '@/app/loading'
+// import Loading from '@/app/loading'
 import { ValueResource } from '@/domain/resource/values/types'
 
 type Props = {
@@ -120,7 +120,7 @@ function ResourceField(
                 singleColumn
               />
             ) : (
-              <Loading />
+              <></>
             )}
           </Box>
         </Drawer>

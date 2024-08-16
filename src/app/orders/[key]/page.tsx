@@ -8,6 +8,7 @@ import SkipButton from './cta/SkipButton'
 import StatusTransitionButton from './cta/StatusTransitionButton'
 import SendPoButton from './cta/SendPoButton'
 import Toolbar from './Toolbar'
+import { findOrderBills } from './actions'
 import LinesAndCosts from '@/lib/resource/LinesAndCosts'
 import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
@@ -33,6 +34,8 @@ export default async function OrderDetail({
     readSchema({ resourceType: 'Order' }),
     readResource({ type: 'Order', key: Number(key) }),
   ])
+
+  const orderBills = await findOrderBills(resource.id)
 
   const status =
     selectValue(resource, fields.orderStatus)?.option ??
@@ -65,9 +68,10 @@ export default async function OrderDetail({
 
           <Toolbar
             key={status?.id}
-            resourceId={resource.id}
+            resource={resource}
             schema={schema}
             isDraft={isDraft}
+            bills={orderBills}
           />
         </Stack>
       </Container>
@@ -151,11 +155,11 @@ export default async function OrderDetail({
           <ResourceFieldsControl
             key={status.id}
             schema={schema}
-            resourceId={resource.id}
+            resource={resource}
             isReadOnly={!isDraft}
           />
           <LinesAndCosts
-            resourceId={resource.id}
+            resource={resource}
             lineQuery={{
               '==': [{ var: 'Order' }, resource.id],
             }}

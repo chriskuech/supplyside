@@ -57,7 +57,7 @@ export default async function BillsDetail({
           <Toolbar
             key={status?.id}
             schema={schema}
-            resourceId={resource.id}
+            resource={resource}
             isDraft={isDraft}
           />
         </Stack>
@@ -94,7 +94,7 @@ export default async function BillsDetail({
                 key={selectValue(resource, fields.billStatus)?.option?.id}
                 schema={schema}
                 user={user}
-                resourceId={resource.id}
+                resource={resource}
               />
             </Stack>
           </Stack>
@@ -104,10 +104,10 @@ export default async function BillsDetail({
 
       <Container sx={{ py: 5 }}>
         <Stack spacing={5}>
-          <ResourceFieldsControl schema={schema} resourceId={resource.id} />
+          <ResourceFieldsControl schema={schema} resource={resource} />
           <LinesAndCosts
             lineQuery={{ '==': [{ var: 'Bill' }, resource.id] }}
-            resourceId={resource.id}
+            resource={resource}
             newLineInitialData={{
               [fields.bill.name]: resource.id,
             }}

@@ -11,6 +11,7 @@ import {
 } from '@prisma/client'
 import { Ajv } from 'ajv'
 import { isArray } from 'remeda'
+import { revalidatePath } from 'next/cache'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { selectField } from '../schema/types'
@@ -145,6 +146,7 @@ export const createResource = async ({
     })
   }
 
+  revalidatePath('.')
   return resource
 }
 
@@ -239,6 +241,8 @@ export const deleteResource = async ({
       await recalculateSubtotalCost(accountId, 'Bill', billId)
     }
   }
+
+  revalidatePath('.')
 }
 
 const include = {
