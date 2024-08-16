@@ -44,6 +44,8 @@ jobs:
           push: true
           tags: supplyside.azurecr.io/app:${{ github.sha }}
           context: .
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy:
     permissions:
