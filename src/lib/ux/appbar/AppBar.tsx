@@ -62,7 +62,7 @@ export default async function AppBar() {
                   </>
                 )}
 
-                {session.account.id !== systemAccountId && (
+                {session.accountId !== systemAccountId && (
                   <>
                     {['Orders', 'Lines', 'Bills'].map((item) => (
                       <Button
@@ -118,7 +118,7 @@ export default async function AppBar() {
 
                 <AccountMenu />
                 {session.user && <UserMenu user={session.user} />}
-                {session.account.id !== systemAccountId && <NavMenu />}
+                {session.accountId !== systemAccountId && <NavMenu />}
               </Stack>
             </>
           )}

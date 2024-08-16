@@ -5,10 +5,10 @@ import { Option } from '@/domain/schema/types'
 import { readSession } from '@/lib/iam/session'
 
 export const readUsers = async (): Promise<Option[]> => {
-  const session = await readSession()
+  const { accountId } = await readSession()
 
   const users = await prisma().user.findMany({
-    where: { accountId: session.account.id },
+    where: { accountId },
     orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
   })
 
