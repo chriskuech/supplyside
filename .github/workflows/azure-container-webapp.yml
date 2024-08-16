@@ -101,9 +101,6 @@ jobs:
         run: |
           #!/bin/bash
 
-          # Example DATABASE_URL
-          DATABASE_URL="postgresql://username:password@host:port/database"
-
           # Parse the components from the DATABASE_URL
           USER=$(echo $DATABASE_URL | sed -r 's|postgresql://([^:]+):.*|\1|')
           PASSWORD=$(echo $DATABASE_URL | sed -r 's|postgresql://[^:]+:([^@]+)@.*|\1|')
