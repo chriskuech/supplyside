@@ -1,7 +1,6 @@
 'use server'
 
 import { RedirectType, redirect } from 'next/navigation'
-import { revalidatePath } from 'next/cache'
 import prisma from '@/lib/prisma'
 import { readSession } from '@/lib/iam/actions'
 
@@ -20,5 +19,4 @@ export const acceptTermsAndConditions = async () => {
   console.log('Terms and conditions accepted')
 
   redirect('/', RedirectType.replace)
-  // revalidatePath('')
 }

@@ -18,4 +18,5 @@ export const mapUuidToBase64 = (uuid: string) => {
       .replace(/[^A-z0-9]/g, '')
   )
 }
+
 export const SESSION_LIFESPAN_IN_DAYS = 7
