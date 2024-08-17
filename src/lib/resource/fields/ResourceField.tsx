@@ -165,6 +165,7 @@ const BaseEditableResourceField = (
 
   return (
     <Autocomplete<ValueResource | { inputValue: string; name: string }>
+      fullWidth
       inputValue={input}
       handleHomeEndKeys
       filterSelectedOptions
@@ -183,11 +184,13 @@ const BaseEditableResourceField = (
       }
       onInputChange={(event, newInputValue) => setInput(newInputValue)}
       renderInput={(params) => (
-        <TextField
-          {...params}
-          placeholder={`Enter a name/number`}
-          inputRef={ref}
-        />
+        <Box display="flex" justifyContent="center" alignContent="center">
+          <TextField
+            {...params}
+            placeholder={`Enter a name/number`}
+            inputRef={ref}
+          />
+        </Box>
       )}
     />
   )
