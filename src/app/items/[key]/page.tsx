@@ -1,10 +1,9 @@
 import { Container, Stack, Typography } from '@mui/material'
-import { FC } from 'react'
 import { ResourceType } from '@prisma/client'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import { RouteProps, readDetailPageModel } from '@/lib/resource/detailPage'
 
-const ItemDetail: FC<RouteProps> = async (props) => {
+export default async function ItemDetail(props: RouteProps) {
   const { resource, schema } = await readDetailPageModel({
     resourceType: ResourceType.Item,
     pageProps: props,
@@ -24,5 +23,3 @@ const ItemDetail: FC<RouteProps> = async (props) => {
     </Container>
   )
 }
-
-export default ItemDetail

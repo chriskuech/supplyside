@@ -86,21 +86,21 @@ export const createResource = async ({
                 boolean:
                   typeof dataValue === 'boolean' && f.type === 'Checkbox'
                     ? dataValue
-                    : (f.defaultValue?.boolean ?? null),
+                    : f.defaultValue?.boolean ?? null,
                 date:
                   typeof dataValue === 'string' && f.type === 'Date'
                     ? dataValue
-                    : (f.defaultValue?.date ?? null),
+                    : f.defaultValue?.date ?? null,
                 number:
                   typeof dataValue === 'number' &&
                   ['Number', 'Money'].includes(f.type)
                     ? dataValue
-                    : (f.defaultValue?.number ?? null),
+                    : f.defaultValue?.number ?? null,
                 string:
                   typeof dataValue === 'string' &&
                   ['Text', 'Textarea'].includes(f.type)
                     ? dataValue
-                    : (f.defaultValue?.string ?? null),
+                    : f.defaultValue?.string ?? null,
                 Resource:
                   typeof dataValue === 'string' && f.type === 'Resource'
                     ? { connect: { id: dataValue } }

@@ -1,9 +1,8 @@
 import { Container, Stack, Typography } from '@mui/material'
-import { FC } from 'react'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import { RouteProps, readDetailPageModel } from '@/lib/resource/detailPage'
 
-const VendorDetail: FC<RouteProps> = async (props) => {
+export default async function VendorDetail(props: RouteProps) {
   const { resource, schema } = await readDetailPageModel({
     resourceType: 'Vendor',
     pageProps: props,
@@ -23,5 +22,3 @@ const VendorDetail: FC<RouteProps> = async (props) => {
     </Container>
   )
 }
-
-export default VendorDetail

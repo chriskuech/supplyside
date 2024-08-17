@@ -2,7 +2,6 @@ import { fail } from 'assert'
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
-import { FC } from 'react'
 import { ResourceType } from '@prisma/client'
 import Toolbar from './Toolbar'
 import BillStatusTracker from './BillStatusTracker'
@@ -16,7 +15,7 @@ import {
 import { selectValue } from '@/domain/resource/types'
 import { RouteProps, readDetailPageModel } from '@/lib/resource/detailPage'
 
-const BillDetail: FC<RouteProps> = async (props) => {
+export default async function BillDetail(props: RouteProps) {
   const {
     resource,
     schema,
@@ -114,5 +113,3 @@ const BillDetail: FC<RouteProps> = async (props) => {
     </Stack>
   )
 }
-
-export default BillDetail
