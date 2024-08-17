@@ -164,36 +164,35 @@ const BaseEditableResourceField = (
   }, [findResources, input, resourceType])
 
   return (
-      <Autocomplete<ValueResource | { inputValue: string; name: string }>
-        fullWidth
-        inputValue={input}
-        handleHomeEndKeys
-        filterSelectedOptions
-        options={options}
-        filterOptions={(options, { inputValue }) => [
-          ...options,
-          ...(inputValue ? [{ inputValue, name: `Add "${inputValue}"` }] : []),
-        ]}
-        getOptionLabel={(option) => option.name}
-        onChange={(event, newValue) =>
-          match(newValue)
-            .with({ id: P.string }, ({ id }) => onUpdate(id))
-            .with({ inputValue: P.string }, (o) => onCreate(o.inputValue))
-            .with(null, () => {})
-            .exhaustive()
-        }
-        onInputChange={(event, newInputValue) => setInput(newInputValue)}
-        renderInput={(params) => (
-          <Box display="flex" justifyContent="center" alignContent="center">
-            <TextField
-              {...params}
-              placeholder={`Enter a name/number`}
-              inputRef={ref}
-              
-            />
-          </Box>
-        )}
-      />
+    <Autocomplete<ValueResource | { inputValue: string; name: string }>
+      fullWidth
+      inputValue={input}
+      handleHomeEndKeys
+      filterSelectedOptions
+      options={options}
+      filterOptions={(options, { inputValue }) => [
+        ...options,
+        ...(inputValue ? [{ inputValue, name: `Add "${inputValue}"` }] : []),
+      ]}
+      getOptionLabel={(option) => option.name}
+      onChange={(event, newValue) =>
+        match(newValue)
+          .with({ id: P.string }, ({ id }) => onUpdate(id))
+          .with({ inputValue: P.string }, (o) => onCreate(o.inputValue))
+          .with(null, () => {})
+          .exhaustive()
+      }
+      onInputChange={(event, newInputValue) => setInput(newInputValue)}
+      renderInput={(params) => (
+        <Box display="flex" justifyContent="center" alignContent="center">
+          <TextField
+            {...params}
+            placeholder={`Enter a name/number`}
+            inputRef={ref}
+          />
+        </Box>
+      )}
+    />
   )
 }
 
