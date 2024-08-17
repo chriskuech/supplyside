@@ -43,7 +43,11 @@ export default async function ListPage({ tableKey, resourceType }: Props) {
             />
           </Box>
         </Stack>
-        <ResourceTable tableKey={tableKey} schema={schema} resources={resources} />
+        <ResourceTable
+          tableKey={tableKey}
+          schema={schema}
+          resources={resources}
+        />
       </Stack>
     </Container>
   )
