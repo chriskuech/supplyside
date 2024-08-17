@@ -13,18 +13,6 @@ export const usePersistDatagridState = (storageKey: string) => {
     }
   }, [apiRef]);
 
-  const onColumnVisibilityModelChange = (params: GridColumnVisibilityModel) => {
-    saveStateToLocalstorage();
-  }
-
-  const onColumnWidthChange = (params: GridColumnResizeParams) => {
-    saveStateToLocalstorage();
-  }
-
-  const onColumnOrderChange = (params: GridColumnOrderChangeParams) => {
-    saveStateToLocalstorage();
-  }
-
   useLayoutEffect(() => {
     const stateFromLocalStorage = localStorage?.getItem(storageKey);
     setInitialState(stateFromLocalStorage ? JSON.parse(stateFromLocalStorage) : {});
