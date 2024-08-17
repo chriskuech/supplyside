@@ -21,11 +21,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Field, Schema, selectField } from '@/domain/schema/types'
 import { Resource, selectValue } from '@/domain/resource/types'
-import { readResource, transitionStatus } from '@/lib/resource/actions'
+import { transitionStatus } from '@/lib/resource/actions'
 import {
   billStatusOptions,
   fields,
@@ -36,21 +35,11 @@ import { useDisclosure } from '@/lib/hooks/useDisclosure'
 
 type Props = {
   schema: Schema
-  resourceId: string
+  resource: Resource
   isDraft: boolean
 }
 
-export default function Toolbar({ schema, resourceId, isDraft }: Props) {
-  const [resource, setResource] = useState<Resource>()
-
-  const refresh = useCallback(() => {
-    readResource({ id: resourceId }).then(setResource)
-  }, [resourceId])
-
-  useEffect(() => {
-    refresh()
-  }, [refresh])
-
+export default function Toolbar({ schema, resource, isDraft }: Props) {
   if (!resource) return
 
   const order = selectValue(resource, fields.order)?.resource
@@ -78,7 +67,7 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
             <IconButton
               onClick={() =>
                 transitionStatus(
-                  resourceId,
+                  resource.id,
                   fields.billStatus,
                   billStatusOptions.draft,
                 )
@@ -95,7 +84,7 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
           <IconButton
             onClick={() =>
               transitionStatus(
-                resourceId,
+                resource.id,
                 fields.billStatus,
                 billStatusOptions.canceled,
               )
@@ -108,12 +97,11 @@ export default function Toolbar({ schema, resourceId, isDraft }: Props) {
       </Box>
       <Box height={'min-content'}>
         <AssigneeControl
-          resourceId={resourceId}
+          resourceId={resource.id}
           field={
             selectField(schema, fields.assignee) ?? fail('Field not found')
           }
           value={selectValue(resource, fields.assignee)}
-          onChange={refresh}
         />
       </Box>
     </>
@@ -124,15 +112,9 @@ type AssigneeControlProps = {
   resourceId: string
   field: Field
   value: Value | undefined
-  onChange: () => void
 }
 
-function AssigneeControl({
-  resourceId,
-  field,
-  value,
-  onChange,
-}: AssigneeControlProps) {
+function AssigneeControl({ resourceId, field, value }: AssigneeControlProps) {
   const { isOpen, open, close } = useDisclosure()
 
   const assignee = value?.user
@@ -164,7 +146,6 @@ function AssigneeControl({
             resourceId={resourceId}
             field={field}
             value={value}
-            onChange={onChange}
           />
         </DialogContent>
         <DialogActions>

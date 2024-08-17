@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 import { faker } from '@faker-js/faker'
 import { applyTemplate } from '../schema/template/actions'
 import { getDownloadPath } from '../blobs/utils'
@@ -21,14 +21,12 @@ export const inviteAccount = async (email: string): Promise<void> => {
     applyTemplate(accountId),
   ])
 
-  revalidateTag('iam')
+  revalidatePath('')
 }
 
 export const readAccount = async (
   accountId: string,
 ): Promise<Account | undefined> => {
-  revalidateTag('iam')
-
   const account = await prisma().account.findUnique({
     where: {
       id: accountId,
@@ -48,6 +46,8 @@ export const readAccount = async (
       fileName: 'logo',
     })
 
+  revalidatePath('')
+
   return {
     id: account.id,
     key: account.key,
@@ -64,5 +64,5 @@ export const deleteAccount = async (accountId: string): Promise<void> => {
     },
   })
 
-  revalidateTag('iam')
+  revalidatePath('')
 }

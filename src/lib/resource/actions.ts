@@ -19,12 +19,11 @@ export const createResource = async (
 ): Promise<ResourceModel> => {
   const { accountId, userId } = await requireSession()
 
-  revalidatePath('.')
-
   if (params.type === 'Order') {
     params.data = { ...params.data, Assignee: userId }
   }
 
+  revalidatePath('')
   return domain.createResource({ ...params, accountId })
 }
 
@@ -55,8 +54,7 @@ export const deleteResource = async (
 ): Promise<void> => {
   const { accountId } = await requireSession()
 
-  revalidatePath('.')
-
+  revalidatePath('')
   return domain.deleteResource({ ...params, accountId })
 }
 
@@ -123,6 +121,5 @@ export const transitionStatus = async (
           ?.id ?? fail('Option not found'),
     },
   })
-
-  revalidatePath('.')
+  revalidatePath('')
 }

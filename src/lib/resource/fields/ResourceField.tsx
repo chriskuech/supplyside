@@ -4,6 +4,7 @@ import assert from 'assert'
 import {
   Autocomplete,
   Box,
+  CircularProgress,
   Drawer,
   IconButton,
   Link,
@@ -27,7 +28,6 @@ import ResourceFieldsControl from '../ResourceFieldsControl'
 import { Resource } from '@/domain/resource/types'
 import { readSchema } from '@/lib/schema/actions'
 import { Schema } from '@/domain/schema/types'
-import Loading from '@/app/loading'
 import { ValueResource } from '@/domain/resource/values/types'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 
@@ -113,11 +113,11 @@ function ResourceField(
             {schema && resource ? (
               <ResourceFieldsControl
                 schema={schema}
-                resourceId={resource.id}
+                resource={resource}
                 singleColumn
               />
             ) : (
-              <Loading />
+              <CircularProgress />
             )}
           </Box>
         </Drawer>

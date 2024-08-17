@@ -12,13 +12,12 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
 import { Resource, selectValue } from '@/domain/resource/types'
 import {
   billStatusOptions,
   fields,
 } from '@/domain/schema/template/system-fields'
-import { readResource, transitionStatus } from '@/lib/resource/actions'
+import { transitionStatus } from '@/lib/resource/actions'
 import { User } from '@/lib/iam/types'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { Schema, selectField } from '@/domain/schema/types'
@@ -27,21 +26,11 @@ import FieldControl from '@/lib/resource/fields/FieldControl'
 type Props = {
   user: User
   schema: Schema
-  resourceId: string
+  resource: Resource
 }
 
-export default function CallToAction({ user, schema, resourceId }: Props) {
+export default function CallToAction({ user, schema, resource }: Props) {
   const { open, isOpen, close } = useDisclosure()
-  const [resource, setResource] = useState<Resource | null>(null)
-
-  const refresh = useCallback(
-    () => readResource({ id: resourceId }).then(setResource),
-    [resourceId],
-  )
-
-  useEffect(() => {
-    refresh()
-  }, [refresh])
 
   if (!resource) return <CircularProgress />
 
@@ -169,7 +158,6 @@ export default function CallToAction({ user, schema, resourceId }: Props) {
                   resourceId={resource.id}
                   field={selectField(schema, fields.order) ?? fail()}
                   value={selectValue(resource, fields.order) ?? fail()}
-                  onChange={refresh}
                 />
               </Box>
               <Stack direction={'row'} sx={{ justifyContent: 'end' }}>
