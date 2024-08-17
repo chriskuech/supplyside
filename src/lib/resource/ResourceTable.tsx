@@ -6,7 +6,7 @@ import {
 } from '@mui/x-data-grid'
 import {DataGridPro, DataGridProProps} from '@mui/x-data-grid-pro'
 import { FieldType } from '@prisma/client'
-import { Box, Chip, IconButton, Stack } from '@mui/material'
+import { Box, Chip, CircularProgress, IconButton, Stack } from '@mui/material'
 import { Check, Clear } from '@mui/icons-material'
 import { P, match } from 'ts-pattern'
 import { useMemo } from 'react'
@@ -25,7 +25,6 @@ import { findField } from '@/domain/schema/template/system-fields'
 import { Value } from '@/domain/resource/values/types'
 import CustomGridToolbar from '../ux/CustomGridToolbar'
 import { usePersistDatagridState } from '@/lib/hooks/usePersistDatagridState'
-import Loading from '@/app/loading'
 
 type Props = {
   tableKey: string
@@ -377,7 +376,7 @@ export default function ResourceTable({
     return newRow
   }
 
-  if(!initialState) return <Loading />
+  if(!initialState) return <CircularProgress />
 
   return (
     <DataGridPro<Resource>
