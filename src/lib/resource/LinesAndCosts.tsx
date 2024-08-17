@@ -33,6 +33,7 @@ export default async function LinesAndCosts({
       </Stack>
       <Stack>
         <ResourceTable
+          tableKey={'linesAndCosts'}
           schema={lineSchema}
           resources={lines}
           isEditable

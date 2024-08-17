@@ -9,10 +9,11 @@ import ResourceTable from './ResourceTable'
 import { requireSessionWithRedirect } from '@/lib/session'
 
 type Props = {
+  tableKey: string
   resourceType: ResourceType
 }
 
-export default async function ListPage({ resourceType }: Props) {
+export default async function ListPage({ tableKey, resourceType }: Props) {
   await requireSessionWithRedirect()
 
   const [schema, resources] = await Promise.all([
@@ -42,7 +43,11 @@ export default async function ListPage({ resourceType }: Props) {
             />
           </Box>
         </Stack>
-        <ResourceTable schema={schema} resources={resources} />
+        <ResourceTable
+          tableKey={tableKey}
+          schema={schema}
+          resources={resources}
+        />
       </Stack>
     </Container>
   )

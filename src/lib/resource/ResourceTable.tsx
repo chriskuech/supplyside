@@ -1,19 +1,16 @@
 'use client'
 
-import {
-  DataGrid,
-  DataGridProps,
-  GridColDef,
-  GridColType,
-} from '@mui/x-data-grid'
+import { GridColDef, GridColType } from '@mui/x-data-grid'
+import { DataGridPro, DataGridProProps } from '@mui/x-data-grid-pro'
 import { FieldType } from '@prisma/client'
-import { Box, Chip, IconButton, Stack } from '@mui/material'
+import { Box, Chip, CircularProgress, IconButton, Stack } from '@mui/material'
 import { Check, Clear } from '@mui/icons-material'
 import { P, match } from 'ts-pattern'
 import { useMemo } from 'react'
 import { difference } from 'remeda'
 import { useSnackbar } from 'notistack'
 import { formatDate } from '../formatDate'
+import CustomGridToolbar from '../ux/CustomGridToolbar'
 import ContactCard from './fields/ContactCard'
 import { deleteResource } from './actions'
 import FieldGridEditCell from './fields/FieldGridEditCell'
@@ -24,21 +21,27 @@ import { selectFields } from '@/domain/schema/selectors'
 import { updateValue, UpdateValueDto } from '@/domain/resource/fields/actions'
 import { findField } from '@/domain/schema/template/system-fields'
 import { Value } from '@/domain/resource/values/types'
+import { usePersistDatagridState } from '@/lib/hooks/usePersistDatagridState'
 
 type Props = {
+  tableKey: string
   schema: Schema
   resources: Resource[]
   isEditable?: boolean
   onChange?: () => void
-} & Partial<DataGridProps>
+} & Partial<DataGridProProps>
 
 export default function ResourceTable({
+  tableKey,
   schema,
   resources,
   isEditable,
   onChange,
   ...props
 }: Props) {
+  const { apiRef, initialState, saveStateToLocalstorage } =
+    usePersistDatagridState(tableKey)
+
   const { enqueueSnackbar } = useSnackbar()
   const columns = useMemo<GridColDef<Resource>[]>(
     () => [
@@ -371,8 +374,10 @@ export default function ResourceTable({
     return newRow
   }
 
+  if (!initialState) return <CircularProgress />
+
   return (
-    <DataGrid<Resource>
+    <DataGridPro<Resource>
       columns={columns}
       rows={resources}
       editMode="row"
@@ -384,6 +389,17 @@ export default function ResourceTable({
         if (type === 'Line') return
 
         window.location.href = `/${type.toLowerCase()}s/${key}`
+      }}
+      apiRef={apiRef}
+      initialState={{
+        ...initialState,
+      }}
+      onColumnVisibilityModelChange={saveStateToLocalstorage}
+      onColumnWidthChange={saveStateToLocalstorage}
+      onColumnOrderChange={saveStateToLocalstorage}
+      onSortModelChange={saveStateToLocalstorage}
+      slots={{
+        toolbar: CustomGridToolbar,
       }}
       {...props}
     />
