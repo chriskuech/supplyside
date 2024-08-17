@@ -17,7 +17,10 @@ export const createSession = async (email: string, password: string) => {
     where: { email },
   })
 
-  if (!user?.passwordHash || !compare(password, user.passwordHash)) return
+  if (!user?.passwordHash) return
+
+  const isMatch = await compare(password, user.passwordHash)
+  if (!isMatch) return
 
   const lifespanInSeconds = 1000 * 60 * 24 * SESSION_LIFESPAN_IN_DAYS
   const expiresAt = new Date(Date.now() + lifespanInSeconds * 1000)

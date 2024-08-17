@@ -16,7 +16,7 @@ import prisma from '@/lib/prisma'
 
 export default async function AppBar() {
   const [session, accounts] = await Promise.all([
-    readSession(),
+    readSession().catch(() => null),
     prisma().account.findMany({
       orderBy: {
         name: 'asc',
