@@ -1,28 +1,28 @@
 'use server'
 
-import assert from 'assert'
 import { compare } from 'bcrypt'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { accountInclude } from '../account/types'
-import { userInclude } from '../user/types'
-import { Session, mapSessionModel } from './types'
+import { Session, mapSessionModel, sessionIncludes } from './types'
 import prisma from '@/lib/prisma'
 import { systemAccountId } from '@/lib/const'
 
 const SESSION_LIFESPAN_IN_DAYS = 7
 
-export const createSession = async (email: string, password: string) => {
+const lifespanInSeconds = 1000 * 60 * 24 * SESSION_LIFESPAN_IN_DAYS
+
+export const createSession = async (
+  email: string,
+  password: string,
+): Promise<Session> => {
   const user = await prisma().user.findUnique({
     where: { email },
   })
 
-  if (!user?.passwordHash) return
+  if (!user) throw new Error('No user in db')
+  if (!user.passwordHash) throw new Error('No password in db')
 
   const isMatch = await compare(password, user.passwordHash)
-  if (!isMatch) return
+  if (!isMatch) throw new Error('Password does not match')
 
-  const lifespanInSeconds = 1000 * 60 * 24 * SESSION_LIFESPAN_IN_DAYS
   const expiresAt = new Date(Date.now() + lifespanInSeconds * 1000)
 
   const session = await prisma().session.create({
@@ -31,35 +31,21 @@ export const createSession = async (email: string, password: string) => {
       Account: { connect: { id: user.accountId } },
       User: { connect: { id: user.id } },
     },
+    include: sessionIncludes,
   })
 
-  cookies().set('sessionId', session.id, {
-    sameSite: true,
-    secure: process.env.NODE_ENV !== 'development',
-    maxAge: lifespanInSeconds,
-  })
+  return mapSessionModel(session)
 }
 
-export const readAndExtendSession = async (): Promise<Session> => {
-  const sessionId = cookies().get('sessionId')?.value
-
-  assert(sessionId, 'No sessionId cookie found')
-
+export const readAndExtendSession = async (
+  sessionId: string,
+): Promise<Session> => {
   const session = await prisma().session.update({
-    where: { id: sessionId },
+    where: { id: sessionId, revokedAt: null },
     data: {
-      expiresAt: new Date(
-        Date.now() + 1000 * 60 * 24 * SESSION_LIFESPAN_IN_DAYS,
-      ),
+      expiresAt: new Date(Date.now() + lifespanInSeconds * 1000),
     },
-    include: {
-      Account: {
-        include: accountInclude,
-      },
-      User: {
-        include: userInclude,
-      },
-    },
+    include: sessionIncludes,
   })
 
   return mapSessionModel(session)
@@ -68,37 +54,20 @@ export const readAndExtendSession = async (): Promise<Session> => {
 export const readSession = async (sessionId: string): Promise<Session> => {
   const session = await prisma().session.findUniqueOrThrow({
     where: { id: sessionId },
-    include: {
-      Account: {
-        include: accountInclude,
-      },
-      User: {
-        include: userInclude,
-      },
-    },
+    include: sessionIncludes,
   })
 
   return mapSessionModel(session)
 }
 
-export const clearSession = async () => {
-  const sessionId = cookies().get('sessionId')?.value
-
-  if (!sessionId) return
-
+export const clearSession = async (sessionId: string) => {
   await prisma().session.update({
     where: { id: sessionId },
     data: { revokedAt: new Date() },
   })
-
-  cookies().delete('session')
 }
 
-export const impersonate = async (accountId: string) => {
-  const sessionId = cookies().get('sessionId')?.value
-
-  assert(sessionId, 'No sessionId cookie found')
-
+export const impersonate = async (sessionId: string, accountId: string) => {
   await prisma().session.update({
     where: {
       id: sessionId,
@@ -108,6 +77,4 @@ export const impersonate = async (accountId: string) => {
     },
     data: { accountId },
   })
-
-  redirect('/')
 }

@@ -3,6 +3,7 @@ import { Box, Container, Stack, Typography } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
 import { FC } from 'react'
+import { ResourceType } from '@prisma/client'
 import OrderStatusTracker from './OrderStatusTracker'
 import ApproveButton from './cta/ApproveButton'
 import SkipButton from './cta/SkipButton'
@@ -18,13 +19,18 @@ import {
 } from '@/domain/schema/template/system-fields'
 import { selectValue } from '@/domain/resource/types'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
-import { PageModelProps, withDetailPage } from '@/lib/resource/withDetailPage'
+import { RouteProps, readDetailPageModel } from '@/lib/resource/detailPage'
 
-const OrderDetail: FC<PageModelProps> = async ({
-  resource,
-  schema,
-  session: { user },
-}) => {
+const OrderDetail: FC<RouteProps> = async (props) => {
+  const {
+    resource,
+    schema,
+    session: { user },
+  } = await readDetailPageModel({
+    resourceType: ResourceType.Order,
+    pageProps: props,
+  })
+
   const orderBills = await findOrderBills(resource.id)
 
   const status =
@@ -162,4 +168,4 @@ const OrderDetail: FC<PageModelProps> = async ({
   )
 }
 
-export default withDetailPage('Order', OrderDetail)
+export default OrderDetail

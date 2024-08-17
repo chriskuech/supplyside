@@ -1,4 +1,5 @@
 import { Account as AccountCoreModel, Blob, Prisma } from '@prisma/client'
+import { getDownloadPath } from '@/domain/blobs/utils'
 
 export type Account = {
   id: string
@@ -16,3 +17,18 @@ export type AccountModel = AccountCoreModel & {
 export const accountInclude = {
   LogoBlob: true,
 } satisfies Prisma.AccountInclude
+
+export const mapAccountModel = (model: AccountModel): Account => ({
+  id: model.id,
+  key: model.key,
+  name: model.name,
+  address: model.address,
+  logoPath:
+    model.LogoBlob &&
+    getDownloadPath({
+      blobId: model.LogoBlob.id,
+      mimeType: model.LogoBlob.mimeType,
+      fileName: 'logo',
+    }),
+  logoBlobId: model.LogoBlob?.id ?? null,
+})

@@ -2,19 +2,21 @@
 
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { ResourceType } from '@prisma/client'
-import { readSchema } from '../schema/actions'
-import { readResources } from './actions'
+import { readAndExtendSession } from '../iam/actions'
 import CreateResourceButton from './CreateResourceButton'
 import ResourceTable from './ResourceTable'
+import { readResources } from '@/domain/resource/actions'
+import { readSchema } from '@/domain/schema/actions'
 
 type Props = {
   resourceType: ResourceType
 }
 
 export default async function ListPage({ resourceType }: Props) {
+  const { accountId } = await readAndExtendSession()
   const [schema, resources] = await Promise.all([
-    readSchema({ resourceType }),
-    readResources({ type: resourceType }),
+    readSchema({ accountId, resourceType }),
+    readResources({ accountId, type: resourceType }),
   ])
 
   return (

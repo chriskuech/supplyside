@@ -1,7 +1,7 @@
 'use server'
 
 import { RedirectType, redirect } from 'next/navigation'
-import { clearSession } from '@/domain/iam/session/actions'
+import { clearSession } from '@/lib/iam/actions'
 
 export const handleLogout = async () => {
   clearSession()

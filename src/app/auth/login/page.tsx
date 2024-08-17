@@ -1,12 +1,10 @@
 import { Box } from '@mui/material'
 import { redirect, RedirectType } from 'next/navigation'
 import LoginForm from './LoginForm'
-import { readSession } from '@/lib/iam/actions'
+import { hasSession } from '@/lib/iam/actions'
 
 export default async function Login() {
-  const session = await readSession()
-
-  if (session) redirect('/', RedirectType.replace)
+  if (await hasSession()) redirect('/', RedirectType.replace)
 
   return (
     <Box

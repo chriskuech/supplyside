@@ -2,24 +2,8 @@
 
 import { faker } from '@faker-js/faker'
 import { applyTemplate } from '../../schema/template/actions'
-import { getDownloadPath } from '../../blobs/utils'
-import { Account, AccountModel, accountInclude } from './types'
+import { Account, accountInclude, mapAccountModel } from './types'
 import prisma from '@/lib/prisma'
-
-export const mapAccountModel = (model: AccountModel): Account => ({
-  id: model.id,
-  key: model.key,
-  name: model.name,
-  address: model.address,
-  logoPath:
-    model.LogoBlob &&
-    getDownloadPath({
-      blobId: model.LogoBlob.id,
-      mimeType: model.LogoBlob.mimeType,
-      fileName: 'logo',
-    }),
-  logoBlobId: model.LogoBlob?.id ?? null,
-})
 
 export const createAccount = async (): Promise<void> => {
   const temporaryKey = faker.string.alpha({ casing: 'lower', length: 5 })

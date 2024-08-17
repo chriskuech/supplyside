@@ -19,7 +19,11 @@ export default async function AdminPage() {
   return (
     <Container sx={{ my: 5 }}>
       <Stack spacing={2}>
-        <Stack direction="row" alignItems="center">
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent={'space-between'}
+        >
           <Typography variant="h4">Accounts</Typography>
           <CreateAccount />
         </Stack>

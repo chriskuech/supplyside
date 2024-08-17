@@ -5,7 +5,8 @@ import { IconButton } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { Account } from '@prisma/client'
 import { closeSnackbar, enqueueSnackbar } from 'notistack'
-import { deleteAccount, impersonateAccount, refreshAccount } from './actions'
+import { deleteAccount, refreshAccount } from './actions'
+import { impersonate } from '@/lib/iam/actions'
 import { systemAccountId } from '@/lib/const'
 
 type Props = {
@@ -16,6 +17,12 @@ export default function AccountsTable({ accounts }: Props) {
   return (
     <DataGrid
       columns={[
+        {
+          field: 'key',
+          headerName: 'ID',
+          type: 'string',
+          width: 100,
+        },
         {
           field: 'name',
           headerName: 'Name',
@@ -77,7 +84,7 @@ export default function AccountsTable({ accounts }: Props) {
       ]}
       rows={accounts}
       rowSelection={false}
-      onRowClick={({ row: { id } }) => impersonateAccount(id)}
+      onRowClick={({ row: { id } }) => impersonate(id)}
     />
   )
 }

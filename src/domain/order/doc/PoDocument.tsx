@@ -3,7 +3,7 @@
 
 'use server'
 
-import { ReactNode } from 'react'
+import { Fragment, ReactNode } from 'react'
 import { Cost, FieldType } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { isTruthy } from 'remeda'
@@ -490,7 +490,7 @@ export default async function PoDocument({
                   } as const
 
                   return (
-                    <>
+                    <Fragment key={line.id}>
                       <tr
                         style={{
                           pageBreakInside: 'avoid',
@@ -583,7 +583,7 @@ export default async function PoDocument({
                           )}
                         </td>
                       </tr>
-                    </>
+                    </Fragment>
                   )
                 }),
               )}
@@ -606,7 +606,10 @@ export default async function PoDocument({
                   breakInside: 'avoid',
                 }}
               >
-                <tr style={{ backgroundColor: '#CCCCCC', fontWeight: 'bold' }}>
+                <tr
+                  key="subtotal"
+                  style={{ backgroundColor: '#CCCCCC', fontWeight: 'bold' }}
+                >
                   <td
                     style={{
                       width: '150px',
@@ -643,7 +646,7 @@ export default async function PoDocument({
                     : item.value
 
                   return (
-                    <tr key={index}>
+                    <tr key={'data-' + index}>
                       <td
                         style={{
                           borderTop: 0,
@@ -669,7 +672,7 @@ export default async function PoDocument({
                     </tr>
                   )
                 })}
-                <tr style={{ backgroundColor: '#C7E1F2' }}>
+                <tr key="total" style={{ backgroundColor: '#C7E1F2' }}>
                   <td
                     style={{
                       fontWeight: 'bold',

@@ -2,7 +2,7 @@
 
 import { RedirectType, redirect } from 'next/navigation'
 import { z } from 'zod'
-import { createSession } from '@/domain/iam/session/actions'
+import { createSession } from '@/lib/iam/actions'
 
 const schema = z.object({
   email: z.string().email(),
@@ -19,7 +19,8 @@ export const handleLogin = async (state: unknown, formData: FormData) => {
     await createSession(email, password)
 
     redirect('/', RedirectType.replace)
-  } catch {
+  } catch (error) {
+    console.error(error)
     return { error: 'Incorrect email or password' }
   }
 }
