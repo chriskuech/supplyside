@@ -1,7 +1,7 @@
 'use client'
 
 import { Autocomplete, TextField } from '@mui/material'
-import { impersonate } from '@/domain/iam/session'
+import { impersonate } from '@/domain/iam/session/actions'
 
 type Props = {
   account: { id: string; name: string }

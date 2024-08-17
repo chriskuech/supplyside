@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { readAndExtendSession } from '@/domain/iam/session'
+import { readAndExtendSession } from '@/domain/iam/session/actions'
 
 export async function middleware(request: NextRequest) {
   const session = await readAndExtendSession().catch(() => null)

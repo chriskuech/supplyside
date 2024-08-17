@@ -11,7 +11,7 @@ import Logo from './Logo'
 import { UserMenu } from './UserMenu'
 import { AccountMenu } from './AccountMenu'
 import ImpersonationControl from './ImpersonationControl'
-import { readSession } from '@/lib/iam/session'
+import { readSession } from '@/lib/iam/actions'
 import prisma from '@/lib/prisma'
 
 export default async function AppBar() {

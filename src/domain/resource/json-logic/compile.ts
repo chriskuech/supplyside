@@ -2,7 +2,7 @@ import { fail } from 'assert'
 import { FieldType, Value } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { OrderBy, Where } from './types'
-import { mapUuidToBase64, sanitizeValue } from '@/lib/sanitize'
+import { mapUuidToBase64, sanitizeValue } from './sanitize'
 import { Schema, Field } from '@/domain/schema/types'
 
 export type MapToSqlParams = {

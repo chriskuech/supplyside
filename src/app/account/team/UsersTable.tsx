@@ -6,7 +6,7 @@ import { IconButton } from '@mui/material'
 import { Clear } from '@mui/icons-material'
 import { filter, fromEntries, keys, map, pipe } from 'remeda'
 import { deleteUser, updateUser } from './actions'
-import { User } from '@/domain/iam/user'
+import { User } from '@/domain/iam/user/types'
 
 /**
  * @param oldObj

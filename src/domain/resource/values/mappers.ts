@@ -2,7 +2,7 @@ import { pick } from 'remeda'
 import { Value, ValueInput, ValueResource } from './types'
 import { ResourceValueModel, ValueModel } from './model'
 import { fields } from '@/domain/schema/template/system-fields'
-import { mapUserModel } from '@/domain/iam/user'
+import { mapUserModel } from '@/domain/iam/user/types'
 
 export const mapValueToInput = (value: Value): ValueInput => ({
   boolean: value.boolean ?? undefined,

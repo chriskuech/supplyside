@@ -1,12 +1,12 @@
 'use server'
 
 import {
-  User,
   inviteUser,
   readUsers as domainReadUsers,
-} from '@/domain/iam/user'
+} from '@/domain/iam/user/actions'
 import prisma from '@/lib/prisma'
-import { readSession } from '@/lib/iam/session'
+import { readSession } from '@/lib/iam/actions'
+import { User } from '@/domain/iam/user/types'
 
 type UpdateUserParams = { id: string } & Partial<User>
 

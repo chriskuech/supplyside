@@ -6,16 +6,16 @@ import { isString, pick } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { readResource } from '../actions'
 import { selectValue } from '../types'
+import {
+  recalculateSubtotalCost,
+  recalculateItemizedCosts,
+} from '../cost/actions'
 import prisma from '@/lib/prisma'
 import { createBlob } from '@/domain/blobs/actions'
 import { fields, findField } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
-import {
-  recalculateItemizedCosts,
-  recalculateSubtotalCost,
-} from '@/domain/cost/actions'
 import { Field, selectField } from '@/domain/schema/types'
-import { readSession } from '@/lib/iam/session' // TODO: this breaks SoC
+import { readSession } from '@/lib/iam/actions' // TODO: this breaks SoC
 
 export type UpdateValueDto = {
   resourceId: string

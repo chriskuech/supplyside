@@ -5,8 +5,8 @@ import { isEmpty } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import prisma from '@/lib/prisma'
 import { createBlob } from '@/domain/blobs/actions'
-import * as domain from '@/domain/iam/user'
-import { readSession } from '@/lib/iam/session'
+import { readSession } from '@/lib/iam/actions'
+import * as domain from '@/domain/iam/user/actions'
 
 type ClientErrors = Record<string, string>
 

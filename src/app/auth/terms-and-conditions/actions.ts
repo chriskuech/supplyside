@@ -2,7 +2,7 @@
 
 import { RedirectType, redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
-import { readSession } from '@/lib/iam/session'
+import { readSession } from '@/lib/iam/actions'
 
 export const acceptTermsAndConditions = async () => {
   const { userId } = await readSession()

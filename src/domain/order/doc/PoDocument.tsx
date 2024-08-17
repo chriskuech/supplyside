@@ -14,7 +14,7 @@ import { readBlob } from '@/domain/blobs/actions'
 import { readSchema } from '@/domain/schema/actions'
 import { selectValue } from '@/domain/resource/types'
 import { allValues } from '@/lib/allValues'
-import { readAccount } from '@/domain/iam/account'
+import { readAccount } from '@/domain/iam/account/actions'
 
 type Props = {
   accountId: string

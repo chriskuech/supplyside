@@ -2,7 +2,7 @@
 
 import prisma from '@/lib/prisma'
 import { Option } from '@/domain/schema/types'
-import { readSession } from '@/lib/iam/session'
+import { readSession } from '@/lib/iam/actions'
 
 export const readUsers = async (): Promise<Option[]> => {
   const { accountId } = await readSession()

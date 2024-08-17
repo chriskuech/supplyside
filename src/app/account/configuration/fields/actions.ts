@@ -6,7 +6,7 @@ import { P, match } from 'ts-pattern'
 import prisma from '@/lib/prisma'
 import { Value, ValueInput, valueInclude } from '@/domain/resource/values/types'
 import { mapValueFromModel } from '@/domain/resource/values/mappers'
-import { readSession } from '@/lib/iam/session'
+import { readSession } from '@/lib/iam/actions'
 
 export type OptionPatch = {
   id: string // patch ID -- must be `id` to work with mui

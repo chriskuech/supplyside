@@ -1,8 +1,8 @@
 'use server'
 
-import * as account from '@/domain/iam/account'
+import * as account from '@/domain/iam/account/actions'
 import { applyTemplate } from '@/domain/schema/template/actions'
-import * as session from '@/domain/iam/session'
+import * as session from '@/domain/iam/session/actions'
 
 export const refreshAccount = async (accountId: string) => {
   await applyTemplate(accountId)

@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import prisma from '@/lib/prisma'
 import { createBlob } from '@/domain/blobs/actions'
-import { readSession } from '@/lib/iam/session'
+import { readSession } from '@/lib/iam/actions'
 
 type ClientErrors = Record<string, string[]>
 

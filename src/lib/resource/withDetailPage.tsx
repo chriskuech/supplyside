@@ -6,8 +6,8 @@ import { allValues } from '../allValues'
 import { Schema } from '@/domain/schema/types'
 import { Resource } from '@/domain/resource/types'
 import { readSchema } from '@/domain/schema/actions'
-import { readSession } from '@/lib/iam/session'
-import { Session } from '@/domain/iam/session'
+import { readSession } from '@/lib/iam/actions'
+import { Session } from '@/domain/iam/session/types'
 import { readResource } from '@/domain/resource/actions'
 
 export type PageModelProps = {

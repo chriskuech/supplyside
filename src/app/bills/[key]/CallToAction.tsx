@@ -21,7 +21,7 @@ import { transitionStatus } from '@/lib/resource/actions'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { Schema, selectField } from '@/domain/schema/types'
 import FieldControl from '@/lib/resource/fields/FieldControl'
-import { User } from '@/domain/iam/user'
+import { User } from '@/domain/iam/user/types'
 
 type Props = {
   user: User

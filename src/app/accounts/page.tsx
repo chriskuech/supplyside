@@ -3,7 +3,7 @@ import AccountsTable from './AccountsTable'
 import CreateAccount from './CreateAccount'
 import prisma from '@/lib/prisma'
 import { systemAccountId } from '@/lib/const'
-import { readSession } from '@/lib/iam/session'
+import { readSession } from '@/lib/iam/actions'
 
 export default async function AdminPage() {
   const { accountId } = await readSession()

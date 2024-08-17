@@ -4,37 +4,11 @@ import assert from 'assert'
 import { compare } from 'bcrypt'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { Session as SessionCoreModel } from '@prisma/client'
-import {
-  Account,
-  AccountModel,
-  accountInclude,
-  mapAccountModel,
-} from './account'
-import { User, UserModel, mapUserModel, userInclude } from './user'
+import { accountInclude } from '../account/types'
+import { userInclude } from '../user/types'
+import { Session, mapSessionModel } from './types'
 import prisma from '@/lib/prisma'
 import { systemAccountId } from '@/lib/const'
-
-export type Session = {
-  accountId: string
-  userId: string
-  account: Account
-  user: User
-  expiresAt: Date
-}
-
-export type SessionModel = SessionCoreModel & {
-  Account: AccountModel
-  User: UserModel
-}
-
-export const mapSessionModel = (model: SessionModel): Session => ({
-  accountId: model.Account.id,
-  userId: model.User.id,
-  account: mapAccountModel(model.Account),
-  user: mapUserModel(model.User),
-  expiresAt: model.expiresAt,
-})
 
 const SESSION_LIFESPAN_IN_DAYS = 7
 

@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readBlob } from '@/domain/blobs/actions'
 import prisma from '@/lib/prisma'
-import { readSession } from '@/lib/iam/session'
+import { readSession } from '@/lib/iam/actions'
 
 /**
  * /api/download/[filename]?blobId=<blobId>[&no-impersonation][&preview]
