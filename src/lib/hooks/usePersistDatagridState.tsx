@@ -28,32 +28,11 @@ export const usePersistDatagridState = (storageKey: string) => {
   useLayoutEffect(() => {
     const stateFromLocalStorage = localStorage?.getItem(storageKey);
     setInitialState(stateFromLocalStorage ? JSON.parse(stateFromLocalStorage) : {});
-
-    // // handle refresh and navigating away/refreshing
-    // window.addEventListener('beforeunload', saveStateToLocalstorage);
-
-    // return () => {
-    //   // // in case of an SPA remove the event-listener
-    //   // window.removeEventListener('beforeunload', saveStateToLocalstorage);
-    //   // saveStateToLocalstorage();
-    // };
   }, [saveStateToLocalstorage]);
-
-  // useEffect(() => {
-  //   if (apiRef?.current?.subscribeEvent) {
-  //     console.log('asd')
-  //     return apiRef.current.subscribeEvent('columnHeaderDragEnd', (params) => {
-  //       console.log('order params', params)
-  //     })
-  //   }
-  // }, [apiRef])
 
   return {
     apiRef,
     initialState,
     saveStateToLocalstorage,
-    // onColumnVisibilityModelChange,
-    // onColumnWidthChange,
-    // onColumnOrderChange,
   }
 };
