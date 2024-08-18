@@ -1,6 +1,6 @@
 'use client'
 
-import assert, { fail } from 'assert'
+import { fail, ok } from 'assert'
 import {
   Accordion,
   AccordionDetails,
@@ -235,7 +235,7 @@ export default function ResourceFieldsControl({
  * @returns an array of arrays with the elements of the original array
  */
 const chunkByN = <T,>(arr: T[], n: number): T[][] => {
-  assert(n > 0)
+  ok(n > 0)
   const m = Math.floor(arr.length / n)
   const r = arr.length % n
   return range(0, n).map((i) =>

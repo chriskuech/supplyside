@@ -1,6 +1,6 @@
 'use client'
 
-import assert from 'assert'
+import { ok } from 'assert'
 import {
   Autocomplete,
   Box,
@@ -125,7 +125,7 @@ function ResourceField(
     )
   }
 
-  assert(onChange)
+  ok(onChange)
 
   return (
     <EditableResourceField

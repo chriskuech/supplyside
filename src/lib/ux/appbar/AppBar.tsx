@@ -15,7 +15,7 @@ import { hasSession, readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
 
 export default async function AppBar() {
-  const session = hasSession() ? await readSession() : null
+  const session = (await hasSession()) ? await readSession() : null
 
   const accounts = await prisma().account.findMany({
     orderBy: {
