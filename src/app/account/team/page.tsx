@@ -18,7 +18,7 @@ export default async function Team() {
         <Stack
           direction={'row'}
           justifyContent={'space-between'}
-          alignItems={'center'}
+          alignItems={'start'}
         >
           <Typography variant={'h4'} textAlign={'left'}>
             Team
