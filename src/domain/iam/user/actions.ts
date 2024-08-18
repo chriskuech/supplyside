@@ -3,8 +3,7 @@
 import { faker } from '@faker-js/faker'
 import { hash } from 'bcrypt'
 import { revalidatePath } from 'next/cache'
-import { getDownloadPath } from '../blobs/utils'
-import { User } from './types'
+import { User, mapUserModel, userInclude } from './types'
 import smtp from '@/lib/smtp'
 import config from '@/lib/config'
 import prisma from '@/lib/prisma'
@@ -59,27 +58,10 @@ export async function readUser({ userId }: ReadUserParams): Promise<User> {
 
   const user = await prisma().user.findUniqueOrThrow({
     where: { id: userId },
-    include: {
-      ImageBlob: true,
-    },
+    include: userInclude,
   })
 
-  const profilePicPath =
-    user.ImageBlob &&
-    getDownloadPath({
-      blobId: user.ImageBlob.id,
-      mimeType: user.ImageBlob.mimeType,
-      fileName: 'profile-pic',
-    })
-
-  return {
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    fullName: `${user.firstName} ${user.lastName}`,
-    email: user.email,
-    profilePicPath,
-  }
+  return mapUserModel(user)
 }
 
 type ReadUsersParams = { accountId: string }
@@ -98,20 +80,7 @@ export async function readUsers({
     },
   })
 
-  return users.map((user) => ({
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    fullName: `${user.firstName} ${user.lastName}`,
-    email: user.email,
-    profilePicPath:
-      user.ImageBlob &&
-      getDownloadPath({
-        blobId: user.ImageBlob.id,
-        mimeType: user.ImageBlob.mimeType,
-        fileName: 'profile-pic',
-      }),
-  }))
+  return users.map(mapUserModel)
 }
 
 type DeleteUserParams = { accountId: string; userId: string }

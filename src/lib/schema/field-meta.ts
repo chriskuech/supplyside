@@ -1,11 +1,11 @@
 'use server'
 
+import { readSession } from '@/lib/iam/actions'
 import prisma from '@/lib/prisma'
 import { Option } from '@/domain/schema/types'
-import { requireSession } from '@/lib/session'
 
 export const readUsers = async (): Promise<Option[]> => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   const users = await prisma().user.findMany({
     where: { accountId },

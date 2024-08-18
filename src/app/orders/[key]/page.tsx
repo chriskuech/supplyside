@@ -9,8 +9,7 @@ import StatusTransitionButton from './cta/StatusTransitionButton'
 import SendPoButton from './cta/SendPoButton'
 import Toolbar from './Toolbar'
 import { findOrderBills } from './actions'
-import LinesAndCosts from '@/lib/resource/LinesAndCosts'
-import { requireSessionWithRedirect } from '@/lib/session'
+import { requireSessionWithRedirect } from '@/lib/iam/actions'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import { readResource } from '@/lib/resource/actions'
 import { readSchema } from '@/lib/schema/actions'
@@ -18,19 +17,20 @@ import {
   fields,
   orderStatusOptions,
 } from '@/domain/schema/template/system-fields'
-import { readUser } from '@/lib/iam/actions'
 import { selectValue } from '@/domain/resource/types'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
+import { readUser } from '@/domain/iam/user/actions'
+import LinesAndCosts from '@/lib/resource/grid/LinesAndCosts'
 
 export default async function OrderDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
-  await requireSessionWithRedirect()
+  const { userId } = await requireSessionWithRedirect()
 
   const [user, schema, resource] = await Promise.all([
-    readUser(),
+    readUser({ userId }),
     readSchema({ resourceType: 'Order' }),
     readResource({ type: 'Order', key: Number(key) }),
   ])

@@ -5,18 +5,33 @@ import MAppBar from '@mui/material/AppBar'
 import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 import Link from 'next/link'
-import { readSession } from '../session'
-import { systemAccountId } from '../const'
-import ImpersonationControl from '../iam/ImpersonationControl'
 import { UserMenu } from './UserMenu'
 import { AccountMenu } from './AccountMenu'
 import { NavMenu } from './NavMenu'
 import Logo from './Logo'
-import { readUser } from '@/domain/iam/user'
+import ImpersonationControl from './ImpersonationControl'
+import { systemAccountId } from '@/lib/const'
+import { readSession } from '@/lib/iam/actions'
+import prisma from '@/lib/prisma'
+import { readUser } from '@/domain/iam/user/actions'
 
 export default async function AppBar() {
   const session = await readSession()
-  const user = session ? await readUser({ userId: session.userId }) : null
+
+  const [user, accounts] = await Promise.all([
+    session ? await readUser({ userId: session.userId }) : null,
+    prisma().account.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+  ])
+
+  const account = accounts.find((a) => a.id === session?.accountId)
 
   return (
     <MAppBar>
@@ -39,11 +54,18 @@ export default async function AppBar() {
                 justifyContent={'end'}
                 spacing={1}
               >
-                <Stack width={300} justifyContent={'center'}>
-                  <ImpersonationControl />
-                </Stack>
+                {user?.accountId === systemAccountId && account && (
+                  <>
+                    <Stack width={300} justifyContent={'center'}>
+                      <ImpersonationControl
+                        account={account}
+                        accounts={accounts}
+                      />
+                    </Stack>
 
-                <Box width={10} />
+                    <Box width={10} />
+                  </>
+                )}
 
                 {session.accountId !== systemAccountId && (
                   <>

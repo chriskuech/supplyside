@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { FieldType, ResourceType } from '@prisma/client'
 import { P, match } from 'ts-pattern'
-import { requireSession } from '@/lib/session'
+import { readSession } from '@/lib/iam/actions'
 import prisma from '@/lib/prisma'
 import { Value, ValueInput, valueInclude } from '@/domain/resource/values/types'
 import { mapValueFromModel } from '@/domain/resource/values/mappers'
@@ -39,7 +39,7 @@ export type CreateFieldParams = {
 }
 
 export const createField = async (params: CreateFieldParams) => {
-  const session = await requireSession()
+  const session = await readSession()
 
   await prisma().field.create({
     data: {
@@ -60,7 +60,7 @@ export const createField = async (params: CreateFieldParams) => {
 }
 
 export const readFields = async (): Promise<Field[]> => {
-  const session = await requireSession()
+  const session = await readSession()
 
   const fields = await prisma().field.findMany({
     where: {
@@ -100,7 +100,7 @@ export type UpdateFieldDto = {
 }
 
 export const updateField = async (dto: UpdateFieldDto) => {
-  const session = await requireSession()
+  const session = await readSession()
 
   await Promise.all([
     prisma().field.update({
@@ -184,7 +184,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
 }
 
 export const deleteField = async (fieldId: string) => {
-  const session = await requireSession()
+  const session = await readSession()
 
   await prisma().field.delete({
     where: {

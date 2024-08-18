@@ -1,5 +1,5 @@
 import { Container, Stack, Typography } from '@mui/material'
-import { requireSessionWithRedirect } from '@/lib/session'
+import { requireSessionWithRedirect } from '@/lib/iam/actions'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import { readSchema } from '@/domain/schema/actions'
 import { readResource } from '@/domain/resource/actions'

@@ -1,9 +1,9 @@
 import { Stack, Typography, Box } from '@mui/material'
-import { readSchema } from '../schema/actions'
-import { readResources } from './actions'
+import { readResources } from '../actions'
+import ItemizedCostLines from './ItemizedCostLines'
+import ResourceTable from './ResourceTable'
+import { readSchema } from '@/lib/schema/actions'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
-import ItemizedCostLines from '@/lib/resource/ItemizedCostLines'
-import ResourceTable from '@/lib/resource/ResourceTable'
 import { Data, Resource } from '@/domain/resource/types'
 import { Where } from '@/domain/resource/json-logic/types'
 

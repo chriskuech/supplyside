@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { requireSessionWithRedirect } from '@/lib/session'
+import { requireSessionWithRedirect } from '@/lib/iam/actions'
 import { systemAccountId } from '@/lib/const'
 
 export default async function Home() {

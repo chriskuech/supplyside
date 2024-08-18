@@ -5,26 +5,26 @@ import { green, red, yellow } from '@mui/material/colors'
 import Toolbar from './Toolbar'
 import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
-import { requireSessionWithRedirect } from '@/lib/session'
+import { requireSessionWithRedirect } from '@/lib/iam/actions'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
 import { readResource } from '@/domain/resource/actions'
 import { readSchema } from '@/domain/schema/actions'
-import LinesAndCosts from '@/lib/resource/LinesAndCosts'
 import {
   billStatusOptions,
   fields,
 } from '@/domain/schema/template/system-fields'
 import { selectValue } from '@/domain/resource/types'
-import { readUser } from '@/lib/iam/actions'
+import { readUser } from '@/domain/iam/user/actions'
+import LinesAndCosts from '@/lib/resource/grid/LinesAndCosts'
 
 export default async function BillsDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
-  const { accountId } = await requireSessionWithRedirect()
+  const { accountId, userId } = await requireSessionWithRedirect()
   const [user, resource, schema] = await Promise.all([
-    readUser(),
+    readUser({ userId }),
     readResource({ accountId, type: 'Bill', key: Number(key) }),
     readSchema({ accountId, resourceType: 'Bill' }),
   ])

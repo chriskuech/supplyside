@@ -1,75 +1,70 @@
 'use server'
 
-import { systemAccountId } from '../const'
-import { User } from './types'
-import { inviteUser } from '@/domain/iam/user'
-import prisma from '@/lib/prisma'
-import { requireSession } from '@/lib/session'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import {
+  clearSession as domainClearSession,
+  createSession as domainCreateSession,
+  readSession as domainReadSession,
+  readAndExtendSession as domainReadAndExtendSession,
+  impersonate as domainImpersonate,
+} from '@/domain/iam/session/actions'
 
-type UpdateUserParams = { id: string } & Partial<User>
+const sessionIdCookieName = 'sessionId'
 
-export const updateUser = async ({ id, ...params }: UpdateUserParams) => {
-  const { accountId } = await requireSession()
+export const createSession = async (email: string, password: string) => {
+  const session = await domainCreateSession(email, password)
 
-  return await prisma().user.update({
-    where: { accountId, id },
-    data: params,
+  cookies().set(sessionIdCookieName, session.id, {
+    sameSite: true,
+    secure: process.env.NODE_ENV !== 'development',
+    expires: session.expiresAt,
   })
 }
 
-export const readUser = async (): Promise<User> => {
-  const { userId } = await requireSession()
+export const hasSession = () => !!cookies().get(sessionIdCookieName)?.value
 
-  const user = await prisma().user.findUniqueOrThrow({
-    where: { id: userId },
-    select: {
-      id: true,
-      accountId: true,
-      email: true,
-      firstName: true,
-      lastName: true,
-      isAdmin: true,
-      isApprover: true,
-    },
-  })
+export const readSession = async () => {
+  const sessionId = cookies().get(sessionIdCookieName)?.value
+  if (!sessionId) return redirect('/auth/login')
 
-  return {
-    ...user,
-    isGlobalAdmin: user.accountId === systemAccountId,
-  }
+  const session = await domainReadSession(sessionId)
+
+  return session
 }
 
-export const readUsers = async (): Promise<User[]> => {
-  const { accountId } = await requireSession()
+// this should be in a middleware, but https://github.com/vercel/next.js/issues/69002
+export const requireSessionWithRedirect = async () => {
+  const sessionId = cookies().get(sessionIdCookieName)?.value
+  if (!sessionId) return redirect('/auth/login')
 
-  const users = await prisma().user.findMany({
-    where: { accountId },
-    orderBy: { email: 'asc' },
-    select: {
-      id: true,
-      accountId: true,
-      email: true,
-      firstName: true,
-      lastName: true,
-      isAdmin: true,
-      isApprover: true,
-    },
-  })
+  const session = await domainReadAndExtendSession(sessionId)
 
-  return users.map((user) => ({
-    ...user,
-    isGlobalAdmin: user.accountId === systemAccountId,
-  }))
+  if (!session) return redirect('/auth/login')
+
+  if (session.user.requirePasswordReset)
+    return redirect('/auth/update-password')
+
+  if (!session.user.tsAndCsSignedAt)
+    return redirect('/auth/terms-and-conditions')
+
+  return session
 }
 
-export const inviteUserToAccount = async (email: string) => {
-  const { accountId } = await requireSession()
+export const clearSession = async () => {
+  const sessionId = cookies().get(sessionIdCookieName)?.value
 
-  await inviteUser({ accountId, email })
+  if (!sessionId) return
+
+  await domainClearSession(sessionId)
+
+  cookies().delete(sessionIdCookieName)
 }
 
-export const deleteUser = async (userId: string) => {
-  const { accountId } = await requireSession()
+export const impersonate = async (accountId: string) => {
+  const session = await readSession()
 
-  await prisma().user.delete({ where: { accountId, id: userId } })
+  await domainImpersonate(session.id, accountId)
+
+  redirect('/')
 }

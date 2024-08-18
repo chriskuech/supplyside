@@ -1,7 +1,7 @@
 import { Box } from '@mui/material'
 import { redirect, RedirectType } from 'next/navigation'
 import LoginForm from './LoginForm'
-import { readSession } from '@/lib/session'
+import { readSession } from '@/lib/iam/actions'
 
 export default async function Login() {
   const session = await readSession()

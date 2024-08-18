@@ -9,12 +9,12 @@ import { P, match } from 'ts-pattern'
 import { useMemo } from 'react'
 import { difference } from 'remeda'
 import { useSnackbar } from 'notistack'
-import { formatDate } from '../formatDate'
-import CustomGridToolbar from '../ux/CustomGridToolbar'
-import ContactCard from './fields/ContactCard'
-import { deleteResource } from './actions'
-import FieldGridEditCell from './fields/FieldGridEditCell'
-import FieldControl from './fields/FieldControl'
+import { formatDate } from '../../formatDate'
+import CustomGridToolbar from '../../ux/CustomGridToolbar'
+import ContactCard from '../fields/ContactCard'
+import { deleteResource } from '../actions'
+import FieldGridEditCell from '../fields/FieldGridEditCell'
+import FieldControl from '../fields/FieldControl'
 import { Resource, ResourceField } from '@/domain/resource/types'
 import { Option, Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
@@ -160,6 +160,12 @@ export default function ResourceTable({
               ...emptyValue,
               user: {
                 id: value.userId,
+                accountId: '...',
+                isAdmin: false,
+                isApprover: false,
+                isGlobalAdmin: false,
+                requirePasswordReset: false,
+                tsAndCsSignedAt: null,
                 email: '...',
                 firstName: '...',
                 fullName: '...',

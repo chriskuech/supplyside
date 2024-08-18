@@ -7,7 +7,6 @@ import { revalidatePath } from 'next/cache'
 import { readResource } from '../actions'
 import { selectValue } from '../types'
 import prisma from '@/lib/prisma'
-import { requireSession } from '@/lib/session'
 import { createBlob } from '@/domain/blobs/actions'
 import { fields, findField } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
@@ -16,6 +15,7 @@ import {
   recalculateSubtotalCost,
 } from '@/domain/cost/actions'
 import { Field, selectField } from '@/domain/schema/types'
+import { readSession } from '@/lib/iam/actions'
 
 export type UpdateValueDto = {
   resourceId: string
@@ -207,7 +207,7 @@ export const uploadFile = async (
   formData: FormData,
 ) => {
   revalidatePath('')
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   const file = formData.get('file')
 
@@ -265,7 +265,7 @@ export const uploadFiles = async (
   formData: FormData,
 ) => {
   revalidatePath('')
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   const files = formData.getAll('files')
 

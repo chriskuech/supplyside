@@ -21,8 +21,8 @@ import {
   Settings,
 } from '@mui/icons-material'
 import { useState } from 'react'
-import { useThemePreference } from './DynamicThemeProvider'
-import { User } from '@/domain/iam/types'
+import { useThemePreference } from '../DynamicThemeProvider'
+import { User } from '@/domain/iam/user/types'
 
 type Props = {
   user: User

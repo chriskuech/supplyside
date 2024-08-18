@@ -3,8 +3,8 @@
 import { Prisma, ResourceType } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { difference } from 'remeda'
-import { requireSession } from '@/lib/session'
 import prisma from '@/lib/prisma'
+import { readSession } from '@/lib/iam/actions'
 
 export type Field = {
   id: string
@@ -25,7 +25,7 @@ export type Schema = {
 }
 
 export const readSchemas = async (): Promise<Schema[]> => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   const existingSchemas = await prisma().schema.findMany({
     where: { accountId, isSystem: false },
@@ -89,7 +89,7 @@ export const updateSchema = async (dto: {
   schemaId: string
   sectionIds: string[]
 }) => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   await prisma().schema.update({
     where: {
@@ -133,7 +133,7 @@ export const updateSection = async (dto: {
   name: string
   fieldIds: string[]
 }) => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   await Promise.all([
     prisma().sectionField.deleteMany({
@@ -178,7 +178,7 @@ export const updateSection = async (dto: {
 }
 
 export const deleteSection = async (sectionId: string) => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   await prisma().section.delete({
     where: {
