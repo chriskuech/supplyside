@@ -4,10 +4,10 @@ import { fail } from 'assert'
 import { NextRequest, NextResponse } from 'next/server'
 import { Message } from 'postmark'
 import { createBlob } from '@/domain/blobs/actions'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 import { createResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
-import smtp from '@/lib/smtp'
+import smtp from '@/services/smtp'
 
 type FileParam = {
   content: string

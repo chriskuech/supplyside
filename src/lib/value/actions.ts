@@ -1,7 +1,7 @@
 'use server'
 
 import { Prisma, Value } from '@prisma/client'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 
 export const createValue = (
   data: Prisma.ValueUncheckedCreateInput,

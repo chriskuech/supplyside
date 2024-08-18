@@ -4,9 +4,9 @@ import { faker } from '@faker-js/faker'
 import { hash } from 'bcrypt'
 import { revalidatePath } from 'next/cache'
 import { User, mapUserModel, userInclude } from './types'
-import smtp from '@/lib/smtp'
-import config from '@/lib/config'
-import prisma from '@/lib/prisma'
+import smtp from '@/services/smtp'
+import config from '@/services/config'
+import prisma from '@/services/prisma'
 
 const loginPath = '/auth/login'
 

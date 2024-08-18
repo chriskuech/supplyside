@@ -17,7 +17,11 @@ import {
 import { Add, Clear } from '@mui/icons-material'
 import { match } from 'ts-pattern'
 import { Resource, selectValue } from '@/domain/resource/types'
-import { createCost, deleteCost, updateCost } from '@/domain/cost/actions'
+import {
+  createCost,
+  deleteCost,
+  updateCost,
+} from '@/domain/resource/cost/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 
 type Props = {

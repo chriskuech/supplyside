@@ -2,7 +2,7 @@
 
 import { compare } from 'bcrypt'
 import { Session, mapSessionModel, sessionIncludes } from './types'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 import { systemAccountId } from '@/lib/const'
 
 const SESSION_LIFESPAN_IN_DAYS = 7

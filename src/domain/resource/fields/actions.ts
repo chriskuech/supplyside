@@ -6,14 +6,14 @@ import { isString, pick } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { readResource } from '../actions'
 import { selectValue } from '../types'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 import { createBlob } from '@/domain/blobs/actions'
 import { fields, findField } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
 import {
   recalculateItemizedCosts,
   recalculateSubtotalCost,
-} from '@/domain/cost/actions'
+} from '@/domain/resource/cost/actions'
 import { Field, selectField } from '@/domain/schema/types'
 import { readSession } from '@/lib/iam/actions'
 

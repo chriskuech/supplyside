@@ -1,6 +1,6 @@
 import { P, match } from 'ts-pattern'
 import { z } from 'zod'
-import { JsonLogicValue } from '../domain/resource/json-logic/types'
+import { JsonLogicValue } from './types'
 
 export const sanitizeValue = (value: JsonLogicValue) =>
   match(value)

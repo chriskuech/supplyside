@@ -1,7 +1,7 @@
 'use server'
 
 import { RedirectType, redirect } from 'next/navigation'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 import { readSession } from '@/lib/iam/actions'
 
 export const acceptTermsAndConditions = async () => {

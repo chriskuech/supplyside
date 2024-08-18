@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { FieldType, ResourceType } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { readSession } from '@/lib/iam/actions'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 import { Value, ValueInput, valueInclude } from '@/domain/resource/values/types'
 import { mapValueFromModel } from '@/domain/resource/values/mappers'
 

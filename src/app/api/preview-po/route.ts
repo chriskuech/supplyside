@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readSession } from '@/lib/iam/actions'
 import { renderPo } from '@/domain/order/renderPo'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 
 /**
  * /api/preview-po?resourceId=<resourceId>

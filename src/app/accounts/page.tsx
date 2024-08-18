@@ -1,7 +1,7 @@
 import { Container, Stack, Typography } from '@mui/material'
 import AccountsTable from './AccountsTable'
 import CreateAccountButton from './CreateAccountButton'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 import { requireSessionWithRedirect } from '@/lib/iam/actions'
 
 export default async function AdminPage() {

@@ -12,7 +12,7 @@ import Logo from './Logo'
 import ImpersonationControl from './ImpersonationControl'
 import { systemAccountId } from '@/lib/const'
 import { readSession } from '@/lib/iam/actions'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 import { readUser } from '@/domain/iam/user/actions'
 
 export default async function AppBar() {

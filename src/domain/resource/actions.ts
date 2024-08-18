@@ -16,7 +16,7 @@ import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { selectField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
-import { recalculateSubtotalCost } from '../cost/actions'
+import { recalculateSubtotalCost } from './cost/actions'
 import { Resource, selectValue } from './types'
 import { valueInclude } from './values/types'
 import { createSql } from './json-logic/compile'
@@ -24,7 +24,7 @@ import { OrderBy, Where } from './json-logic/types'
 import { copyLinkedResourceFields, updateValue } from './fields/actions'
 import { ValueModel } from './values/model'
 import { mapValueFromModel } from './values/mappers'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 
 const ajv = new Ajv()
 

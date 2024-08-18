@@ -3,7 +3,7 @@
 import { faker } from '@faker-js/faker'
 import { Account, accountInclude, mapAccountModel } from './types'
 import { applyTemplate } from '@/domain/schema/template/actions'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 
 export const createAccount = async (): Promise<void> => {
   const temporaryKey = faker.string.alpha({ casing: 'lower', length: 5 })

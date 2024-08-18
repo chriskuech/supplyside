@@ -7,7 +7,7 @@ import puppeteer from 'puppeteer'
 import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.browser.production'
 import PoDocument from './doc/PoDocument'
 import PoDocumentFooter from '@/domain/order/doc/PoDocumentFooter'
-import singleton from '@/lib/singleton'
+import singleton from '@/services/singleton'
 
 const browser = singleton('browser', async (clear) => {
   const browser = await puppeteer.launch()

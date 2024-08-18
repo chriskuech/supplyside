@@ -3,7 +3,7 @@
 import { fail } from 'assert'
 import { schemas } from './system-schemas'
 import { fields } from './system-fields'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 
 export const applyTemplate = async (accountId: string) => {
   await applyFields(accountId)

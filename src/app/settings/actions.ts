@@ -3,7 +3,7 @@
 import { Prisma } from '@prisma/client'
 import { isEmpty } from 'remeda'
 import { revalidatePath } from 'next/cache'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 import { createBlob } from '@/domain/blobs/actions'
 import { readSession } from '@/lib/iam/actions'
 

@@ -1,7 +1,7 @@
 'use server'
 
 import { readSession } from '@/lib/iam/actions'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 import { Option } from '@/domain/schema/types'
 
 export const readUsers = async (): Promise<Option[]> => {
