@@ -11,15 +11,14 @@ import Toolbar from './Toolbar'
 import { findOrderBills } from './actions'
 import { requireSessionWithRedirect } from '@/lib/iam/actions'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
-import { readResource } from '@/lib/resource/actions'
-import { readSchema } from '@/lib/schema/actions'
+import { readResource } from '@/domain/resource/actions'
+import { readSchema } from '@/domain/schema/actions'
 import {
   fields,
   orderStatusOptions,
 } from '@/domain/schema/template/system-fields'
 import { selectValue } from '@/domain/resource/types'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
-import { readUser } from '@/domain/iam/user/actions'
 import LinesAndCosts from '@/lib/resource/grid/LinesAndCosts'
 
 export default async function OrderDetail({
@@ -27,12 +26,10 @@ export default async function OrderDetail({
 }: {
   params: { key: string }
 }) {
-  const { userId } = await requireSessionWithRedirect()
-
-  const [user, schema, resource] = await Promise.all([
-    readUser({ userId }),
-    readSchema({ resourceType: 'Order' }),
-    readResource({ type: 'Order', key: Number(key) }),
+  const { user, accountId } = await requireSessionWithRedirect()
+  const [schema, resource] = await Promise.all([
+    readSchema({ accountId, resourceType: 'Order' }),
+    readResource({ accountId, type: 'Order', key: Number(key) }),
   ])
 
   const orderBills = await findOrderBills(resource.id)
@@ -41,15 +38,15 @@ export default async function OrderDetail({
     selectValue(resource, fields.orderStatus)?.option ??
     fail('Status not found')
 
-  const isDraft = status?.templateId === orderStatusOptions.draft.templateId
+  const isDraft = status.templateId === orderStatusOptions.draft.templateId
 
-  const statusColorStart = match(status?.templateId)
+  const statusColorStart = match(status.templateId)
     .with(orderStatusOptions.draft.templateId, () => yellow[600])
     .with(orderStatusOptions.received.templateId, () => green[900])
     .with(orderStatusOptions.canceled.templateId, () => red[900])
     .otherwise(() => yellow[900])
 
-  const statusColorEnd = match(status?.templateId)
+  const statusColorEnd = match(status.templateId)
     .with(orderStatusOptions.draft.templateId, () => yellow[500])
     .with(orderStatusOptions.received.templateId, () => green[800])
     .with(orderStatusOptions.canceled.templateId, () => red[800])
@@ -67,7 +64,7 @@ export default async function OrderDetail({
           <Box flexGrow={1} />
 
           <Toolbar
-            key={status?.id}
+            key={status.id}
             resource={resource}
             schema={schema}
             isDraft={isDraft}
@@ -113,7 +110,7 @@ export default async function OrderDetail({
                   />
                 </>
               )}
-              {status?.templateId ===
+              {status.templateId ===
                 orderStatusOptions.submitted.templateId && (
                 <>
                   <PreviewDraftPoButton resourceId={resource.id} />
@@ -123,22 +120,21 @@ export default async function OrderDetail({
                   />
                 </>
               )}
-              {status?.templateId ===
-                orderStatusOptions.approved.templateId && (
+              {status.templateId === orderStatusOptions.approved.templateId && (
                 <>
                   <SendPoButton resourceId={resource.id} />
                   <SkipButton resourceId={resource.id} />
                 </>
               )}
-              {status?.templateId === orderStatusOptions.ordered.templateId && (
+              {status.templateId === orderStatusOptions.ordered.templateId && (
                 <StatusTransitionButton
                   resourceId={resource.id}
                   statusOption={orderStatusOptions.received}
                   label={'Confirm Receipt'}
                 />
               )}
-              {(status?.templateId === orderStatusOptions.received.templateId ||
-                status?.templateId ===
+              {(status.templateId === orderStatusOptions.received.templateId ||
+                status.templateId ===
                   orderStatusOptions.canceled.templateId) && (
                 <Typography sx={{ opacity: 0.5 }}>
                   No further action required

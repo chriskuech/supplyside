@@ -14,7 +14,6 @@ import {
   fields,
 } from '@/domain/schema/template/system-fields'
 import { selectValue } from '@/domain/resource/types'
-import { readUser } from '@/domain/iam/user/actions'
 import LinesAndCosts from '@/lib/resource/grid/LinesAndCosts'
 
 export default async function BillsDetail({
@@ -22,9 +21,8 @@ export default async function BillsDetail({
 }: {
   params: { key: string }
 }) {
-  const { accountId, userId } = await requireSessionWithRedirect()
-  const [user, resource, schema] = await Promise.all([
-    readUser({ userId }),
+  const { accountId, user } = await requireSessionWithRedirect()
+  const [resource, schema] = await Promise.all([
     readResource({ accountId, type: 'Bill', key: Number(key) }),
     readSchema({ accountId, resourceType: 'Bill' }),
   ])
@@ -32,15 +30,15 @@ export default async function BillsDetail({
   const status =
     selectValue(resource, fields.billStatus)?.option ?? fail('Status not found')
 
-  const isDraft = status?.templateId === billStatusOptions.draft.templateId
+  const isDraft = status.templateId === billStatusOptions.draft.templateId
 
-  const statusColorStart = match(status?.templateId)
+  const statusColorStart = match(status.templateId)
     .with(billStatusOptions.draft.templateId, () => yellow[600])
     .with(billStatusOptions.paid.templateId, () => green[900])
     .with(billStatusOptions.canceled.templateId, () => red[900])
     .otherwise(() => yellow[900])
 
-  const statusColorEnd = match(status?.templateId)
+  const statusColorEnd = match(status.templateId)
     .with(billStatusOptions.draft.templateId, () => yellow[500])
     .with(billStatusOptions.paid.templateId, () => green[800])
     .with(billStatusOptions.canceled.templateId, () => red[800])
@@ -55,7 +53,7 @@ export default async function BillsDetail({
             <span>{key}</span>
           </Typography>
           <Toolbar
-            key={status?.id}
+            key={status.id}
             schema={schema}
             resource={resource}
             isDraft={isDraft}

@@ -4,11 +4,9 @@ import Image from 'next/image'
 import { handleSaveSettings } from './actions'
 import { privacyPolicyUrl, termsOfServiceUrl } from '@/lib/const'
 import { requireSessionWithRedirect } from '@/lib/iam/actions'
-import { readUser } from '@/domain/iam/user/actions'
 
 export default async function SettingsPage() {
-  const { userId } = await requireSessionWithRedirect()
-  const user = await readUser({ userId })
+  const { user } = await requireSessionWithRedirect()
 
   return (
     <Stack

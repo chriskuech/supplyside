@@ -269,6 +269,7 @@ const mapResource = (
   },
 ): Resource => ({
   id: model.id,
+  accountId: model.accountId,
   key: model.key,
   type: model.type,
   fields: model.ResourceField.map((rf) => ({

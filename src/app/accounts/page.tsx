@@ -3,18 +3,18 @@ import AccountsTable from './AccountsTable'
 import CreateAccountButton from './CreateAccountButton'
 import prisma from '@/lib/prisma'
 import { requireSessionWithRedirect } from '@/lib/iam/actions'
-import { systemAccountId } from '@/lib/const'
 
 export default async function AdminPage() {
-  const { accountId } = await requireSessionWithRedirect()
+  const [{ user }, accounts] = await Promise.all([
+    requireSessionWithRedirect(),
+    prisma().account.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    }),
+  ])
 
-  if (accountId !== systemAccountId) return
-
-  const accounts = await prisma().account.findMany({
-    orderBy: {
-      name: 'asc',
-    },
-  })
+  if (!user.isGlobalAdmin) return
 
   return (
     <Container sx={{ my: 5 }}>

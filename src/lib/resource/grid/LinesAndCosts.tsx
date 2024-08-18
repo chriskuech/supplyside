@@ -1,11 +1,11 @@
 import { Stack, Typography, Box } from '@mui/material'
-import { readResources } from '../actions'
 import ItemizedCostLines from './ItemizedCostLines'
 import ResourceTable from './ResourceTable'
-import { readSchema } from '@/lib/schema/actions'
+import { readSchema } from '@/domain/schema/actions'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { Data, Resource } from '@/domain/resource/types'
 import { Where } from '@/domain/resource/json-logic/types'
+import { readResources } from '@/domain/resource/actions'
 
 type Props = {
   resource: Resource
@@ -19,8 +19,12 @@ export default async function LinesAndCosts({
   newLineInitialData,
 }: Props) {
   const [lines, lineSchema] = await Promise.all([
-    readResources({ type: 'Line', where: lineQuery }),
-    readSchema({ resourceType: 'Line' }),
+    readResources({
+      accountId: resource.accountId,
+      type: 'Line',
+      where: lineQuery,
+    }),
+    readSchema({ accountId: resource.accountId, resourceType: 'Line' }),
   ])
 
   return (

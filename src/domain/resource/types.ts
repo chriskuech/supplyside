@@ -4,6 +4,7 @@ import { Value } from './values/types'
 
 export type Resource = {
   id: string
+  accountId: string
   type: ResourceType
   key: number
   fields: ResourceField[]

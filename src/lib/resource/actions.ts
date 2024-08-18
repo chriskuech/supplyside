@@ -4,7 +4,6 @@ import { fail } from 'assert'
 import { Resource as ResourceModel, ResourceType } from '@prisma/client'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { readSchema } from '../schema/actions'
 import { readSession } from '../iam/actions'
 import * as domain from '@/domain/resource/actions'
 import { Resource } from '@/domain/resource/types'
@@ -13,9 +12,10 @@ import { ValueResource } from '@/domain/resource/values/types'
 import { updateValue } from '@/domain/resource/fields/actions'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
 import { selectField } from '@/domain/schema/types'
+import { readSchema } from '@/domain/schema/actions'
 
 export const createResource = async (
-  params: Omit<domain.CreateResourceParams, 'accountId'>,
+  params: Pick<domain.CreateResourceParams, 'type' | 'data'>,
 ): Promise<ResourceModel> => {
   const { accountId, userId } = await readSession()
 
@@ -39,14 +39,6 @@ export const readResource = async (
   const { accountId } = await readSession()
 
   return domain.readResource({ ...params, accountId })
-}
-
-export const readResources = async (
-  params: Omit<domain.ReadResourcesParams, 'accountId'>,
-): Promise<Resource[]> => {
-  const { accountId } = await readSession()
-
-  return domain.readResources({ ...params, accountId })
 }
 
 export const deleteResource = async (
@@ -103,10 +95,11 @@ export const transitionStatus = async (
   fieldTemplate: FieldTemplate,
   statusTemplate: OptionTemplate,
 ) => {
-  const { type: resourceType } = await readResource({
+  const { accountId, type: resourceType } = await readResource({
     id: resourceId,
   })
   const schema = await readSchema({
+    accountId,
     resourceType,
     isSystem: true,
   })
