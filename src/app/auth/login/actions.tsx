@@ -2,7 +2,7 @@
 
 import { RedirectType, redirect } from 'next/navigation'
 import { z } from 'zod'
-import { createSession } from '@/lib/iam/actions'
+import { createSession } from '@/lib/session/actions'
 
 const schema = z.object({
   email: z.string().email(),

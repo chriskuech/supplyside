@@ -2,7 +2,7 @@
 
 import { inviteUser } from '@/domain/iam/user/actions'
 import { User } from '@/domain/iam/user/types'
-import { readSession } from '@/lib/iam/actions'
+import { readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
 
 type UpdateUserParams = { id: string } & Partial<User>

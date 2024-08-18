@@ -9,7 +9,7 @@ import { createPo as domainCreatePo } from '@/domain/order/createPo'
 import { transitionStatus } from '@/lib/resource/actions'
 import prisma from '@/services/prisma'
 import { mapValueFromResource } from '@/domain/resource/values/mappers'
-import { readSession } from '@/lib/iam/actions'
+import { readSession } from '@/lib/session/actions'
 
 export const createPo = async (resourceId: string) => {
   const { accountId } = await readSession()

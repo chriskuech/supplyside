@@ -9,10 +9,7 @@ import StatusTransitionButton from './cta/StatusTransitionButton'
 import SendPoButton from './cta/SendPoButton'
 import Toolbar from './Toolbar'
 import { findOrderBills } from './actions'
-import { requireSessionWithRedirect } from '@/lib/iam/actions'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
-import { readResource } from '@/domain/resource/actions'
-import { readSchema } from '@/domain/schema/actions'
 import {
   fields,
   orderStatusOptions,
@@ -20,17 +17,18 @@ import {
 import { selectValue } from '@/domain/resource/types'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 import LinesAndCosts from '@/lib/resource/grid/LinesAndCosts'
+import { readDetailPageModel } from '@/lib/resource/detail/actions'
 
 export default async function OrderDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
-  const { user, accountId } = await requireSessionWithRedirect()
-  const [schema, resource] = await Promise.all([
-    readSchema({ accountId, resourceType: 'Order' }),
-    readResource({ accountId, type: 'Order', key: Number(key) }),
-  ])
+  const {
+    session: { user },
+    resource,
+    schema,
+  } = await readDetailPageModel('Order', key)
 
   const orderBills = await findOrderBills(resource.id)
 

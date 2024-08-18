@@ -15,7 +15,7 @@ import {
   recalculateSubtotalCost,
 } from '@/domain/resource/cost/actions'
 import { Field, selectField } from '@/domain/schema/types'
-import { readSession } from '@/lib/iam/actions'
+import { readSession } from '@/lib/session/actions'
 
 export type UpdateValueDto = {
   resourceId: string

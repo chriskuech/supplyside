@@ -5,27 +5,25 @@ import { green, red, yellow } from '@mui/material/colors'
 import Toolbar from './Toolbar'
 import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
-import { requireSessionWithRedirect } from '@/lib/iam/actions'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
-import { readResource } from '@/domain/resource/actions'
-import { readSchema } from '@/domain/schema/actions'
 import {
   billStatusOptions,
   fields,
 } from '@/domain/schema/template/system-fields'
 import { selectValue } from '@/domain/resource/types'
 import LinesAndCosts from '@/lib/resource/grid/LinesAndCosts'
+import { readDetailPageModel } from '@/lib/resource/detail/actions'
 
 export default async function BillsDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
-  const { accountId, user } = await requireSessionWithRedirect()
-  const [resource, schema] = await Promise.all([
-    readResource({ accountId, type: 'Bill', key: Number(key) }),
-    readSchema({ accountId, resourceType: 'Bill' }),
-  ])
+  const {
+    session: { user },
+    resource,
+    schema,
+  } = await readDetailPageModel('Bill', key)
 
   const status =
     selectValue(resource, fields.billStatus)?.option ?? fail('Status not found')

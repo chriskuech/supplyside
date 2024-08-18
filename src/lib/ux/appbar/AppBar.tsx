@@ -11,27 +11,21 @@ import { NavMenu } from './NavMenu'
 import Logo from './Logo'
 import ImpersonationControl from './ImpersonationControl'
 import { systemAccountId } from '@/lib/const'
-import { readSession } from '@/lib/iam/actions'
+import { hasSession, readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
-import { readUser } from '@/domain/iam/user/actions'
 
 export default async function AppBar() {
-  const session = await readSession()
+  const session = hasSession() ? await readSession() : null
 
-  const [user, accounts] = await Promise.all([
-    session ? await readUser({ userId: session.userId }) : null,
-    prisma().account.findMany({
-      orderBy: {
-        name: 'asc',
-      },
-      select: {
-        id: true,
-        name: true,
-      },
-    }),
-  ])
-
-  const account = accounts.find((a) => a.id === session?.accountId)
+  const accounts = await prisma().account.findMany({
+    orderBy: {
+      name: 'asc',
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  })
 
   return (
     <MAppBar>
@@ -54,11 +48,11 @@ export default async function AppBar() {
                 justifyContent={'end'}
                 spacing={1}
               >
-                {user?.accountId === systemAccountId && account && (
+                {session.user.isGlobalAdmin && (
                   <>
                     <Stack width={300} justifyContent={'center'}>
                       <ImpersonationControl
-                        account={account}
+                        account={session.account}
                         accounts={accounts}
                       />
                     </Stack>
@@ -122,7 +116,7 @@ export default async function AppBar() {
                 )}
 
                 <AccountMenu />
-                {user && <UserMenu user={user} />}
+                <UserMenu user={session.user} />
                 {session.accountId !== systemAccountId && <NavMenu />}
               </Stack>
             </>

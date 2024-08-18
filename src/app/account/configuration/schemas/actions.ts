@@ -4,7 +4,7 @@ import { Prisma, ResourceType } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { difference } from 'remeda'
 import prisma from '@/services/prisma'
-import { readSession } from '@/lib/iam/actions'
+import { readSession } from '@/lib/session/actions'
 
 export type Field = {
   id: string

@@ -3,7 +3,7 @@
 import { hash } from 'bcrypt'
 import { RedirectType, redirect } from 'next/navigation'
 import prisma from '@/services/prisma'
-import { readSession } from '@/lib/iam/actions'
+import { readSession } from '@/lib/session/actions'
 
 export const updatePassword = async (password: string) => {
   const { userId } = await readSession()

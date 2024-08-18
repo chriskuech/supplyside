@@ -1,7 +1,7 @@
 /**
  * Ensures that--
- *   - that no code runs at build time (via module import)
- *   - that clients are not reinstantiated from hot reloads in local dev
+ *   - no code runs at build time (via module import)
+ *   - clients are not reinstantiated from hot reloads in local dev
  * @param fn - the function that creates the singleton instance. It receives a `clear` function that can be called to clear the singleton instance.
  * @returns the singleton instance
  */

@@ -2,7 +2,7 @@ import { Box, Container, Stack, Typography } from '@mui/material'
 import UsersTable from './UsersTable'
 import InviteUserControl from './InviteUserControl'
 import { readUser, readUsers } from '@/domain/iam/user/actions'
-import { readSession } from '@/lib/iam/actions'
+import { readSession } from '@/lib/session/actions'
 
 export default async function Team() {
   const { accountId, userId } = await readSession()

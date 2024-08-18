@@ -3,7 +3,7 @@ import { CloudUpload } from '@mui/icons-material'
 import Image from 'next/image'
 import { handleSaveSettings } from './actions'
 import { privacyPolicyUrl, termsOfServiceUrl } from '@/lib/const'
-import { requireSessionWithRedirect } from '@/lib/iam/actions'
+import { requireSessionWithRedirect } from '@/lib/session/actions'
 
 export default async function SettingsPage() {
   const { user } = await requireSessionWithRedirect()

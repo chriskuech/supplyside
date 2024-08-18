@@ -6,7 +6,7 @@ import CreateResourceButton from './CreateResourceButton'
 import ResourceTable from './grid/ResourceTable'
 import { readResources } from '@/domain/resource/actions'
 import { readSchema } from '@/domain/schema/actions'
-import { requireSessionWithRedirect } from '@/lib/iam/actions'
+import { requireSessionWithRedirect } from '@/lib/session/actions'
 
 type Props = {
   tableKey: string

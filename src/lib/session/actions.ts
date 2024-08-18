@@ -1,5 +1,6 @@
 'use server'
 
+import assert from 'assert'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import {
@@ -26,7 +27,8 @@ export const hasSession = () => !!cookies().get(sessionIdCookieName)?.value
 
 export const readSession = async () => {
   const sessionId = cookies().get(sessionIdCookieName)?.value
-  if (!sessionId) return redirect('/auth/login')
+
+  assert(sessionId, `Session not found in cookies`)
 
   const session = await domainReadSession(sessionId)
 

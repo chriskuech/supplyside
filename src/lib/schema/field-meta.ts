@@ -1,6 +1,6 @@
 'use server'
 
-import { readSession } from '@/lib/iam/actions'
+import { readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
 import { Option } from '@/domain/schema/types'
 

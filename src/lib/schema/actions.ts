@@ -1,6 +1,6 @@
 'use server'
 
-import { readSession } from '../iam/actions'
+import { readSession } from '../session/actions'
 import * as domain from '@/domain/schema/actions'
 
 export const readSchema = async (

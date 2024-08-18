@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { FieldType, ResourceType } from '@prisma/client'
 import { P, match } from 'ts-pattern'
-import { readSession } from '@/lib/iam/actions'
+import { readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
 import { Value, ValueInput, valueInclude } from '@/domain/resource/values/types'
 import { mapValueFromModel } from '@/domain/resource/values/mappers'

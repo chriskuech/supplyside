@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import * as account from '@/domain/iam/account/actions'
 import { applyTemplate } from '@/domain/schema/template/actions'
 import { systemAccountId } from '@/lib/const'
-import * as iam from '@/lib/iam/actions'
+import * as iam from '@/lib/session/actions'
 
 const authz = async () => {
   const s = await iam.readSession()

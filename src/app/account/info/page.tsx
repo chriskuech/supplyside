@@ -3,7 +3,7 @@ import { CloudUpload } from '@mui/icons-material'
 import Image from 'next/image'
 import { handleSaveSettings } from './actions'
 import { readAccount } from '@/domain/iam/account/actions'
-import { readSession } from '@/lib/iam/actions'
+import { readSession } from '@/lib/session/actions'
 
 export default async function InfoPage() {
   const { accountId } = await readSession()

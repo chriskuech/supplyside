@@ -1,19 +1,13 @@
 import { Container, Stack, Typography } from '@mui/material'
-import { requireSessionWithRedirect } from '@/lib/iam/actions'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
-import { readSchema } from '@/domain/schema/actions'
-import { readResource } from '@/domain/resource/actions'
+import { readDetailPageModel } from '@/lib/resource/detail/actions'
 
 export default async function ItemsDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
-  const { accountId } = await requireSessionWithRedirect()
-  const [resource, schema] = await Promise.all([
-    readResource({ accountId, type: 'Item', key: Number(key) }),
-    readSchema({ accountId, resourceType: 'Item' }),
-  ])
+  const { resource, schema } = await readDetailPageModel('Item', key)
 
   return (
     <Container sx={{ my: 5 }}>
