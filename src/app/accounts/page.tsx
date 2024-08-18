@@ -1,9 +1,9 @@
-import { Box, Container, Stack, Typography } from '@mui/material'
+import { Container, Stack, Typography } from '@mui/material'
 import AccountsTable from './AccountsTable'
+import CreateAccountButton from './CreateAccountButton'
 import prisma from '@/lib/prisma'
 import { requireSessionWithRedirect } from '@/lib/session'
 import { systemAccountId } from '@/lib/const'
-import InviteUserControl from '@/lib/iam/InviteUserControl'
 
 export default async function AdminPage() {
   const { accountId } = await requireSessionWithRedirect()
@@ -19,10 +19,14 @@ export default async function AdminPage() {
   return (
     <Container sx={{ my: 5 }}>
       <Stack spacing={2}>
-        <Typography variant="h4">Accounts</Typography>
-        <Box width={400}>
-          <InviteUserControl />
-        </Box>
+        <Stack
+          direction={'row'}
+          alignItems={'center'}
+          justifyContent={'space-between'}
+        >
+          <Typography variant="h4">Accounts</Typography>
+          <CreateAccountButton />
+        </Stack>
         <AccountsTable accounts={accounts} />
       </Stack>
     </Container>

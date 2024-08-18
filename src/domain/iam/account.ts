@@ -1,27 +1,21 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { faker } from '@faker-js/faker'
 import { applyTemplate } from '../schema/template/actions'
 import { getDownloadPath } from '../blobs/utils'
-import { inviteUser } from './user'
 import { Account } from './types'
 import prisma from '@/lib/prisma'
 
-export const inviteAccount = async (email: string): Promise<void> => {
+export const createAccount = async (): Promise<void> => {
+  const key = faker.string.alpha({ casing: 'lower', length: 5 })
   const { id: accountId } = await prisma().account.create({
     data: {
-      key: faker.string.alpha({ casing: 'lower', length: 5 }),
-      name: `${email}'s Account`,
+      key,
+      name: `New Account - ${key}`,
     },
   })
 
-  await Promise.all([
-    inviteUser({ accountId, email, isAdmin: true }),
-    applyTemplate(accountId),
-  ])
-
-  revalidatePath('')
+  await applyTemplate(accountId)
 }
 
 export const readAccount = async (
@@ -46,8 +40,6 @@ export const readAccount = async (
       fileName: 'logo',
     })
 
-  revalidatePath('')
-
   return {
     id: account.id,
     key: account.key,
@@ -63,6 +55,4 @@ export const deleteAccount = async (accountId: string): Promise<void> => {
       id: accountId,
     },
   })
-
-  revalidatePath('')
 }
