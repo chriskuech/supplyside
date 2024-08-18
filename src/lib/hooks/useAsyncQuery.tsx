@@ -13,7 +13,10 @@ export function useAsyncQuery<const Args extends unknown[], ResolvedType>(
     showGenericError,
   })
 
-  const memoizedCallback = useCallback(() => triggerCallback(...deps), deps)
+  const memoizedCallback = useCallback(
+    () => triggerCallback(...deps),
+    [deps, triggerCallback],
+  )
 
   useEffect(() => {
     memoizedCallback()
