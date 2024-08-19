@@ -6,7 +6,7 @@ import { createAccount } from './actions'
 
 export default function CreateAccountButton() {
   return (
-    <Button startIcon={<Add />} onClick={createAccount}>
+    <Button startIcon={<Add />} onClick={() => createAccount()}>
       Account
     </Button>
   )
