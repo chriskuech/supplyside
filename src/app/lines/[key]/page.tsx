@@ -1,19 +1,13 @@
 import { Container, Stack, Typography } from '@mui/material'
-import { requireSessionWithRedirect } from '@/lib/session'
 import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
-import { readSchema } from '@/domain/schema/actions'
-import { readResource } from '@/domain/resource/actions'
+import { readDetailPageModel } from '@/lib/resource/detail/actions'
 
 export default async function LinesDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
-  const { accountId } = await requireSessionWithRedirect()
-  const [resource, schema] = await Promise.all([
-    readResource({ accountId, type: 'Line', key: Number(key) }),
-    readSchema({ accountId, resourceType: 'Line' }),
-  ])
+  const { resource, schema } = await readDetailPageModel('Line', key)
 
   return (
     <Container sx={{ my: 5 }}>
@@ -23,7 +17,7 @@ export default async function LinesDetail({
             <span style={{ opacity: 0.5 }}>Line #</span>
             <span>{key}</span>
           </Typography>
-          <ResourceFieldsControl resourceId={resource.id} schema={schema} />
+          <ResourceFieldsControl resource={resource} schema={schema} />
         </Stack>
       </Stack>
     </Container>

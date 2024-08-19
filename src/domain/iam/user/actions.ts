@@ -2,12 +2,11 @@
 
 import { faker } from '@faker-js/faker'
 import { hash } from 'bcrypt'
-import { revalidateTag } from 'next/cache'
-import { getDownloadPath } from '../blobs/utils'
-import { User } from './types'
-import smtp from '@/lib/smtp'
-import config from '@/lib/config'
-import prisma from '@/lib/prisma'
+import { revalidatePath } from 'next/cache'
+import { User, mapUserModel, userInclude } from './types'
+import smtp from '@/services/smtp'
+import config from '@/services/config'
+import prisma from '@/services/prisma'
 
 const loginPath = '/auth/login'
 
@@ -28,7 +27,7 @@ export async function inviteUser({
     data: {
       email,
       accountId,
-      passwordHash: await hash(password, config().SALT),
+      passwordHash: await hash(password, 12),
       requirePasswordReset: true,
       isAdmin,
     },
@@ -47,7 +46,7 @@ export async function inviteUser({
     MessageStream: 'outbound',
   })
 
-  revalidateTag('iam')
+  revalidatePath('')
 }
 
 type ReadUserParams = {
@@ -55,31 +54,14 @@ type ReadUserParams = {
 }
 
 export async function readUser({ userId }: ReadUserParams): Promise<User> {
-  revalidateTag('iam')
+  revalidatePath('')
 
   const user = await prisma().user.findUniqueOrThrow({
     where: { id: userId },
-    include: {
-      ImageBlob: true,
-    },
+    include: userInclude,
   })
 
-  const profilePicPath =
-    user.ImageBlob &&
-    getDownloadPath({
-      blobId: user.ImageBlob.id,
-      mimeType: user.ImageBlob.mimeType,
-      fileName: 'profile-pic',
-    })
-
-  return {
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    fullName: `${user.firstName} ${user.lastName}`,
-    email: user.email,
-    profilePicPath,
-  }
+  return mapUserModel(user)
 }
 
 type ReadUsersParams = { accountId: string }
@@ -87,7 +69,7 @@ type ReadUsersParams = { accountId: string }
 export async function readUsers({
   accountId,
 }: ReadUsersParams): Promise<User[]> {
-  revalidateTag('iam')
+  revalidatePath('')
 
   const users = await prisma().user.findMany({
     where: {
@@ -98,20 +80,7 @@ export async function readUsers({
     },
   })
 
-  return users.map((user) => ({
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    fullName: `${user.firstName} ${user.lastName}`,
-    email: user.email,
-    profilePicPath:
-      user.ImageBlob &&
-      getDownloadPath({
-        blobId: user.ImageBlob.id,
-        mimeType: user.ImageBlob.mimeType,
-        fileName: 'profile-pic',
-      }),
-  }))
+  return users.map(mapUserModel)
 }
 
 type DeleteUserParams = { accountId: string; userId: string }
@@ -127,5 +96,5 @@ export async function deleteUser({
     },
   })
 
-  revalidateTag('iam')
+  revalidatePath('')
 }

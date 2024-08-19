@@ -3,18 +3,20 @@
 import { fail } from 'assert'
 import { Prisma, ResourceType } from '@prisma/client'
 import { map, pipe, sum } from 'remeda'
-import { fields } from '../schema/template/system-fields'
-import { updateValue } from '../resource/fields/actions'
-import { readResource, readResources } from '../resource/actions'
-import { readSchema } from '../schema/actions'
-import { selectValue } from '../resource/types'
-import { selectField } from '../schema/types'
-import prisma from '@/lib/prisma'
+import { revalidatePath } from 'next/cache'
+import { readResource, readResources } from '../actions'
+import { selectValue } from '../types'
+import { updateValue } from '../fields/actions'
+import { readSchema } from '@/domain/schema/actions'
+import prisma from '@/services/prisma'
+import { selectField } from '@/domain/schema/types'
+import { fields } from '@/domain/schema/template/system-fields'
 
 export const createCost = async (resourceId: string): Promise<void> => {
   await prisma().cost.create({
     data: { resourceId },
   })
+  revalidatePath('')
 }
 
 export const updateCost = async (id: string, data: Prisma.CostUpdateInput) => {
@@ -27,6 +29,8 @@ export const updateCost = async (id: string, data: Prisma.CostUpdateInput) => {
   })
 
   await recalculateItemizedCosts(cost.Resource.accountId, cost.resourceId)
+
+  revalidatePath('')
 }
 
 export const deleteCost = async (id: string): Promise<void> => {
@@ -38,6 +42,7 @@ export const deleteCost = async (id: string): Promise<void> => {
   })
 
   await recalculateItemizedCosts(cost.Resource.accountId, cost.resourceId)
+  revalidatePath('')
 }
 
 export const recalculateItemizedCosts = async (
@@ -65,6 +70,7 @@ export const recalculateItemizedCosts = async (
       ),
     },
   })
+  revalidatePath('')
 }
 
 export const recalculateSubtotalCost = async (
@@ -99,4 +105,5 @@ export const recalculateSubtotalCost = async (
       number: subTotal,
     },
   })
+  revalidatePath('')
 }

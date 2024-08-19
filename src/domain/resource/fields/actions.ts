@@ -3,18 +3,19 @@
 import { fail } from 'assert'
 import { Cost, Prisma, ResourceType } from '@prisma/client'
 import { isString, pick } from 'remeda'
+import { revalidatePath } from 'next/cache'
 import { readResource } from '../actions'
 import { selectValue } from '../types'
-import prisma from '@/lib/prisma'
-import { requireSession } from '@/lib/session'
+import prisma from '@/services/prisma'
 import { createBlob } from '@/domain/blobs/actions'
 import { fields, findField } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
 import {
   recalculateItemizedCosts,
   recalculateSubtotalCost,
-} from '@/domain/cost/actions'
+} from '@/domain/resource/cost/actions'
 import { Field, selectField } from '@/domain/schema/types'
+import { readSession } from '@/lib/session/actions'
 
 export type UpdateValueDto = {
   resourceId: string
@@ -37,6 +38,7 @@ export const updateValue = async ({
   fieldId,
   value,
 }: UpdateValueDto) => {
+  revalidatePath('')
   //TODO:  check if value object is correct for each fieldType
 
   const { fileIds, optionIds, ...rest } = value
@@ -204,7 +206,8 @@ export const uploadFile = async (
   fieldId: string,
   formData: FormData,
 ) => {
-  const { accountId } = await requireSession()
+  revalidatePath('')
+  const { accountId } = await readSession()
 
   const file = formData.get('file')
 
@@ -261,7 +264,8 @@ export const uploadFiles = async (
   fieldId: string,
   formData: FormData,
 ) => {
-  const { accountId } = await requireSession()
+  revalidatePath('')
+  const { accountId } = await readSession()
 
   const files = formData.getAll('files')
 
@@ -403,6 +407,8 @@ export const updateContact = async (
       },
     })
   }
+
+  revalidatePath('')
 }
 
 export const copyLinkedResourceFields = async (
@@ -452,6 +458,8 @@ export const copyLinkedResourceFields = async (
     await copyResourceCosts(linkedResourceId, resourceId)
     //TODO: Copy line items
   }
+
+  revalidatePath('')
 }
 
 export const copyResourceCosts = async (
@@ -503,6 +511,8 @@ export const copyResourceCosts = async (
       }
     }),
   )
+
+  revalidatePath('')
 }
 
 export const copyField = async (
@@ -650,4 +660,5 @@ export const copyField = async (
       },
     },
   })
+  revalidatePath('')
 }

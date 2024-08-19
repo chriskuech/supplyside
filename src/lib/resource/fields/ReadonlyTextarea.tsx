@@ -2,12 +2,12 @@
 
 import { ExpandMore } from '@mui/icons-material'
 import { Box, Link, Typography } from '@mui/material'
-import { useState } from 'react'
+import { useDisclosure } from '@/lib/hooks/useDisclosure'
 
 const maxLength = 200
 
 export default function ReadonlyTextarea({ value }: { value: string }) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const { isOpen: isExpanded, toggle } = useDisclosure()
 
   const isPreviewTruncated = value.length > maxLength
   const isTruncated = !isExpanded && isPreviewTruncated
@@ -18,10 +18,7 @@ export default function ReadonlyTextarea({ value }: { value: string }) {
       {isTruncated && '...'}
       {'  '}
       {isPreviewTruncated && (
-        <Link
-          onClick={() => setIsExpanded(!isExpanded)}
-          sx={{ cursor: 'pointer', lineHeight: 1 }}
-        >
+        <Link onClick={toggle} sx={{ cursor: 'pointer', lineHeight: 1 }}>
           {isExpanded ? 'Collapse' : 'Expand'}
           <Box
             display={'inline-block'}

@@ -10,7 +10,7 @@ import { readSchema } from '../schema/actions'
 import { selectField } from '../schema/types'
 import { selectValue } from '../resource/types'
 import { renderPo } from './renderPo'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 
 type CreatePoParams = {
   accountId: string

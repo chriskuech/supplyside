@@ -11,5 +11,5 @@
   },
   "eslint.format.enable": true,
   // "prettier.enable": false,
-  "eslint.runtime": "node",
+  "eslint.runtime": "node"
 }

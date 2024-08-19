@@ -7,7 +7,7 @@ import {
   Value,
 } from '@prisma/client'
 import { Field, Schema } from './types'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 
 export type ReadSchemaParams = {
   accountId: string

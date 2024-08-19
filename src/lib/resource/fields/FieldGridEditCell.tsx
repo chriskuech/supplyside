@@ -45,7 +45,7 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
   }
 
   return (
-    <Box width="100%">
+    <Box display="flex" width="100%" alignItems="center">
       <Field
         ref={inputRef}
         field={field}

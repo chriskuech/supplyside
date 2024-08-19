@@ -5,18 +5,27 @@ import MAppBar from '@mui/material/AppBar'
 import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 import Link from 'next/link'
-import { readSession } from '../session'
-import { systemAccountId } from '../const'
-import ImpersonationControl from '../iam/ImpersonationControl'
 import { UserMenu } from './UserMenu'
 import { AccountMenu } from './AccountMenu'
 import { NavMenu } from './NavMenu'
 import Logo from './Logo'
-import { readUser } from '@/domain/iam/user'
+import ImpersonationControl from './ImpersonationControl'
+import { systemAccountId } from '@/lib/const'
+import { hasSession, readSession } from '@/lib/session/actions'
+import prisma from '@/services/prisma'
 
 export default async function AppBar() {
-  const session = await readSession()
-  const user = session ? await readUser({ userId: session.userId }) : null
+  const session = (await hasSession()) ? await readSession() : null
+
+  const accounts = await prisma().account.findMany({
+    orderBy: {
+      name: 'asc',
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  })
 
   return (
     <MAppBar>
@@ -39,11 +48,18 @@ export default async function AppBar() {
                 justifyContent={'end'}
                 spacing={1}
               >
-                <Stack width={300} justifyContent={'center'}>
-                  <ImpersonationControl />
-                </Stack>
+                {session.user.isGlobalAdmin && (
+                  <>
+                    <Stack width={300} justifyContent={'center'}>
+                      <ImpersonationControl
+                        account={session.account}
+                        accounts={accounts}
+                      />
+                    </Stack>
 
-                <Box width={10} />
+                    <Box width={10} />
+                  </>
+                )}
 
                 {session.accountId !== systemAccountId && (
                   <>
@@ -100,7 +116,7 @@ export default async function AppBar() {
                 )}
 
                 <AccountMenu />
-                {user && <UserMenu user={user} />}
+                <UserMenu user={session.user} />
                 {session.accountId !== systemAccountId && <NavMenu />}
               </Stack>
             </>

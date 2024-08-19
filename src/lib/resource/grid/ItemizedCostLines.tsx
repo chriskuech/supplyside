@@ -17,15 +17,18 @@ import {
 import { Add, Clear } from '@mui/icons-material'
 import { match } from 'ts-pattern'
 import { Resource, selectValue } from '@/domain/resource/types'
-import { createCost, deleteCost, updateCost } from '@/domain/cost/actions'
+import {
+  createCost,
+  deleteCost,
+  updateCost,
+} from '@/domain/resource/cost/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 
 type Props = {
   resource: Resource
-  onChange: () => void
 }
 
-export default function ItemizedCostLines({ resource, onChange }: Props) {
+export default function ItemizedCostLines({ resource }: Props) {
   const theme = useTheme()
 
   const subtotalCost = selectValue(resource, fields.subtotalCost)?.number ?? 0
@@ -76,9 +79,7 @@ export default function ItemizedCostLines({ resource, onChange }: Props) {
                   <TextField
                     defaultValue={row.name}
                     onChange={(e) =>
-                      updateCost(row.id, { name: e.target.value }).then(() =>
-                        onChange?.(),
-                      )
+                      updateCost(row.id, { name: e.target.value })
                     }
                     placeholder="Description"
                     size="small"
@@ -91,7 +92,7 @@ export default function ItemizedCostLines({ resource, onChange }: Props) {
                     onChange={(e) =>
                       updateCost(row.id, {
                         isPercentage: e.target.value === '%',
-                      }).then(() => onChange?.())
+                      })
                     }
                     size="small"
                   >
@@ -105,7 +106,7 @@ export default function ItemizedCostLines({ resource, onChange }: Props) {
                     onChange={(e) =>
                       updateCost(row.id, {
                         value: Number(e.target.value),
-                      }).then(() => onChange?.())
+                      })
                     }
                     type="number"
                     InputProps={{
@@ -125,9 +126,7 @@ export default function ItemizedCostLines({ resource, onChange }: Props) {
                   })}
                 </TableCell>
                 <TableCell>
-                  <IconButton
-                    onClick={() => deleteCost(row.id).then(() => onChange?.())}
-                  >
+                  <IconButton onClick={() => deleteCost(row.id)}>
                     <Clear />
                   </IconButton>
                 </TableCell>
@@ -162,10 +161,7 @@ export default function ItemizedCostLines({ resource, onChange }: Props) {
       </Card>
 
       <Stack direction={'row'} justifyContent={'end'}>
-        <Button
-          onClick={() => createCost(resource.id).then(() => onChange?.())}
-          startIcon={<Add />}
-        >
+        <Button onClick={() => createCost(resource.id)} startIcon={<Add />}>
           Itemized Cost
         </Button>
       </Stack>

@@ -7,7 +7,7 @@ import { ImportMock } from 'ts-mock-imports'
 import nextCache from 'next/cache'
 import { faker } from '@faker-js/faker'
 import { systemAccountId } from '@/lib/const'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 import { applyTemplate } from '@/domain/schema/template/actions'
 import { createResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
@@ -19,7 +19,6 @@ expandDotenv(loadDotenv())
 
 const config = z
   .object({
-    SALT: z.string().min(1),
     DEV_EMAIL: z.string().email(),
     DEV_FIRST_NAME: z.string().min(1),
     DEV_LAST_NAME: z.string().min(1),
@@ -45,7 +44,7 @@ async function main() {
       email: config.DEV_EMAIL,
       firstName: config.DEV_FIRST_NAME,
       lastName: config.DEV_LAST_NAME,
-      passwordHash: await hash(config.DEV_PASSWORD, config.SALT),
+      passwordHash: await hash(config.DEV_PASSWORD, 12),
       requirePasswordReset: false,
     },
   })

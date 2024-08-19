@@ -4,27 +4,26 @@ import { fail } from 'assert'
 import { Resource as ResourceModel, ResourceType } from '@prisma/client'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { requireSession } from '../session'
-import { readSchema } from '../schema/actions'
+import { readSession } from '../session/actions'
 import * as domain from '@/domain/resource/actions'
 import { Resource } from '@/domain/resource/types'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 import { ValueResource } from '@/domain/resource/values/types'
 import { updateValue } from '@/domain/resource/fields/actions'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
 import { selectField } from '@/domain/schema/types'
+import { readSchema } from '@/domain/schema/actions'
 
 export const createResource = async (
-  params: Omit<domain.CreateResourceParams, 'accountId'>,
+  params: Pick<domain.CreateResourceParams, 'type' | 'data'>,
 ): Promise<ResourceModel> => {
-  const { accountId, userId } = await requireSession()
-
-  revalidatePath('.')
+  const { accountId, userId } = await readSession()
 
   if (params.type === 'Order') {
     params.data = { ...params.data, Assignee: userId }
   }
 
+  revalidatePath('')
   return domain.createResource({ ...params, accountId })
 }
 
@@ -37,26 +36,17 @@ type ReadResourceParams = {
 export const readResource = async (
   params: ReadResourceParams,
 ): Promise<Resource> => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   return domain.readResource({ ...params, accountId })
-}
-
-export const readResources = async (
-  params: Omit<domain.ReadResourcesParams, 'accountId'>,
-): Promise<Resource[]> => {
-  const { accountId } = await requireSession()
-
-  return domain.readResources({ ...params, accountId })
 }
 
 export const deleteResource = async (
   params: Omit<domain.DeleteResourceParams, 'accountId'>,
 ): Promise<void> => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
-  revalidatePath('.')
-
+  revalidatePath('')
   return domain.deleteResource({ ...params, accountId })
 }
 
@@ -69,7 +59,7 @@ export const findResources = async ({
   resourceType,
   input,
 }: FindResourcesParams): Promise<ValueResource[]> => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   const results = await prisma().$queryRaw`
     WITH "View" AS (
@@ -105,10 +95,11 @@ export const transitionStatus = async (
   fieldTemplate: FieldTemplate,
   statusTemplate: OptionTemplate,
 ) => {
-  const { type: resourceType } = await readResource({
+  const { accountId, type: resourceType } = await readResource({
     id: resourceId,
   })
   const schema = await readSchema({
+    accountId,
     resourceType,
     isSystem: true,
   })
@@ -123,6 +114,5 @@ export const transitionStatus = async (
           ?.id ?? fail('Option not found'),
     },
   })
-
-  revalidatePath('.')
+  revalidatePath('')
 }

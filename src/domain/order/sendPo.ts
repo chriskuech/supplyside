@@ -2,9 +2,9 @@ import { readBlob } from '../blobs/actions'
 import { readResource } from '../resource/actions'
 import { fields } from '../schema/template/system-fields'
 import { selectValue } from '../resource/types'
-import smtp from '@/lib/smtp'
-import prisma from '@/lib/prisma'
-import config from '@/lib/config'
+import smtp from '@/services/smtp'
+import prisma from '@/services/prisma'
+import config from '@/services/config'
 
 type SendPoParams = {
   accountId: string

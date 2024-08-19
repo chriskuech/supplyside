@@ -2,22 +2,22 @@
 
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { ResourceType } from '@prisma/client'
-import { readSchema } from '../schema/actions'
-import { readResources } from './actions'
 import CreateResourceButton from './CreateResourceButton'
-import ResourceTable from './ResourceTable'
-import { requireSessionWithRedirect } from '@/lib/session'
+import ResourceTable from './grid/ResourceTable'
+import { readResources } from '@/domain/resource/actions'
+import { readSchema } from '@/domain/schema/actions'
+import { requireSessionWithRedirect } from '@/lib/session/actions'
 
 type Props = {
+  tableKey: string
   resourceType: ResourceType
 }
 
-export default async function ListPage({ resourceType }: Props) {
-  await requireSessionWithRedirect()
-
+export default async function ListPage({ tableKey, resourceType }: Props) {
+  const { accountId } = await requireSessionWithRedirect()
   const [schema, resources] = await Promise.all([
-    readSchema({ resourceType }),
-    readResources({ type: resourceType }),
+    readSchema({ accountId, resourceType }),
+    readResources({ accountId, type: resourceType }),
   ])
 
   return (
@@ -42,7 +42,11 @@ export default async function ListPage({ resourceType }: Props) {
             />
           </Box>
         </Stack>
-        <ResourceTable schema={schema} resources={resources} />
+        <ResourceTable
+          tableKey={tableKey}
+          schema={schema}
+          resources={resources}
+        />
       </Stack>
     </Container>
   )

@@ -1,44 +1,47 @@
 'use client'
 
-import {
-  DataGrid,
-  DataGridProps,
-  GridColDef,
-  GridColType,
-} from '@mui/x-data-grid'
+import { GridColDef, GridColType } from '@mui/x-data-grid'
+import { DataGridPro, DataGridProProps } from '@mui/x-data-grid-pro'
 import { FieldType } from '@prisma/client'
-import { Box, Chip, IconButton, Stack } from '@mui/material'
+import { Box, Chip, CircularProgress, IconButton, Stack } from '@mui/material'
 import { Check, Clear } from '@mui/icons-material'
 import { P, match } from 'ts-pattern'
 import { useMemo } from 'react'
 import { difference } from 'remeda'
 import { useSnackbar } from 'notistack'
-import { formatDate } from '../formatDate'
-import ContactCard from './fields/ContactCard'
-import { deleteResource } from './actions'
-import FieldGridEditCell from './fields/FieldGridEditCell'
-import FieldControl from './fields/FieldControl'
+import { formatDate } from '../../formatDate'
+import CustomGridToolbar from '../../ux/CustomGridToolbar'
+import ContactCard from '../fields/ContactCard'
+import { deleteResource } from '../actions'
+import FieldGridEditCell from '../fields/FieldGridEditCell'
+import FieldControl from '../fields/FieldControl'
 import { Resource, ResourceField } from '@/domain/resource/types'
 import { Option, Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
 import { updateValue, UpdateValueDto } from '@/domain/resource/fields/actions'
 import { findField } from '@/domain/schema/template/system-fields'
 import { Value } from '@/domain/resource/values/types'
+import { usePersistDatagridState } from '@/lib/hooks/usePersistDatagridState'
 
 type Props = {
+  tableKey: string
   schema: Schema
   resources: Resource[]
   isEditable?: boolean
   onChange?: () => void
-} & Partial<DataGridProps>
+} & Partial<DataGridProProps>
 
 export default function ResourceTable({
+  tableKey,
   schema,
   resources,
   isEditable,
   onChange,
   ...props
 }: Props) {
+  const { apiRef, initialState, saveStateToLocalstorage } =
+    usePersistDatagridState(tableKey)
+
   const { enqueueSnackbar } = useSnackbar()
   const columns = useMemo<GridColDef<Resource>[]>(
     () => [
@@ -157,6 +160,12 @@ export default function ResourceTable({
               ...emptyValue,
               user: {
                 id: value.userId,
+                accountId: '...',
+                isAdmin: false,
+                isApprover: false,
+                isGlobalAdmin: false,
+                requirePasswordReset: false,
+                tsAndCsSignedAt: null,
                 email: '...',
                 firstName: '...',
                 fullName: '...',
@@ -293,7 +302,7 @@ export default function ResourceTable({
 
   const handleProcessRowUpdate = async (newRow: Resource, oldRow: Resource) => {
     // find which cell has been updated
-    const editedField = newRow.fields.find(
+    const editedFields = newRow.fields.filter(
       ({ fieldId, fieldType, value: newValue }) => {
         const oldValue = oldRow.fields.find((f) => f.fieldId === fieldId)?.value
 
@@ -326,49 +335,58 @@ export default function ResourceTable({
       },
     )
 
-    if (!editedField) return newRow
-
-    const { value } = editedField
-
-    const newValue = match<FieldType, UpdateValueDto['value']>(
-      editedField.fieldType,
-    )
-      .with('Checkbox', () => ({ boolean: value.boolean }))
-      .with('Number', () => ({ number: value.number }))
-      .with('Date', () => ({ date: value.date }))
-      .with('Money', () => ({ number: value.number }))
-      .with('Text', () => ({ string: value.string }))
-      .with('Textarea', () => ({ string: value.string }))
-      .with('Select', () => ({ optionId: value.option?.id ?? null }))
-      .with('MultiSelect', () => ({
-        optionIds: value.options?.map((option) => option.id) ?? null,
-      }))
-      .with('User', () => ({ userId: value.user?.id ?? null }))
-      .with('Resource', () => ({ resourceId: value.resource?.id ?? null }))
-      .with(P.union('Contact', 'File', 'Files'), () => ({}))
-      .exhaustive()
+    if (!editedFields.length) return newRow
 
     try {
-      await updateValue({
-        resourceId: newRow.id,
-        fieldId: editedField.fieldId,
-        value: newValue,
-      })
-      onChange?.()
+      await Promise.all(
+        editedFields.map(async (editedField) => {
+          const { value } = editedField
+
+          const newValue = match<FieldType, UpdateValueDto['value']>(
+            editedField.fieldType,
+          )
+            .with('Checkbox', () => ({ boolean: value.boolean }))
+            .with('Number', () => ({ number: value.number }))
+            .with('Date', () => ({ date: value.date }))
+            .with('Money', () => ({ number: value.number }))
+            .with('Text', () => ({ string: value.string }))
+            .with('Textarea', () => ({ string: value.string }))
+            .with('Select', () => ({ optionId: value.option?.id ?? null }))
+            .with('MultiSelect', () => ({
+              optionIds: value.options?.map((option) => option.id) ?? null,
+            }))
+            .with('User', () => ({ userId: value.user?.id ?? null }))
+            .with('Resource', () => ({
+              resourceId: value.resource?.id ?? null,
+            }))
+            .with(P.union('Contact', 'File', 'Files'), () => ({}))
+            .exhaustive()
+
+          await updateValue({
+            resourceId: newRow.id,
+            fieldId: editedField.fieldId,
+            value: newValue,
+          })
+        }),
+      )
     } catch {
-      enqueueSnackbar('There was an error updating the field', {
+      enqueueSnackbar('There was an error updating the fields', {
         variant: 'error',
       })
       return oldRow
     }
 
+    onChange?.()
     return newRow
   }
 
+  if (!initialState) return <CircularProgress />
+
   return (
-    <DataGrid<Resource>
+    <DataGridPro<Resource>
       columns={columns}
       rows={resources}
+      editMode="row"
       rowSelection={false}
       autoHeight
       density="standard"
@@ -377,6 +395,17 @@ export default function ResourceTable({
         if (type === 'Line') return
 
         window.location.href = `/${type.toLowerCase()}s/${key}`
+      }}
+      apiRef={apiRef}
+      initialState={{
+        ...initialState,
+      }}
+      onColumnVisibilityModelChange={saveStateToLocalstorage}
+      onColumnWidthChange={saveStateToLocalstorage}
+      onColumnOrderChange={saveStateToLocalstorage}
+      onSortModelChange={saveStateToLocalstorage}
+      slots={{
+        toolbar: CustomGridToolbar,
       }}
       {...props}
     />

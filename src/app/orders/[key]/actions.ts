@@ -1,6 +1,5 @@
 'use server'
 
-import { requireSession } from '@/lib/session'
 import {
   fields,
   orderStatusOptions,
@@ -8,17 +7,18 @@ import {
 import { sendPo as domainSendPo } from '@/domain/order/sendPo'
 import { createPo as domainCreatePo } from '@/domain/order/createPo'
 import { transitionStatus } from '@/lib/resource/actions'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 import { mapValueFromResource } from '@/domain/resource/values/mappers'
+import { readSession } from '@/lib/session/actions'
 
 export const createPo = async (resourceId: string) => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   return domainCreatePo({ accountId, resourceId })
 }
 
 export const sendPo = async (resourceId: string) => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   await domainSendPo({ accountId, resourceId })
   await transitionStatus(
@@ -29,7 +29,7 @@ export const sendPo = async (resourceId: string) => {
 }
 
 export const findOrderBills = async (resourceId: string) => {
-  const { accountId } = await requireSession()
+  const { accountId } = await readSession()
 
   const bills = await prisma().resourceField.findMany({
     where: {

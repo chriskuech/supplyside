@@ -5,9 +5,9 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { IconButton } from '@mui/material'
 import { Clear } from '@mui/icons-material'
 import { filter, fromEntries, keys, map, pipe } from 'remeda'
-import { deleteUser, updateUser } from '../../../lib/iam/actions'
-import { User } from '../../../lib/iam/types'
+import { deleteUser, updateUser } from './actions'
 import { systemAccountId } from '@/lib/const'
+import { User } from '@/domain/iam/user/types'
 
 /**
  * @param oldObj

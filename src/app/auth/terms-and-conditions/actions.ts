@@ -1,11 +1,11 @@
 'use server'
 
 import { RedirectType, redirect } from 'next/navigation'
-import prisma from '@/lib/prisma'
-import { requireSession } from '@/lib/session'
+import prisma from '@/services/prisma'
+import { readSession } from '@/lib/session/actions'
 
 export const acceptTermsAndConditions = async () => {
-  const { userId } = await requireSession()
+  const { userId } = await readSession()
 
   await prisma().user.update({
     where: { id: userId },

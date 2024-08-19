@@ -11,11 +11,12 @@ import {
 } from '@prisma/client'
 import { Ajv } from 'ajv'
 import { isArray } from 'remeda'
+import { revalidatePath } from 'next/cache'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
 import { selectField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
-import { recalculateSubtotalCost } from '../cost/actions'
+import { recalculateSubtotalCost } from './cost/actions'
 import { Resource, selectValue } from './types'
 import { valueInclude } from './values/types'
 import { createSql } from './json-logic/compile'
@@ -23,7 +24,7 @@ import { OrderBy, Where } from './json-logic/types'
 import { copyLinkedResourceFields, updateValue } from './fields/actions'
 import { ValueModel } from './values/model'
 import { mapValueFromModel } from './values/mappers'
-import prisma from '@/lib/prisma'
+import prisma from '@/services/prisma'
 
 const ajv = new Ajv()
 
@@ -145,6 +146,7 @@ export const createResource = async ({
     })
   }
 
+  revalidatePath('')
   return resource
 }
 
@@ -239,6 +241,8 @@ export const deleteResource = async ({
       await recalculateSubtotalCost(accountId, 'Bill', billId)
     }
   }
+
+  revalidatePath('')
 }
 
 const include = {
@@ -265,6 +269,7 @@ const mapResource = (
   },
 ): Resource => ({
   id: model.id,
+  accountId: model.accountId,
   key: model.key,
   type: model.type,
   fields: model.ResourceField.map((rf) => ({

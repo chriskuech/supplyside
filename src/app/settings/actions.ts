@@ -2,18 +2,17 @@
 
 import { Prisma } from '@prisma/client'
 import { isEmpty } from 'remeda'
-import { revalidateTag } from 'next/cache'
-import prisma from '@/lib/prisma'
-import { requireSession } from '@/lib/session'
+import { revalidatePath } from 'next/cache'
+import prisma from '@/services/prisma'
 import { createBlob } from '@/domain/blobs/actions'
-import * as domain from '@/domain/iam/user'
+import { readSession } from '@/lib/session/actions'
 
 type ClientErrors = Record<string, string>
 
 export const handleSaveSettings = async (
   formData: FormData,
 ): Promise<ClientErrors | undefined> => {
-  const { accountId, userId } = await requireSession()
+  const { accountId, userId } = await readSession()
 
   const firstName = formData.get('firstName')
   const lastName = formData.get('lastName')
@@ -55,14 +54,8 @@ export const handleSaveSettings = async (
       data: update,
     })
 
-    revalidateTag('iam')
+    revalidatePath('')
   } else {
     return errors
   }
-}
-
-export const readUser = async () => {
-  const { userId } = await requireSession()
-
-  return domain.readUser({ userId })
 }

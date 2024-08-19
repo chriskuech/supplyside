@@ -1,6 +1,6 @@
 'use client'
 
-import assert, { fail } from 'assert'
+import { fail, ok } from 'assert'
 import {
   Accordion,
   AccordionDetails,
@@ -16,44 +16,26 @@ import {
 import { range } from 'remeda'
 import { Check, Clear, ExpandMore } from '@mui/icons-material'
 import { match } from 'ts-pattern'
-import { useCallback, useEffect, useState } from 'react'
 import ReadonlyTextarea from './fields/ReadonlyTextarea'
 import ResourceField from './fields/ResourceField'
 import FieldControl from './fields/FieldControl'
-import { readResource } from './actions'
 import { Schema } from '@/domain/schema/types'
 import { Resource } from '@/domain/resource/types'
-import Loading from '@/app/loading'
 
 type Props = {
   schema: Schema
-  resourceId: string
+  resource: Resource
   isReadOnly?: boolean
   singleColumn?: boolean
 }
 
 export default function ResourceFieldsControl({
   schema,
-  resourceId,
+  resource,
   isReadOnly,
   singleColumn,
 }: Props) {
-  const [resource, setResource] = useState<Resource>()
-
   const columns = singleColumn ? 1 : 3
-
-  const refresh = useCallback(
-    () => readResource({ id: resourceId }).then(setResource),
-    [resourceId],
-  )
-
-  useEffect(() => {
-    refresh()
-  }, [refresh])
-
-  if (!resource) {
-    return <Loading />
-  }
 
   if (isReadOnly) {
     return (
@@ -208,7 +190,6 @@ export default function ResourceFieldsControl({
                       (rf) => rf.fieldId === s.fields.at(0)?.id,
                     )?.value
                   }
-                  onChange={refresh}
                 />
               </Box>
             ) : (
@@ -229,7 +210,6 @@ export default function ResourceFieldsControl({
                               resource.fields.find((rf) => rf.fieldId === f.id)
                                 ?.value
                             }
-                            onChange={refresh}
                           />
                         </Box>
                       </Box>
@@ -255,7 +235,7 @@ export default function ResourceFieldsControl({
  * @returns an array of arrays with the elements of the original array
  */
 const chunkByN = <T,>(arr: T[], n: number): T[][] => {
-  assert(n > 0)
+  ok(n > 0)
   const m = Math.floor(arr.length / n)
   const r = arr.length % n
   return range(0, n).map((i) =>
