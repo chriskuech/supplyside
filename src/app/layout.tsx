@@ -4,6 +4,7 @@ import { PropsWithChildren } from 'react'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import dynamic from 'next/dynamic'
 import AppBar from '@/lib/ux/appbar/AppBar'
+import MuiXLicense from '@/lib/ux/MuiXLicense'
 
 const RootProvider = dynamic(() => import('@/lib/ux/RootProvider'), {
   ssr: false,
@@ -30,6 +31,7 @@ export default async function RootLayout({
           flexDirection: 'column',
         }}
       >
+        <MuiXLicense />
         <AppRouterCacheProvider>
           <RootProvider>
             <CssBaseline />
