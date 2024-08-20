@@ -1,4 +1,4 @@
-name: Build and deploy a container to an Azure Web App
+name: CD
 
 on:
   workflow_dispatch:
