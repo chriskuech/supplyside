@@ -1,6 +1,8 @@
 'use server'
 
 import { compare } from 'bcrypt'
+import { isMatching } from 'ts-pattern'
+import { isError } from 'remeda'
 import { Session, mapSessionModel, sessionIncludes } from './types'
 import prisma from '@/services/prisma'
 import { systemAccountId } from '@/lib/const'
@@ -39,16 +41,22 @@ export const createSession = async (
 
 export const readAndExtendSession = async (
   sessionId: string,
-): Promise<Session> => {
-  const session = await prisma().session.update({
-    where: { id: sessionId, revokedAt: null },
-    data: {
-      expiresAt: new Date(Date.now() + lifespanInSeconds * 1000),
-    },
-    include: sessionIncludes,
-  })
+): Promise<Session | null> => {
+  try {
+    const session = await prisma().session.update({
+      where: { id: sessionId, revokedAt: null },
+      data: {
+        expiresAt: new Date(Date.now() + lifespanInSeconds * 1000),
+      },
+      include: sessionIncludes,
+    })
 
-  return mapSessionModel(session)
+    return mapSessionModel(session)
+  } catch (error) {
+    if (isError(error) && isMatching({ code: 'P2025' }, error)) return null
+
+    throw error
+  }
 }
 
 export const readSession = async (sessionId: string): Promise<Session> => {

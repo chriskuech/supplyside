@@ -38,6 +38,9 @@ type Props = {
   isReadOnly?: boolean
 }
 
+/**
+ * A field that allows the user to select a resource of a given type.
+ */
 function ResourceField(
   { resourceType, value, onChange, isReadOnly }: Props,
   ref: ForwardedRef<HTMLInputElement>,
