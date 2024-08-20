@@ -3,6 +3,7 @@
 import { ok } from 'assert'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { validate as isUuid } from 'uuid'
 import {
   clearSession as domainClearSession,
   createSession as domainCreateSession,
@@ -23,13 +24,21 @@ export const createSession = async (email: string, password: string) => {
   })
 }
 
-export const hasSession = () =>
-  Promise.resolve(!!cookies().get(sessionIdCookieName)?.value)
+export const hasSession = () => {
+  const sessionId = cookies().get(sessionIdCookieName)?.value
+
+  if (!sessionId || !isUuid(sessionId)) return false
+
+  return domainReadSession(sessionId)
+    .then(() => true)
+    .catch(() => false)
+}
 
 export const readSession = async () => {
   const sessionId = cookies().get(sessionIdCookieName)?.value
 
-  ok(sessionId, `Session not found in cookies`)
+  ok(sessionId, '`sessionId` not found in cookies')
+  ok(isUuid(sessionId), '`sessionId` is not a valid UUID')
 
   const session = await domainReadSession(sessionId)
 
@@ -39,10 +48,9 @@ export const readSession = async () => {
 // this should be in a middleware, but https://github.com/vercel/next.js/issues/69002
 export const requireSessionWithRedirect = async () => {
   const sessionId = cookies().get(sessionIdCookieName)?.value
-  if (!sessionId) return redirect('/auth/login')
+  if (!sessionId || !isUuid(sessionId)) return redirect('/auth/login')
 
   const session = await domainReadAndExtendSession(sessionId)
-
   if (!session) return redirect('/auth/login')
 
   if (session.user.requirePasswordReset)
@@ -59,9 +67,11 @@ export const clearSession = async () => {
 
   if (!sessionId) return
 
-  await domainClearSession(sessionId)
-
   cookies().delete(sessionIdCookieName)
+
+  if (!isUuid(sessionId)) return
+
+  await domainClearSession(sessionId)
 }
 
 export const impersonate = async (accountId: string) => {
