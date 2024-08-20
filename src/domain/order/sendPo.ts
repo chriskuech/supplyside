@@ -27,7 +27,7 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
 
   const poRecipient = selectValue(order, fields.poRecipient)?.contact
   const po = selectValue(order, fields.document)?.file
-  const assignee = selectValue(order, fields.assignee)?.user
+  const assignee = selectValue(order, fields.assignee)?.user ?? undefined
   const vendor = selectValue(order, fields.vendor)?.resource
   const number = selectValue(order, fields.number)?.string
   const date = selectValue(order, fields.issuedDate)?.date
@@ -46,8 +46,8 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   await smtp().sendEmailWithTemplate({
     From: 'SupplySide <bot@supplyside.io>',
     To: `${poRecipient.name} <${poRecipient.email}>`,
-    Cc: `${assignee?.fullName} <${assignee?.email}>`,
-    ReplyTo: `${assignee?.fullName} <${assignee?.email}>`,
+    Cc: assignee && `${assignee.fullName} <${assignee.email}>`,
+    ReplyTo: assignee && `${assignee.fullName} <${assignee.email}>`,
     TemplateAlias: 'new-po',
     TemplateModel: {
       // layout
