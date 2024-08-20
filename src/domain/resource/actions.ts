@@ -117,6 +117,10 @@ export const createResource = async ({
                   f.type === 'Files'
                     ? { create: dataValue.map((fileId) => ({ fileId })) }
                     : undefined,
+                User:
+                  typeof dataValue === 'string' && f.type === 'User'
+                    ? { connect: { id: dataValue } }
+                    : undefined,
               } satisfies Prisma.ValueCreateWithoutResourceFieldValueInput,
             },
           }
@@ -141,7 +145,9 @@ export const createResource = async ({
   if (type === 'Order') {
     await updateValue({
       resourceId: resource.id,
-      fieldId: selectField(schema, fields.number)?.id ?? fail(),
+      fieldId:
+        selectField(schema, fields.number)?.id ??
+        fail(`"${fields.number.name}" field not found`),
       value: { string: resource.key.toString() },
     })
   }
