@@ -8,9 +8,10 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
+
     environment:
       name: Production
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+      url: https://app.supplyside.io
 
     steps:
       - uses: actions/checkout@v4
