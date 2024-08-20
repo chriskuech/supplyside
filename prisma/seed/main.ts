@@ -13,7 +13,6 @@ import { createResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 
 ImportMock.mockFunction(nextCache, 'revalidatePath', () => {})
-ImportMock.mockFunction(nextCache, 'revalidateTag', () => {})
 
 expandDotenv(loadDotenv())
 
