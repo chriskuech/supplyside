@@ -54,7 +54,7 @@ jobs:
     needs: build
     if: ${{ github.event_name != 'pull_request' }}
     environment:
-      name: Development
+      name: Integration
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:

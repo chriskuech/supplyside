@@ -1,0 +1,61 @@
+name: Build and deploy a container to an Azure Web App
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Tailscale
+        uses: tailscale/github-action@main
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Run Prisma migrations
+        run: |
+          # Extract database connection details from DATABASE_URL
+          USER=$(echo $DATABASE_URL | sed -r 's|postgresql://([^:]+):.*|\1|')
+          PASSWORD=$(echo $DATABASE_URL | sed -r 's|postgresql://[^:]+:([^@]+)@.*|\1|')
+          HOST=$(echo $DATABASE_URL | sed -r 's|postgresql://[^@]+@([^:]+):.*|\1|')
+          PORT=$(echo $DATABASE_URL | sed -r 's|postgresql://[^@]+@[^:]+:([^/]+)/.*|\1|')
+          DBNAME=$(echo $DATABASE_URL | sed -r 's|postgresql://[^/]+/(.+)|\1|')
+          export PGPASSWORD=$PASSWORD
+
+          # Rollback failed migration if any
+          QUERY="SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NULL ORDER BY started_at LIMIT 1;"
+          FAILED_MIGRATION_NAME=$(psql -U $USER -h $HOST -p $PORT -d $DBNAME -t -c "$QUERY" | xargs)
+          if [ -n "$FAILED_MIGRATION_NAME" ]; then
+            echo "Rolling back failed migration: $FAILED_MIGRATION_NAME"
+            npx prisma migrate resolve --rolled-back $FAILED_MIGRATION_NAME
+          fi
+
+          # Deploy new migration
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DB_SERVER_URL }}/production
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: supplyside.azurecr.io
+          username: supplyside-github-actions
+          password: ${{ secrets.ACR_TOKEN }}
+
+      - name: Push the Docker image to Docker Hub
+        run: |
+          docker pull supplyside.azurecr.io/app:integration
+          docker tag supplyside.azurecr.io/app:integration supplyside.azurecr.io/app:production
+          docker push supplyside.azurecr.io/app:production
