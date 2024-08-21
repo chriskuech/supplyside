@@ -1,6 +1,6 @@
 'use client'
 
-import { Close, Download, UploadFile } from '@mui/icons-material'
+import { Close, Download, UploadFile, Visibility } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -38,6 +38,22 @@ export default function FilesField({
         {value?.files?.map((file) => (
           <Stack key={file.id} direction={'row'} alignItems={'center'}>
             <Typography flexGrow={1}>{file.name ?? '-'}</Typography>
+            <Tooltip title="View File">
+              <IconButton
+                onClick={() =>
+                  window.open(
+                    getDownloadPath({
+                      blobId: file.blobId,
+                      fileName: file.name,
+                      mimeType: file.Blob.mimeType,
+                      isPreview: true,
+                    }),
+                  )
+                }
+              >
+                <Visibility />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Download File">
               <IconButton
                 onClick={() =>
