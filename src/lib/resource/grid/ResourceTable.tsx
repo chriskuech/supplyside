@@ -399,6 +399,9 @@ export default function ResourceTable({
       apiRef={apiRef}
       initialState={{
         ...initialState,
+        preferencePanel: {
+          open: false,
+        },
       }}
       onColumnVisibilityModelChange={saveStateToLocalstorage}
       onColumnWidthChange={saveStateToLocalstorage}
