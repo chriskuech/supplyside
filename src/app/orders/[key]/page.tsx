@@ -160,6 +160,7 @@ export default async function OrderDetail({
             newLineInitialData={{
               [fields.order.name]: resource.id,
             }}
+            isReadOnly={!isDraft}
           />
         </Stack>
       </Container>

@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Box,
   Button,
   Card,
   IconButton,
@@ -26,9 +27,10 @@ import { fields } from '@/domain/schema/template/system-fields'
 
 type Props = {
   resource: Resource
+  isReadOnly?: boolean
 }
 
-export default function ItemizedCostLines({ resource }: Props) {
+export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
   const theme = useTheme()
 
   const subtotalCost = selectValue(resource, fields.subtotalCost)?.number ?? 0
@@ -83,6 +85,7 @@ export default function ItemizedCostLines({ resource }: Props) {
                     }
                     placeholder="Description"
                     size="small"
+                    disabled={isReadOnly}
                   />
                 </TableCell>
                 <TableCell width={100} sx={{ paddingX: '10px' }}>
@@ -95,6 +98,7 @@ export default function ItemizedCostLines({ resource }: Props) {
                       })
                     }
                     size="small"
+                    disabled={isReadOnly}
                   >
                     <MenuItem value="$">$</MenuItem>
                     <MenuItem value="%">%</MenuItem>
@@ -114,6 +118,7 @@ export default function ItemizedCostLines({ resource }: Props) {
                       endAdornment: row.isPercentage && <span>%</span>,
                     }}
                     size="small"
+                    disabled={isReadOnly}
                   />
                 </TableCell>
                 <TableCell align="right" sx={{ paddingX: '10px' }}>
@@ -126,9 +131,13 @@ export default function ItemizedCostLines({ resource }: Props) {
                   })}
                 </TableCell>
                 <TableCell>
-                  <IconButton onClick={() => deleteCost(row.id)}>
-                    <Clear />
-                  </IconButton>
+                  <Box width={40}>
+                    {!isReadOnly && (
+                      <IconButton onClick={() => deleteCost(row.id)}>
+                        <Clear />
+                      </IconButton>
+                    )}
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
@@ -160,11 +169,13 @@ export default function ItemizedCostLines({ resource }: Props) {
         </Table>
       </Card>
 
-      <Stack direction={'row'} justifyContent={'end'}>
-        <Button onClick={() => createCost(resource.id)} startIcon={<Add />}>
-          Itemized Cost
-        </Button>
-      </Stack>
+      {!isReadOnly && (
+        <Stack direction={'row'} justifyContent={'end'}>
+          <Button onClick={() => createCost(resource.id)} startIcon={<Add />}>
+            Itemized Cost
+          </Button>
+        </Stack>
+      )}
     </Stack>
   )
 }

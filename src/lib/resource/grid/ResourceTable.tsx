@@ -291,6 +291,7 @@ export default function ResourceTable({
               e.stopPropagation()
               deleteResource({ id })
             }}
+            disabled={!isEditable}
           >
             <Clear />
           </IconButton>
