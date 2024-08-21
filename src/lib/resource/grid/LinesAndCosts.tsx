@@ -11,12 +11,14 @@ type Props = {
   resource: Resource
   lineQuery: Where
   newLineInitialData: Data
+  isReadOnly?: boolean
 }
 
 export default async function LinesAndCosts({
   resource,
   lineQuery,
   newLineInitialData,
+  isReadOnly,
 }: Props) {
   const [lines, lineSchema] = await Promise.all([
     readResources({
@@ -33,14 +35,16 @@ export default async function LinesAndCosts({
         <Typography variant="h4" flexGrow={1}>
           Lines
         </Typography>
-        <CreateResourceButton type={'Line'} data={newLineInitialData} />
+        {!isReadOnly && (
+          <CreateResourceButton type={'Line'} data={newLineInitialData} />
+        )}
       </Stack>
       <Stack>
         <ResourceTable
           tableKey={'linesAndCosts'}
           schema={lineSchema}
           resources={lines}
-          isEditable
+          isEditable={!isReadOnly}
           sx={{
             borderBottomLeftRadius: 0,
           }}
@@ -50,7 +54,7 @@ export default async function LinesAndCosts({
           hideFooter
         />
         <Box alignSelf="flex-end">
-          <ItemizedCostLines resource={resource} />
+          <ItemizedCostLines resource={resource} isReadOnly={isReadOnly} />
         </Box>
       </Stack>
     </Stack>
