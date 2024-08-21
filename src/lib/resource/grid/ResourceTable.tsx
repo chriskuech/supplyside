@@ -1,6 +1,10 @@
 'use client'
 
-import { GridColDef, GridColType } from '@mui/x-data-grid'
+import {
+  GridColDef,
+  GridColType,
+  GridPreferencePanelsValue,
+} from '@mui/x-data-grid'
 import { DataGridPro, DataGridProProps } from '@mui/x-data-grid-pro'
 import { FieldType } from '@prisma/client'
 import { Box, Chip, CircularProgress, IconButton, Stack } from '@mui/material'
@@ -399,6 +403,9 @@ export default function ResourceTable({
       apiRef={apiRef}
       initialState={{
         ...initialState,
+        preferencePanel: {
+          open: false,
+        },
       }}
       onColumnVisibilityModelChange={saveStateToLocalstorage}
       onColumnWidthChange={saveStateToLocalstorage}
