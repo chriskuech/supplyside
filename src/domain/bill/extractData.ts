@@ -93,7 +93,9 @@ export const extractContent = async (accountId: string, resourceId: string) => {
 
   assert(fn.name === functionName)
 
-  return JSON.parse(fn.arguments)
+  const data = JSON.parse(fn.arguments)
+
+  await updateResource(accountId, resourceId, data)
 }
 
 const readPdfToBase64s = async (

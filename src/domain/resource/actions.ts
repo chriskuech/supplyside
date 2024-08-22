@@ -14,7 +14,7 @@ import { isArray } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema/actions'
-import { selectField } from '../schema/types'
+import { Field, Schema, selectField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
 import { recalculateSubtotalCost } from './cost/actions'
 import { Resource, selectValue } from './types'
@@ -28,10 +28,55 @@ import prisma from '@/services/prisma'
 
 const ajv = new Ajv()
 
+type Primitive = string | number | boolean | string[] | null
+type InputData = Record<string, Primitive>
+
+const getCreate = (schema: Schema, resource: InputData) => ({})
+
+const getValueCreate = (
+  f: Field,
+  dataValue: Primitive,
+): Prisma.ValueCreateInput => ({
+  boolean:
+    typeof dataValue === 'boolean' && f.type === 'Checkbox'
+      ? dataValue
+      : f.defaultValue?.boolean ?? null,
+  date:
+    typeof dataValue === 'string' && f.type === 'Date'
+      ? dataValue
+      : f.defaultValue?.date ?? null,
+  number:
+    typeof dataValue === 'number' && ['Number', 'Money'].includes(f.type)
+      ? dataValue
+      : f.defaultValue?.number ?? null,
+  string:
+    typeof dataValue === 'string' && ['Text', 'Textarea'].includes(f.type)
+      ? dataValue
+      : f.defaultValue?.string ?? null,
+  Resource:
+    typeof dataValue === 'string' && f.type === 'Resource'
+      ? { connect: { id: dataValue } }
+      : undefined,
+  Option:
+    typeof dataValue === 'string' && f.type === 'Select'
+      ? { connect: { id: dataValue } }
+      : f.defaultValue?.optionId
+        ? { connect: { id: f.defaultValue.optionId } }
+        : undefined,
+  Files:
+    isArray(dataValue) && typeof dataValue[0] === 'string' && f.type === 'Files'
+      ? { create: dataValue.map((fileId) => ({ fileId })) }
+      : undefined,
+  User:
+    typeof dataValue === 'string' && f.type === 'User'
+      ? { connect: { id: dataValue } }
+      : undefined,
+})
+
 export type CreateResourceParams = {
   accountId: string
   type: ResourceType
-  data?: Record<string, string | number | boolean | string[] | null>
+  data?: Record<string, Primitive>
 }
 
 export const createResource = async ({
@@ -219,6 +264,144 @@ export const readResources = async ({
   })
 
   return models.map(mapResource)
+}
+
+export type UpdateResourceParams = {
+  accountId: string
+  type: ResourceType
+  resourceId: string
+  data?: Record<string, string | number | boolean | string[] | null>
+}
+
+export const updateResource = async ({
+  accountId,
+  resourceId,
+  type,
+  data,
+}: UpdateResourceParams): Promise<ResourceModel> => {
+  const schema = await readSchema({ accountId, resourceType: type })
+  const jsonSchema = mapSchemaToJsonSchema(schema)
+
+  if (data && !ajv.validate(jsonSchema, data)) {
+    throw new Error('invalid')
+  }
+
+  const resource = await prisma().resource.update({
+    where: {
+      id: resourceId,
+      accountId,
+    },
+    data: {
+      ResourceField: {
+        upsert: schema.allFields.map((f) => {
+          const dataValue = data?.[f.name]
+
+          const delta: Prisma.ResourceFieldUpsertWithWhereUniqueWithoutResourceInput['create'] &
+            Prisma.ResourceFieldUpsertWithWhereUniqueWithoutResourceInput['update'] =
+            {
+              // fieldId: f.id,
+              // Value: {
+              //   // create: {
+              //   //   boolean:
+              //   //     typeof dataValue === 'boolean' && f.type === 'Checkbox'
+              //   //       ? dataValue
+              //   //       : f.defaultValue?.boolean ?? null,
+              //   //   date:
+              //   //     typeof dataValue === 'string' && f.type === 'Date'
+              //   //       ? dataValue
+              //   //       : f.defaultValue?.date ?? null,
+              //   //   number:
+              //   //     typeof dataValue === 'number' &&
+              //   //     ['Number', 'Money'].includes(f.type)
+              //   //       ? dataValue
+              //   //       : f.defaultValue?.number ?? null,
+              //   //   string:
+              //   //     typeof dataValue === 'string' &&
+              //   //     ['Text', 'Textarea'].includes(f.type)
+              //   //       ? dataValue
+              //   //       : f.defaultValue?.string ?? null,
+              //   //   Resource:
+              //   //     typeof dataValue === 'string' && f.type === 'Resource'
+              //   //       ? { connect: { id: dataValue } }
+              //   //       : undefined,
+              //   //   Option:
+              //   //     typeof dataValue === 'string' && f.type === 'Select'
+              //   //       ? { connect: { id: dataValue } }
+              //   //       : f.defaultValue?.optionId
+              //   //         ? { connect: { id: f.defaultValue.optionId } }
+              //   //         : undefined,
+              //   //   Files:
+              //   //     isArray(dataValue) &&
+              //   //     typeof dataValue[0] === 'string' &&
+              //   //     f.type === 'Files'
+              //   //       ? { create: dataValue.map((fileId) => ({ fileId })) }
+              //   //       : undefined,
+              //   //   User:
+              //   //     typeof dataValue === 'string' && f.type === 'User'
+              //   //       ? { connect: { id: dataValue } }
+              //   //       : undefined,
+              //   // },
+              // },
+            }
+
+          return {
+            where: {
+              resourceId_fieldId: {
+                resourceId,
+                fieldId: f.id,
+              },
+            },
+            create: {
+              Field: {
+                connect: {
+                  id: f.id,
+                },
+              },
+              Value: {
+                create: {},
+              },
+            },
+            update: {
+              Field: {
+                connect: {
+                  id: f.id,
+                },
+              },
+              Value: {
+                update: {},
+              },
+            },
+          } satisfies Prisma.ResourceFieldUpsertWithWhereUniqueWithoutResourceInput
+        }),
+      },
+    },
+    include,
+  })
+
+  await Promise.all(
+    resource.ResourceField.filter(
+      (rf) => rf.Field.resourceType && rf.Value.resourceId,
+    ).map((rf) =>
+      copyLinkedResourceFields(
+        rf.resourceId,
+        rf.fieldId,
+        rf.Value.resourceId ?? fail(),
+      ),
+    ),
+  )
+
+  if (type === 'Order') {
+    await updateValue({
+      resourceId: resource.id,
+      fieldId:
+        selectField(schema, fields.number)?.id ??
+        fail(`"${fields.number.name}" field not found`),
+      value: { string: resource.key.toString() },
+    })
+  }
+
+  revalidatePath('')
+  return resource
 }
 
 export type DeleteResourceParams = {

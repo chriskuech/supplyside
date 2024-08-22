@@ -8,6 +8,7 @@ import prisma from '@/services/prisma'
 import { createResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 import smtp from '@/services/smtp'
+import { extractContent } from '@/domain/bill/extractData'
 
 type FileParam = {
   content: string
@@ -44,13 +45,18 @@ const createBill = async (params: Params) => {
 
   console.log('Creating Bill', fileIds)
 
-  return await createResource({
+  const bill = await createResource({
     accountId: params.accountId,
     type: 'Bill',
     data: {
       [fields.billFiles.name]: fileIds,
     },
   })
+
+  // TODO: this isn't the right place for this
+  await extractContent(params.accountId, bill.id)
+
+  return bill
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
