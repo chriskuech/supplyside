@@ -5,6 +5,7 @@
 - NVM
 - Docker
 - VS Code (Install all recommended extensions)
+- Poppler (`brew install poppler`)
 
 ## Commands
 

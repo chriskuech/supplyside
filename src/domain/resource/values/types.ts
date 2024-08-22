@@ -17,7 +17,7 @@ export type ValueInput = {
   optionIds?: string[]
   string?: string | null
   userId?: string | null
-  fileId?: string | null // This one's probably wrong if we are going to support previewing files before upload
+  fileId?: string | null
   resourceId?: string | null
 }
 
@@ -30,8 +30,8 @@ export type Value = {
   options?: Option[]
   string: string | null
   user: User | null
-  file: (File & { Blob: Blob }) | null
-  files?: (File & { Blob: Blob })[]
+  file: ValueFile | null
+  files?: ValueFile[]
   resource: ValueResource | null
 }
 
@@ -40,6 +40,8 @@ export type ValueResource = {
   name: string
   key: number
 }
+
+export type ValueFile = File & { Blob: Blob }
 
 export const valueInclude = {
   Contact: true,

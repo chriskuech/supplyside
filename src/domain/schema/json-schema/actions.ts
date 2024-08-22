@@ -1,4 +1,4 @@
-import { JSONSchema7 } from 'json-schema'
+import { JSONSchema7Object } from 'json-schema'
 import { mapToObj } from 'remeda'
 import { P, match } from 'ts-pattern'
 import { Field, Schema } from '../types'
@@ -9,11 +9,11 @@ const phonePattern = '^[0-9]{10}$'
 const uuidPattern =
   '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
 
-export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
+export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7Object => ({
   type: 'object',
   properties: mapToObj(schema.allFields, (f) => [
     f.name,
-    match<Field, JSONSchema7>(f)
+    match<Field, JSONSchema7Object>(f)
       .with({ type: 'Checkbox' }, () => ({ type: ['boolean', 'null'] }))
       .with({ type: 'Contact' }, () => ({
         type: ['object', 'null'],

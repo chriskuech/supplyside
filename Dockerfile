@@ -21,13 +21,14 @@ FROM alpine AS runner
 WORKDIR /app
 
 RUN apk add --no-cache \
+  ca-certificates \
   chromium \
-  nss \
   freetype \
   harfbuzz \
-  ca-certificates \
-  ttf-freefont \
-  nodejs
+  nodejs \
+  nss \
+  poppler-utils \
+  ttf-freefont
 
 # Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
