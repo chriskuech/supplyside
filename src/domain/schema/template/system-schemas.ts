@@ -32,10 +32,6 @@ export const schemas: SchemaTemplate[] = [
           fields.currency,
         ],
       },
-      {
-        name: fields.termsAndConditions.name,
-        fields: [fields.termsAndConditions],
-      },
     ],
   },
   {
@@ -117,7 +113,7 @@ export const schemas: SchemaTemplate[] = [
       },
       {
         name: 'Payment Info',
-        fields: [fields.paymentTerms, fields.preferredPaymentType],
+        fields: [fields.paymentTerms, fields.paymentMethod],
       },
     ],
   },
