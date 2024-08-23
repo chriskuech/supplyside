@@ -21,7 +21,8 @@ const quickbooksTokenSchema: z.ZodType<QuickbooksToken> = z.object({
   x_refresh_token_expires_in: z.number(),
 })
 
-const baseUrl = (realmId) => `${quickbooksBaseUrl}/v3/company/${realmId}`
+const baseUrl = (realmId: string) =>
+  `${quickbooksBaseUrl}/v3/company/${realmId}`
 
 export const getQuickbooksToken = async (
   accountId: string,
