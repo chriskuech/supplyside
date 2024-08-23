@@ -2,8 +2,8 @@ import CSRF from 'csrf'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { cleanToken, quickbooksClient } from '@/services/quickbooks'
-import prisma from '@/services/prisma'
 import config from '@/services/config'
+import { updateQuickbooksToken } from '@/domain/quickbooks/actions'
 
 const stateSchema = z.object({
   accountId: z.string().uuid(),
@@ -22,10 +22,7 @@ export async function GET({ url }: NextRequest): Promise<NextResponse> {
 
   const quickbooksToken = cleanToken(tokenExchange.token)
 
-  await prisma().account.update({
-    where: { id: accountId },
-    data: { quickbooksToken },
-  })
+  await updateQuickbooksToken(accountId, quickbooksToken)
 
   return NextResponse.redirect(new URL('/account/integrations', url))
 }

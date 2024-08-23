@@ -5,7 +5,7 @@ import { CompanyInfo } from './types'
 import prisma from '@/services/prisma'
 import {
   authQuickbooksClient,
-  baseUrl,
+  baseUrl as quickbooksBaseUrl,
   QuickbooksToken,
 } from '@/services/quickbooks'
 
@@ -20,6 +20,8 @@ const quickbooksTokenSchema: z.ZodType<QuickbooksToken> = z.object({
   token_type: z.string(),
   x_refresh_token_expires_in: z.number(),
 })
+
+const baseUrl = (realmId) => `${quickbooksBaseUrl}/v3/company/${realmId}`
 
 export const getQuickbooksToken = async (
   accountId: string,
@@ -60,7 +62,7 @@ export const getCompanyInfo = async (
 
   return client
     .makeApiCall<CompanyInfo>({
-      url: `${baseUrl}/v3/company/${client.token.realmId}/companyinfo/${client.token.realmId}`,
+      url: `${baseUrl(client.token.realmId)}/companyinfo/${client.token.realmId}`,
       method: 'GET',
     })
     .then((data) => data.json)
