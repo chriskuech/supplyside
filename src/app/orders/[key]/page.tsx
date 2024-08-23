@@ -114,7 +114,7 @@ export default async function OrderDetail({
                   <PreviewDraftPoButton resourceId={resource.id} />
                   <ApproveButton
                     resourceId={resource.id}
-                    isDisabled={user.isApprover}
+                    isDisabled={!user.isApprover}
                   />
                 </>
               )}
@@ -160,6 +160,7 @@ export default async function OrderDetail({
             newLineInitialData={{
               [fields.order.name]: resource.id,
             }}
+            isReadOnly={!isDraft}
           />
         </Stack>
       </Container>

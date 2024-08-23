@@ -291,6 +291,7 @@ export default function ResourceTable({
               e.stopPropagation()
               deleteResource({ id })
             }}
+            disabled={!isEditable}
           >
             <Clear />
           </IconButton>
@@ -399,6 +400,9 @@ export default function ResourceTable({
       apiRef={apiRef}
       initialState={{
         ...initialState,
+        preferencePanel: {
+          open: false,
+        },
       }}
       onColumnVisibilityModelChange={saveStateToLocalstorage}
       onColumnWidthChange={saveStateToLocalstorage}
