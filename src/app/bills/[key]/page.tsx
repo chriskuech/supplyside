@@ -100,13 +100,18 @@ export default async function BillsDetail({
 
       <Container sx={{ py: 5 }}>
         <Stack spacing={5}>
-          <ResourceFieldsControl schema={schema} resource={resource} />
+          <ResourceFieldsControl
+            schema={schema}
+            resource={resource}
+            isReadOnly={!isDraft}
+          />
           <LinesAndCosts
             lineQuery={{ '==': [{ var: 'Bill' }, resource.id] }}
             resource={resource}
             newLineInitialData={{
               [fields.bill.name]: resource.id,
             }}
+            isReadOnly={!isDraft}
           />
         </Stack>
       </Container>
