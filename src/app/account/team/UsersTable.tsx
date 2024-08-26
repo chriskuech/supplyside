@@ -1,6 +1,6 @@
 'use client'
 
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { IconButton } from '@mui/material'
 import { Clear } from '@mui/icons-material'
@@ -8,6 +8,8 @@ import { filter, fromEntries, keys, map, pipe } from 'remeda'
 import { deleteUser, updateUser } from './actions'
 import { systemAccountId } from '@/lib/const'
 import { User } from '@/domain/iam/user/types'
+import { useDisclosure } from '@/lib/hooks/useDisclosure'
+import ConfirmationDialog from '@/lib/ux/ConfirmationDialog'
 
 /**
  * @param oldObj
@@ -31,6 +33,9 @@ type Props = {
 }
 
 const UsersTable: FC<Props> = ({ currentUser, users }) => {
+  const { isOpen, close, open } = useDisclosure()
+  const [userIdToDelete, setUserIdToDelete] = useState<string | null>(null)
+
   const editable: boolean =
     currentUser?.isAdmin || currentUser?.accountId === systemAccountId
 
@@ -77,7 +82,12 @@ const UsersTable: FC<Props> = ({ currentUser, users }) => {
       sortable: false,
       disableColumnMenu: true,
       renderCell: ({ row }) => (
-        <IconButton onClick={() => deleteUser(row.id)}>
+        <IconButton
+          onClick={() => {
+            setUserIdToDelete(row.id)
+            open()
+          }}
+        >
           <Clear />
         </IconButton>
       ),
@@ -85,21 +95,38 @@ const UsersTable: FC<Props> = ({ currentUser, users }) => {
   ]
 
   return (
-    <DataGrid
-      columns={columns}
-      rows={users}
-      rowSelection={false}
-      processRowUpdate={async (newRow, oldRow) => {
-        const patch = diff(oldRow, newRow)
+    <>
+      <ConfirmationDialog
+        title="Delete User"
+        content="Are you sure you want to delete this user?"
+        isOpen={isOpen}
+        onClose={close}
+        onConfirm={() => {
+          if (userIdToDelete) {
+            deleteUser(userIdToDelete)
+          }
 
-        await updateUser({
-          id: newRow.id,
-          ...patch,
-        })
+          setUserIdToDelete(null)
 
-        return newRow
-      }}
-    />
+          close()
+        }}
+      />
+      <DataGrid
+        columns={columns}
+        rows={users}
+        rowSelection={false}
+        processRowUpdate={async (newRow, oldRow) => {
+          const patch = diff(oldRow, newRow)
+
+          await updateUser({
+            id: newRow.id,
+            ...patch,
+          })
+
+          return newRow
+        }}
+      />
+    </>
   )
 }
 
