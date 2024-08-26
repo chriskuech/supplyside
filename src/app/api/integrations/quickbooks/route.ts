@@ -1,3 +1,5 @@
+'use server'
+
 import CSRF from 'csrf'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
