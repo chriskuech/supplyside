@@ -3,9 +3,12 @@
 import CSRF from 'csrf'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { cleanToken, quickbooksClient } from '@/services/quickbooks'
 import config from '@/services/config'
-import { updateQuickbooksToken } from '@/domain/quickbooks/actions'
+import {
+  cleanToken,
+  quickbooksClient,
+  updateQuickbooksToken,
+} from '@/domain/quickbooks/actions'
 
 const stateSchema = z.object({
   accountId: z.string().uuid(),
