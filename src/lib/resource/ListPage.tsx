@@ -3,7 +3,7 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 import CreateResourceButton from './CreateResourceButton'
-import ResourceTable from './grid/ResourceTable'
+import ResourceTable from './ResourceTable'
 import { readResources } from '@/domain/resource/actions'
 import { readSchema } from '@/domain/schema/actions'
 import { requireSessionWithRedirect } from '@/lib/session/actions'

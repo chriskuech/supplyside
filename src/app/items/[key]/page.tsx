@@ -1,6 +1,7 @@
-import { Container, Stack, Typography } from '@mui/material'
-import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
+import { selectValue } from '@/domain/resource/types'
+import { fields } from '@/domain/schema/template/system-fields'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
+import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 
 export default async function ItemsDetail({
   params: { key },
@@ -10,16 +11,11 @@ export default async function ItemsDetail({
   const { resource, schema } = await readDetailPageModel('Item', key)
 
   return (
-    <Container sx={{ my: 5 }}>
-      <Stack spacing={5}>
-        <Stack spacing={2}>
-          <Typography variant="h3">
-            <span style={{ opacity: 0.5 }}>Item #</span>
-            <span>{key}</span>
-          </Typography>
-          <ResourceFieldsControl resource={resource} schema={schema} />
-        </Stack>
-      </Stack>
-    </Container>
+    <ResourceDetailPage
+      schema={schema}
+      resource={resource}
+      tools={[]}
+      name={selectValue(resource, fields.name)?.string}
+    />
   )
 }
