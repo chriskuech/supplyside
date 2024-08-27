@@ -1,4 +1,4 @@
-import OAuthClient, { Token } from 'intuit-oauth'
+import OAuthClient from 'intuit-oauth'
 import { QuickBooksConnection } from '@prisma/client'
 import {
   deleteQuickBooksToken,
@@ -17,18 +17,6 @@ const environmentUrls = {
 const redirectUri = `${BASE_URL}/api/integrations/quickbooks`
 const environment = QUICKBOOKS_ENVIRONMENT
 export const quickBooksBaseUrl = environmentUrls[environment]
-
-export const cleanToken = (token: Token): QuickBooksToken => ({
-  access_token: token.access_token,
-  createdAt: token.createdAt,
-  expires_in: token.expires_in,
-  id_token: token.id_token,
-  latency: token.latency,
-  realmId: token.realmId,
-  refresh_token: token.refresh_token,
-  token_type: token.token_type,
-  x_refresh_token_expires_in: token.x_refresh_token_expires_in,
-})
 
 export const isRefreshTokenValid = (token: QuickBooksToken) => {
   const createdAtDate = new Date(token.createdAt)
@@ -65,7 +53,7 @@ export const authQuickBooksClient = async (accountId: string) => {
   if (!client.isAccessTokenValid()) {
     if (isRefreshTokenValid(token)) {
       const tokenResponse = await client.refresh()
-      await updateQuickBooksToken(accountId, cleanToken(tokenResponse.token))
+      await updateQuickBooksToken(accountId, tokenResponse.token)
       return client
     } else {
       await deleteQuickBooksToken(accountId)

@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import config from '@/services/config'
 import { createQuickBooksConnection } from '@/domain/quickBooks/actions'
-import { cleanToken, quickBooksClient } from '@/domain/quickBooks/client'
+import { quickBooksClient } from '@/domain/quickBooks/client'
 
 const stateSchema = z.object({
   accountId: z.string().uuid(),
@@ -22,9 +22,7 @@ export async function GET({ url }: NextRequest): Promise<NextResponse> {
     throw new Error('CSRF token not valid')
   }
 
-  const quickBooksToken = cleanToken(tokenExchange.token)
-
-  await createQuickBooksConnection(accountId, quickBooksToken)
+  await createQuickBooksConnection(accountId, tokenExchange.token)
 
   return NextResponse.redirect(new URL('/account/integrations', url))
 }
