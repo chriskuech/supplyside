@@ -71,6 +71,7 @@ const _fields = {
     templateId: 'cd1c7d34-57bf-43ad-8b32-a90081cde55b',
     name: 'Bill Description',
     type: 'Textarea',
+    description: 'Brief, identifiable description of the bill',
   },
   billFiles: {
     templateId: 'b4c4a6e9-6b7a-4f8b-92f4-a9264d0fa6e9',
@@ -100,16 +101,19 @@ const _fields = {
     templateId: '9f1af7c6-c04c-45cc-a97b-188c3a16aaad',
     name: 'Incoterms',
     type: 'Select',
+    description: 'International commercial terms',
   },
   invoiceDate: {
     templateId: 'c2b2f1b5-7d2f-4b3b-9d8e-4a8f9e3c0b7b',
     name: 'Invoice Date',
     type: 'Date',
+    description: 'Date the invoice was issued',
   },
   invoiceNumber: {
     templateId: 'f4d0d4a0-7f2b-4e0c-8f6a-8c6d4e0b7f2b',
     name: 'Invoice Number',
     type: 'Text',
+    description: "The vendor's original invoice number",
   },
   issuedDate: {
     templateId: '6c2f58e8-2f6e-47cc-b109-904e74d1067b',
@@ -126,6 +130,7 @@ const _fields = {
     templateId: 'f7b4e0f7-a1b1-4e1e-8f7b-4e0f7e1e7e5d',
     name: 'Item Description',
     type: 'Textarea',
+    description: 'Brief, identifiable description of the item',
   },
   itemizedCosts: {
     templateId: '25a46eb4-2eca-40a8-9596-cda2a524facd',
@@ -164,11 +169,14 @@ const _fields = {
     templateId: 'f7b4e0f7-e1e7-4e1e-abad-4e0f7e1e7e5d',
     name: 'Order Description',
     type: 'Textarea',
+    description: 'Brief, identifiable internal order description',
   },
   orderNotes: {
     templateId: '3749e137-c1d8-474a-9539-ba9b82cd6e94',
     name: 'Order Notes',
     type: 'Textarea',
+    description:
+      'Order notes that will be included in the purchase order header',
   },
   orderStatus: {
     templateId: 'd51e1004-c999-4ac1-8692-ff3d966c5dc3',
@@ -183,26 +191,31 @@ const _fields = {
     templateId: 'e2c3b1b2-180c-4a8f-9e3c-0b7bcb4a0c88',
     name: 'Payment Due Date',
     type: 'Date',
+    description: 'Vendor bill payment due date',
   },
   paymentMethod: {
     templateId: '6afca34e-8501-4dfe-bb6b-2b1028999a08',
     name: 'Payment Method',
     type: 'Select',
+    description: 'Required form of payment',
   },
   paymentTerms: {
     templateId: '8a9c85a4-1aea-4c0c-9cd2-51c6943aaaf7',
     name: 'Payment Terms',
     type: 'Select',
+    description: 'Payment terms expressed via number of days',
   },
   poRecipient: {
     templateId: 'b735b67c-be50-4859-9242-00572b4d32cb',
     name: 'PO Recipient',
     type: 'Contact',
+    description: 'Primary vendor recipient for orders',
   },
   primaryAddress: {
     templateId: '58e1e7ae-2dab-44e2-b741-e47eddd7a626',
     name: 'Primary Address',
     type: 'Textarea',
+    description: "The vendor's primary physical address",
   },
   quantity: {
     templateId: '8c04f743-23a3-417f-8fd9-98cd5ffa4a67',
@@ -218,16 +231,20 @@ const _fields = {
     templateId: '848fe67b-ee4f-4c68-bdaa-3089622337f6',
     name: 'Shipping Address',
     type: 'Textarea',
+    description: 'Indicate the ship-to address on the purchase order',
   },
   shippingMethod: {
     templateId: '01bcb707-bd68-4726-8220-65bd19eee224',
     name: 'Shipping Method',
     type: 'Select',
+    description: 'Required form of shipping',
   },
   shippingNotes: {
     templateId: '0d5a6944-49e6-45bc-ac1e-5ed1c2ccc55c',
     name: 'Shipping Notes',
     type: 'Textarea',
+    description:
+      'Shipping notes that will be included in the purchase order header',
   },
   subtotalCost: {
     templateId: '3234298a-d186-424e-a4b4-7678b4eec7d0',
@@ -239,6 +256,7 @@ const _fields = {
     templateId: '8e61b78c-6e8c-4863-a7fd-af55fa66503f',
     name: 'Taxable',
     type: 'Checkbox',
+    description: 'Indicate if the order is taxable',
   },
   termsAndConditions: {
     templateId: '156bdd18-42d2-427b-bcfe-97b7214c401e',
@@ -276,6 +294,7 @@ const _fields = {
     templateId: 'f7b4e0f7-e1e7-4e1e-8f7b-4e0f7e1e7e5d',
     name: 'Vendor Description',
     type: 'Textarea',
+    description: 'Brief, internal description of the vendor',
   },
 } satisfies Record<string, FieldTemplate>
 
