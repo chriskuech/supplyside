@@ -9,7 +9,6 @@ import StatusTransitionButton from './cta/StatusTransitionButton'
 import SendPoButton from './cta/SendPoButton'
 import { findOrderBills } from './actions'
 import TrackingControl from './tools/TrackingControl'
-import AssigneeControl from './tools/AssigneeControl'
 import CancelOrderControl from './tools/CancelOrderControl'
 import EditControl from './tools/EditControl'
 import BillLink from './tools/BillLink'
@@ -24,6 +23,7 @@ import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectField } from '@/domain/schema/types'
+import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 
 export default async function OrderDetail({
   params: { key },
@@ -77,9 +77,10 @@ export default async function OrderDetail({
         ...(poFile
           ? [<DownloadPoControl key={poFile.id} file={poFile} />]
           : []),
-        <AssigneeControl
-          key={AssigneeControl.name}
+        <AssigneeToolbarControl
+          key={AssigneeToolbarControl.name}
           resourceId={resource.id}
+          resourceType={'Order'}
           field={
             selectField(schema, fields.assignee) ?? fail('Field not found')
           }

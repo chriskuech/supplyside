@@ -2,16 +2,17 @@
 
 import { AssignmentInd } from '@mui/icons-material'
 import {
-  Tooltip,
-  IconButton,
   Avatar,
+  Button,
   Dialog,
-  DialogTitle,
+  DialogActions,
   DialogContent,
   DialogContentText,
-  DialogActions,
-  Button,
+  DialogTitle,
+  IconButton,
+  Tooltip,
 } from '@mui/material'
+import { ResourceType } from '@prisma/client'
 import { Value } from '@/domain/resource/values/types'
 import { Field } from '@/domain/schema/types'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
@@ -19,18 +20,20 @@ import FieldControl from '@/lib/resource/fields/FieldControl'
 
 type AssigneeControlProps = {
   resourceId: string
+  resourceType: ResourceType
   field: Field
-  value: Value
+  value: Value | undefined
 }
 
-export default function AssigneeControl({
+export default function AssigneeToolbarControl({
+  resourceType,
   resourceId,
   field,
   value,
 }: AssigneeControlProps) {
   const { isOpen, open, close } = useDisclosure()
 
-  const assignee = value.user
+  const assignee = value?.user
 
   return (
     <>
@@ -38,7 +41,7 @@ export default function AssigneeControl({
         title={
           assignee
             ? `Assigned to ${assignee?.fullName}`
-            : `Assign the Order to a user`
+            : `Assign the ${resourceType} to a user`
         }
       >
         <IconButton onClick={open}>
@@ -52,7 +55,8 @@ export default function AssigneeControl({
         <DialogTitle>Assignee</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Set the assignee for this order, responsible for its completion.
+            Set the assignee for this {resourceType}, responsible for its
+            completion.
           </DialogContentText>
           <FieldControl
             inputId={`rf-${field.id}`}

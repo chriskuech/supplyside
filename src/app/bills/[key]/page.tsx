@@ -5,8 +5,8 @@ import { green, red, yellow } from '@mui/material/colors'
 import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
 import OrderLink from './tools/OrderLink'
-import AssigneeControl from './tools/AssigneeControl'
 import CancelControl from './tools/CancelControl'
+import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import {
   billStatusOptions,
   fields,
@@ -53,9 +53,10 @@ export default async function BillsDetail({
       resource={resource}
       tools={[
         ...(order ? [<OrderLink key={order.id} order={order} />] : []),
-        <AssigneeControl
-          key={AssigneeControl.name}
+        <AssigneeToolbarControl
+          key={AssigneeToolbarControl.name}
           resourceId={resource.id}
+          resourceType={'Bill'}
           field={
             selectField(schema, fields.assignee) ?? fail('Field not found')
           }
