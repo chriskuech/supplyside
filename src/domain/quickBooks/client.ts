@@ -1,8 +1,6 @@
 import OAuthClient, { Token } from 'intuit-oauth'
-import { QuickBooksConnection } from '@prisma/client'
 import config from '@/services/config'
 
-export type QuickBooksToken = Omit<QuickBooksConnection, 'id'>
 export const environmentUrls = {
   sandbox: 'https://sandbox-quickbooks.api.intuit.com/',
   production: 'https://quickbooks.api.intuit.com/',

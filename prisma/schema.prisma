@@ -22,19 +22,18 @@ model Session {
 }
 
 model Account {
-  id                     String  @id @default(uuid()) @db.Uuid
-  key                    String  @unique
-  name                   String  @unique
-  address                String  @default("")
-  logoBlobId             String? @unique @db.Uuid
-  quickBooksEnabled      Boolean @default(false)
-  quickBooksConnectionId String? @unique @db.Uuid
+  id                String  @id @default(uuid()) @db.Uuid
+  key               String  @unique
+  name              String  @unique
+  address           String  @default("")
+  logoBlobId        String? @unique @db.Uuid
+  quickBooksEnabled Boolean @default(false)
+  quickBooksToken   Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  LogoBlob             Blob?                 @relation(name: "logo", fields: [logoBlobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  QuickBooksConnection QuickBooksConnection? @relation(fields: [quickBooksConnectionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  LogoBlob Blob? @relation(name: "logo", fields: [logoBlobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   User     User[]
   Resource Resource[]
@@ -43,21 +42,6 @@ model Account {
   Blob     Blob[]     @relation(name: "owner")
   File     File[]
   Session  Session[]
-}
-
-model QuickBooksConnection {
-  id                         String @id @default(uuid()) @db.Uuid
-  latency                    Float
-  access_token               String
-  createdAt                  Float
-  expires_in                 Float
-  id_token                   String
-  realmId                    String
-  refresh_token              String
-  token_type                 String
-  x_refresh_token_expires_in Float
-
-  Account Account?
 }
 
 model Blob {
