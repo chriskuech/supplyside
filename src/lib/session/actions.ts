@@ -11,6 +11,7 @@ import {
   readAndExtendSession as domainReadAndExtendSession,
   impersonate as domainImpersonate,
 } from '@/domain/iam/session/actions'
+import config from '@/services/config'
 
 const sessionIdCookieName = 'sessionId'
 
@@ -20,6 +21,8 @@ export const createSession = async (email: string, password: string) => {
   cookies().set(sessionIdCookieName, session.id, {
     sameSite: true,
     secure: process.env.NODE_ENV !== 'development',
+    httpOnly: true,
+    domain: new URL(config().BASE_URL).hostname,
     expires: session.expiresAt,
   })
 }
