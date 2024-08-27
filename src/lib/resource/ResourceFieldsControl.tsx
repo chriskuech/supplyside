@@ -11,10 +11,11 @@ import {
   Chip,
   Divider,
   Stack,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { range } from 'remeda'
-import { Check, Clear, ExpandMore } from '@mui/icons-material'
+import { Check, Clear, ExpandMore, Info } from '@mui/icons-material'
 import { match } from 'ts-pattern'
 import ReadonlyTextarea from './fields/ReadonlyTextarea'
 import ResourceField from './fields/ResourceField'
@@ -52,9 +53,14 @@ export default function ResourceFieldsControl({
                     <Stack spacing={2}>
                       {section.fields.map((field) => (
                         <Stack key={field.id}>
-                          <Typography variant="overline">
-                            {field.name}
-                          </Typography>
+                          <Tooltip title={field.description}>
+                            <Typography variant="overline">
+                              {field.name}{' '}
+                              {field.description && (
+                                <Info color="info" fontSize={'small'} />
+                              )}
+                            </Typography>
+                          </Tooltip>
                           <Box>
                             {match(
                               resource.fields.find(
@@ -166,61 +172,79 @@ export default function ResourceFieldsControl({
 
   return (
     <Box>
-      {schema.sections.map((s, i) => (
-        <Accordion key={s.id} defaultExpanded={i === 0} variant="outlined">
-          <AccordionSummary expandIcon={<ExpandMore />}>
-            <Typography variant="h6" fontWeight={'bold'}>
-              {s.name}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            {s.fields.length === 1 && s.fields.at(0)?.type === 'Textarea' ? (
-              <Box>
-                {s.fields.at(0)?.name !== s.name && (
-                  <Typography variant="overline" gutterBottom>
-                    {s.fields.at(0)?.name}
+      {schema.sections.map((s, i) => {
+        const singleField =
+          s.fields.length === 1 && s.fields.at(0)?.type === 'Textarea'
+            ? s.fields.at(0)
+            : null
+
+        return (
+          <Accordion key={s.id} defaultExpanded={i === 0} variant="outlined">
+            <AccordionSummary expandIcon={<ExpandMore />}>
+              <Typography variant="h6" fontWeight={'bold'}>
+                {s.name}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              {singleField ? (
+                <Box>
+                  {singleField.name !== s.name && (
+                    <Typography variant="overline" gutterBottom>
+                      {singleField.name}
+                    </Typography>
+                  )}
+                  <Typography variant="caption">
+                    {singleField.description}
                   </Typography>
-                )}
-                <FieldControl
-                  inputId={`rf-${s.fields.at(0)?.id}`}
-                  resourceId={resource.id}
-                  field={s.fields.at(0) ?? fail()}
-                  value={
-                    resource.fields.find(
-                      (rf) => rf.fieldId === s.fields.at(0)?.id,
-                    )?.value
-                  }
-                />
-              </Box>
-            ) : (
-              <Stack spacing={3} direction={'row'}>
-                {chunkByN(s.fields, columns).map((fs, i) => (
-                  <Stack key={i} spacing={3} flex={1}>
-                    {fs.map((f) => (
-                      <Box key={f.id}>
-                        <Typography variant="overline" gutterBottom>
-                          {f.name}
-                        </Typography>
-                        <Box>
-                          <FieldControl
-                            inputId={`rf-${f.id}`}
-                            resourceId={resource.id}
-                            field={f}
-                            value={
-                              resource.fields.find((rf) => rf.fieldId === f.id)
-                                ?.value
-                            }
-                          />
-                        </Box>
-                      </Box>
-                    ))}
-                  </Stack>
-                ))}
-              </Stack>
-            )}
-          </AccordionDetails>
-        </Accordion>
-      ))}
+                  <FieldControl
+                    inputId={`rf-${singleField.id}`}
+                    resourceId={resource.id}
+                    field={singleField ?? fail()}
+                    value={
+                      resource.fields.find(
+                        (rf) => rf.fieldId === singleField.id,
+                      )?.value
+                    }
+                  />
+                </Box>
+              ) : (
+                <Stack spacing={3} direction={'row'}>
+                  {chunkByN(s.fields, columns).map((fs, i) => (
+                    <Stack key={i} spacing={3} flex={1}>
+                      {fs.map((f) => (
+                        <Stack key={f.id}>
+                          <Typography
+                            variant="overline"
+                            fontSize={14}
+                            lineHeight={'unset'}
+                          >
+                            {f.name}
+                          </Typography>
+                          <Typography variant="caption" gutterBottom>
+                            {f.description}
+                          </Typography>
+                          <Box>
+                            <FieldControl
+                              inputId={`rf-${f.id}`}
+                              resourceId={resource.id}
+                              field={f}
+                              value={
+                                resource.fields.find(
+                                  (rf) => rf.fieldId === f.id,
+                                )?.value
+                              }
+                            />
+                          </Box>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  ))}
+                </Stack>
+              )}
+            </AccordionDetails>
+          </Accordion>
+        )
+      })}
     </Box>
   )
 }

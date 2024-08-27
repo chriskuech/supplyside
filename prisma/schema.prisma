@@ -143,6 +143,7 @@ model Field {
   accountId      String        @db.Uuid
   type           FieldType
   name           String
+  description    String?
   resourceType   ResourceType?
   templateId     String?       @db.Uuid
   defaultValueId String        @db.Uuid

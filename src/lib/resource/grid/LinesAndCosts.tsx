@@ -41,17 +41,18 @@ export default async function LinesAndCosts({
       </Stack>
       <Stack>
         <ResourceTable
-          tableKey={'linesAndCosts'}
           schema={lineSchema}
           resources={lines}
           isEditable={!isReadOnly}
           sx={{
-            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
           }}
           disableColumnFilter
           disableColumnResize
           disableColumnMenu
+          disableColumnReorder
           hideFooter
+          indexed
         />
         <Box alignSelf="flex-end">
           <ItemizedCostLines resource={resource} isReadOnly={isReadOnly} />

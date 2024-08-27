@@ -1,5 +1,3 @@
-'use server'
-
 import { ServerClient } from 'postmark'
 import config from '@/services/config'
 import singleton from '@/services/singleton'
