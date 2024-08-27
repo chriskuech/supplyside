@@ -296,21 +296,24 @@ export default function ResourceTable({
           </Box>
         ),
       })),
-      {
-        field: '_delete',
-        headerName: 'Delete',
-        renderCell: ({ row: { id } }) => (
-          <IconButton
-            onClick={(e) => {
-              e.stopPropagation()
-              deleteResource({ id })
-            }}
-            disabled={!isEditable}
-          >
-            <Clear />
-          </IconButton>
-        ),
-      },
+      ...(isEditable
+        ? [
+            {
+              field: '_delete',
+              headerName: 'Delete',
+              renderCell: ({ row: { id } }) => (
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    deleteResource({ id })
+                  }}
+                >
+                  <Clear />
+                </IconButton>
+              ),
+            } satisfies GridColDef<Resource>,
+          ]
+        : []),
     ],
     [indexed, schema, isEditable],
   )
