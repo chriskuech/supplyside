@@ -1,8 +1,8 @@
 import { Button } from '@mui/material'
 import QuickbooksOauthClient from 'intuit-oauth'
 import Csrf from 'csrf'
-import { quickbooksClient } from '@/services/quickbooks'
 import config from '@/services/config'
+import { quickbooksClient } from '@/domain/quickbooks/actions'
 
 type Props = {
   accountId: string
