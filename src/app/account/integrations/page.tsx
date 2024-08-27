@@ -1,5 +1,5 @@
 import { Box, Stack, Typography } from '@mui/material'
-import Quickbooks from './Quickbooks'
+import QuickBooks from './QuickBooks'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 
 export default async function SettingsPage() {
@@ -10,7 +10,7 @@ export default async function SettingsPage() {
       <Box>
         <Typography variant={'h4'}>Integrations</Typography>
       </Box>
-      <Quickbooks session={session} />
+      <QuickBooks session={session} />
     </Stack>
   )
 }

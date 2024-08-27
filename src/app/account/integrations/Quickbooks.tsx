@@ -1,8 +1,8 @@
 import { Box, Stack, Switch, Typography } from '@mui/material'
 
-import QuickbooksConnectButton from './QuikbooksConnectButton'
-import QuickbooksConnection from './QuickbooksConnection'
-import { getQuickbooksToken } from '@/domain/quickbooks/actions'
+import QuickbooksConnectButton from './QuikBooksConnectButton'
+import QuickbooksConnection from './QuickBooksConnection'
+import { getQuickbooksToken } from '@/domain/quickBooks/actions'
 import { Session } from '@/domain/iam/session/types'
 
 type Props = {
@@ -10,18 +10,18 @@ type Props = {
 }
 
 export default async function Quickbooks({ session }: Props) {
-  const quickbooksToken = await getQuickbooksToken(session.accountId)
+  const quickBooksToken = await getQuickbooksToken(session.accountId)
 
   return (
     <Box>
       <Stack direction="row" alignItems="center">
         <Typography variant="h6">Quickbooks</Typography>
-        <Switch checked={session.account.quickbooksEnabled} readOnly />
+        <Switch checked={session.account.quickBooksEnabled} readOnly />
       </Stack>
 
-      {session.account.quickbooksEnabled && (
+      {session.account.quickBooksEnabled && (
         <>
-          {quickbooksToken ? (
+          {quickBooksToken ? (
             <QuickbooksConnection accountId={session.accountId} />
           ) : (
             <QuickbooksConnectButton accountId={session.accountId} />

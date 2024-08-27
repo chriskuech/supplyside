@@ -1,22 +1,13 @@
 import OAuthClient, { Token } from 'intuit-oauth'
+import { QuickBooksConnection } from '@prisma/client'
 import {
-  deleteQuickbooksToken,
+  deleteQuickBooksToken,
   getQuickbooksToken,
-  updateQuickbooksToken,
+  updateQuickBooksToken,
 } from './actions'
 import config from '@/services/config'
 
-export type QuickbooksToken = {
-  latency: number
-  realmId: string
-  token_type: string
-  access_token: string
-  refresh_token: string
-  expires_in: number
-  x_refresh_token_expires_in: number
-  id_token: string
-  createdAt: number
-}
+export type QuickBooksToken = Omit<QuickBooksConnection, 'id'>
 
 const { BASE_URL, QUICKBOOKS_ENVIRONMENT } = config()
 const environmentUrls = {
@@ -25,9 +16,9 @@ const environmentUrls = {
 }
 const redirectUri = `${BASE_URL}/api/integrations/quickbooks`
 const environment = QUICKBOOKS_ENVIRONMENT
-export const quickbooksBaseUrl = environmentUrls[environment]
+export const quickBooksBaseUrl = environmentUrls[environment]
 
-export const cleanToken = (token: Token): QuickbooksToken => ({
+export const cleanToken = (token: Token): QuickBooksToken => ({
   access_token: token.access_token,
   createdAt: token.createdAt,
   expires_in: token.expires_in,
@@ -39,7 +30,7 @@ export const cleanToken = (token: Token): QuickbooksToken => ({
   x_refresh_token_expires_in: token.x_refresh_token_expires_in,
 })
 
-export const isRefreshTokenValid = (token: QuickbooksToken) => {
+export const isRefreshTokenValid = (token: QuickBooksToken) => {
   const createdAtDate = new Date(token.createdAt)
   const expirationTime =
     createdAtDate.getTime() + token.x_refresh_token_expires_in * 1000
@@ -48,7 +39,7 @@ export const isRefreshTokenValid = (token: QuickbooksToken) => {
   return expirationTime > currentTime
 }
 
-export const quickbooksClient = () =>
+export const quickBooksClient = () =>
   new OAuthClient({
     clientId: config().QUICKBOOKS_CLIENT_ID,
     clientSecret: config().QUICKBOOKS_CLIENT_SECRET,
@@ -56,11 +47,11 @@ export const quickbooksClient = () =>
     redirectUri,
   })
 
-export const authQuickbooksClient = async (accountId: string) => {
+export const authQuickBooksClient = async (accountId: string) => {
   const token = await getQuickbooksToken(accountId)
 
   if (!token) {
-    throw new Error('Account has no quickbooks token')
+    throw new Error('Account has no quickBooks token')
   }
 
   const client = new OAuthClient({
@@ -74,10 +65,10 @@ export const authQuickbooksClient = async (accountId: string) => {
   if (!client.isAccessTokenValid()) {
     if (isRefreshTokenValid(token)) {
       const tokenResponse = await client.refresh()
-      await updateQuickbooksToken(accountId, cleanToken(tokenResponse.token))
+      await updateQuickBooksToken(accountId, cleanToken(tokenResponse.token))
       return client
     } else {
-      await deleteQuickbooksToken(accountId)
+      await deleteQuickBooksToken(accountId)
       throw new Error('Quickbooks token has expired')
     }
   }

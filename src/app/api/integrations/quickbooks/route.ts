@@ -4,11 +4,8 @@ import CSRF from 'csrf'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import config from '@/services/config'
-import {
-  cleanToken,
-  quickbooksClient,
-  updateQuickbooksToken,
-} from '@/domain/quickbooks/actions'
+import { createQuickBooksConnection } from '@/domain/quickBooks/actions'
+import { cleanToken, quickBooksClient } from '@/domain/quickBooks/client'
 
 const stateSchema = z.object({
   accountId: z.string().uuid(),
@@ -17,7 +14,7 @@ const stateSchema = z.object({
 
 export async function GET({ url }: NextRequest): Promise<NextResponse> {
   const authCode = url.toString()
-  const tokenExchange = await quickbooksClient().createToken(authCode)
+  const tokenExchange = await quickBooksClient().createToken(authCode)
   const { accountId, csrf } = stateSchema.parse(
     JSON.parse(tokenExchange.token.state ?? ''),
   )
@@ -25,9 +22,9 @@ export async function GET({ url }: NextRequest): Promise<NextResponse> {
     throw new Error('CSRF token not valid')
   }
 
-  const quickbooksToken = cleanToken(tokenExchange.token)
+  const quickBooksToken = cleanToken(tokenExchange.token)
 
-  await updateQuickbooksToken(accountId, quickbooksToken)
+  await createQuickBooksConnection(accountId, quickBooksToken)
 
   return NextResponse.redirect(new URL('/account/integrations', url))
 }
