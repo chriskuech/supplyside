@@ -32,6 +32,7 @@ const applyFields = async (accountId: string) => {
     options,
     defaultValue,
     name,
+    description,
     type,
     resourceType,
   } of Object.values(fields)) {
@@ -53,11 +54,13 @@ const applyFields = async (accountId: string) => {
         },
         templateId,
         name,
+        description: description ?? null,
         type,
         resourceType,
       },
       update: {
         name,
+        description: description ?? null,
         type,
         resourceType,
       },
