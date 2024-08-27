@@ -1,16 +1,21 @@
 'use server'
 
 import { CompanyInfo, Token } from 'intuit-oauth'
+import { redirect } from 'next/navigation'
 import {
   authQuickBooksClient,
-  isRefreshTokenValid,
-  quickBooksBaseUrl,
+  environmentUrls,
   QuickBooksToken,
 } from './client'
 import prisma from '@/services/prisma'
+import config from '@/services/config'
 
-const baseUrl = (realmId: string) =>
-  `${quickBooksBaseUrl}/v3/company/${realmId}`
+const baseUrl = (realmId: string) => {
+  const { QUICKBOOKS_ENVIRONMENT } = config()
+
+  const quickBooksApiBaseUrl = environmentUrls[QUICKBOOKS_ENVIRONMENT]
+  return `${quickBooksApiBaseUrl}/v3/company/${realmId}`
+}
 
 const cleanToken = (token: Token): QuickBooksToken => ({
   access_token: token.access_token,
@@ -24,26 +29,43 @@ const cleanToken = (token: Token): QuickBooksToken => ({
   x_refresh_token_expires_in: token.x_refresh_token_expires_in,
 })
 
-export const getQuickbooksToken = async (
+const isRefreshTokenValid = (token: QuickBooksToken) => {
+  const createdAtDate = new Date(token.createdAt)
+  const expirationTime =
+    createdAtDate.getTime() + token.x_refresh_token_expires_in * 1000
+  const currentTime = Date.now()
+
+  return expirationTime > currentTime
+}
+
+const requireTokenWithRedirect = async (
   accountId: string,
-): Promise<QuickBooksToken | null> => {
-  const account = await prisma().account.findUniqueOrThrow({
-    where: { id: accountId },
-    include: {
-      QuickBooksConnection: true,
-    },
+): Promise<QuickBooksToken> => {
+  const token = await getQuickbooksToken(accountId)
+
+  if (!token) {
+    redirect('account/integrations')
+  }
+
+  return token
+}
+
+const updateQuickBooksToken = async (
+  accountId: string,
+  quickBooksToken: Token,
+) => {
+  const token = cleanToken(quickBooksToken)
+
+  await prisma().quickBooksConnection.updateMany({
+    where: { Account: { id: accountId } },
+    data: token,
   })
+}
 
-  if (!account.QuickBooksConnection) {
-    return null
-  }
-
-  if (!isRefreshTokenValid(account.QuickBooksConnection)) {
-    await deleteQuickBooksToken(accountId)
-    return null
-  }
-
-  return account.QuickBooksConnection
+const deleteQuickBooksToken = async (accountId: string) => {
+  await prisma().quickBooksConnection.deleteMany({
+    where: { Account: { id: accountId } },
+  })
 }
 
 export const createQuickBooksConnection = async (
@@ -60,28 +82,41 @@ export const createQuickBooksConnection = async (
   })
 }
 
-export const updateQuickBooksToken = async (
+export const getQuickbooksToken = async (
   accountId: string,
-  quickBooksToken: Token,
-) => {
-  const token = cleanToken(quickBooksToken)
-
-  await prisma().quickBooksConnection.updateMany({
-    where: { Account: { id: accountId } },
-    data: token,
+): Promise<QuickBooksToken | null> => {
+  const account = await prisma().account.findUniqueOrThrow({
+    where: { id: accountId },
+    include: {
+      QuickBooksConnection: true,
+    },
   })
-}
 
-export const deleteQuickBooksToken = async (accountId: string) => {
-  await prisma().quickBooksConnection.deleteMany({
-    where: { Account: { id: accountId } },
-  })
+  if (!account.quickBooksEnabled || !account.QuickBooksConnection) {
+    return null
+  }
+
+  const client = await authQuickBooksClient(account.QuickBooksConnection)
+
+  if (!client.isAccessTokenValid()) {
+    if (isRefreshTokenValid(client.token)) {
+      const tokenResponse = await client.refresh()
+      await updateQuickBooksToken(accountId, tokenResponse.token)
+    } else {
+      await deleteQuickBooksToken(accountId)
+    }
+
+    return getQuickbooksToken(accountId)
+  }
+
+  return account.QuickBooksConnection
 }
 
 export const getCompanyInfo = async (
   accountId: string,
 ): Promise<CompanyInfo> => {
-  const client = await authQuickBooksClient(accountId)
+  const token = await requireTokenWithRedirect(accountId)
+  const client = await authQuickBooksClient(token)
 
   return client
     .makeApiCall<CompanyInfo>({

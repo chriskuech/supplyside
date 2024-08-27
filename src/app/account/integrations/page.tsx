@@ -10,7 +10,11 @@ export default async function SettingsPage() {
       <Box>
         <Typography variant={'h4'}>Integrations</Typography>
       </Box>
-      <QuickBooks session={session} />
+      {!session.user.isAdmin && !session.user.isGlobalAdmin ? (
+        <Typography>You must be an admin to do this</Typography>
+      ) : (
+        <QuickBooks session={session} />
+      )}
     </Stack>
   )
 }
