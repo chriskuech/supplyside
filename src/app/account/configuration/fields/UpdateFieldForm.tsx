@@ -27,8 +27,8 @@ type Props = {
 
 export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
   const [name, setName] = useState<string>(field.name)
-  const [description, setDescription] = useState<string | null>(
-    field.description,
+  const [description, setDescription] = useState<string>(
+    field.description ?? '',
   )
   const [options, setOptions] = useState<OptionPatch[]>(
     field.Option.map((o) => ({
@@ -78,7 +78,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         label="Description"
         value={description}
         fullWidth
-        onChange={(e) => setDescription(e.target.value.trim() || null)}
+        onChange={(e) => setDescription(e.target.value)}
         disabled={isDisabled}
       />
 
@@ -126,7 +126,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
             onSubmit({
               id: field.id,
               name,
-              description,
+              description: description?.trim() || null,
               options,
               defaultValue,
             })
