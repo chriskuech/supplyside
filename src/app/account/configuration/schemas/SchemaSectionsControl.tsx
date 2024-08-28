@@ -28,7 +28,7 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { z } from 'zod'
-import { Field } from '../fields/actions'
+import { Field } from '../../../../domain/configuration/fields/actions'
 import {
   Schema,
   Section,

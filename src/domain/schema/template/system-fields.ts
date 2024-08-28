@@ -296,6 +296,11 @@ const _fields = {
     type: 'Textarea',
     description: 'Brief, internal description of the vendor',
   },
+  quickBooksAccount: {
+    templateId: '3cf75b8f-f4e4-406f-a1db-0761aa6db523',
+    name: 'Accounting category',
+    type: 'Select',
+  },
 } satisfies Record<string, FieldTemplate>
 
 export const fields: Record<keyof typeof _fields, FieldTemplate> = _fields

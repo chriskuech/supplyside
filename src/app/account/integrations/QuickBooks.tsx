@@ -10,7 +10,7 @@ type Props = {
 }
 
 export default async function Quickbooks({ session }: Props) {
-  const quickBooksToken = await getQuickbooksToken(session.accountId)
+  const quickBooksToken = await getQuickbooksToken()
 
   return (
     <Box>
@@ -22,9 +22,9 @@ export default async function Quickbooks({ session }: Props) {
       {session.account.quickBooksEnabled && (
         <>
           {quickBooksToken ? (
-            <QuickbooksConnection accountId={session.accountId} />
+            <QuickbooksConnection />
           ) : (
-            <QuickbooksConnectButton accountId={session.accountId} />
+            <QuickbooksConnectButton />
           )}
         </>
       )}

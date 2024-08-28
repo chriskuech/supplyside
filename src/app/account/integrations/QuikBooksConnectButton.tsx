@@ -4,13 +4,8 @@ import Csrf from 'csrf'
 import config from '@/services/config'
 import { quickBooksClient } from '@/domain/quickBooks/client'
 
-type Props = {
-  accountId: string
-}
-
-export default async function QuickBooksConnectButton({ accountId }: Props) {
+export default async function QuickBooksConnectButton() {
   const state = {
-    accountId,
     csrf: new Csrf().create(config().QUICKBOOKS_CSRF_SECRET),
   }
 

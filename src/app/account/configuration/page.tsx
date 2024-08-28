@@ -1,5 +1,5 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
-import { readFields } from './fields/actions'
+import { readFields } from '../../../domain/configuration/fields/actions'
 import { readSchemas } from './schemas/actions'
 import SchemasControl from './schemas/SchemasControl'
 import AddFieldButton from './fields/AddFieldButton'

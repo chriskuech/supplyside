@@ -1,11 +1,20 @@
 'use server'
 
-import { CompanyInfo, Token } from 'intuit-oauth'
+import { fail } from 'assert'
+import { AccountQuery, CompanyInfo, Token } from 'intuit-oauth'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { faker } from '@faker-js/faker'
+import {
+  OptionPatch,
+  readFields,
+  updateField,
+} from '../configuration/fields/actions'
+import { fields } from '../schema/template/system-fields'
 import { authQuickBooksClient, environmentUrls } from './client'
 import prisma from '@/services/prisma'
 import config from '@/services/config'
+import { readSession } from '@/lib/session/actions'
 
 const quickbooksTokenSchema = z.object({
   latency: z.number(),
@@ -49,10 +58,8 @@ const isRefreshTokenValid = (token: QuickBooksToken) => {
   return expirationTime > currentTime
 }
 
-const requireTokenWithRedirect = async (
-  accountId: string,
-): Promise<QuickBooksToken> => {
-  const token = await getQuickbooksToken(accountId)
+const requireTokenWithRedirect = async (): Promise<QuickBooksToken> => {
+  const token = await getQuickbooksToken()
 
   if (!token) {
     redirect('account/integrations')
@@ -84,10 +91,9 @@ const deleteQuickBooksToken = async (accountId: string) => {
   })
 }
 
-export const createQuickBooksConnection = async (
-  accountId: string,
-  quickBooksToken: Token,
-) => {
+export const createQuickBooksConnection = async (quickBooksToken: Token) => {
+  const session = await readSession()
+  const { accountId } = session
   const token = cleanToken(quickBooksToken)
 
   await prisma().account.update({
@@ -98,9 +104,9 @@ export const createQuickBooksConnection = async (
   })
 }
 
-export const getQuickbooksToken = async (
-  accountId: string,
-): Promise<QuickBooksToken | null> => {
+export const getQuickbooksToken = async (): Promise<QuickBooksToken | null> => {
+  const session = await readSession()
+  const { accountId } = session
   const account = await prisma().account.findUniqueOrThrow({
     where: { id: accountId },
   })
@@ -124,7 +130,7 @@ export const getQuickbooksToken = async (
     if (isRefreshTokenValid(client.token)) {
       const tokenResponse = await client.refresh()
       await updateQuickBooksToken(accountId, tokenResponse.token)
-      return getQuickbooksToken(accountId)
+      return getQuickbooksToken()
     } else {
       await deleteQuickBooksToken(accountId)
       return null
@@ -134,10 +140,8 @@ export const getQuickbooksToken = async (
   return token
 }
 
-export const getCompanyInfo = async (
-  accountId: string,
-): Promise<CompanyInfo> => {
-  const token = await requireTokenWithRedirect(accountId)
+export const getCompanyInfo = async (): Promise<CompanyInfo> => {
+  const token = await requireTokenWithRedirect()
   const client = await authQuickBooksClient(token)
 
   return client
@@ -146,4 +150,55 @@ export const getCompanyInfo = async (
       method: 'GET',
     })
     .then((data) => data.json)
+}
+
+export const syncDataFromQuickBooks = async (): Promise<void> => {
+  const token = await requireTokenWithRedirect()
+  const client = await authQuickBooksClient(token)
+
+  const quickBooksAccounts = await client
+    .makeApiCall<AccountQuery>({
+      url: `${baseUrl(client.token.realmId)}/query?query=select * from Account`,
+      method: 'GET',
+    })
+    .then((data) => data.json)
+
+  const accountFields = await readFields()
+  const quickBooksAccountField = accountFields.find(
+    (field) => field.templateId === fields.quickBooksAccount.templateId,
+  )
+
+  if (!quickBooksAccountField) {
+    fail('QuickBooks account field does not exist')
+  }
+
+  const quickBooksAccountNames = quickBooksAccounts.QueryResponse.Account.map(
+    (account) => account.FullyQualifiedName,
+  )
+
+  const currentAccounts = quickBooksAccountField.Option
+  const accountsToAdd = quickBooksAccountNames.filter(
+    (accountName) =>
+      !currentAccounts.some(
+        (currentAccount) => currentAccount.name === accountName,
+      ),
+  )
+
+  //TODO: Do I need to delete options which no longer exist on quickbooks? what about past relations?
+
+  console.log({ accountsToAdd })
+
+  const options: OptionPatch[] = accountsToAdd.map((accountName) => ({
+    id: faker.string.uuid(),
+    op: 'add',
+    name: accountName,
+  }))
+
+  await updateField({
+    description: quickBooksAccountField.description,
+    id: quickBooksAccountField.id,
+    name: quickBooksAccountField.name,
+    defaultValue: { optionId: quickBooksAccountField.defaultValue.option?.id },
+    options,
+  })
 }

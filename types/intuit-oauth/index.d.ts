@@ -230,5 +230,35 @@ declare module 'intuit-oauth' {
     }
   }
 
+  export type AccountQuery = {
+    QueryResponse: {
+      Account: Account[]
+    }
+  }
+
+  export type Account = {
+    FullyQualifiedName: string
+    domain: string
+    Name: string
+    Classification: string
+    AccountSubType: string
+    CurrencyRef: {
+      name: string
+      value: string
+    }
+    CurrentBalanceWithSubAccounts: number
+    sparse: boolean
+    MetaData: {
+      CreateTime: string
+      LastUpdatedTime: string
+    }
+    AccountType: string
+    CurrentBalance: number
+    Active: boolean
+    SyncToken: string
+    Id: string
+    SubAccount: boolean
+  }
+
   export = OAuthClient
 }
