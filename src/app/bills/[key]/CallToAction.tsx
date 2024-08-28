@@ -10,6 +10,7 @@ import {
   CircularProgress,
   Modal,
   Stack,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { Resource, selectValue } from '@/domain/resource/types'
@@ -22,6 +23,7 @@ import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { Schema, selectField } from '@/domain/schema/types'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { User } from '@/domain/iam/user/types'
+import { checkForInvalidFields } from '@/domain/resource/values/mappers'
 
 type Props = {
   user: User
@@ -46,6 +48,8 @@ export default function CallToAction({ user, schema, resource }: Props) {
     billStatus?.templateId === billStatusOptions.canceled.templateId
   const isPaid = billStatus?.templateId === billStatusOptions.paid.templateId
 
+  const hasInvalidFields = checkForInvalidFields(schema, resource)
+
   return (
     <>
       {isDraft && (
@@ -59,21 +63,33 @@ export default function CallToAction({ user, schema, resource }: Props) {
           >
             {order ? 'Order Matched' : 'Match Order'}
           </Button>
-          <Button
-            color="secondary"
-            size="large"
-            sx={{ height: 'fit-content', fontSize: '1.2em' }}
-            endIcon={<ArrowRight />}
-            onClick={() =>
-              transitionStatus(
-                resource.id,
-                fields.billStatus,
-                billStatusOptions.submitted,
-              )
+          <Tooltip
+            title={
+              hasInvalidFields
+                ? 'Please fill in all required fields before submitting'
+                : undefined
             }
+            placement="top"
           >
-            Submit
-          </Button>
+            <span>
+              <Button
+                color="secondary"
+                size="large"
+                sx={{ height: 'fit-content', fontSize: '1.2em' }}
+                endIcon={<ArrowRight />}
+                onClick={() =>
+                  transitionStatus(
+                    resource.id,
+                    fields.billStatus,
+                    billStatusOptions.submitted,
+                  )
+                }
+                disabled={hasInvalidFields}
+              >
+                Submit
+              </Button>
+            </span>
+          </Tooltip>
         </>
       )}
       {isSubmitted && (
