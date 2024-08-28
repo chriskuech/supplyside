@@ -24,5 +24,5 @@ export async function GET({ url }: NextRequest): Promise<NextResponse> {
 
   await createQuickBooksConnection(accountId, tokenExchange.token)
 
-  return NextResponse.redirect(new URL('/account/integrations', url))
+  return NextResponse.redirect(`${config().BASE_URL}/account/integrations`)
 }
