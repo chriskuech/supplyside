@@ -113,7 +113,7 @@ const _fields = {
     templateId: 'f4d0d4a0-7f2b-4e0c-8f6a-8c6d4e0b7f2b',
     name: 'Invoice Number',
     type: 'Text',
-    description: "The vendor's original invoice number",
+    description: "Vendor's original invoice number",
   },
   issuedDate: {
     templateId: '6c2f58e8-2f6e-47cc-b109-904e74d1067b',
