@@ -22,9 +22,7 @@ import LinesAndCosts from '@/lib/resource/grid/LinesAndCosts'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import { Value } from '@/domain/resource/values/types'
 
-type PrimitiveFieldType = Exclude<FieldType, 'Contact' | 'MultiSelect'>
-
-const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
+const mapFieldTypeToValueColumn = (t: FieldType) =>
   match<FieldType, keyof Value>(t)
     .with('Checkbox', () => 'boolean')
     .with('Date', () => 'date')
@@ -42,8 +40,7 @@ const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
 const selectResourceFieldValue = (resource: Resource, fieldId: string) => {
   const field = resource.fields.find((rf) => rf.fieldId === fieldId)
 
-  const valueColumn =
-    field && mapFieldTypeToValueColumn(field.fieldType as PrimitiveFieldType)
+  const valueColumn = field && mapFieldTypeToValueColumn(field.fieldType)
 
   if (!field || !valueColumn) {
     return undefined
