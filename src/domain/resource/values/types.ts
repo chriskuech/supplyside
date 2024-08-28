@@ -21,6 +21,8 @@ export type ValueInput = {
   resourceId?: string | null
 }
 
+export type ValueFile = File & { Blob: Blob }
+
 export type Value = {
   boolean: boolean | null
   contact: Contact | null
@@ -30,8 +32,8 @@ export type Value = {
   options?: Option[]
   string: string | null
   user: User | null
-  file: (File & { Blob: Blob }) | null
-  files?: (File & { Blob: Blob })[]
+  file: ValueFile | null
+  files?: ValueFile[]
   resource: ValueResource | null
 }
 

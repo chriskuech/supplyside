@@ -4,6 +4,7 @@ import { fail } from 'assert'
 import { Resource as ResourceModel, ResourceType } from '@prisma/client'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { readSession } from '../session/actions'
 import * as domain from '@/domain/resource/actions'
 import { Resource } from '@/domain/resource/types'
@@ -41,13 +42,19 @@ export const readResource = async (
   return domain.readResource({ ...params, accountId })
 }
 
-export const deleteResource = async (
-  params: Omit<domain.DeleteResourceParams, 'accountId'>,
-): Promise<void> => {
+export const deleteResource = async ({
+  resourceType,
+  ...params
+}: Omit<domain.DeleteResourceParams, 'accountId'> & {
+  resourceType?: ResourceType
+}): Promise<void> => {
   const { accountId } = await readSession()
 
   revalidatePath('')
-  return domain.deleteResource({ ...params, accountId })
+
+  await domain.deleteResource({ ...params, accountId })
+
+  resourceType && redirect(`/${resourceType.toLowerCase()}s`)
 }
 
 export type FindResourcesParams = {
