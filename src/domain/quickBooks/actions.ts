@@ -184,8 +184,6 @@ export const syncDataFromQuickBooks = async (): Promise<void> => {
       ),
   )
 
-  //TODO: Do we have to delete options which no longer exist on quickbooks? what about resource relations to that option?
-
   const options: OptionPatch[] = accountsToAdd.map((accountName) => ({
     id: faker.string.uuid(),
     op: 'add',
