@@ -178,7 +178,17 @@ export default function ResourceFieldsControl({
               <Box>
                 {s.fields.at(0)?.name !== s.name && (
                   <Typography variant="overline" gutterBottom>
-                    {s.fields.at(0)?.name}
+                    {s.fields.at(0)?.name}{' '}
+                    {s.fields.at(0)?.isRequired && (
+                      <Typography
+                        color="error"
+                        display="inline"
+                        variant="overline"
+                        fontWeight="bold"
+                      >
+                        *
+                      </Typography>
+                    )}
                   </Typography>
                 )}
                 <FieldControl
@@ -199,7 +209,17 @@ export default function ResourceFieldsControl({
                     {fs.map((f) => (
                       <Box key={f.id}>
                         <Typography variant="overline" gutterBottom>
-                          {f.name}
+                          {f.name}{' '}
+                          {f.isRequired && (
+                            <Typography
+                              color="error"
+                              display="inline"
+                              variant="overline"
+                              fontWeight="bold"
+                            >
+                              *
+                            </Typography>
+                          )}
                         </Typography>
                         <Box>
                           <FieldControl

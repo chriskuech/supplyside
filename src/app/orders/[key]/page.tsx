@@ -1,7 +1,9 @@
 import { fail } from 'assert'
 import { Box, Container, Stack, Typography } from '@mui/material'
-import { match } from 'ts-pattern'
+import { match, P } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
+import { FieldType } from '@prisma/client'
+import { isArray, isNullish } from 'remeda'
 import OrderStatusTracker from './OrderStatusTracker'
 import ApproveButton from './cta/ApproveButton'
 import SkipButton from './cta/SkipButton'
@@ -14,10 +16,41 @@ import {
   fields,
   orderStatusOptions,
 } from '@/domain/schema/template/system-fields'
-import { selectValue } from '@/domain/resource/types'
+import { Resource, selectValue } from '@/domain/resource/types'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 import LinesAndCosts from '@/lib/resource/grid/LinesAndCosts'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
+import { Value } from '@/domain/resource/values/types'
+
+type PrimitiveFieldType = Exclude<FieldType, 'Contact' | 'MultiSelect'>
+
+const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
+  match<FieldType, keyof Value>(t)
+    .with('Checkbox', () => 'boolean')
+    .with('Date', () => 'date')
+    .with('File', () => 'file')
+    .with(P.union('Money', 'Number'), () => 'number')
+    .with('User', () => 'user')
+    .with('Select', () => 'option')
+    .with(P.union('Textarea', 'Text'), () => 'string')
+    .with('Resource', () => 'resource')
+    .with('Contact', () => 'contact')
+    .with('Files', () => 'files')
+    .with('MultiSelect', () => 'options')
+    .exhaustive()
+
+const selectResourceFieldValue = (resource: Resource, fieldId: string) => {
+  const field = resource.fields.find((rf) => rf.fieldId === fieldId)
+
+  const valueColumn =
+    field && mapFieldTypeToValueColumn(field.fieldType as PrimitiveFieldType)
+
+  if (!field || !valueColumn) {
+    return undefined
+  }
+
+  return field?.value[valueColumn]
+}
 
 export default async function OrderDetail({
   params: { key },
@@ -49,6 +82,15 @@ export default async function OrderDetail({
     .with(orderStatusOptions.received.templateId, () => green[800])
     .with(orderStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
+
+  const hasInvalidFields = schema.allFields.some((field) => {
+    const value = selectResourceFieldValue(resource, field.id)
+
+    return (
+      field.isRequired &&
+      (isNullish(value) || (isArray(value) && value.length === 0))
+    )
+  })
 
   return (
     <Stack>
@@ -102,6 +144,12 @@ export default async function OrderDetail({
                 <>
                   <PreviewDraftPoButton resourceId={resource.id} />
                   <StatusTransitionButton
+                    isDisabled={hasInvalidFields}
+                    tooltip={
+                      hasInvalidFields
+                        ? 'Please fill in all required fields before submitting'
+                        : undefined
+                    }
                     resourceId={resource.id}
                     statusOption={orderStatusOptions.submitted}
                     label={'Submit'}

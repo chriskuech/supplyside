@@ -2,7 +2,9 @@
 
 import {
   Button,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -22,6 +24,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
   const [name, setName] = useState<string>()
   const [type, setType] = useState<FieldType>()
   const [resourceType, setResourceType] = useState<ResourceType>()
+  const [isRequired, setIsRequired] = useState<boolean>(false)
 
   const clear = () => {
     setName(undefined)
@@ -59,12 +62,24 @@ export default function CreateFieldForm({ onSubmit }: Props) {
           </Select>
         </FormControl>
 
+        <FormControl sx={{ width: 150 }}>
+          <FormControlLabel
+            label="Required"
+            control={
+              <Checkbox
+                checked={isRequired}
+                onChange={(e) => setIsRequired(e.target.checked)}
+              />
+            }
+          />
+        </FormControl>
+
         <Button
           disabled={!isValid}
           onClick={() => {
             if (!name || !type) return
 
-            onSubmit({ name, type, resourceType })
+            onSubmit({ name, type, resourceType, isRequired })
             clear()
           }}
         >

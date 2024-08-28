@@ -41,12 +41,22 @@ export default function FieldsTable({ fields }: Props) {
       editable: false,
     },
     {
+      field: 'isRequired',
+      headerName: 'Required',
+      type: 'boolean',
+      width: 100,
+      editable: false,
+    },
+    {
       field: '_delete',
       headerName: 'Delete',
       type: 'actions',
       width: 75,
       sortable: false,
       disableColumnMenu: true,
+      flex: 1,
+      headerAlign: 'right',
+      align: 'right',
       renderCell: ({ row }) => (
         <IconButton
           onClick={() => deleteField(row.id)}

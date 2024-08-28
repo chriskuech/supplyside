@@ -110,4 +110,5 @@ const mapField = (
   })),
   resourceType: model.resourceType,
   defaultValue: model.DefaultValue,
+  isRequired: model.isRequired,
 })

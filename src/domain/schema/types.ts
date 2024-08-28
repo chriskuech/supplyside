@@ -21,6 +21,7 @@ export type Field = {
   options: Option[]
   resourceType: ResourceType | null
   defaultValue: Value | null
+  isRequired: boolean
 }
 
 export type Option = {
