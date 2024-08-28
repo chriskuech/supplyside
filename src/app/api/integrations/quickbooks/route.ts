@@ -12,8 +12,7 @@ const stateSchema = z.object({
 })
 
 export async function GET({ url }: NextRequest): Promise<NextResponse> {
-  const authCode = url.toString()
-  const tokenExchange = await quickBooksClient().createToken(authCode)
+  const tokenExchange = await quickBooksClient().createToken(url)
   const { csrf } = stateSchema.parse(
     JSON.parse(tokenExchange.token.state ?? ''),
   )
