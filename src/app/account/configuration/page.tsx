@@ -3,7 +3,7 @@ import { readSchemas } from './schemas/actions'
 import SchemasControl from './schemas/SchemasControl'
 import AddFieldButton from './fields/AddFieldButton'
 import FieldsTable from './fields/FieldsTable'
-import { readFields } from '@/domain/configuration/fields/actions'
+import { readFields } from '@/domain/schema/fields/actions'
 
 export default async function Configuration() {
   const [fields, schemas] = await Promise.all([readFields(), readSchemas()])

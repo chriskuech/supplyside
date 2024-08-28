@@ -5,12 +5,8 @@ import { AccountQuery, CompanyInfo, Token } from 'intuit-oauth'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { faker } from '@faker-js/faker'
-import {
-  OptionPatch,
-  readFields,
-  updateField,
-} from '../configuration/fields/actions'
 import { fields } from '../schema/template/system-fields'
+import { OptionPatch, readFields, updateField } from '../schema/fields/actions'
 import { authQuickBooksClient, environmentUrls } from './client'
 import prisma from '@/services/prisma'
 import config from '@/services/config'

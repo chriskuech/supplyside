@@ -18,7 +18,7 @@ import {
   Field,
   OptionPatch,
   UpdateFieldDto,
-} from '@/domain/configuration/fields/actions'
+} from '@/domain/schema/fields/actions'
 import { findField } from '@/domain/schema/template/system-fields'
 import { mapValueToInput } from '@/domain/resource/values/mappers'
 import { ValueInput } from '@/domain/resource/values/types'

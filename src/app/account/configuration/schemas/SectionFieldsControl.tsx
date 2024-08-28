@@ -26,7 +26,7 @@ import { FC } from 'react'
 import { z } from 'zod'
 import { isPlainObject } from 'remeda'
 import { Field, Section } from './actions'
-import { Field as FullField } from '@/domain/configuration/fields/actions'
+import { Field as FullField } from '@/domain/schema/fields/actions'
 
 type Props = {
   fields: FullField[]

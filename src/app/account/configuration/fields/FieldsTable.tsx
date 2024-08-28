@@ -13,7 +13,7 @@ import {
   UpdateFieldDto,
   deleteField,
   updateField,
-} from '@/domain/configuration/fields/actions'
+} from '@/domain/schema/fields/actions'
 
 type Props = {
   fields: Field[]
