@@ -115,6 +115,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
           label="Required"
           control={
             <Checkbox
+              disabled={isDisabled}
               checked={isRequired}
               onChange={(e) => setIsRequired(e.target.checked)}
             />

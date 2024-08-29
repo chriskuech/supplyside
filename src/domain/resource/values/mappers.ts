@@ -79,10 +79,10 @@ export const selectResourceFieldValue = (
     return undefined
   }
 
-  return field?.value[valueColumn]
+  return field.value[valueColumn]
 }
 
-export const checkForInvalidFields = (
+export const isMissingRequiredFields = (
   schema: Schema,
   resource: Resource,
 ): boolean =>

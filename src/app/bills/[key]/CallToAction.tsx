@@ -23,7 +23,7 @@ import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { Schema, selectField } from '@/domain/schema/types'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { User } from '@/domain/iam/user/types'
-import { checkForInvalidFields } from '@/domain/resource/values/mappers'
+import { isMissingRequiredFields } from '@/domain/resource/values/mappers'
 
 type Props = {
   user: User
@@ -48,7 +48,7 @@ export default function CallToAction({ user, schema, resource }: Props) {
     billStatus?.templateId === billStatusOptions.canceled.templateId
   const isPaid = billStatus?.templateId === billStatusOptions.paid.templateId
 
-  const hasInvalidFields = checkForInvalidFields(schema, resource)
+  const hasInvalidFields = isMissingRequiredFields(schema, resource)
 
   return (
     <>

@@ -18,7 +18,7 @@ import { selectValue } from '@/domain/resource/types'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 import LinesAndCosts from '@/lib/resource/grid/LinesAndCosts'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
-import { checkForInvalidFields } from '@/domain/resource/values/mappers'
+import { isMissingRequiredFields } from '@/domain/resource/values/mappers'
 
 export default async function OrderDetail({
   params: { key },
@@ -51,7 +51,7 @@ export default async function OrderDetail({
     .with(orderStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
 
-  const hasInvalidFields = checkForInvalidFields(schema, resource)
+  const hasInvalidFields = isMissingRequiredFields(schema, resource)
 
   return (
     <Stack>

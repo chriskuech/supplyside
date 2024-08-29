@@ -62,7 +62,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
           </Select>
         </FormControl>
 
-        <FormControl sx={{ width: 150 }}>
+        <FormControl sx={{ width: 'fit-content' }}>
           <FormControlLabel
             label="Required"
             control={
