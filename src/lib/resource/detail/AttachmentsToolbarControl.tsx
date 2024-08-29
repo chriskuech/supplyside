@@ -35,7 +35,7 @@ export default function AttachmentsToolbarControl({
 
   return (
     <>
-      <Tooltip title={'View/Edit attachments'}>
+      <Tooltip title="View/Edit attachments">
         <IconButton onClick={open}>
           <Badge
             badgeContent={value?.files?.length || undefined}

@@ -18,7 +18,7 @@ export default function SkipButton({ resourceId }: Props) {
       <Button
         sx={{ fontSize: '1.2em' }}
         endIcon={<ArrowRight />}
-        variant={'text'}
+        variant="text"
         onClick={() =>
           transitionStatus(
             resourceId,

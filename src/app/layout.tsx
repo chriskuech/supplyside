@@ -37,7 +37,7 @@ export default async function RootLayout({
           <RootProvider>
             <CssBaseline />
             <AppBar />
-            <Box width={'100vw'} flexGrow={1}>
+            <Box width="100vw" flexGrow={1}>
               {children}
             </Box>
           </RootProvider>

@@ -23,7 +23,7 @@ export default async function ListPage({ tableKey, resourceType }: Props) {
   return (
     <Container sx={{ my: 5 }}>
       <Stack spacing={4}>
-        <Stack direction="row" alignItems={'center'}>
+        <Stack direction="row" alignItems="center">
           <Typography
             variant="h3"
             flexGrow={1}

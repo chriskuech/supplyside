@@ -13,14 +13,14 @@ export default async function Team() {
   ])
 
   return (
-    <Container maxWidth={'md'} sx={{ marginTop: 5 }}>
-      <Stack spacing={5} direction={'column'}>
+    <Container maxWidth="md" sx={{ marginTop: 5 }}>
+      <Stack spacing={5} direction="column">
         <Stack
-          direction={'row'}
-          justifyContent={'space-between'}
-          alignItems={'start'}
+          direction="row"
+          justifyContent="space-between"
+          alignItems="start"
         >
-          <Typography variant={'h4'} textAlign={'left'}>
+          <Typography variant="h4" textAlign="left">
             Team
           </Typography>
           <Box width={300}>

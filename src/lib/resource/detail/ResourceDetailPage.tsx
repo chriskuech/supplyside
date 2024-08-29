@@ -31,13 +31,13 @@ export default function ResourceDetailPage({
     <Stack>
       <Container sx={{ py: 5 }}>
         {name && (
-          <Stack direction={'row'} alignItems={'center'}>
+          <Stack direction="row" alignItems="center">
             <Typography variant="overline">
               {resource.type} #{resource.key}
             </Typography>
           </Stack>
         )}
-        <Stack direction={'row'} alignItems={'center'} spacing={1}>
+        <Stack direction="row" alignItems="center" spacing={1}>
           <Typography variant="h3">
             {match(name)
               .with(P.string, () => <>{name}</>)
@@ -56,12 +56,12 @@ export default function ResourceDetailPage({
           {[
             ...tools,
             <DeleteResourceButton
-              key={'delete-resource-button'}
+              key="delete-resource-button"
               resourceType={resource.type}
               resourceId={resource.id}
             />,
           ].map((tool, i) => (
-            <Box height={'min-content'} key={i}>
+            <Box height="min-content" key={i}>
               {tool}
             </Box>
           ))}

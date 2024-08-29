@@ -51,8 +51,8 @@ export default function ContactField({
           {!inline && <ContactCard contact={contact} />}
           <Stack
             spacing={1}
-            direction={'row'}
-            justifyContent={'end'}
+            direction="row"
+            justifyContent="end"
             alignItems="center"
           >
             {inline && (
@@ -155,7 +155,7 @@ const ContactForm: FC<ContactFormProps> = ({ contact, onChange, onCancel }) => {
           ),
         }}
       />
-      <Stack spacing={1} direction={'row'} justifyContent={'end'}>
+      <Stack spacing={1} direction="row" justifyContent="end">
         <Button size="small" onClick={onCancel}>
           Cancel
         </Button>
