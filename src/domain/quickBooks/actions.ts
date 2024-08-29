@@ -183,6 +183,7 @@ export const syncDataFromQuickBooks = async (): Promise<void> => {
     id: quickBooksAccountField.id,
     name: quickBooksAccountField.name,
     defaultValue: { optionId: quickBooksAccountField.defaultValue.option?.id },
+    isRequired: quickBooksAccountField.isRequired,
     options,
   })
 }
