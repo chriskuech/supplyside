@@ -56,12 +56,18 @@ export default function ResourceFieldsControl({
                       {section.fields.map((field) => (
                         <Stack key={field.id}>
                           <Tooltip title={field.description}>
-                            <Typography variant="overline">
-                              {field.name}{' '}
+                            <Stack
+                              direction={'row'}
+                              spacing={1}
+                              alignItems={'center'}
+                            >
+                              <Typography variant="overline">
+                                {field.name}
+                              </Typography>
                               {field.description && (
-                                <Info color="info" fontSize="small" />
+                                <Info color="primary" fontSize="small" />
                               )}
-                            </Typography>
+                            </Stack>
                           </Tooltip>
                           <Box>
                             {match(
