@@ -57,9 +57,9 @@ export default function ResourceFieldsControl({
                         <Stack key={field.id}>
                           <Tooltip title={field.description}>
                             <Stack
-                              direction={'row'}
+                              direction="row"
                               spacing={1}
-                              alignItems={'center'}
+                              alignItems="center"
                             >
                               <Typography variant="overline">
                                 {field.name}

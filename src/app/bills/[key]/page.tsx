@@ -57,7 +57,7 @@ export default async function BillsDetail({
         <AttachmentsToolbarControl
           key={AttachmentsToolbarControl.name}
           resourceId={resource.id}
-          resourceType={'Bill'}
+          resourceType="Bill"
           field={
             selectField(schema, fields.billAttachments) ??
             fail('Field not found')

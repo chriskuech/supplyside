@@ -83,7 +83,7 @@ export default async function OrderDetail({
         <AttachmentsToolbarControl
           key={AttachmentsToolbarControl.name}
           resourceId={resource.id}
-          resourceType={'Order'}
+          resourceType="Order"
           field={
             selectField(schema, fields.orderAttachments) ??
             fail('Field not found')
