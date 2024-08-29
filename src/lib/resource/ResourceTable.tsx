@@ -75,7 +75,7 @@ export default function ResourceTable({
           .with(P.union('Number', 'Money', 'Checkbox'), () => 'right' as const)
           .otherwise(() => 'left' as const),
         width: match(field.type)
-          .with('Resource', () => 390)
+          .with('Resource', () => 440)
           .with(P.union('Select', 'MultiSelect'), () => 200)
           .with(P.union('Number', 'Money'), () => 130)
           .with('Date', () => 150)
