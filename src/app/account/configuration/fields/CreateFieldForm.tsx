@@ -36,7 +36,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
 
   return (
     <Stack spacing={2}>
-      <Stack direction={'row'} spacing={1}>
+      <Stack direction="row" spacing={1}>
         <TextField
           sx={{ width: 300 }}
           label="Name"
@@ -86,7 +86,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
           Create
         </Button>
       </Stack>
-      <Stack direction={'row'} spacing={2}>
+      <Stack direction="row" spacing={2}>
         {type === 'Resource' && (
           <FormControl sx={{ width: 150 }}>
             <InputLabel id="field-resource-type-label">

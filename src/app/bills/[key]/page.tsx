@@ -16,6 +16,7 @@ import { selectValue } from '@/domain/resource/types'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectField } from '@/domain/schema/types'
+import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 
 export default async function BillsDetail({
   params: { key },
@@ -53,10 +54,20 @@ export default async function BillsDetail({
       resource={resource}
       tools={[
         ...(order ? [<OrderLink key={order.id} order={order} />] : []),
+        <AttachmentsToolbarControl
+          key={AttachmentsToolbarControl.name}
+          resourceId={resource.id}
+          resourceType="Bill"
+          field={
+            selectField(schema, fields.billAttachments) ??
+            fail('Field not found')
+          }
+          value={selectValue(resource, fields.billAttachments)}
+        />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
           resourceId={resource.id}
-          resourceType={'Bill'}
+          resourceType="Bill"
           field={
             selectField(schema, fields.assignee) ?? fail('Field not found')
           }
@@ -70,20 +81,20 @@ export default async function BillsDetail({
       backlinkField={fields.bill}
       isReadOnly={!isDraft}
       actions={
-        <Stack direction={'row'} height={100}>
+        <Stack direction="row" height={100}>
           <Box
             flexGrow={1}
             height={70}
-            my={'15px'}
+            my="15px"
             sx={{
               background: `linear-gradient(90deg, ${statusColorStart} 0%, ${statusColorEnd} 100%)`,
             }}
           />
           <Container sx={{ flexShrink: 0 }} disableGutters>
             <Stack
-              direction={'row'}
+              direction="row"
               sx={{ overflowX: 'hidden', height: 100 }}
-              alignItems={'center'}
+              alignItems="center"
             >
               <Box sx={{ borderRadius: 10, flexGrow: 1 }}>
                 <BillStatusTracker resource={resource} />
@@ -91,9 +102,9 @@ export default async function BillsDetail({
               <Stack
                 width={400}
                 flexShrink={0}
-                direction={'row'}
-                justifyContent={'end'}
-                alignItems={'center'}
+                direction="row"
+                justifyContent="end"
+                alignItems="center"
                 spacing={2}
                 mr={3}
               >
@@ -106,7 +117,7 @@ export default async function BillsDetail({
               </Stack>
             </Stack>
           </Container>
-          <Box flexGrow={1} bgcolor={'transparent'} />
+          <Box flexGrow={1} bgcolor="transparent" />
         </Stack>
       }
     />

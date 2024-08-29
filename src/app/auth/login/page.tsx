@@ -10,12 +10,12 @@ export default async function Login() {
 
   return (
     <Box
-      width={'100vw'}
-      height={'100%'}
-      display={'flex'}
-      alignItems={'center'}
-      justifyContent={'center'}
-      flexDirection={'column'}
+      width="100vw"
+      height="100%"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      flexDirection="column"
     >
       <Box width={500}>
         <LoginForm />

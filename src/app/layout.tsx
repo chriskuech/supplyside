@@ -5,6 +5,7 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import dynamic from 'next/dynamic'
 import AppBar from '@/lib/ux/appbar/AppBar'
 import MuiXLicense from '@/lib/ux/MuiXLicense'
+import 'source-map-support/register' // TODO: check if stack traces are correct in azure
 
 const RootProvider = dynamic(() => import('@/lib/ux/RootProvider'), {
   ssr: false,
@@ -36,7 +37,7 @@ export default async function RootLayout({
           <RootProvider>
             <CssBaseline />
             <AppBar />
-            <Box width={'100vw'} flexGrow={1}>
+            <Box width="100vw" flexGrow={1}>
               {children}
             </Box>
           </RootProvider>

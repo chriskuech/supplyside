@@ -50,8 +50,8 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
   const isDisabled = !!field.templateId
 
   return (
-    <Stack spacing={2} width={'fit-content'}>
-      <Stack direction={'row'} spacing={1}>
+    <Stack spacing={2} width="fit-content">
+      <Stack direction="row" spacing={1}>
         <TextField
           sx={{ width: 300 }}
           label="Name"
@@ -94,7 +94,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         />
       )}
 
-      <Stack direction={'row'} spacing={1} flexWrap={'wrap'}>
+      <Stack direction="row" spacing={1} flexWrap="wrap">
         {field.type === 'Resource' && (
           <FormControl sx={{ width: 150 }}>
             <InputLabel id="field-resource-type-label">
@@ -132,7 +132,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         />
       </FormControl>
 
-      <Stack justifyContent={'end'} direction={'row'} spacing={1}>
+      <Stack justifyContent="end" direction="row" spacing={1}>
         <Button variant="text" onClick={onCancel}>
           Cancel
         </Button>

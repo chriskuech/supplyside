@@ -44,24 +44,30 @@ export default function ResourceFieldsControl({
     return (
       <Card variant="elevation">
         <CardContent>
-          <Stack direction={'row'} spacing={5} overflow={'hidden'}>
+          <Stack direction="row" spacing={5} overflow="hidden">
             {chunkByN(schema.sections, columns).map((sections, i) => (
               <Stack key={i} flex={1} divider={<Divider />} spacing={2}>
                 {sections.map((section) => (
                   <Stack key={section.id}>
-                    <Typography variant="h6" fontWeight={'bold'}>
+                    <Typography variant="h6" fontWeight="bold">
                       {section.name}
                     </Typography>
                     <Stack spacing={2}>
                       {section.fields.map((field) => (
                         <Stack key={field.id}>
                           <Tooltip title={field.description}>
-                            <Typography variant="overline">
-                              {field.name}{' '}
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              alignItems="center"
+                            >
+                              <Typography variant="overline">
+                                {field.name}
+                              </Typography>
                               {field.description && (
-                                <Info color="info" fontSize={'small'} />
+                                <Info color="primary" fontSize="small" />
                               )}
-                            </Typography>
+                            </Stack>
                           </Tooltip>
                           <Box>
                             {match(
@@ -185,7 +191,7 @@ export default function ResourceFieldsControl({
         return (
           <Accordion key={s.id} defaultExpanded={i === 0} variant="outlined">
             <AccordionSummary expandIcon={<ExpandMore />}>
-              <Typography variant="h6" fontWeight={'bold'}>
+              <Typography variant="h6" fontWeight="bold">
                 {s.name}
               </Typography>
             </AccordionSummary>
@@ -222,7 +228,7 @@ export default function ResourceFieldsControl({
                   />
                 </Box>
               ) : (
-                <Stack spacing={3} direction={'row'}>
+                <Stack spacing={3} direction="row">
                   {chunkByN(s.fields, columns).map((fs, i) => (
                     <Stack key={i} spacing={3} flex={1}>
                       {fs.map((f) => (
@@ -230,10 +236,10 @@ export default function ResourceFieldsControl({
                           <Typography
                             variant="overline"
                             fontSize={14}
-                            lineHeight={'unset'}
+                            lineHeight="unset"
                           >
                             {f.name}{' '}
-                            {s.fields.at(0)?.isRequired && (
+                            {f.isRequired && (
                               <Typography
                                 color="error"
                                 display="inline"

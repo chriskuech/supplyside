@@ -186,7 +186,7 @@ const SortableChips: FC<{
       }}
     >
       <SortableContext items={values} strategy={rectSortingStrategy}>
-        <Stack direction={'row'} spacing={1} flexWrap={'wrap'}>
+        <Stack direction="row" spacing={1} flexWrap="wrap">
           {values
             .filter((v) => v.op !== 'remove')
             .map((value) => (

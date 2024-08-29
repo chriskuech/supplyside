@@ -11,6 +11,7 @@ export const schemas: SchemaTemplate[] = [
       fields.subtotalCost,
       fields.totalCost,
       fields.assignee,
+      fields.billAttachments,
     ],
     sections: [
       {
@@ -71,6 +72,7 @@ export const schemas: SchemaTemplate[] = [
       fields.subtotalCost,
       fields.itemizedCosts,
       fields.trackingNumber,
+      fields.orderAttachments,
     ],
     sections: [
       {

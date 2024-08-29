@@ -206,7 +206,7 @@ function Field(
     )
     .with('Textarea', () =>
       isReadOnly ? (
-        <Typography whiteSpace={'pre'}>{value?.string}</Typography>
+        <Typography whiteSpace="pre">{value?.string}</Typography>
       ) : (
         <TextField
           inputRef={ref}

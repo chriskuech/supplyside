@@ -53,8 +53,8 @@ const LoginForm: FC = () => {
 
   return (
     <form action={formAction}>
-      <Stack spacing={5} direction={'column'}>
-        <Typography variant={'h4'} textAlign={'left'}>
+      <Stack spacing={5} direction="column">
+        <Typography variant="h4" textAlign="left">
           Login
         </Typography>
         {state?.error && (
@@ -95,7 +95,7 @@ const LoginForm: FC = () => {
           }}
         />
 
-        <Stack direction={'row'} justifyContent={'end'}>
+        <Stack direction="row" justifyContent="end">
           <Button type="submit" disabled={!isValid}>
             Submit
           </Button>

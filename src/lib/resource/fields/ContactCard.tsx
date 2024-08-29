@@ -47,7 +47,7 @@ function FullContactCard({ contact }: ContactProp) {
         </ListItem>
         <ListItemButton
           disabled={!contact?.email}
-          component={'a'}
+          component="a"
           href={contact.email ? `mailto:${contact.email}` : undefined}
         >
           <ListItemIcon>
@@ -60,7 +60,7 @@ function FullContactCard({ contact }: ContactProp) {
         </ListItemButton>
         <ListItemButton
           disabled={!contact?.phone}
-          component={'a'}
+          component="a"
           href={contact.phone ? `tel:${contact.phone}` : undefined}
         >
           <ListItemIcon>
