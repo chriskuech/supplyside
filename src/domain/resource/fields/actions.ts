@@ -23,6 +23,7 @@ export type UpdateValueDto = {
   value: {
     boolean?: boolean | null | undefined
     date?: Date | null | undefined
+    fileId?: string | null | undefined
     fileIds?: string[] | null | undefined
     number?: number | null | undefined
     optionId?: string | null | undefined

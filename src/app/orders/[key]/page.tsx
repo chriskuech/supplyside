@@ -97,7 +97,7 @@ export default async function OrderDetail({
         />,
       ]}
       backlinkField={fields.order}
-      isDraft={isDraft}
+      isReadOnly={!isDraft}
       actions={
         <Stack direction={'row'} height={100}>
           <Box
