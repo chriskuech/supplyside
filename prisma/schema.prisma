@@ -146,6 +146,7 @@ model Field {
   resourceType   ResourceType?
   templateId     String?       @db.Uuid
   defaultValueId String        @db.Uuid
+  isRequired     Boolean       @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

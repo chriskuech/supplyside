@@ -2,7 +2,9 @@
 
 import {
   Button,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -41,6 +43,8 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
   const [defaultValue, setDefaultValue] = useState<ValueInput>(
     mapValueToInput(field.defaultValue),
   )
+
+  const [isRequired, setIsRequired] = useState<boolean>(field.isRequired)
 
   const isValid = !!name
   const isDisabled = !!field.templateId
@@ -115,6 +119,19 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         </FormControl>
       )}
 
+      <FormControl fullWidth>
+        <FormControlLabel
+          label="Required"
+          control={
+            <Checkbox
+              disabled={isDisabled}
+              checked={isRequired}
+              onChange={(e) => setIsRequired(e.target.checked)}
+            />
+          }
+        />
+      </FormControl>
+
       <Stack justifyContent={'end'} direction={'row'} spacing={1}>
         <Button variant="text" onClick={onCancel}>
           Cancel
@@ -129,6 +146,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
               description: description?.trim() || null,
               options,
               defaultValue,
+              isRequired,
             })
           }
         >
