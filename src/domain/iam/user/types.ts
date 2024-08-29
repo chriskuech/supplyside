@@ -1,4 +1,5 @@
 import { Blob, Prisma, User as UserCoreModel } from '@prisma/client'
+import { isTruthy } from 'remeda'
 import { getDownloadPath } from '@/domain/blobs/utils'
 import { systemAccountId } from '@/lib/const'
 
@@ -11,7 +12,7 @@ export type User = {
   accountId: string
   firstName: string | null
   lastName: string | null
-  fullName: string
+  fullName: string | null
   email: string
   profilePicPath: string | null
   requirePasswordReset: boolean
@@ -30,7 +31,8 @@ export const mapUserModel = (model: UserModel): User => ({
   accountId: model.accountId,
   firstName: model.firstName,
   lastName: model.lastName,
-  fullName: `${model.firstName} ${model.lastName}`,
+  fullName:
+    [model.firstName, model.lastName].filter(isTruthy).join(' ') || null,
   email: model.email,
   profilePicPath:
     model.ImageBlob &&

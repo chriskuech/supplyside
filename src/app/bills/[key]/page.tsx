@@ -6,6 +6,7 @@ import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
 import OrderLink from './tools/OrderLink'
 import CancelControl from './tools/CancelControl'
+import EditControl from './tools/EditControl'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import {
   billStatusOptions,
@@ -15,7 +16,6 @@ import { selectValue } from '@/domain/resource/types'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectField } from '@/domain/schema/types'
-import EditControl from '@/app/orders/[key]/tools/EditControl'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 
 export default async function BillsDetail({
@@ -79,7 +79,7 @@ export default async function BillsDetail({
         <CancelControl key={CancelControl.name} resourceId={resource.id} />,
       ]}
       backlinkField={fields.bill}
-      isDraft={isDraft}
+      isReadOnly={!isDraft}
       actions={
         <Stack direction={'row'} height={100}>
           <Box
