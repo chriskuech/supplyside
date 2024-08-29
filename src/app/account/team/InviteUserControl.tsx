@@ -32,7 +32,7 @@ const InviteUserControl: FC = () => {
       label="Invite User"
       value={email}
       error={showError}
-      helperText={'Provide an email to send the invite to.'}
+      helperText="Provide an email to send the invite to."
       onChange={(e) => setEmail(e.target.value)}
       InputProps={{
         endAdornment: (

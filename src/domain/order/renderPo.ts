@@ -10,7 +10,9 @@ import PoDocumentFooter from '@/domain/order/doc/PoDocumentFooter'
 import singleton from '@/services/singleton'
 
 const browser = singleton('browser', async (clear) => {
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox'],
+  })
 
   browser.once('disconnected', () => {
     browser.close()

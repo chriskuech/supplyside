@@ -36,7 +36,7 @@ export default function FilesField({
     <>
       <Stack>
         {value?.files?.map((file) => (
-          <Stack key={file.id} direction={'row'} alignItems={'center'}>
+          <Stack key={file.id} direction="row" alignItems="center">
             <Typography flexGrow={1}>{file.name ?? '-'}</Typography>
             <Tooltip title="View File">
               <IconButton
@@ -69,29 +69,25 @@ export default function FilesField({
                 <Download />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Delete File">
-              <IconButton
-                onClick={() => {
-                  console.log('deleting')
-                  updateValue({
-                    resourceId,
-                    fieldId: field.id,
-                    value: {
-                      fileIds: value?.files
-                        ?.map((f) => f.id)
-                        .filter((fileId) => fileId !== file.id),
-                    },
-                  })
-                    .then(() => onChange?.())
-                    .then(() => console.log('deleted'))
-                  // deleteFile(resourceId, field.id, file.id)
-                  //   .then(() => onChange?.())
-                  //   .then(() => console.log('deleted'))
-                }}
-              >
-                <Close />
-              </IconButton>
-            </Tooltip>
+            {!isReadOnly && (
+              <Tooltip title="Delete File">
+                <IconButton
+                  onClick={() =>
+                    updateValue({
+                      resourceId,
+                      fieldId: field.id,
+                      value: {
+                        fileIds: value?.files
+                          ?.map((f) => f.id)
+                          .filter((fileId) => fileId !== file.id),
+                      },
+                    }).then(() => onChange?.())
+                  }
+                >
+                  <Close />
+                </IconButton>
+              </Tooltip>
+            )}
           </Stack>
         ))}
         {!isReadOnly && (

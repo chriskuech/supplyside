@@ -14,6 +14,7 @@ export type SectionTemplate = {
 export type FieldTemplate = {
   templateId: string
   name: string
+  description?: string
   type: FieldType
   resourceType?: ResourceType
   options?: OptionTemplate[]
@@ -21,6 +22,7 @@ export type FieldTemplate = {
     optionTemplateId: string
   }
   isDerived?: boolean
+  isRequired?: boolean
 }
 
 export type OptionTemplate = {

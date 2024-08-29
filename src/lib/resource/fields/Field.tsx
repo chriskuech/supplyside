@@ -136,7 +136,12 @@ function Field(
         getOptionLabel={(o) => o.name}
         getOptionKey={(o) => o.id}
         renderInput={(props) => <TextField inputRef={ref} {...props} />}
-        options={field.options}
+        options={field.options.filter(
+          (option) =>
+            !value?.options?.some(
+              (valueOption) => valueOption.id === option.id,
+            ),
+        )}
         defaultValue={field.options.filter((option) =>
           value?.options?.some((valueOption) => valueOption.id === option.id),
         )}
@@ -201,7 +206,7 @@ function Field(
     )
     .with('Textarea', () =>
       isReadOnly ? (
-        <Typography whiteSpace={'pre'}>{value?.string}</Typography>
+        <Typography whiteSpace="pre">{value?.string}</Typography>
       ) : (
         <TextField
           inputRef={ref}

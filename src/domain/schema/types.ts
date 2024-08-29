@@ -17,10 +17,12 @@ export type Field = {
   id: string
   templateId: string | null
   name: string
+  description: string | null
   type: FieldType
   options: Option[]
   resourceType: ResourceType | null
   defaultValue: Value | null
+  isRequired: boolean
 }
 
 export type Option = {

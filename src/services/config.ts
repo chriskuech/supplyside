@@ -6,6 +6,11 @@ const schema = z.object({
   AZURE_STORAGE_CONNECTION_STRING: z.string().min(1),
   NODE_ENV: z.enum(['development', 'integration', 'production']),
   BASE_URL: z.string().url(),
+
+  QUICKBOOKS_CLIENT_ID: z.string().min(1).optional(),
+  QUICKBOOKS_CLIENT_SECRET: z.string().min(1).optional(),
+  QUICKBOOKS_CSRF_SECRET: z.string().min(1).optional(),
+  QUICKBOOKS_ENVIRONMENT: z.enum(['sandbox', 'production']).optional(),
 })
 
 export type Config = z.infer<typeof schema>

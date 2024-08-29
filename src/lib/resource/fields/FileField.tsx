@@ -1,11 +1,11 @@
 'use client'
 
-import { Download, UploadFile, Visibility } from '@mui/icons-material'
+import { Close, Download, UploadFile, Visibility } from '@mui/icons-material'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useRef } from 'react'
 import { getDownloadPath } from '@/domain/blobs/utils'
 import { Field } from '@/domain/schema/types'
-import { uploadFile } from '@/domain/resource/fields/actions'
+import { updateValue, uploadFile } from '@/domain/resource/fields/actions'
 import { Value } from '@/domain/resource/values/types'
 
 type Props = {
@@ -28,7 +28,7 @@ export default function FileField({
   const file = value?.file
 
   return (
-    <Stack direction={'row'} alignItems={'center'}>
+    <Stack direction="row" alignItems="center">
       <input
         style={{ display: 'none' }}
         type="file"
@@ -81,11 +81,28 @@ export default function FileField({
         </>
       )}
       {!isReadOnly && (
-        <Tooltip title="Upload File">
-          <IconButton onClick={() => fileInputRef.current?.click()}>
-            <UploadFile />
-          </IconButton>
-        </Tooltip>
+        <>
+          <Tooltip title="Upload File">
+            <IconButton onClick={() => fileInputRef.current?.click()}>
+              <UploadFile />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete File">
+            <IconButton
+              onClick={() =>
+                updateValue({
+                  resourceId,
+                  fieldId: field.id,
+                  value: {
+                    fileId: null,
+                  },
+                }).then(() => onChange?.())
+              }
+            >
+              <Close />
+            </IconButton>
+          </Tooltip>
+        </>
       )}
     </Stack>
   )

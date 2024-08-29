@@ -2,7 +2,9 @@
 
 import {
   Button,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -22,6 +24,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
   const [name, setName] = useState<string>()
   const [type, setType] = useState<FieldType>()
   const [resourceType, setResourceType] = useState<ResourceType>()
+  const [isRequired, setIsRequired] = useState<boolean>(false)
 
   const clear = () => {
     setName(undefined)
@@ -33,7 +36,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
 
   return (
     <Stack spacing={2}>
-      <Stack direction={'row'} spacing={1}>
+      <Stack direction="row" spacing={1}>
         <TextField
           sx={{ width: 300 }}
           label="Name"
@@ -59,19 +62,31 @@ export default function CreateFieldForm({ onSubmit }: Props) {
           </Select>
         </FormControl>
 
+        <FormControl sx={{ width: 'fit-content' }}>
+          <FormControlLabel
+            label="Required"
+            control={
+              <Checkbox
+                checked={isRequired}
+                onChange={(e) => setIsRequired(e.target.checked)}
+              />
+            }
+          />
+        </FormControl>
+
         <Button
           disabled={!isValid}
           onClick={() => {
             if (!name || !type) return
 
-            onSubmit({ name, type, resourceType })
+            onSubmit({ name, type, resourceType, isRequired })
             clear()
           }}
         >
           Create
         </Button>
       </Stack>
-      <Stack direction={'row'} spacing={2}>
+      <Stack direction="row" spacing={2}>
         {type === 'Resource' && (
           <FormControl sx={{ width: 150 }}>
             <InputLabel id="field-resource-type-label">

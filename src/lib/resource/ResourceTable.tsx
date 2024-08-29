@@ -9,12 +9,12 @@ import { P, match } from 'ts-pattern'
 import { useMemo } from 'react'
 import { difference } from 'remeda'
 import { useSnackbar } from 'notistack'
-import { formatDate } from '../../formatDate'
-import CustomGridToolbar from '../../ux/CustomGridToolbar'
-import ContactCard from '../fields/ContactCard'
-import { deleteResource } from '../actions'
-import FieldGridEditCell from '../fields/FieldGridEditCell'
-import FieldControl from '../fields/FieldControl'
+import { formatDate } from '../formatDate'
+import CustomGridToolbar from '../ux/CustomGridToolbar'
+import ContactCard from './fields/ContactCard'
+import { deleteResource } from './actions'
+import FieldGridEditCell from './fields/FieldGridEditCell'
+import FieldControl from './fields/FieldControl'
 import { Resource, ResourceField } from '@/domain/resource/types'
 import { Option, Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
@@ -23,11 +23,16 @@ import { findField } from '@/domain/schema/template/system-fields'
 import { Value } from '@/domain/resource/values/types'
 import { usePersistDatagridState } from '@/lib/hooks/usePersistDatagridState'
 
+type IndexedResource = {
+  index: number
+} & Resource
+
 type Props = {
-  tableKey: string
+  tableKey?: string
   schema: Schema
   resources: Resource[]
   isEditable?: boolean
+  indexed?: boolean
   onChange?: () => void
 } & Partial<DataGridProProps>
 
@@ -37,21 +42,30 @@ export default function ResourceTable({
   resources,
   isEditable,
   onChange,
+  indexed,
   ...props
 }: Props) {
   const { apiRef, initialState, saveStateToLocalstorage } =
     usePersistDatagridState(tableKey)
 
   const { enqueueSnackbar } = useSnackbar()
-  const columns = useMemo<GridColDef<Resource>[]>(
+  const columns = useMemo<GridColDef<IndexedResource>[]>(
     () => [
-      {
-        field: 'key',
-        headerName: 'ID',
-        type: 'number',
-        editable: false,
-      },
-      ...selectFields(schema).map<GridColDef<Resource>>((field) => ({
+      indexed
+        ? {
+            field: 'index',
+            headerName: '#',
+            type: 'number',
+            editable: false,
+            width: 30,
+          }
+        : {
+            field: 'key',
+            headerName: 'ID',
+            type: 'number',
+            editable: false,
+          },
+      ...selectFields(schema).map<GridColDef<IndexedResource>>((field) => ({
         field: field.id,
         headerName: field.name,
         headerAlign: match(field.type)
@@ -61,7 +75,7 @@ export default function ResourceTable({
           .with(P.union('Number', 'Money', 'Checkbox'), () => 'right' as const)
           .otherwise(() => 'left' as const),
         width: match(field.type)
-          .with('Resource', () => 390)
+          .with('Resource', () => 440)
           .with(P.union('Select', 'MultiSelect'), () => 200)
           .with(P.union('Number', 'Money'), () => 130)
           .with('Date', () => 150)
@@ -123,7 +137,7 @@ export default function ResourceTable({
             .exhaustive()
         },
         valueParser: (value) => value,
-        valueSetter: (value, row: Resource) => {
+        valueSetter: (value, row: IndexedResource) => {
           if (typeof value !== 'object') return row //TODO: check why value is the raw value 'example' instead of an object {string: 'example'} or similar for other field types when entering edit mode
           const emptyValue: Value = {
             boolean: null,
@@ -282,26 +296,32 @@ export default function ResourceTable({
           </Box>
         ),
       })),
-      {
-        field: '_delete',
-        headerName: 'Delete',
-        renderCell: ({ row: { id } }) => (
-          <IconButton
-            onClick={(e) => {
-              e.stopPropagation()
-              deleteResource({ id })
-            }}
-            disabled={!isEditable}
-          >
-            <Clear />
-          </IconButton>
-        ),
-      },
+      ...(isEditable
+        ? [
+            {
+              field: '_delete',
+              headerName: 'Delete',
+              renderCell: ({ row: { id } }) => (
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    deleteResource({ id })
+                  }}
+                >
+                  <Clear />
+                </IconButton>
+              ),
+            } satisfies GridColDef<Resource>,
+          ]
+        : []),
     ],
-    [schema, isEditable],
+    [indexed, schema, isEditable],
   )
 
-  const handleProcessRowUpdate = async (newRow: Resource, oldRow: Resource) => {
+  const handleProcessRowUpdate = async (
+    newRow: IndexedResource,
+    oldRow: IndexedResource,
+  ) => {
     // find which cell has been updated
     const editedFields = newRow.fields.filter(
       ({ fieldId, fieldType, value: newValue }) => {
@@ -381,12 +401,12 @@ export default function ResourceTable({
     return newRow
   }
 
-  if (!initialState) return <CircularProgress />
+  if (tableKey && !initialState) return <CircularProgress />
 
   return (
-    <DataGridPro<Resource>
+    <DataGridPro<IndexedResource>
       columns={columns}
-      rows={resources}
+      rows={resources.map((resource, i) => ({ ...resource, index: i + 1 }))}
       editMode="row"
       rowSelection={false}
       autoHeight

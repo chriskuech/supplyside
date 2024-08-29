@@ -12,6 +12,7 @@ type Props = {
   statusOption: OptionTemplate
   label: string
   isDisabled?: boolean
+  tooltip?: string
 }
 
 export default function StatusTransitionButton({
@@ -19,6 +20,7 @@ export default function StatusTransitionButton({
   statusOption,
   label,
   isDisabled,
+  tooltip,
 }: Props) {
   const [state, transitionStatus] = useAsyncCallback(transitionStatusAction)
 
@@ -34,6 +36,7 @@ export default function StatusTransitionButton({
       color="secondary"
       disabled={isDisabled}
       isLoading={state.isLoading}
+      tooltip={tooltip}
     >
       {label}
     </LoadingButton>

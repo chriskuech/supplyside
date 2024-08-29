@@ -2,7 +2,9 @@
 
 import {
   Button,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -27,6 +29,9 @@ type Props = {
 
 export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
   const [name, setName] = useState<string>(field.name)
+  const [description, setDescription] = useState<string>(
+    field.description ?? '',
+  )
   const [options, setOptions] = useState<OptionPatch[]>(
     field.Option.map((o) => ({
       id: o.id,
@@ -39,12 +44,14 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
     mapValueToInput(field.defaultValue),
   )
 
+  const [isRequired, setIsRequired] = useState<boolean>(field.isRequired)
+
   const isValid = !!name
   const isDisabled = !!field.templateId
 
   return (
-    <Stack spacing={2} width={'fit-content'}>
-      <Stack direction={'row'} spacing={1}>
+    <Stack spacing={2} width="fit-content">
+      <Stack direction="row" spacing={1}>
         <TextField
           sx={{ width: 300 }}
           label="Name"
@@ -71,6 +78,14 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         </FormControl>
       </Stack>
 
+      <TextField
+        label="Description"
+        value={description}
+        fullWidth
+        onChange={(e) => setDescription(e.target.value)}
+        disabled={isDisabled}
+      />
+
       {(field.type === 'MultiSelect' || field.type === 'Select') && (
         <OptionsControl
           options={options}
@@ -79,7 +94,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         />
       )}
 
-      <Stack direction={'row'} spacing={1} flexWrap={'wrap'}>
+      <Stack direction="row" spacing={1} flexWrap="wrap">
         {field.type === 'Resource' && (
           <FormControl sx={{ width: 150 }}>
             <InputLabel id="field-resource-type-label">
@@ -104,7 +119,20 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         </FormControl>
       )}
 
-      <Stack justifyContent={'end'} direction={'row'} spacing={1}>
+      <FormControl fullWidth>
+        <FormControlLabel
+          label="Required"
+          control={
+            <Checkbox
+              disabled={isDisabled}
+              checked={isRequired}
+              onChange={(e) => setIsRequired(e.target.checked)}
+            />
+          }
+        />
+      </FormControl>
+
+      <Stack justifyContent="end" direction="row" spacing={1}>
         <Button variant="text" onClick={onCancel}>
           Cancel
         </Button>
@@ -115,8 +143,10 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
             onSubmit({
               id: field.id,
               name,
+              description: description?.trim() || null,
               options,
               defaultValue,
+              isRequired,
             })
           }
         >

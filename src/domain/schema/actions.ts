@@ -102,6 +102,7 @@ const mapField = (
   id: model.id,
   templateId: model.templateId,
   name: model.name,
+  description: model.description,
   type: model.type,
   options: model.Option.map((o) => ({
     id: o.id,
@@ -110,4 +111,5 @@ const mapField = (
   })),
   resourceType: model.resourceType,
   defaultValue: model.DefaultValue,
+  isRequired: model.isRequired,
 })

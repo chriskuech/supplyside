@@ -20,9 +20,9 @@ export default async function AdminPage() {
     <Container sx={{ my: 5 }}>
       <Stack spacing={2}>
         <Stack
-          direction={'row'}
-          alignItems={'center'}
-          justifyContent={'space-between'}
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
         >
           <Typography variant="h4">Accounts</Typography>
           <CreateAccountButton />

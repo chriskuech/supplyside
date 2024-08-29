@@ -82,7 +82,7 @@ function ResourceField(
 
     return (
       <>
-        <Stack direction={'row'} alignItems={'center'}>
+        <Stack direction="row" alignItems="center">
           <Link onClick={open} flexGrow={1} sx={{ cursor: 'pointer' }}>
             {value.name}
           </Link>
@@ -190,7 +190,7 @@ const BaseEditableResourceField = (
         <Box display="flex" justifyContent="center" alignContent="center">
           <TextField
             {...params}
-            placeholder={`Enter a name/number`}
+            placeholder="Enter a name/number"
             inputRef={ref}
           />
         </Box>

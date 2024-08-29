@@ -11,14 +11,17 @@ import {
   Chip,
   Divider,
   Stack,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { range } from 'remeda'
-import { Check, Clear, ExpandMore } from '@mui/icons-material'
+import { Check, Clear, ExpandMore, Info } from '@mui/icons-material'
 import { match } from 'ts-pattern'
 import ReadonlyTextarea from './fields/ReadonlyTextarea'
 import ResourceField from './fields/ResourceField'
 import FieldControl from './fields/FieldControl'
+import FileField from './fields/FileField'
+import FilesField from './fields/FilesField'
 import { Schema } from '@/domain/schema/types'
 import { Resource } from '@/domain/resource/types'
 
@@ -41,20 +44,31 @@ export default function ResourceFieldsControl({
     return (
       <Card variant="elevation">
         <CardContent>
-          <Stack direction={'row'} spacing={5} overflow={'hidden'}>
+          <Stack direction="row" spacing={5} overflow="hidden">
             {chunkByN(schema.sections, columns).map((sections, i) => (
               <Stack key={i} flex={1} divider={<Divider />} spacing={2}>
                 {sections.map((section) => (
                   <Stack key={section.id}>
-                    <Typography variant="h6" fontWeight={'bold'}>
+                    <Typography variant="h6" fontWeight="bold">
                       {section.name}
                     </Typography>
                     <Stack spacing={2}>
                       {section.fields.map((field) => (
                         <Stack key={field.id}>
-                          <Typography variant="overline">
-                            {field.name}
-                          </Typography>
+                          <Tooltip title={field.description}>
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              alignItems="center"
+                            >
+                              <Typography variant="overline">
+                                {field.name}
+                              </Typography>
+                              {field.description && (
+                                <Info color="primary" fontSize="small" />
+                              )}
+                            </Stack>
+                          </Tooltip>
                           <Box>
                             {match(
                               resource.fields.find(
@@ -76,20 +90,22 @@ export default function ResourceFieldsControl({
                                 ({ value: { date } }) =>
                                   date?.toLocaleDateString() ?? '-',
                               )
-                              .with(
-                                { fieldType: 'File' },
-                                ({ value: { file } }) => file?.name ?? '-',
-                              )
-                              .with(
-                                { fieldType: 'Files' },
-                                ({ value: { files } }) => {
-                                  const fileNames = files?.map((f) => f.name)
-
-                                  if (!fileNames?.length) return '-'
-
-                                  return fileNames.join(', ')
-                                },
-                              )
+                              .with({ fieldType: 'File' }, ({ value }) => (
+                                <FileField
+                                  resourceId={resource.id}
+                                  field={field}
+                                  value={value}
+                                  isReadOnly
+                                />
+                              ))
+                              .with({ fieldType: 'Files' }, ({ value }) => (
+                                <FilesField
+                                  resourceId={resource.id}
+                                  field={field}
+                                  value={value}
+                                  isReadOnly
+                                />
+                              ))
                               .with(
                                 { fieldType: 'Money' },
                                 ({ value: { number } }) =>
@@ -166,61 +182,99 @@ export default function ResourceFieldsControl({
 
   return (
     <Box>
-      {schema.sections.map((s, i) => (
-        <Accordion key={s.id} defaultExpanded={i === 0} variant="outlined">
-          <AccordionSummary expandIcon={<ExpandMore />}>
-            <Typography variant="h6" fontWeight={'bold'}>
-              {s.name}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            {s.fields.length === 1 && s.fields.at(0)?.type === 'Textarea' ? (
-              <Box>
-                {s.fields.at(0)?.name !== s.name && (
-                  <Typography variant="overline" gutterBottom>
-                    {s.fields.at(0)?.name}
-                  </Typography>
-                )}
-                <FieldControl
-                  inputId={`rf-${s.fields.at(0)?.id}`}
-                  resourceId={resource.id}
-                  field={s.fields.at(0) ?? fail()}
-                  value={
-                    resource.fields.find(
-                      (rf) => rf.fieldId === s.fields.at(0)?.id,
-                    )?.value
-                  }
-                />
-              </Box>
-            ) : (
-              <Stack spacing={3} direction={'row'}>
-                {chunkByN(s.fields, columns).map((fs, i) => (
-                  <Stack key={i} spacing={3} flex={1}>
-                    {fs.map((f) => (
-                      <Box key={f.id}>
-                        <Typography variant="overline" gutterBottom>
-                          {f.name}
+      {schema.sections.map((s, i) => {
+        const singleField =
+          s.fields.length === 1 && s.fields.at(0)?.type === 'Textarea'
+            ? s.fields.at(0)
+            : null
+
+        return (
+          <Accordion key={s.id} defaultExpanded={i === 0} variant="outlined">
+            <AccordionSummary expandIcon={<ExpandMore />}>
+              <Typography variant="h6" fontWeight="bold">
+                {s.name}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              {singleField ? (
+                <Box>
+                  {singleField.name !== s.name && (
+                    <Typography variant="overline" gutterBottom>
+                      {singleField.name}{' '}
+                      {s.fields.at(0)?.isRequired && (
+                        <Typography
+                          color="error"
+                          display="inline"
+                          variant="overline"
+                          fontWeight="bold"
+                        >
+                          *
                         </Typography>
-                        <Box>
-                          <FieldControl
-                            inputId={`rf-${f.id}`}
-                            resourceId={resource.id}
-                            field={f}
-                            value={
-                              resource.fields.find((rf) => rf.fieldId === f.id)
-                                ?.value
-                            }
-                          />
-                        </Box>
-                      </Box>
-                    ))}
-                  </Stack>
-                ))}
-              </Stack>
-            )}
-          </AccordionDetails>
-        </Accordion>
-      ))}
+                      )}
+                    </Typography>
+                  )}
+                  <Typography variant="caption">
+                    {singleField.description}
+                  </Typography>
+                  <FieldControl
+                    inputId={`rf-${singleField.id}`}
+                    resourceId={resource.id}
+                    field={singleField ?? fail()}
+                    value={
+                      resource.fields.find(
+                        (rf) => rf.fieldId === singleField.id,
+                      )?.value
+                    }
+                  />
+                </Box>
+              ) : (
+                <Stack spacing={3} direction="row">
+                  {chunkByN(s.fields, columns).map((fs, i) => (
+                    <Stack key={i} spacing={3} flex={1}>
+                      {fs.map((f) => (
+                        <Stack key={f.id}>
+                          <Typography
+                            variant="overline"
+                            fontSize={14}
+                            lineHeight="unset"
+                          >
+                            {f.name}{' '}
+                            {f.isRequired && (
+                              <Typography
+                                color="error"
+                                display="inline"
+                                variant="overline"
+                                fontWeight="bold"
+                              >
+                                *
+                              </Typography>
+                            )}
+                          </Typography>
+                          <Typography variant="caption" gutterBottom>
+                            {f.description}
+                          </Typography>
+                          <Box>
+                            <FieldControl
+                              inputId={`rf-${f.id}`}
+                              resourceId={resource.id}
+                              field={f}
+                              value={
+                                resource.fields.find(
+                                  (rf) => rf.fieldId === f.id,
+                                )?.value
+                              }
+                            />
+                          </Box>
+                        </Stack>
+                      ))}
+                    </Stack>
+                  ))}
+                </Stack>
+              )}
+            </AccordionDetails>
+          </Accordion>
+        )
+      })}
     </Box>
   )
 }

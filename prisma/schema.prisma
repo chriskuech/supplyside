@@ -22,11 +22,13 @@ model Session {
 }
 
 model Account {
-  id         String  @id @default(uuid()) @db.Uuid
-  key        String  @unique
-  name       String  @unique
-  address    String  @default("")
-  logoBlobId String? @unique @db.Uuid
+  id                    String    @id @default(uuid()) @db.Uuid
+  key                   String    @unique
+  name                  String    @unique
+  address               String    @default("")
+  logoBlobId            String?   @unique @db.Uuid
+  quickBooksConnectedAt DateTime?
+  quickBooksToken       Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -141,9 +143,11 @@ model Field {
   accountId      String        @db.Uuid
   type           FieldType
   name           String
+  description    String?
   resourceType   ResourceType?
   templateId     String?       @db.Uuid
   defaultValueId String        @db.Uuid
+  isRequired     Boolean       @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

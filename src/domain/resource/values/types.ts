@@ -1,5 +1,4 @@
 import { Blob, Contact, File, Prisma } from '@prisma/client'
-import { fields } from '@/domain/schema/template/system-fields'
 import { Option } from '@/domain/schema/types'
 import { User } from '@/domain/iam/user/types'
 
@@ -21,6 +20,8 @@ export type ValueInput = {
   resourceId?: string | null
 }
 
+export type ValueFile = File & { Blob: Blob }
+
 export type Value = {
   boolean: boolean | null
   contact: Contact | null
@@ -30,8 +31,8 @@ export type Value = {
   options?: Option[]
   string: string | null
   user: User | null
-  file: (File & { Blob: Blob }) | null
-  files?: (File & { Blob: Blob })[]
+  file: ValueFile | null
+  files?: ValueFile[]
   resource: ValueResource | null
 }
 
@@ -71,24 +72,17 @@ export const valueInclude = {
   Resource: {
     include: {
       ResourceField: {
-        where: {
-          Field: {
-            templateId: {
-              in: [fields.name.templateId, fields.number.templateId],
-            },
-          },
-        },
+        // This snippets prevents pulling n^2 data, but the prisma runtime has a bug that prevents it from working
+        // where: {
+        //   Field: {
+        //     templateId: {
+        //       in: [fields.name.templateId, fields.number.templateId],
+        //     },
+        //   },
+        // },
         include: {
           Field: true,
-          Value: {
-            include: {
-              User: {
-                include: {
-                  ImageBlob: true,
-                },
-              },
-            },
-          },
+          Value: true,
         },
       },
     },

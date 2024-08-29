@@ -3,7 +3,7 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 import CreateResourceButton from './CreateResourceButton'
-import ResourceTable from './grid/ResourceTable'
+import ResourceTable from './ResourceTable'
 import { readResources } from '@/domain/resource/actions'
 import { readSchema } from '@/domain/schema/actions'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
@@ -23,7 +23,7 @@ export default async function ListPage({ tableKey, resourceType }: Props) {
   return (
     <Container sx={{ my: 5 }}>
       <Stack spacing={4}>
-        <Stack direction="row" alignItems={'center'}>
+        <Stack direction="row" alignItems="center">
           <Typography
             variant="h3"
             flexGrow={1}

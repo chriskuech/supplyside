@@ -20,7 +20,7 @@ const ConsentCard: FC = () => {
 
   return (
     <Card>
-      <CardHeader title={'Terms of service'} />
+      <CardHeader title="Terms of service" />
       <CardContent>
         <Stack spacing={4}>
           <Typography>
@@ -43,7 +43,7 @@ const ConsentCard: FC = () => {
             }
             onClick={() => setChecked(!checked)}
           />
-          <Stack direction={'row'} justifyContent={'end'}>
+          <Stack direction="row" justifyContent="end">
             <Button
               onClick={() => acceptTermsAndConditions()}
               disabled={!checked}

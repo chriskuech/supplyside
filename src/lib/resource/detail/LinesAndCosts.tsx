@@ -1,6 +1,6 @@
 import { Stack, Typography, Box } from '@mui/material'
+import ResourceTable from '../ResourceTable'
 import ItemizedCostLines from './ItemizedCostLines'
-import ResourceTable from './ResourceTable'
 import { readSchema } from '@/domain/schema/actions'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { Data, Resource } from '@/domain/resource/types'
@@ -31,27 +31,28 @@ export default async function LinesAndCosts({
 
   return (
     <Stack spacing={2}>
-      <Stack direction={'row'} alignItems={'end'}>
+      <Stack direction="row" alignItems="end">
         <Typography variant="h4" flexGrow={1}>
           Lines
         </Typography>
         {!isReadOnly && (
-          <CreateResourceButton type={'Line'} data={newLineInitialData} />
+          <CreateResourceButton type="Line" data={newLineInitialData} />
         )}
       </Stack>
       <Stack>
         <ResourceTable
-          tableKey={'linesAndCosts'}
           schema={lineSchema}
           resources={lines}
           isEditable={!isReadOnly}
           sx={{
-            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
           }}
           disableColumnFilter
           disableColumnResize
           disableColumnMenu
+          disableColumnReorder
           hideFooter
+          indexed
         />
         <Box alignSelf="flex-end">
           <ItemizedCostLines resource={resource} isReadOnly={isReadOnly} />
