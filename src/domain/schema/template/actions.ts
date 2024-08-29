@@ -62,6 +62,7 @@ const applyFields = async (accountId: string) => {
       },
       update: {
         name,
+        isRequired: !!isRequired,
         description: description ?? null,
         type,
         resourceType,
