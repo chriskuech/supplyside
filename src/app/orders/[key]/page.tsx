@@ -21,6 +21,7 @@ import {
 import { emptyValue, selectValue } from '@/domain/resource/types'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
+import { isMissingRequiredFields } from '@/domain/resource/values/mappers'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectField } from '@/domain/schema/types'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
@@ -56,6 +57,7 @@ export default async function OrderDetail({
     .with(orderStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
 
+  const hasInvalidFields = isMissingRequiredFields(schema, resource)
   const poFile = selectValue(resource, fields.document)?.file
 
   return (
@@ -95,7 +97,7 @@ export default async function OrderDetail({
         />,
       ]}
       backlinkField={fields.order}
-      isDraft={isDraft}
+      isReadOnly={!isDraft}
       actions={
         <Stack direction={'row'} height={100}>
           <Box
@@ -128,6 +130,12 @@ export default async function OrderDetail({
                   <>
                     <PreviewDraftPoButton resourceId={resource.id} />
                     <StatusTransitionButton
+                      isDisabled={hasInvalidFields}
+                      tooltip={
+                        hasInvalidFields
+                          ? 'Please fill in all required fields before submitting'
+                          : undefined
+                      }
                       resourceId={resource.id}
                       statusOption={orderStatusOptions.submitted}
                       label={'Submit'}

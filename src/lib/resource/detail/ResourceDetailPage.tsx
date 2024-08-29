@@ -13,7 +13,7 @@ type Props = {
   resource: Resource
   name?: string | null
   tools: readonly ReactNode[]
-  isDraft?: boolean
+  isReadOnly?: boolean
   backlinkField?: FieldTemplate
   actions?: ReactNode
 }
@@ -24,7 +24,7 @@ export default function ResourceDetailPage({
   name,
   tools,
   backlinkField,
-  isDraft,
+  isReadOnly,
   actions,
 }: Props) {
   return (
@@ -75,7 +75,7 @@ export default function ResourceDetailPage({
           <ResourceFieldsControl
             schema={schema}
             resource={resource}
-            isReadOnly={!isDraft}
+            isReadOnly={isReadOnly}
           />
           {backlinkField && (
             <LinesAndCosts
@@ -86,7 +86,7 @@ export default function ResourceDetailPage({
               newLineInitialData={{
                 [backlinkField.name]: resource.id,
               }}
-              isReadOnly={!isDraft}
+              isReadOnly={isReadOnly}
             />
           )}
         </Stack>
