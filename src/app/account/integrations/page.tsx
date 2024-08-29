@@ -15,7 +15,7 @@ export default async function SettingsPage() {
       ) : (
         <Box>
           <Typography variant="h6">QuickBooks</Typography>
-          <QuickBooks session={session} />
+          <QuickBooks />
         </Box>
       )}
     </Stack>

@@ -7,7 +7,6 @@ import CSRF from 'csrf'
 import { Prisma } from '@prisma/client'
 import { fields } from '../schema/template/system-fields'
 import { OptionPatch, readFields, updateField } from '../schema/fields'
-import { authQuickBooksClient } from './client'
 import {
   accountQuerySchema,
   CompanyInfo,
@@ -82,13 +81,15 @@ const deleteQuickBooksToken = async (accountId: string) => {
   })
 }
 
-export const createQuickBooksConnection = async (url: string) => {
+export const createQuickBooksConnection = async (
+  accountId: string,
+  url: string,
+) => {
   const { csrfSecret } = getQuickBooksConfig()
 
   const tokenExchange = await quickBooksClient().createToken(url)
-  const { accountId, csrf } = z
+  const { csrf } = z
     .object({
-      accountId: z.string().uuid(),
       csrf: z.string().min(1),
     })
     .parse(JSON.parse(tokenExchange.token.state ?? ''))
@@ -162,7 +163,7 @@ export const syncDataFromQuickBooks = async (
   accountId: string,
 ): Promise<void> => {
   const token = await requireTokenWithRedirect(accountId)
-  const client = await authQuickBooksClient(token)
+  const client = await quickBooksClient(token)
 
   const quickBooksAccounts = await client
     .makeApiCall({
