@@ -6,6 +6,7 @@ import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
 import OrderLink from './tools/OrderLink'
 import CancelControl from './tools/CancelControl'
+import EditControl from './tools/EditControl'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import {
   billStatusOptions,
@@ -15,7 +16,7 @@ import { selectValue } from '@/domain/resource/types'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectField } from '@/domain/schema/types'
-import EditControl from '@/app/orders/[key]/tools/EditControl'
+import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 
 export default async function BillsDetail({
   params: { key },
@@ -53,6 +54,16 @@ export default async function BillsDetail({
       resource={resource}
       tools={[
         ...(order ? [<OrderLink key={order.id} order={order} />] : []),
+        <AttachmentsToolbarControl
+          key={AttachmentsToolbarControl.name}
+          resourceId={resource.id}
+          resourceType={'Bill'}
+          field={
+            selectField(schema, fields.billAttachments) ??
+            fail('Field not found')
+          }
+          value={selectValue(resource, fields.billAttachments)}
+        />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
           resourceId={resource.id}
@@ -68,7 +79,7 @@ export default async function BillsDetail({
         <CancelControl key={CancelControl.name} resourceId={resource.id} />,
       ]}
       backlinkField={fields.bill}
-      isDraft={isDraft}
+      isReadOnly={!isDraft}
       actions={
         <Stack direction={'row'} height={100}>
           <Box

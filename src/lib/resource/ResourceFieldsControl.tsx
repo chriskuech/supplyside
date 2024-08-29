@@ -20,6 +20,8 @@ import { match } from 'ts-pattern'
 import ReadonlyTextarea from './fields/ReadonlyTextarea'
 import ResourceField from './fields/ResourceField'
 import FieldControl from './fields/FieldControl'
+import FileField from './fields/FileField'
+import FilesField from './fields/FilesField'
 import { Schema } from '@/domain/schema/types'
 import { Resource } from '@/domain/resource/types'
 
@@ -54,12 +56,18 @@ export default function ResourceFieldsControl({
                       {section.fields.map((field) => (
                         <Stack key={field.id}>
                           <Tooltip title={field.description}>
-                            <Typography variant="overline">
-                              {field.name}{' '}
+                            <Stack
+                              direction={'row'}
+                              spacing={1}
+                              alignItems={'center'}
+                            >
+                              <Typography variant="overline">
+                                {field.name}
+                              </Typography>
                               {field.description && (
-                                <Info color="info" fontSize={'small'} />
+                                <Info color="primary" fontSize={'small'} />
                               )}
-                            </Typography>
+                            </Stack>
                           </Tooltip>
                           <Box>
                             {match(
@@ -82,20 +90,22 @@ export default function ResourceFieldsControl({
                                 ({ value: { date } }) =>
                                   date?.toLocaleDateString() ?? '-',
                               )
-                              .with(
-                                { fieldType: 'File' },
-                                ({ value: { file } }) => file?.name ?? '-',
-                              )
-                              .with(
-                                { fieldType: 'Files' },
-                                ({ value: { files } }) => {
-                                  const fileNames = files?.map((f) => f.name)
-
-                                  if (!fileNames?.length) return '-'
-
-                                  return fileNames.join(', ')
-                                },
-                              )
+                              .with({ fieldType: 'File' }, ({ value }) => (
+                                <FileField
+                                  resourceId={resource.id}
+                                  field={field}
+                                  value={value}
+                                  isReadOnly
+                                />
+                              ))
+                              .with({ fieldType: 'Files' }, ({ value }) => (
+                                <FilesField
+                                  resourceId={resource.id}
+                                  field={field}
+                                  value={value}
+                                  isReadOnly
+                                />
+                              ))
                               .with(
                                 { fieldType: 'Money' },
                                 ({ value: { number } }) =>
@@ -190,7 +200,17 @@ export default function ResourceFieldsControl({
                 <Box>
                   {singleField.name !== s.name && (
                     <Typography variant="overline" gutterBottom>
-                      {singleField.name}
+                      {singleField.name}{' '}
+                      {s.fields.at(0)?.isRequired && (
+                        <Typography
+                          color="error"
+                          display="inline"
+                          variant="overline"
+                          fontWeight="bold"
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Typography>
                   )}
                   <Typography variant="caption">
@@ -218,7 +238,17 @@ export default function ResourceFieldsControl({
                             fontSize={14}
                             lineHeight={'unset'}
                           >
-                            {f.name}
+                            {f.name}{' '}
+                            {s.fields.at(0)?.isRequired && (
+                              <Typography
+                                color="error"
+                                display="inline"
+                                variant="overline"
+                                fontWeight="bold"
+                              >
+                                *
+                              </Typography>
+                            )}
                           </Typography>
                           <Typography variant="caption" gutterBottom>
                             {f.description}

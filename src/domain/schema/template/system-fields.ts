@@ -67,6 +67,11 @@ const _fields = {
     type: 'Resource',
     resourceType: 'Bill',
   },
+  billAttachments: {
+    templateId: '9deb8b41-c6c2-4c72-a058-9a14acc4f89b',
+    name: 'Bill Attachments',
+    type: 'Files',
+  },
   billDescription: {
     templateId: 'cd1c7d34-57bf-43ad-8b32-a90081cde55b',
     name: 'Bill Description',
@@ -107,6 +112,7 @@ const _fields = {
     templateId: 'c2b2f1b5-7d2f-4b3b-9d8e-4a8f9e3c0b7b',
     name: 'Invoice Date',
     type: 'Date',
+    isRequired: true,
     description: 'Date the invoice was issued',
   },
   invoiceNumber: {
@@ -165,6 +171,11 @@ const _fields = {
     type: 'Resource',
     resourceType: 'Order',
   },
+  orderAttachments: {
+    templateId: '3a0f3e04-b4ac-4266-9d4e-bac5091d0922',
+    name: 'Order Attachments',
+    type: 'Files',
+  },
   orderDescription: {
     templateId: 'f7b4e0f7-e1e7-4e1e-abad-4e0f7e1e7e5d',
     name: 'Order Description',
@@ -191,6 +202,7 @@ const _fields = {
     templateId: 'e2c3b1b2-180c-4a8f-9e3c-0b7bcb4a0c88',
     name: 'Payment Due Date',
     type: 'Date',
+    isRequired: true,
     description: 'Vendor bill payment due date',
   },
   paymentMethod: {
@@ -289,6 +301,7 @@ const _fields = {
     name: 'Vendor',
     type: 'Resource',
     resourceType: 'Vendor',
+    isRequired: true,
   },
   vendorDescription: {
     templateId: 'f7b4e0f7-e1e7-4e1e-8f7b-4e0f7e1e7e5d',

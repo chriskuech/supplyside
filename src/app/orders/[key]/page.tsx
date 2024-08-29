@@ -21,9 +21,11 @@ import {
 import { emptyValue, selectValue } from '@/domain/resource/types'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
+import { isMissingRequiredFields } from '@/domain/resource/values/mappers'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectField } from '@/domain/schema/types'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
+import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 
 export default async function OrderDetail({
   params: { key },
@@ -56,6 +58,7 @@ export default async function OrderDetail({
     .with(orderStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
 
+  const hasInvalidFields = isMissingRequiredFields(schema, resource)
   const poFile = selectValue(resource, fields.document)?.file
 
   return (
@@ -77,6 +80,16 @@ export default async function OrderDetail({
         ...(poFile
           ? [<DownloadPoControl key={poFile.id} file={poFile} />]
           : []),
+        <AttachmentsToolbarControl
+          key={AttachmentsToolbarControl.name}
+          resourceId={resource.id}
+          resourceType={'Order'}
+          field={
+            selectField(schema, fields.orderAttachments) ??
+            fail('Field not found')
+          }
+          value={selectValue(resource, fields.orderAttachments)}
+        />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
           resourceId={resource.id}
@@ -95,7 +108,7 @@ export default async function OrderDetail({
         />,
       ]}
       backlinkField={fields.order}
-      isDraft={isDraft}
+      isReadOnly={!isDraft}
       actions={
         <Stack direction={'row'} height={100}>
           <Box
@@ -128,6 +141,12 @@ export default async function OrderDetail({
                   <>
                     <PreviewDraftPoButton resourceId={resource.id} />
                     <StatusTransitionButton
+                      isDisabled={hasInvalidFields}
+                      tooltip={
+                        hasInvalidFields
+                          ? 'Please fill in all required fields before submitting'
+                          : undefined
+                      }
                       resourceId={resource.id}
                       statusOption={orderStatusOptions.submitted}
                       label={'Submit'}

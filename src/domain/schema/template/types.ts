@@ -22,6 +22,7 @@ export type FieldTemplate = {
     optionTemplateId: string
   }
   isDerived?: boolean
+  isRequired?: boolean
 }
 
 export type OptionTemplate = {

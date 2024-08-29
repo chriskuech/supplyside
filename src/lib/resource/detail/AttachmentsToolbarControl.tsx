@@ -1,8 +1,8 @@
 'use client'
 
-import { AssignmentInd } from '@mui/icons-material'
+import { AttachFile } from '@mui/icons-material'
 import {
-  Avatar,
+  Badge,
   Button,
   Dialog,
   DialogActions,
@@ -18,48 +18,39 @@ import { Field } from '@/domain/schema/types'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 
-type AssigneeControlProps = {
+type AttachmentsToolbarControlProps = {
   resourceId: string
   resourceType: ResourceType
   field: Field
   value: Value | undefined
 }
 
-export default function AssigneeToolbarControl({
+export default function AttachmentsToolbarControl({
   resourceType,
   resourceId,
   field,
   value,
-}: AssigneeControlProps) {
+}: AttachmentsToolbarControlProps) {
   const { isOpen, open, close } = useDisclosure()
-
-  const assignee = value?.user
 
   return (
     <>
-      <Tooltip
-        title={
-          assignee
-            ? `Assigned to ${assignee?.fullName ?? assignee?.email ?? '(No name)'}`
-            : `Assign the ${resourceType} to a user`
-        }
-      >
+      <Tooltip title={'View/Edit attachments'}>
         <IconButton onClick={open}>
-          <Avatar
-            alt={assignee?.fullName ?? ''}
-            src={assignee?.profilePicPath ?? ''}
+          <Badge
+            badgeContent={value?.files?.length || undefined}
+            color="primary"
           >
-            {!assignee && <AssignmentInd />}
-          </Avatar>
+            <AttachFile fontSize="large" />
+          </Badge>
         </IconButton>
       </Tooltip>
 
       <Dialog open={isOpen} onClose={close}>
-        <DialogTitle>Assignee</DialogTitle>
+        <DialogTitle>Attachments</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Set the assignee for this {resourceType}, responsible for its
-            completion.
+            Add, view, or remove attachments for this {resourceType}.
           </DialogContentText>
           <FieldControl
             inputId={`rf-${field.id}`}
