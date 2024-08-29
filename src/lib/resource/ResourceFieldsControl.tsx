@@ -20,6 +20,8 @@ import { match } from 'ts-pattern'
 import ReadonlyTextarea from './fields/ReadonlyTextarea'
 import ResourceField from './fields/ResourceField'
 import FieldControl from './fields/FieldControl'
+import FileField from './fields/FileField'
+import FilesField from './fields/FilesField'
 import { Schema } from '@/domain/schema/types'
 import { Resource } from '@/domain/resource/types'
 
@@ -82,20 +84,22 @@ export default function ResourceFieldsControl({
                                 ({ value: { date } }) =>
                                   date?.toLocaleDateString() ?? '-',
                               )
-                              .with(
-                                { fieldType: 'File' },
-                                ({ value: { file } }) => file?.name ?? '-',
-                              )
-                              .with(
-                                { fieldType: 'Files' },
-                                ({ value: { files } }) => {
-                                  const fileNames = files?.map((f) => f.name)
-
-                                  if (!fileNames?.length) return '-'
-
-                                  return fileNames.join(', ')
-                                },
-                              )
+                              .with({ fieldType: 'File' }, ({ value }) => (
+                                <FileField
+                                  resourceId={resource.id}
+                                  field={field}
+                                  value={value}
+                                  isReadOnly
+                                />
+                              ))
+                              .with({ fieldType: 'Files' }, ({ value }) => (
+                                <FilesField
+                                  resourceId={resource.id}
+                                  field={field}
+                                  value={value}
+                                  isReadOnly
+                                />
+                              ))
                               .with(
                                 { fieldType: 'Money' },
                                 ({ value: { number } }) =>
