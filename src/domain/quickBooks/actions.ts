@@ -3,9 +3,10 @@
 import { CompanyInfo, Token } from 'intuit-oauth'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import { authQuickBooksClient, environmentUrls } from './client'
+import CSRF from 'csrf'
+import { Prisma } from '@prisma/client'
+import { getQuickBooksConfig, quickBooksClient } from './util'
 import prisma from '@/services/prisma'
-import config from '@/services/config'
 
 const quickbooksTokenSchema = z.object({
   latency: z.number(),
@@ -22,9 +23,8 @@ const quickbooksTokenSchema = z.object({
 type QuickBooksToken = z.infer<typeof quickbooksTokenSchema>
 
 const baseUrl = (realmId: string) => {
-  const { QUICKBOOKS_ENVIRONMENT } = config()
+  const { quickBooksApiBaseUrl } = getQuickBooksConfig()
 
-  const quickBooksApiBaseUrl = environmentUrls[QUICKBOOKS_ENVIRONMENT]
   return `${quickBooksApiBaseUrl}/v3/company/${realmId}`
 }
 
@@ -70,6 +70,7 @@ const updateQuickBooksToken = async (
   await prisma().account.update({
     where: { id: accountId },
     data: {
+      quickBooksConnectedAt: new Date(),
       quickBooksToken: token,
     },
   })
@@ -79,20 +80,33 @@ const deleteQuickBooksToken = async (accountId: string) => {
   await prisma().account.update({
     where: { id: accountId },
     data: {
-      quickBooksToken: undefined,
+      quickBooksConnectedAt: null,
+      quickBooksToken: Prisma.NullableJsonNullValueInput.DbNull,
     },
   })
 }
 
-export const createQuickBooksConnection = async (
-  accountId: string,
-  quickBooksToken: Token,
-) => {
-  const token = cleanToken(quickBooksToken)
+export const createQuickBooksConnection = async (url: string) => {
+  const { csrfSecret } = getQuickBooksConfig()
+
+  const tokenExchange = await quickBooksClient().createToken(url)
+  const { accountId, csrf } = z
+    .object({
+      accountId: z.string().uuid(),
+      csrf: z.string().min(1),
+    })
+    .parse(JSON.parse(tokenExchange.token.state ?? ''))
+
+  if (!new CSRF().verify(csrfSecret, csrf)) {
+    throw new Error('CSRF token not valid')
+  }
+
+  const token = cleanToken(tokenExchange.token)
 
   await prisma().account.update({
     where: { id: accountId },
     data: {
+      quickBooksConnectedAt: new Date(),
       quickBooksToken: token,
     },
   })
@@ -105,7 +119,7 @@ export const getQuickbooksToken = async (
     where: { id: accountId },
   })
 
-  if (!account.quickBooksEnabled || !account.quickBooksToken) {
+  if (!account.quickBooksConnectedAt || !account.quickBooksToken) {
     return null
   }
 
@@ -118,7 +132,7 @@ export const getQuickbooksToken = async (
     return null
   }
 
-  const client = await authQuickBooksClient(token)
+  const client = quickBooksClient(token)
 
   if (!client.isAccessTokenValid()) {
     if (isRefreshTokenValid(client.token)) {
@@ -138,7 +152,7 @@ export const getCompanyInfo = async (
   accountId: string,
 ): Promise<CompanyInfo> => {
   const token = await requireTokenWithRedirect(accountId)
-  const client = await authQuickBooksClient(token)
+  const client = quickBooksClient(token)
 
   return client
     .makeApiCall<CompanyInfo>({
