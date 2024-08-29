@@ -48,6 +48,13 @@ export default function FieldsTable({ fields }: Props) {
       editable: false,
     },
     {
+      field: 'description',
+      headerName: 'Description',
+      type: 'string',
+      width: 500,
+      editable: false,
+    },
+    {
       field: '_delete',
       headerName: 'Delete',
       type: 'actions',

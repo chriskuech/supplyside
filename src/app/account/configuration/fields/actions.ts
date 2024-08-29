@@ -25,6 +25,7 @@ export type Option = {
 export type Field = {
   id: string
   name: string
+  description: string | null
   type: FieldType
   resourceType: ResourceType | null
   Option: Option[]
@@ -77,6 +78,7 @@ export const readFields = async (): Promise<Field[]> => {
       templateId: true,
       type: true,
       name: true,
+      description: true,
       resourceType: true,
       DefaultValue: {
         include: valueInclude,
@@ -99,6 +101,7 @@ export const readFields = async (): Promise<Field[]> => {
 export type UpdateFieldDto = {
   id: string
   name: string
+  description: string | null
   options: OptionPatch[]
   defaultValue: ValueInput
   isRequired?: boolean
@@ -115,6 +118,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
       },
       data: {
         name: sanitizeColumnName(dto.name),
+        description: dto.description,
         DefaultValue: {
           update: {
             boolean: dto.defaultValue.boolean,

@@ -29,6 +29,9 @@ type Props = {
 
 export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
   const [name, setName] = useState<string>(field.name)
+  const [description, setDescription] = useState<string>(
+    field.description ?? '',
+  )
   const [options, setOptions] = useState<OptionPatch[]>(
     field.Option.map((o) => ({
       id: o.id,
@@ -76,6 +79,14 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
           </Select>
         </FormControl>
       </Stack>
+
+      <TextField
+        label="Description"
+        value={description}
+        fullWidth
+        onChange={(e) => setDescription(e.target.value)}
+        disabled={isDisabled}
+      />
 
       {(field.type === 'MultiSelect' || field.type === 'Select') && (
         <OptionsControl
@@ -134,6 +145,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
             onSubmit({
               id: field.id,
               name,
+              description: description?.trim() || null,
               options,
               defaultValue,
               isRequired,

@@ -14,7 +14,10 @@ export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
   properties: mapToObj(schema.allFields, (f) => [
     f.name,
     match<Field, JSONSchema7>(f)
-      .with({ type: 'Checkbox' }, () => ({ type: ['boolean', 'null'] }))
+      .with({ type: 'Checkbox' }, () => ({
+        type: ['boolean', 'null'],
+        description: f.description ?? undefined,
+      }))
       .with({ type: 'Contact' }, () => ({
         type: ['object', 'null'],
         properties: {
@@ -26,33 +29,44 @@ export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
           },
           title: { type: ['string', 'null'], minLength: 1 },
         },
+        description: f.description ?? undefined,
       }))
       .with({ type: 'Date' }, () => ({
         type: ['string', 'null'],
         pattern: datePattern,
+        description: f.description ?? undefined,
       }))
       .with({ type: 'File' }, () => ({
         type: ['string', 'null'],
         pattern: uuidPattern,
+        description: f.description ?? undefined,
       }))
       .with({ type: 'Files' }, () => ({
         type: ['array', 'null'],
         items: { type: 'string', pattern: uuidPattern },
+        description: f.description ?? undefined,
       }))
       .with({ type: P.union('Number', 'Money') }, () => ({
         type: ['number', 'null'],
+        description: f.description ?? undefined,
       }))
       .with({ type: 'MultiSelect' }, () => ({
         type: ['array', 'null'],
-        items: { type: 'string', pattern: uuidPattern },
+        items: [
+          { type: 'string', pattern: uuidPattern },
+          { type: 'string', enum: f.options.map((o) => o.name) },
+        ],
+        description: f.description ?? undefined,
       }))
       .with({ type: P.union('Resource', 'Select', 'User') }, () => ({
         type: ['string', 'null'],
         pattern: uuidPattern,
+        description: f.description ?? undefined,
       }))
       .with({ type: P.union('Text', 'Textarea') }, () => ({
         type: ['string', 'null'],
         minLength: 1,
+        description: f.description ?? undefined,
       }))
       .exhaustive(),
   ]),
