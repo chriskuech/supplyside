@@ -136,7 +136,12 @@ function Field(
         getOptionLabel={(o) => o.name}
         getOptionKey={(o) => o.id}
         renderInput={(props) => <TextField inputRef={ref} {...props} />}
-        options={field.options}
+        options={field.options.filter(
+          (option) =>
+            !value?.options?.some(
+              (valueOption) => valueOption.id === option.id,
+            ),
+        )}
         defaultValue={field.options.filter((option) =>
           value?.options?.some((valueOption) => valueOption.id === option.id),
         )}
