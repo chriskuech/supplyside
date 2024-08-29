@@ -1,30 +1,22 @@
 'use server'
 
 import { fail } from 'assert'
-import { AccountQuery, CompanyInfo, Token } from 'intuit-oauth'
+import { Token } from 'intuit-oauth'
 import { redirect } from 'next/navigation'
-import { z } from 'zod'
 import { faker } from '@faker-js/faker'
 import { fields } from '../schema/template/system-fields'
 import { OptionPatch, readFields, updateField } from '../schema/fields/actions'
 import { authQuickBooksClient, environmentUrls } from './client'
+import {
+  accountQuerySchema,
+  CompanyInfo,
+  companyInfoSchema,
+  QuickBooksToken,
+  quickbooksTokenSchema,
+} from './schemas'
 import prisma from '@/services/prisma'
 import config from '@/services/config'
 import { readSession } from '@/lib/session/actions'
-
-const quickbooksTokenSchema = z.object({
-  latency: z.number(),
-  access_token: z.string(),
-  createdAt: z.number(),
-  expires_in: z.number(),
-  id_token: z.string(),
-  realmId: z.string(),
-  refresh_token: z.string(),
-  token_type: z.string(),
-  x_refresh_token_expires_in: z.number(),
-})
-
-type QuickBooksToken = z.infer<typeof quickbooksTokenSchema>
 
 const baseUrl = (realmId: string) => {
   const { QUICKBOOKS_ENVIRONMENT } = config()
@@ -141,11 +133,11 @@ export const getCompanyInfo = async (): Promise<CompanyInfo> => {
   const client = await authQuickBooksClient(token)
 
   return client
-    .makeApiCall<CompanyInfo>({
+    .makeApiCall({
       url: `${baseUrl(client.token.realmId)}/companyinfo/${client.token.realmId}`,
       method: 'GET',
     })
-    .then((data) => data.json)
+    .then((data) => companyInfoSchema.parse(data.json))
 }
 
 export const syncDataFromQuickBooks = async (): Promise<void> => {
@@ -153,11 +145,11 @@ export const syncDataFromQuickBooks = async (): Promise<void> => {
   const client = await authQuickBooksClient(token)
 
   const quickBooksAccounts = await client
-    .makeApiCall<AccountQuery>({
+    .makeApiCall({
       url: `${baseUrl(client.token.realmId)}/query?query=select * from Account`,
       method: 'GET',
     })
-    .then((data) => data.json)
+    .then((data) => accountQuerySchema.parse(data.json))
 
   const accountFields = await readFields()
   const quickBooksAccountField = accountFields.find(

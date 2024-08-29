@@ -222,6 +222,11 @@ const _fields = {
     name: 'Quantity',
     type: 'Number',
   },
+  quickBooksAccount: {
+    templateId: '3cf75b8f-f4e4-406f-a1db-0761aa6db523',
+    name: 'Accounting category',
+    type: 'Select',
+  },
   shippingAccountNumber: {
     templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
     name: 'Shipping Account Number',
@@ -295,11 +300,6 @@ const _fields = {
     name: 'Vendor Description',
     type: 'Textarea',
     description: 'Brief, internal description of the vendor',
-  },
-  quickBooksAccount: {
-    templateId: '3cf75b8f-f4e4-406f-a1db-0761aa6db523',
-    name: 'Accounting category',
-    type: 'Select',
   },
 } satisfies Record<string, FieldTemplate>
 
