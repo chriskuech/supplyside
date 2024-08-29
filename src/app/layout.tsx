@@ -5,6 +5,7 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import dynamic from 'next/dynamic'
 import AppBar from '@/lib/ux/appbar/AppBar'
 import MuiXLicense from '@/lib/ux/MuiXLicense'
+import { ConfirmationProvider } from '@/lib/ux/ConfirmationDialog/useConfirmation'
 
 const RootProvider = dynamic(() => import('@/lib/ux/RootProvider'), {
   ssr: false,
@@ -34,11 +35,13 @@ export default async function RootLayout({
         <MuiXLicense />
         <AppRouterCacheProvider>
           <RootProvider>
-            <CssBaseline />
-            <AppBar />
-            <Box width={'100vw'} flexGrow={1}>
-              {children}
-            </Box>
+            <ConfirmationProvider>
+              <CssBaseline />
+              <AppBar />
+              <Box width={'100vw'} flexGrow={1}>
+                {children}
+              </Box>
+            </ConfirmationProvider>
           </RootProvider>
         </AppRouterCacheProvider>
       </body>

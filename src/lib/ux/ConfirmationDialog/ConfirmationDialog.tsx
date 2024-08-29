@@ -13,25 +13,24 @@ type Props = {
   isOpen: boolean
   title: string
   content: ReactNode
-  cancelButtonText?: string
   confirmButtonText?: string
+  cancelButtonText?: string
   onConfirm: () => void
   onClose: () => void
 }
 
-//TODO: refactor for using with a useConfirmation hook
 export default function ConfirmationDialog({
   isOpen,
-  content,
   title,
-  onClose,
-  onConfirm,
+  content,
   confirmButtonText = 'Confirm',
   cancelButtonText = 'Cancel',
+  onConfirm,
+  onClose,
 }: Props) {
   const handleConfirm = () => {
-    onClose()
     onConfirm()
+    onClose()
   }
 
   return (
