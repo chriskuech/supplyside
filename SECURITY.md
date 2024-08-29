@@ -4,13 +4,9 @@
 
 Email chris@supplyside.io with any security risks or concerns.
 
-## Corporate policy
-
-### Device policy
+## Corporate device policy
 
 Employees use their personal devices. Employees are responsible for ensuring Automatic Updates are enabled on their OS and responsible for ensuring the updates apply the day they are released.
-
-### Application
 
 ## Infrastructure
 
@@ -78,5 +74,3 @@ Contractors must not be granted access to critical systems.
 Tailscale logs all logins and active sessions.
 
 <img width="1161" alt="image" src="https://github.com/user-attachments/assets/1878c418-2060-41c8-900d-854a3c07efbc">
-
-### Monitoring our private network
