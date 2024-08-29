@@ -67,6 +67,11 @@ const _fields = {
     type: 'Resource',
     resourceType: 'Bill',
   },
+  billAttachments: {
+    templateId: '9deb8b41-c6c2-4c72-a058-9a14acc4f89b',
+    name: 'Bill Attachments',
+    type: 'Files',
+  },
   billDescription: {
     templateId: 'cd1c7d34-57bf-43ad-8b32-a90081cde55b',
     name: 'Bill Description',
@@ -165,6 +170,11 @@ const _fields = {
     name: 'Order',
     type: 'Resource',
     resourceType: 'Order',
+  },
+  orderAttachments: {
+    templateId: '3a0f3e04-b4ac-4266-9d4e-bac5091d0922',
+    name: 'Order Attachments',
+    type: 'Files',
   },
   orderDescription: {
     templateId: 'f7b4e0f7-e1e7-4e1e-abad-4e0f7e1e7e5d',
