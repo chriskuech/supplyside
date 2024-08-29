@@ -24,6 +24,7 @@ import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectField } from '@/domain/schema/types'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
+import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 
 export default async function OrderDetail({
   params: { key },
@@ -77,6 +78,16 @@ export default async function OrderDetail({
         ...(poFile
           ? [<DownloadPoControl key={poFile.id} file={poFile} />]
           : []),
+        <AttachmentsToolbarControl
+          key={AttachmentsToolbarControl.name}
+          resourceId={resource.id}
+          resourceType={'Order'}
+          field={
+            selectField(schema, fields.orderAttachments) ??
+            fail('Field not found')
+          }
+          value={selectValue(resource, fields.orderAttachments)}
+        />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
           resourceId={resource.id}

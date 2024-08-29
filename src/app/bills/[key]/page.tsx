@@ -16,6 +16,7 @@ import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectField } from '@/domain/schema/types'
 import EditControl from '@/app/orders/[key]/tools/EditControl'
+import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 
 export default async function BillsDetail({
   params: { key },
@@ -53,6 +54,16 @@ export default async function BillsDetail({
       resource={resource}
       tools={[
         ...(order ? [<OrderLink key={order.id} order={order} />] : []),
+        <AttachmentsToolbarControl
+          key={AttachmentsToolbarControl.name}
+          resourceId={resource.id}
+          resourceType={'Bill'}
+          field={
+            selectField(schema, fields.billAttachments) ??
+            fail('Field not found')
+          }
+          value={selectValue(resource, fields.billAttachments)}
+        />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
           resourceId={resource.id}
