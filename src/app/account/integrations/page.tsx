@@ -7,14 +7,14 @@ export default async function SettingsPage() {
 
   return (
     <Stack spacing={2} my={5} mx="auto" width="fit-content">
-      <Typography variant={'h4'} gutterBottom>
+      <Typography variant="h4" gutterBottom>
         Integrations
       </Typography>
       {!session.user.isAdmin && !session.user.isGlobalAdmin ? (
         <Alert severity="error">You must be an admin to access this page</Alert>
       ) : (
         <Box>
-          <Typography variant={'h6'}>QuickBooks</Typography>
+          <Typography variant="h6">QuickBooks</Typography>
           <QuickBooks session={session} />
         </Box>
       )}
