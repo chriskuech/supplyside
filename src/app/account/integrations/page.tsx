@@ -6,7 +6,7 @@ export default async function SettingsPage() {
   const session = await requireSessionWithRedirect()
 
   return (
-    <Stack spacing={2} my={5} mx="auto" width={'fit-content'}>
+    <Stack spacing={2} my={5} mx="auto" width="fit-content">
       <Typography variant={'h4'} gutterBottom>
         Integrations
       </Typography>

@@ -31,12 +31,12 @@ export default async function LinesAndCosts({
 
   return (
     <Stack spacing={2}>
-      <Stack direction={'row'} alignItems={'end'}>
+      <Stack direction="row" alignItems="end">
         <Typography variant="h4" flexGrow={1}>
           Lines
         </Typography>
         {!isReadOnly && (
-          <CreateResourceButton type={'Line'} data={newLineInitialData} />
+          <CreateResourceButton type="Line" data={newLineInitialData} />
         )}
       </Stack>
       <Stack>

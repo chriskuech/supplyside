@@ -57,7 +57,7 @@ export default async function BillsDetail({
         <AttachmentsToolbarControl
           key={AttachmentsToolbarControl.name}
           resourceId={resource.id}
-          resourceType={'Bill'}
+          resourceType="Bill"
           field={
             selectField(schema, fields.billAttachments) ??
             fail('Field not found')
@@ -67,7 +67,7 @@ export default async function BillsDetail({
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
           resourceId={resource.id}
-          resourceType={'Bill'}
+          resourceType="Bill"
           field={
             selectField(schema, fields.assignee) ?? fail('Field not found')
           }
@@ -81,20 +81,20 @@ export default async function BillsDetail({
       backlinkField={fields.bill}
       isReadOnly={!isDraft}
       actions={
-        <Stack direction={'row'} height={100}>
+        <Stack direction="row" height={100}>
           <Box
             flexGrow={1}
             height={70}
-            my={'15px'}
+            my="15px"
             sx={{
               background: `linear-gradient(90deg, ${statusColorStart} 0%, ${statusColorEnd} 100%)`,
             }}
           />
           <Container sx={{ flexShrink: 0 }} disableGutters>
             <Stack
-              direction={'row'}
+              direction="row"
               sx={{ overflowX: 'hidden', height: 100 }}
-              alignItems={'center'}
+              alignItems="center"
             >
               <Box sx={{ borderRadius: 10, flexGrow: 1 }}>
                 <BillStatusTracker resource={resource} />
@@ -102,9 +102,9 @@ export default async function BillsDetail({
               <Stack
                 width={400}
                 flexShrink={0}
-                direction={'row'}
-                justifyContent={'end'}
-                alignItems={'center'}
+                direction="row"
+                justifyContent="end"
+                alignItems="center"
                 spacing={2}
                 mr={3}
               >
@@ -117,7 +117,7 @@ export default async function BillsDetail({
               </Stack>
             </Stack>
           </Container>
-          <Box flexGrow={1} bgcolor={'transparent'} />
+          <Box flexGrow={1} bgcolor="transparent" />
         </Stack>
       }
     />

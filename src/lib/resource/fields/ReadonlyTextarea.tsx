@@ -13,7 +13,7 @@ export default function ReadonlyTextarea({ value }: { value: string }) {
   const isTruncated = !isExpanded && isPreviewTruncated
 
   return (
-    <Typography whiteSpace={'pre-wrap'}>
+    <Typography whiteSpace="pre-wrap">
       {isExpanded ? value : value.slice(0, 250)}
       {isTruncated && '...'}
       {'  '}
@@ -21,7 +21,7 @@ export default function ReadonlyTextarea({ value }: { value: string }) {
         <Link onClick={toggle} sx={{ cursor: 'pointer', lineHeight: 1 }}>
           {isExpanded ? 'Collapse' : 'Expand'}
           <Box
-            display={'inline-block'}
+            display="inline-block"
             sx={{
               rotate: isExpanded ? '180deg' : '0deg',
               verticalAlign: 'middle',

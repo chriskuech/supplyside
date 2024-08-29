@@ -28,7 +28,7 @@ export default function FileField({
   const file = value?.file
 
   return (
-    <Stack direction={'row'} alignItems={'center'}>
+    <Stack direction="row" alignItems="center">
       <input
         style={{ display: 'none' }}
         type="file"
