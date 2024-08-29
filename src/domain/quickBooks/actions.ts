@@ -87,8 +87,7 @@ const deleteQuickBooksToken = async (accountId: string) => {
 export const createQuickBooksConnection = async (url: string) => {
   const { csrfSecret } = getQuickBooksConfig()
 
-  const authCode = url.toString()
-  const tokenExchange = await quickBooksClient().createToken(authCode)
+  const tokenExchange = await quickBooksClient().createToken(url)
   const { accountId, csrf } = z
     .object({
       accountId: z.string().uuid(),
