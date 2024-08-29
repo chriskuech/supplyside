@@ -14,7 +14,7 @@ import {
 import { FieldType, ResourceType } from '@prisma/client'
 import { useState } from 'react'
 import ResourceTypeSelect from './ResourceTypeSelect'
-import { CreateFieldParams } from '@/domain/schema/fields/actions'
+import { CreateFieldParams } from '@/domain/schema/fields'
 
 type Props = {
   onSubmit: (params: CreateFieldParams) => void

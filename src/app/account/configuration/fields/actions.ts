@@ -1,0 +1,39 @@
+'use server'
+import { revalidatePath } from 'next/cache'
+import { readSession } from '@/lib/session/actions'
+import {
+  CreateFieldParams,
+  createField as domainCreateField,
+  readFields as domainReadFields,
+  updateField as domainUpdateField,
+  deleteField as domainDeleteField,
+  Field,
+  UpdateFieldDto,
+} from '@/domain/schema/fields'
+
+export const createField = async (params: CreateFieldParams) => {
+  const session = await readSession()
+
+  await domainCreateField(session.accountId, params)
+  revalidatePath('')
+}
+
+export const readFields = async (): Promise<Field[]> => {
+  const session = await readSession()
+  return domainReadFields(session.accountId)
+}
+
+export const updateField = async (dto: UpdateFieldDto) => {
+  const session = await readSession()
+
+  await domainUpdateField(session.accountId, dto)
+
+  revalidatePath('')
+}
+
+export const deleteField = async (fieldId: string) => {
+  const session = await readSession()
+
+  await domainDeleteField(session.accountId, fieldId)
+  revalidatePath('')
+}

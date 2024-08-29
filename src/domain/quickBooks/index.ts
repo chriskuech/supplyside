@@ -1,11 +1,9 @@
-'use server'
-
 import { fail } from 'assert'
 import { Token } from 'intuit-oauth'
 import { redirect } from 'next/navigation'
 import { faker } from '@faker-js/faker'
 import { fields } from '../schema/template/system-fields'
-import { OptionPatch, readFields, updateField } from '../schema/fields/actions'
+import { OptionPatch, readFields, updateField } from '../schema/fields'
 import { authQuickBooksClient, environmentUrls } from './client'
 import {
   accountQuerySchema,
@@ -16,7 +14,6 @@ import {
 } from './schemas'
 import prisma from '@/services/prisma'
 import config from '@/services/config'
-import { readSession } from '@/lib/session/actions'
 
 const baseUrl = (realmId: string) => {
   const { QUICKBOOKS_ENVIRONMENT } = config()
@@ -46,8 +43,10 @@ const isRefreshTokenValid = (token: QuickBooksToken) => {
   return expirationTime > currentTime
 }
 
-const requireTokenWithRedirect = async (): Promise<QuickBooksToken> => {
-  const token = await getQuickbooksToken()
+const requireTokenWithRedirect = async (
+  accountId: string,
+): Promise<QuickBooksToken> => {
+  const token = await getQuickbooksToken(accountId)
 
   if (!token) {
     redirect('account/integrations')
@@ -79,9 +78,10 @@ const deleteQuickBooksToken = async (accountId: string) => {
   })
 }
 
-export const createQuickBooksConnection = async (quickBooksToken: Token) => {
-  const session = await readSession()
-  const { accountId } = session
+export const createQuickBooksConnection = async (
+  accountId: string,
+  quickBooksToken: Token,
+) => {
   const token = cleanToken(quickBooksToken)
 
   await prisma().account.update({
@@ -92,9 +92,9 @@ export const createQuickBooksConnection = async (quickBooksToken: Token) => {
   })
 }
 
-export const getQuickbooksToken = async (): Promise<QuickBooksToken | null> => {
-  const session = await readSession()
-  const { accountId } = session
+export const getQuickbooksToken = async (
+  accountId: string,
+): Promise<QuickBooksToken | null> => {
   const account = await prisma().account.findUniqueOrThrow({
     where: { id: accountId },
   })
@@ -118,7 +118,7 @@ export const getQuickbooksToken = async (): Promise<QuickBooksToken | null> => {
     if (isRefreshTokenValid(client.token)) {
       const tokenResponse = await client.refresh()
       await updateQuickBooksToken(accountId, tokenResponse.token)
-      return getQuickbooksToken()
+      return getQuickbooksToken(accountId)
     } else {
       await deleteQuickBooksToken(accountId)
       return null
@@ -128,8 +128,10 @@ export const getQuickbooksToken = async (): Promise<QuickBooksToken | null> => {
   return token
 }
 
-export const getCompanyInfo = async (): Promise<CompanyInfo> => {
-  const token = await requireTokenWithRedirect()
+export const getCompanyInfo = async (
+  accountId: string,
+): Promise<CompanyInfo> => {
+  const token = await requireTokenWithRedirect(accountId)
   const client = await authQuickBooksClient(token)
 
   return client
@@ -140,8 +142,10 @@ export const getCompanyInfo = async (): Promise<CompanyInfo> => {
     .then((data) => companyInfoSchema.parse(data.json))
 }
 
-export const syncDataFromQuickBooks = async (): Promise<void> => {
-  const token = await requireTokenWithRedirect()
+export const syncDataFromQuickBooks = async (
+  accountId: string,
+): Promise<void> => {
+  const token = await requireTokenWithRedirect(accountId)
   const client = await authQuickBooksClient(token)
 
   const quickBooksAccounts = await client
@@ -151,7 +155,7 @@ export const syncDataFromQuickBooks = async (): Promise<void> => {
     })
     .then((data) => accountQuerySchema.parse(data.json))
 
-  const accountFields = await readFields()
+  const accountFields = await readFields(accountId)
   const quickBooksAccountField = accountFields.find(
     (field) => field.templateId === fields.quickBooksAccount.templateId,
   )
@@ -178,7 +182,7 @@ export const syncDataFromQuickBooks = async (): Promise<void> => {
     name: accountName,
   }))
 
-  await updateField({
+  await updateField(accountId, {
     description: quickBooksAccountField.description,
     id: quickBooksAccountField.id,
     name: quickBooksAccountField.name,

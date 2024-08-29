@@ -2,7 +2,7 @@ import { Box, Stack, Switch, Typography } from '@mui/material'
 
 import QuickbooksConnectButton from './QuikBooksConnectButton'
 import QuickbooksConnection from './QuickBooksConnection'
-import { getQuickbooksToken } from '@/domain/quickBooks/actions'
+import { getQuickbooksToken } from './actions'
 import { Session } from '@/domain/iam/session/types'
 
 type Props = {

@@ -36,7 +36,7 @@ import {
   updateSection,
 } from './actions'
 import SectionFieldsControl from './SectionFieldsControl'
-import { Field } from '@/domain/schema/fields/actions'
+import { Field } from '@/domain/schema/fields'
 
 type Props = {
   fields: Field[]

@@ -1,9 +1,5 @@
-'use server'
-
-import { revalidatePath } from 'next/cache'
 import { FieldType, ResourceType } from '@prisma/client'
 import { P, match } from 'ts-pattern'
-import { readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
 import { Value, ValueInput, valueInclude } from '@/domain/resource/values/types'
 import { mapValueFromModel } from '@/domain/resource/values/mappers'
@@ -41,14 +37,15 @@ export type CreateFieldParams = {
   isRequired?: boolean
 }
 
-export const createField = async (params: CreateFieldParams) => {
-  const session = await readSession()
-
+export const createField = async (
+  accountId: string,
+  params: CreateFieldParams,
+) => {
   await prisma().field.create({
     data: {
       Account: {
         connect: {
-          id: session.accountId,
+          id: accountId,
         },
       },
       DefaultValue: {
@@ -60,15 +57,12 @@ export const createField = async (params: CreateFieldParams) => {
       resourceType: params.resourceType,
     },
   })
-  revalidatePath('')
 }
 
-export const readFields = async (): Promise<Field[]> => {
-  const session = await readSession()
-
+export const readFields = async (accountId: string): Promise<Field[]> => {
   const fields = await prisma().field.findMany({
     where: {
-      accountId: session.accountId,
+      accountId,
     },
     orderBy: {
       name: 'asc',
@@ -107,14 +101,12 @@ export type UpdateFieldDto = {
   isRequired?: boolean
 }
 
-export const updateField = async (dto: UpdateFieldDto) => {
-  const session = await readSession()
-
+export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
   await Promise.all([
     prisma().field.update({
       where: {
         id: dto.id,
-        accountId: session.accountId,
+        accountId,
       },
       data: {
         name: sanitizeColumnName(dto.name),
@@ -152,7 +144,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
               Field: {
                 connect: {
                   id: dto.id,
-                  accountId: session.accountId,
+                  accountId,
                 },
               },
               name: o.name,
@@ -166,7 +158,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
               id: o.optionId,
               Field: {
                 id: dto.id,
-                accountId: session.accountId,
+                accountId,
               },
             },
             data: {
@@ -181,7 +173,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
               id: o.optionId,
               Field: {
                 id: dto.id,
-                accountId: session.accountId,
+                accountId,
               },
             },
           }),
@@ -189,20 +181,15 @@ export const updateField = async (dto: UpdateFieldDto) => {
         .exhaustive(),
     ),
   ])
-
-  revalidatePath('')
 }
 
-export const deleteField = async (fieldId: string) => {
-  const session = await readSession()
-
+export const deleteField = async (accountId: string, fieldId: string) => {
   await prisma().field.delete({
     where: {
-      accountId: session.accountId,
+      accountId: accountId,
       id: fieldId,
     },
   })
-  revalidatePath('')
 }
 
 const sanitizeColumnName = (name: string) => name.replace('"', '')

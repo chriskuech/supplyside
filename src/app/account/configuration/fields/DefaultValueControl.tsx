@@ -12,7 +12,7 @@ import { Close } from '@mui/icons-material'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { Field } from '@/domain/schema/fields/actions'
+import { Field } from '@/domain/schema/fields'
 import { ValueInput } from '@/domain/resource/values/types'
 
 type Props = {

@@ -8,12 +8,8 @@ import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 import { FC, useState } from 'react'
 import UpdateFieldForm from './UpdateFieldForm'
-import {
-  Field,
-  UpdateFieldDto,
-  deleteField,
-  updateField,
-} from '@/domain/schema/fields/actions'
+import { deleteField, updateField } from './actions'
+import { Field, UpdateFieldDto } from '@/domain/schema/fields'
 
 type Props = {
   fields: Field[]

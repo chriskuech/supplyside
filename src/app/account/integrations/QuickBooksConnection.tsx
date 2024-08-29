@@ -2,7 +2,7 @@ import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 
 import QuickBooksSyncButton from './QuickbooksSyncButton'
-import { getCompanyInfo } from '@/domain/quickBooks/actions'
+import { getCompanyInfo } from './actions'
 
 export default async function QuickBooksConnection() {
   const quickBooksCompanyInfo = await getCompanyInfo()
