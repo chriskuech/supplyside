@@ -239,7 +239,7 @@ export default function ResourceFieldsControl({
                             lineHeight="unset"
                           >
                             {f.name}{' '}
-                            {s.fields.at(0)?.isRequired && (
+                            {f.isRequired && (
                               <Typography
                                 color="error"
                                 display="inline"
