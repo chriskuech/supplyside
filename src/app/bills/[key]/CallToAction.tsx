@@ -154,9 +154,9 @@ export default function CallToAction({ user, schema, resource }: Props) {
                 Match your Order to the Bill to complete the 3-way match.
               </Typography>
               <Stack
-                direction={'row'}
-                justifyContent={'center'}
-                alignItems={'center'}
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
                 spacing={1}
               >
                 <Box>Receipt</Box>
@@ -170,13 +170,13 @@ export default function CallToAction({ user, schema, resource }: Props) {
                   Order
                 </Typography>
                 <FieldControl
-                  inputId={`rf-order`}
+                  inputId="rf-order"
                   resourceId={resource.id}
                   field={selectField(schema, fields.order) ?? fail()}
                   value={selectValue(resource, fields.order) ?? fail()}
                 />
               </Box>
-              <Stack direction={'row'} sx={{ justifyContent: 'end' }}>
+              <Stack direction="row" sx={{ justifyContent: 'end' }}>
                 <Button onClick={close}>Close</Button>
               </Stack>
             </Stack>

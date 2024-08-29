@@ -12,21 +12,21 @@ export default async function InfoPage() {
   return (
     <Stack
       spacing={2}
-      direction={'column'}
-      textAlign={'left'}
+      direction="column"
+      textAlign="left"
       my={5}
       mx="auto"
-      width={'fit-content'}
+      width="fit-content"
     >
       <Box>
-        <Typography variant={'h4'}>Info</Typography>
-        <Typography variant={'caption'}>
+        <Typography variant="h4">Info</Typography>
+        <Typography variant="caption">
           Provide your company information for use across the platform.
         </Typography>
       </Box>
       <form action={handleSaveSettings}>
-        <Stack spacing={4} direction={'column'} alignItems={'center'}>
-          <Stack spacing={2} alignItems={'center'}>
+        <Stack spacing={4} direction="column" alignItems="center">
+          <Stack spacing={2} alignItems="center">
             <Image
               src={account?.logoPath ?? ''}
               alt="Logo"
@@ -49,32 +49,32 @@ export default async function InfoPage() {
           </Stack>
 
           <TextField
-            label={'Company Name'}
-            variant={'outlined'}
+            label="Company Name"
+            variant="outlined"
             fullWidth
             required
-            margin={'normal'}
+            margin="normal"
             name="name"
             defaultValue={account?.name}
           />
 
           <TextField
-            label={'Company ID'}
-            variant={'outlined'}
+            label="Company ID"
+            variant="outlined"
             required
-            margin={'normal'}
+            margin="normal"
             name="key"
             defaultValue={account?.key}
           />
 
           <TextField
-            label={'Company Address'}
-            variant={'outlined'}
+            label="Company Address"
+            variant="outlined"
             fullWidth
             multiline
             minRows={3}
             required
-            margin={'normal'}
+            margin="normal"
             name="address"
             defaultValue={account?.address}
           />
