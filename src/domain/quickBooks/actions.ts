@@ -70,6 +70,7 @@ const updateQuickBooksToken = async (
   await prisma().account.update({
     where: { id: accountId },
     data: {
+      quickBooksConnectedAt: new Date(),
       quickBooksToken: token,
     },
   })
@@ -79,6 +80,7 @@ const deleteQuickBooksToken = async (accountId: string) => {
   await prisma().account.update({
     where: { id: accountId },
     data: {
+      quickBooksConnectedAt: null,
       quickBooksToken: Prisma.NullableJsonNullValueInput.DbNull,
     },
   })
@@ -104,6 +106,7 @@ export const createQuickBooksConnection = async (url: string) => {
   await prisma().account.update({
     where: { id: accountId },
     data: {
+      quickBooksConnectedAt: new Date(),
       quickBooksToken: token,
     },
   })
@@ -116,7 +119,7 @@ export const getQuickbooksToken = async (
     where: { id: accountId },
   })
 
-  if (!account.quickBooksToken) {
+  if (!account.quickBooksConnectedAt || !account.quickBooksToken) {
     return null
   }
 

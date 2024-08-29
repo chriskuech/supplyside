@@ -22,12 +22,13 @@ model Session {
 }
 
 model Account {
-  id              String  @id @default(uuid()) @db.Uuid
-  key             String  @unique
-  name            String  @unique
-  address         String  @default("")
-  logoBlobId      String? @unique @db.Uuid
-  quickBooksToken Json?
+  id                    String    @id @default(uuid()) @db.Uuid
+  key                   String    @unique
+  name                  String    @unique
+  address               String    @default("")
+  logoBlobId            String?   @unique @db.Uuid
+  quickBooksConnectedAt DateTime?
+  quickBooksToken       Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
