@@ -30,7 +30,7 @@ export type Field = {
   resourceType: ResourceType | null
   Option: Option[]
   defaultValue: Value
-  isRequired?: boolean
+  isRequired: boolean
   templateId: string | null
 }
 

@@ -44,9 +44,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
     mapValueToInput(field.defaultValue),
   )
 
-  const [isRequired, setIsRequired] = useState<boolean>(
-    field.isRequired ?? false,
-  )
+  const [isRequired, setIsRequired] = useState<boolean>(field.isRequired)
 
   const isValid = !!name
   const isDisabled = !!field.templateId

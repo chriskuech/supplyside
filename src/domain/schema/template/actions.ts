@@ -31,6 +31,7 @@ const applyFields = async (accountId: string) => {
     templateId,
     options,
     defaultValue,
+    isRequired,
     name,
     description,
     type,
@@ -57,6 +58,7 @@ const applyFields = async (accountId: string) => {
         description: description ?? null,
         type,
         resourceType,
+        isRequired,
       },
       update: {
         name,
