@@ -83,7 +83,7 @@ export default async function OrderDetail({
         <AttachmentsToolbarControl
           key={AttachmentsToolbarControl.name}
           resourceId={resource.id}
-          resourceType={'Order'}
+          resourceType="Order"
           field={
             selectField(schema, fields.orderAttachments) ??
             fail('Field not found')
@@ -93,7 +93,7 @@ export default async function OrderDetail({
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
           resourceId={resource.id}
-          resourceType={'Order'}
+          resourceType="Order"
           field={
             selectField(schema, fields.assignee) ?? fail('Field not found')
           }
@@ -110,20 +110,20 @@ export default async function OrderDetail({
       backlinkField={fields.order}
       isReadOnly={!isDraft}
       actions={
-        <Stack direction={'row'} height={100}>
+        <Stack direction="row" height={100}>
           <Box
             flexGrow={1}
             height={70}
-            my={'15px'}
+            my="15px"
             sx={{
               background: `linear-gradient(90deg, ${statusColorStart} 0%, ${statusColorEnd} 100%)`,
             }}
           />
           <Container sx={{ flexShrink: 0 }} disableGutters>
             <Stack
-              direction={'row'}
+              direction="row"
               sx={{ overflowX: 'hidden', height: 100 }}
-              alignItems={'center'}
+              alignItems="center"
             >
               <Box sx={{ borderRadius: 10, flexGrow: 1 }}>
                 <OrderStatusTracker resource={resource} />
@@ -131,9 +131,9 @@ export default async function OrderDetail({
               <Stack
                 width={400}
                 flexShrink={0}
-                direction={'row'}
-                justifyContent={'end'}
-                alignItems={'center'}
+                direction="row"
+                justifyContent="end"
+                alignItems="center"
                 spacing={2}
                 mr={3}
               >
@@ -149,7 +149,7 @@ export default async function OrderDetail({
                       }
                       resourceId={resource.id}
                       statusOption={orderStatusOptions.submitted}
-                      label={'Submit'}
+                      label="Submit"
                     />
                   </>
                 )}
@@ -175,7 +175,7 @@ export default async function OrderDetail({
                   <StatusTransitionButton
                     resourceId={resource.id}
                     statusOption={orderStatusOptions.received}
-                    label={'Confirm Receipt'}
+                    label="Confirm Receipt"
                   />
                 )}
                 {(status.templateId ===
@@ -189,7 +189,7 @@ export default async function OrderDetail({
               </Stack>
             </Stack>
           </Container>
-          <Box flexGrow={1} bgcolor={'transparent'} />
+          <Box flexGrow={1} bgcolor="transparent" />
         </Stack>
       }
     />

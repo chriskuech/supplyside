@@ -136,7 +136,7 @@ const SortableChips: FC<{
       }}
     >
       <SortableContext items={fields} strategy={rectSortingStrategy}>
-        <Stack direction={'row'} gap={1} flexWrap={'wrap'}>
+        <Stack direction="row" gap={1} flexWrap="wrap">
           {fields.map((field) => (
             <SortableChip
               key={field.id}

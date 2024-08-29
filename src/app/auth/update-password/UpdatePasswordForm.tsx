@@ -8,7 +8,7 @@ const UpdatePasswordForm: FC = () => {
   const [password, setPassword] = useState<string>('')
 
   return (
-    <Stack direction={'row'} width={500}>
+    <Stack direction="row" width={500}>
       <TextField
         type="password"
         name="password"

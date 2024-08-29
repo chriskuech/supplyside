@@ -14,7 +14,7 @@ type Props = {
 
 export default function EditControl({ resourceId }: Props) {
   return (
-    <Box height={'min-content'}>
+    <Box height="min-content">
       <Tooltip title="Transition back to Draft for editing">
         <IconButton
           onClick={() =>

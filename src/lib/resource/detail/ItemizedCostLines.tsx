@@ -170,7 +170,7 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
       </Card>
 
       {!isReadOnly && (
-        <Stack direction={'row'} justifyContent={'end'}>
+        <Stack direction="row" justifyContent="end">
           <Button onClick={() => createCost(resource.id)} startIcon={<Add />}>
             Itemized Cost
           </Button>

@@ -11,9 +11,11 @@
     "plugin:prettier/recommended"
   ],
   "rules": {
+    "arrow-body-style": ["error", "as-needed"],
     "import/first": "error",
-    "import/order": "error",
     "import/newline-after-import": "error",
+    "import/order": "error",
+    "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1 }],
     "padding-line-between-statements": [
       "error",
       {
@@ -22,8 +24,6 @@
         "next": "*"
       }
     ],
-    "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1 }],
-    "arrow-body-style": ["error", "as-needed"],
     "prettier/prettier": [
       "error",
       {
@@ -32,6 +32,10 @@
         "tabWidth": 2,
         "semi": false
       }
+    ],
+    "react/jsx-curly-brace-presence": [
+      "error",
+      { "props": "never", "children": "ignore" }
     ]
     // "unused-imports/no-unused-imports": "error"
   }

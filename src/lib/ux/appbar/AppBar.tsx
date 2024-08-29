@@ -34,23 +34,23 @@ export default async function AppBar() {
           {session && (
             <>
               <Stack
-                justifyContent={'center'}
-                height={'100%'}
+                justifyContent="center"
+                height="100%"
                 component={Link}
-                href={'/'}
+                href="/"
               >
                 <Logo />
               </Stack>
 
               <Stack
                 flexGrow={1}
-                direction={'row'}
-                justifyContent={'end'}
+                direction="row"
+                justifyContent="end"
                 spacing={1}
               >
                 {session.user.isGlobalAdmin && (
                   <>
-                    <Stack width={300} justifyContent={'center'}>
+                    <Stack width={300} justifyContent="center">
                       <ImpersonationControl
                         account={session.account}
                         accounts={accounts}
@@ -106,7 +106,7 @@ export default async function AppBar() {
                       </Button>
                     ))}
 
-                    <Box display={'flex'} alignItems={'center'}>
+                    <Box display="flex" alignItems="center">
                       <Divider
                         orientation="vertical"
                         sx={{ mx: 2, height: '1em' }}
