@@ -1,11 +1,17 @@
 import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 
-import QuickBooksSyncButton from './QuickbooksSyncButton'
 import { getCompanyInfo } from './actions'
+import QuickBooksSyncButton from './QuickbooksSyncButton'
+import { readAccount } from '@/domain/iam/account/actions'
+import { readSession } from '@/lib/session/actions'
 
 export default async function QuickBooksConnection() {
-  const quickBooksCompanyInfo = await getCompanyInfo()
+  const { accountId } = await readSession()
+  const [quickBooksCompanyInfo, account] = await Promise.all([
+    getCompanyInfo(),
+    readAccount(accountId),
+  ])
 
   return (
     <Stack gap={2}>
@@ -18,6 +24,10 @@ export default async function QuickBooksConnection() {
           <CheckIcon color="success" />
         </Stack>
       </Stack>
+      <Typography variant="caption">
+        Connected at:{' '}
+        <strong>{account.quickBooksConnectedAt?.toLocaleTimeString()}</strong>
+      </Typography>
       <QuickBooksSyncButton />
     </Stack>
   )

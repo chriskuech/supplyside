@@ -1,21 +1,13 @@
 import { Button } from '@mui/material'
-import QuickbooksOauthClient from 'intuit-oauth'
-import Csrf from 'csrf'
-import config from '@/services/config'
-import { quickBooksClient } from '@/domain/quickBooks/client'
+import { createQuickBooksSetupUrl } from '@/domain/quickBooks/util'
 
-export default async function QuickBooksConnectButton() {
-  const state = {
-    csrf: new Csrf().create(config().QUICKBOOKS_CSRF_SECRET),
-  }
+type Props = {
+  accountId: string
+}
 
-  const authUri = quickBooksClient().authorizeUri({
-    scope: [QuickbooksOauthClient.scopes.Accounting],
-    state: JSON.stringify(state),
-  })
-
+export default async function QuickBooksConnectButton({ accountId }: Props) {
   return (
-    <Button variant="outlined" href={authUri}>
+    <Button variant="outlined" href={createQuickBooksSetupUrl(accountId)}>
       Connect to QuickBooks
     </Button>
   )
