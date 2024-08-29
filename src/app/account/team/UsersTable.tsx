@@ -1,6 +1,6 @@
 'use client'
 
-import { FC, useState } from 'react'
+import { FC } from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { IconButton } from '@mui/material'
 import { Clear } from '@mui/icons-material'
@@ -8,8 +8,7 @@ import { filter, fromEntries, keys, map, pipe } from 'remeda'
 import { deleteUser, updateUser } from './actions'
 import { systemAccountId } from '@/lib/const'
 import { User } from '@/domain/iam/user/types'
-import { useDisclosure } from '@/lib/hooks/useDisclosure'
-import ConfirmationDialog from '@/lib/ux/ConfirmationDialog'
+import { useConfirmation } from '@/lib/confirmation'
 
 /**
  * @param oldObj
@@ -33,8 +32,17 @@ type Props = {
 }
 
 const UsersTable: FC<Props> = ({ currentUser, users }) => {
-  const { isOpen, close, open } = useDisclosure()
-  const [userIdToDelete, setUserIdToDelete] = useState<string | null>(null)
+  const confirm = useConfirmation()
+  const handleDeleteUser = async (userId: string) => {
+    const confirmed = await confirm({
+      title: 'Delete User',
+      content: 'Are you sure you want to delete this user?',
+    })
+
+    if (confirmed) {
+      deleteUser(userId)
+    }
+  }
 
   const editable: boolean =
     currentUser?.isAdmin || currentUser?.accountId === systemAccountId
@@ -81,11 +89,10 @@ const UsersTable: FC<Props> = ({ currentUser, users }) => {
       width: 75,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: ({ row }) => (
+      renderCell: ({ row: { id: userId } }) => (
         <IconButton
           onClick={() => {
-            setUserIdToDelete(row.id)
-            open()
+            handleDeleteUser(userId)
           }}
         >
           <Clear />
@@ -95,38 +102,21 @@ const UsersTable: FC<Props> = ({ currentUser, users }) => {
   ]
 
   return (
-    <>
-      <ConfirmationDialog
-        title="Delete User"
-        content="Are you sure you want to delete this user?"
-        isOpen={isOpen}
-        onClose={close}
-        onConfirm={() => {
-          if (userIdToDelete) {
-            deleteUser(userIdToDelete)
-          }
+    <DataGrid
+      columns={columns}
+      rows={users}
+      rowSelection={false}
+      processRowUpdate={async (newRow, oldRow) => {
+        const patch = diff(oldRow, newRow)
 
-          setUserIdToDelete(null)
+        await updateUser({
+          id: newRow.id,
+          ...patch,
+        })
 
-          close()
-        }}
-      />
-      <DataGrid
-        columns={columns}
-        rows={users}
-        rowSelection={false}
-        processRowUpdate={async (newRow, oldRow) => {
-          const patch = diff(oldRow, newRow)
-
-          await updateUser({
-            id: newRow.id,
-            ...patch,
-          })
-
-          return newRow
-        }}
-      />
-    </>
+        return newRow
+      }}
+    />
   )
 }
 
