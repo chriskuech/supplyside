@@ -8,7 +8,6 @@ export type Account = {
   address: string
   logoPath: string | null
   logoBlobId: string | null
-  quickBooksEnabled: boolean
 }
 
 export type AccountModel = AccountCoreModel & {
@@ -32,5 +31,4 @@ export const mapAccountModel = (model: AccountModel): Account => ({
       fileName: 'logo',
     }),
   logoBlobId: model.LogoBlob?.id ?? null,
-  quickBooksEnabled: model.quickBooksEnabled,
 })
