@@ -4,6 +4,7 @@ import { CompanyInfo, Token } from 'intuit-oauth'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import CSRF from 'csrf'
+import { Prisma } from '@prisma/client'
 import { getQuickBooksConfig, quickBooksClient } from './util'
 import prisma from '@/services/prisma'
 
@@ -78,7 +79,7 @@ const deleteQuickBooksToken = async (accountId: string) => {
   await prisma().account.update({
     where: { id: accountId },
     data: {
-      quickBooksToken: undefined,
+      quickBooksToken: Prisma.NullableJsonNullValueInput.DbNull,
     },
   })
 }
