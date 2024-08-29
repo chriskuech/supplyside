@@ -190,7 +190,7 @@ export default function ResourceFieldsControl({
                 <Box>
                   {singleField.name !== s.name && (
                     <Typography variant="overline" gutterBottom>
-                      {singleField.name}
+                      {singleField.name}{' '}
                       {s.fields.at(0)?.isRequired && (
                         <Typography
                           color="error"
