@@ -30,6 +30,7 @@ export type Field = {
   resourceType: ResourceType | null
   Option: Option[]
   defaultValue: Value
+  isRequired: boolean
   templateId: string | null
 }
 
@@ -37,6 +38,7 @@ export type CreateFieldParams = {
   name: string
   type: FieldType
   resourceType?: ResourceType
+  isRequired?: boolean
 }
 
 export const createField = async (params: CreateFieldParams) => {
@@ -52,6 +54,7 @@ export const createField = async (params: CreateFieldParams) => {
       DefaultValue: {
         create: {},
       },
+      isRequired: params.isRequired,
       name: sanitizeColumnName(params.name),
       type: params.type,
       resourceType: params.resourceType,
@@ -80,6 +83,7 @@ export const readFields = async (): Promise<Field[]> => {
       DefaultValue: {
         include: valueInclude,
       },
+      isRequired: true,
       Option: {
         orderBy: {
           order: 'asc',
@@ -100,6 +104,7 @@ export type UpdateFieldDto = {
   description: string | null
   options: OptionPatch[]
   defaultValue: ValueInput
+  isRequired?: boolean
 }
 
 export const updateField = async (dto: UpdateFieldDto) => {
@@ -136,6 +141,7 @@ export const updateField = async (dto: UpdateFieldDto) => {
             resourceId: dto.defaultValue.resourceId,
           },
         },
+        isRequired: dto.isRequired,
       },
     }),
     ...dto.options.map((o, i) =>

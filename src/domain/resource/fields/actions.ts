@@ -41,9 +41,10 @@ export const updateValue = async ({
   revalidatePath('')
   //TODO:  check if value object is correct for each fieldType
 
-  const { fileIds, optionIds, ...rest } = value
+  const { fileIds, optionIds, string, ...rest } = value
   const data: Prisma.ValueCreateInput & Prisma.ValueUpdateInput = {
     ...rest,
+    string: string?.trim() || null,
     ValueOption: optionIds
       ? {
           create: optionIds.map((optionId) => ({ optionId })),

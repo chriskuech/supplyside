@@ -1,8 +1,12 @@
-import { pick } from 'remeda'
+import { isArray, isNullish, pick } from 'remeda'
+import { FieldType } from '@prisma/client'
+import { match, P } from 'ts-pattern'
+import { Resource } from '../types'
 import { Value, ValueInput, ValueResource } from './types'
 import { ResourceValueModel, ValueModel } from './model'
 import { fields } from '@/domain/schema/template/system-fields'
 import { mapUserModel } from '@/domain/iam/user/types'
+import { Field, Schema } from '@/domain/schema/types'
 
 export const mapValueToInput = (value: Value): ValueInput => ({
   boolean: value.boolean ?? undefined,
@@ -47,3 +51,46 @@ export const mapValueFromResource = (
         ).includes(rf.Field.templateId),
     )?.Value.string ?? '',
 })
+
+export const mapFieldTypeToValueColumn = (t: FieldType) =>
+  match<FieldType, keyof Value>(t)
+    .with('Checkbox', () => 'boolean')
+    .with('Date', () => 'date')
+    .with('File', () => 'file')
+    .with(P.union('Money', 'Number'), () => 'number')
+    .with('User', () => 'user')
+    .with('Select', () => 'option')
+    .with(P.union('Textarea', 'Text'), () => 'string')
+    .with('Resource', () => 'resource')
+    .with('Contact', () => 'contact')
+    .with('Files', () => 'files')
+    .with('MultiSelect', () => 'options')
+    .exhaustive()
+
+export const selectResourceFieldValue = (
+  resource: Resource,
+  fieldId: string,
+) => {
+  const field = resource.fields.find((rf) => rf.fieldId === fieldId)
+
+  const valueColumn = field && mapFieldTypeToValueColumn(field.fieldType)
+
+  if (!field || !valueColumn) {
+    return undefined
+  }
+
+  return field.value[valueColumn]
+}
+
+export const isMissingRequiredFields = (
+  schema: Schema,
+  resource: Resource,
+): boolean =>
+  schema.allFields.some((field: Field) => {
+    const value = selectResourceFieldValue(resource, field.id)
+
+    return (
+      field.isRequired &&
+      (isNullish(value) || (isArray(value) && value.length === 0))
+    )
+  })

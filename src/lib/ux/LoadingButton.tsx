@@ -1,8 +1,9 @@
-import { Button, ButtonProps, CircularProgress } from '@mui/material'
+import { Button, ButtonProps, CircularProgress, Tooltip } from '@mui/material'
 import { match, P } from 'ts-pattern'
 
 type Props = {
   isLoading?: boolean
+  tooltip?: string
 } & ButtonProps
 
 export default function LoadingButton({
@@ -10,6 +11,7 @@ export default function LoadingButton({
   children,
   disabled,
   endIcon,
+  tooltip,
   ...rest
 }: Props) {
   const spinnerSize = match(rest.size)
@@ -19,12 +21,18 @@ export default function LoadingButton({
     .exhaustive()
 
   return (
-    <Button
-      {...rest}
-      disabled={isLoading || disabled}
-      endIcon={isLoading ? <CircularProgress size={spinnerSize} /> : endIcon}
-    >
-      {children}
-    </Button>
+    <Tooltip title={tooltip} placement="top">
+      <span>
+        <Button
+          {...rest}
+          disabled={isLoading || disabled}
+          endIcon={
+            isLoading ? <CircularProgress size={spinnerSize} /> : endIcon
+          }
+        >
+          {children}
+        </Button>
+      </span>
+    </Tooltip>
   )
 }
