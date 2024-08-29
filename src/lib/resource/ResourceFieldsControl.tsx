@@ -190,7 +190,17 @@ export default function ResourceFieldsControl({
                 <Box>
                   {singleField.name !== s.name && (
                     <Typography variant="overline" gutterBottom>
-                      {singleField.name}
+                      {singleField.name}{' '}
+                      {s.fields.at(0)?.isRequired && (
+                        <Typography
+                          color="error"
+                          display="inline"
+                          variant="overline"
+                          fontWeight="bold"
+                        >
+                          *
+                        </Typography>
+                      )}
                     </Typography>
                   )}
                   <Typography variant="caption">
@@ -218,7 +228,17 @@ export default function ResourceFieldsControl({
                             fontSize={14}
                             lineHeight={'unset'}
                           >
-                            {f.name}
+                            {f.name}{' '}
+                            {s.fields.at(0)?.isRequired && (
+                              <Typography
+                                color="error"
+                                display="inline"
+                                variant="overline"
+                                fontWeight="bold"
+                              >
+                                *
+                              </Typography>
+                            )}
                           </Typography>
                           <Typography variant="caption" gutterBottom>
                             {f.description}
