@@ -1,6 +1,7 @@
 import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 
+import QuickBooksSyncButton from './QuickBooksSyncButton'
 import { readAccount } from '@/domain/iam/account/actions'
 import { Session } from '@/domain/iam/session/types'
 import { getCompanyInfo } from '@/domain/quickBooks'
