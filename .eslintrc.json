@@ -36,6 +36,10 @@
     "react/jsx-curly-brace-presence": [
       "error",
       { "props": "never", "children": "ignore" }
+    ],
+    "@typescript-eslint/no-unused-expressions": [
+      "error",
+      { "allowShortCircuit": true, "allowTernary": true }
     ]
     // "unused-imports/no-unused-imports": "error"
   }
