@@ -1,4 +1,4 @@
-import { fail } from 'assert'
+import assert from 'assert'
 import { Token } from 'intuit-oauth'
 import { redirect } from 'next/navigation'
 import { faker } from '@faker-js/faker'
@@ -177,9 +177,7 @@ export const syncDataFromQuickBooks = async (
     (field) => field.templateId === fields.quickBooksAccount.templateId,
   )
 
-  if (!quickBooksAccountField) {
-    fail('QuickBooks account field does not exist')
-  }
+  assert(quickBooksAccountField, 'QuickBooks account field does not exist')
 
   const quickBooksAccountNames = quickBooksAccounts.QueryResponse.Account.map(
     (account) => account.FullyQualifiedName,

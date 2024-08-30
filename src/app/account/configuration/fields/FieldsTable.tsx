@@ -107,7 +107,7 @@ const FieldModal: FC<{
         transform: 'translate(-50%, -50%)',
         width: 'fit-content',
         maxHeight: '100%',
-        overflow: 'scroll',
+        overflow: 'auto',
       }}
     >
       <Card>

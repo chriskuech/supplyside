@@ -250,7 +250,7 @@ const _fields = {
   },
   quickBooksAccount: {
     templateId: '3cf75b8f-f4e4-406f-a1db-0761aa6db523',
-    name: 'Accounting category',
+    name: 'Accounting Category',
     type: 'Select',
   },
   shippingAccountNumber: {
