@@ -1,16 +1,19 @@
 import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 
-import { getCompanyInfo } from './actions'
 import QuickBooksSyncButton from './QuickBooksSyncButton'
 import { readAccount } from '@/domain/iam/account/actions'
-import { readSession } from '@/lib/session/actions'
+import { Session } from '@/domain/iam/session/types'
+import { getCompanyInfo } from '@/domain/quickBooks'
 
-export default async function QuickBooksConnection() {
-  const { accountId } = await readSession()
+type Props = {
+  session: Session
+}
+
+export default async function QuickBooksConnection({ session }: Props) {
   const [quickBooksCompanyInfo, account] = await Promise.all([
-    getCompanyInfo(),
-    readAccount(accountId),
+    getCompanyInfo(session.accountId),
+    readAccount(session.accountId),
   ])
 
   return (
