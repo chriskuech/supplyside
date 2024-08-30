@@ -54,7 +54,9 @@ export const deleteResource = async ({
 
   await domain.deleteResource({ ...params, accountId })
 
-  resourceType && redirect(`/${resourceType.toLowerCase()}s`)
+  if (!resourceType) return
+
+  redirect(`/${resourceType.toLowerCase()}s`)
 }
 
 export type FindResourcesParams = {
@@ -121,5 +123,6 @@ export const transitionStatus = async (
           ?.id ?? fail('Option not found'),
     },
   })
+
   revalidatePath('')
 }

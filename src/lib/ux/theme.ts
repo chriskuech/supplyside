@@ -9,6 +9,8 @@ import { colors } from '@/lib/ux/colors'
 //  - Somehow support "elevation"-like text-shadow on `Typography` (currently hardcoded in ListPage)
 
 declare module '@mui/material/Button' {
+  // This is the official way to extend the Button component
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface ButtonPropsVariantOverrides {
     // gradient: true
   }
