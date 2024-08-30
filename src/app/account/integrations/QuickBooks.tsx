@@ -1,6 +1,6 @@
 import { Alert } from '@mui/material'
 import QuickBooksConnectButton from './QuickBooksConnectButton'
-import QuickbooksConnection from './QuickBooksConnection'
+import QuickBooksConnection from './QuickBooksConnection'
 import { getQuickbooksToken } from './actions'
 import { isQuickBooksEnabledForSystem } from '@/domain/quickBooks/util'
 
@@ -14,7 +14,7 @@ export default async function Quickbooks() {
   const quickBooksToken = await getQuickbooksToken()
 
   return quickBooksToken ? (
-    <QuickbooksConnection />
+    <QuickBooksConnection />
   ) : (
     <QuickBooksConnectButton />
   )
