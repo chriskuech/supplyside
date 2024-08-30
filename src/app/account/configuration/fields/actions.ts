@@ -2,14 +2,16 @@
 import { revalidatePath } from 'next/cache'
 import { readSession } from '@/lib/session/actions'
 import {
-  CreateFieldParams,
   createField as domainCreateField,
   readFields as domainReadFields,
   updateField as domainUpdateField,
   deleteField as domainDeleteField,
+} from '@/domain/schema/fields'
+import {
+  CreateFieldParams,
   Field,
   UpdateFieldDto,
-} from '@/domain/schema/fields'
+} from '@/domain/schema/fields/types'
 
 export const createField = async (params: CreateFieldParams) => {
   const session = await readSession()
