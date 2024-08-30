@@ -78,6 +78,7 @@ export async function readUsers({
     include: {
       ImageBlob: true,
     },
+    orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
   })
 
   return users.map(mapUserModel)
