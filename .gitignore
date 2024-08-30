@@ -2,6 +2,7 @@
 
 .env
 *.pfx
+*.pdf
 
 # IDK wy these keep appearing
 *.swp

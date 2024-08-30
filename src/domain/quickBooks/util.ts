@@ -3,11 +3,10 @@ import Csrf from 'csrf'
 import QuickbooksOauthClient from 'intuit-oauth'
 import config from '@/services/config'
 
-export const createQuickBooksSetupUrl = (accountId: string) => {
+export const createQuickBooksSetupUrl = () => {
   const { csrfSecret } = getQuickBooksConfig()
 
   const state = {
-    accountId,
     csrf: new Csrf().create(csrfSecret),
   }
 
@@ -49,7 +48,7 @@ export const getQuickBooksConfig = () => {
     clientSecret,
     csrfSecret,
     environment,
-    baseUrl: BASE_URL + '/api/integrations/quickbooks',
+    redirectUri: BASE_URL + '/api/integrations/quickbooks/login',
     quickBooksApiBaseUrl: {
       sandbox: 'https://sandbox-quickbooks.api.intuit.com/',
       production: 'https://quickbooks.api.intuit.com/',
