@@ -6,14 +6,6 @@ import { z } from 'zod'
 import CSRF from 'csrf'
 import { Prisma } from '@prisma/client'
 import { difference } from 'remeda'
-import { fields } from '../schema/template/system-fields'
-import { OptionPatch } from '../schema/fields/types'
-import { readFields, updateField } from '../schema/fields'
-import { createResource, readResources } from '../resource/actions'
-import { selectResourceFieldValue } from '../resource/values/mappers'
-import { updateValue } from '../resource/fields/actions'
-import { readSchema } from '../schema/actions'
-import { selectField } from '../schema/types'
 import {
   accountQuerySchema,
   companyInfoSchema,
@@ -24,6 +16,14 @@ import {
 } from './schemas'
 import { getQuickBooksConfig, quickBooksClient } from './util'
 import { CompanyInfo, QueryOptions } from './types'
+import { fields } from '@/domain/schema/template/system-fields'
+import { OptionPatch } from '@/domain/schema/fields/types'
+import { readFields, updateField } from '@/domain/schema/fields'
+import { createResource, readResources } from '@/domain/resource/actions'
+import { selectResourceFieldValue } from '@/domain/resource/values/mappers'
+import { updateValue } from '@/domain/resource/fields/actions'
+import { readSchema } from '@/domain/schema/actions'
+import { selectField } from '@/domain/schema/types'
 import prisma from '@/services/prisma'
 
 const baseUrl = (realmId: string) => {
