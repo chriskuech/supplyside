@@ -8,7 +8,8 @@ import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 import { FC, useState } from 'react'
 import UpdateFieldForm from './UpdateFieldForm'
-import { Field, UpdateFieldDto, deleteField, updateField } from './actions'
+import { deleteField, updateField } from './actions'
+import { Field, UpdateFieldDto } from '@/domain/schema/fields'
 
 type Props = {
   fields: Field[]
@@ -105,6 +106,8 @@ const FieldModal: FC<{
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: 'fit-content',
+        maxHeight: '100%',
+        overflow: 'auto',
       }}
     >
       <Card>

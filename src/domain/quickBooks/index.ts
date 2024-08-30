@@ -1,26 +1,21 @@
-'use server'
-
-import { CompanyInfo, Token } from 'intuit-oauth'
+import assert from 'assert'
+import { Token } from 'intuit-oauth'
 import { redirect } from 'next/navigation'
+import { faker } from '@faker-js/faker'
 import { z } from 'zod'
 import CSRF from 'csrf'
 import { Prisma } from '@prisma/client'
+import { fields } from '../schema/template/system-fields'
+import { OptionPatch, readFields, updateField } from '../schema/fields'
+import {
+  accountQuerySchema,
+  CompanyInfo,
+  companyInfoSchema,
+  QuickBooksToken,
+  quickbooksTokenSchema,
+} from './schemas'
 import { getQuickBooksConfig, quickBooksClient } from './util'
 import prisma from '@/services/prisma'
-
-const quickbooksTokenSchema = z.object({
-  latency: z.number(),
-  access_token: z.string(),
-  createdAt: z.number(),
-  expires_in: z.number(),
-  id_token: z.string(),
-  realmId: z.string(),
-  refresh_token: z.string(),
-  token_type: z.string(),
-  x_refresh_token_expires_in: z.number(),
-})
-
-type QuickBooksToken = z.infer<typeof quickbooksTokenSchema>
 
 const baseUrl = (realmId: string) => {
   const { quickBooksApiBaseUrl } = getQuickBooksConfig()
@@ -86,13 +81,15 @@ const deleteQuickBooksToken = async (accountId: string) => {
   })
 }
 
-export const createQuickBooksConnection = async (url: string) => {
+export const createQuickBooksConnection = async (
+  accountId: string,
+  url: string,
+) => {
   const { csrfSecret } = getQuickBooksConfig()
 
   const tokenExchange = await quickBooksClient().createToken(url)
-  const { accountId, csrf } = z
+  const { csrf } = z
     .object({
-      accountId: z.string().uuid(),
       csrf: z.string().min(1),
     })
     .parse(JSON.parse(tokenExchange.token.state ?? ''))
@@ -155,9 +152,57 @@ export const getCompanyInfo = async (
   const client = quickBooksClient(token)
 
   return client
-    .makeApiCall<CompanyInfo>({
+    .makeApiCall({
       url: `${baseUrl(client.token.realmId)}/companyinfo/${client.token.realmId}`,
       method: 'GET',
     })
-    .then((data) => data.json)
+    .then((data) => companyInfoSchema.parse(data.json))
+}
+
+export const syncDataFromQuickBooks = async (
+  accountId: string,
+): Promise<void> => {
+  const token = await requireTokenWithRedirect(accountId)
+  const client = await quickBooksClient(token)
+
+  const quickBooksAccounts = await client
+    .makeApiCall({
+      url: `${baseUrl(client.token.realmId)}/query?query=select * from Account`,
+      method: 'GET',
+    })
+    .then((data) => accountQuerySchema.parse(data.json))
+
+  const accountFields = await readFields(accountId)
+  const quickBooksAccountField = accountFields.find(
+    (field) => field.templateId === fields.quickBooksAccount.templateId,
+  )
+
+  assert(quickBooksAccountField, 'QuickBooks account field does not exist')
+
+  const quickBooksAccountNames = quickBooksAccounts.QueryResponse.Account.map(
+    (account) => account.FullyQualifiedName,
+  )
+
+  const currentAccounts = quickBooksAccountField.Option
+  const accountsToAdd = quickBooksAccountNames.filter(
+    (accountName) =>
+      !currentAccounts.some(
+        (currentAccount) => currentAccount.name === accountName,
+      ),
+  )
+
+  const options: OptionPatch[] = accountsToAdd.map((accountName) => ({
+    id: faker.string.uuid(),
+    op: 'add',
+    name: accountName,
+  }))
+
+  await updateField(accountId, {
+    description: quickBooksAccountField.description,
+    id: quickBooksAccountField.id,
+    name: quickBooksAccountField.name,
+    defaultValue: { optionId: quickBooksAccountField.defaultValue.option?.id },
+    isRequired: quickBooksAccountField.isRequired,
+    options,
+  })
 }
