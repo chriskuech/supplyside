@@ -5,17 +5,25 @@ import { faker } from '@faker-js/faker'
 import { z } from 'zod'
 import CSRF from 'csrf'
 import { Prisma } from '@prisma/client'
+import { difference } from 'remeda'
 import { fields } from '../schema/template/system-fields'
-import { readFields, updateField } from '../schema/fields'
 import { OptionPatch } from '../schema/fields/types'
+import { readFields, updateField } from '../schema/fields'
+import { createResource, readResources } from '../resource/actions'
+import { selectResourceFieldValue } from '../resource/values/mappers'
+import { updateValue } from '../resource/fields/actions'
+import { readSchema } from '../schema/actions'
+import { selectField } from '../schema/types'
 import {
   accountQuerySchema,
-  CompanyInfo,
   companyInfoSchema,
+  countQuerySchema,
   QuickBooksToken,
   quickbooksTokenSchema,
+  vendorQuerySchema,
 } from './schemas'
 import { getQuickBooksConfig, quickBooksClient } from './util'
+import { CompanyInfo, QueryOptions } from './types'
 import prisma from '@/services/prisma'
 
 const baseUrl = (realmId: string) => {
@@ -160,19 +168,30 @@ export const getCompanyInfo = async (
     .then((data) => companyInfoSchema.parse(data.json))
 }
 
-export const syncDataFromQuickBooks = async (
+const query = async <T>(
   accountId: string,
-): Promise<void> => {
+  { entity, getCount, maxResults, startPosition, where }: QueryOptions,
+  schema: z.ZodType<T>,
+): Promise<T> => {
   const token = await requireTokenWithRedirect(accountId)
-  const client = await quickBooksClient(token)
+  const client = quickBooksClient(token)
 
-  const quickBooksAccounts = await client
+  return client
     .makeApiCall({
-      url: `${baseUrl(client.token.realmId)}/query?query=select * from Account`,
+      url: `${baseUrl(client.token.realmId)}/query?query=select ${getCount ? 'count(*)' : '*'} from ${entity} ${where ?? ''} ${startPosition ? `STARTPOSITION ${startPosition}` : ''} ${maxResults ? `MAXRESULTS ${maxResults}` : ''}`,
       method: 'GET',
     })
-    .then((data) => accountQuerySchema.parse(data.json))
+    .then((data) => schema.parse(data.json))
+}
 
+const upsertAccountsFromQuickBooks = async (
+  accountId: string,
+): Promise<void> => {
+  const quickBooksAccounts = await query(
+    accountId,
+    { entity: 'Account' },
+    accountQuerySchema,
+  )
   const accountFields = await readFields(accountId)
   const quickBooksAccountField = accountFields.find(
     (field) => field.templateId === fields.quickBooksAccount.templateId,
@@ -202,8 +221,110 @@ export const syncDataFromQuickBooks = async (
     description: quickBooksAccountField.description,
     id: quickBooksAccountField.id,
     name: quickBooksAccountField.name,
-    defaultValue: { optionId: quickBooksAccountField.defaultValue.option?.id },
+    defaultValue: {
+      optionId: quickBooksAccountField.defaultValue.option?.id,
+    },
     isRequired: quickBooksAccountField.isRequired,
     options,
   })
+}
+
+const upsertVendorsFromQuickBooks = async (
+  accountId: string,
+): Promise<void> => {
+  const quickBooksVendorsCount = await query(
+    accountId,
+    { entity: 'Vendor', getCount: true },
+    countQuerySchema,
+  )
+  const totalQuickBooksVendors = quickBooksVendorsCount.QueryResponse.totalCount
+  const maxVendorsPerPage = 1000
+  const numberOfRequests = Math.ceil(totalQuickBooksVendors / maxVendorsPerPage)
+
+  const vendorQueryPromises = []
+  for (let i = 0; i < numberOfRequests; i++) {
+    vendorQueryPromises.push(
+      query(
+        accountId,
+        {
+          entity: 'Vendor',
+          startPosition: i * maxVendorsPerPage + 1,
+          maxResults: maxVendorsPerPage,
+        },
+        vendorQuerySchema,
+      ),
+    )
+  }
+
+  const vendorResponses = await Promise.all(vendorQueryPromises)
+  const quickBooksVendors = vendorResponses.flatMap(
+    (vendorResponse) => vendorResponse.QueryResponse.Vendor,
+  )
+
+  const [currentVendors, vendorSchema] = await Promise.all([
+    readResources({ accountId, type: 'Vendor' }),
+    readSchema({ accountId, resourceType: 'Vendor' }),
+  ])
+  const quickBooksIdField = selectField(vendorSchema, fields.quickBooksId)
+  const vendorNameField = selectField(vendorSchema, fields.name)
+
+  assert(quickBooksIdField, 'QuickBooksId field not found')
+  assert(vendorNameField, 'Name field not found')
+
+  const quickBooksVendorsToAdd = quickBooksVendors.filter(
+    (quickBooksVendor) =>
+      !currentVendors.some(
+        (vendor) =>
+          selectResourceFieldValue(vendor, quickBooksIdField.id) ===
+          quickBooksVendor.Id,
+      ),
+  )
+
+  const quickBooksVendorsToUpdate = difference(
+    quickBooksVendors,
+    quickBooksVendorsToAdd,
+  )
+
+  await Promise.all(
+    quickBooksVendorsToUpdate.map(async (quickBooksVendor) => {
+      const vendor = currentVendors.find(
+        (currentVendor) =>
+          selectResourceFieldValue(currentVendor, quickBooksIdField.id) ===
+          quickBooksVendor.Id,
+      )
+
+      if (!vendor) return
+
+      const vendorName = selectResourceFieldValue(vendor, vendorNameField.id)
+
+      if (vendorName === quickBooksVendor.DisplayName) return
+
+      return updateValue({
+        resourceId: vendor.id,
+        fieldId: vendorNameField.id,
+        value: { string: quickBooksVendor.DisplayName },
+      })
+    }),
+  )
+
+  //This can be improved by creating all vendors in parallel. To do this we must create a Key and Id here for each resource
+  for (const quickBooksVendorToAdd of quickBooksVendorsToAdd) {
+    await createResource({
+      accountId,
+      type: 'Vendor',
+      data: {
+        [fields.name.name]: quickBooksVendorToAdd.DisplayName,
+        [fields.quickBooksId.name]: quickBooksVendorToAdd.Id,
+      },
+    })
+  }
+}
+
+export const syncDataFromQuickBooks = async (
+  accountId: string,
+): Promise<void> => {
+  await Promise.all([
+    upsertAccountsFromQuickBooks(accountId),
+    upsertVendorsFromQuickBooks(accountId),
+  ])
 }
