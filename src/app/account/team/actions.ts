@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { inviteUser } from '@/domain/iam/user/actions'
 import { User } from '@/domain/iam/user/types'
 import { readSession } from '@/lib/session/actions'
@@ -26,4 +27,6 @@ export const deleteUser = async (userId: string) => {
   const { accountId } = await readSession()
 
   await prisma().user.delete({ where: { accountId, id: userId } })
+
+  revalidatePath('')
 }
