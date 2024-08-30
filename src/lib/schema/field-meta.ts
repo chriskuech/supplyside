@@ -1,19 +1,16 @@
 'use server'
 
 import { readSession } from '@/lib/session/actions'
-import prisma from '@/services/prisma'
 import { Option } from '@/domain/schema/types'
+import { readUsers as domainReadUsers } from '@/domain/iam/user/actions'
 
 export const readUsers = async (): Promise<Option[]> => {
   const { accountId } = await readSession()
 
-  const users = await prisma().user.findMany({
-    where: { accountId },
-    orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
-  })
+  const users = await domainReadUsers({ accountId })
 
   return users.map((user) => ({
     id: user.id,
-    name: `${user.firstName} ${user.lastName}`,
+    name: user.fullName ?? user.email,
   }))
 }
