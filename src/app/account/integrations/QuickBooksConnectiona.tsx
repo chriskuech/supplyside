@@ -2,7 +2,7 @@ import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 
 import { getCompanyInfo } from './actions'
-import QuickBooksSyncButton from './QuickbooksSyncButton'
+import QuickBooksSyncButton from './QuickBooksSyncButton'
 import { readAccount } from '@/domain/iam/account/actions'
 import { readSession } from '@/lib/session/actions'
 
