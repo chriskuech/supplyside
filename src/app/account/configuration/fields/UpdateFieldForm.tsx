@@ -16,7 +16,11 @@ import { FieldType } from '@prisma/client'
 import OptionsControl from './OptionsControl'
 import ResourceTypeSelect from './ResourceTypeSelect'
 import DefaultValueControl from './DefaultValueControl'
-import { Field, OptionPatch, UpdateFieldDto } from '@/domain/schema/fields'
+import {
+  Field,
+  OptionPatch,
+  UpdateFieldDto,
+} from '@/domain/schema/fields/types'
 import { findField } from '@/domain/schema/template/system-fields'
 import { mapValueToInput } from '@/domain/resource/values/mappers'
 import { ValueInput } from '@/domain/resource/values/types'
