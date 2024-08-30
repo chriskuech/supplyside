@@ -1,9 +1,9 @@
 import { Alert } from '@mui/material'
-import QuickbooksConnectButton from './QuikBooksConnectButton'
-import QuickbooksConnection from './QuickBooksConnection'
-import { getQuickbooksToken } from '@/domain/quickBooks/actions'
-import { Session } from '@/domain/iam/session/types'
+import QuickBooksConnectButton from './QuickBooksConnectButton'
+import QuickBooksConnection from './QuickBooksConnection'
 import { isQuickBooksEnabledForSystem } from '@/domain/quickBooks/util'
+import { Session } from '@/domain/iam/session/types'
+import { getQuickbooksToken } from '@/domain/quickBooks'
 
 type Props = {
   session: Session
@@ -19,8 +19,8 @@ export default async function Quickbooks({ session }: Props) {
   const quickBooksToken = await getQuickbooksToken(session.accountId)
 
   return quickBooksToken ? (
-    <QuickbooksConnection accountId={session.accountId} />
+    <QuickBooksConnection session={session} />
   ) : (
-    <QuickbooksConnectButton accountId={session.accountId} />
+    <QuickBooksConnectButton />
   )
 }

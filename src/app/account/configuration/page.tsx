@@ -1,9 +1,9 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
-import { readFields } from './fields/actions'
 import { readSchemas } from './schemas/actions'
 import SchemasControl from './schemas/SchemasControl'
 import AddFieldButton from './fields/AddFieldButton'
 import FieldsTable from './fields/FieldsTable'
+import { readFields } from './fields/actions'
 
 export default async function Configuration() {
   const [fields, schemas] = await Promise.all([readFields(), readSchemas()])

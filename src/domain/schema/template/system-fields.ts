@@ -248,6 +248,11 @@ const _fields = {
     type: 'Number',
     description: 'The number of units purchased of an item',
   },
+  quickBooksAccount: {
+    templateId: '3cf75b8f-f4e4-406f-a1db-0761aa6db523',
+    name: 'Accounting Category',
+    type: 'Select',
+  },
   shippingAccountNumber: {
     templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
     name: 'Shipping Account Number',

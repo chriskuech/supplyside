@@ -25,6 +25,10 @@ export const schemas: SchemaTemplate[] = [
         ],
       },
       {
+        name: 'Accounting Info',
+        fields: [fields.quickBooksAccount],
+      },
+      {
         name: 'Payment Info',
         fields: [
           fields.paymentTerms,
