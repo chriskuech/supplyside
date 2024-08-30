@@ -8,7 +8,7 @@ import { ExpandMore } from '@mui/icons-material'
 import AddSectionControl from './AddSectionControl'
 import { Schema } from './actions'
 import SchemaSectionsControl from './SchemaSectionsControl'
-import { Field } from '@/domain/schema/fields'
+import { Field } from '@/domain/schema/fields/types'
 
 type Props = {
   fields: Field[]

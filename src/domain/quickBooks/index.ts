@@ -6,7 +6,8 @@ import { z } from 'zod'
 import CSRF from 'csrf'
 import { Prisma } from '@prisma/client'
 import { fields } from '../schema/template/system-fields'
-import { OptionPatch, readFields, updateField } from '../schema/fields'
+import { readFields, updateField } from '../schema/fields'
+import { OptionPatch } from '../schema/fields/types'
 import {
   accountQuerySchema,
   CompanyInfo,
