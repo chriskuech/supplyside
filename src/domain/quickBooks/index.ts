@@ -5,7 +5,7 @@ import { faker } from '@faker-js/faker'
 import { z } from 'zod'
 import CSRF from 'csrf'
 import { Prisma } from '@prisma/client'
-import { difference } from 'remeda'
+import { difference, range } from 'remeda'
 import {
   accountQuerySchema,
   companyInfoSchema,
@@ -241,9 +241,8 @@ const upsertVendorsFromQuickBooks = async (
   const maxVendorsPerPage = 1000
   const numberOfRequests = Math.ceil(totalQuickBooksVendors / maxVendorsPerPage)
 
-  const vendorQueryPromises = []
-  for (let i = 0; i < numberOfRequests; i++) {
-    vendorQueryPromises.push(
+  const vendorResponses = await Promise.all(
+    range(0, numberOfRequests).map((i) =>
       query(
         accountId,
         {
@@ -253,10 +252,9 @@ const upsertVendorsFromQuickBooks = async (
         },
         vendorQuerySchema,
       ),
-    )
-  }
+    ),
+  )
 
-  const vendorResponses = await Promise.all(vendorQueryPromises)
   const quickBooksVendors = vendorResponses.flatMap(
     (vendorResponse) => vendorResponse.QueryResponse.Vendor,
   )
@@ -265,17 +263,20 @@ const upsertVendorsFromQuickBooks = async (
     readResources({ accountId, type: 'Vendor' }),
     readSchema({ accountId, resourceType: 'Vendor' }),
   ])
-  const quickBooksIdField = selectField(vendorSchema, fields.quickBooksId)
+  const quickBooksVendorIdField = selectField(
+    vendorSchema,
+    fields.quickBooksVendorId,
+  )
   const vendorNameField = selectField(vendorSchema, fields.name)
 
-  assert(quickBooksIdField, 'QuickBooksId field not found')
+  assert(quickBooksVendorIdField, 'QuickBooksId field not found')
   assert(vendorNameField, 'Name field not found')
 
   const quickBooksVendorsToAdd = quickBooksVendors.filter(
     (quickBooksVendor) =>
       !currentVendors.some(
         (vendor) =>
-          selectResourceFieldValue(vendor, quickBooksIdField.id) ===
+          selectResourceFieldValue(vendor, quickBooksVendorIdField.id) ===
           quickBooksVendor.Id,
       ),
   )
@@ -289,8 +290,10 @@ const upsertVendorsFromQuickBooks = async (
     quickBooksVendorsToUpdate.map(async (quickBooksVendor) => {
       const vendor = currentVendors.find(
         (currentVendor) =>
-          selectResourceFieldValue(currentVendor, quickBooksIdField.id) ===
-          quickBooksVendor.Id,
+          selectResourceFieldValue(
+            currentVendor,
+            quickBooksVendorIdField.id,
+          ) === quickBooksVendor.Id,
       )
 
       if (!vendor) return
@@ -314,7 +317,7 @@ const upsertVendorsFromQuickBooks = async (
       type: 'Vendor',
       data: {
         [fields.name.name]: quickBooksVendorToAdd.DisplayName,
-        [fields.quickBooksId.name]: quickBooksVendorToAdd.Id,
+        [fields.quickBooksVendorId.name]: quickBooksVendorToAdd.Id,
       },
     })
   }

@@ -11,11 +11,11 @@ const refSchema = z.object({
 })
 
 const addressSchema = z.object({
-  City: z.string(),
+  City: z.string().optional(),
   Country: z.string().optional(),
-  Line1: z.string(),
-  PostalCode: z.string(),
-  CountrySubDivisionCode: z.string(),
+  Line1: z.string().optional(),
+  PostalCode: z.string().optional(),
+  CountrySubDivisionCode: z.string().optional(),
   Id: z.string(),
 })
 
