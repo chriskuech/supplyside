@@ -255,7 +255,7 @@ const _fields = {
   },
   quickBooksVendorId: {
     templateId: '392bfedc-3b4f-46c9-a0a9-9bfa2eeb0896',
-    name: 'QuickBooks vendor ID',
+    name: 'QuickBooks Vendor ID',
     type: 'Text',
   },
   shippingAccountNumber: {

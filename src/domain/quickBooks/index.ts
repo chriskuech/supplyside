@@ -6,6 +6,7 @@ import { z } from 'zod'
 import CSRF from 'csrf'
 import { Prisma } from '@prisma/client'
 import { difference, range } from 'remeda'
+import { selectValue } from '../resource/types'
 import {
   accountQuerySchema,
   companyInfoSchema,
@@ -20,7 +21,6 @@ import { fields } from '@/domain/schema/template/system-fields'
 import { OptionPatch } from '@/domain/schema/fields/types'
 import { readFields, updateField } from '@/domain/schema/fields'
 import { createResource, readResources } from '@/domain/resource/actions'
-import { selectResourceFieldValue } from '@/domain/resource/values/mappers'
 import { updateValue } from '@/domain/resource/fields/actions'
 import { readSchema } from '@/domain/schema/actions'
 import { selectField } from '@/domain/schema/types'
@@ -263,20 +263,15 @@ const upsertVendorsFromQuickBooks = async (
     readResources({ accountId, type: 'Vendor' }),
     readSchema({ accountId, resourceType: 'Vendor' }),
   ])
-  const quickBooksVendorIdField = selectField(
-    vendorSchema,
-    fields.quickBooksVendorId,
-  )
-  const vendorNameField = selectField(vendorSchema, fields.name)
 
-  assert(quickBooksVendorIdField, 'QuickBooksId field not found')
-  assert(vendorNameField, 'Name field not found')
+  const vendorNameField = selectField(vendorSchema, fields.name)
+  assert(vendorNameField, 'Vendor name field not found')
 
   const quickBooksVendorsToAdd = quickBooksVendors.filter(
     (quickBooksVendor) =>
       !currentVendors.some(
         (vendor) =>
-          selectResourceFieldValue(vendor, quickBooksVendorIdField.id) ===
+          selectValue(vendor, fields.quickBooksVendorId)?.string ===
           quickBooksVendor.Id,
       ),
   )
@@ -290,15 +285,13 @@ const upsertVendorsFromQuickBooks = async (
     quickBooksVendorsToUpdate.map(async (quickBooksVendor) => {
       const vendor = currentVendors.find(
         (currentVendor) =>
-          selectResourceFieldValue(
-            currentVendor,
-            quickBooksVendorIdField.id,
-          ) === quickBooksVendor.Id,
+          selectValue(currentVendor, fields.quickBooksVendorId)?.string ===
+          quickBooksVendor.Id,
       )
 
       if (!vendor) return
 
-      const vendorName = selectResourceFieldValue(vendor, vendorNameField.id)
+      const vendorName = selectValue(vendor, fields.name)?.string
 
       if (vendorName === quickBooksVendor.DisplayName) return
 
@@ -310,7 +303,7 @@ const upsertVendorsFromQuickBooks = async (
     }),
   )
 
-  //This can be improved by creating all vendors in parallel. To do this we must create a Key and Id here for each resource
+  // `Resource.key` is (currently) created transactionally and thus not parallelizable
   for (const quickBooksVendorToAdd of quickBooksVendorsToAdd) {
     await createResource({
       accountId,
