@@ -25,8 +25,8 @@ import { Box, Stack, TextField } from '@mui/material'
 import { FC } from 'react'
 import { z } from 'zod'
 import { isPlainObject } from 'remeda'
-import { Field as FullField } from '../fields/actions'
 import { Field, Section } from './actions'
+import { Field as FullField } from '@/domain/schema/fields/types'
 
 type Props = {
   fields: FullField[]

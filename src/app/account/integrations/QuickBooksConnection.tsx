@@ -1,30 +1,34 @@
 import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
-
-import { getCompanyInfo } from '@/domain/quickBooks/actions'
-import { readAccount } from '@/domain/iam/account/actions'
+import QuickBooksSyncButton from './QuickBooksSyncButton'
+import { Session } from '@/domain/iam/session/types'
+import { getCompanyInfo } from '@/domain/quickBooks'
 
 type Props = {
-  accountId: string
+  session: Session
 }
 
-export default async function QuickBooksConnection({ accountId }: Props) {
-  const [quickBooksCompanyInfo, account] = await Promise.all([
-    getCompanyInfo(accountId),
-    readAccount(accountId),
-  ])
+export default async function QuickBooksConnection({ session }: Props) {
+  const quickBooksCompanyInfo = await getCompanyInfo(session.accountId)
 
   return (
-    <Stack>
-      <Typography fontWeight="bold">Connected company</Typography>
-      <Stack direction="row" alignItems="center">
-        <Typography>{quickBooksCompanyInfo.CompanyInfo.CompanyName}</Typography>
-        <CheckIcon color="success" />
+    <Stack gap={2}>
+      <Stack>
+        <Typography fontWeight="bold">Connected company</Typography>
+        <Stack direction="row" alignItems="center">
+          <Typography>
+            {quickBooksCompanyInfo.CompanyInfo.CompanyName}
+          </Typography>
+          <CheckIcon color="success" />
+        </Stack>
       </Stack>
       <Typography variant="caption">
         Connected at:{' '}
-        <strong>{account.quickBooksConnectedAt?.toLocaleTimeString()}</strong>
+        <strong>
+          {session.account.quickBooksConnectedAt?.toLocaleTimeString()}
+        </strong>
       </Typography>
+      <QuickBooksSyncButton />
     </Stack>
   )
 }

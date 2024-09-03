@@ -8,6 +8,7 @@ import { filter, fromEntries, keys, map, pipe } from 'remeda'
 import { deleteUser, updateUser } from './actions'
 import { systemAccountId } from '@/lib/const'
 import { User } from '@/domain/iam/user/types'
+import { useConfirmation } from '@/lib/confirmation'
 
 /**
  * @param oldObj
@@ -31,6 +32,18 @@ type Props = {
 }
 
 const UsersTable: FC<Props> = ({ currentUser, users }) => {
+  const confirm = useConfirmation()
+  const handleDeleteUser = async (userId: string) => {
+    const confirmed = await confirm({
+      title: 'Delete User',
+      content: 'Are you sure you want to delete this user?',
+    })
+
+    if (confirmed) {
+      deleteUser(userId)
+    }
+  }
+
   const editable: boolean =
     currentUser?.isAdmin || currentUser?.accountId === systemAccountId
 
@@ -76,8 +89,12 @@ const UsersTable: FC<Props> = ({ currentUser, users }) => {
       width: 75,
       sortable: false,
       disableColumnMenu: true,
-      renderCell: ({ row }) => (
-        <IconButton onClick={() => deleteUser(row.id)}>
+      renderCell: ({ row: { id: userId } }) => (
+        <IconButton
+          onClick={() => {
+            handleDeleteUser(userId)
+          }}
+        >
           <Clear />
         </IconButton>
       ),

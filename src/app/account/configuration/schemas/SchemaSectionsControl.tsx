@@ -28,7 +28,6 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { z } from 'zod'
-import { Field } from '../fields/actions'
 import {
   Schema,
   Section,
@@ -37,6 +36,7 @@ import {
   updateSection,
 } from './actions'
 import SectionFieldsControl from './SectionFieldsControl'
+import { Field } from '@/domain/schema/fields/types'
 
 type Props = {
   fields: Field[]
