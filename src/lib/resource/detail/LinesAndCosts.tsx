@@ -6,6 +6,8 @@ import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { Data, Resource } from '@/domain/resource/types'
 import { Where } from '@/domain/resource/json-logic/types'
 import { readResources } from '@/domain/resource/actions'
+import { Schema } from '@/domain/schema/types'
+import { fields } from '@/domain/schema/template/system-fields'
 
 type Props = {
   resource: Resource
@@ -29,6 +31,15 @@ export default async function LinesAndCosts({
     readSchema({ accountId: resource.accountId, resourceType: 'Line' }),
   ])
 
+  const strippedSchema: Schema = {
+    ...lineSchema,
+    allFields: lineSchema.allFields.filter(
+      ({ templateId }) =>
+        !templateId ||
+        ![fields.order.templateId, fields.bill.templateId].includes(templateId),
+    ),
+  }
+
   return (
     <Stack spacing={2}>
       <Stack direction="row" alignItems="end">
@@ -41,7 +52,7 @@ export default async function LinesAndCosts({
       </Stack>
       <Stack>
         <ResourceTable
-          schema={lineSchema}
+          schema={strippedSchema}
           resources={lines}
           isEditable={!isReadOnly}
           sx={{
