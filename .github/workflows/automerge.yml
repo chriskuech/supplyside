@@ -21,7 +21,7 @@ jobs:
           fi
 
           NUMBER=${{ github.event.pull_request.number }}
-          gh pr merge $NUMBER --auto --merge
+          gh pr merge $NUMBER --auto
           gh pr review $NUMBER --approve
         env:
           GH_TOKEN: ${{ secrets.AUTOMATION_PAT }}
