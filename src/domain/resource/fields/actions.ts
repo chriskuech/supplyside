@@ -4,6 +4,7 @@ import { fail } from 'assert'
 import { Cost, Prisma, ResourceType } from '@prisma/client'
 import { isString, pick } from 'remeda'
 import { revalidatePath } from 'next/cache'
+import { P, match } from 'ts-pattern'
 import { readResource } from '../actions'
 import { selectValue } from '../types'
 import prisma from '@/services/prisma'
@@ -42,10 +43,25 @@ export const updateValue = async ({
   revalidatePath('')
   //TODO:  check if value object is correct for each fieldType
 
-  const { fileIds, optionIds, string, ...rest } = value
+  const {
+    fileIds,
+    optionIds,
+    resourceId: linkedResourceId,
+    string,
+    ...rest
+  } = value
   const data: Prisma.ValueCreateInput & Prisma.ValueUpdateInput = {
     ...rest,
     string: string?.trim() || null,
+    Resource: match(linkedResourceId)
+      .with(null, () => ({
+        disconnect: true,
+      }))
+      .with(P.string, (id) => ({
+        connect: { id },
+      }))
+      .with(undefined, () => undefined)
+      .exhaustive(),
     ValueOption: optionIds
       ? {
           create: optionIds.map((optionId) => ({ optionId })),
