@@ -4,7 +4,7 @@ import { fail } from 'assert'
 import { Cost, Prisma, ResourceType } from '@prisma/client'
 import { isString, pick } from 'remeda'
 import { revalidatePath } from 'next/cache'
-import { readResource } from '../actions'
+import { readResource, readResources } from '../actions'
 import { selectValue } from '../types'
 import prisma from '@/services/prisma'
 import { createBlob } from '@/domain/blobs/actions'
@@ -458,8 +458,62 @@ export const copyLinkedResourceFields = async (
     )
   ) {
     await copyResourceCosts(linkedResourceId, resourceId)
-    //TODO: Copy line items
+    await copyResourceLines(linkedResourceId, resourceId)
   }
+
+  revalidatePath('')
+}
+
+export const copyResourceLines = async (
+  linkedResourceId: string,
+  resourceId: string,
+) => {
+  const linkedResource = await prisma().resource.findUniqueOrThrow({
+    where: { id: linkedResourceId },
+  })
+
+  const thisResource = await prisma().resource.findUniqueOrThrow({
+    where: { id: resourceId },
+  })
+
+  const linkedResourceLines = await readResources({
+    accountId: linkedResource.accountId,
+    type: 'Line',
+    where: {
+      '==': [{ var: linkedResource.type }, linkedResourceId],
+    },
+  })
+
+  await Promise.all(
+    linkedResourceLines.map(async (line) => {
+      const schema = await readSchema({
+        accountId: line.accountId,
+        resourceType: line.type,
+      })
+
+      const billField = selectField(schema, fields.bill) ?? fail()
+
+      return prisma().resourceField.update({
+        where: {
+          resourceId_fieldId: {
+            resourceId: line.id,
+            fieldId: billField.id,
+          },
+        },
+        data: {
+          Value: {
+            update: {
+              Resource: {
+                connect: {
+                  id: thisResource.id,
+                },
+              },
+            },
+          },
+        },
+      })
+    }),
+  )
 
   revalidatePath('')
 }
