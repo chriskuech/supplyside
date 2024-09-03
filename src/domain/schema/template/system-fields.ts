@@ -253,6 +253,11 @@ const _fields = {
     name: 'Accounting Category',
     type: 'Select',
   },
+  quickBooksVendorId: {
+    templateId: '392bfedc-3b4f-46c9-a0a9-9bfa2eeb0896',
+    name: 'QuickBooks Vendor ID',
+    type: 'Text',
+  },
   shippingAccountNumber: {
     templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
     name: 'Shipping Account Number',

@@ -107,7 +107,7 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'Vendor',
-    fields: [],
+    fields: [fields.quickBooksVendorId],
     sections: [
       {
         name: 'Summary',
