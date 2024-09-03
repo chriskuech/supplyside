@@ -6,7 +6,7 @@ import { Value, ValueInput, ValueResource } from './types'
 import { ResourceValueModel, ValueModel } from './model'
 import { fields } from '@/domain/schema/template/system-fields'
 import { mapUserModel } from '@/domain/iam/user/types'
-import { Field, Schema } from '@/domain/schema/types'
+import { Schema } from '@/domain/schema/types'
 
 export const mapValueToInput = (value: Value): ValueInput => ({
   boolean: value.boolean ?? undefined,
@@ -52,45 +52,27 @@ export const mapValueFromResource = (
     )?.Value.string ?? '',
 })
 
-export const mapFieldTypeToValueColumn = (t: FieldType) =>
-  match<FieldType, keyof Value>(t)
-    .with('Checkbox', () => 'boolean')
-    .with('Date', () => 'date')
-    .with('File', () => 'file')
-    .with(P.union('Money', 'Number'), () => 'number')
-    .with('User', () => 'user')
-    .with('Select', () => 'option')
-    .with(P.union('Textarea', 'Text'), () => 'string')
-    .with('Resource', () => 'resource')
-    .with('Contact', () => 'contact')
-    .with('Files', () => 'files')
-    .with('MultiSelect', () => 'options')
-    .exhaustive()
+export const isMissingRequiredFields = (schema: Schema, resource: Resource) =>
+  schema.allFields.some((field) => {
+    if (!field.isRequired) return false
 
-export const selectResourceFieldValue = (
-  resource: Resource,
-  fieldId: string,
-) => {
-  const field = resource.fields.find((rf) => rf.fieldId === fieldId)
+    const valueColumnName = match<FieldType, keyof Value>(field.type)
+      .with('Checkbox', () => 'boolean')
+      .with('Date', () => 'date')
+      .with('File', () => 'file')
+      .with(P.union('Money', 'Number'), () => 'number')
+      .with('User', () => 'user')
+      .with('Select', () => 'option')
+      .with(P.union('Textarea', 'Text'), () => 'string')
+      .with('Resource', () => 'resource')
+      .with('Contact', () => 'contact')
+      .with('Files', () => 'files')
+      .with('MultiSelect', () => 'options')
+      .exhaustive()
 
-  const valueColumn = field && mapFieldTypeToValueColumn(field.fieldType)
+    const value = resource.fields.find((rf) => rf.fieldId === field.id)?.value[
+      valueColumnName
+    ]
 
-  if (!field || !valueColumn) {
-    return undefined
-  }
-
-  return field.value[valueColumn]
-}
-
-export const isMissingRequiredFields = (
-  schema: Schema,
-  resource: Resource,
-): boolean =>
-  schema.allFields.some((field: Field) => {
-    const value = selectResourceFieldValue(resource, field.id)
-
-    return (
-      field.isRequired &&
-      (isNullish(value) || (isArray(value) && value.length === 0))
-    )
+    return isNullish(value) || (isArray(value) && value.length === 0)
   })

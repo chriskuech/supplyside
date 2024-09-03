@@ -11,11 +11,11 @@ const refSchema = z.object({
 })
 
 const addressSchema = z.object({
-  City: z.string(),
+  City: z.string().optional(),
   Country: z.string().optional(),
-  Line1: z.string(),
-  PostalCode: z.string(),
-  CountrySubDivisionCode: z.string(),
+  Line1: z.string().optional(),
+  PostalCode: z.string().optional(),
+  CountrySubDivisionCode: z.string().optional(),
   Id: z.string(),
 })
 
@@ -25,16 +25,34 @@ const accountSchema = z.object({
   Name: z.string(),
   Classification: z.string(),
   AccountSubType: z.string(),
-  CurrencyRef: refSchema,
+  CurrencyRef: refSchema.optional(),
   CurrentBalanceWithSubAccounts: z.number(),
   sparse: z.boolean(),
-  MetaData: metadataSchema,
+  MetaData: metadataSchema.optional(),
   AccountType: z.string(),
   CurrentBalance: z.number(),
-  Active: z.boolean(),
+  Active: z.boolean().optional(),
   SyncToken: z.string(),
   Id: z.string(),
   SubAccount: z.boolean(),
+})
+
+const emailSchema = z.object({
+  Address: z.string(),
+})
+
+const phoneSchema = z.object({
+  FreeFormNumber: z.string().optional(),
+})
+
+const urlSchema = z.object({
+  URI: z.string(),
+})
+
+export const countQuerySchema = z.object({
+  QueryResponse: z.object({
+    totalCount: z.number(),
+  }),
 })
 
 export const quickbooksTokenSchema = z.object({
@@ -57,32 +75,55 @@ export const accountQuerySchema = z.object({
   }),
 })
 
-export type AccountQuery = z.infer<typeof accountQuerySchema>
-
 export const companyInfoSchema = z.object({
   CompanyInfo: z.object({
     SyncToken: z.string(),
     domain: z.string(),
-    LegalAddr: addressSchema,
-    SupportedLanguages: z.string(),
+    LegalAddr: addressSchema.optional(),
+    SupportedLanguages: z.string().optional(),
     CompanyName: z.string(),
-    Country: z.string(),
+    Country: z.string().optional(),
     CompanyAddr: addressSchema,
     sparse: z.boolean(),
     Id: z.string(),
-    FiscalYearStartMonth: z.string(),
-    CustomerCommunicationAddr: addressSchema,
-    PrimaryPhone: z.object({
-      FreeFormNumber: z.string().optional(),
-    }),
-    LegalName: z.string(),
+    FiscalYearStartMonth: z.string().optional(),
+    CustomerCommunicationAddr: addressSchema.optional(),
+    PrimaryPhone: phoneSchema.optional(),
+    LegalName: z.string().optional(),
     CompanyStartDate: z.string(),
-    Email: z.object({
-      Address: z.string(),
-    }),
-    NameValue: z.array(z.object({ Name: z.string(), Value: z.string() })),
-    MetaData: metadataSchema,
+    Email: emailSchema.optional(),
+    NameValue: z
+      .array(z.object({ Name: z.string(), Value: z.string() }))
+      .optional(),
+    MetaData: metadataSchema.optional(),
   }),
 })
 
-export type CompanyInfo = z.infer<typeof companyInfoSchema>
+export const vendorSchema = z.object({
+  PrimaryEmailAddr: emailSchema.optional(),
+  Vendor1099: z.boolean().optional(),
+  domain: z.string(),
+  GivenName: z.string().optional(),
+  DisplayName: z.string(),
+  BillAddr: addressSchema.optional(),
+  SyncToken: z.string(),
+  PrintOnCheckName: z.string().optional(),
+  FamilyName: z.string().optional(),
+  PrimaryPhone: phoneSchema.optional(),
+  AcctNum: z.string().optional(),
+  CompanyName: z.string().optional(),
+  WebAddr: urlSchema.optional(),
+  sparse: z.boolean(),
+  Active: z.boolean().optional(),
+  Balance: z.number(),
+  Id: z.string(),
+  MetaData: metadataSchema.optional(),
+})
+
+export const vendorQuerySchema = z.object({
+  QueryResponse: z.object({
+    startPosition: z.number(),
+    Vendor: z.array(vendorSchema),
+    maxResults: z.number(),
+  }),
+})
