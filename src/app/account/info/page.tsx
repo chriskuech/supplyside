@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { handleSaveSettings } from './actions'
 import { readAccount } from '@/domain/iam/account/actions'
 import { readSession } from '@/lib/session/actions'
+import config from '@/services/config'
 
 export default async function InfoPage() {
   const { accountId } = await readSession()
@@ -68,7 +69,11 @@ export default async function InfoPage() {
             helperText={
               <>
                 Your Bills Inbox address is currently{' '}
-                <strong>{account?.key ?? ''}@bills.supplyside.io</strong>.
+                <strong>
+                  {account?.key ?? <em>(Company ID)</em>}@
+                  {config().BILLS_EMAIL_DOMAIN}
+                </strong>
+                .
               </>
             }
           />
