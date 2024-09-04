@@ -1,13 +1,12 @@
 'use server'
 
-import { ok } from 'assert'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { validate as isUuid } from 'uuid'
+import { InvalidSessionError } from './types'
 import {
   clearSession as domainClearSession,
   createSession as domainCreateSession,
-  readSession as domainReadSession,
   readAndExtendSession as domainReadAndExtendSession,
   impersonate as domainImpersonate,
 } from '@/domain/iam/session/actions'
@@ -27,42 +26,40 @@ export const createSession = async (email: string, password: string) => {
   })
 }
 
-export const hasSession = () => {
-  const sessionId = cookies().get(sessionIdCookieName)?.value
-
-  if (!sessionId || !isUuid(sessionId)) return false
-
-  return domainReadSession(sessionId)
-    .then(() => true)
-    .catch(() => false)
-}
-
 export const readSession = async () => {
   const sessionId = cookies().get(sessionIdCookieName)?.value
 
-  ok(sessionId, '`sessionId` not found in cookies')
-  ok(isUuid(sessionId), '`sessionId` is not a valid UUID')
+  if (!sessionId)
+    throw new InvalidSessionError('`sessionId` not found in cookies')
 
-  const session = await domainReadSession(sessionId)
+  if (!isUuid(sessionId))
+    throw new InvalidSessionError('`sessionId` is not a valid UUID')
+
+  const session = await domainReadAndExtendSession(sessionId)
+
+  if (!session) throw new InvalidSessionError('`session` not found')
 
   return session
 }
 
 // this should be in a middleware, but https://github.com/vercel/next.js/issues/69002
 export const requireSessionWithRedirect = async () => {
-  const sessionId = cookies().get(sessionIdCookieName)?.value
-  if (!sessionId || !isUuid(sessionId)) return redirect('/auth/login')
+  try {
+    const session = await readSession()
 
-  const session = await domainReadAndExtendSession(sessionId)
-  if (!session) return redirect('/auth/login')
+    if (session.user.requirePasswordReset) redirect('/auth/update-password')
 
-  if (session.user.requirePasswordReset)
-    return redirect('/auth/update-password')
+    if (!session.user.tsAndCsSignedAt) redirect('/auth/terms-and-conditions')
 
-  if (!session.user.tsAndCsSignedAt)
-    return redirect('/auth/terms-and-conditions')
+    return session
+  } catch (e) {
+    if (e instanceof InvalidSessionError) {
+      await clearSession()
+      redirect('/auth/login')
+    }
 
-  return session
+    throw e
+  }
 }
 
 export const clearSession = async () => {

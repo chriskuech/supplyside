@@ -11,7 +11,7 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FieldType } from '@prisma/client'
 import OptionsControl from './OptionsControl'
 import ResourceTypeSelect from './ResourceTypeSelect'
@@ -48,7 +48,17 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
     mapValueToInput(field.defaultValue),
   )
 
+  const [defaultToToday, setDefaultToToday] = useState<boolean>(
+    field.defaultToToday,
+  )
+
   const [isRequired, setIsRequired] = useState<boolean>(field.isRequired)
+
+  useEffect(() => {
+    if (defaultToToday) {
+      setDefaultValue((state) => ({ ...state, date: null }))
+    }
+  }, [defaultToToday])
 
   const isValid = !!name
   const isDisabled = !!field.templateId
@@ -110,6 +120,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
           </FormControl>
         )}
       </Stack>
+
       {!findField(field.templateId)?.defaultValue && (
         <FormControl fullWidth>
           <InputLabel htmlFor="default-field-value-control">
@@ -119,6 +130,21 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
             field={field}
             defaultValue={defaultValue}
             onChange={setDefaultValue}
+            isDisabled={defaultToToday}
+          />
+        </FormControl>
+      )}
+
+      {field.type === FieldType.Date && (
+        <FormControl fullWidth>
+          <FormControlLabel
+            label="Default to Today"
+            control={
+              <Checkbox
+                checked={defaultToToday}
+                onChange={(e) => setDefaultToToday(e.target.checked)}
+              />
+            }
           />
         </FormControl>
       )}
@@ -150,6 +176,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
               description: description?.trim() || null,
               options,
               defaultValue,
+              defaultToToday,
               isRequired,
             })
           }

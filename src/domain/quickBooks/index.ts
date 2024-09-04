@@ -4,16 +4,16 @@ import { z } from 'zod'
 import CSRF from 'csrf'
 import { Prisma } from '@prisma/client'
 import { QuickBooksToken, quickbooksTokenSchema } from './schemas'
-import { getQuickBooksConfig, quickBooksClient } from './util'
+import { getQuickBooksConfigUnsafe, quickBooksClient } from './util'
 import { QueryOptions } from './types'
 import { upsertAccountsFromQuickBooks } from './entities/accounts'
 import { upsertVendorsFromQuickBooks } from './entities/vendor'
 import prisma from '@/services/prisma'
 
 export const baseUrl = (realmId: string) => {
-  const { quickBooksApiBaseUrl } = getQuickBooksConfig()
+  const { apiBaseUrl } = getQuickBooksConfigUnsafe()
 
-  return `${quickBooksApiBaseUrl}/v3/company/${realmId}`
+  return `${apiBaseUrl}/v3/company/${realmId}`
 }
 
 const cleanToken = (token: Token): QuickBooksToken => ({
@@ -78,7 +78,7 @@ export const createQuickBooksConnection = async (
   accountId: string,
   url: string,
 ) => {
-  const { csrfSecret } = getQuickBooksConfig()
+  const { csrfSecret } = getQuickBooksConfigUnsafe()
 
   const tokenExchange = await quickBooksClient().createToken(url)
   const { csrf } = z

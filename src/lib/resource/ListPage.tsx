@@ -2,6 +2,7 @@
 
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { ResourceType } from '@prisma/client'
+import { ReactNode } from 'react'
 import CreateResourceButton from './CreateResourceButton'
 import ResourceTable from './ResourceTable'
 import { readResources } from '@/domain/resource/actions'
@@ -11,9 +12,14 @@ import { requireSessionWithRedirect } from '@/lib/session/actions'
 type Props = {
   tableKey: string
   resourceType: ResourceType
+  callToActions?: ReactNode[]
 }
 
-export default async function ListPage({ tableKey, resourceType }: Props) {
+export default async function ListPage({
+  tableKey,
+  resourceType,
+  callToActions = [],
+}: Props) {
   const { accountId } = await requireSessionWithRedirect()
   const [schema, resources] = await Promise.all([
     readSchema({ accountId, resourceType }),
@@ -23,7 +29,7 @@ export default async function ListPage({ tableKey, resourceType }: Props) {
   return (
     <Container sx={{ my: 5 }}>
       <Stack spacing={4}>
-        <Stack direction="row" alignItems="center">
+        <Stack direction="row" alignItems="center" gap={1}>
           <Typography
             variant="h3"
             flexGrow={1}
@@ -31,16 +37,22 @@ export default async function ListPage({ tableKey, resourceType }: Props) {
           >
             {resourceType}s
           </Typography>
-          <Box>
+          {[
+            ...callToActions,
             <CreateResourceButton
+              key={CreateResourceButton.name}
               type={resourceType}
               shouldRedirect
               buttonProps={{
                 size: 'large',
                 color: 'secondary',
               }}
-            />
-          </Box>
+            />,
+          ].map((cta, i) => (
+            <Box key={i} height="min-content">
+              {cta}
+            </Box>
+          ))}
         </Stack>
         <ResourceTable
           tableKey={tableKey}

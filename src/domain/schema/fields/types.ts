@@ -25,6 +25,7 @@ export type Field = {
   defaultValue: Value
   isRequired: boolean
   templateId: string | null
+  defaultToToday: boolean
 }
 
 export type CreateFieldParams = {
@@ -40,5 +41,6 @@ export type UpdateFieldDto = {
   description: string | null
   options: OptionPatch[]
   defaultValue: ValueInput
+  defaultToToday: boolean
   isRequired?: boolean
 }

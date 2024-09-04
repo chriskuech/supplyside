@@ -22,6 +22,7 @@ export type Field = {
   options: Option[]
   resourceType: ResourceType | null
   defaultValue: Value | null
+  defaultToToday: boolean
   isRequired: boolean
 }
 

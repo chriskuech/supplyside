@@ -8,6 +8,7 @@ import OrderLink from './tools/OrderLink'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
 import UpsertBillButton from './UpsertBillButton'
+import QuickBooksBillLink from './tools/QuickBooksBillLink'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import {
   billStatusOptions,
@@ -18,6 +19,7 @@ import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectField } from '@/domain/schema/types'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
+import { getQuickBooksConfig } from '@/domain/quickBooks/util'
 
 export default async function BillsDetail({
   params: { key },
@@ -44,11 +46,30 @@ export default async function BillsDetail({
 
   const order = selectValue(resource, fields.order)?.resource
 
+  const quickBooksBillId = selectValue(
+    resource,
+    fields.quickBooksBillId,
+  )?.string
+
+  const qbConfig = getQuickBooksConfig()
+  const quickBooksAppUrl =
+    quickBooksBillId && qbConfig
+      ? `${qbConfig.appBaseUrl}/app/bill?&txnId=${quickBooksBillId}`
+      : undefined
+
   return (
     <ResourceDetailPage
       schema={schema}
       resource={resource}
       tools={[
+        ...(quickBooksAppUrl
+          ? [
+              <QuickBooksBillLink
+                key={QuickBooksBillLink.name}
+                quickBooksAppUrl={quickBooksAppUrl}
+              />,
+            ]
+          : []),
         ...(order ? [<OrderLink key={order.id} order={order} />] : []),
         <AttachmentsToolbarControl
           key={AttachmentsToolbarControl.name}

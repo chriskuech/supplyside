@@ -148,6 +148,7 @@ model Field {
   templateId     String?       @db.Uuid
   defaultValueId String        @db.Uuid
   isRequired     Boolean       @default(false)
+  defaultToToday Boolean       @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

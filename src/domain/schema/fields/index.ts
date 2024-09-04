@@ -34,17 +34,10 @@ export const readFields = async (accountId: string): Promise<Field[]> => {
     orderBy: {
       name: 'asc',
     },
-    select: {
-      id: true,
-      templateId: true,
-      type: true,
-      name: true,
-      description: true,
-      resourceType: true,
+    include: {
       DefaultValue: {
         include: valueInclude,
       },
-      isRequired: true,
       Option: {
         orderBy: {
           order: 'asc',
@@ -54,7 +47,18 @@ export const readFields = async (accountId: string): Promise<Field[]> => {
   })
 
   return fields.map((f) => ({
-    ...f,
+    id: f.id,
+    name: f.name,
+    defaultToToday: f.defaultToToday,
+    description: f.description,
+    isRequired: f.isRequired,
+    Option: f.Option.map((o) => ({
+      id: o.id,
+      name: o.name,
+    })),
+    resourceType: f.resourceType,
+    type: f.type,
+    templateId: f.templateId,
     defaultValue: mapValueFromModel(f.DefaultValue),
   }))
 }
@@ -92,6 +96,7 @@ export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
           },
         },
         isRequired: dto.isRequired,
+        defaultToToday: dto.defaultToToday,
       },
     }),
     ...dto.options.map((o, i) =>
