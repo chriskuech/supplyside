@@ -50,7 +50,7 @@ export const renderPo = async (params: RenderPoParams) => {
       displayHeaderFooter: true,
       margin: {
         top: '35px',
-        bottom: '15px',
+        bottom: '35px',
         left: '15px',
         right: '15px',
       },

@@ -38,14 +38,13 @@ export default async function PoDocumentFooter({
       }}
     >
       <div style={{ flexGrow: 1 }}>
-        <span>Order #{resource.key} </span>
-        <span style={{ margin: '0px 5px' }}>| </span>
-        {formattedDate}
+        <span>Order #{resource.key}</span>
+        <span style={{ margin: '0px 5px' }}>|</span>
+        <span>{formattedDate}</span>
       </div>
 
       <div>
-        Page <span className="pageNumber"></span> of{' '}
-        <span className="totalPages"></span>
+        Page <span className="pageNumber" /> of <span className="totalPages" />
       </div>
     </div>
   )
