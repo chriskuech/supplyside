@@ -11,11 +11,11 @@ import { NavMenu } from './NavMenu'
 import Logo from './Logo'
 import ImpersonationControl from './ImpersonationControl'
 import { systemAccountId } from '@/lib/const'
-import { readSession } from '@/lib/session/actions'
+import { hasSession, readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
 
 export default async function AppBar() {
-  const session = await readSession().catch(() => null)
+  const session = (await hasSession()) ? await readSession() : null
 
   const accounts = await prisma().account.findMany({
     orderBy: {

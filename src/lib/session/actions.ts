@@ -27,6 +27,16 @@ export const createSession = async (email: string, password: string) => {
   })
 }
 
+export const hasSession = () => {
+  const sessionId = cookies().get(sessionIdCookieName)?.value
+
+  if (!sessionId || !isUuid(sessionId)) return false
+
+  return domainReadSession(sessionId)
+    .then(() => true)
+    .catch(() => false)
+}
+
 export const readSession = async () => {
   const sessionId = cookies().get(sessionIdCookieName)?.value
 
@@ -41,10 +51,7 @@ export const readSession = async () => {
 // this should be in a middleware, but https://github.com/vercel/next.js/issues/69002
 export const requireSessionWithRedirect = async () => {
   const sessionId = cookies().get(sessionIdCookieName)?.value
-
-  if (!sessionId) return redirect('/auth/login')
-
-  if (!isUuid(sessionId)) return redirect('/auth/logout')
+  if (!sessionId || !isUuid(sessionId)) return redirect('/auth/login')
 
   const session = await domainReadAndExtendSession(sessionId)
   if (!session) return redirect('/auth/login')
