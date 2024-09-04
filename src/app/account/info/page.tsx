@@ -65,6 +65,12 @@ export default async function InfoPage() {
             margin="normal"
             name="key"
             defaultValue={account?.key}
+            helperText={
+              <>
+                Your Bills Inbox address is currently{' '}
+                <strong>{account?.key ?? ''}@bills.supplyside.io</strong>.
+              </>
+            }
           />
 
           <TextField
