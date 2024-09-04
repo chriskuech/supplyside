@@ -3,7 +3,7 @@ import QuickBooksConnectButton from './QuickBooksConnectButton'
 import QuickBooksConnection from './QuickBooksConnection'
 import {
   createQuickBooksSetupUrl,
-  isQuickBooksEnabledForSystem,
+  getQuickBooksConfig,
 } from '@/domain/quickBooks/util'
 import { Session } from '@/domain/iam/session/types'
 import { getQuickbooksToken } from '@/domain/quickBooks'
@@ -13,7 +13,7 @@ type Props = {
 }
 
 export default async function Quickbooks({ session }: Props) {
-  if (!isQuickBooksEnabledForSystem()) {
+  if (!getQuickBooksConfig()) {
     return (
       <Alert severity="error">QuickBooks is not enabled on this system</Alert>
     )
