@@ -18,12 +18,13 @@ type DetailPageModel = {
 export const readDetailPageModel = async (
   resourceType: ResourceType,
   rawKey: unknown,
+  path: string,
 ): Promise<DetailPageModel> => {
   const key = Number(rawKey)
 
   if (isNaN(key)) notFound()
 
-  const session = await requireSessionWithRedirect()
+  const session = await requireSessionWithRedirect(path)
 
   const [resource, schema] = await Promise.all([
     readResource({

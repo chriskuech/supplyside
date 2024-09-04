@@ -8,7 +8,11 @@ export default async function ItemsDetail({
 }: {
   params: { key: string }
 }) {
-  const { resource, schema } = await readDetailPageModel('Item', key)
+  const { resource, schema } = await readDetailPageModel(
+    'Item',
+    key,
+    `/items/${key}`,
+  )
 
   return (
     <ResourceDetailPage

@@ -6,7 +6,7 @@ import { requireSessionWithRedirect } from '@/lib/session/actions'
 
 export default async function AdminPage() {
   const [{ user }, accounts] = await Promise.all([
-    requireSessionWithRedirect(),
+    requireSessionWithRedirect('/accounts'),
     prisma().account.findMany({
       orderBy: {
         name: 'asc',

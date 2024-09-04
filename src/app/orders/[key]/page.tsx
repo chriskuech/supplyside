@@ -36,7 +36,7 @@ export default async function OrderDetail({
     session: { user },
     resource,
     schema,
-  } = await readDetailPageModel('Order', key)
+  } = await readDetailPageModel('Order', key, `/orders/${key}`)
 
   const orderBills = (await findOrderBills(resource.id)) ?? []
 
