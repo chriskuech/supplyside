@@ -14,11 +14,11 @@ import ImpersonationControl from './ImpersonationControl'
 import { systemAccountId } from '@/lib/const'
 import { readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
-import { InvalidSessionError } from '@/lib/session/types'
+import { SessionError } from '@/lib/session/types'
 
 export default async function AppBar() {
   const session = await readSession().catch((e) =>
-    e instanceof InvalidSessionError ? null : fail(e),
+    e instanceof SessionError ? null : fail(e),
   )
 
   const accounts = await prisma().account.findMany({
