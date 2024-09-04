@@ -1,5 +1,6 @@
 'use server'
 
+import { fail } from 'assert'
 import { Box, Button, Divider, Stack } from '@mui/material'
 import MAppBar from '@mui/material/AppBar'
 import Container from '@mui/material/Container'
@@ -11,11 +12,14 @@ import { NavMenu } from './NavMenu'
 import Logo from './Logo'
 import ImpersonationControl from './ImpersonationControl'
 import { systemAccountId } from '@/lib/const'
-import { hasSession, readSession } from '@/lib/session/actions'
+import { readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
+import { InvalidSessionError } from '@/lib/session/types'
 
 export default async function AppBar() {
-  const session = (await hasSession()) ? await readSession() : null
+  const session = await readSession().catch((e) =>
+    e instanceof InvalidSessionError ? null : fail(e),
+  )
 
   const accounts = await prisma().account.findMany({
     orderBy: {
