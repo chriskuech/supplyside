@@ -7,6 +7,7 @@ import CallToAction from './CallToAction'
 import OrderLink from './tools/OrderLink'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
+import UpsertBillButton from './UpsertBillButton'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import {
   billStatusOptions,
@@ -23,12 +24,7 @@ export default async function BillsDetail({
 }: {
   params: { key: string }
 }) {
-  const {
-    session: { user },
-    resource,
-    schema,
-  } = await readDetailPageModel('Bill', key)
-
+  const { session, resource, schema } = await readDetailPageModel('Bill', key)
   const status =
     selectValue(resource, fields.billStatus)?.option ?? fail('Status not found')
 
@@ -108,10 +104,14 @@ export default async function BillsDetail({
                 spacing={2}
                 mr={3}
               >
+                <UpsertBillButton
+                  accountId={session.accountId}
+                  resourceId={resource.id}
+                />
                 <CallToAction
                   key={selectValue(resource, fields.billStatus)?.option?.id}
                   schema={schema}
-                  user={user}
+                  user={session.user}
                   resource={resource}
                 />
               </Stack>

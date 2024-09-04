@@ -2,7 +2,7 @@ import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import QuickBooksSyncButton from './QuickBooksSyncButton'
 import { Session } from '@/domain/iam/session/types'
-import { getCompanyInfo } from '@/domain/quickBooks'
+import { getCompanyInfo } from '@/domain/quickBooks/entities/companyInfo'
 
 type Props = {
   session: Session

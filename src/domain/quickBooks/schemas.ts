@@ -71,7 +71,7 @@ export type QuickBooksToken = z.infer<typeof quickbooksTokenSchema>
 
 export const accountQuerySchema = z.object({
   QueryResponse: z.object({
-    Account: z.array(accountSchema),
+    Account: z.array(accountSchema).optional(),
   }),
 })
 
@@ -123,7 +123,15 @@ export const vendorSchema = z.object({
 export const vendorQuerySchema = z.object({
   QueryResponse: z.object({
     startPosition: z.number(),
-    Vendor: z.array(vendorSchema),
+    Vendor: z.array(vendorSchema).optional(),
     maxResults: z.number(),
   }),
+})
+
+export const readAccountSchema = z.object({
+  Account: accountSchema,
+})
+
+export const readVendorSchema = z.object({
+  Vendor: vendorSchema,
 })

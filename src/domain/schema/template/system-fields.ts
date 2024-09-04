@@ -252,6 +252,7 @@ const _fields = {
     templateId: '3cf75b8f-f4e4-406f-a1db-0761aa6db523',
     name: 'Accounting Category',
     type: 'Select',
+    isRequired: true,
   },
   quickBooksVendorId: {
     templateId: '392bfedc-3b4f-46c9-a0a9-9bfa2eeb0896',

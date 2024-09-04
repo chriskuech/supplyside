@@ -1,8 +1,13 @@
 import { z } from 'zod'
-import { companyInfoSchema, vendorSchema } from './schemas'
+import {
+  companyInfoSchema,
+  readAccountSchema,
+  readVendorSchema,
+} from './schemas'
 
 export type CompanyInfo = z.infer<typeof companyInfoSchema>
-export type Vendor = z.infer<typeof vendorSchema>
+export type Vendor = z.infer<typeof readVendorSchema>
+export type Account = z.infer<typeof readAccountSchema>
 
 type Entity = 'Vendor' | 'Account'
 
