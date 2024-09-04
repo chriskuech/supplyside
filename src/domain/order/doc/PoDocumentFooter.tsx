@@ -3,7 +3,7 @@
 import { ReactNode } from 'react'
 import { readResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
-import { selectValue } from '@/domain/resource/types'
+import { selectResourceField } from '@/domain/resource/types'
 
 type Props = {
   accountId: string
@@ -20,7 +20,7 @@ export default async function PoDocumentFooter({
     type: 'Order',
   })
 
-  const issuedDate = selectValue(resource, fields.issuedDate)?.date
+  const issuedDate = selectResourceField(resource, fields.issuedDate)?.date
 
   const formattedDate = issuedDate
     ? new Date(issuedDate).toLocaleDateString()

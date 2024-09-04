@@ -1,5 +1,5 @@
 import { ResourceType, FieldType, Cost } from '@prisma/client'
-import { FieldTemplate } from '../schema/template/types'
+import { P, match } from 'ts-pattern'
 import { Value } from './values/types'
 
 export type Resource = {
@@ -20,17 +20,22 @@ export type ResourceField = {
 
 export type Data = Record<string, string[] | string | number | boolean | null>
 
-export const selectValue = (
+export const selectResourceField = (
   resource: Resource,
-  fieldTemplateOrTemplateId: FieldTemplate | string,
+  fieldRef: { templateId: string } | { fieldId: string },
 ) =>
-  resource.fields.find(
-    (field) =>
-      field.templateId ===
-      (typeof fieldTemplateOrTemplateId === 'string'
-        ? fieldTemplateOrTemplateId
-        : fieldTemplateOrTemplateId.templateId),
-  )?.value
+  match(fieldRef)
+    .with(
+      { templateId: P.string },
+      ({ templateId }) =>
+        resource.fields.find((field) => field.templateId === templateId)?.value,
+    )
+    .with(
+      { fieldId: P.string },
+      ({ fieldId }) =>
+        resource.fields.find((field) => field.fieldId === fieldId)?.value,
+    )
+    .exhaustive()
 
 export const emptyValue = {
   boolean: null,

@@ -350,7 +350,7 @@ const _fields = {
 
 export const fields: Record<keyof typeof _fields, FieldTemplate> = _fields
 
-export const findField = (templateId: string | null | undefined) =>
+export const findTemplateField = (templateId: string | null | undefined) =>
   templateId
     ? Object.values(fields).find((field) => field.templateId === templateId)
     : undefined

@@ -18,12 +18,12 @@ import {
   fields,
   orderStatusOptions,
 } from '@/domain/schema/template/system-fields'
-import { emptyValue, selectValue } from '@/domain/resource/types'
+import { emptyValue, selectResourceField } from '@/domain/resource/types'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import { isMissingRequiredFields } from '@/domain/resource/values/mappers'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
-import { selectField } from '@/domain/schema/types'
+import { selectSchemaField } from '@/domain/schema/types'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 
@@ -41,7 +41,7 @@ export default async function OrderDetail({
   const orderBills = (await findOrderBills(resource.id)) ?? []
 
   const status =
-    selectValue(resource, fields.orderStatus)?.option ??
+    selectResourceField(resource, fields.orderStatus)?.option ??
     fail('Status not found')
 
   const isDraft = status.templateId === orderStatusOptions.draft.templateId
@@ -59,7 +59,7 @@ export default async function OrderDetail({
     .otherwise(() => yellow[800])
 
   const hasInvalidFields = isMissingRequiredFields(schema, resource)
-  const poFile = selectValue(resource, fields.document)?.file
+  const poFile = selectResourceField(resource, fields.document)?.file
 
   return (
     <ResourceDetailPage
@@ -71,10 +71,12 @@ export default async function OrderDetail({
           key={TrackingControl.name}
           resourceId={resource.id}
           field={
-            selectField(schema, fields.trackingNumber) ??
+            selectSchemaField(schema, fields.trackingNumber) ??
             fail('Field not found')
           }
-          value={selectValue(resource, fields.trackingNumber) ?? emptyValue}
+          value={
+            selectResourceField(resource, fields.trackingNumber) ?? emptyValue
+          }
         />,
         ...(poFile ? [<PreviewPoControl key={poFile.id} file={poFile} />] : []),
         ...(poFile
@@ -85,19 +87,20 @@ export default async function OrderDetail({
           resourceId={resource.id}
           resourceType="Order"
           field={
-            selectField(schema, fields.orderAttachments) ??
+            selectSchemaField(schema, fields.orderAttachments) ??
             fail('Field not found')
           }
-          value={selectValue(resource, fields.orderAttachments)}
+          value={selectResourceField(resource, fields.orderAttachments)}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
           resourceId={resource.id}
           resourceType="Order"
           field={
-            selectField(schema, fields.assignee) ?? fail('Field not found')
+            selectSchemaField(schema, fields.assignee) ??
+            fail('Field not found')
           }
-          value={selectValue(resource, fields.assignee) ?? emptyValue}
+          value={selectResourceField(resource, fields.assignee) ?? emptyValue}
         />,
         ...(!isDraft
           ? [<EditControl key={EditControl.name} resourceId={resource.id} />]

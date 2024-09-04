@@ -6,7 +6,7 @@ import { z } from 'zod'
 import CSRF from 'csrf'
 import { Prisma } from '@prisma/client'
 import { difference, range } from 'remeda'
-import { selectValue } from '../resource/types'
+import { selectResourceField } from '../resource/types'
 import {
   accountQuerySchema,
   companyInfoSchema,
@@ -23,7 +23,7 @@ import { readFields, updateField } from '@/domain/schema/fields'
 import { createResource, readResources } from '@/domain/resource/actions'
 import { updateValue } from '@/domain/resource/fields/actions'
 import { readSchema } from '@/domain/schema/actions'
-import { selectField } from '@/domain/schema/types'
+import { selectSchemaField } from '@/domain/schema/types'
 import prisma from '@/services/prisma'
 
 const baseUrl = (realmId: string) => {
@@ -265,14 +265,14 @@ const upsertVendorsFromQuickBooks = async (
     readSchema({ accountId, resourceType: 'Vendor' }),
   ])
 
-  const vendorNameField = selectField(vendorSchema, fields.name)
+  const vendorNameField = selectSchemaField(vendorSchema, fields.name)
   assert(vendorNameField, 'Vendor name field not found')
 
   const quickBooksVendorsToAdd = quickBooksVendors.filter(
     (quickBooksVendor) =>
       !currentVendors.some(
         (vendor) =>
-          selectValue(vendor, fields.quickBooksVendorId)?.string ===
+          selectResourceField(vendor, fields.quickBooksVendorId)?.string ===
           quickBooksVendor.Id,
       ),
   )
@@ -286,13 +286,13 @@ const upsertVendorsFromQuickBooks = async (
     quickBooksVendorsToUpdate.map(async (quickBooksVendor) => {
       const vendor = currentVendors.find(
         (currentVendor) =>
-          selectValue(currentVendor, fields.quickBooksVendorId)?.string ===
-          quickBooksVendor.Id,
+          selectResourceField(currentVendor, fields.quickBooksVendorId)
+            ?.string === quickBooksVendor.Id,
       )
 
       if (!vendor) return
 
-      const vendorName = selectValue(vendor, fields.name)?.string
+      const vendorName = selectResourceField(vendor, fields.name)?.string
 
       if (vendorName === quickBooksVendor.DisplayName) return
 
