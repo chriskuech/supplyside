@@ -19,12 +19,14 @@ type Props = {
   field: Field
   defaultValue: ValueInput
   onChange: (dto: ValueInput) => void
+  isDisabled?: boolean
 }
 
 export default function DefaultValueControl({
   field: { type, Option: options },
   defaultValue,
   onChange,
+  isDisabled,
 }: Props) {
   dayjs.extend(utc)
 
@@ -34,12 +36,14 @@ export default function DefaultValueControl({
         id="default-field-defaultValue-control"
         checked={defaultValue?.boolean ?? false}
         onChange={(e) => onChange({ boolean: e.target.checked })}
+        disabled={isDisabled}
       />
     ))
     .with('Select', () => (
       <Select
         id="default-field-defaultValue-control"
         value={defaultValue?.optionId ?? ''}
+        disabled={isDisabled}
         onChange={(e) => onChange({ optionId: e.target.value })}
         endAdornment={
           defaultValue?.optionId && (
@@ -59,6 +63,7 @@ export default function DefaultValueControl({
     .with('Textarea', () => (
       <TextField
         id="default-field-defaultValue-control"
+        disabled={isDisabled}
         value={defaultValue?.string ?? ''}
         onChange={(e) => onChange({ string: e.target.value })}
         multiline
@@ -69,6 +74,7 @@ export default function DefaultValueControl({
     .with('Text', () => (
       <TextField
         id="default-field-defaultValue-control"
+        disabled={isDisabled}
         value={defaultValue?.string ?? ''}
         onChange={(e) => onChange({ string: e.target.value })}
       />
@@ -76,18 +82,13 @@ export default function DefaultValueControl({
     .with('Number', () => (
       <TextField
         id="default-field-defaultValue-control"
+        disabled={isDisabled}
         value={defaultValue?.number ?? ''}
         onChange={(e) => onChange({ number: parseInt(e.target.value) })}
         type="number"
       />
     ))
     .with('Date', () => (
-      // <TextField
-      //   id="default-field-defaultValue-control"
-      //   value={defaultValue?.date ?? ''}
-      //   onChange={(e) => onChange({ date: e.target.value })}
-      //   type="date"
-      // />
       <DatePicker
         sx={{ width: '100%' }}
         slotProps={{
@@ -96,7 +97,8 @@ export default function DefaultValueControl({
             onClear: () => onChange({ date: null }),
           },
         }}
-        defaultValue={defaultValue?.date && dayjs.utc(defaultValue.date)}
+        value={defaultValue?.date && dayjs.utc(defaultValue.date)}
+        disabled={isDisabled}
         onChange={(value) => onChange({ date: value?.toDate() ?? null })}
       />
     ))

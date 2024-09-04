@@ -118,6 +118,7 @@ const _fields = {
     name: 'Invoice Date',
     type: 'Date',
     isRequired: true,
+    defaultToToday: true,
     description: 'Date the invoice was issued',
   },
   invoiceNumber: {

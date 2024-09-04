@@ -224,6 +224,7 @@ const upsertAccountsFromQuickBooks = async (
     defaultValue: {
       optionId: quickBooksAccountField.defaultValue.option?.id,
     },
+    defaultToToday: quickBooksAccountField.defaultToToday,
     isRequired: quickBooksAccountField.isRequired,
     options,
   })
