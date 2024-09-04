@@ -1,7 +1,7 @@
 'use client'
 
 import { Clear } from '@mui/icons-material'
-import { Card, CardContent, IconButton } from '@mui/material'
+import { Card, CardContent, IconButton, Stack } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -10,6 +10,7 @@ import { FC, useState } from 'react'
 import UpdateFieldForm from './UpdateFieldForm'
 import { deleteField, updateField } from './actions'
 import { Field, UpdateFieldDto } from '@/domain/schema/fields/types'
+import { useConfirmation } from '@/lib/confirmation'
 
 type Props = {
   fields: Field[]
@@ -17,6 +18,7 @@ type Props = {
 
 export default function FieldsTable({ fields }: Props) {
   const [field, setField] = useState<Field>()
+  const confirm = useConfirmation()
 
   const columns: GridColDef<Field>[] = [
     {
@@ -67,7 +69,25 @@ export default function FieldsTable({ fields }: Props) {
       align: 'right',
       renderCell: ({ row }) => (
         <IconButton
-          onClick={() => deleteField(row.id)}
+          onClick={async () => {
+            const isConfirmed = await confirm({
+              title: 'Delete Field',
+              content: (
+                <Stack spacing={2}>
+                  <Box>
+                    Are you sure you want to delete this Field? This will
+                    permanently delete any data associated with the Field.
+                  </Box>
+                  <Box>This action is not reversible.</Box>
+                </Stack>
+              ),
+              confirmButtonText: 'Delete',
+            })
+
+            if (!isConfirmed) return
+
+            await deleteField(row.id)
+          }}
           disabled={!!row.templateId}
         >
           <Clear />

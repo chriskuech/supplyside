@@ -254,6 +254,11 @@ const _fields = {
     name: 'Accounting Category',
     type: 'Select',
   },
+  quickBooksBillId: {
+    templateId: '421e7256-e918-4456-bb17-8feae1849ce0',
+    name: 'QuickBooks Bill ID',
+    type: 'Text',
+  },
   quickBooksVendorId: {
     templateId: '392bfedc-3b4f-46c9-a0a9-9bfa2eeb0896',
     name: 'QuickBooks Vendor ID',
