@@ -54,15 +54,6 @@ export const updateValue = async ({
   const data: Prisma.ValueCreateInput & Prisma.ValueUpdateInput = {
     ...rest,
     string: string?.trim() || null,
-    Resource: match(linkedResourceId)
-      .with(null, () => ({
-        disconnect: true,
-      }))
-      .with(P.string, (id) => ({
-        connect: { id },
-      }))
-      .with(undefined, () => undefined)
-      .exhaustive(),
     ValueOption: optionIds
       ? {
           create: optionIds.map((optionId) => ({ optionId })),
@@ -103,10 +94,30 @@ export const updateValue = async ({
             id: fieldId,
           },
         },
-        Value: { create: data },
+        Value: {
+          create: {
+            ...data,
+            Resource: linkedResourceId
+              ? { connect: { id: linkedResourceId } }
+              : undefined,
+          },
+        },
       },
       update: {
-        Value: { update: data },
+        Value: {
+          update: {
+            ...data,
+            Resource: match(linkedResourceId)
+              .with(null, () => ({
+                disconnect: true,
+              }))
+              .with(undefined, () => undefined)
+              .with(P.string, (id) => ({
+                connect: { id },
+              }))
+              .exhaustive(),
+          },
+        },
       },
       include: {
         Resource: true,
@@ -502,10 +513,10 @@ const copyResourceLines = async (
 ) => {
   const [linkedResource, thisResource] = await Promise.all([
     prisma().resource.findUniqueOrThrow({
-    where: { id: linkedResourceId },
+      where: { id: linkedResourceId },
     }),
     prisma().resource.findUniqueOrThrow({
-    where: { id: resourceId },
+      where: { id: resourceId },
     }),
   ])
 
@@ -527,11 +538,11 @@ const copyResourceLines = async (
   await Promise.all(
     linkedResourceLines.map(async (line) =>
       updateValue({
-            resourceId: line.id,
+        resourceId: line.id,
         fieldId: field.id,
         value: {
           resourceId: thisResource.id,
-                },
+        },
       }),
     ),
   )
