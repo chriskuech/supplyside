@@ -18,6 +18,7 @@ import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectField } from '@/domain/schema/types'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
+import { getQuickBooksConfig } from '@/domain/quickBooks/util'
 
 export default async function BillsDetail({
   params: { key },
@@ -54,16 +55,22 @@ export default async function BillsDetail({
     fields.quickBooksBillId,
   )?.string
 
+  const qbConfig = getQuickBooksConfig()
+  const quickBooksAppUrl =
+    quickBooksBillId && qbConfig
+      ? `${qbConfig.appBaseUrl}/app/bill?&txnId=${quickBooksBillId}`
+      : undefined
+
   return (
     <ResourceDetailPage
       schema={schema}
       resource={resource}
       tools={[
-        ...(quickBooksBillId
+        ...(quickBooksAppUrl
           ? [
               <QuickBooksBillLink
                 key={QuickBooksBillLink.name}
-                quickBooksBillId={quickBooksBillId}
+                quickBooksAppUrl={quickBooksAppUrl}
               />,
             ]
           : []),

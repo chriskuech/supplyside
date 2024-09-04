@@ -1,10 +1,11 @@
+import { fail } from 'assert'
 import OAuthClient, { Token } from 'intuit-oauth'
 import Csrf from 'csrf'
 import QuickbooksOauthClient from 'intuit-oauth'
 import config from '@/services/config'
 
 export const createQuickBooksSetupUrl = () => {
-  const { csrfSecret } = getQuickBooksConfig()
+  const { csrfSecret } = getQuickBooksConfigUnsafe()
 
   const state = {
     csrf: new Csrf().create(csrfSecret),
@@ -19,16 +20,7 @@ export const createQuickBooksSetupUrl = () => {
 }
 
 export const quickBooksClient = (token?: Token) =>
-  new OAuthClient({ ...getQuickBooksConfig(), token })
-
-export const isQuickBooksEnabledForSystem = () => {
-  try {
-    getQuickBooksConfig()
-    return true
-  } catch {
-    return false
-  }
-}
+  new OAuthClient({ ...getQuickBooksConfigUnsafe(), token })
 
 export const getQuickBooksConfig = () => {
   const {
@@ -40,7 +32,7 @@ export const getQuickBooksConfig = () => {
   } = config()
 
   if (!clientId || !clientSecret || !csrfSecret || !environment) {
-    throw new Error('QuickBooks environment variables are not set')
+    return null
   }
 
   return {
@@ -59,3 +51,6 @@ export const getQuickBooksConfig = () => {
     }[environment],
   }
 }
+
+export const getQuickBooksConfigUnsafe = () =>
+  getQuickBooksConfig() ?? fail('QuickBooks not configured')

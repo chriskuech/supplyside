@@ -1,22 +1,49 @@
-import { Chip, Typography } from '@mui/material'
-import { Link as LinkIcon } from '@mui/icons-material'
+'use client'
+
+import { Chip, Stack, useTheme } from '@mui/material'
 import Link from 'next/link'
-import { getQuickBooksConfig } from '@/domain/quickBooks/util'
+import Image from 'next/image'
+import { match } from 'ts-pattern'
 
 type Props = {
-  quickBooksBillId: string
+  quickBooksAppUrl: string
 }
 
-export default async function QuickBooksBillLink({ quickBooksBillId }: Props) {
-  const { appBaseUrl } = getQuickBooksConfig()
+export default function QuickBooksBillLink({ quickBooksAppUrl }: Props) {
+  const {
+    palette: { mode },
+  } = useTheme()
+
+  // The other chip is 32px in height
+  const scale = 0.05
+  const [width, height] = [2345, 600].map((v) => v * scale)
 
   return (
     <Chip
-      sx={{ py: 2, cursor: 'pointer' }}
-      icon={<LinkIcon fontSize="large" />}
+      sx={{ cursor: 'pointer', height: 'auto' }}
       component={Link}
-      href={`${appBaseUrl}/app/bill?&txnId=${quickBooksBillId}`}
-      label={<Typography sx={{ opacity: 0.8 }}>QuickBooks</Typography>}
+      href={quickBooksAppUrl}
+      label={
+        <Stack justifyContent="center" py={0.5}>
+          <Image
+            src={match(mode)
+              .with(
+                'light',
+                () =>
+                  '/quickbooks-brand-preferred-logo-50-50-black-external.png',
+              )
+              .with(
+                'dark',
+                () =>
+                  '/quickbooks-brand-preferred-logo-50-50-white-external.png',
+              )
+              .exhaustive()}
+            alt="Open in QuickBooks"
+            width={width}
+            height={height}
+          />
+        </Stack>
+      }
       target="_blank"
     />
   )
