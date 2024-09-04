@@ -36,6 +36,7 @@ const applyFields = async (accountId: string) => {
     description,
     type,
     resourceType,
+    defaultToToday,
   } of Object.values(fields)) {
     const { id: fieldId } = await prisma().field.upsert({
       where: {
@@ -59,6 +60,7 @@ const applyFields = async (accountId: string) => {
         type,
         resourceType,
         isRequired,
+        defaultToToday,
       },
       update: {
         name,
@@ -66,6 +68,7 @@ const applyFields = async (accountId: string) => {
         description: description ?? null,
         type,
         resourceType,
+        defaultToToday,
       },
     })
 

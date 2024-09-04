@@ -88,9 +88,13 @@ export const createResource = async ({
                     ? dataValue
                     : (f.defaultValue?.boolean ?? null),
                 date:
-                  typeof dataValue === 'string' && f.type === 'Date'
-                    ? dataValue
-                    : (f.defaultValue?.date ?? null),
+                  f.type !== 'Date'
+                    ? null
+                    : typeof dataValue === 'string'
+                      ? dataValue
+                      : f.defaultToToday
+                        ? new Date()
+                        : (f.defaultValue?.date ?? null),
                 number:
                   typeof dataValue === 'number' &&
                   ['Number', 'Money'].includes(f.type)
