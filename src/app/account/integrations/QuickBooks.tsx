@@ -1,7 +1,10 @@
 import { Alert } from '@mui/material'
 import QuickBooksConnectButton from './QuickBooksConnectButton'
 import QuickBooksConnection from './QuickBooksConnection'
-import { getQuickBooksConfig } from '@/domain/quickBooks/util'
+import {
+  createQuickBooksSetupUrl,
+  getQuickBooksConfig,
+} from '@/domain/quickBooks/util'
 import { Session } from '@/domain/iam/session/types'
 import { getQuickbooksToken } from '@/domain/quickBooks'
 
@@ -21,6 +24,6 @@ export default async function Quickbooks({ session }: Props) {
   return quickBooksToken ? (
     <QuickBooksConnection session={session} />
   ) : (
-    <QuickBooksConnectButton />
+    <QuickBooksConnectButton url={createQuickBooksSetupUrl()} />
   )
 }
