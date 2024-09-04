@@ -17,6 +17,7 @@ import {
 } from '@/domain/resource/cost/actions'
 import { Field, selectField } from '@/domain/schema/types'
 import { readSession } from '@/lib/session/actions'
+import { FieldTemplate } from '@/domain/schema/template/types'
 
 export type UpdateValueDto = {
   resourceId: string
@@ -473,62 +474,66 @@ export const copyLinkedResourceFields = async (
       resourcesWithLines.includes(linkedResource),
     )
   ) {
-    await copyResourceCosts(linkedResourceId, resourceId)
-    await copyResourceLines(linkedResourceId, resourceId)
+    const linkedFieldTemplate =
+      linkedResourceType === ResourceType.Order ? fields.order : fields.bill
+
+    const resourceFieldTemplate =
+      thisResourceType === ResourceType.Order ? fields.order : fields.bill
+
+    await Promise.all([
+      copyResourceCosts(linkedResourceId, resourceId),
+      copyResourceLines(
+        linkedResourceId,
+        linkedFieldTemplate,
+        resourceId,
+        resourceFieldTemplate,
+      ),
+    ])
   }
 
   revalidatePath('')
 }
 
-export const copyResourceLines = async (
+const copyResourceLines = async (
   linkedResourceId: string,
+  linkedFieldTemplate: FieldTemplate,
   resourceId: string,
+  resourceFieldTemplate: FieldTemplate,
 ) => {
-  const linkedResource = await prisma().resource.findUniqueOrThrow({
+  const [linkedResource, thisResource] = await Promise.all([
+    prisma().resource.findUniqueOrThrow({
     where: { id: linkedResourceId },
-  })
-
-  const thisResource = await prisma().resource.findUniqueOrThrow({
+    }),
+    prisma().resource.findUniqueOrThrow({
     where: { id: resourceId },
-  })
+    }),
+  ])
 
   const linkedResourceLines = await readResources({
     accountId: linkedResource.accountId,
-    type: 'Line',
+    type: ResourceType.Line,
     where: {
-      '==': [{ var: linkedResource.type }, linkedResourceId],
+      '==': [{ var: linkedFieldTemplate.name }, linkedResourceId],
     },
   })
 
+  const schema = await readSchema({
+    accountId: linkedResource.accountId,
+    resourceType: ResourceType.Line,
+  })
+
+  const field = selectField(schema, resourceFieldTemplate) ?? fail()
+
   await Promise.all(
-    linkedResourceLines.map(async (line) => {
-      const schema = await readSchema({
-        accountId: line.accountId,
-        resourceType: line.type,
-      })
-
-      const billField = selectField(schema, fields.bill) ?? fail()
-
-      return prisma().resourceField.update({
-        where: {
-          resourceId_fieldId: {
+    linkedResourceLines.map(async (line) =>
+      updateValue({
             resourceId: line.id,
-            fieldId: billField.id,
-          },
-        },
-        data: {
-          Value: {
-            update: {
-              Resource: {
-                connect: {
-                  id: thisResource.id,
+        fieldId: field.id,
+        value: {
+          resourceId: thisResource.id,
                 },
-              },
-            },
-          },
-        },
-      })
-    }),
+      }),
+    ),
   )
 
   revalidatePath('')
