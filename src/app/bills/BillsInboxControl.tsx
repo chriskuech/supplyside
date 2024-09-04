@@ -28,6 +28,9 @@ export default function BillsInboxControl({ address }: Props) {
           },
           input: {
             readOnly: true,
+            sx: {
+              width: 300,
+            },
           },
         }}
       />
