@@ -49,9 +49,13 @@ export const getQuickBooksConfig = () => {
     csrfSecret,
     environment,
     redirectUri: BASE_URL + '/api/integrations/quickbooks/login',
-    quickBooksApiBaseUrl: {
-      sandbox: 'https://sandbox-quickbooks.api.intuit.com/',
-      production: 'https://quickbooks.api.intuit.com/',
+    apiBaseUrl: {
+      sandbox: 'https://sandbox-quickbooks.api.intuit.com',
+      production: 'https://quickbooks.api.intuit.com',
+    }[environment],
+    appBaseUrl: {
+      sandbox: 'https://sandbox.qbo.intuit.com',
+      production: 'https://qbo.intuit.com',
     }[environment],
   }
 }

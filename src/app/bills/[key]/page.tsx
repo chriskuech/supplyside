@@ -7,6 +7,7 @@ import CallToAction from './CallToAction'
 import OrderLink from './tools/OrderLink'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
+import QuickBooksBillLink from './tools/QuickBooksBillLink'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import {
   billStatusOptions,
@@ -48,11 +49,24 @@ export default async function BillsDetail({
 
   const order = selectValue(resource, fields.order)?.resource
 
+  const quickBooksBillId = selectValue(
+    resource,
+    fields.quickBooksBillId,
+  )?.string
+
   return (
     <ResourceDetailPage
       schema={schema}
       resource={resource}
       tools={[
+        ...(quickBooksBillId
+          ? [
+              <QuickBooksBillLink
+                key={QuickBooksBillLink.name}
+                quickBooksBillId={quickBooksBillId}
+              />,
+            ]
+          : []),
         ...(order ? [<OrderLink key={order.id} order={order} />] : []),
         <AttachmentsToolbarControl
           key={AttachmentsToolbarControl.name}

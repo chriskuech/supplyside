@@ -27,9 +27,9 @@ import { selectField } from '@/domain/schema/types'
 import prisma from '@/services/prisma'
 
 const baseUrl = (realmId: string) => {
-  const { quickBooksApiBaseUrl } = getQuickBooksConfig()
+  const { apiBaseUrl } = getQuickBooksConfig()
 
-  return `${quickBooksApiBaseUrl}/v3/company/${realmId}`
+  return `${apiBaseUrl}/v3/company/${realmId}`
 }
 
 const cleanToken = (token: Token): QuickBooksToken => ({
