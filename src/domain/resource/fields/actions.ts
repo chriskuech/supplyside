@@ -230,7 +230,7 @@ export const updateValue = async ({
     })
   }
 
-  // When an Order is linked to a Bill
+  // When the Order field of a Bill resource has been updated (an Order has been linked to a Bill)
   // Then recalculate the Bill."Subtotal Cost"
   if (
     rf.Resource.type === ResourceType.Bill &&
