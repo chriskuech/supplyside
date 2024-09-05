@@ -229,6 +229,19 @@ export const updateValue = async ({
       },
     })
   }
+
+  // When an Order is linked to a Bill
+  // Then recalculate the Bill."Subtotal Cost"
+  if (
+    rf.Resource.type === ResourceType.Bill &&
+    rf.Field.templateId === fields.order.templateId
+  ) {
+    await recalculateSubtotalCost(
+      rf.Resource.accountId,
+      ResourceType.Bill,
+      rf.Resource.id,
+    )
+  }
 }
 
 export const uploadFile = async (
