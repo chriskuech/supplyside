@@ -1,6 +1,7 @@
 import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import QuickBooksSyncButton from './QuickBooksSyncButton'
+import QuickBooksDisconnectLink from './QuickBooksDisconnectLink'
 import { Session } from '@/domain/iam/session/types'
 import { getCompanyInfo } from '@/domain/quickBooks'
 
@@ -27,6 +28,7 @@ export default async function QuickBooksConnection({ session }: Props) {
         <strong>
           {session.account.quickBooksConnectedAt?.toLocaleTimeString()}
         </strong>
+        . <QuickBooksDisconnectLink />
       </Typography>
       <QuickBooksSyncButton />
     </Stack>

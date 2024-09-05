@@ -6,7 +6,7 @@ import { privacyPolicyUrl, termsOfServiceUrl } from '@/lib/const'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 
 export default async function SettingsPage() {
-  const { user } = await requireSessionWithRedirect()
+  const { user } = await requireSessionWithRedirect('/settings')
 
   return (
     <Stack

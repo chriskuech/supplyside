@@ -14,10 +14,10 @@ import { isArray } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema'
-import { selectField } from '../schema/types'
+import { selectSchemaField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
 import { recalculateSubtotalCost } from './cost/actions'
-import { Resource, selectValue } from './types'
+import { Resource, selectResourceField } from './types'
 import { valueInclude } from './values/types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
@@ -150,7 +150,7 @@ export const createResource = async ({
     await updateValue({
       resourceId: resource.id,
       fieldId:
-        selectField(schema, fields.number)?.id ??
+        selectSchemaField(schema, fields.number)?.id ??
         fail(`"${fields.number.name}" field not found`),
       value: { string: resource.key.toString() },
     })
@@ -241,12 +241,12 @@ export const deleteResource = async ({
 
   const entity = mapResource(model)
   if (entity.type === 'Line') {
-    const orderId = selectValue(entity, fields.order)?.resource?.id
+    const orderId = selectResourceField(entity, fields.order)?.resource?.id
     if (orderId) {
       await recalculateSubtotalCost(accountId, 'Order', orderId)
     }
 
-    const billId = selectValue(entity, fields.bill)?.resource?.id
+    const billId = selectResourceField(entity, fields.bill)?.resource?.id
     if (billId) {
       await recalculateSubtotalCost(accountId, 'Bill', billId)
     }

@@ -1,5 +1,5 @@
 import { FieldType, ResourceType, Value } from '@prisma/client'
-import { FieldTemplate } from './template/types'
+import { P, match } from 'ts-pattern'
 
 export type Schema = {
   resourceType: ResourceType
@@ -32,14 +32,18 @@ export type Option = {
   templateId?: string | null
 }
 
-export const selectField = (
+export const selectSchemaField = (
   schema: Schema,
-  fieldTemplateOrTemplateId: FieldTemplate | string,
+  fieldRef: { fieldId: string } | { templateId: string } | { name: string },
 ) =>
-  schema.allFields?.find(
-    (field) =>
-      field.templateId ===
-      (typeof fieldTemplateOrTemplateId === 'string'
-        ? fieldTemplateOrTemplateId
-        : fieldTemplateOrTemplateId.templateId),
-  )
+  match(fieldRef)
+    .with({ templateId: P.string }, ({ templateId }) =>
+      schema.allFields.find((field) => field.templateId === templateId),
+    )
+    .with({ fieldId: P.string }, ({ fieldId }) =>
+      schema.allFields.find((field) => field.id === fieldId),
+    )
+    .with({ name: P.string }, ({ name }) =>
+      schema.allFields.find((field) => field.name === name),
+    )
+    .exhaustive()

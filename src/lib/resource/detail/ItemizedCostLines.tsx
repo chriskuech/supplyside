@@ -17,7 +17,7 @@ import {
 } from '@mui/material'
 import { Add, Clear } from '@mui/icons-material'
 import { match } from 'ts-pattern'
-import { Resource, selectValue } from '@/domain/resource/types'
+import { Resource, selectResourceField } from '@/domain/resource/types'
 import {
   createCost,
   deleteCost,
@@ -33,8 +33,9 @@ type Props = {
 export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
   const theme = useTheme()
 
-  const subtotalCost = selectValue(resource, fields.subtotalCost)?.number ?? 0
-  const totalCost = selectValue(resource, fields.totalCost)?.number ?? 0
+  const subtotalCost =
+    selectResourceField(resource, fields.subtotalCost)?.number ?? 0
+  const totalCost = selectResourceField(resource, fields.totalCost)?.number ?? 0
 
   return (
     <Stack spacing={2}>
