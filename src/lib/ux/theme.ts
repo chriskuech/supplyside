@@ -110,7 +110,6 @@ const base: ThemeOptions = {
             backgroundSize: '120%',
             backgroundPosition: '20%',
             '&:hover': {
-              marginTop: 2,
               backgroundPosition: '0%',
             },
             transition: 'all 0.15s',
@@ -124,7 +123,6 @@ const base: ThemeOptions = {
             backgroundSize: '120%',
             backgroundPosition: '20%',
             '&:hover': {
-              marginTop: 2,
               backgroundPosition: '0%',
             },
             transition: 'all 0.15s',
