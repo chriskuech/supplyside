@@ -7,7 +7,6 @@ import CallToAction from './CallToAction'
 import OrderLink from './tools/OrderLink'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
-import UpsertBillButton from './UpsertBillButton'
 import QuickBooksBillLink from './tools/QuickBooksBillLink'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import {
@@ -132,10 +131,6 @@ export default async function BillsDetail({
                 spacing={2}
                 mr={3}
               >
-                <UpsertBillButton
-                  accountId={session.accountId}
-                  resourceId={resource.id}
-                />
                 <CallToAction
                   key={
                     selectResourceField(resource, fields.billStatus)?.option?.id
