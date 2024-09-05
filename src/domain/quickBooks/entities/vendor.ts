@@ -138,16 +138,16 @@ const createVendorOnQuickBooks = async (
     .then((data) => readVendorSchema.parse(data.json))
 
   const vendorSchema = await readSchema({ accountId, resourceType: 'Vendor' })
-  const quickBooksIdField = selectField(
+  const quickBooksVendorIdField = selectField(
     vendorSchema,
     fields.quickBooksVendorId,
   )?.id
 
-  assert(quickBooksIdField, 'quickBooksId field not found')
+  assert(quickBooksVendorIdField, 'quickBooksVendorId field not found')
 
   await updateValue({
     resourceId: vendor.id,
-    fieldId: quickBooksIdField,
+    fieldId: quickBooksVendorIdField,
     value: { string: quickBooksVendor.Vendor.Id },
   })
 
@@ -158,6 +158,7 @@ const updateVendorOnQuickBooks = async (
   accountId: string,
   vendor: Resource,
 ): Promise<Vendor> => {
+  //TODO: what do we do if there are vendor changes on QB
   const token = await requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
   const quickBooksVendorId = selectValue(
@@ -165,10 +166,9 @@ const updateVendorOnQuickBooks = async (
     fields.quickBooksVendorId,
   )?.string
 
-  assert(quickBooksVendorId, 'Vendor has no vendorQuickBooksId')
+  assert(quickBooksVendorId, 'Vendor has no quickBooksVendorId')
 
-  //TODO: vendor can be incative on QB
-  //TODO: what do we do if there are vendor changes on QB
+  //TODO: vendor can be inactive on QB
   const quickBooksVendor = await readVendor(accountId, quickBooksVendorId)
 
   const vendorBody = mapVendor(vendor)

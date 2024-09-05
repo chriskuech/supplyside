@@ -6,6 +6,10 @@ import config from '@/services/config'
 
 const fieldsMap = [
   {
+    field: fields.quickBooksBillId,
+    key: 'Id',
+  },
+  {
     field: fields.invoiceDate,
     key: 'TxnDate',
   },
