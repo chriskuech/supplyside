@@ -21,7 +21,7 @@ import {
   OptionPatch,
   UpdateFieldDto,
 } from '@/domain/schema/fields/types'
-import { findField } from '@/domain/schema/template/system-fields'
+import { findTemplateField } from '@/domain/schema/template/system-fields'
 import { mapValueToInput } from '@/domain/resource/values/mappers'
 import { ValueInput } from '@/domain/resource/values/types'
 
@@ -104,7 +104,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         <OptionsControl
           options={options}
           onChange={setOptions}
-          isDisabled={!!findField(field.templateId)?.options}
+          isDisabled={!!findTemplateField(field.templateId)?.options}
         />
       )}
 
@@ -121,7 +121,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         )}
       </Stack>
 
-      {!findField(field.templateId)?.defaultValue && (
+      {!findTemplateField(field.templateId)?.defaultValue && (
         <FormControl fullWidth>
           <InputLabel htmlFor="default-field-value-control">
             Default Value

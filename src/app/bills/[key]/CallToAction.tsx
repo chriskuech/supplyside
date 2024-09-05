@@ -13,14 +13,14 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { Resource, selectValue } from '@/domain/resource/types'
+import { Resource, selectResourceField } from '@/domain/resource/types'
 import {
   billStatusOptions,
   fields,
 } from '@/domain/schema/template/system-fields'
 import { transitionStatus } from '@/lib/resource/actions'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
-import { Schema, selectField } from '@/domain/schema/types'
+import { Schema, selectSchemaField } from '@/domain/schema/types'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { User } from '@/domain/iam/user/types'
 import { isMissingRequiredFields } from '@/domain/resource/values/mappers'
@@ -36,8 +36,8 @@ export default function CallToAction({ user, schema, resource }: Props) {
 
   if (!resource) return <CircularProgress />
 
-  const billStatus = selectValue(resource, fields.billStatus)?.option
-  const order = selectValue(resource, fields.order)?.resource
+  const billStatus = selectResourceField(resource, fields.billStatus)?.option
+  const order = selectResourceField(resource, fields.order)?.resource
 
   const isDraft = billStatus?.templateId === billStatusOptions.draft.templateId
   const isSubmitted =
@@ -172,8 +172,8 @@ export default function CallToAction({ user, schema, resource }: Props) {
                 <FieldControl
                   inputId="rf-order"
                   resourceId={resource.id}
-                  field={selectField(schema, fields.order) ?? fail()}
-                  value={selectValue(resource, fields.order) ?? fail()}
+                  field={selectSchemaField(schema, fields.order) ?? fail()}
+                  value={selectResourceField(resource, fields.order) ?? fail()}
                 />
               </Box>
               <Stack direction="row" sx={{ justifyContent: 'end' }}>

@@ -12,7 +12,7 @@ import prisma from '@/services/prisma'
 import { ValueResource } from '@/domain/resource/values/types'
 import { updateValue } from '@/domain/resource/fields/actions'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
-import { selectField } from '@/domain/schema/types'
+import { selectSchemaField } from '@/domain/schema/types'
 import { readSchema } from '@/domain/schema/actions'
 
 export const createResource = async (
@@ -112,7 +112,8 @@ export const transitionStatus = async (
     resourceType,
     isSystem: true,
   })
-  const field = selectField(schema, fieldTemplate) ?? fail('Field not found')
+  const field =
+    selectSchemaField(schema, fieldTemplate) ?? fail('Field not found')
 
   await updateValue({
     resourceId,
