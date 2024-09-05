@@ -1,8 +1,8 @@
 import { P, match } from 'ts-pattern'
 import { CreateFieldParams, Field, UpdateFieldDto } from './types'
 import prisma from '@/services/prisma'
-import { valueInclude } from '@/domain/resource/values/types'
-import { mapValueFromModel } from '@/domain/resource/values/mappers'
+import { valueInclude } from '@/domain/resource/model'
+import { mapValueModelToEntity } from '@/domain/resource/map-model-to-entity'
 
 export const createField = async (
   accountId: string,
@@ -59,7 +59,7 @@ export const readFields = async (accountId: string): Promise<Field[]> => {
     resourceType: f.resourceType,
     type: f.type,
     templateId: f.templateId,
-    defaultValue: mapValueFromModel(f.DefaultValue),
+    defaultValue: mapValueModelToEntity(f.DefaultValue),
   }))
 }
 
@@ -78,7 +78,7 @@ export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
             boolean: dto.defaultValue.boolean,
             string: dto.defaultValue.string,
             date: dto.defaultValue.date,
-            optionId: dto.defaultValue.optionId,
+            optionId: dto.defaultValue.option?.id,
             number: dto.defaultValue.number,
             fileId: dto.defaultValue.fileId,
             Contact: match(dto.defaultValue.contact)
@@ -91,8 +91,8 @@ export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
                 },
               }))
               .exhaustive(),
-            userId: dto.defaultValue.userId,
-            resourceId: dto.defaultValue.resourceId,
+            userId: dto.defaultValue.user?.id,
+            resourceId: dto.defaultValue.resource?.id,
           },
         },
         isRequired: dto.isRequired,

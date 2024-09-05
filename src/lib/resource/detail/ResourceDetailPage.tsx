@@ -5,7 +5,7 @@ import ResourceFieldsControl from '../ResourceFieldsControl'
 import LinesAndCosts from './LinesAndCosts'
 import DeleteResourceButton from './DeleteResourceButton'
 import { Schema } from '@/domain/schema/types'
-import { Resource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/entity'
 import { FieldTemplate } from '@/domain/schema/template/types'
 
 type Props = {
@@ -83,9 +83,12 @@ export default function ResourceDetailPage({
               lineQuery={{
                 '==': [{ var: backlinkField.name }, resource.id],
               }}
-              newLineInitialData={{
-                [backlinkField.name]: resource.id,
-              }}
+              newLineInitialData={[
+                {
+                  templateId: backlinkField.templateId,
+                  value: { resource: resource },
+                },
+              ]}
               isReadOnly={isReadOnly}
             />
           )}

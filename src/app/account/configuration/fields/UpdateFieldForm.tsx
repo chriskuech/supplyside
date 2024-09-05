@@ -22,8 +22,8 @@ import {
   UpdateFieldDto,
 } from '@/domain/schema/fields/types'
 import { findField } from '@/domain/schema/template/system-fields'
-import { mapValueToInput } from '@/domain/resource/values/mappers'
-import { ValueInput } from '@/domain/resource/values/types'
+import { mapValueToInput } from '@/domain/resource/map-entity-to-input'
+import { ValueInput } from '@/domain/resource/input'
 
 type Props = {
   field: Field

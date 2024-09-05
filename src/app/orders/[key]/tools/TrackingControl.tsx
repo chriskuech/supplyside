@@ -11,15 +11,15 @@ import {
   Button,
   DialogActions,
 } from '@mui/material'
-import { Value } from '@/domain/resource/values/types'
 import { Field } from '@/domain/schema/types'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
+import { Value } from '@/domain/resource/entity'
 
 type TrackingControlProps = {
   resourceId: string
   field: Field
-  value: Value
+  value: Value | undefined
 }
 
 export default function TrackingControl({
@@ -29,7 +29,7 @@ export default function TrackingControl({
 }: TrackingControlProps) {
   const { isOpen, open, close } = useDisclosure()
 
-  const { string: trackingNumber } = value
+  const { string: trackingNumber } = value ?? {}
 
   return (
     <>

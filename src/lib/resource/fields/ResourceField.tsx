@@ -25,11 +25,12 @@ import {
   readResource,
 } from '../actions'
 import ResourceFieldsControl from '../ResourceFieldsControl'
-import { Resource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/entity'
 import { readSchema } from '@/lib/schema/actions'
 import { Schema } from '@/domain/schema/types'
-import { ValueResource } from '@/domain/resource/values/types'
+import { ValueResource } from '@/domain/resource/entity'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
+import { fields } from '@/domain/schema/template/system-fields'
 
 type Props = {
   value: ValueResource | null
@@ -64,14 +65,15 @@ function ResourceField(
   const handleCreate = (nameOrNumber: string) =>
     createResource({
       type: resourceType,
-      data: match(resourceType)
-        .with(P.union('Vendor', 'Item'), () => ({
-          Name: nameOrNumber,
-        }))
-        .with(P.union('Bill', 'Order', 'Line'), () => ({
-          Number: nameOrNumber,
-        }))
-        .exhaustive(),
+      fields: [
+        {
+          templateId: match(resourceType)
+            .with(P.union('Vendor', 'Item'), () => fields.name)
+            .with(P.union('Bill', 'Order', 'Line'), () => fields.number)
+            .exhaustive().templateId,
+          value: { string: nameOrNumber },
+        },
+      ],
     }).then(({ id }) => {
       onChange?.(id)
       open()

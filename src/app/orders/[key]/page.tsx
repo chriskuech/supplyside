@@ -18,14 +18,14 @@ import {
   fields,
   orderStatusOptions,
 } from '@/domain/schema/template/system-fields'
-import { emptyValue, selectValue } from '@/domain/resource/types'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
-import { isMissingRequiredFields } from '@/domain/resource/values/mappers'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectField } from '@/domain/schema/types'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
+import { isMissingRequiredFields } from '@/domain/resource/validate'
+import { selectValue } from '@/domain/resource/entity'
 
 export default async function OrderDetail({
   params: { key },
@@ -74,7 +74,7 @@ export default async function OrderDetail({
             selectField(schema, fields.trackingNumber) ??
             fail('Field not found')
           }
-          value={selectValue(resource, fields.trackingNumber) ?? emptyValue}
+          value={selectValue(resource, fields.trackingNumber)}
         />,
         ...(poFile ? [<PreviewPoControl key={poFile.id} file={poFile} />] : []),
         ...(poFile
@@ -97,7 +97,7 @@ export default async function OrderDetail({
           field={
             selectField(schema, fields.assignee) ?? fail('Field not found')
           }
-          value={selectValue(resource, fields.assignee) ?? emptyValue}
+          value={selectValue(resource, fields.assignee)}
         />,
         ...(!isDraft
           ? [<EditControl key={EditControl.name} resourceId={resource.id} />]

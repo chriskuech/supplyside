@@ -1,9 +1,9 @@
 'use server'
 
 import { ReactNode } from 'react'
-import { readResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
-import { selectValue } from '@/domain/resource/types'
+import { readResource } from '@/domain/resource'
+import { selectValue } from '@/domain/resource/entity'
 
 type Props = {
   accountId: string

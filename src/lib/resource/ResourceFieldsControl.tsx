@@ -23,7 +23,7 @@ import FieldControl from './fields/FieldControl'
 import FileField from './fields/FileField'
 import FilesField from './fields/FilesField'
 import { Schema } from '@/domain/schema/types'
-import { Resource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/entity'
 
 type Props = {
   schema: Schema

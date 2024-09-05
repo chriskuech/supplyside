@@ -13,7 +13,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { Resource, selectValue } from '@/domain/resource/types'
+import { Resource, selectValue } from '@/domain/resource/entity'
 import {
   billStatusOptions,
   fields,
@@ -23,7 +23,7 @@ import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { Schema, selectField } from '@/domain/schema/types'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { User } from '@/domain/iam/user/types'
-import { isMissingRequiredFields } from '@/domain/resource/values/mappers'
+import { isMissingRequiredFields } from '@/domain/resource/validate'
 
 type Props = {
   user: User

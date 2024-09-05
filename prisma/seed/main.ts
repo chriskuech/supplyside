@@ -8,7 +8,7 @@ import nextCache from 'next/cache'
 import { systemAccountId } from '@/lib/const'
 import prisma from '@/services/prisma'
 import { applyTemplate } from '@/domain/schema/template/actions'
-import { createResource } from '@/domain/resource/actions'
+import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 
 ImportMock.mockFunction(nextCache, 'revalidatePath', () => {})
@@ -88,57 +88,99 @@ async function main() {
   const vendor = await createResource({
     accountId: customerAccount.id,
     type: ResourceType.Vendor,
-    data: {
-      [fields.name.name]: 'ACME Supplies',
-    },
+    fields: [
+      {
+        templateId: fields.name.templateId,
+        value: { string: 'ACME Supplies' },
+      },
+    ],
   })
 
   const order = await createResource({
     accountId: customerAccount.id,
     type: ResourceType.Order,
-    data: {
-      [fields.assignee.name]: systemUser.id,
-      [fields.number.name]: '42',
-      [fields.vendor.name]: vendor.id,
-    },
+    fields: [
+      {
+        templateId: fields.assignee.templateId,
+        value: { user: systemUser },
+      },
+      {
+        templateId: fields.number.templateId,
+        value: { string: '42' },
+      },
+      {
+        templateId: fields.vendor.templateId,
+        value: { resource: vendor },
+      },
+    ],
   })
 
   const item1 = await createResource({
     accountId: customerAccount.id,
     type: ResourceType.Item,
-    data: {
-      [fields.name.name]: 'Item Name 1',
-      [fields.itemDescription.name]: 'Item Desc 1',
-      [fields.unitOfMeasure.name]: unitOfMeasureOption.id,
-    },
+    fields: [
+      {
+        templateId: fields.name.templateId,
+        value: { string: 'Item Name 1' },
+      },
+      {
+        templateId: fields.itemDescription.templateId,
+        value: { string: 'Item Desc 1' },
+      },
+      {
+        templateId: fields.unitOfMeasure.templateId,
+        value: { option: unitOfMeasureOption },
+      },
+    ],
   })
 
   await createResource({
     accountId: customerAccount.id,
     type: ResourceType.Line,
-    data: {
-      [fields.order.name]: order.id,
-      [fields.item.name]: item1.id,
-    },
+    fields: [
+      {
+        templateId: fields.order.templateId,
+        value: { resource: order },
+      },
+      {
+        templateId: fields.item.templateId,
+        value: { resource: item1 },
+      },
+    ],
   })
 
   const item2 = await createResource({
     accountId: customerAccount.id,
     type: ResourceType.Item,
-    data: {
-      [fields.name.name]: 'Item Name 2',
-      [fields.itemDescription.name]: 'Item Desc 2',
-      [fields.unitOfMeasure.name]: unitOfMeasureOption.id,
-    },
+    fields: [
+      {
+        templateId: fields.name.templateId,
+        value: { string: 'Item Name 2' },
+      },
+      {
+        templateId: fields.itemDescription.templateId,
+        value: { string: 'Item Desc 2' },
+      },
+      {
+        templateId: fields.unitOfMeasure.templateId,
+        value: { option: unitOfMeasureOption },
+      },
+    ],
   })
 
   await createResource({
     accountId: customerAccount.id,
     type: ResourceType.Line,
-    data: {
-      [fields.order.name]: order.id,
-      [fields.item.name]: item2.id,
-    },
+    fields: [
+      {
+        templateId: fields.order.templateId,
+        value: { resource: order },
+      },
+      {
+        templateId: fields.item.templateId,
+        value: { resource: item2 },
+      },
+    ],
   })
 }
 

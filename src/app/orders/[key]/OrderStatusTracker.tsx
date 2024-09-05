@@ -1,6 +1,6 @@
 import { match } from 'ts-pattern'
 import StatusTrackerView from '@/lib/ux/StatusTrackerView'
-import { Resource, selectValue } from '@/domain/resource/types'
+import { Resource, selectValue } from '@/domain/resource/entity'
 import {
   fields,
   orderStatusOptions,

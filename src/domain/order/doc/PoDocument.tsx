@@ -9,11 +9,11 @@ import { P, match } from 'ts-pattern'
 import { isTruthy } from 'remeda'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
 import prisma from '@/services/prisma'
-import { readResource, readResources } from '@/domain/resource/actions'
+import { readResource, readResources } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readBlob } from '@/domain/blobs/actions'
 import { readSchema } from '@/domain/schema/actions'
-import { selectValue } from '@/domain/resource/types'
+import { selectValue } from '@/domain/resource/entity'
 
 type Props = {
   accountId: string

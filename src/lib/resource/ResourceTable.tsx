@@ -1,6 +1,6 @@
 'use client'
 
-import { GridColDef, GridColType } from '@mui/x-data-grid'
+import { GridAlignment, GridColDef, GridColType } from '@mui/x-data-grid'
 import { DataGridPro, DataGridProProps } from '@mui/x-data-grid-pro'
 import { FieldType } from '@prisma/client'
 import { Box, Chip, CircularProgress, IconButton, Stack } from '@mui/material'
@@ -15,13 +15,13 @@ import ContactCard from './fields/ContactCard'
 import { deleteResource } from './actions'
 import FieldGridEditCell from './fields/FieldGridEditCell'
 import FieldControl from './fields/FieldControl'
-import { Resource, ResourceField } from '@/domain/resource/types'
 import { Option, Schema } from '@/domain/schema/types'
 import { selectFields } from '@/domain/schema/selectors'
 import { updateValue, UpdateValueDto } from '@/domain/resource/fields/actions'
 import { findField } from '@/domain/schema/template/system-fields'
-import { Value } from '@/domain/resource/values/types'
 import { usePersistDatagridState } from '@/lib/hooks/usePersistDatagridState'
+import { Resource } from '@/domain/resource/entity'
+import { ValueInput } from '@/domain/resource/input'
 
 type IndexedResource = {
   index: number
@@ -68,13 +68,13 @@ export default function ResourceTable({
       ...selectFields(schema).map<GridColDef<IndexedResource>>((field) => ({
         field: field.id,
         headerName: field.name,
-        headerAlign: match(field.type)
-          .with(P.union('Number', 'Money', 'Checkbox'), () => 'right' as const)
-          .otherwise(() => 'left' as const),
-        align: match(field.type)
-          .with(P.union('Number', 'Money', 'Checkbox'), () => 'right' as const)
-          .otherwise(() => 'left' as const),
-        width: match(field.type)
+        headerAlign: match<FieldType, GridAlignment>(field.type)
+          .with(P.union('Number', 'Money', 'Checkbox'), () => 'right')
+          .otherwise(() => 'left'),
+        align: match<FieldType, GridAlignment>(field.type)
+          .with(P.union('Number', 'Money', 'Checkbox'), () => 'right')
+          .otherwise(() => 'left'),
+        width: match<FieldType, number>(field.type)
           .with('Resource', () => 440)
           .with(P.union('Select', 'MultiSelect'), () => 200)
           .with(P.union('Number', 'Money'), () => 130)
@@ -139,27 +139,14 @@ export default function ResourceTable({
         valueParser: (value) => value,
         valueSetter: (value, row: IndexedResource) => {
           if (typeof value !== 'object') return row //TODO: check why value is the raw value 'example' instead of an object {string: 'example'} or similar for other field types when entering edit mode
-          const emptyValue: Value = {
-            boolean: null,
-            contact: null,
-            date: null,
-            file: null,
-            number: null,
-            option: null,
-            resource: null,
-            string: null,
-            user: null,
-          }
 
-          const updatedValue = match<FieldType, Value>(field.type)
+          const updatedValue = match<FieldType, ValueInput>(field.type)
             .with('Select', () => ({
-              ...emptyValue,
               option:
                 field.options.find((option) => option.id === value.optionId) ??
                 null,
             }))
             .with('MultiSelect', () => ({
-              ...emptyValue,
               options: value?.optionIds
                 ? value.optionIds.map((id: string) => ({
                     id,
@@ -171,52 +158,39 @@ export default function ResourceTable({
             }))
             //TODO: get user information to show while refetching data
             .with('User', () => ({
-              ...emptyValue,
               user: {
                 id: value.userId,
-                accountId: '...',
-                isAdmin: false,
-                isApprover: false,
-                isGlobalAdmin: false,
-                requirePasswordReset: false,
-                tsAndCsSignedAt: null,
-                email: '...',
-                firstName: '...',
-                fullName: '...',
-                lastName: '...',
-                profilePicPath: null,
               },
             }))
             //TODO: get resource information to show while refetching data
             .with('Resource', () => ({
-              ...emptyValue,
               resource: {
                 id: value.resourceId,
-                key: 0,
-                name: '...',
               },
             }))
-            .otherwise(() => ({ ...emptyValue, ...value }))
+            .otherwise(() => value)
 
           const editedField = row.fields.find((f) => f.fieldId === field.id)
           if (!editedField) {
-            const newField: ResourceField = {
-              fieldId: field.id,
-              fieldType: field.type,
-              templateId: field.templateId,
-              value: updatedValue,
-            }
-
-            return { ...row, fields: [...row.fields, newField] }
-          } else {
-            const otherFields = row.fields.filter((f) => f.fieldId !== field.id)
-
-            const updatedField = { ...editedField, value: updatedValue }
-
             return {
               ...row,
-              fields: [...otherFields, updatedField],
+              fields: [
+                ...row.fields,
+                {
+                  fieldId: field.id,
+                  fieldType: field.type,
+                  value: updatedValue,
+                },
+              ],
             }
+          }
+
+          return {
+            ...row,
+            fields: [
+              ...row.fields.filter((f) => f.fieldId !== field.id),
+              { ...editedField, value: updatedValue },
+            ],
           }
         },
         valueFormatter: (_, resource) => {

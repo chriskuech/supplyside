@@ -13,7 +13,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { Field } from '@/domain/schema/fields/types'
-import { ValueInput } from '@/domain/resource/values/types'
+import { ValueInput } from '@/domain/resource/input'
 
 type Props = {
   field: Field
@@ -42,12 +42,12 @@ export default function DefaultValueControl({
     .with('Select', () => (
       <Select
         id="default-field-defaultValue-control"
-        value={defaultValue?.optionId ?? ''}
+        value={defaultValue?.option?.id ?? ''}
         disabled={isDisabled}
-        onChange={(e) => onChange({ optionId: e.target.value })}
+        onChange={(e) => onChange({ option: { id: e.target.value } })}
         endAdornment={
-          defaultValue?.optionId && (
-            <IconButton onClick={() => onChange({ optionId: null })}>
+          defaultValue?.option && (
+            <IconButton onClick={() => onChange({ option: null })}>
               <Close fontSize="small" />
             </IconButton>
           )

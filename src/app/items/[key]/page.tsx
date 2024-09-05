@@ -1,4 +1,4 @@
-import { selectValue } from '@/domain/resource/types'
+import { selectValue } from '@/domain/resource/entity'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'

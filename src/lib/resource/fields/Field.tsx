@@ -25,7 +25,7 @@ import ContactCard from './ContactCard'
 import FilesField from './FilesField'
 import { UpdateValueDto, updateContact } from '@/domain/resource/fields/actions'
 import { Field as FieldModel } from '@/domain/schema/types'
-import { Value } from '@/domain/resource/values/types'
+import { Value } from '@/domain/resource/entity'
 
 export type Props = {
   inputId: string
@@ -221,7 +221,7 @@ function Field(
     )
     .with('User', () =>
       isReadOnly ? (
-        <Typography>{value?.user && value.user.fullName}</Typography>
+        <Typography>{value?.user?.fullName}</Typography>
       ) : (
         <UserField
           ref={ref}

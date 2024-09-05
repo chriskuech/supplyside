@@ -1,31 +1,43 @@
 'use server'
 
 import { fail } from 'assert'
-import { Resource as ResourceModel, ResourceType } from '@prisma/client'
+import { ResourceType } from '@prisma/client'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { readSession } from '../session/actions'
-import * as domain from '@/domain/resource/actions'
-import { Resource } from '@/domain/resource/types'
+import * as domain from '@/domain/resource'
+import { Resource } from '@/domain/resource/entity'
 import prisma from '@/services/prisma'
-import { ValueResource } from '@/domain/resource/values/types'
+import { ValueResource } from '@/domain/resource/entity'
 import { updateValue } from '@/domain/resource/fields/actions'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
 import { selectField } from '@/domain/schema/types'
 import { readSchema } from '@/domain/schema/actions'
+import { fields } from '@/domain/schema/template/system-fields'
 
 export const createResource = async (
-  params: Pick<domain.CreateResourceParams, 'type' | 'data'>,
-): Promise<ResourceModel> => {
+  params: Pick<domain.CreateResourceParams, 'type' | 'fields'>,
+): Promise<Resource> => {
   const { accountId, userId } = await readSession()
 
-  if (params.type === 'Order') {
-    params.data = { ...params.data, Assignee: userId }
-  }
-
   revalidatePath('')
-  return domain.createResource({ ...params, accountId })
+
+  return domain.createResource({
+    type: params.type,
+    accountId,
+    fields: [
+      ...params.fields,
+      ...(params.type === 'Order'
+        ? [
+            {
+              templateId: fields.assignee.templateId,
+              value: { user: { id: userId } },
+            },
+          ]
+        : []),
+    ],
+  })
 }
 
 type ReadResourceParams = {

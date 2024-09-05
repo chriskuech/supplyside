@@ -3,7 +3,7 @@
 import { Chip, Typography } from '@mui/material'
 import { Link as LinkIcon } from '@mui/icons-material'
 import Link from 'next/link'
-import { ValueResource } from '@/domain/resource/values/types'
+import { ValueResource } from '@/domain/resource/entity'
 
 type Props = {
   order: ValueResource

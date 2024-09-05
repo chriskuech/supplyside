@@ -7,7 +7,7 @@ import { useLayoutEffect, useRef } from 'react'
 import Field from './Field'
 import { UpdateValueDto } from '@/domain/resource/fields/actions'
 import { Field as FieldModel } from '@/domain/schema/types'
-import { Resource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/entity'
 
 type Props = {
   cellParams: GridRenderEditCellParams<Resource>

@@ -3,16 +3,17 @@ import ResourceTable from '../ResourceTable'
 import ItemizedCostLines from './ItemizedCostLines'
 import { readSchema } from '@/domain/schema/actions'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
-import { Data, Resource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/entity'
 import { Where } from '@/domain/resource/json-logic/types'
-import { readResources } from '@/domain/resource/actions'
+import { readResources } from '@/domain/resource'
 import { Schema } from '@/domain/schema/types'
 import { fields } from '@/domain/schema/template/system-fields'
+import { ResourceFieldInput } from '@/domain/resource/input'
 
 type Props = {
   resource: Resource
   lineQuery: Where
-  newLineInitialData: Data
+  newLineInitialData: ResourceFieldInput[]
   isReadOnly?: boolean
 }
 
@@ -47,7 +48,7 @@ export default async function LinesAndCosts({
           Lines
         </Typography>
         {!isReadOnly && (
-          <CreateResourceButton type="Line" data={newLineInitialData} />
+          <CreateResourceButton type="Line" fields={newLineInitialData} />
         )}
       </Stack>
       <Stack>

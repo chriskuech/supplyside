@@ -6,7 +6,8 @@ import { z } from 'zod'
 import CSRF from 'csrf'
 import { Prisma } from '@prisma/client'
 import { difference, range } from 'remeda'
-import { selectValue } from '../resource/types'
+import { createResource, readResources } from '../resource'
+import { selectValue } from '../resource/entity'
 import {
   accountQuerySchema,
   companyInfoSchema,
@@ -20,7 +21,6 @@ import { CompanyInfo, QueryOptions } from './types'
 import { fields } from '@/domain/schema/template/system-fields'
 import { OptionPatch } from '@/domain/schema/fields/types'
 import { readFields, updateField } from '@/domain/schema/fields'
-import { createResource, readResources } from '@/domain/resource/actions'
 import { updateValue } from '@/domain/resource/fields/actions'
 import { readSchema } from '@/domain/schema/actions'
 import { selectField } from '@/domain/schema/types'
@@ -222,7 +222,7 @@ const upsertAccountsFromQuickBooks = async (
     id: quickBooksAccountField.id,
     name: quickBooksAccountField.name,
     defaultValue: {
-      optionId: quickBooksAccountField.defaultValue.option?.id,
+      option: quickBooksAccountField.defaultValue.option,
     },
     defaultToToday: quickBooksAccountField.defaultToToday,
     isRequired: quickBooksAccountField.isRequired,
@@ -309,10 +309,16 @@ const upsertVendorsFromQuickBooks = async (
     await createResource({
       accountId,
       type: 'Vendor',
-      data: {
-        [fields.name.name]: quickBooksVendorToAdd.DisplayName,
-        [fields.quickBooksVendorId.name]: quickBooksVendorToAdd.Id,
-      },
+      fields: [
+        {
+          templateId: fields.name.templateId,
+          value: { string: quickBooksVendorToAdd.DisplayName },
+        },
+        {
+          templateId: fields.quickBooksVendorId.templateId,
+          value: { string: quickBooksVendorToAdd.Id },
+        },
+      ],
     })
   }
 }

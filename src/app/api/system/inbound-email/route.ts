@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Message } from 'postmark'
 import { createBlob } from '@/domain/blobs/actions'
 import prisma from '@/services/prisma'
-import { createResource } from '@/domain/resource/actions'
+import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import smtp from '@/services/smtp'
 
@@ -47,9 +47,12 @@ const createBill = async (params: Params) => {
   return await createResource({
     accountId: params.accountId,
     type: 'Bill',
-    data: {
-      [fields.billFiles.name]: fileIds,
-    },
+    fields: [
+      {
+        templateId: fields.billFiles.templateId,
+        value: { fileIds },
+      },
+    ],
   })
 }
 

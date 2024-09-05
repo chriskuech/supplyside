@@ -1,17 +1,18 @@
 'use server'
 
 import { fail } from 'assert'
-import { Cost, Prisma, ResourceType } from '@prisma/client'
+import { Prisma, ResourceType } from '@prisma/client'
 import { isString, pick } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { P, match } from 'ts-pattern'
-import { readResource, readResources } from '../actions'
-import { selectValue } from '../types'
+import { readResource, readResources } from '..'
+import { selectValue } from '../entity'
 import prisma from '@/services/prisma'
 import { createBlob } from '@/domain/blobs/actions'
 import { fields, findField } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
 import {
+  copyResourceCosts,
   recalculateItemizedCosts,
   recalculateSubtotalCost,
 } from '@/domain/resource/cost/actions'
@@ -558,59 +559,6 @@ const copyResourceLines = async (
         },
       }),
     ),
-  )
-
-  revalidatePath('')
-}
-
-export const copyResourceCosts = async (
-  fromResourceId: string,
-  toResourceId: string,
-) => {
-  const newCosts = await prisma().cost.findMany({
-    where: { resourceId: fromResourceId },
-  })
-
-  const originalCosts = await prisma().cost.findMany({
-    where: { resourceId: toResourceId },
-  })
-
-  const costsMatch = (cost1: Cost, cost2: Cost) => cost1.name === cost2.name
-
-  const costs: { newCost: Cost; originalCost?: Cost }[] = newCosts.map(
-    (newCost) => {
-      const similarCostIndex = originalCosts.findIndex((originalCost) =>
-        costsMatch(originalCost, newCost),
-      )
-
-      if (similarCostIndex >= 0) {
-        const [originalCost] = originalCosts.splice(similarCostIndex, 1)
-        return { newCost, originalCost }
-      } else {
-        return { newCost }
-      }
-    },
-  )
-
-  await Promise.all(
-    costs.map(({ newCost, originalCost }) => {
-      const newCostData = {
-        name: newCost.name,
-        isPercentage: newCost.isPercentage,
-        value: newCost.value,
-      }
-
-      if (originalCost) {
-        return prisma().cost.update({
-          where: { id: originalCost.id },
-          data: newCostData,
-        })
-      } else {
-        return prisma().cost.create({
-          data: { ...newCostData, resourceId: toResourceId },
-        })
-      }
-    }),
   )
 
   revalidatePath('')

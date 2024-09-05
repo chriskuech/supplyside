@@ -1,7 +1,7 @@
 import { readBlob } from '../blobs/actions'
-import { readResource } from '../resource/actions'
+import { readResource } from '../resource'
 import { fields } from '../schema/template/system-fields'
-import { selectValue } from '../resource/types'
+import { selectValue } from '../resource/entity'
 import smtp from '@/services/smtp'
 import prisma from '@/services/prisma'
 import config from '@/services/config'
@@ -35,7 +35,7 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   if (!po || !poRecipient?.email) return
 
   const [poBlob, logoBlob] = await Promise.all([
-    readBlob({ accountId, blobId: po.Blob.id }),
+    readBlob({ accountId, blobId: po.blobId }),
     account.logoBlobId
       ? readBlob({ accountId, blobId: account.logoBlobId })
       : undefined,
@@ -69,7 +69,7 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
         Name: po.name,
         ContentID: '', // bad typings
         Content: poBlob.buffer.toString('base64'),
-        ContentType: po.Blob.mimeType,
+        ContentType: po.contentType,
       },
     ],
   })

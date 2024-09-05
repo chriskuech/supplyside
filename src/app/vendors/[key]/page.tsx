@@ -1,6 +1,6 @@
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
-import { selectValue } from '@/domain/resource/types'
+import { selectValue } from '@/domain/resource/entity'
 import { fields } from '@/domain/schema/template/system-fields'
 
 export default async function VendorDetail({
