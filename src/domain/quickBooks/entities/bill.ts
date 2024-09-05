@@ -158,8 +158,6 @@ export const syncBill = async (
 
   const quickBooksAccountId = quickBooksAccountQuery.QueryResponse.Account[0].Id
 
-  console.log({ quickBooksAccountId })
-
   const vendor = selectResourceField(bill, fields.vendor)
   const vendorId = vendor?.resource?.id
   assert(vendorId, 'Vendor not set')
