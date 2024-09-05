@@ -228,8 +228,9 @@ const _fields = {
   paymentTerms: {
     templateId: '8a9c85a4-1aea-4c0c-9cd2-51c6943aaaf7',
     name: 'Payment Terms',
-    type: 'Select',
+    type: 'Number',
     description: 'Payment terms expressed in days',
+    prefix: 'Net',
   },
   poRecipient: {
     templateId: 'b735b67c-be50-4859-9242-00572b4d32cb',

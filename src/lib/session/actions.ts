@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { validate as isUuid } from 'uuid'
-import { InvalidSessionError } from './types'
+import { InvalidSessionError, MissingSessionError } from './types'
 import {
   clearSession as domainClearSession,
   createSession as domainCreateSession,
@@ -30,14 +30,14 @@ export const readSession = async () => {
   const sessionId = cookies().get(sessionIdCookieName)?.value
 
   if (!sessionId)
-    throw new InvalidSessionError('`sessionId` not found in cookies')
+    throw new MissingSessionError('`sessionId` not found in cookies')
 
   if (!isUuid(sessionId))
     throw new InvalidSessionError('`sessionId` is not a valid UUID')
 
   const session = await domainReadAndExtendSession(sessionId)
 
-  if (!session) throw new InvalidSessionError('`session` not found')
+  if (!session) throw new MissingSessionError('`session` not found')
 
   return session
 }
@@ -54,7 +54,10 @@ export const requireSessionWithRedirect = async (returnTo: string) => {
     return session
   } catch (e) {
     if (e instanceof InvalidSessionError) {
-      await clearSession()
+      redirect('/auth/logout')
+    }
+
+    if (e instanceof MissingSessionError) {
       redirect(`/auth/login?returnTo=${returnTo}`)
     }
 

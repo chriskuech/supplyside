@@ -24,6 +24,7 @@ export type FieldTemplate = {
   isDerived?: boolean
   isRequired?: boolean
   defaultToToday?: boolean
+  prefix?: string
 }
 
 export type OptionTemplate = {
