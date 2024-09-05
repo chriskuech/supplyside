@@ -26,7 +26,7 @@ import FilesField from './FilesField'
 import { UpdateValueDto, updateContact } from '@/domain/resource/fields/actions'
 import { Field as FieldModel } from '@/domain/schema/types'
 import { Value } from '@/domain/resource/values/types'
-import { findField } from '@/domain/schema/template/system-fields'
+import { findTemplateField } from '@/domain/schema/template/system-fields'
 
 export type Props = {
   inputId: string
@@ -162,9 +162,9 @@ function Field(
           defaultValue={value?.number}
           onChange={(e) => onChange({ number: parseFloat(e.target.value) })}
           InputProps={{
-            startAdornment: findField(field.templateId)?.prefix && (
+            startAdornment: findTemplateField(field.templateId)?.prefix && (
               <InputAdornment position="start">
-                {findField(field.templateId)?.prefix}
+                {findTemplateField(field.templateId)?.prefix}
               </InputAdornment>
             ),
           }}
