@@ -6,7 +6,7 @@ const metadataSchema = z.object({
 })
 
 const refSchema = z.object({
-  name: z.string(),
+  name: z.string().optional(),
   value: z.string(),
 })
 

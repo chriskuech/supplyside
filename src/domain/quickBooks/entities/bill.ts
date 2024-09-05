@@ -71,7 +71,6 @@ const updateBillOnQuickBooks = async (
   quickBooksAccountId: string,
   quickBooksVendorId: string,
 ): Promise<Bill> => {
-  //TODO: what do we do if there are changes someone made on QB
   const token = await requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
 
@@ -88,8 +87,8 @@ const updateBillOnQuickBooks = async (
   const billBody = mapBill(bill, quickBooksAccountId, quickBooksVendorId)
 
   const body = {
+    ...quickBooksBill.Bill,
     ...billBody,
-    SyncToken: quickBooksBill.Bill.SyncToken,
   }
 
   return client
@@ -136,53 +135,46 @@ export const syncBill = async (
   accountId: string,
   resourceId: string,
 ): Promise<void> => {
-  //TODO: remove try
-  try {
-    const bill = await readResource({ accountId, type: 'Bill', id: resourceId })
+  const bill = await readResource({ accountId, type: 'Bill', id: resourceId })
 
-    const quickBooksAccount = selectResourceField(
-      bill,
-      fields.quickBooksAccount,
-    )
-    const accountName = quickBooksAccount?.option?.name
-    assert(accountName, 'Account not set')
-    const quickBooksAccountQuery = await query(
-      accountId,
-      {
-        entity: 'Account',
-        where: `FullyQualifiedName = \'${accountName}\'`,
-      },
-      accountQuerySchema,
-    )
+  const quickBooksAccount = selectResourceField(bill, fields.quickBooksAccount)
+  const accountName = quickBooksAccount?.option?.name
+  assert(accountName, 'Account not set')
 
-    //TODO: show error to user
-    //TODO: accounts can change name
-    assert(
-      quickBooksAccountQuery.QueryResponse.Account,
-      'Account does not exist or is inactive',
-    )
+  const quickBooksAccountQuery = await query(
+    accountId,
+    {
+      entity: 'Account',
+      where: `FullyQualifiedName = '${accountName}'`,
+    },
+    accountQuerySchema,
+  )
 
-    const quickBooksAccountId =
-      quickBooksAccountQuery.QueryResponse.Account[0].Id
+  //TODO: accounts can change name
+  assert(
+    quickBooksAccountQuery.QueryResponse.Account,
+    'Account does not exist or is not active',
+  )
 
-    const vendor = selectResourceField(bill, fields.vendor)
-    const vendorId = vendor?.resource?.id
-    assert(vendorId, 'Vendor not set')
-    const vendorResource = await readResource({ accountId, id: vendorId })
+  const quickBooksAccountId = quickBooksAccountQuery.QueryResponse.Account[0].Id
 
-    const quickBooksVendor = await upsertVendorOnQuickBooks(
-      accountId,
-      vendorResource,
-    )
-    const quickBooksVendorId = quickBooksVendor.Vendor.Id
+  console.log({ quickBooksAccountId })
 
-    await upsertBillOnQuickBooks(
-      accountId,
-      bill,
-      quickBooksAccountId,
-      quickBooksVendorId,
-    )
-  } catch (e) {
-    console.log({ e })
-  }
+  const vendor = selectResourceField(bill, fields.vendor)
+  const vendorId = vendor?.resource?.id
+  assert(vendorId, 'Vendor not set')
+  const vendorResource = await readResource({ accountId, id: vendorId })
+
+  const quickBooksVendor = await upsertVendorOnQuickBooks(
+    accountId,
+    vendorResource,
+  )
+  const quickBooksVendorId = quickBooksVendor.Vendor.Id
+
+  await upsertBillOnQuickBooks(
+    accountId,
+    bill,
+    quickBooksAccountId,
+    quickBooksVendorId,
+  )
 }

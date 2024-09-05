@@ -158,7 +158,6 @@ const updateVendorOnQuickBooks = async (
   accountId: string,
   vendor: Resource,
 ): Promise<Vendor> => {
-  //TODO: what do we do if there are vendor changes on QB
   const token = await requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
   const quickBooksVendorId = selectResourceField(
@@ -173,8 +172,8 @@ const updateVendorOnQuickBooks = async (
 
   const vendorBody = mapVendor(vendor)
   const body = {
+    ...quickBooksVendor.Vendor,
     ...vendorBody,
-    SyncToken: quickBooksVendor.Vendor.SyncToken,
   }
 
   return client
