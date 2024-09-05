@@ -15,7 +15,7 @@ import {
   quickbooksTokenSchema,
   vendorQuerySchema,
 } from './schemas'
-import { getQuickBooksConfig, quickBooksClient } from './util'
+import { getQuickBooksConfigUnsafe, quickBooksClient } from './util'
 import { CompanyInfo, QueryOptions } from './types'
 import { fields } from '@/domain/schema/template/system-fields'
 import { OptionPatch } from '@/domain/schema/fields/types'
@@ -27,9 +27,9 @@ import { selectField } from '@/domain/schema/types'
 import prisma from '@/services/prisma'
 
 const baseUrl = (realmId: string) => {
-  const { quickBooksApiBaseUrl } = getQuickBooksConfig()
+  const { apiBaseUrl } = getQuickBooksConfigUnsafe()
 
-  return `${quickBooksApiBaseUrl}/v3/company/${realmId}`
+  return `${apiBaseUrl}/v3/company/${realmId}`
 }
 
 const cleanToken = (token: Token): QuickBooksToken => ({
@@ -94,7 +94,7 @@ export const createQuickBooksConnection = async (
   accountId: string,
   url: string,
 ) => {
-  const { csrfSecret } = getQuickBooksConfig()
+  const { csrfSecret } = getQuickBooksConfigUnsafe()
 
   const tokenExchange = await quickBooksClient().createToken(url)
   const { csrf } = z
@@ -224,6 +224,7 @@ const upsertAccountsFromQuickBooks = async (
     defaultValue: {
       optionId: quickBooksAccountField.defaultValue.option?.id,
     },
+    defaultToToday: quickBooksAccountField.defaultToToday,
     isRequired: quickBooksAccountField.isRequired,
     options,
   })

@@ -59,15 +59,6 @@ export const readAndExtendSession = async (
   }
 }
 
-export const readSession = async (sessionId: string): Promise<Session> => {
-  const session = await prisma().session.findUniqueOrThrow({
-    where: { id: sessionId },
-    include: sessionIncludes,
-  })
-
-  return mapSessionModel(session)
-}
-
 export const clearSession = async (sessionId: string) => {
   await prisma().session.update({
     where: { id: sessionId },
