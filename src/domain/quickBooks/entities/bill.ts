@@ -5,11 +5,11 @@ import { mapBill } from '../mappers/bill'
 import { accountQuerySchema, readBillSchema } from '../schemas'
 import { Bill } from '../types'
 import { upsertVendorOnQuickBooks } from './vendor'
-import { Resource, selectValue } from '@/domain/resource/types'
+import { Resource, selectResourceField } from '@/domain/resource/types'
 import { readResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
-import { selectField } from '@/domain/schema/types'
+import { selectSchemaField } from '@/domain/schema/types'
 import { updateValue } from '@/domain/resource/fields/actions'
 
 export const readBill = async (
@@ -49,7 +49,7 @@ const createBillOnQuickBooks = async (
     .then((data) => readBillSchema.parse(data.json))
 
   const vendorSchema = await readSchema({ accountId, resourceType: 'Bill' })
-  const quickBooksBillIdField = selectField(
+  const quickBooksBillIdField = selectSchemaField(
     vendorSchema,
     fields.quickBooksBillId,
   )?.id
@@ -75,7 +75,10 @@ const updateBillOnQuickBooks = async (
   const token = await requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
 
-  const quickBooksBillId = selectValue(bill, fields.quickBooksBillId)?.string
+  const quickBooksBillId = selectResourceField(
+    bill,
+    fields.quickBooksBillId,
+  )?.string
 
   assert(quickBooksBillId, 'Bill has no quickBooksBillId')
 
@@ -107,7 +110,10 @@ const upsertBillOnQuickBooks = async (
   quickBooksAccountId: string,
   quickBooksVendorId: string,
 ): Promise<Bill> => {
-  const quickBooksBillId = selectValue(bill, fields.quickBooksBillId)?.string
+  const quickBooksBillId = selectResourceField(
+    bill,
+    fields.quickBooksBillId,
+  )?.string
 
   if (quickBooksBillId) {
     return updateBillOnQuickBooks(
@@ -134,7 +140,10 @@ export const syncBill = async (
   try {
     const bill = await readResource({ accountId, type: 'Bill', id: resourceId })
 
-    const quickBooksAccount = selectValue(bill, fields.quickBooksAccount)
+    const quickBooksAccount = selectResourceField(
+      bill,
+      fields.quickBooksAccount,
+    )
     const accountName = quickBooksAccount?.option?.name
     assert(accountName, 'Account not set')
     const quickBooksAccountQuery = await query(
@@ -156,7 +165,7 @@ export const syncBill = async (
     const quickBooksAccountId =
       quickBooksAccountQuery.QueryResponse.Account[0].Id
 
-    const vendor = selectValue(bill, fields.vendor)
+    const vendor = selectResourceField(bill, fields.vendor)
     const vendorId = vendor?.resource?.id
     assert(vendorId, 'Vendor not set')
     const vendorResource = await readResource({ accountId, id: vendorId })

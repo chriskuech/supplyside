@@ -11,9 +11,9 @@ import { quickBooksClient } from '../util'
 import { mapVendor } from '../mappers/vendor'
 import { createResource, readResources } from '@/domain/resource/actions'
 import { readSchema } from '@/domain/schema/actions'
-import { selectField } from '@/domain/schema/types'
+import { selectSchemaField } from '@/domain/schema/types'
 import { fields } from '@/domain/schema/template/system-fields'
-import { Resource, selectValue } from '@/domain/resource/types'
+import { Resource, selectResourceField } from '@/domain/resource/types'
 import { updateValue } from '@/domain/resource/fields/actions'
 
 export const readVendor = async (
@@ -66,14 +66,14 @@ export const upsertVendorsFromQuickBooks = async (
     readSchema({ accountId, resourceType: 'Vendor' }),
   ])
 
-  const vendorNameField = selectField(vendorSchema, fields.name)
+  const vendorNameField = selectSchemaField(vendorSchema, fields.name)
   assert(vendorNameField, 'Vendor name field not found')
 
   const quickBooksVendorsToAdd = quickBooksVendors.filter(
     (quickBooksVendor) =>
       !currentVendors.some(
         (vendor) =>
-          selectValue(vendor, fields.quickBooksVendorId)?.string ===
+          selectResourceField(vendor, fields.quickBooksVendorId)?.string ===
           quickBooksVendor.Id,
       ),
   )
@@ -87,13 +87,13 @@ export const upsertVendorsFromQuickBooks = async (
     quickBooksVendorsToUpdate.map(async (quickBooksVendor) => {
       const vendor = currentVendors.find(
         (currentVendor) =>
-          selectValue(currentVendor, fields.quickBooksVendorId)?.string ===
-          quickBooksVendor.Id,
+          selectResourceField(currentVendor, fields.quickBooksVendorId)
+            ?.string === quickBooksVendor.Id,
       )
 
       if (!vendor) return
 
-      const vendorName = selectValue(vendor, fields.name)?.string
+      const vendorName = selectResourceField(vendor, fields.name)?.string
 
       if (vendorName === quickBooksVendor.DisplayName) return
 
@@ -138,7 +138,7 @@ const createVendorOnQuickBooks = async (
     .then((data) => readVendorSchema.parse(data.json))
 
   const vendorSchema = await readSchema({ accountId, resourceType: 'Vendor' })
-  const quickBooksVendorIdField = selectField(
+  const quickBooksVendorIdField = selectSchemaField(
     vendorSchema,
     fields.quickBooksVendorId,
   )?.id
@@ -161,7 +161,7 @@ const updateVendorOnQuickBooks = async (
   //TODO: what do we do if there are vendor changes on QB
   const token = await requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
-  const quickBooksVendorId = selectValue(
+  const quickBooksVendorId = selectResourceField(
     vendor,
     fields.quickBooksVendorId,
   )?.string
@@ -194,7 +194,7 @@ export const upsertVendorOnQuickBooks = async (
   vendor: Resource,
 ): Promise<Vendor> => {
   //TODO: can't have two vendor with same name on QB
-  const quickBooksVendorId = selectValue(
+  const quickBooksVendorId = selectResourceField(
     vendor,
     fields.quickBooksVendorId,
   )?.string
