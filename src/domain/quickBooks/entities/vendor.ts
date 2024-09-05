@@ -9,6 +9,7 @@ import {
 import { Vendor } from '../types'
 import { quickBooksClient } from '../util'
 import { mapVendor } from '../mappers/vendor'
+import { handleNotFoundError } from '../errors'
 import { createResource, readResources } from '@/domain/resource/actions'
 import { readSchema } from '@/domain/schema/actions'
 import { selectSchemaField } from '@/domain/schema/types'
@@ -167,8 +168,15 @@ const updateVendorOnQuickBooks = async (
 
   assert(quickBooksVendorId, 'Vendor has no quickBooksVendorId')
 
-  //TODO: vendor can be inactive on QB
-  const quickBooksVendor = await readVendor(accountId, quickBooksVendorId)
+  const quickBooksVendor = await readVendor(
+    accountId,
+    quickBooksVendorId,
+  ).catch((e) =>
+    handleNotFoundError(
+      e,
+      'Vendor does not exist or is not active in QuickBooks',
+    ),
+  )
 
   const vendorBody = mapVendor(vendor)
   const body = {
@@ -192,7 +200,6 @@ export const upsertVendorOnQuickBooks = async (
   accountId: string,
   vendor: Resource,
 ): Promise<Vendor> => {
-  //TODO: can't have two vendor with same name on QB
   const quickBooksVendorId = selectResourceField(
     vendor,
     fields.quickBooksVendorId,

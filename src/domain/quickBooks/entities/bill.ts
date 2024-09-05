@@ -11,6 +11,7 @@ import { fields } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
 import { selectSchemaField } from '@/domain/schema/types'
 import { updateValue } from '@/domain/resource/fields/actions'
+import { ExpectedError } from '@/domain/errors'
 
 export const readBill = async (
   accountId: string,
@@ -81,7 +82,7 @@ const updateBillOnQuickBooks = async (
 
   assert(quickBooksBillId, 'Bill has no quickBooksBillId')
 
-  //TODO: bill can be deleted on QB
+  //TODO: bill can be deleted on QB, do we recreate it?
   const quickBooksBill = await readBill(accountId, quickBooksBillId)
 
   const billBody = mapBill(bill, quickBooksAccountId, quickBooksVendorId)
@@ -137,29 +138,31 @@ export const syncBill = async (
 ): Promise<void> => {
   const bill = await readResource({ accountId, type: 'Bill', id: resourceId })
 
-  const quickBooksAccount = selectResourceField(bill, fields.quickBooksAccount)
-  const accountName = quickBooksAccount?.option?.name
-  assert(accountName, 'Account not set')
+  const quickBooksAccountName = selectResourceField(
+    bill,
+    fields.quickBooksAccount,
+  )?.option?.name
+  assert(quickBooksAccountName, 'Account not set')
 
   const quickBooksAccountQuery = await query(
     accountId,
     {
       entity: 'Account',
-      where: `FullyQualifiedName = '${accountName}'`,
+      where: `FullyQualifiedName = '${quickBooksAccountName}'`,
     },
     accountQuerySchema,
   )
 
-  //TODO: accounts can change name
   assert(
     quickBooksAccountQuery.QueryResponse.Account,
-    'Account does not exist or is not active',
+    new ExpectedError(
+      'Accounting category does not exist or is not active in QuickBooks',
+    ),
   )
 
   const quickBooksAccountId = quickBooksAccountQuery.QueryResponse.Account[0].Id
 
-  const vendor = selectResourceField(bill, fields.vendor)
-  const vendorId = vendor?.resource?.id
+  const vendorId = selectResourceField(bill, fields.vendor)?.resource?.id
   assert(vendorId, 'Vendor not set')
   const vendorResource = await readResource({ accountId, id: vendorId })
 
