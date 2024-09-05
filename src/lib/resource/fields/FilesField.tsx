@@ -10,7 +10,6 @@ import {
   Typography,
 } from '@mui/material'
 import { useRef } from 'react'
-import { getDownloadPath } from '@/domain/blobs/utils'
 import { Field } from '@/domain/schema/types'
 import { updateValue, uploadFiles } from '@/domain/resource/fields/actions'
 import { Value } from '@/domain/resource/values/types'
@@ -39,33 +38,12 @@ export default function FilesField({
           <Stack key={file.id} direction="row" alignItems="center">
             <Typography flexGrow={1}>{file.name ?? '-'}</Typography>
             <Tooltip title="View File">
-              <IconButton
-                onClick={() =>
-                  window.open(
-                    getDownloadPath({
-                      blobId: file.blobId,
-                      fileName: file.name,
-                      mimeType: file.Blob.mimeType,
-                      isPreview: true,
-                    }),
-                  )
-                }
-              >
+              <IconButton onClick={() => window.open(file.previewPath)}>
                 <Visibility />
               </IconButton>
             </Tooltip>
             <Tooltip title="Download File">
-              <IconButton
-                onClick={() =>
-                  window.open(
-                    getDownloadPath({
-                      blobId: file.blobId,
-                      fileName: file.name,
-                      mimeType: file.Blob.mimeType,
-                    }),
-                  )
-                }
-              >
+              <IconButton onClick={() => window.open(file.downloadPath)}>
                 <Download />
               </IconButton>
             </Tooltip>

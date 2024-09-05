@@ -42,4 +42,5 @@ export const emptyValue = {
   user: null,
   file: null,
   resource: null,
+  files: [],
 } as const satisfies Value

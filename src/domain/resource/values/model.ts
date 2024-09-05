@@ -20,10 +20,12 @@ export type ResourceValueModel = Resource & {
 
 export type ValueModel = Value & {
   Contact: Contact | null
-  File: (File & { Blob: Blob }) | null
+  File: ValueFileModel | null
   Option: Option | null
   User: (User & { ImageBlob: Blob | null }) | null
-  Files: { File: File & { Blob: Blob } }[]
+  Files: { File: ValueFileModel }[]
   ValueOption: (ValueOption & { Option: Option })[]
   Resource: ResourceValueModel | null
 }
+
+export type ValueFileModel = File & { Blob: Blob }

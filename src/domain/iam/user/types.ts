@@ -1,6 +1,6 @@
 import { Blob, Prisma, User as UserCoreModel } from '@prisma/client'
 import { isTruthy } from 'remeda'
-import { getDownloadPath } from '@/domain/blobs/utils'
+import { getDownloadPath } from '@/domain/blobs'
 import { systemAccountId } from '@/lib/const'
 
 export const userInclude = {
