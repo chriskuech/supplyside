@@ -148,6 +148,7 @@ export default function ResourceTable({
             resource: null,
             string: null,
             user: null,
+            files: [],
           }
 
           const updatedValue = match<FieldType, Value>(field.type)

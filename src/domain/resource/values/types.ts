@@ -1,4 +1,4 @@
-import { Blob, Contact, File, Prisma } from '@prisma/client'
+import { Contact, Prisma } from '@prisma/client'
 import { Option } from '@/domain/schema/types'
 import { User } from '@/domain/iam/user/types'
 
@@ -20,7 +20,14 @@ export type ValueInput = {
   resourceId?: string | null
 }
 
-export type ValueFile = File & { Blob: Blob }
+export type ValueFile = {
+  id: string
+  blobId: string
+  name: string
+  contentType: string
+  downloadPath: string
+  previewPath: string
+}
 
 export type Value = {
   boolean: boolean | null
@@ -32,7 +39,7 @@ export type Value = {
   string: string | null
   user: User | null
   file: ValueFile | null
-  files?: ValueFile[]
+  files: ValueFile[]
   resource: ValueResource | null
 }
 

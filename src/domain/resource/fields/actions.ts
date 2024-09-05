@@ -8,7 +8,7 @@ import { P, match } from 'ts-pattern'
 import { readResource, readResources } from '../actions'
 import { selectResourceField } from '../types'
 import prisma from '@/services/prisma'
-import { createBlob } from '@/domain/blobs/actions'
+import { createBlob } from '@/domain/blobs'
 import {
   fields,
   findTemplateField,

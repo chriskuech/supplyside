@@ -2,7 +2,7 @@
 
 import { fail } from 'assert'
 import { Prisma } from '@prisma/client'
-import { createBlob } from '../blobs/actions'
+import { createBlob } from '../blobs'
 import { fields } from '../schema/template/system-fields'
 import { readResource } from '../resource/actions'
 import { updateValue } from '../resource/fields/actions'

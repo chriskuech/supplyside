@@ -3,7 +3,7 @@
 import { fail } from 'assert'
 import { NextRequest, NextResponse } from 'next/server'
 import { Message } from 'postmark'
-import { createBlob } from '@/domain/blobs/actions'
+import { createBlob } from '@/domain/blobs'
 import prisma from '@/services/prisma'
 import { createResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'

@@ -2,11 +2,31 @@ import { isArray, isNullish, pick } from 'remeda'
 import { FieldType } from '@prisma/client'
 import { match, P } from 'ts-pattern'
 import { Resource, selectResourceField } from '../types'
-import { Value, ValueInput, ValueResource } from './types'
-import { ResourceValueModel, ValueModel } from './model'
+import { ResourceValueModel, ValueFileModel, ValueModel } from './model'
+import { Value, ValueFile, ValueInput, ValueResource } from './types'
 import { fields } from '@/domain/schema/template/system-fields'
 import { mapUserModel } from '@/domain/iam/user/types'
 import { Schema } from '@/domain/schema/types'
+import { getDownloadPath } from '@/domain/blobs'
+
+const mapValueFile = (file: ValueFileModel): ValueFile => ({
+  id: file.id,
+  blobId: file.blobId,
+  name: file.name,
+  contentType: file.Blob.mimeType,
+  downloadPath: getDownloadPath({
+    blobId: file.blobId,
+    mimeType: file.Blob.mimeType,
+    fileName: file.name,
+    isPreview: false,
+  }),
+  previewPath: getDownloadPath({
+    blobId: file.blobId,
+    mimeType: file.Blob.mimeType,
+    fileName: file.name,
+    isPreview: true,
+  }),
+})
 
 export const mapValueToInput = (value: Value): ValueInput => ({
   boolean: value.boolean ?? undefined,
@@ -33,8 +53,8 @@ export const mapValueFromModel = (model: ValueModel): Value => ({
   options: model.ValueOption.map((vo) => vo.Option),
   user: model.User && mapUserModel(model.User),
   resource: model.Resource && mapValueFromResource(model.Resource),
-  file: model.File,
-  files: model.Files.map(({ File: file }) => file),
+  file: model.File ? mapValueFile(model.File) : null,
+  files: model.Files.map(({ File: file }) => mapValueFile(file)),
 })
 
 export const mapValueFromResource = (

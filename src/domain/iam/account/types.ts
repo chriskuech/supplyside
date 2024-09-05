@@ -1,5 +1,5 @@
 import { Account as AccountCoreModel, Blob, Prisma } from '@prisma/client'
-import { getDownloadPath } from '@/domain/blobs/utils'
+import { getDownloadPath } from '@/domain/blobs'
 
 export type Account = {
   id: string

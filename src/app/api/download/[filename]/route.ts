@@ -1,7 +1,7 @@
 'use server'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { readBlob } from '@/domain/blobs/actions'
+import { readBlob } from '@/domain/blobs'
 import { readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
 

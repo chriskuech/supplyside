@@ -11,7 +11,7 @@ import { PoDocumentStyles, styles } from './PoDocumentStyles'
 import prisma from '@/services/prisma'
 import { readResource, readResources } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
-import { readBlob } from '@/domain/blobs/actions'
+import { readBlob } from '@/domain/blobs'
 import { readSchema } from '@/domain/schema/actions'
 import { selectResourceField } from '@/domain/resource/types'
 

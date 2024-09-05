@@ -1,5 +1,3 @@
-'use server'
-
 import { randomUUID } from 'crypto'
 import { Blob } from '@prisma/client'
 import azblob from '@/services/azblob'
@@ -57,6 +55,7 @@ export const readBlob = async ({
   const blob = await prisma().blob.findUnique({
     where: { accountId, id: blobId },
   })
+
   if (!blob) {
     throw new Error('Blob not found')
   }
@@ -90,3 +89,11 @@ export const deleteBlob = async ({ accountId, blobId }: DeleteBlobParams) => {
 
   await prisma().blob.delete({ where: { accountId, id: blobId } })
 }
+
+export const getDownloadPath = (params: {
+  blobId: string
+  mimeType: string
+  fileName: string
+  isPreview?: boolean
+}): string =>
+  `/api/download/${encodeURIComponent(params.fileName)}?blobId=${params.blobId}${params.isPreview ? '&preview' : ''}`
