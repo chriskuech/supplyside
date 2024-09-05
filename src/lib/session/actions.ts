@@ -43,7 +43,7 @@ export const readSession = async () => {
 }
 
 // this should be in a middleware, but https://github.com/vercel/next.js/issues/69002
-export const requireSessionWithRedirect = async () => {
+export const requireSessionWithRedirect = async (returnTo: string) => {
   try {
     const session = await readSession()
 
@@ -55,7 +55,7 @@ export const requireSessionWithRedirect = async () => {
   } catch (e) {
     if (e instanceof InvalidSessionError) {
       await clearSession()
-      redirect('/auth/login')
+      redirect(`/auth/login?returnTo=${returnTo}`)
     }
 
     throw e

@@ -29,7 +29,7 @@ export default async function BillsDetail({
     session: { user },
     resource,
     schema,
-  } = await readDetailPageModel('Bill', key)
+  } = await readDetailPageModel('Bill', key, `/bills/${key}`)
 
   const status =
     selectValue(resource, fields.billStatus)?.option ?? fail('Status not found')

@@ -8,7 +8,11 @@ export default async function VendorDetail({
 }: {
   params: { key: string }
 }) {
-  const { resource, schema } = await readDetailPageModel('Vendor', key)
+  const { resource, schema } = await readDetailPageModel(
+    'Vendor',
+    key,
+    `/vendors/${key}`,
+  )
 
   const name = selectValue(resource, fields.name)?.string
 

@@ -4,7 +4,7 @@ import { requireSessionWithRedirect } from '@/lib/session/actions'
 import config from '@/services/config'
 
 export default async function Bills() {
-  const { account } = await requireSessionWithRedirect()
+  const { account } = await requireSessionWithRedirect('/bills')
 
   return (
     <ListPage
@@ -16,6 +16,7 @@ export default async function Bills() {
           address={`${account.key}@${config().BILLS_EMAIL_DOMAIN}`}
         />,
       ]}
+      path="/bills"
     />
   )
 }
