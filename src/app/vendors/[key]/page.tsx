@@ -1,6 +1,6 @@
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
-import { selectValue } from '@/domain/resource/types'
+import { selectResourceField } from '@/domain/resource/types'
 import { fields } from '@/domain/schema/template/system-fields'
 
 export default async function VendorDetail({
@@ -8,9 +8,13 @@ export default async function VendorDetail({
 }: {
   params: { key: string }
 }) {
-  const { resource, schema } = await readDetailPageModel('Vendor', key)
+  const { resource, schema } = await readDetailPageModel(
+    'Vendor',
+    key,
+    `/vendors/${key}`,
+  )
 
-  const name = selectValue(resource, fields.name)?.string
+  const name = selectResourceField(resource, fields.name)?.string
 
   return (
     <ResourceDetailPage

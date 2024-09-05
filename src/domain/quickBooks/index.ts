@@ -64,7 +64,7 @@ const updateQuickBooksToken = async (
   })
 }
 
-const deleteQuickBooksToken = async (accountId: string) => {
+export const deleteQuickBooksToken = async (accountId: string) => {
   await prisma().account.update({
     where: { id: accountId },
     data: {

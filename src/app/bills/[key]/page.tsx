@@ -14,10 +14,10 @@ import {
   billStatusOptions,
   fields,
 } from '@/domain/schema/template/system-fields'
-import { selectValue } from '@/domain/resource/types'
+import { selectResourceField } from '@/domain/resource/types'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
-import { selectField } from '@/domain/schema/types'
+import { selectSchemaField } from '@/domain/schema/types'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import { getQuickBooksConfig } from '@/domain/quickBooks/util'
 
@@ -26,9 +26,15 @@ export default async function BillsDetail({
 }: {
   params: { key: string }
 }) {
-  const { session, resource, schema } = await readDetailPageModel('Bill', key)
+  const { session, resource, schema } = await readDetailPageModel(
+    'Bill',
+    key,
+    `/bills/${key}`,
+  )
+
   const status =
-    selectValue(resource, fields.billStatus)?.option ?? fail('Status not found')
+    selectResourceField(resource, fields.billStatus)?.option ??
+    fail('Status not found')
 
   const isDraft = status.templateId === billStatusOptions.draft.templateId
 
@@ -44,9 +50,9 @@ export default async function BillsDetail({
     .with(billStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
 
-  const order = selectValue(resource, fields.order)?.resource
+  const order = selectResourceField(resource, fields.order)?.resource
 
-  const quickBooksBillId = selectValue(
+  const quickBooksBillId = selectResourceField(
     resource,
     fields.quickBooksBillId,
   )?.string
@@ -76,19 +82,20 @@ export default async function BillsDetail({
           resourceId={resource.id}
           resourceType="Bill"
           field={
-            selectField(schema, fields.billAttachments) ??
+            selectSchemaField(schema, fields.billAttachments) ??
             fail('Field not found')
           }
-          value={selectValue(resource, fields.billAttachments)}
+          value={selectResourceField(resource, fields.billAttachments)}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
           resourceId={resource.id}
           resourceType="Bill"
           field={
-            selectField(schema, fields.assignee) ?? fail('Field not found')
+            selectSchemaField(schema, fields.assignee) ??
+            fail('Field not found')
           }
-          value={selectValue(resource, fields.assignee)}
+          value={selectResourceField(resource, fields.assignee)}
         />,
         ...(!isDraft
           ? [<EditControl key={EditControl.name} resourceId={resource.id} />]
@@ -130,7 +137,9 @@ export default async function BillsDetail({
                   resourceId={resource.id}
                 />
                 <CallToAction
-                  key={selectValue(resource, fields.billStatus)?.option?.id}
+                  key={
+                    selectResourceField(resource, fields.billStatus)?.option?.id
+                  }
                   schema={schema}
                   user={session.user}
                   resource={resource}

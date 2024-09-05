@@ -17,9 +17,8 @@ import FieldGridEditCell from './fields/FieldGridEditCell'
 import FieldControl from './fields/FieldControl'
 import { Resource, ResourceField } from '@/domain/resource/types'
 import { Option, Schema } from '@/domain/schema/types'
-import { selectFields } from '@/domain/schema/selectors'
 import { updateValue, UpdateValueDto } from '@/domain/resource/fields/actions'
-import { findField } from '@/domain/schema/template/system-fields'
+import { findTemplateField } from '@/domain/schema/template/system-fields'
 import { Value } from '@/domain/resource/values/types'
 import { usePersistDatagridState } from '@/lib/hooks/usePersistDatagridState'
 
@@ -65,7 +64,7 @@ export default function ResourceTable({
             type: 'number',
             editable: false,
           },
-      ...selectFields(schema).map<GridColDef<IndexedResource>>((field) => ({
+      ...schema.allFields.map<GridColDef<IndexedResource>>((field) => ({
         field: field.id,
         headerName: field.name,
         headerAlign: match(field.type)
@@ -86,7 +85,7 @@ export default function ResourceTable({
           .with('Textarea', () => 300)
           .with('User', () => 150)
           .exhaustive(),
-        editable: isEditable && !findField(field.templateId)?.isDerived,
+        editable: isEditable && !findTemplateField(field.templateId)?.isDerived,
         valueOptions: match(field.type)
           .with('Select', () => field.options)
           .otherwise(() => undefined),

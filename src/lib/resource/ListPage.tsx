@@ -13,14 +13,16 @@ type Props = {
   tableKey: string
   resourceType: ResourceType
   callToActions?: ReactNode[]
+  path: string
 }
 
 export default async function ListPage({
   tableKey,
   resourceType,
+  path,
   callToActions = [],
 }: Props) {
-  const { accountId } = await requireSessionWithRedirect()
+  const { accountId } = await requireSessionWithRedirect(path)
   const [schema, resources] = await Promise.all([
     readSchema({ accountId, resourceType }),
     readResources({ accountId, type: resourceType }),
