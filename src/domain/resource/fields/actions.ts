@@ -6,16 +6,19 @@ import { isString, pick } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { P, match } from 'ts-pattern'
 import { readResource, readResources } from '../actions'
-import { selectValue } from '../types'
+import { selectResourceField } from '../types'
 import prisma from '@/services/prisma'
 import { createBlob } from '@/domain/blobs'
-import { fields, findField } from '@/domain/schema/template/system-fields'
+import {
+  fields,
+  findTemplateField,
+} from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
 import {
   recalculateItemizedCosts,
   recalculateSubtotalCost,
 } from '@/domain/resource/cost/actions'
-import { Field, selectField } from '@/domain/schema/types'
+import { Field, selectSchemaField } from '@/domain/schema/types'
 import { readSession } from '@/lib/session/actions'
 import { FieldTemplate } from '@/domain/schema/template/types'
 
@@ -155,9 +158,10 @@ export const updateValue = async ({
       }),
     ])
 
-    const totalCostFieldId = selectField(schema, fields.totalCost)?.id ?? fail()
-    const unitCost = selectValue(resource, fields.unitCost)?.number ?? 0
-    const quantity = selectValue(resource, fields.quantity)?.number ?? 0
+    const totalCostFieldId =
+      selectSchemaField(schema, fields.totalCost)?.id ?? fail()
+    const unitCost = selectResourceField(resource, fields.unitCost)?.number ?? 0
+    const quantity = selectResourceField(resource, fields.quantity)?.number ?? 0
 
     await updateValue({
       fieldId: totalCostFieldId,
@@ -179,12 +183,12 @@ export const updateValue = async ({
       id: rf.Resource.id,
     })
 
-    const orderId = selectValue(line, fields.order)?.resource?.id
+    const orderId = selectResourceField(line, fields.order)?.resource?.id
     if (orderId) {
       await recalculateSubtotalCost(rf.Resource.accountId, 'Order', orderId)
     }
 
-    const billId = selectValue(line, fields.bill)?.resource?.id
+    const billId = selectResourceField(line, fields.bill)?.resource?.id
     if (billId) {
       await recalculateSubtotalCost(rf.Resource.accountId, 'Bill', billId)
     }
@@ -218,16 +222,30 @@ export const updateValue = async ({
     })
 
     const itemizedCosts =
-      selectValue(resource, fields.itemizedCosts)?.number ?? 0
-    const subtotalCost = selectValue(resource, fields.subtotalCost)?.number ?? 0
+      selectResourceField(resource, fields.itemizedCosts)?.number ?? 0
+    const subtotalCost =
+      selectResourceField(resource, fields.subtotalCost)?.number ?? 0
 
     await updateValue({
-      fieldId: selectField(schema, fields.totalCost)?.id ?? fail(),
+      fieldId: selectSchemaField(schema, fields.totalCost)?.id ?? fail(),
       resourceId: resource.id,
       value: {
         number: itemizedCosts + subtotalCost,
       },
     })
+  }
+
+  // When the Order field of a Bill resource has been updated (an Order has been linked to a Bill)
+  // Then recalculate the Bill."Subtotal Cost"
+  if (
+    rf.Resource.type === ResourceType.Bill &&
+    rf.Field.templateId === fields.order.templateId
+  ) {
+    await recalculateSubtotalCost(
+      rf.Resource.accountId,
+      ResourceType.Bill,
+      rf.Resource.id,
+    )
   }
 }
 
@@ -464,7 +482,7 @@ export const copyLinkedResourceFields = async (
   ])
 
   const excludeDerivedFields = (f: Field) =>
-    !f.templateId || !findField(f.templateId)?.isDerived
+    !f.templateId || !findTemplateField(f.templateId)?.isDerived
 
   const thisFieldIds = thisSchema.allFields
     .filter(excludeDerivedFields)
@@ -533,7 +551,7 @@ const copyResourceLines = async (
     resourceType: ResourceType.Line,
   })
 
-  const field = selectField(schema, resourceFieldTemplate) ?? fail()
+  const field = selectSchemaField(schema, resourceFieldTemplate) ?? fail()
 
   await Promise.all(
     linkedResourceLines.map(async (line) =>

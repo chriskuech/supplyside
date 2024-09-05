@@ -1,7 +1,7 @@
 import { readBlob } from '../blobs'
 import { readResource } from '../resource/actions'
 import { fields } from '../schema/template/system-fields'
-import { selectValue } from '../resource/types'
+import { selectResourceField } from '../resource/types'
 import smtp from '@/services/smtp'
 import prisma from '@/services/prisma'
 import config from '@/services/config'
@@ -25,12 +25,12 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
     }),
   ])
 
-  const poRecipient = selectValue(order, fields.poRecipient)?.contact
-  const po = selectValue(order, fields.document)?.file
-  const assignee = selectValue(order, fields.assignee)?.user
-  const vendor = selectValue(order, fields.vendor)?.resource
-  const number = selectValue(order, fields.number)?.string
-  const date = selectValue(order, fields.issuedDate)?.date
+  const poRecipient = selectResourceField(order, fields.poRecipient)?.contact
+  const po = selectResourceField(order, fields.document)?.file
+  const assignee = selectResourceField(order, fields.assignee)?.user
+  const vendor = selectResourceField(order, fields.vendor)?.resource
+  const number = selectResourceField(order, fields.number)?.string
+  const date = selectResourceField(order, fields.issuedDate)?.date
 
   if (!po || !poRecipient?.email) return
 

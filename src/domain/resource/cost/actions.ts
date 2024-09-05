@@ -5,11 +5,11 @@ import { Prisma, ResourceType } from '@prisma/client'
 import { map, pipe, sum } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { readResource, readResources } from '../actions'
-import { selectValue } from '../types'
+import { selectResourceField } from '../types'
 import { updateValue } from '../fields/actions'
 import { readSchema } from '@/domain/schema/actions'
 import prisma from '@/services/prisma'
-import { selectField } from '@/domain/schema/types'
+import { selectSchemaField } from '@/domain/schema/types'
 import { fields } from '@/domain/schema/template/system-fields'
 
 export const createCost = async (resourceId: string): Promise<void> => {
@@ -55,11 +55,12 @@ export const recalculateItemizedCosts = async (
     where: { resourceId },
   })
 
-  const subtotal = selectValue(resource, fields.subtotalCost)?.number ?? 0
+  const subtotal =
+    selectResourceField(resource, fields.subtotalCost)?.number ?? 0
 
   await updateValue({
     resourceId,
-    fieldId: selectField(schema, fields.itemizedCosts)?.id ?? fail(),
+    fieldId: selectSchemaField(schema, fields.itemizedCosts)?.id ?? fail(),
     value: {
       number: pipe(
         costs,
@@ -94,12 +95,12 @@ export const recalculateSubtotalCost = async (
 
   const subTotal = pipe(
     lines,
-    map((line) => selectValue(line, fields.totalCost)?.number ?? 0),
+    map((line) => selectResourceField(line, fields.totalCost)?.number ?? 0),
     sum(),
   )
 
   await updateValue({
-    fieldId: selectField(schema, fields.subtotalCost)?.id ?? fail(),
+    fieldId: selectSchemaField(schema, fields.subtotalCost)?.id ?? fail(),
     resourceId,
     value: {
       number: subTotal,

@@ -1,9 +1,9 @@
 import { isArray, isNullish, pick } from 'remeda'
 import { FieldType } from '@prisma/client'
 import { match, P } from 'ts-pattern'
-import { Resource } from '../types'
-import { Value, ValueFile, ValueInput, ValueResource } from './types'
+import { Resource, selectResourceField } from '../types'
 import { ResourceValueModel, ValueFileModel, ValueModel } from './model'
+import { Value, ValueFile, ValueInput, ValueResource } from './types'
 import { fields } from '@/domain/schema/template/system-fields'
 import { mapUserModel } from '@/domain/iam/user/types'
 import { Schema } from '@/domain/schema/types'
@@ -90,7 +90,7 @@ export const isMissingRequiredFields = (schema: Schema, resource: Resource) =>
       .with('MultiSelect', () => 'options')
       .exhaustive()
 
-    const value = resource.fields.find((rf) => rf.fieldId === field.id)?.value[
+    const value = selectResourceField(resource, { fieldId: field.id })?.[
       valueColumnName
     ]
 
