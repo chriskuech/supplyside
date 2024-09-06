@@ -1,7 +1,6 @@
 import { useSnackbar } from 'notistack'
 import { useCallback, useState } from 'react'
 import { isMatching } from 'ts-pattern'
-import { ExpectedError } from '../../domain/errors'
 
 export type UseAsyncState<T> = {
   data: T | undefined
@@ -20,7 +19,10 @@ export function useAsyncCallback<Args extends unknown[], ResolvedType>(
     ...args: Args
   ) => Promise<ResolvedType | { error: true; message: string }>,
   { showGenericError }: Options = { showGenericError: true },
-): [UseAsyncState<ResolvedType>, (...args: Args) => Promise<ResolvedType>] {
+): [
+  UseAsyncState<ResolvedType>,
+  (...args: Args) => Promise<ResolvedType | undefined>,
+] {
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState(false)
@@ -37,7 +39,8 @@ export function useAsyncCallback<Args extends unknown[], ResolvedType>(
           enqueueSnackbar(result.message, {
             variant: 'error',
           })
-          throw new ExpectedError(result.message)
+          setError(true)
+          return
         }
 
         setData(result)
@@ -47,7 +50,7 @@ export function useAsyncCallback<Args extends unknown[], ResolvedType>(
       } catch (e) {
         setError(true)
 
-        if (showGenericError && !(e instanceof ExpectedError)) {
+        if (showGenericError) {
           enqueueSnackbar('Something went wrong, please try again later', {
             variant: 'error',
           })
