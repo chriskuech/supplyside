@@ -7,7 +7,6 @@ import CallToAction from './CallToAction'
 import OrderLink from './tools/OrderLink'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
-import QuickBooksBillLink from './tools/QuickBooksBillLink'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import {
   billStatusOptions,
@@ -19,6 +18,7 @@ import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectSchemaField } from '@/domain/schema/types'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import { getQuickBooksConfig } from '@/domain/quickBooks/util'
+import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
 
 export default async function BillsDetail({
   params: { key },
@@ -69,8 +69,8 @@ export default async function BillsDetail({
       tools={[
         ...(quickBooksAppUrl
           ? [
-              <QuickBooksBillLink
-                key={QuickBooksBillLink.name}
+              <QuickBooksLink
+                key={QuickBooksLink.name}
                 quickBooksAppUrl={quickBooksAppUrl}
               />,
             ]

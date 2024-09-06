@@ -9,7 +9,7 @@ type Props = {
   quickBooksAppUrl: string
 }
 
-export default function QuickBooksBillLink({ quickBooksAppUrl }: Props) {
+export default function QuickBooksLink({ quickBooksAppUrl }: Props) {
   const {
     palette: { mode },
   } = useTheme()
