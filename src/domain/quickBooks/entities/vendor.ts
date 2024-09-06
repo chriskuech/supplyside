@@ -10,6 +10,7 @@ import { Vendor } from '../types'
 import { quickBooksClient } from '../util'
 import { mapVendor } from '../mappers/vendor'
 import { handleNotFoundError } from '../errors'
+import { MAX_ENTITIES_PER_PAGE } from '../constants'
 import { createResource, readResources } from '@/domain/resource/actions'
 import { readSchema } from '@/domain/schema/actions'
 import { selectSchemaField } from '@/domain/schema/types'
@@ -41,8 +42,9 @@ export const upsertVendorsFromQuickBooks = async (
     countQuerySchema,
   )
   const totalQuickBooksVendors = quickBooksVendorsCount.QueryResponse.totalCount
-  const maxVendorsPerPage = 1000
-  const numberOfRequests = Math.ceil(totalQuickBooksVendors / maxVendorsPerPage)
+  const numberOfRequests = Math.ceil(
+    totalQuickBooksVendors / MAX_ENTITIES_PER_PAGE,
+  )
 
   const vendorResponses = await Promise.all(
     range(0, numberOfRequests).map((i) =>
@@ -50,8 +52,8 @@ export const upsertVendorsFromQuickBooks = async (
         accountId,
         {
           entity: 'Vendor',
-          startPosition: i * maxVendorsPerPage + 1,
-          maxResults: maxVendorsPerPage,
+          startPosition: i * MAX_ENTITIES_PER_PAGE + 1,
+          maxResults: MAX_ENTITIES_PER_PAGE,
         },
         vendorQuerySchema,
       ),
