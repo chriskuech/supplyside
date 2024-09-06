@@ -145,12 +145,11 @@ export const query = async <T>(
 ): Promise<T> => {
   const token = await requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
-  //TODO: check why escaping '&' is not working
-  // const mappedWhere = where && where.replaceAll('&', '\\&')
+  const mappedWhere = where && encodeURIComponent(where)
 
   return client
     .makeApiCall({
-      url: `${baseUrl(client.token.realmId)}/query?query=select ${getCount ? 'count(*)' : '*'} from ${entity} ${where ? `where ${where}` : ''} ${startPosition ? `STARTPOSITION ${startPosition}` : ''} ${maxResults ? `MAXRESULTS ${maxResults}` : ''}`,
+      url: `${baseUrl(client.token.realmId)}/query?query=select ${getCount ? 'count(*)' : '*'} from ${entity} ${where ? `where ${mappedWhere}` : ''} ${startPosition ? `STARTPOSITION ${startPosition}` : ''} ${maxResults ? `MAXRESULTS ${maxResults}` : ''}`,
       method: 'GET',
     })
     .then((data) => schema.parse(data.json))
