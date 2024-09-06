@@ -13,6 +13,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { approveBill as approveBillAction } from './actions'
 import { Resource, selectResourceField } from '@/domain/resource/types'
 import {
   billStatusOptions,
@@ -24,6 +25,8 @@ import { Schema, selectSchemaField } from '@/domain/schema/types'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { User } from '@/domain/iam/user/types'
 import { isMissingRequiredFields } from '@/domain/resource/values/mappers'
+import LoadingButton from '@/lib/ux/LoadingButton'
+import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
 
 type Props = {
   user: User
@@ -33,6 +36,9 @@ type Props = {
 
 export default function CallToAction({ user, schema, resource }: Props) {
   const { open, isOpen, close } = useDisclosure()
+  const [{ isLoading }, approveBill] = useAsyncCallback(() =>
+    approveBillAction(resource.id),
+  )
 
   if (!resource) return <CircularProgress />
 
@@ -93,22 +99,17 @@ export default function CallToAction({ user, schema, resource }: Props) {
         </>
       )}
       {isSubmitted && (
-        <Button
+        <LoadingButton
           color="secondary"
           size="large"
           sx={{ height: 'fit-content', fontSize: '1.2em' }}
           endIcon={<ArrowRight />}
           disabled={!user.isApprover && !user.isGlobalAdmin}
-          onClick={() =>
-            transitionStatus(
-              resource.id,
-              fields.billStatus,
-              billStatusOptions.approved,
-            )
-          }
+          onClick={approveBill}
+          isLoading={isLoading}
         >
           Approve
-        </Button>
+        </LoadingButton>
       )}
       {isApproved && (
         <Button

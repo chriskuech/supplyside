@@ -42,8 +42,6 @@ const createBill = async (params: Params) => {
     }),
   )
 
-  console.log('Creating Bill', fileIds)
-
   return await createResource({
     accountId: params.accountId,
     type: 'Bill',
