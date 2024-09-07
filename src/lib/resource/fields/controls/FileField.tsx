@@ -3,28 +3,19 @@
 import { Close, Download, UploadFile, Visibility } from '@mui/icons-material'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useRef } from 'react'
-import { Field } from '@/domain/schema/types'
-import { updateValue, uploadFile } from '@/domain/resource/fields/actions'
-import { Value } from '@/domain/resource/values/types'
+import { uploadFile } from './actions'
+import { File } from '@/domain/files/types'
 
 type Props = {
   resourceId: string
-  field: Field
-  value: Value | undefined
+  fieldId: string
+  file: File | null
   isReadOnly?: boolean
-  onChange?: () => void
+  onChange?: (file: File | null) => void
 }
 
-export default function FileField({
-  resourceId,
-  field,
-  value,
-  isReadOnly,
-  onChange,
-}: Props) {
+export default function FileField({ file, isReadOnly, onChange }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const file = value?.file
 
   return (
     <Stack direction="row" alignItems="center">
@@ -39,10 +30,10 @@ export default function FileField({
           const formData = new FormData()
           formData.append('file', file)
 
-          uploadFile(resourceId, field.id, formData).then(() => onChange?.())
+          uploadFile(formData).then((file) => onChange?.(file ?? null))
         }}
       />
-      <Typography flexGrow={1}>{value?.file?.name ?? '-'}</Typography>
+      <Typography flexGrow={1}>{file?.name ?? '-'}</Typography>
       {file && (
         <>
           <Tooltip title="View File">
@@ -57,7 +48,7 @@ export default function FileField({
           </Tooltip>
         </>
       )}
-      {!isReadOnly && (
+      {!isReadOnly && onChange && (
         <>
           <Tooltip title="Upload File">
             <IconButton onClick={() => fileInputRef.current?.click()}>
@@ -65,17 +56,7 @@ export default function FileField({
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete File">
-            <IconButton
-              onClick={() =>
-                updateValue({
-                  resourceId,
-                  fieldId: field.id,
-                  value: {
-                    fileId: null,
-                  },
-                }).then(() => onChange?.())
-              }
-            >
+            <IconButton onClick={() => onChange(null)}>
               <Close />
             </IconButton>
           </Tooltip>

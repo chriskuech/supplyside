@@ -2,12 +2,12 @@
 
 import { fail } from 'assert'
 import {
-  ResourceType,
   Resource as ResourceModel,
   ResourceField,
   Prisma,
   Field as FieldModel,
   Cost,
+  ResourceType,
 } from '@prisma/client'
 import { Ajv } from 'ajv'
 import { isArray } from 'remeda'
@@ -21,7 +21,7 @@ import { Resource, selectResourceField } from './types'
 import { valueInclude } from './values/types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
-import { copyLinkedResourceFields, updateValue } from './fields/actions'
+import { copyLinkedResourceFields, updateValue } from './fields'
 import { ValueModel } from './values/model'
 import { mapValueFromModel } from './values/mappers'
 import prisma from '@/services/prisma'
@@ -38,7 +38,7 @@ export const createResource = async ({
   accountId,
   type,
   data,
-}: CreateResourceParams): Promise<ResourceModel> => {
+}: CreateResourceParams): Promise<Resource> => {
   const schema = await readSchema({ accountId, resourceType: type })
   const jsonSchema = mapSchemaToJsonSchema(schema)
 
@@ -157,7 +157,7 @@ export const createResource = async ({
   }
 
   revalidatePath('')
-  return resource
+  return mapResource(resource)
 }
 
 export type ReadResourceParams = {
@@ -225,6 +225,39 @@ export const readResources = async ({
   return models.map(mapResource)
 }
 
+export const updateResource = async ({ accountId, id, fields }: Resource) => {
+  await Promise.all([
+    prisma().resourceField.deleteMany({
+      where: {
+        Resource: {
+          accountId,
+          id,
+        },
+        Field: {
+          id: {
+            notIn: fields.map((f) => f.fieldId),
+          },
+        },
+      },
+    }),
+    ...fields.map((f) =>
+      updateValue({
+        resourceId: id,
+        fieldId: f.fieldId,
+        value: f.value,
+      }),
+    ),
+  ])
+
+  const model = await prisma().resource.update({
+    where: { accountId, id },
+    data: {},
+    include,
+  })
+
+  return mapResource(model)
+}
+
 export type DeleteResourceParams = {
   accountId: string
   id: string
@@ -243,12 +276,12 @@ export const deleteResource = async ({
   if (entity.type === 'Line') {
     const orderId = selectResourceField(entity, fields.order)?.resource?.id
     if (orderId) {
-      await recalculateSubtotalCost(accountId, 'Order', orderId)
+      await recalculateSubtotalCost(accountId, ResourceType.Order, orderId)
     }
 
     const billId = selectResourceField(entity, fields.bill)?.resource?.id
     if (billId) {
-      await recalculateSubtotalCost(accountId, 'Bill', billId)
+      await recalculateSubtotalCost(accountId, ResourceType.Bill, billId)
     }
   }
 

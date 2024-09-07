@@ -1,34 +1,28 @@
+import { fail } from 'assert'
 import { isArray, isNullish, pick } from 'remeda'
 import { FieldType } from '@prisma/client'
 import { match, P } from 'ts-pattern'
 import { Resource, selectResourceField } from '../types'
-import { ResourceValueModel, ValueFileModel, ValueModel } from './model'
-import { Value, ValueFile, ValueInput, ValueResource } from './types'
+import { mapFile } from '../../files/mapValueFile'
+import { ResourceValueModel, ValueModel } from './model'
+import { Value, ValueInput, ValueResource } from './types'
 import { fields } from '@/domain/schema/template/system-fields'
 import { mapUserModel } from '@/domain/iam/user/types'
 import { Schema } from '@/domain/schema/types'
-import { getDownloadPath } from '@/domain/blobs'
 
-const mapValueFile = (file: ValueFileModel): ValueFile => ({
-  id: file.id,
-  blobId: file.blobId,
-  name: file.name,
-  contentType: file.Blob.mimeType,
-  downloadPath: getDownloadPath({
-    blobId: file.blobId,
-    mimeType: file.Blob.mimeType,
-    fileName: file.name,
-    isPreview: false,
-  }),
-  previewPath: getDownloadPath({
-    blobId: file.blobId,
-    mimeType: file.Blob.mimeType,
-    fileName: file.name,
-    isPreview: true,
-  }),
+export const mapResourceToValueResource = (
+  resource: Resource,
+): ValueResource => ({
+  id: resource.id,
+  type: resource.type,
+  key: resource.key,
+  name:
+    selectResourceField(resource, fields.name)?.string ??
+    selectResourceField(resource, fields.number)?.string ??
+    fail('Resource type does not have a name or number field'),
 })
 
-export const mapValueToInput = (value: Value): ValueInput => ({
+export const mapValueToValueInput = (value: Value): ValueInput => ({
   boolean: value.boolean ?? undefined,
   contact: value.contact
     ? pick(value.contact, ['name', 'title', 'email', 'phone'])
@@ -53,14 +47,15 @@ export const mapValueFromModel = (model: ValueModel): Value => ({
   options: model.ValueOption.map((vo) => vo.Option),
   user: model.User && mapUserModel(model.User),
   resource: model.Resource && mapValueFromResource(model.Resource),
-  file: model.File ? mapValueFile(model.File) : null,
-  files: model.Files.map(({ File: file }) => mapValueFile(file)),
+  file: model.File ? mapFile(model.File) : null,
+  files: model.Files.map(({ File: file }) => mapFile(file)),
 })
 
 export const mapValueFromResource = (
   resource: ResourceValueModel,
 ): ValueResource => ({
   id: resource.id,
+  type: resource.type,
   key: resource.key,
   name:
     resource.ResourceField.find(

@@ -2,6 +2,7 @@ import { fail } from 'assert'
 import { Box, Container, Stack } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
+import { ResourceType } from '@prisma/client'
 import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
 import OrderLink from './tools/OrderLink'
@@ -29,7 +30,7 @@ export default async function BillsDetail({
     session: { user },
     resource,
     schema,
-  } = await readDetailPageModel('Bill', key, `/bills/${key}`)
+  } = await readDetailPageModel(ResourceType.Bill, key, `/bills/${key}`)
 
   const status =
     selectResourceField(resource, fields.billStatus)?.option ??

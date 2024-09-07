@@ -1,7 +1,7 @@
 'use server'
 
-import { type ResourceType } from '@prisma/client'
 import { notFound } from 'next/navigation'
+import { ResourceType } from '@prisma/client'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 import { readResource } from '@/domain/resource/actions'
 import { readSchema } from '@/domain/schema/actions'

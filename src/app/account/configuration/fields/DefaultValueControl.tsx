@@ -7,7 +7,7 @@ import {
   Select,
   TextField,
 } from '@mui/material'
-import { match } from 'ts-pattern'
+import { P, match } from 'ts-pattern'
 import { Close } from '@mui/icons-material'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -30,23 +30,23 @@ export default function DefaultValueControl({
 }: Props) {
   dayjs.extend(utc)
 
-  return match(type)
-    .with('Checkbox', () => (
+  return match([type, defaultValue])
+    .with(['Checkbox', { boolean: P.not(undefined) }], ([, { boolean }]) => (
       <Checkbox
         id="default-field-defaultValue-control"
-        checked={defaultValue?.boolean ?? false}
+        checked={boolean ?? false}
         onChange={(e) => onChange({ boolean: e.target.checked })}
         disabled={isDisabled}
       />
     ))
-    .with('Select', () => (
+    .with(['Select', { optionId: P.not(undefined) }], ([, { optionId }]) => (
       <Select
         id="default-field-defaultValue-control"
-        value={defaultValue?.optionId ?? ''}
+        value={optionId ?? ''}
         disabled={isDisabled}
         onChange={(e) => onChange({ optionId: e.target.value })}
         endAdornment={
-          defaultValue?.optionId && (
+          optionId && (
             <IconButton onClick={() => onChange({ optionId: null })}>
               <Close fontSize="small" />
             </IconButton>
@@ -60,35 +60,35 @@ export default function DefaultValueControl({
         ))}
       </Select>
     ))
-    .with('Textarea', () => (
+    .with(['Textarea', { string: P.string }], ([, { string }]) => (
       <TextField
         id="default-field-defaultValue-control"
         disabled={isDisabled}
-        value={defaultValue?.string ?? ''}
+        value={string ?? ''}
         onChange={(e) => onChange({ string: e.target.value })}
         multiline
         fullWidth
         minRows={3}
       />
     ))
-    .with('Text', () => (
+    .with(['Text', { string: P.string }], ([, { string }]) => (
       <TextField
         id="default-field-defaultValue-control"
         disabled={isDisabled}
-        value={defaultValue?.string ?? ''}
+        value={string ?? ''}
         onChange={(e) => onChange({ string: e.target.value })}
       />
     ))
-    .with('Number', () => (
+    .with(['Number', { number: P.not(undefined) }], ([, { number }]) => (
       <TextField
         id="default-field-defaultValue-control"
         disabled={isDisabled}
-        value={defaultValue?.number ?? ''}
+        value={number ?? ''}
         onChange={(e) => onChange({ number: parseInt(e.target.value) })}
         type="number"
       />
     ))
-    .with('Date', () => (
+    .with(['Date', { date: P.not(undefined) }], ([, { date }]) => (
       <DatePicker
         sx={{ width: '100%' }}
         slotProps={{
@@ -97,7 +97,7 @@ export default function DefaultValueControl({
             onClear: () => onChange({ date: null }),
           },
         }}
-        value={defaultValue?.date && dayjs.utc(defaultValue.date)}
+        value={date && dayjs.utc(date)}
         disabled={isDisabled}
         onChange={(value) => onChange({ date: value?.toDate() ?? null })}
       />

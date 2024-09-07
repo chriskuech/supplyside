@@ -6,7 +6,7 @@ import { map, pipe, sum } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { readResource, readResources } from '../actions'
 import { selectResourceField } from '../types'
-import { updateValue } from '../fields/actions'
+import { updateValue } from '../fields'
 import { readSchema } from '@/domain/schema/actions'
 import prisma from '@/services/prisma'
 import { selectSchemaField } from '@/domain/schema/types'
@@ -87,7 +87,7 @@ export const recalculateSubtotalCost = async (
 
   const lines = await readResources({
     accountId,
-    type: 'Line',
+    type: ResourceType.Line,
     where: {
       '==': [{ var: resourceType }, resourceId],
     },

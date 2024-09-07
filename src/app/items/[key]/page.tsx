@@ -1,3 +1,4 @@
+import { ResourceType } from '@prisma/client'
 import { selectResourceField } from '@/domain/resource/types'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
@@ -9,7 +10,7 @@ export default async function ItemsDetail({
   params: { key: string }
 }) {
   const { resource, schema } = await readDetailPageModel(
-    'Item',
+    ResourceType.Item,
     key,
     `/items/${key}`,
   )

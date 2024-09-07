@@ -1,10 +1,8 @@
 'use client'
 
-import { ok } from 'assert'
 import {
   Autocomplete,
   Box,
-  CircularProgress,
   Drawer,
   IconButton,
   Link,
@@ -22,18 +20,17 @@ import { P, match } from 'ts-pattern'
 import {
   createResource,
   findResources as findResourcesRaw,
-  readResource,
-} from '../actions'
-import ResourceFieldsControl from '../ResourceFieldsControl'
-import { Resource } from '@/domain/resource/types'
-import { readSchema } from '@/lib/schema/actions'
-import { Schema } from '@/domain/schema/types'
+} from '../../actions'
+import ResourceForm from '../../ResourceForm'
+import ResourceFieldView from '../views/ResourceFieldView'
+import ResourceEditContext from '../../ResourceEditContext'
 import { ValueResource } from '@/domain/resource/values/types'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
+import { mapResourceToValueResource } from '@/domain/resource/values/mappers'
 
 type Props = {
-  value: ValueResource | null
-  onChange?: (resourceId: string | null) => void
+  resource: ValueResource | null
+  onChange: (resource: ValueResource | null) => void
   resourceType: ResourceType
   isReadOnly?: boolean
 }
@@ -42,24 +39,10 @@ type Props = {
  * A field that allows the user to select a resource of a given type.
  */
 function ResourceField(
-  { resourceType, value, onChange, isReadOnly }: Props,
+  { resourceType, resource, onChange, isReadOnly }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
   const { isOpen, open, close } = useDisclosure()
-  const [resource, setResource] = useState<Resource | null>(null)
-  const [schema, setSchema] = useState<Schema | null>(null)
-
-  useEffect(() => {
-    readSchema({ resourceType }).then(setSchema)
-  }, [resourceType])
-
-  useEffect(() => {
-    if (!value?.id) {
-      setResource(null)
-    } else if (value.id !== resource?.id) {
-      readResource({ id: value.id }).then(setResource)
-    }
-  }, [resource?.id, value?.id])
 
   const handleCreate = (nameOrNumber: string) =>
     createResource({
@@ -72,23 +55,25 @@ function ResourceField(
           Number: nameOrNumber,
         }))
         .exhaustive(),
-    }).then(({ id }) => {
-      onChange?.(id)
+    }).then((resource) => {
+      onChange(mapResourceToValueResource(resource))
       open()
     })
 
-  if (isReadOnly || value) {
-    if (!value) return '-'
+  if (isReadOnly) {
+    return <ResourceFieldView resource={resource} />
+  }
 
+  if (resource) {
     return (
       <>
         <Stack direction="row" alignItems="center">
           <Link onClick={open} flexGrow={1} sx={{ cursor: 'pointer' }}>
-            {value.name}
+            {resource.name}
           </Link>
           <Tooltip title={`Open ${resourceType} page`}>
             <IconButton
-              href={`/${resourceType.toLowerCase()}s/${value.key}`}
+              href={`/${resourceType.toLowerCase()}s/${resource.key}`}
               LinkComponent={NextLink}
               size="small"
             >
@@ -113,22 +98,24 @@ function ResourceField(
             <Typography variant="h5" sx={{ p: 2 }} gutterBottom>
               {resourceType} details
             </Typography>
-            {schema && resource ? (
-              <ResourceFieldsControl
-                schema={schema}
-                resource={resource}
-                singleColumn
-              />
-            ) : (
-              <CircularProgress />
-            )}
+            <ResourceEditContext
+              resourceId={resource.id}
+              resourceType={resourceType}
+            >
+              {({ schema, resource, onChange }) => (
+                <ResourceForm
+                  schema={schema}
+                  resource={resource}
+                  singleColumn
+                  onChange={onChange}
+                />
+              )}
+            </ResourceEditContext>
           </Box>
         </Drawer>
       </>
     )
   }
-
-  ok(onChange)
 
   return (
     <EditableResourceField
@@ -142,7 +129,7 @@ function ResourceField(
 
 type EditableResourceFieldProps = {
   onCreate: (name: string) => void
-  onUpdate: (id: string | null) => void
+  onUpdate: (valueResource: ValueResource | null) => void
   resourceType: ResourceType
 }
 
@@ -180,7 +167,7 @@ const BaseEditableResourceField = (
       getOptionLabel={(option) => option.name}
       onChange={(event, newValue) =>
         match(newValue)
-          .with({ id: P.string }, ({ id }) => onUpdate(id))
+          .with({ id: P.string }, onUpdate)
           .with({ inputValue: P.string }, (o) => onCreate(o.inputValue))
           .with(null, () => {})
           .exhaustive()

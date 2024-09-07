@@ -1,11 +1,11 @@
 'use server'
 
 import { fail } from 'assert'
-import { Prisma } from '@prisma/client'
+import { Prisma, ResourceType } from '@prisma/client'
 import { createBlob } from '../blobs'
 import { fields } from '../schema/template/system-fields'
 import { readResource } from '../resource/actions'
-import { updateValue } from '../resource/fields/actions'
+import { updateValue } from '../resource/fields'
 import { readSchema } from '../schema/actions'
 import { selectSchemaField } from '../schema/types'
 import { selectResourceField } from '../resource/types'
@@ -18,7 +18,10 @@ type CreatePoParams = {
 }
 
 export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
-  const schema = await readSchema({ accountId, resourceType: 'Order' })
+  const schema = await readSchema({
+    accountId,
+    resourceType: ResourceType.Order,
+  })
 
   const documentFieldId =
     selectSchemaField(schema, fields.document)?.id ?? fail()

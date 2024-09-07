@@ -4,9 +4,10 @@ import { redirect } from 'next/navigation'
 import { faker } from '@faker-js/faker'
 import { z } from 'zod'
 import CSRF from 'csrf'
-import { Prisma } from '@prisma/client'
+import { Prisma, ResourceType } from '@prisma/client'
 import { difference, range } from 'remeda'
 import { selectResourceField } from '../resource/types'
+import { updateValue } from '../resource/fields'
 import {
   accountQuerySchema,
   companyInfoSchema,
@@ -21,7 +22,6 @@ import { fields } from '@/domain/schema/template/system-fields'
 import { OptionPatch } from '@/domain/schema/fields/types'
 import { readFields, updateField } from '@/domain/schema/fields'
 import { createResource, readResources } from '@/domain/resource/actions'
-import { updateValue } from '@/domain/resource/fields/actions'
 import { readSchema } from '@/domain/schema/actions'
 import { selectSchemaField } from '@/domain/schema/types'
 import prisma from '@/services/prisma'
@@ -222,7 +222,7 @@ const upsertAccountsFromQuickBooks = async (
     id: quickBooksAccountField.id,
     name: quickBooksAccountField.name,
     defaultValue: {
-      optionId: quickBooksAccountField.defaultValue.option?.id,
+      optionId: quickBooksAccountField.defaultValue.option?.id ?? null,
     },
     defaultToToday: quickBooksAccountField.defaultToToday,
     isRequired: quickBooksAccountField.isRequired,
@@ -261,8 +261,8 @@ const upsertVendorsFromQuickBooks = async (
   )
 
   const [currentVendors, vendorSchema] = await Promise.all([
-    readResources({ accountId, type: 'Vendor' }),
-    readSchema({ accountId, resourceType: 'Vendor' }),
+    readResources({ accountId, type: ResourceType.Vendor }),
+    readSchema({ accountId, resourceType: ResourceType.Vendor }),
   ])
 
   const vendorNameField = selectSchemaField(vendorSchema, fields.name)
@@ -308,7 +308,7 @@ const upsertVendorsFromQuickBooks = async (
   for (const quickBooksVendorToAdd of quickBooksVendorsToAdd) {
     await createResource({
       accountId,
-      type: 'Vendor',
+      type: ResourceType.Vendor,
       data: {
         [fields.name.name]: quickBooksVendorToAdd.DisplayName,
         [fields.quickBooksVendorId.name]: quickBooksVendorToAdd.Id,

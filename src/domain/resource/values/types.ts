@@ -1,50 +1,59 @@
-import { Contact, Prisma } from '@prisma/client'
+import { Prisma, ResourceType } from '@prisma/client'
 import { Option } from '@/domain/schema/types'
 import { User } from '@/domain/iam/user/types'
+import { File } from '@/domain/files/types'
+
+export type ValueContact = {
+  name: string | null
+  title: string | null
+  email: string | null
+  phone: string | null
+}
+
+// export type ValueInput =
+//   | { boolean: boolean | null }
+//   | { contact: ValueContact | null }
+//   | { date: Date | null }
+//   | { number: number | null }
+//   | { optionId: string | null }
+//   | { optionIds: string[] }
+//   | { string: string | null }
+//   | { userId: string | null }
+//   | { fileId: string | null }
+//   | { fileIds: string[] }
+//   | { resourceId: string | null }
 
 export type ValueInput = {
-  boolean?: boolean
-  contact?: {
-    name: string | null
-    title: string | null
-    email: string | null
-    phone: string | null
-  } | null
+  boolean?: boolean | null
+  contact?: ValueContact | null
   date?: Date | null
+  fileId?: string | null
+  fileIds?: string[]
   number?: number | null
   optionId?: string | null
   optionIds?: string[]
+  resourceId?: string | null
   string?: string | null
   userId?: string | null
-  fileId?: string | null // This one's probably wrong if we are going to support previewing files before upload
-  resourceId?: string | null
-}
-
-export type ValueFile = {
-  id: string
-  blobId: string
-  name: string
-  contentType: string
-  downloadPath: string
-  previewPath: string
 }
 
 export type Value = {
   boolean: boolean | null
-  contact: Contact | null
+  contact: ValueContact | null
   date: Date | null
   number: number | null
   option: Option | null
   options?: Option[]
   string: string | null
   user: User | null
-  file: ValueFile | null
-  files: ValueFile[]
+  file: File | null
+  files: File[]
   resource: ValueResource | null
 }
 
 export type ValueResource = {
   id: string
+  type: ResourceType
   name: string
   key: number
 }

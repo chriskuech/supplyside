@@ -2,6 +2,7 @@ import { fail } from 'assert'
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
+import { ResourceType } from '@prisma/client'
 import OrderStatusTracker from './OrderStatusTracker'
 import ApproveButton from './cta/ApproveButton'
 import SkipButton from './cta/SkipButton'
@@ -36,7 +37,7 @@ export default async function OrderDetail({
     session: { user },
     resource,
     schema,
-  } = await readDetailPageModel('Order', key, `/orders/${key}`)
+  } = await readDetailPageModel(ResourceType.Order, key, `/orders/${key}`)
 
   const orderBills = (await findOrderBills(resource.id)) ?? []
 

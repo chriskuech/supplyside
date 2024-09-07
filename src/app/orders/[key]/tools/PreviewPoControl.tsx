@@ -2,10 +2,10 @@
 
 import { Visibility } from '@mui/icons-material'
 import { Tooltip, IconButton } from '@mui/material'
-import { ValueFile } from '@/domain/resource/values/types'
+import { File } from '@/domain/files/types'
 
 type Props = {
-  file: ValueFile
+  file: File
 }
 
 export default function PreviewPoControl({ file }: Props) {

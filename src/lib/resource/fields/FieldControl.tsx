@@ -2,8 +2,8 @@
 
 import { useCallback, useMemo } from 'react'
 import { debounce } from 'remeda'
-import Field, { Props as FieldProps } from './Field'
-import { UpdateValueDto, updateValue } from '@/domain/resource/fields/actions'
+import Field, { Props as FieldProps } from './controls/Field'
+import { UpdateValueDto, updateValue } from '@/domain/resource/fields'
 
 type Props = Omit<FieldProps, 'onChange'> & {
   onChange?: () => void
@@ -25,11 +25,5 @@ export default function FieldControl({ onChange, ...props }: Props) {
     [handleChange],
   )
 
-  return (
-    <Field
-      {...props}
-      onChange={debouncedOnChange}
-      onUncontrolledChange={onChange}
-    />
-  )
+  return <Field {...props} onChange={debouncedOnChange} />
 }

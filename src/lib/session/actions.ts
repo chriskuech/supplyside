@@ -11,8 +11,17 @@ import {
   impersonate as domainImpersonate,
 } from '@/domain/iam/session/actions'
 import config from '@/services/config'
+import { Session } from '@/domain/iam/session/types'
 
 const sessionIdCookieName = 'sessionId'
+
+export const withSession = async <T>(
+  handler: (session: Session) => Promise<T>,
+): Promise<T> => {
+  const session = await readSession()
+
+  return await handler(session)
+}
 
 export const createSession = async (email: string, password: string) => {
   const session = await domainCreateSession(email, password)

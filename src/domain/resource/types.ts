@@ -1,5 +1,6 @@
-import { ResourceType, FieldType, Cost } from '@prisma/client'
+import { FieldType, Cost, ResourceType } from '@prisma/client'
 import { P, match } from 'ts-pattern'
+import { Field } from '../schema/types'
 import { Value } from './values/types'
 
 export type Resource = {
@@ -36,6 +37,23 @@ export const selectResourceField = (
         resource.fields.find((field) => field.fieldId === fieldId)?.value,
     )
     .exhaustive()
+
+export const setResourceField = (
+  resource: Resource,
+  field: Field,
+  value: Value,
+): Resource => ({
+  ...resource,
+  fields: [
+    ...resource.fields.filter((f) => f.fieldId !== field.id),
+    {
+      fieldId: field.id,
+      fieldType: field.type,
+      templateId: field.templateId,
+      value,
+    },
+  ],
+})
 
 export const emptyValue = {
   boolean: null,

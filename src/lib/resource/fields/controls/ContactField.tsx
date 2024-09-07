@@ -12,15 +12,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { Contact } from '@prisma/client'
 import { FC, useEffect, useState } from 'react'
-import ContactCard from './ContactCard'
-import { UpdateContactDto } from '@/domain/resource/fields/actions'
+import ContactCard from '../views/ContactCard'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
+import { ValueContact } from '@/domain/resource/values/types'
 
 export type ContactFieldProps = {
-  contact: Contact | null
-  onChange: (contact: UpdateContactDto | null) => void
+  contact: ValueContact | null
+  onChange: (contact: ValueContact | null) => void
   inline?: boolean
 }
 
@@ -36,14 +35,16 @@ export default function ContactField({
       <Dialog onClose={close} open={isOpen}>
         <DialogTitle>Edit Contact</DialogTitle>
         <DialogContent>
-          <ContactForm
-            contact={contact}
-            onChange={(dto) => {
-              close()
-              onChange(dto)
-            }}
-            onCancel={close}
-          />
+          {contact && (
+            <ContactForm
+              contact={contact}
+              onChange={(dto) => {
+                close()
+                onChange(dto)
+              }}
+              onCancel={close}
+            />
+          )}
         </DialogContent>
       </Dialog>
       {contact ? (
@@ -79,13 +80,18 @@ export default function ContactField({
 }
 
 type ContactFormProps = {
-  contact: Contact | null
-  onChange: (dto: UpdateContactDto | null) => void
+  contact: ValueContact | null
+  onChange: (dto: ValueContact | null) => void
   onCancel: () => void
 }
 
 const ContactForm: FC<ContactFormProps> = ({ contact, onChange, onCancel }) => {
-  const [dto, setDto] = useState<UpdateContactDto>({})
+  const [dto, setDto] = useState<ValueContact>({
+    email: null,
+    name: null,
+    phone: null,
+    title: null,
+  })
 
   useEffect(
     () =>
@@ -97,6 +103,7 @@ const ContactForm: FC<ContactFormProps> = ({ contact, onChange, onCancel }) => {
       }),
     [contact],
   )
+
   return (
     <Stack spacing={2} pt={2}>
       <TextField

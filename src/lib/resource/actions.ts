@@ -1,23 +1,23 @@
 'use server'
 
-import { fail } from 'assert'
-import { Resource as ResourceModel, ResourceType } from '@prisma/client'
+import assert, { fail } from 'assert'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { ResourceType } from '@prisma/client'
 import { readSession } from '../session/actions'
 import * as domain from '@/domain/resource/actions'
 import { Resource } from '@/domain/resource/types'
 import prisma from '@/services/prisma'
 import { ValueResource } from '@/domain/resource/values/types'
-import { updateValue } from '@/domain/resource/fields/actions'
+import { updateValue } from '@/domain/resource/fields'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
 import { selectSchemaField } from '@/domain/schema/types'
 import { readSchema } from '@/domain/schema/actions'
 
 export const createResource = async (
   params: Pick<domain.CreateResourceParams, 'type' | 'data'>,
-): Promise<ResourceModel> => {
+): Promise<Resource> => {
   const { accountId, userId } = await readSession()
 
   if (params.type === 'Order') {
@@ -25,6 +25,7 @@ export const createResource = async (
   }
 
   revalidatePath('')
+
   return domain.createResource({ ...params, accountId })
 }
 
@@ -40,6 +41,25 @@ export const readResource = async (
   const { accountId } = await readSession()
 
   return domain.readResource({ ...params, accountId })
+}
+
+type UpdateResourceParams = {
+  resource: Resource
+}
+
+export const updateResource = async ({
+  resource,
+}: UpdateResourceParams): Promise<Resource> => {
+  const { accountId } = await readSession()
+
+  revalidatePath('')
+
+  assert(
+    resource.accountId === accountId,
+    'Resource does not belong to account',
+  )
+
+  return domain.updateResource(resource)
 }
 
 export const deleteResource = async ({
@@ -73,8 +93,7 @@ export const findResources = async ({
   const results = await prisma().$queryRaw`
     WITH "View" AS (
       SELECT
-        "Resource"."id" AS "id",
-        "Resource"."key" AS "key",
+        "Resource".*,
         "Value"."string" AS "name"
       FROM "Resource"
       LEFT JOIN "ResourceField" ON "Resource".id = "ResourceField"."resourceId"
@@ -86,7 +105,7 @@ export const findResources = async ({
         AND "Value"."string" <> ''
         AND "Value"."string" IS NOT NULL
     )
-    SELECT "id", "key", "name"
+    SELECT "id", "type", "key", "name"
     FROM "View"
     WHERE "name" ILIKE '%' || ${input} || '%' OR "name" % ${input} -- % operator uses pg_trgm for similarity matching
     ORDER BY similarity("name", ${input}) DESC
@@ -94,7 +113,12 @@ export const findResources = async ({
   `
 
   return z
-    .object({ id: z.string(), name: z.string(), key: z.number() })
+    .object({
+      id: z.string(),
+      type: z.nativeEnum(ResourceType),
+      name: z.string(),
+      key: z.number(),
+    })
     .array()
     .parse(results)
 }

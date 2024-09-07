@@ -2,13 +2,13 @@
 
 import { fail } from 'assert'
 import { Cost, Prisma, ResourceType } from '@prisma/client'
-import { isString, pick } from 'remeda'
+import { pick } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { P, match } from 'ts-pattern'
 import { readResource, readResources } from '../actions'
 import { selectResourceField } from '../types'
+import { ValueInput } from '../values/types'
 import prisma from '@/services/prisma'
-import { createBlob } from '@/domain/blobs'
 import {
   fields,
   findTemplateField,
@@ -19,24 +19,12 @@ import {
   recalculateSubtotalCost,
 } from '@/domain/resource/cost/actions'
 import { Field, selectSchemaField } from '@/domain/schema/types'
-import { readSession } from '@/lib/session/actions'
 import { FieldTemplate } from '@/domain/schema/template/types'
 
 export type UpdateValueDto = {
   resourceId: string
   fieldId: string
-  value: {
-    boolean?: boolean | null | undefined
-    date?: Date | null | undefined
-    fileId?: string | null | undefined
-    fileIds?: string[] | null | undefined
-    number?: number | null | undefined
-    optionId?: string | null | undefined
-    optionIds?: string[] | null | undefined
-    resourceId?: string | null | undefined
-    string?: string | null | undefined
-    userId?: string | null | undefined
-  }
+  value: ValueInput
 }
 
 export const updateValue = async ({
@@ -142,7 +130,7 @@ export const updateValue = async ({
   // When the Line."Unit Cost" or Line."Quantity" field is updated,
   // Then update Line."Total Cost"
   if (
-    rf.Resource.type === 'Line' &&
+    rf.Resource.type === ResourceType.Line &&
     (rf.Field.templateId === fields.unitCost.templateId ||
       rf.Field.templateId === fields.quantity.templateId)
   ) {
@@ -153,7 +141,7 @@ export const updateValue = async ({
       }),
       readSchema({
         accountId: rf.Resource.accountId,
-        resourceType: 'Line',
+        resourceType: ResourceType.Line,
         isSystem: true,
       }),
     ])
@@ -185,12 +173,20 @@ export const updateValue = async ({
 
     const orderId = selectResourceField(line, fields.order)?.resource?.id
     if (orderId) {
-      await recalculateSubtotalCost(rf.Resource.accountId, 'Order', orderId)
+      await recalculateSubtotalCost(
+        rf.Resource.accountId,
+        ResourceType.Order,
+        orderId,
+      )
     }
 
     const billId = selectResourceField(line, fields.bill)?.resource?.id
     if (billId) {
-      await recalculateSubtotalCost(rf.Resource.accountId, 'Bill', billId)
+      await recalculateSubtotalCost(
+        rf.Resource.accountId,
+        ResourceType.Bill,
+        billId,
+      )
     }
   }
 
@@ -249,216 +245,6 @@ export const updateValue = async ({
   }
 }
 
-export const uploadFile = async (
-  resourceId: string,
-  fieldId: string,
-  formData: FormData,
-) => {
-  revalidatePath('')
-  const { accountId } = await readSession()
-
-  const file = formData.get('file')
-
-  if (!file || typeof file === 'string' || file.size === 0) return
-
-  const { id: blobId } = await createBlob({ accountId, file })
-
-  const input: Prisma.ValueCreateInput = {
-    File: {
-      create: {
-        name: file.name,
-        Account: {
-          connect: {
-            id: accountId,
-          },
-        },
-        Blob: {
-          connect: {
-            id: blobId,
-          },
-        },
-      },
-    },
-  }
-
-  await prisma().resourceField.upsert({
-    where: {
-      resourceId_fieldId: {
-        resourceId,
-        fieldId,
-      },
-    },
-    create: {
-      Resource: {
-        connect: {
-          id: resourceId,
-        },
-      },
-      Field: {
-        connect: {
-          id: fieldId,
-        },
-      },
-      Value: { create: input },
-    },
-    update: {
-      Value: { update: input },
-    },
-  })
-}
-
-export const uploadFiles = async (
-  resourceId: string,
-  fieldId: string,
-  formData: FormData,
-) => {
-  revalidatePath('')
-  const { accountId } = await readSession()
-
-  const files = formData.getAll('files')
-
-  if (files.length === 0) return
-
-  const input: Prisma.ValueCreateWithoutResourceFieldValueInput = {
-    Files: {
-      create: await Promise.all(
-        files
-          .filter(
-            (file): file is Exclude<FormDataEntryValue, string> =>
-              !isString(file),
-          )
-          .map(async (file) => {
-            const blob = await createBlob({ accountId, file })
-            return {
-              File: {
-                create: {
-                  name: file.name,
-                  Account: {
-                    connect: {
-                      id: accountId,
-                    },
-                  },
-                  Blob: {
-                    connect: {
-                      id: blob.id,
-                    },
-                  },
-                },
-              },
-            }
-          }),
-      ),
-    },
-  }
-
-  await prisma().resourceField.upsert({
-    where: {
-      resourceId_fieldId: {
-        resourceId,
-        fieldId,
-      },
-    },
-    create: {
-      Resource: {
-        connect: {
-          id: resourceId,
-        },
-      },
-      Field: {
-        connect: {
-          id: fieldId,
-        },
-      },
-      Value: { create: input },
-    },
-    update: {
-      Value: { update: input },
-    },
-  })
-}
-
-export type UpdateContactDto = {
-  name?: string
-  title?: string
-  email?: string
-  phone?: string
-}
-
-export const updateContact = async (
-  resourceId: string,
-  fieldId: string,
-  dto: UpdateContactDto | null,
-) => {
-  if (!dto) {
-    await prisma().resourceField.update({
-      where: {
-        resourceId_fieldId: {
-          resourceId,
-          fieldId,
-        },
-      },
-      data: {
-        Value: {
-          update: {
-            Contact: {
-              delete: true,
-            },
-          },
-        },
-      },
-    })
-  } else {
-    await prisma().resourceField.upsert({
-      where: {
-        resourceId_fieldId: {
-          resourceId,
-          fieldId,
-        },
-      },
-      create: {
-        Resource: {
-          connect: {
-            id: resourceId,
-          },
-        },
-        Field: {
-          connect: {
-            id: fieldId,
-          },
-        },
-        Value: {
-          create: {
-            Contact: {
-              create: dto,
-            },
-          },
-        },
-      },
-      update: {
-        Value: {
-          upsert: {
-            create: {
-              Contact: {
-                create: dto,
-              },
-            },
-            update: {
-              Contact: {
-                upsert: {
-                  create: dto,
-                  update: dto,
-                },
-              },
-            },
-          },
-        },
-      },
-    })
-  }
-
-  revalidatePath('')
-}
-
 export const copyLinkedResourceFields = async (
   resourceId: string,
   fieldId: string,
@@ -477,8 +263,14 @@ export const copyLinkedResourceFields = async (
     })
 
   const [thisSchema, linkedSchema] = await Promise.all([
-    readSchema({ accountId, resourceType: thisResourceType }),
-    readSchema({ accountId, resourceType: linkedResourceType }),
+    readSchema({
+      accountId,
+      resourceType: thisResourceType,
+    }),
+    readSchema({
+      accountId,
+      resourceType: linkedResourceType,
+    }),
   ])
 
   const excludeDerivedFields = (f: Field) =>
@@ -497,7 +289,10 @@ export const copyLinkedResourceFields = async (
       .map((fieldId) => copyField(linkedResourceId, resourceId, fieldId)),
   )
 
-  const resourcesWithLines: ResourceType[] = ['Order', 'Bill']
+  const resourcesWithLines: ResourceType[] = [
+    ResourceType.Order,
+    ResourceType.Bill,
+  ]
   if (
     [thisResourceType, linkedResourceType].every((linkedResource) =>
       resourcesWithLines.includes(linkedResource),

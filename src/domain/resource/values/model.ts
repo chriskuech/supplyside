@@ -2,7 +2,6 @@ import {
   Blob,
   Contact,
   Field,
-  File,
   Option,
   User,
   Value,
@@ -10,6 +9,7 @@ import {
   Resource,
   ResourceField,
 } from '@prisma/client'
+import { FileModel } from '@/domain/files/model'
 
 export type ResourceValueModel = Resource & {
   ResourceField: (ResourceField & {
@@ -20,12 +20,10 @@ export type ResourceValueModel = Resource & {
 
 export type ValueModel = Value & {
   Contact: Contact | null
-  File: ValueFileModel | null
+  File: FileModel | null
   Option: Option | null
   User: (User & { ImageBlob: Blob | null }) | null
-  Files: { File: ValueFileModel }[]
+  Files: { File: FileModel }[]
   ValueOption: (ValueOption & { Option: Option })[]
   Resource: ResourceValueModel | null
 }
-
-export type ValueFileModel = File & { Blob: Blob }

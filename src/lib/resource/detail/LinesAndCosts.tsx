@@ -1,5 +1,6 @@
 import { Stack, Typography, Box } from '@mui/material'
-import ResourceTable from '../ResourceTable'
+import { ResourceType } from '@prisma/client'
+import ResourceTable from '../table/ResourceTable'
 import ItemizedCostLines from './ItemizedCostLines'
 import { readSchema } from '@/domain/schema/actions'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
@@ -25,10 +26,13 @@ export default async function LinesAndCosts({
   const [lines, lineSchema] = await Promise.all([
     readResources({
       accountId: resource.accountId,
-      type: 'Line',
+      type: ResourceType.Line,
       where: lineQuery,
     }),
-    readSchema({ accountId: resource.accountId, resourceType: 'Line' }),
+    readSchema({
+      accountId: resource.accountId,
+      resourceType: ResourceType.Line,
+    }),
   ])
 
   const strippedSchema: Schema = {
