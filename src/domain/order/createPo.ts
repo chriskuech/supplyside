@@ -8,7 +8,7 @@ import { readResource } from '../resource/actions'
 import { updateValue } from '../resource/fields'
 import { readSchema } from '../schema/actions'
 import { selectSchemaField } from '../schema/types'
-import { selectResourceField } from '../resource/types'
+import { emptyValue, selectResourceField } from '../resource/types'
 import { renderPo } from './renderPo'
 import prisma from '@/services/prisma'
 
@@ -31,7 +31,7 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   await updateValue({
     resourceId,
     fieldId: issuedDateFieldId,
-    value: { date: new Date() },
+    value: { ...emptyValue, date: new Date() },
   })
 
   const buffer = await renderPo({ accountId, resourceId })

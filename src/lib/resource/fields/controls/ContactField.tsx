@@ -35,16 +35,14 @@ export default function ContactField({
       <Dialog onClose={close} open={isOpen}>
         <DialogTitle>Edit Contact</DialogTitle>
         <DialogContent>
-          {contact && (
-            <ContactForm
-              contact={contact}
-              onChange={(dto) => {
-                close()
-                onChange(dto)
-              }}
-              onCancel={close}
-            />
-          )}
+          <ContactForm
+            contact={contact}
+            onChange={(dto) => {
+              close()
+              onChange(dto)
+            }}
+            onCancel={close}
+          />
         </DialogContent>
       </Dialog>
       {contact ? (

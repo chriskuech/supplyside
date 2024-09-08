@@ -66,4 +66,5 @@ export const emptyValue = {
   file: null,
   resource: null,
   files: [],
+  options: [],
 } as const satisfies Value

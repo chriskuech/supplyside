@@ -4,10 +4,11 @@ import { fail } from 'assert'
 import { Cost, Prisma, ResourceType } from '@prisma/client'
 import { pick } from 'remeda'
 import { revalidatePath } from 'next/cache'
-import { P, match } from 'ts-pattern'
+import { match } from 'ts-pattern'
 import { readResource, readResources } from '../actions'
-import { selectResourceField } from '../types'
-import { ValueInput } from '../values/types'
+import { emptyValue, selectResourceField } from '../types'
+import { Value } from '../values/types'
+import { mapResourceToValueResource } from '../values/mappers'
 import prisma from '@/services/prisma'
 import {
   fields,
@@ -24,7 +25,7 @@ import { FieldTemplate } from '@/domain/schema/template/types'
 export type UpdateValueDto = {
   resourceId: string
   fieldId: string
-  value: ValueInput
+  value: Value
 }
 
 export const updateValue = async ({
@@ -36,25 +37,29 @@ export const updateValue = async ({
   //TODO:  check if value object is correct for each fieldType
 
   const {
-    fileIds,
-    optionIds,
-    resourceId: linkedResourceId,
+    files,
+    options,
+    resource: linkedResource,
     string,
-    ...rest
+    contact,
+    file,
+    option,
+    user,
+    ...primitives
   } = value
   const data: Prisma.ValueCreateInput & Prisma.ValueUpdateInput = {
-    ...rest,
+    ...primitives,
     string: string?.trim() || null,
-    ValueOption: optionIds
+    ValueOption: options
       ? {
-          create: optionIds.map((optionId) => ({ optionId })),
+          create: options.map(({ id }) => ({ optionId: id })),
         }
       : undefined,
-    Files: fileIds
+    Files: files
       ? {
           createMany: {
-            data: fileIds.map((fileId) => ({
-              fileId,
+            data: files.map(({ id }) => ({
+              fileId: id,
             })),
             skipDuplicates: true,
           },
@@ -88,8 +93,24 @@ export const updateValue = async ({
         Value: {
           create: {
             ...data,
-            Resource: linkedResourceId
-              ? { connect: { id: linkedResourceId } }
+            Contact: contact
+              ? {
+                  create: {
+                    name: contact.name,
+                    title: contact.title,
+                    email: contact.email,
+                    phone: contact.phone,
+                  },
+                }
+              : undefined,
+            File: file ? { connect: { id: file.id } } : undefined,
+            Option: option ? { connect: { id: option.id } } : undefined,
+            Resource: linkedResource
+              ? { connect: { id: linkedResource.id } }
+              : undefined,
+            User: user ? { connect: { id: user.id } } : undefined,
+            ValueOption: value.options.length
+              ? { create: value.options.map(({ id }) => ({ optionId: id })) }
               : undefined,
           },
         },
@@ -98,15 +119,45 @@ export const updateValue = async ({
         Value: {
           update: {
             ...data,
-            Resource: match(linkedResourceId)
+            Contact: contact
+              ? {
+                  upsert: {
+                    create: {
+                      name: contact.name,
+                      title: contact.title,
+                      email: contact.email,
+                      phone: contact.phone,
+                    },
+                    update: {
+                      name: contact.name,
+                      title: contact.title,
+                      email: contact.email,
+                      phone: contact.phone,
+                    },
+                  },
+                }
+              : {
+                  disconnect: true,
+                },
+            File: file ? { connect: { id: file.id } } : { disconnect: true },
+            Option: option
+              ? { connect: { id: option.id } }
+              : { disconnect: true },
+            Resource: match(linkedResource)
               .with(null, () => ({
                 disconnect: true,
               }))
-              .with(undefined, () => undefined)
-              .with(P.string, (id) => ({
+              .otherwise(({ id }) => ({
                 connect: { id },
-              }))
-              .exhaustive(),
+              })),
+            User: user ? { connect: { id: user.id } } : { disconnect: true },
+            // ValueOption: {
+            //   upsert: value.options.map(({ id }) => ({
+            //     where: { optionId: id },
+            //     create: { optionId: id },
+            //     update: { optionId: id },
+            //   })),
+            // },
           },
         },
       },
@@ -115,13 +166,13 @@ export const updateValue = async ({
         Field: true,
       },
     }),
-    ...(value.resourceId
-      ? [copyLinkedResourceFields(resourceId, fieldId, value.resourceId)]
+    ...(value.resource
+      ? [copyLinkedResourceFields(resourceId, fieldId, value.resource.id)]
       : []),
-    ...(fileIds
+    ...(files
       ? [
           prisma().valueFile.deleteMany({
-            where: { fileId: { notIn: fileIds } },
+            where: { fileId: { notIn: files.map((f) => f.id) } },
           }),
         ]
       : []),
@@ -155,6 +206,7 @@ export const updateValue = async ({
       fieldId: totalCostFieldId,
       resourceId: rf.Resource.id,
       value: {
+        ...emptyValue,
         number: unitCost * quantity,
       },
     })
@@ -226,6 +278,7 @@ export const updateValue = async ({
       fieldId: selectSchemaField(schema, fields.totalCost)?.id ?? fail(),
       resourceId: resource.id,
       value: {
+        ...emptyValue,
         number: itemizedCosts + subtotalCost,
       },
     })
@@ -307,6 +360,7 @@ export const copyLinkedResourceFields = async (
     await Promise.all([
       copyResourceCosts(linkedResourceId, resourceId),
       copyResourceLines(
+        accountId,
         linkedResourceId,
         linkedFieldTemplate,
         resourceId,
@@ -319,17 +373,20 @@ export const copyLinkedResourceFields = async (
 }
 
 const copyResourceLines = async (
+  accountId: string,
   linkedResourceId: string,
   linkedFieldTemplate: FieldTemplate,
   resourceId: string,
   resourceFieldTemplate: FieldTemplate,
 ) => {
   const [linkedResource, thisResource] = await Promise.all([
-    prisma().resource.findUniqueOrThrow({
-      where: { id: linkedResourceId },
+    readResource({
+      accountId,
+      id: linkedResourceId,
     }),
-    prisma().resource.findUniqueOrThrow({
-      where: { id: resourceId },
+    readResource({
+      accountId,
+      id: resourceId,
     }),
   ])
 
@@ -354,7 +411,8 @@ const copyResourceLines = async (
         resourceId: line.id,
         fieldId: field.id,
         value: {
-          resourceId: thisResource.id,
+          ...emptyValue,
+          resource: mapResourceToValueResource(thisResource),
         },
       }),
     ),

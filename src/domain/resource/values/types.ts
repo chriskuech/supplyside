@@ -43,7 +43,7 @@ export type Value = {
   date: Date | null
   number: number | null
   option: Option | null
-  options?: Option[]
+  options: Option[]
   string: string | null
   user: User | null
   file: File | null

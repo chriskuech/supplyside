@@ -17,7 +17,7 @@ import { mapSchemaToJsonSchema } from '../schema/json-schema'
 import { selectSchemaField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
 import { recalculateSubtotalCost } from './cost/actions'
-import { Resource, selectResourceField } from './types'
+import { Resource, emptyValue, selectResourceField } from './types'
 import { valueInclude } from './values/types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
@@ -152,7 +152,7 @@ export const createResource = async ({
       fieldId:
         selectSchemaField(schema, fields.number)?.id ??
         fail(`"${fields.number.name}" field not found`),
-      value: { string: resource.key.toString() },
+      value: { ...emptyValue, string: resource.key.toString() },
     })
   }
 
@@ -249,9 +249,8 @@ export const updateResource = async ({ accountId, id, fields }: Resource) => {
     ),
   ])
 
-  const model = await prisma().resource.update({
+  const model = await prisma().resource.findUniqueOrThrow({
     where: { accountId, id },
-    data: {},
     include,
   })
 

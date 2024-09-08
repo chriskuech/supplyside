@@ -6,7 +6,7 @@ import { z } from 'zod'
 import CSRF from 'csrf'
 import { Prisma, ResourceType } from '@prisma/client'
 import { difference, range } from 'remeda'
-import { selectResourceField } from '../resource/types'
+import { emptyValue, selectResourceField } from '../resource/types'
 import { updateValue } from '../resource/fields'
 import {
   accountQuerySchema,
@@ -299,7 +299,7 @@ const upsertVendorsFromQuickBooks = async (
       return updateValue({
         resourceId: vendor.id,
         fieldId: vendorNameField.id,
-        value: { string: quickBooksVendor.DisplayName },
+        value: { ...emptyValue, string: quickBooksVendor.DisplayName },
       })
     }),
   )

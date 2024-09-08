@@ -6,14 +6,20 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
+  CircularProgress,
   Stack,
   Typography,
 } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
+import { useEffect, useMemo, useState } from 'react'
+import { debounce } from 'remeda'
+import { ResourceType } from '@prisma/client'
+import { readSchema } from '../schema/actions'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
 import ReadOnlyFieldsView from './fields/views/ReadOnlyFieldsView'
 import Field from './fields/controls/Field'
+import { readResource, updateResource as updateResourceAction } from './actions'
 import { Schema } from '@/domain/schema/types'
 import {
   Resource,
@@ -22,20 +28,54 @@ import {
 } from '@/domain/resource/types'
 
 type Props = {
-  schema: Schema
-  resource: Resource
-  onChange: (resource: Resource) => void
+  resourceId?: string
+  resource?: Resource
+  schema?: Schema
+  resourceType?: ResourceType
   isReadOnly?: boolean
   singleColumn?: boolean
 }
 
 export default function ResourceForm({
-  schema,
-  resource,
+  resourceId,
+  resourceType,
+  schema: defaultSchema,
+  resource: defaultResource,
   isReadOnly,
   singleColumn,
 }: Props) {
   const columns = singleColumn ? 1 : 3
+
+  const [schema, setSchema] = useState<Schema | null>(defaultSchema ?? null)
+  const [resource, setResource] = useState<Resource | null>(
+    defaultResource ?? null,
+  )
+
+  const changeHandler = useMemo(
+    () =>
+      debounce((resource: Resource) => updateResourceAction({ resource }), {
+        timing: 'trailing',
+        waitMs: 500,
+      }).call,
+    [],
+  )
+
+  useEffect(() => {
+    if (!schema && resourceType) {
+      readSchema({ resourceType }).then(setSchema)
+    }
+
+    if (resourceId && resource?.id !== resourceId) {
+      readResource({ id: resourceId }).then(setResource)
+    }
+  }, [schema, resource?.id, resourceType, resourceId])
+
+  useEffect(() => {
+    console.log('Changin')
+    resource && changeHandler(resource)
+  }, [resource, changeHandler])
+
+  if (!schema || !resource) return <CircularProgress />
 
   if (isReadOnly) {
     return <ReadOnlyFieldsView schema={schema} resource={resource} />
@@ -121,7 +161,9 @@ export default function ResourceForm({
                                 fieldId: f.id,
                               })}
                               onChange={(value) =>
-                                setResourceField(resource, f, value)
+                                setResource(
+                                  setResourceField(resource, f, value),
+                                )
                               }
                             />
                           </Box>

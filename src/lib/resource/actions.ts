@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation'
 import { ResourceType } from '@prisma/client'
 import { readSession } from '../session/actions'
 import * as domain from '@/domain/resource/actions'
-import { Resource } from '@/domain/resource/types'
+import { Resource, emptyValue } from '@/domain/resource/types'
 import prisma from '@/services/prisma'
 import { ValueResource } from '@/domain/resource/values/types'
 import { updateValue } from '@/domain/resource/fields'
@@ -143,9 +143,10 @@ export const transitionStatus = async (
     resourceId,
     fieldId: field.id,
     value: {
-      optionId:
-        field.options.find((o) => o.templateId === statusTemplate.templateId)
-          ?.id ?? fail('Option not found'),
+      ...emptyValue,
+      option:
+        field.options.find((o) => o.templateId === statusTemplate.templateId) ??
+        fail('Option not found'),
     },
   })
 

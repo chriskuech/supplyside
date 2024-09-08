@@ -23,7 +23,6 @@ import {
 } from '../../actions'
 import ResourceForm from '../../ResourceForm'
 import ResourceFieldView from '../views/ResourceFieldView'
-import ResourceEditContext from '../../ResourceEditContext'
 import { ValueResource } from '@/domain/resource/values/types'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { mapResourceToValueResource } from '@/domain/resource/values/mappers'
@@ -98,19 +97,11 @@ function ResourceField(
             <Typography variant="h5" sx={{ p: 2 }} gutterBottom>
               {resourceType} details
             </Typography>
-            <ResourceEditContext
+            <ResourceForm
               resourceId={resource.id}
               resourceType={resourceType}
-            >
-              {({ schema, resource, onChange }) => (
-                <ResourceForm
-                  schema={schema}
-                  resource={resource}
-                  singleColumn
-                  onChange={onChange}
-                />
-              )}
-            </ResourceEditContext>
+              singleColumn
+            />
           </Box>
         </Drawer>
       </>

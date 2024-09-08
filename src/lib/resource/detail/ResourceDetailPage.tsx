@@ -2,7 +2,6 @@ import { Box, Container, Stack, Typography } from '@mui/material'
 import { ReactNode } from 'react'
 import { match, P } from 'ts-pattern'
 import ResourceForm from '../ResourceForm'
-import { useUpdateResource } from '../useUpdateResource'
 import LinesAndCosts from './LinesAndCosts'
 import DeleteResourceButton from './DeleteResourceButton'
 import { Schema } from '@/domain/schema/types'
@@ -28,8 +27,6 @@ export default function ResourceDetailPage({
   isReadOnly,
   actions,
 }: Props) {
-  const updateResource = useUpdateResource()
-
   return (
     <Stack>
       <Container sx={{ py: 5 }}>
@@ -79,7 +76,6 @@ export default function ResourceDetailPage({
             schema={schema}
             resource={resource}
             isReadOnly={isReadOnly}
-            onChange={() => updateResource(resource)}
           />
           {backlinkField && (
             <LinesAndCosts
