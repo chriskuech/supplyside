@@ -4,7 +4,6 @@ import { readResource } from '@/domain/resource/actions'
 import { Resource, selectResourceField } from '@/domain/resource/types'
 import { ValueResource } from '@/domain/resource/values/types'
 import { File, JsFile } from '@/domain/files/types'
-import { ActionPromise, accountAction } from '@/lib/action'
 import { createFile } from '@/domain/files'
 import { withSession } from '@/lib/session/actions'
 import { readUsers } from '@/domain/iam/user/actions'
@@ -50,8 +49,8 @@ export const uploadFiles = async (formData: FormData) =>
 export const readResourceFieldFileAction = ({
   fieldId,
   resourceId,
-}: ResourceFieldActionParams): ActionPromise<File | undefined> =>
-  accountAction(({ session: { accountId } }) =>
+}: ResourceFieldActionParams): Promise<File | undefined> =>
+  withSession(({ accountId }) =>
     readResource({ accountId, id: resourceId }).then(
       (resource) =>
         selectResourceField(resource, { fieldId })?.file ?? undefined,
@@ -61,8 +60,8 @@ export const readResourceFieldFileAction = ({
 export const readResourceFieldFilesAction = ({
   fieldId,
   resourceId,
-}: ResourceFieldActionParams): ActionPromise<File[] | undefined> =>
-  accountAction(({ session: { accountId } }) =>
+}: ResourceFieldActionParams): Promise<File[] | undefined> =>
+  withSession(({ accountId }) =>
     readResource({ accountId, id: resourceId }).then(
       (resource) => selectResourceField(resource, { fieldId })?.files ?? [],
     ),
@@ -71,8 +70,8 @@ export const readResourceFieldFilesAction = ({
 export const readResourceFieldResourceAction = ({
   fieldId,
   resourceId,
-}: ResourceFieldActionParams): ActionPromise<ValueResource | undefined> =>
-  accountAction(({ session: { accountId } }) =>
+}: ResourceFieldActionParams): Promise<ValueResource | undefined> =>
+  withSession(({ accountId }) =>
     readResource({ accountId, id: resourceId }).then(
       (resource) =>
         selectResourceField(resource, { fieldId })?.resource ?? undefined,
@@ -83,10 +82,8 @@ export const readResourceAction = ({
   resourceId,
 }: {
   resourceId: string
-}): ActionPromise<Resource> =>
-  accountAction(({ session: { accountId } }) =>
-    readResource({ accountId, id: resourceId }),
-  )
+}): Promise<Resource> =>
+  withSession(({ accountId }) => readResource({ accountId, id: resourceId }))
 
 export const readUsersAction = (): Promise<User[]> =>
   withSession(({ accountId }) => readUsers({ accountId }))

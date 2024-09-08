@@ -10,32 +10,18 @@ export type ValueContact = {
   phone: string | null
 }
 
-// export type ValueInput =
-//   | { boolean: boolean | null }
-//   | { contact: ValueContact | null }
-//   | { date: Date | null }
-//   | { number: number | null }
-//   | { optionId: string | null }
-//   | { optionIds: string[] }
-//   | { string: string | null }
-//   | { userId: string | null }
-//   | { fileId: string | null }
-//   | { fileIds: string[] }
-//   | { resourceId: string | null }
-
-export type ValueInput = {
-  boolean?: boolean | null
-  contact?: ValueContact | null
-  date?: Date | null
-  fileId?: string | null
-  fileIds?: string[]
-  number?: number | null
-  optionId?: string | null
-  optionIds?: string[]
-  resourceId?: string | null
-  string?: string | null
-  userId?: string | null
-}
+export type ValueInput =
+  | { boolean: boolean | null }
+  | { contact: ValueContact | null }
+  | { date: Date | null }
+  | { fileId: string | null }
+  | { fileIds: string[] }
+  | { number: number | null }
+  | { optionId: string | null }
+  | { optionIds: string[] }
+  | { resourceId: string | null }
+  | { string: string | null }
+  | { userId: string | null }
 
 export type Value = {
   boolean: boolean | null

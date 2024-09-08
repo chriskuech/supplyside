@@ -5,7 +5,7 @@ import { Prisma, ResourceType } from '@prisma/client'
 import { map, pipe, sum } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { readResource, readResources } from '../actions'
-import { emptyValue, selectResourceField } from '../types'
+import { selectResourceField } from '../types'
 import { updateValue } from '../fields'
 import { readSchema } from '@/domain/schema/actions'
 import prisma from '@/services/prisma'
@@ -62,7 +62,6 @@ export const recalculateItemizedCosts = async (
     resourceId,
     fieldId: selectSchemaField(schema, fields.itemizedCosts)?.id ?? fail(),
     value: {
-      ...emptyValue,
       number: pipe(
         costs,
         map((cost) =>
@@ -104,7 +103,6 @@ export const recalculateSubtotalCost = async (
     fieldId: selectSchemaField(schema, fields.subtotalCost)?.id ?? fail(),
     resourceId,
     value: {
-      ...emptyValue,
       number: subTotal,
     },
   })

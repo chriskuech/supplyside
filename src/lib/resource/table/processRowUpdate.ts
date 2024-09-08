@@ -3,6 +3,7 @@ import { enqueueSnackbar } from 'notistack'
 import { Row } from './types'
 import { Schema, selectSchemaField } from '@/domain/schema/types'
 import { updateValue } from '@/domain/resource/fields'
+import { mapValueToValueInput } from '@/domain/resource/values/mappers'
 
 export const handleProcessRowUpdate = async (
   schema: Schema,
@@ -24,11 +25,11 @@ export const handleProcessRowUpdate = async (
 
           return !isDeepEqual(oldValue, newValue)
         })
-        .map(({ fieldId, value }) =>
+        .map(({ fieldId, fieldType, value }) =>
           updateValue({
             resourceId: newRow.id,
             fieldId,
-            value,
+            value: mapValueToValueInput(fieldType, value),
           }),
         ),
     )

@@ -15,11 +15,7 @@ import { createResource, readResources } from '@/domain/resource/actions'
 import { readSchema } from '@/domain/schema/actions'
 import { selectSchemaField } from '@/domain/schema/types'
 import { fields } from '@/domain/schema/template/system-fields'
-import {
-  Resource,
-  emptyValue,
-  selectResourceField,
-} from '@/domain/resource/types'
+import { Resource, selectResourceField } from '@/domain/resource/types'
 import { updateValue } from '@/domain/resource/fields'
 
 export const readVendor = async (
@@ -107,7 +103,7 @@ export const upsertVendorsFromQuickBooks = async (
       return updateValue({
         resourceId: vendor.id,
         fieldId: vendorNameField.id,
-        value: { ...emptyValue, string: quickBooksVendor.DisplayName },
+        value: { string: quickBooksVendor.DisplayName },
       })
     }),
   )
@@ -155,7 +151,7 @@ const createVendorOnQuickBooks = async (
   await updateValue({
     resourceId: vendor.id,
     fieldId: quickBooksVendorIdField,
-    value: { ...emptyValue, string: quickBooksVendor.Vendor.Id },
+    value: { string: quickBooksVendor.Vendor.Id },
   })
 
   return quickBooksVendor

@@ -6,9 +6,8 @@ import { pick } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { match } from 'ts-pattern'
 import { readResource, readResources } from '../actions'
-import { emptyValue, selectResourceField } from '../types'
-import { Value } from '../values/types'
-import { mapResourceToValueResource } from '../values/mappers'
+import { selectResourceField } from '../types'
+import { ValueInput } from '../values/types'
 import prisma from '@/services/prisma'
 import {
   fields,
@@ -25,7 +24,7 @@ import { FieldTemplate } from '@/domain/schema/template/types'
 export type UpdateValueDto = {
   resourceId: string
   fieldId: string
-  value: Value
+  value: ValueInput
 }
 
 export const updateValue = async ({
@@ -35,33 +34,31 @@ export const updateValue = async ({
 }: UpdateValueDto) => {
   revalidatePath('')
 
-  //TODO:  check if value object is correct for each fieldType
+  // TODO: use `match` or something
+  const fileIds = 'fileIds' in value ? value.fileIds : []
+  const optionIds = 'optionIds' in value ? value.optionIds : []
+  const string = 'string' in value ? value.string : null
+  const contact = 'contact' in value ? value.contact : null
+  const fileId = 'fileId' in value ? value.fileId : null
+  const optionId = 'optionId' in value ? value.optionId : null
+  const userId = 'userId' in value ? value.userId : null
+  const linkedResourceId = 'resourceId' in value ? value.resourceId : null
 
-  const {
-    files,
-    options,
-    resource: linkedResource,
-    string,
-    contact,
-    file,
-    option,
-    user,
-    ...primitives
-  } = value
   const data: Prisma.ValueCreateInput & Prisma.ValueUpdateInput = {
-    ...primitives,
+    boolean: 'boolean' in value ? value.boolean : undefined,
+    date: 'date' in value ? value.date : undefined,
+    number: 'number' in value ? value.number : undefined,
+
     string: string?.trim() || null,
-    ValueOption: options
+    ValueOption: optionIds
       ? {
-          create: options.map(({ id }) => ({ optionId: id })),
+          create: optionIds.map((optionId) => ({ optionId })),
         }
       : undefined,
-    Files: files
+    Files: fileIds
       ? {
           createMany: {
-            data: files.map(({ id }) => ({
-              fileId: id,
-            })),
+            data: fileIds.map((fileId) => ({ fileId })),
             skipDuplicates: true,
           },
         }
@@ -104,14 +101,14 @@ export const updateValue = async ({
                   },
                 }
               : undefined,
-            File: file ? { connect: { id: file.id } } : undefined,
-            Option: option ? { connect: { id: option.id } } : undefined,
-            Resource: linkedResource
-              ? { connect: { id: linkedResource.id } }
+            File: fileId ? { connect: { id: fileId } } : undefined,
+            Option: optionId ? { connect: { id: optionId } } : undefined,
+            Resource: linkedResourceId
+              ? { connect: { id: linkedResourceId } }
               : undefined,
-            User: user ? { connect: { id: user.id } } : undefined,
-            ValueOption: value.options.length
-              ? { create: value.options.map(({ id }) => ({ optionId: id })) }
+            User: userId ? { connect: { id: userId } } : undefined,
+            ValueOption: optionIds
+              ? { create: optionIds.map((optionId) => ({ optionId })) }
               : undefined,
           },
         },
@@ -140,18 +137,18 @@ export const updateValue = async ({
               : {
                   disconnect: true,
                 },
-            File: file ? { connect: { id: file.id } } : { disconnect: true },
-            Option: option
-              ? { connect: { id: option.id } }
+            File: fileId ? { connect: { id: fileId } } : { disconnect: true },
+            Option: optionId
+              ? { connect: { id: optionId } }
               : { disconnect: true },
-            Resource: match(linkedResource)
+            Resource: match(linkedResourceId)
               .with(null, () => ({
                 disconnect: true,
               }))
-              .otherwise(({ id }) => ({
+              .otherwise((id) => ({
                 connect: { id },
               })),
-            User: user ? { connect: { id: user.id } } : { disconnect: true },
+            User: userId ? { connect: { id: userId } } : { disconnect: true },
             // ValueOption: {
             //   upsert: value.options.map(({ id }) => ({
             //     where: { optionId: id },
@@ -167,13 +164,13 @@ export const updateValue = async ({
         Field: true,
       },
     }),
-    ...(value.resource
-      ? [copyLinkedResourceFields(resourceId, fieldId, value.resource.id)]
+    ...(resourceId
+      ? [copyLinkedResourceFields(resourceId, fieldId, resourceId)]
       : []),
-    ...(files
+    ...(fileIds
       ? [
           prisma().valueFile.deleteMany({
-            where: { fileId: { notIn: files.map((f) => f.id) } },
+            where: { fileId: { notIn: fileIds } },
           }),
         ]
       : []),
@@ -207,7 +204,6 @@ export const updateValue = async ({
       fieldId: totalCostFieldId,
       resourceId: rf.Resource.id,
       value: {
-        ...emptyValue,
         number: unitCost * quantity,
       },
     })
@@ -271,7 +267,6 @@ export const updateValue = async ({
       fieldId: selectSchemaField(schema, fields.totalCost)?.id ?? fail(),
       resourceId: resource.id,
       value: {
-        ...emptyValue,
         number: itemizedCosts + subtotalCost,
       },
     })
@@ -397,8 +392,7 @@ const copyResourceLines = async (
         resourceId: line.id,
         fieldId: field.id,
         value: {
-          ...emptyValue,
-          resource: mapResourceToValueResource(thisResource),
+          resourceId: thisResource.id,
         },
       }),
     ),

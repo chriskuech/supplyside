@@ -22,8 +22,7 @@ import {
   UpdateFieldDto,
 } from '@/domain/schema/fields/types'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
-import { mapValueToValueInput } from '@/domain/resource/values/mappers'
-import { ValueInput } from '@/domain/resource/values/types'
+import { Value } from '@/domain/resource/values/types'
 
 type Props = {
   field: Field
@@ -44,9 +43,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
       op: 'update',
     })),
   )
-  const [defaultValue, setDefaultValue] = useState<ValueInput>(
-    mapValueToValueInput(field.defaultValue),
-  )
+  const [defaultValue, setDefaultValue] = useState<Value>(field.defaultValue)
 
   const [defaultToToday, setDefaultToToday] = useState<boolean>(
     field.defaultToToday,

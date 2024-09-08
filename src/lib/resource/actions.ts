@@ -143,10 +143,9 @@ export const transitionStatus = async (
     resourceId,
     fieldId: field.id,
     value: {
-      ...emptyValue,
-      option:
-        field.options.find((o) => o.templateId === statusTemplate.templateId) ??
-        fail('Option not found'),
+      optionId:
+        field.options.find((o) => o.templateId === statusTemplate.templateId)
+          ?.id ?? fail('Option not found'),
     },
   })
 

@@ -5,11 +5,7 @@ import { mapBill } from '../mappers/bill'
 import { accountQuerySchema, readBillSchema } from '../schemas'
 import { Bill } from '../types'
 import { upsertVendorOnQuickBooks } from './vendor'
-import {
-  Resource,
-  emptyValue,
-  selectResourceField,
-} from '@/domain/resource/types'
+import { Resource, selectResourceField } from '@/domain/resource/types'
 import { readResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
@@ -64,7 +60,7 @@ const createBillOnQuickBooks = async (
   await updateValue({
     resourceId: bill.id,
     fieldId: quickBooksBillIdField,
-    value: { ...emptyValue, string: quickBooksBill.Bill.Id },
+    value: { string: quickBooksBill.Bill.Id },
   })
 
   return quickBooksBill

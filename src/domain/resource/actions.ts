@@ -17,13 +17,13 @@ import { mapSchemaToJsonSchema } from '../schema/json-schema'
 import { selectSchemaField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
 import { recalculateSubtotalCost } from './cost/actions'
-import { Resource, emptyValue, selectResourceField } from './types'
+import { Resource, selectResourceField } from './types'
 import { valueInclude } from './values/types'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
 import { copyLinkedResourceFields, updateValue } from './fields'
 import { ValueModel } from './values/model'
-import { mapValueFromModel } from './values/mappers'
+import { mapValueFromModel, mapValueToValueInput } from './values/mappers'
 import prisma from '@/services/prisma'
 
 const ajv = new Ajv()
@@ -152,7 +152,7 @@ export const createResource = async ({
       fieldId:
         selectSchemaField(schema, fields.number)?.id ??
         fail(`"${fields.number.name}" field not found`),
-      value: { ...emptyValue, string: resource.key.toString() },
+      value: { string: resource.key.toString() },
     })
   }
 
@@ -244,7 +244,7 @@ export const updateResource = async ({ accountId, id, fields }: Resource) => {
       updateValue({
         resourceId: id,
         fieldId: f.fieldId,
-        value: f.value,
+        value: mapValueToValueInput(f.fieldType, f.value),
       }),
     ),
   ])

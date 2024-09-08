@@ -22,20 +22,27 @@ export const mapResourceToValueResource = (
     fail('Resource type does not have a name or number field'),
 })
 
-export const mapValueToValueInput = (value: Value): ValueInput => ({
-  boolean: value.boolean ?? undefined,
-  contact: value.contact
-    ? pick(value.contact, ['name', 'title', 'email', 'phone'])
-    : undefined,
-  date: value.date,
-  number: value.number ?? null,
-  optionId: value.option?.id ?? null,
-  optionIds: value.options?.map((o) => o.id) ?? [],
-  string: value.string ?? null,
-  userId: value.user?.id ?? null,
-  fileId: value.file?.id ?? null,
-  resourceId: value.resource?.id ?? null,
-})
+export const mapValueToValueInput = (
+  fieldType: FieldType,
+  value: Value,
+): ValueInput =>
+  match<FieldType, ValueInput>(fieldType)
+    .with('Checkbox', () => ({ boolean: value.boolean }))
+    .with('Date', () => ({ date: value.date }))
+    .with('File', () => ({ fileId: value.file?.id ?? null }))
+    .with(P.union('Money', 'Number'), () => ({ number: value.number }))
+    .with('User', () => ({ userId: value.user?.id ?? null }))
+    .with('Select', () => ({ optionId: value.option?.id ?? null }))
+    .with(P.union('Textarea', 'Text'), () => ({ string: value.string }))
+    .with('Resource', () => ({ resourceId: value.resource?.id ?? null }))
+    .with('Contact', () => ({
+      contact: value.contact
+        ? pick(value.contact, ['name', 'title', 'email', 'phone'])
+        : null,
+    }))
+    .with('Files', () => ({ fileIds: value.files?.map((f) => f.id) }))
+    .with('MultiSelect', () => ({ optionIds: value.options?.map((o) => o.id) }))
+    .exhaustive()
 
 export const mapValueFromModel = (model: ValueModel): Value => ({
   boolean: model.boolean,

@@ -3,7 +3,8 @@
 import { useCallback, useMemo } from 'react'
 import { debounce } from 'remeda'
 import Field, { Props as FieldProps } from './controls/Field'
-import { UpdateValueDto, updateValue } from '@/domain/resource/fields'
+import { updateValue } from '@/domain/resource/fields'
+import { ValueInput } from '@/domain/resource/values/types'
 
 type Props = Omit<FieldProps, 'onChange'> & {
   onChange?: () => void
@@ -11,7 +12,7 @@ type Props = Omit<FieldProps, 'onChange'> & {
 
 export default function FieldControl({ onChange, ...props }: Props) {
   const handleChange = useCallback(
-    (value: UpdateValueDto['value']) =>
+    (value: ValueInput) =>
       updateValue({
         resourceId: props.resourceId,
         fieldId: props.field.id,
