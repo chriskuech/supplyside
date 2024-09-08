@@ -1,3 +1,4 @@
+import assert from 'assert'
 import { isDeepEqual } from 'remeda'
 import { enqueueSnackbar } from 'notistack'
 import { Row } from './types'
@@ -13,6 +14,9 @@ export const handleProcessRowUpdate = async (
     await Promise.all(
       newRow.fields
         .filter(({ fieldId, value: newValue }) => {
+          console.log('holla')
+          assert(newValue, 'Value is required. Instead got: ' + newValue)
+
           const field = selectSchemaField(schema, { fieldId })
 
           const oldValue = oldRow.fields.find(
@@ -34,10 +38,12 @@ export const handleProcessRowUpdate = async (
     )
 
     return newRow
-  } catch {
+  } catch (error) {
     enqueueSnackbar('There was an error updating the fields', {
       variant: 'error',
     })
+
+    console.error(error)
 
     return oldRow
   }

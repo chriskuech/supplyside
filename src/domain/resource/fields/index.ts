@@ -34,6 +34,7 @@ export const updateValue = async ({
   value,
 }: UpdateValueDto) => {
   revalidatePath('')
+
   //TODO:  check if value object is correct for each fieldType
 
   const {
