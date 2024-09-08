@@ -2,6 +2,7 @@ import { hash } from 'bcrypt'
 import { z } from 'zod'
 import { config as loadDotenv } from 'dotenv'
 import { expand as expandDotenv } from 'dotenv-expand'
+import { ResourceType } from '@prisma/client'
 import { ImportMock } from 'ts-mock-imports'
 import nextCache from 'next/cache'
 import { systemAccountId } from '@/lib/const'
@@ -86,7 +87,7 @@ async function main() {
 
   const vendor = await createResource({
     accountId: customerAccount.id,
-    type: 'Vendor',
+    type: ResourceType.Vendor,
     data: {
       [fields.name.name]: 'ACME Supplies',
     },
@@ -94,7 +95,7 @@ async function main() {
 
   const order = await createResource({
     accountId: customerAccount.id,
-    type: 'Order',
+    type: ResourceType.Order,
     data: {
       [fields.assignee.name]: systemUser.id,
       [fields.number.name]: '42',
@@ -104,7 +105,7 @@ async function main() {
 
   const item1 = await createResource({
     accountId: customerAccount.id,
-    type: 'Item',
+    type: ResourceType.Item,
     data: {
       [fields.name.name]: 'Item Name 1',
       [fields.itemDescription.name]: 'Item Desc 1',
@@ -114,7 +115,7 @@ async function main() {
 
   await createResource({
     accountId: customerAccount.id,
-    type: 'Line',
+    type: ResourceType.Line,
     data: {
       [fields.order.name]: order.id,
       [fields.item.name]: item1.id,
@@ -123,7 +124,7 @@ async function main() {
 
   const item2 = await createResource({
     accountId: customerAccount.id,
-    type: 'Item',
+    type: ResourceType.Item,
     data: {
       [fields.name.name]: 'Item Name 2',
       [fields.itemDescription.name]: 'Item Desc 2',
@@ -133,7 +134,7 @@ async function main() {
 
   await createResource({
     accountId: customerAccount.id,
-    type: 'Line',
+    type: ResourceType.Line,
     data: {
       [fields.order.name]: order.id,
       [fields.item.name]: item2.id,
