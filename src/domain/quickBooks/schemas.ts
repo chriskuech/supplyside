@@ -6,7 +6,7 @@ const metadataSchema = z.object({
 })
 
 const refSchema = z.object({
-  name: z.string(),
+  name: z.string().optional(),
   value: z.string(),
 })
 
@@ -35,6 +35,45 @@ const accountSchema = z.object({
   SyncToken: z.string(),
   Id: z.string(),
   SubAccount: z.boolean(),
+})
+
+const lineSchema = z.object({
+  Description: z.string().optional(),
+  DetailType: z.string(),
+  ProjectRef: refSchema.optional(),
+  Amount: z.number(),
+  Id: z.string(),
+  AccountBasedExpenseLineDetail: z.object({
+    TaxCodeRef: refSchema.optional(),
+    AccountRef: refSchema,
+    BillableStatus: z.string().optional(),
+    CustomerRef: refSchema.optional(),
+  }),
+})
+
+const billSchema = z.object({
+  SyncToken: z.string(),
+  domain: z.string(),
+  APAccountRef: refSchema.optional(),
+  VendorRef: refSchema.optional(),
+  TxnDate: z.string().optional(),
+  TotalAmt: z.number().optional(),
+  CurrencyRef: refSchema.optional(),
+  LinkedTxn: z
+    .array(
+      z.object({
+        TxnId: z.string(),
+        TxnType: z.string(),
+      }),
+    )
+    .optional(),
+  SalesTermRef: refSchema.optional(),
+  DueDate: z.string().optional(),
+  sparse: z.boolean(),
+  Line: z.array(lineSchema).optional(),
+  Balance: z.number(),
+  Id: z.string(),
+  MetaData: metadataSchema,
 })
 
 const emailSchema = z.object({
@@ -71,7 +110,7 @@ export type QuickBooksToken = z.infer<typeof quickbooksTokenSchema>
 
 export const accountQuerySchema = z.object({
   QueryResponse: z.object({
-    Account: z.array(accountSchema),
+    Account: z.array(accountSchema).optional(),
   }),
 })
 
@@ -123,7 +162,19 @@ export const vendorSchema = z.object({
 export const vendorQuerySchema = z.object({
   QueryResponse: z.object({
     startPosition: z.number(),
-    Vendor: z.array(vendorSchema),
+    Vendor: z.array(vendorSchema).optional(),
     maxResults: z.number(),
   }),
+})
+
+export const readAccountSchema = z.object({
+  Account: accountSchema,
+})
+
+export const readVendorSchema = z.object({
+  Vendor: vendorSchema,
+})
+
+export const readBillSchema = z.object({
+  Bill: billSchema,
 })
