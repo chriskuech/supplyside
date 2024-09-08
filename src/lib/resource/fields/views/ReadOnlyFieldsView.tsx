@@ -16,6 +16,7 @@ import { chunkByN } from '../../chunkByN'
 import ReadonlyTextarea from './ReadonlyTextarea'
 import ResourceFieldView from './ResourceFieldView'
 import UserCard from './UserCard'
+import ContactCard from './ContactCard'
 import { Schema } from '@/domain/schema/types'
 import { Resource } from '@/domain/resource/types'
 
@@ -66,7 +67,12 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                             )
                             .with(
                               { fieldType: 'Contact' },
-                              ({ value: { contact } }) => contact?.email ?? '-', // TODO: show contact name
+                              ({ value: { contact } }) =>
+                                contact ? (
+                                  <ContactCard contact={contact} />
+                                ) : (
+                                  '-'
+                                ),
                             )
                             .with(
                               { fieldType: 'Date' },
