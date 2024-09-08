@@ -1,4 +1,3 @@
-import { ResourceType } from '@prisma/client'
 import { readBlob } from '../blobs'
 import { readResource } from '../resource/actions'
 import { fields } from '../schema/template/system-fields'
@@ -15,7 +14,7 @@ type SendPoParams = {
 export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   const [order, account] = await Promise.all([
     readResource({
-      type: ResourceType.Order,
+      type: 'Order',
       id: resourceId,
       accountId,
     }),

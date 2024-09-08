@@ -88,7 +88,7 @@ export const recalculateSubtotalCost = async (
 
   const lines = await readResources({
     accountId,
-    type: ResourceType.Line,
+    type: 'Line',
     where: {
       '==': [{ var: resourceType }, resourceId],
     },

@@ -1,7 +1,6 @@
 'use server'
 
 import { ReactNode } from 'react'
-import { ResourceType } from '@prisma/client'
 import { readResource } from '@/domain/resource/actions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectResourceField } from '@/domain/resource/types'
@@ -18,7 +17,7 @@ export default async function PoDocumentFooter({
   const resource = await readResource({
     accountId,
     id: resourceId,
-    type: ResourceType.Order,
+    type: 'Order',
   })
 
   const issuedDate = selectResourceField(resource, fields.issuedDate)?.date

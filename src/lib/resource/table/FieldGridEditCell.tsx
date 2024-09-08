@@ -7,6 +7,7 @@ import { useLayoutEffect, useRef } from 'react'
 import Field from '../fields/controls/Field'
 import { Cell, Display, Row } from './types'
 import { Field as SchemaField } from '@/domain/schema/types'
+import { selectResourceField } from '@/domain/resource/types'
 
 type Props = {
   cellParams: GridRenderEditCellParams<Row, Cell, Display>
@@ -25,10 +26,6 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
       inputRef.current?.focus()
     }
   }, [cellParams.hasFocus])
-
-  const currentField = cellParams.row.fields.find(
-    (rf) => rf.fieldId === cellParams.field,
-  )
 
   return (
     <Box display="flex" width="100%" alignItems="center">
@@ -52,7 +49,7 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
           }
         }}
         resourceId={cellParams.row.id}
-        value={currentField?.value}
+        value={selectResourceField(cellParams.row, { fieldId: field.id })}
         inline
       />
     </Box>

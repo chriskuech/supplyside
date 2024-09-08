@@ -275,12 +275,12 @@ export const deleteResource = async ({
   if (entity.type === 'Line') {
     const orderId = selectResourceField(entity, fields.order)?.resource?.id
     if (orderId) {
-      await recalculateSubtotalCost(accountId, ResourceType.Order, orderId)
+      await recalculateSubtotalCost(accountId, 'Order', orderId)
     }
 
     const billId = selectResourceField(entity, fields.bill)?.resource?.id
     if (billId) {
-      await recalculateSubtotalCost(accountId, ResourceType.Bill, billId)
+      await recalculateSubtotalCost(accountId, 'Bill', billId)
     }
   }
 

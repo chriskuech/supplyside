@@ -3,7 +3,6 @@
 import { fail } from 'assert'
 import { NextRequest, NextResponse } from 'next/server'
 import { Message } from 'postmark'
-import { ResourceType } from '@prisma/client'
 import { createBlob } from '@/domain/blobs'
 import prisma from '@/services/prisma'
 import { createResource } from '@/domain/resource/actions'
@@ -43,9 +42,11 @@ const createBill = async (params: Params) => {
     }),
   )
 
+  console.log('Creating Bill', fileIds)
+
   return await createResource({
     accountId: params.accountId,
-    type: ResourceType.Bill,
+    type: 'Bill',
     data: {
       [fields.billFiles.name]: fileIds,
     },

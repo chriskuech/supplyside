@@ -47,26 +47,10 @@ export const mapSchemaFieldToGridColDef = (
   editable:
     options.isEditable && !findTemplateField(field.templateId)?.isDerived,
 
-  // valueOptions: match(field.type)
-  //   .with('Select', () => field.options)
-  //   .otherwise(() => undefined),
-
-  // getOptionLabel: (options: ValueOptions) =>
-  //   match(field.type)
-  //     .with('Select', () => options.name)
-  //     .otherwise(() => undefined),
-
-  // getOptionValue: (options: ValueOptions) =>
-  //   match(field.type)
-  //     .with('Select', () => options.id)
-  //     .otherwise(() => undefined),
-
   type: 'custom',
 
   valueGetter: (cell: Display, resource: Row): Value =>
     selectResourceField(resource, { fieldId: field.id }) ?? emptyValue,
-
-  // valueParser: (value) => emptyValue, // TODOs
 
   // This function is called when a value is written to the row, prior to persisting the resource.
   valueSetter: (value: Value | undefined = emptyValue, row: Row): Row =>
@@ -96,7 +80,6 @@ export const mapSchemaFieldToGridColDef = (
           ],
         },
 
-  // This is called to render the cell if `valueFormatter` returns `undefined`
   renderCell: ({ value }) => {
     const children = match<FieldType>(field.type)
       .with('Checkbox', () => value?.boolean && <Check />)
@@ -129,6 +112,7 @@ export const mapSchemaFieldToGridColDef = (
     )
   },
 
+  // Only called if `renderCell` returns `undefined`
   valueFormatter: (_, resource) => {
     const value = selectResourceField(resource, { fieldId: field.id })
 

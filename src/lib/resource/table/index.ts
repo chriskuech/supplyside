@@ -1,3 +1,1 @@
-import ResourceTable from './ResourceTable'
-
-export default ResourceTable
+export { default as ResourceTable } from './ResourceTable'

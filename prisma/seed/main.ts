@@ -4,7 +4,6 @@ import { config as loadDotenv } from 'dotenv'
 import { expand as expandDotenv } from 'dotenv-expand'
 import { ImportMock } from 'ts-mock-imports'
 import nextCache from 'next/cache'
-import { ResourceType } from '@prisma/client'
 import { systemAccountId } from '@/lib/const'
 import prisma from '@/services/prisma'
 import { applyTemplate } from '@/domain/schema/template/actions'
@@ -87,7 +86,7 @@ async function main() {
 
   const vendor = await createResource({
     accountId: customerAccount.id,
-    type: ResourceType.Vendor,
+    type: 'Vendor',
     data: {
       [fields.name.name]: 'ACME Supplies',
     },
@@ -95,7 +94,7 @@ async function main() {
 
   const order = await createResource({
     accountId: customerAccount.id,
-    type: ResourceType.Order,
+    type: 'Order',
     data: {
       [fields.assignee.name]: systemUser.id,
       [fields.number.name]: '42',
@@ -105,7 +104,7 @@ async function main() {
 
   const item1 = await createResource({
     accountId: customerAccount.id,
-    type: ResourceType.Item,
+    type: 'Item',
     data: {
       [fields.name.name]: 'Item Name 1',
       [fields.itemDescription.name]: 'Item Desc 1',
@@ -115,7 +114,7 @@ async function main() {
 
   await createResource({
     accountId: customerAccount.id,
-    type: ResourceType.Line,
+    type: 'Line',
     data: {
       [fields.order.name]: order.id,
       [fields.item.name]: item1.id,
@@ -124,7 +123,7 @@ async function main() {
 
   const item2 = await createResource({
     accountId: customerAccount.id,
-    type: ResourceType.Item,
+    type: 'Item',
     data: {
       [fields.name.name]: 'Item Name 2',
       [fields.itemDescription.name]: 'Item Desc 2',
@@ -134,7 +133,7 @@ async function main() {
 
   await createResource({
     accountId: customerAccount.id,
-    type: ResourceType.Line,
+    type: 'Line',
     data: {
       [fields.order.name]: order.id,
       [fields.item.name]: item2.id,

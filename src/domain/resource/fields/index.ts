@@ -182,7 +182,7 @@ export const updateValue = async ({
   // When the Line."Unit Cost" or Line."Quantity" field is updated,
   // Then update Line."Total Cost"
   if (
-    rf.Resource.type === ResourceType.Line &&
+    rf.Resource.type === 'Line' &&
     (rf.Field.templateId === fields.unitCost.templateId ||
       rf.Field.templateId === fields.quantity.templateId)
   ) {
@@ -193,7 +193,7 @@ export const updateValue = async ({
       }),
       readSchema({
         accountId: rf.Resource.accountId,
-        resourceType: ResourceType.Line,
+        resourceType: 'Line',
         isSystem: true,
       }),
     ])
@@ -226,20 +226,12 @@ export const updateValue = async ({
 
     const orderId = selectResourceField(line, fields.order)?.resource?.id
     if (orderId) {
-      await recalculateSubtotalCost(
-        rf.Resource.accountId,
-        ResourceType.Order,
-        orderId,
-      )
+      await recalculateSubtotalCost(rf.Resource.accountId, 'Order', orderId)
     }
 
     const billId = selectResourceField(line, fields.bill)?.resource?.id
     if (billId) {
-      await recalculateSubtotalCost(
-        rf.Resource.accountId,
-        ResourceType.Bill,
-        billId,
-      )
+      await recalculateSubtotalCost(rf.Resource.accountId, 'Bill', billId)
     }
   }
 
@@ -288,14 +280,10 @@ export const updateValue = async ({
   // When the Order field of a Bill resource has been updated (an Order has been linked to a Bill)
   // Then recalculate the Bill."Subtotal Cost"
   if (
-    rf.Resource.type === ResourceType.Bill &&
+    rf.Resource.type === 'Bill' &&
     rf.Field.templateId === fields.order.templateId
   ) {
-    await recalculateSubtotalCost(
-      rf.Resource.accountId,
-      ResourceType.Bill,
-      rf.Resource.id,
-    )
+    await recalculateSubtotalCost(rf.Resource.accountId, 'Bill', rf.Resource.id)
   }
 }
 
@@ -343,20 +331,17 @@ export const copyLinkedResourceFields = async (
       .map((fieldId) => copyField(linkedResourceId, resourceId, fieldId)),
   )
 
-  const resourcesWithLines: ResourceType[] = [
-    ResourceType.Order,
-    ResourceType.Bill,
-  ]
+  const resourcesWithLines: ResourceType[] = ['Order', 'Bill']
   if (
     [thisResourceType, linkedResourceType].every((linkedResource) =>
       resourcesWithLines.includes(linkedResource),
     )
   ) {
     const linkedFieldTemplate =
-      linkedResourceType === ResourceType.Order ? fields.order : fields.bill
+      linkedResourceType === 'Order' ? fields.order : fields.bill
 
     const resourceFieldTemplate =
-      thisResourceType === ResourceType.Order ? fields.order : fields.bill
+      thisResourceType === 'Order' ? fields.order : fields.bill
 
     await Promise.all([
       copyResourceCosts(linkedResourceId, resourceId),
@@ -393,7 +378,7 @@ const copyResourceLines = async (
 
   const linkedResourceLines = await readResources({
     accountId: linkedResource.accountId,
-    type: ResourceType.Line,
+    type: 'Line',
     where: {
       '==': [{ var: linkedFieldTemplate.name }, linkedResourceId],
     },
@@ -401,7 +386,7 @@ const copyResourceLines = async (
 
   const schema = await readSchema({
     accountId: linkedResource.accountId,
-    resourceType: ResourceType.Line,
+    resourceType: 'Line',
   })
 
   const field = selectSchemaField(schema, resourceFieldTemplate) ?? fail()

@@ -4,7 +4,7 @@
 'use server'
 
 import { ReactNode } from 'react'
-import { Cost, FieldType, ResourceType } from '@prisma/client'
+import { Cost, FieldType } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { isTruthy } from 'remeda'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
@@ -29,16 +29,16 @@ export default async function PoDocument({
     readResource({
       accountId,
       id: resourceId,
-      type: ResourceType.Order,
+      type: 'Order',
     }),
     readResources({
       accountId,
-      type: ResourceType.Line,
+      type: 'Line',
       where: {
         '==': [{ var: 'Order' }, resourceId],
       },
     }),
-    readSchema({ accountId, resourceType: ResourceType.Line }),
+    readSchema({ accountId, resourceType: 'Line' }),
     prisma().account.findUniqueOrThrow({
       where: { id: accountId },
     }),
@@ -50,7 +50,7 @@ export default async function PoDocument({
     ? await readResource({
         accountId,
         id: vendorId,
-        type: ResourceType.Vendor,
+        type: 'Vendor',
       })
     : undefined
 
@@ -406,7 +406,7 @@ export default async function PoDocument({
                     ? await readResource({
                         accountId,
                         id: itemId,
-                        type: ResourceType.Item,
+                        type: 'Item',
                       })
                     : undefined
 
