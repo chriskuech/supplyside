@@ -71,7 +71,6 @@ export default function ResourceForm({
   }, [schema, resource?.id, resourceType, resourceId])
 
   useEffect(() => {
-    console.log('Changin')
     resource && changeHandler(resource)
   }, [resource, changeHandler])
 
