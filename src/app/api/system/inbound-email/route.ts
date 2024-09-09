@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Message } from 'postmark'
 import { createBlob } from '@/domain/blobs'
 import prisma from '@/services/prisma'
-import { createResource } from '@/domain/resource/actions'
+import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import smtp from '@/services/smtp'
 

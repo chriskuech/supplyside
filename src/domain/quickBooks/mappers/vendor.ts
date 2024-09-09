@@ -1,5 +1,5 @@
 import { mapValue } from './utils'
-import { Resource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/entity'
 import { fields } from '@/domain/schema/template/system-fields'
 
 export const mapVendor = (vendorResource: Resource) => ({

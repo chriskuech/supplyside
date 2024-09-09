@@ -10,7 +10,7 @@ import { mapSchemaFieldToGridColDef } from './mappers'
 import { Row, Column } from './types'
 import { handleProcessRowUpdate } from './processRowUpdate'
 import { usePersistDatagridState } from './usePersistDatagridState'
-import { Resource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/entity'
 import { Schema } from '@/domain/schema/types'
 
 type Props = {
@@ -83,9 +83,7 @@ export default function ResourceTable({
       rowSelection={false}
       autoHeight
       density="standard"
-      processRowUpdate={(newRow, oldRow) =>
-        handleProcessRowUpdate(schema, newRow, oldRow)
-      }
+      processRowUpdate={handleProcessRowUpdate}
       onRowClick={({ row: { type, key } }) => {
         if (type === 'Line') return
 

@@ -2,8 +2,9 @@ import { P, match } from 'ts-pattern'
 import { Prisma } from '@prisma/client'
 import { CreateFieldParams, Field, UpdateFieldDto } from './types'
 import prisma from '@/services/prisma'
-import { ValueInput, valueInclude } from '@/domain/resource/values/types'
-import { mapValueFromModel } from '@/domain/resource/values/mappers'
+import { ValueInput } from '@/domain/resource/patch'
+import { mapValueModelToEntity } from '@/domain/resource/mappers'
+import { valueInclude } from '@/domain/resource/model'
 
 export const createField = async (
   accountId: string,
@@ -60,7 +61,7 @@ export const readFields = async (accountId: string): Promise<Field[]> => {
     resourceType: f.resourceType,
     type: f.type,
     templateId: f.templateId,
-    defaultValue: mapValueFromModel(f.DefaultValue),
+    defaultValue: mapValueModelToEntity(f.DefaultValue),
   }))
 }
 

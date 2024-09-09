@@ -22,7 +22,7 @@ import {
   UpdateFieldDto,
 } from '@/domain/schema/fields/types'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
-import { Value } from '@/domain/resource/values/types'
+import { Value } from '@/domain/resource/entity'
 
 type Props = {
   field: Field

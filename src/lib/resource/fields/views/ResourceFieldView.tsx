@@ -1,6 +1,6 @@
 import { Link } from '@mui/material'
 import NextLink from 'next/link'
-import { ValueResource } from '@/domain/resource/values/types'
+import { ValueResource } from '@/domain/resource/entity'
 
 type Props = {
   resource: ValueResource | null

@@ -13,8 +13,8 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { Field } from '@/domain/schema/fields/types'
-import { Value } from '@/domain/resource/values/types'
-import { emptyValue } from '@/domain/resource/types'
+import { Value } from '@/domain/resource/entity'
+import { emptyValue } from '@/domain/resource/entity'
 
 type Props = {
   field: Field

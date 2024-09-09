@@ -23,9 +23,9 @@ import {
 } from '../../actions'
 import ResourceForm from '../../ResourceForm'
 import ResourceFieldView from '../views/ResourceFieldView'
-import { ValueResource } from '@/domain/resource/values/types'
+import { ValueResource } from '@/domain/resource/entity'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
-import { mapResourceToValueResource } from '@/domain/resource/values/mappers'
+import { mapResourceToValueResource } from '@/domain/resource/mappers'
 
 type Props = {
   resource: ValueResource | null

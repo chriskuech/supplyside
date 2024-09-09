@@ -15,11 +15,11 @@ import {
 import { FC, useEffect, useState } from 'react'
 import ContactCard from '../views/ContactCard'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
-import { ValueContact } from '@/domain/resource/values/types'
+import { Contact } from '@/domain/resource/entity'
 
 export type ContactFieldProps = {
-  contact: ValueContact | null
-  onChange: (contact: ValueContact | null) => void
+  contact: Contact | null
+  onChange: (contact: Contact | null) => void
   inline?: boolean
 }
 
@@ -78,13 +78,13 @@ export default function ContactField({
 }
 
 type ContactFormProps = {
-  contact: ValueContact | null
-  onChange: (dto: ValueContact | null) => void
+  contact: Contact | null
+  onChange: (dto: Contact | null) => void
   onCancel: () => void
 }
 
 const ContactForm: FC<ContactFormProps> = ({ contact, onChange, onCancel }) => {
-  const [dto, setDto] = useState<ValueContact>({
+  const [dto, setDto] = useState<Contact>({
     email: null,
     name: null,
     phone: null,

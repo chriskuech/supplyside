@@ -5,7 +5,7 @@ import { ResourceType } from '@prisma/client'
 import { ReactNode } from 'react'
 import CreateResourceButton from './CreateResourceButton'
 import { ResourceTable } from './table'
-import { readResources } from '@/domain/resource/actions'
+import { readResources } from '@/domain/resource'
 import { readSchema } from '@/domain/schema/actions'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 

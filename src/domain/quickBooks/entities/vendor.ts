@@ -11,12 +11,16 @@ import { quickBooksClient } from '../util'
 import { mapVendor } from '../mappers/vendor'
 import { handleNotFoundError } from '../errors'
 import { MAX_ENTITIES_PER_PAGE } from '../constants'
-import { createResource, readResources } from '@/domain/resource/actions'
+import {
+  createResource,
+  readResources,
+  updateResourceField,
+} from '@/domain/resource'
 import { readSchema } from '@/domain/schema/actions'
 import { selectSchemaField } from '@/domain/schema/types'
 import { fields } from '@/domain/schema/template/system-fields'
-import { Resource, selectResourceField } from '@/domain/resource/types'
-import { updateValue } from '@/domain/resource/fields'
+import { selectResourceField } from '@/domain/resource/extensions'
+import { Resource } from '@/domain/resource/entity'
 
 export const readVendor = async (
   accountId: string,
@@ -100,7 +104,8 @@ export const upsertVendorsFromQuickBooks = async (
 
       if (vendorName === quickBooksVendor.DisplayName) return
 
-      return updateValue({
+      return updateResourceField({
+        accountId,
         resourceId: vendor.id,
         fieldId: vendorNameField.id,
         value: { string: quickBooksVendor.DisplayName },
@@ -148,7 +153,8 @@ const createVendorOnQuickBooks = async (
 
   assert(quickBooksVendorIdField, 'quickBooksVendorId field not found')
 
-  await updateValue({
+  await updateResourceField({
+    accountId,
     resourceId: vendor.id,
     fieldId: quickBooksVendorIdField,
     value: { string: quickBooksVendor.Vendor.Id },

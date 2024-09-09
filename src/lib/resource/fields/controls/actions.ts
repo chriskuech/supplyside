@@ -1,8 +1,9 @@
 'use server'
 
-import { readResource } from '@/domain/resource/actions'
-import { Resource, selectResourceField } from '@/domain/resource/types'
-import { ValueResource } from '@/domain/resource/values/types'
+import { readResource } from '@/domain/resource'
+import { selectResourceField } from '@/domain/resource/extensions'
+import { Resource } from '@/domain/resource/entity'
+import { ValueResource } from '@/domain/resource/entity'
 import { File, JsFile } from '@/domain/files/types'
 import { createFile } from '@/domain/files'
 import { withSession } from '@/lib/session/actions'

@@ -4,11 +4,10 @@ import { fail } from 'assert'
 import { Prisma } from '@prisma/client'
 import { createBlob } from '../blobs'
 import { fields } from '../schema/template/system-fields'
-import { readResource } from '../resource/actions'
+import { readResource, updateResourceField } from '../resource'
 import { readSchema } from '../schema/actions'
 import { selectSchemaField } from '../schema/types'
-import { selectResourceField } from '../resource/types'
-import { updateValue } from '../resource/fields'
+import { selectResourceField } from '../resource/extensions'
 import { renderPo } from './renderPo'
 import prisma from '@/services/prisma'
 
@@ -25,7 +24,8 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   const issuedDateFieldId =
     selectSchemaField(schema, fields.issuedDate)?.id ?? fail()
 
-  await updateValue({
+  await updateResourceField({
+    accountId,
     resourceId,
     fieldId: issuedDateFieldId,
     value: { date: new Date() },

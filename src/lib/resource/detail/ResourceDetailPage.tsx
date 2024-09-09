@@ -5,7 +5,7 @@ import ResourceForm from '../ResourceForm'
 import LinesAndCosts from './LinesAndCosts'
 import DeleteResourceButton from './DeleteResourceButton'
 import { Schema } from '@/domain/schema/types'
-import { Resource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/entity'
 import { FieldTemplate } from '@/domain/schema/template/types'
 
 type Props = {

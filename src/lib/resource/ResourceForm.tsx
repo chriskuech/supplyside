@@ -19,13 +19,14 @@ import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
 import ReadOnlyFieldsView from './fields/views/ReadOnlyFieldsView'
 import Field from './fields/controls/Field'
-import { readResource, updateResource as updateResourceAction } from './actions'
+import { readResource, updateResource } from './actions'
 import { Schema } from '@/domain/schema/types'
 import {
-  Resource,
   selectResourceField,
   setResourceField,
-} from '@/domain/resource/types'
+} from '@/domain/resource/extensions'
+import { Resource } from '@/domain/resource/entity'
+import { mapValueToValueInput } from '@/domain/resource/mappers'
 
 type Props = {
   resourceId?: string
@@ -53,10 +54,20 @@ export default function ResourceForm({
 
   const changeHandler = useMemo(
     () =>
-      debounce((resource: Resource) => updateResourceAction({ resource }), {
-        timing: 'trailing',
-        waitMs: 500,
-      }).call,
+      debounce(
+        (resource: Resource) =>
+          updateResource({
+            resourceId: resource.id,
+            fields: resource.fields.map(({ fieldId, fieldType, value }) => ({
+              fieldId,
+              value: mapValueToValueInput(fieldType, value),
+            })),
+          }),
+        {
+          timing: 'trailing',
+          waitMs: 500,
+        },
+      ).call,
     [],
   )
 

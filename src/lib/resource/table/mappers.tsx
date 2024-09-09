@@ -10,8 +10,9 @@ import { Column, Display, Row } from './types'
 import { Field } from '@/domain/schema/types'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
 import { formatDate } from '@/lib/formatDate'
-import { Value } from '@/domain/resource/values/types'
-import { emptyValue, selectResourceField } from '@/domain/resource/types'
+import { Value } from '@/domain/resource/entity'
+import { selectResourceField } from '@/domain/resource/extensions'
+import { emptyValue } from '@/domain/resource/entity'
 
 export const mapSchemaFieldToGridColDef = (
   field: Field,

@@ -18,10 +18,11 @@ import {
   fields,
   orderStatusOptions,
 } from '@/domain/schema/template/system-fields'
-import { emptyValue, selectResourceField } from '@/domain/resource/types'
+import { selectResourceField } from '@/domain/resource/extensions'
+import { emptyValue } from '@/domain/resource/entity'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
-import { isMissingRequiredFields } from '@/domain/resource/values/mappers'
+import { isMissingRequiredFields } from '@/domain/resource/mappers'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectSchemaField } from '@/domain/schema/types'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'

@@ -18,7 +18,7 @@ import ResourceFieldView from './ResourceFieldView'
 import UserCard from './UserCard'
 import ContactCard from './ContactCard'
 import { Schema } from '@/domain/schema/types'
-import { Resource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/entity'
 
 type Props = {
   schema: Schema

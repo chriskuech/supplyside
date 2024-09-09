@@ -12,15 +12,15 @@ import {
   IconButton,
 } from '@mui/material'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
-import { ValueContact } from '@/domain/resource/values/types'
+import { Contact } from '@/domain/resource/entity'
 
 type Props = {
-  contact: ValueContact | null
+  contact: Contact | null
   inline?: boolean
 }
 
 type ContactProp = {
-  contact: ValueContact
+  contact: Contact
 }
 
 export default function ContactCard(props: Props) {

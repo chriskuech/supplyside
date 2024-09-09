@@ -23,22 +23,9 @@ import UserField from './UserField'
 import ResourceField from './ResourceField'
 import FilesField from './FilesField'
 import { Field as FieldModel } from '@/domain/schema/types'
-import { Value } from '@/domain/resource/values/types'
+import { Value } from '@/domain/resource/entity'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
-
-const emptyValue = {
-  boolean: null,
-  contact: null,
-  date: null,
-  number: null,
-  option: null,
-  options: [],
-  string: null,
-  user: null,
-  file: null,
-  files: [],
-  resource: null,
-} satisfies Value
+import { emptyValue } from '@/domain/resource/entity'
 
 export type Props = {
   inputId: string

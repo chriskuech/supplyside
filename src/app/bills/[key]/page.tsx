@@ -12,7 +12,7 @@ import {
   billStatusOptions,
   fields,
 } from '@/domain/schema/template/system-fields'
-import { selectResourceField } from '@/domain/resource/types'
+import { selectResourceField } from '@/domain/resource/extensions'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectSchemaField } from '@/domain/schema/types'

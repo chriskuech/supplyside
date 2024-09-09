@@ -7,7 +7,7 @@ import { useLayoutEffect, useRef } from 'react'
 import Field from '../fields/controls/Field'
 import { Cell, Display, Row } from './types'
 import { Field as SchemaField } from '@/domain/schema/types'
-import { selectResourceField } from '@/domain/resource/types'
+import { selectResourceField } from '@/domain/resource/extensions'
 
 type Props = {
   cellParams: GridRenderEditCellParams<Row, Cell, Display>

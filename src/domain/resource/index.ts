@@ -1,14 +1,7 @@
 'use server'
 
 import { fail } from 'assert'
-import {
-  Resource as ResourceModel,
-  ResourceField,
-  Prisma,
-  Field as FieldModel,
-  Cost,
-  ResourceType,
-} from '@prisma/client'
+import { Prisma, ResourceType } from '@prisma/client'
 import { Ajv } from 'ajv'
 import { isArray } from 'remeda'
 import { revalidatePath } from 'next/cache'
@@ -16,14 +9,17 @@ import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema'
 import { selectSchemaField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
-import { recalculateSubtotalCost } from './cost/actions'
-import { Resource, selectResourceField } from './types'
-import { valueInclude } from './values/types'
+import { recalculateSubtotalCost } from './costs'
+import { selectResourceField } from './extensions'
+import { mapValueInputToPrismaValueCreate } from './mappers'
+import { mapValueInputToPrismaValueUpdate } from './mappers'
+import { Resource } from './entity'
+import { ValueInput } from './patch'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
-import { copyLinkedResourceFields, updateValue } from './fields'
-import { ValueModel } from './values/model'
-import { mapValueFromModel, mapValueToValueInput } from './values/mappers'
+import { mapResourceModelToEntity } from './mappers'
+import { resourceInclude } from './model'
+import { handleResourceCreate, handleResourceUpdate } from './effects'
 import prisma from '@/services/prisma'
 
 const ajv = new Ajv()
@@ -131,33 +127,18 @@ export const createResource = async ({
         }),
       },
     },
-    include,
+    include: resourceInclude,
   })
 
-  await Promise.all(
-    resource.ResourceField.filter(
-      (rf) => rf.Field.resourceType && rf.Value.resourceId,
-    ).map((rf) =>
-      copyLinkedResourceFields(
-        rf.resourceId,
-        rf.fieldId,
-        rf.Value.resourceId ?? fail(),
-      ),
-    ),
-  )
-
-  if (type === 'Order') {
-    await updateValue({
-      resourceId: resource.id,
-      fieldId:
-        selectSchemaField(schema, fields.number)?.id ??
-        fail(`"${fields.number.name}" field not found`),
-      value: { string: resource.key.toString() },
-    })
-  }
+  await handleResourceCreate({
+    accountId,
+    schema,
+    resource: mapResourceModelToEntity(resource),
+  })
 
   revalidatePath('')
-  return mapResource(resource)
+
+  return await readResource({ accountId, id: resource.id })
 }
 
 export type ReadResourceParams = {
@@ -186,10 +167,10 @@ export const readResource = async ({
             }
           : undefined,
     },
-    include,
+    include: resourceInclude,
   })
 
-  return mapResource(model)
+  return mapResourceModelToEntity(model)
 }
 
 export type ReadResourcesParams = {
@@ -218,43 +199,73 @@ export const readResources = async ({
         in: results.map((row) => row._id),
       },
     },
-    include,
+    include: resourceInclude,
     orderBy: [{ key: 'desc' }],
   })
 
-  return models.map(mapResource)
+  return models.map(mapResourceModelToEntity)
 }
 
-export const updateResource = async ({ accountId, id, fields }: Resource) => {
-  await Promise.all([
-    prisma().resourceField.deleteMany({
-      where: {
-        Resource: {
-          accountId,
-          id,
-        },
-        Field: {
-          id: {
-            notIn: fields.map((f) => f.fieldId),
-          },
-        },
-      },
-    }),
-    ...fields.map((f) =>
-      updateValue({
-        resourceId: id,
-        fieldId: f.fieldId,
-        value: mapValueToValueInput(f.fieldType, f.value),
-      }),
-    ),
-  ])
+export type UpdateResourceParams = {
+  accountId: string
+  resourceId: string
+  fields: { fieldId: string; value: ValueInput }[]
+}
 
-  const model = await prisma().resource.findUniqueOrThrow({
-    where: { accountId, id },
-    include,
+export const updateResource = async ({
+  accountId,
+  resourceId,
+  fields,
+}: UpdateResourceParams) => {
+  const model = await prisma().resource.update({
+    where: { accountId, id: resourceId },
+    data: {
+      ResourceField: {
+        upsert: fields.map(
+          (field) =>
+            ({
+              where: {
+                resourceId_fieldId: {
+                  resourceId: resourceId,
+                  fieldId: field.fieldId,
+                },
+              },
+              create: {
+                Field: {
+                  connect: { id: field.fieldId },
+                },
+                Value: {
+                  create: mapValueInputToPrismaValueCreate(field.value),
+                },
+              },
+              update: {
+                Value: {
+                  create: mapValueInputToPrismaValueCreate(field.value),
+                  update: mapValueInputToPrismaValueUpdate(field.value),
+                },
+              },
+            }) satisfies Prisma.ResourceFieldUpsertWithWhereUniqueWithoutResourceInput,
+        ),
+      },
+    },
+    include: resourceInclude,
   })
 
-  return mapResource(model)
+  const entity = mapResourceModelToEntity(model)
+
+  const schema = await readSchema({ accountId, resourceType: entity.type })
+
+  await handleResourceUpdate({
+    accountId,
+    schema,
+    resource: entity,
+    updatedFields: fields.map((field) => ({
+      field: selectSchemaField(schema, field) ?? fail('Field not found'),
+      value: selectResourceField(entity, field) ?? fail('Value not found'),
+    })),
+  })
+
+  return await readResource({ accountId, id: resourceId })
 }
 
 export type DeleteResourceParams = {
@@ -268,10 +279,10 @@ export const deleteResource = async ({
 }: DeleteResourceParams): Promise<void> => {
   const model = await prisma().resource.delete({
     where: { id, accountId },
-    include,
+    include: resourceInclude,
   })
 
-  const entity = mapResource(model)
+  const entity = mapResourceModelToEntity(model)
   if (entity.type === 'Line') {
     const orderId = selectResourceField(entity, fields.order)?.resource?.id
     if (orderId) {
@@ -287,38 +298,24 @@ export const deleteResource = async ({
   revalidatePath('')
 }
 
-const include = {
-  Cost: {
-    orderBy: { createdAt: 'asc' },
-  },
-  ResourceField: {
-    include: {
-      Field: true,
-      Value: {
-        include: valueInclude,
+export const updateResourceField = async ({
+  accountId,
+  resourceId,
+  fieldId,
+  value,
+}: {
+  accountId: string
+  resourceId: string
+  fieldId: string
+  value: ValueInput
+}) =>
+  await updateResource({
+    accountId,
+    resourceId: resourceId,
+    fields: [
+      {
+        fieldId,
+        value,
       },
-    },
-  },
-} satisfies Prisma.ResourceInclude
-
-const mapResource = (
-  model: ResourceModel & {
-    Cost: Cost[]
-    ResourceField: (ResourceField & {
-      Field: FieldModel
-      Value: ValueModel
-    })[]
-  },
-): Resource => ({
-  id: model.id,
-  accountId: model.accountId,
-  key: model.key,
-  type: model.type,
-  fields: model.ResourceField.map((rf) => ({
-    fieldId: rf.fieldId,
-    fieldType: rf.Field.type,
-    templateId: rf.Field.templateId,
-    value: mapValueFromModel(rf.Value),
-  })),
-  costs: model.Cost,
-})
+    ],
+  })

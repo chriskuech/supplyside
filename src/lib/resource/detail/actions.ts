@@ -3,10 +3,10 @@
 import { type ResourceType } from '@prisma/client'
 import { notFound } from 'next/navigation'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
-import { readResource } from '@/domain/resource/actions'
+import { readResource } from '@/domain/resource'
 import { readSchema } from '@/domain/schema/actions'
 import { Session } from '@/domain/iam/session/types'
-import { Resource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/entity'
 import { Schema } from '@/domain/schema/types'
 
 type DetailPageModel = {

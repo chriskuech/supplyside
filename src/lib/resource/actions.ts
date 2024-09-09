@@ -1,16 +1,16 @@
 'use server'
 
-import assert, { fail } from 'assert'
+import { fail } from 'assert'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { ResourceType } from '@prisma/client'
-import { readSession } from '../session/actions'
-import * as domain from '@/domain/resource/actions'
-import { Resource } from '@/domain/resource/types'
+import { readSession, withSession } from '../session/actions'
+import * as domain from '@/domain/resource'
+import { Resource } from '@/domain/resource/entity'
 import prisma from '@/services/prisma'
-import { ValueResource } from '@/domain/resource/values/types'
-import { updateValue } from '@/domain/resource/fields'
+import { ValueInput } from '@/domain/resource/patch'
+import { ValueResource } from '@/domain/resource/entity'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
 import { selectSchemaField } from '@/domain/schema/types'
 import { readSchema } from '@/domain/schema/actions'
@@ -43,23 +43,33 @@ export const readResource = async (
   return domain.readResource({ ...params, accountId })
 }
 
-type UpdateResourceParams = {
-  resource: Resource
-}
+// type UpdateResourceParams = {
+//   resource: Resource
+// }
 
-export const updateResource = async ({
-  resource,
-}: UpdateResourceParams): Promise<Resource> => {
+// export const upsertResource = async ({
+//   resource,
+// }: UpdateResourceParams): Promise<Resource> => {
+//   const { accountId } = await readSession()
+
+//   revalidatePath('')
+
+//   assert(
+//     resource.accountId === accountId,
+//     'Resource does not belong to account',
+//   )
+
+//   return domain.upsertResource(resource)
+// }
+
+export const updateResource = async (
+  params: Omit<domain.UpdateResourceParams, 'accountId'>,
+): Promise<Resource> => {
   const { accountId } = await readSession()
 
   revalidatePath('')
 
-  assert(
-    resource.accountId === accountId,
-    'Resource does not belong to account',
-  )
-
-  return domain.updateResource(resource)
+  return domain.updateResource({ ...params, accountId })
 }
 
 export const deleteResource = async ({
@@ -139,7 +149,8 @@ export const transitionStatus = async (
   const field =
     selectSchemaField(schema, fieldTemplate) ?? fail('Field not found')
 
-  await updateValue({
+  await domain.updateResourceField({
+    accountId,
     resourceId,
     fieldId: field.id,
     value: {
@@ -151,3 +162,12 @@ export const transitionStatus = async (
 
   revalidatePath('')
 }
+
+export const updateResourceField = async (params: {
+  resourceId: string
+  fieldId: string
+  value: ValueInput
+}) =>
+  withSession(({ accountId }) =>
+    domain.updateResourceField({ ...params, accountId }),
+  )
