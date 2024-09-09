@@ -20,10 +20,7 @@ import { chunkByN } from './chunkByN'
 import Field from './fields/controls/Field'
 import { readResource, updateResource } from './actions'
 import { Schema } from '@/domain/schema/types'
-import {
-  selectResourceField,
-  setResourceField,
-} from '@/domain/resource/extensions'
+import { selectResourceField } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { mapValueToValueInput } from '@/domain/resource/mappers'
 
@@ -164,9 +161,20 @@ export default function ResourceForm({
                                 fieldId: f.id,
                               })}
                               onChange={(value) =>
-                                setResource(
-                                  setResourceField(resource, f, value),
-                                )
+                                setResource({
+                                  ...resource,
+                                  fields: [
+                                    ...resource.fields.filter(
+                                      ({ fieldId }) => fieldId !== f.id,
+                                    ),
+                                    {
+                                      fieldId: f.id,
+                                      fieldType: f.type,
+                                      templateId: f.templateId,
+                                      value,
+                                    },
+                                  ],
+                                })
                               }
                             />
                           </Box>
