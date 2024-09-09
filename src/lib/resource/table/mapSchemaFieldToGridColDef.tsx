@@ -1,15 +1,17 @@
+import assert from 'assert'
 import { P, match } from 'ts-pattern'
 import { FieldType } from '@prisma/client'
 import { Box, Chip, Stack } from '@mui/material'
 import { Check } from '@mui/icons-material'
+import { GridApplyQuickFilter } from '@mui/x-data-grid/models/colDef/gridColDef'
 import ContactCard from '../fields/views/ContactCard'
 import UserCard from '../fields/views/UserCard'
 import ResourceFieldView from '../fields/views/ResourceFieldView'
 import FieldGridEditCell from './FieldGridEditCell'
-import { Column, Display, Row } from './types'
+import { Cell, Column, Display, Row } from './types'
 import { Field } from '@/domain/schema/types'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
-import { formatDate } from '@/lib/formatDate'
+import { formatDate, formatMoney } from '@/lib/format'
 import { Value } from '@/domain/resource/entity'
 import { selectResourceField } from '@/domain/resource/extensions'
 import { emptyValue } from '@/domain/resource/entity'
@@ -49,6 +51,66 @@ export const mapSchemaFieldToGridColDef = (
     options.isEditable && !findTemplateField(field.templateId)?.isDerived,
 
   type: 'custom',
+
+  getApplyQuickFilterFn: (query) => {
+    assert(typeof query === 'string', 'Query must be a string')
+    return match<FieldType, null | GridApplyQuickFilter<Row, Cell>>(field.type)
+      .with(
+        'Checkbox',
+        () => (value) => value?.string?.includes(field.name) ?? false,
+      )
+      .with(
+        'Contact',
+        () => (value) =>
+          (['name', 'title', 'email', 'phone'] as const).some(
+            (key) => value?.contact?.[key]?.includes(query) ?? false,
+          ),
+      )
+      .with(
+        'Date',
+        () => (value) => formatDate(value?.date)?.includes(query) ?? false,
+      )
+      .with('File', () => (value) => value?.file?.name.includes(query) ?? false)
+      .with(
+        'Files',
+        () => (value) =>
+          value?.files?.some((file) => file.name.includes(query)) ?? false,
+      )
+      .with(
+        'Money',
+        () => (value) => formatMoney(value?.number)?.includes(query) ?? false,
+      )
+      .with(
+        'MultiSelect',
+        () => (value) =>
+          value?.options?.some((option) => option.name.includes(query)) ??
+          false,
+      )
+      .with(
+        'Number',
+        () => (value) => value?.number?.toString().includes(query) ?? false,
+      )
+      .with(
+        'Select',
+        () => (value) => value?.option?.name.includes(query) ?? false,
+      )
+      .with(
+        P.union('Text', 'Textarea'),
+        () => (value) => value?.string?.includes(query) ?? false,
+      )
+      .with(
+        'Resource',
+        () => (value) => value?.resource?.name.includes(query) ?? false,
+      )
+      .with(
+        'User',
+        () => (value) =>
+          value?.user?.fullName?.includes(query) ||
+          value?.user?.email.includes(query) ||
+          false,
+      )
+      .exhaustive()
+  },
 
   valueGetter: (cell: Display, resource: Row): Value =>
     selectResourceField(resource, { fieldId: field.id }) ?? emptyValue,

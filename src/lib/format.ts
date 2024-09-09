@@ -11,3 +11,16 @@ export function formatDate(
     )
     .otherwise((v) => v)
 }
+
+export function formatMoney(
+  value: number | null | undefined,
+): string | null | undefined {
+  return match(value)
+    .with(P.number, (v) =>
+      v.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }),
+    )
+    .otherwise((v) => v)
+}
