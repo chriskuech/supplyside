@@ -6,19 +6,15 @@ import Field, { Props as FieldProps } from './controls/Field'
 import { updateValue } from '@/domain/resource/fields'
 import { ValueInput } from '@/domain/resource/values/types'
 
-type Props = Omit<FieldProps, 'onChange'> & {
-  onChange?: () => void
-}
-
-export default function FieldControl({ onChange, ...props }: Props) {
+export default function FieldControl(props: Omit<FieldProps, 'onChange'>) {
   const handleChange = useCallback(
     (value: ValueInput) =>
       updateValue({
         resourceId: props.resourceId,
         fieldId: props.field.id,
         value,
-      }).then(() => onChange?.()),
-    [onChange, props.field.id, props.resourceId],
+      }),
+    [props.field.id, props.resourceId],
   )
 
   const debouncedOnChange = useMemo(
