@@ -45,11 +45,13 @@ type ReadResourceParams = {
 
 export const readResource = async (
   params: ReadResourceParams,
-): Promise<Resource> => {
-  const { accountId } = await readSession()
+): Promise<Resource> =>
+  withSession(({ accountId }) => domain.readResource({ ...params, accountId }))
 
-  return domain.readResource({ ...params, accountId })
-}
+export const readResources = async (
+  params: Omit<domain.ReadResourcesParams, 'accountId'>,
+): Promise<Resource[]> =>
+  withSession(({ accountId }) => domain.readResources({ ...params, accountId }))
 
 export const updateResource = async (
   params: Omit<domain.UpdateResourceParams, 'accountId'>,

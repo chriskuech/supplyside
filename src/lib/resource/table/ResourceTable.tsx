@@ -1,11 +1,17 @@
 'use client'
 
-import { DataGridPro, DataGridProProps } from '@mui/x-data-grid-pro'
+import {
+  DataGridPro,
+  DataGridProProps,
+  GridToolbarColumnsButton,
+  GridToolbarContainer,
+  GridToolbarFilterButton,
+  GridToolbarQuickFilter,
+} from '@mui/x-data-grid-pro'
 import { CircularProgress, IconButton } from '@mui/material'
 import { Clear } from '@mui/icons-material'
 import { useMemo } from 'react'
 import { deleteResource } from '../actions'
-import CustomGridToolbar from './CustomGridToolbar'
 import { mapSchemaFieldToGridColDef } from './mapSchemaFieldToGridColDef'
 import { Row, Column } from './types'
 import { handleProcessRowUpdate } from './processRowUpdate'
@@ -19,7 +25,8 @@ type Props = {
   resources: Resource[]
   isEditable?: boolean
   indexed?: boolean
-} & Partial<DataGridProProps>
+  initialQuery?: string[]
+} & Partial<DataGridProProps<Row>>
 
 export default function ResourceTable({
   tableKey,
@@ -95,7 +102,26 @@ export default function ResourceTable({
       onColumnWidthChange={saveStateToLocalstorage}
       onColumnOrderChange={saveStateToLocalstorage}
       onSortModelChange={saveStateToLocalstorage}
-      slots={{ toolbar: CustomGridToolbar }}
+      slots={{
+        toolbar: () => (
+          <GridToolbarContainer>
+            <GridToolbarColumnsButton />
+            <GridToolbarFilterButton />
+            <GridToolbarQuickFilter
+              quickFilterParser={(searchInput) =>
+                searchInput
+                  .split(',')
+                  .map((value) => value.trim())
+                  .filter(Boolean)
+              }
+              quickFilterFormatter={(quickFilterValues) =>
+                quickFilterValues.join(', ')
+              }
+              debounceMs={200} // time before applying the new quick filter value
+            />
+          </GridToolbarContainer>
+        ),
+      }}
       {...props}
     />
   )
