@@ -3,7 +3,6 @@
 import { fail } from 'assert'
 import { ResourceType } from '@prisma/client'
 import { pick } from 'remeda'
-import { revalidatePath } from 'next/cache'
 import { copyResourceCosts } from './costs'
 import { readResource, readResources, updateResourceField } from '.'
 import prisma from '@/services/prisma'
@@ -82,8 +81,6 @@ export const copyLinkedResourceFields = async (
       ),
     ])
   }
-
-  revalidatePath('')
 }
 
 const copyResourceLines = async (
@@ -131,8 +128,6 @@ const copyResourceLines = async (
       }),
     ),
   )
-
-  revalidatePath('')
 }
 
 export const copyField = async (
@@ -280,5 +275,4 @@ export const copyField = async (
       },
     },
   })
-  revalidatePath('')
 }

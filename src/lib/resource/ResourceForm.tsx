@@ -17,7 +17,6 @@ import { ResourceType } from '@prisma/client'
 import { readSchema } from '../schema/actions'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
-import ReadOnlyFieldsView from './fields/views/ReadOnlyFieldsView'
 import Field from './fields/controls/Field'
 import { readResource, updateResource } from './actions'
 import { Schema } from '@/domain/schema/types'
@@ -33,7 +32,6 @@ type Props = {
   resource?: Resource
   schema?: Schema
   resourceType?: ResourceType
-  isReadOnly?: boolean
   singleColumn?: boolean
 }
 
@@ -42,7 +40,6 @@ export default function ResourceForm({
   resourceType,
   schema: defaultSchema,
   resource: defaultResource,
-  isReadOnly,
   singleColumn,
 }: Props) {
   const columns = singleColumn ? 1 : 3
@@ -86,10 +83,6 @@ export default function ResourceForm({
   }, [resource, changeHandler])
 
   if (!schema || !resource) return <CircularProgress />
-
-  if (isReadOnly) {
-    return <ReadOnlyFieldsView schema={schema} resource={resource} />
-  }
 
   return (
     <Box>

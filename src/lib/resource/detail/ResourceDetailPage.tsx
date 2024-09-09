@@ -2,6 +2,7 @@ import { Box, Container, Stack, Typography } from '@mui/material'
 import { ReactNode } from 'react'
 import { match, P } from 'ts-pattern'
 import ResourceForm from '../ResourceForm'
+import ReadOnlyFieldsView from '../ReadOnlyFieldsView'
 import LinesAndCosts from './LinesAndCosts'
 import DeleteResourceButton from './DeleteResourceButton'
 import { Schema } from '@/domain/schema/types'
@@ -72,11 +73,11 @@ export default function ResourceDetailPage({
 
       <Container sx={{ py: 5 }}>
         <Stack spacing={5}>
-          <ResourceForm
-            schema={schema}
-            resource={resource}
-            isReadOnly={isReadOnly}
-          />
+          {isReadOnly ? (
+            <ReadOnlyFieldsView schema={schema} resource={resource} />
+          ) : (
+            <ResourceForm schema={schema} resource={resource} />
+          )}
           {backlinkField && (
             <LinesAndCosts
               resource={resource}

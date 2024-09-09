@@ -4,7 +4,6 @@ import { fail } from 'assert'
 import { Prisma, ResourceType } from '@prisma/client'
 import { Ajv } from 'ajv'
 import { isArray } from 'remeda'
-import { revalidatePath } from 'next/cache'
 import { readSchema } from '../schema/actions'
 import { mapSchemaToJsonSchema } from '../schema/json-schema'
 import { selectSchemaField } from '../schema/types'
@@ -135,8 +134,6 @@ export const createResource = async ({
     schema,
     resource: mapResourceModelToEntity(resource),
   })
-
-  revalidatePath('')
 
   return await readResource({ accountId, id: resource.id })
 }
@@ -294,8 +291,6 @@ export const deleteResource = async ({
       await recalculateSubtotalCost(accountId, 'Bill', billId)
     }
   }
-
-  revalidatePath('')
 }
 
 export const updateResourceField = async ({

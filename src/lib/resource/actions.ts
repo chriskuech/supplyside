@@ -43,25 +43,6 @@ export const readResource = async (
   return domain.readResource({ ...params, accountId })
 }
 
-// type UpdateResourceParams = {
-//   resource: Resource
-// }
-
-// export const upsertResource = async ({
-//   resource,
-// }: UpdateResourceParams): Promise<Resource> => {
-//   const { accountId } = await readSession()
-
-//   revalidatePath('')
-
-//   assert(
-//     resource.accountId === accountId,
-//     'Resource does not belong to account',
-//   )
-
-//   return domain.upsertResource(resource)
-// }
-
 export const updateResource = async (
   params: Omit<domain.UpdateResourceParams, 'accountId'>,
 ): Promise<Resource> => {
@@ -168,6 +149,8 @@ export const updateResourceField = async (params: {
   fieldId: string
   value: ValueInput
 }) =>
-  withSession(({ accountId }) =>
-    domain.updateResourceField({ ...params, accountId }),
-  )
+  withSession(({ accountId }) => {
+    revalidatePath('')
+
+    return domain.updateResourceField({ ...params, accountId })
+  })
