@@ -7,13 +7,21 @@ import { redirect } from 'next/navigation'
 import { ResourceType } from '@prisma/client'
 import { readSession, withSession } from '../session/actions'
 import * as domain from '@/domain/resource'
+import * as schemaDomain from '@/domain/schema/actions'
 import { Resource } from '@/domain/resource/entity'
 import prisma from '@/services/prisma'
 import { ValueInput } from '@/domain/resource/patch'
 import { ValueResource } from '@/domain/resource/entity'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
 import { selectSchemaField } from '@/domain/schema/types'
-import { readSchema } from '@/domain/schema/actions'
+
+export const readSchema = async (
+  params: Omit<schemaDomain.ReadSchemaParams, 'accountId'>,
+) => {
+  const { accountId } = await readSession()
+
+  return schemaDomain.readSchema({ ...params, accountId })
+}
 
 export const createResource = async (
   params: Pick<domain.CreateResourceParams, 'type' | 'data'>,
@@ -122,7 +130,7 @@ export const transitionStatus = async (
   const { accountId, type: resourceType } = await readResource({
     id: resourceId,
   })
-  const schema = await readSchema({
+  const schema = await schemaDomain.readSchema({
     accountId,
     resourceType,
     isSystem: true,
