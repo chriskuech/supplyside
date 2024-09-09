@@ -2,22 +2,19 @@
 
 import { useCallback, useMemo } from 'react'
 import { debounce } from 'remeda'
-import Field, { Props as FieldProps } from './Field'
-import { UpdateValueDto, updateValue } from '@/domain/resource/fields/actions'
+import { updateResourceField } from '../actions'
+import Field, { Props as FieldProps } from './controls/Field'
+import { ValueInput } from '@/domain/resource/patch'
 
-type Props = Omit<FieldProps, 'onChange'> & {
-  onChange?: () => void
-}
-
-export default function FieldControl({ onChange, ...props }: Props) {
+export default function FieldControl(props: Omit<FieldProps, 'onChange'>) {
   const handleChange = useCallback(
-    (value: UpdateValueDto['value']) =>
-      updateValue({
+    (value: ValueInput) =>
+      updateResourceField({
         resourceId: props.resourceId,
         fieldId: props.field.id,
         value,
-      }).then(() => onChange?.()),
-    [onChange, props.field.id, props.resourceId],
+      }),
+    [props.field.id, props.resourceId],
   )
 
   const debouncedOnChange = useMemo(
@@ -25,11 +22,5 @@ export default function FieldControl({ onChange, ...props }: Props) {
     [handleChange],
   )
 
-  return (
-    <Field
-      {...props}
-      onChange={debouncedOnChange}
-      onUncontrolledChange={onChange}
-    />
-  )
+  return <Field {...props} onChange={debouncedOnChange} />
 }

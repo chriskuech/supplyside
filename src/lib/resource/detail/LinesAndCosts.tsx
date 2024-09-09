@@ -1,11 +1,12 @@
 import { Stack, Typography, Box } from '@mui/material'
-import ResourceTable from '../ResourceTable'
+import { ResourceTable } from '../table'
 import ItemizedCostLines from './ItemizedCostLines'
 import { readSchema } from '@/domain/schema/actions'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
-import { Data, Resource } from '@/domain/resource/types'
+import { Data } from '@/domain/resource/extensions'
+import { Resource } from '@/domain/resource/entity'
 import { Where } from '@/domain/resource/json-logic/types'
-import { readResources } from '@/domain/resource/actions'
+import { readResources } from '@/domain/resource'
 import { Schema } from '@/domain/schema/types'
 import { fields } from '@/domain/schema/template/system-fields'
 
@@ -28,7 +29,10 @@ export default async function LinesAndCosts({
       type: 'Line',
       where: lineQuery,
     }),
-    readSchema({ accountId: resource.accountId, resourceType: 'Line' }),
+    readSchema({
+      accountId: resource.accountId,
+      resourceType: 'Line',
+    }),
   ])
 
   const strippedSchema: Schema = {

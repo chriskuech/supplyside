@@ -1,6 +1,6 @@
 import { ACCOUNT_BASED_EXPENSE } from '../constants'
 import { mapValue } from './utils'
-import { Resource } from '@/domain/resource/types'
+import { Resource } from '@/domain/resource/entity'
 import { fields } from '@/domain/schema/template/system-fields'
 import config from '@/services/config'
 

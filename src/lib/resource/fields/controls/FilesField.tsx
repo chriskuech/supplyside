@@ -10,31 +10,22 @@ import {
   Typography,
 } from '@mui/material'
 import { useRef } from 'react'
-import { Field } from '@/domain/schema/types'
-import { updateValue, uploadFiles } from '@/domain/resource/fields/actions'
-import { Value } from '@/domain/resource/values/types'
+import { uploadFiles } from './actions'
+import { File } from '@/domain/files/types'
 
 type Props = {
-  resourceId: string
-  field: Field
-  value: Value | undefined
+  files: File[]
   isReadOnly?: boolean
-  onChange?: () => void
+  onChange?: (files: File[]) => void
 }
 
-export default function FilesField({
-  resourceId,
-  field,
-  value,
-  isReadOnly,
-  onChange,
-}: Props) {
+export default function FilesField({ files, isReadOnly, onChange }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   return (
     <>
       <Stack>
-        {value?.files?.map((file) => (
+        {files.map((file) => (
           <Stack key={file.id} direction="row" alignItems="center">
             <Typography flexGrow={1}>{file.name ?? '-'}</Typography>
             <Tooltip title="View File">
@@ -47,19 +38,11 @@ export default function FilesField({
                 <Download />
               </IconButton>
             </Tooltip>
-            {!isReadOnly && (
+            {!isReadOnly && onChange && (
               <Tooltip title="Delete File">
                 <IconButton
                   onClick={() =>
-                    updateValue({
-                      resourceId,
-                      fieldId: field.id,
-                      value: {
-                        fileIds: value?.files
-                          ?.map((f) => f.id)
-                          .filter((fileId) => fileId !== file.id),
-                      },
-                    }).then(() => onChange?.())
+                    onChange(files.filter((f) => f.id !== file.id))
                   }
                 >
                   <Close />
@@ -68,7 +51,7 @@ export default function FilesField({
             )}
           </Stack>
         ))}
-        {!isReadOnly && (
+        {!isReadOnly && onChange && (
           <Box>
             <Tooltip title="Upload File">
               <Button
@@ -93,10 +76,7 @@ export default function FilesField({
               formData.append('files', file)
             }
 
-            console.log('uploading')
-            uploadFiles(resourceId, field.id, formData)
-              .then(() => onChange?.())
-              .then(() => console.log('uploaded'))
+            uploadFiles(formData).then((files) => files && onChange?.(files))
           }}
           multiple
         />

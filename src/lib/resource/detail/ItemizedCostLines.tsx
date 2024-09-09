@@ -17,13 +17,10 @@ import {
 } from '@mui/material'
 import { Add, Clear } from '@mui/icons-material'
 import { match } from 'ts-pattern'
-import { Resource, selectResourceField } from '@/domain/resource/types'
-import {
-  createCost,
-  deleteCost,
-  updateCost,
-} from '@/domain/resource/cost/actions'
+import { Resource } from '@/domain/resource/entity'
+import { createCost, deleteCost, updateCost } from '@/domain/resource/costs'
 import { fields } from '@/domain/schema/template/system-fields'
+import { selectResourceField } from '@/domain/resource/extensions'
 
 type Props = {
   resource: Resource

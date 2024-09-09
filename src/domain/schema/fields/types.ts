@@ -1,5 +1,6 @@
 import { FieldType, ResourceType } from '@prisma/client'
-import { Value, ValueInput } from '@/domain/resource/values/types'
+import { ValueInput } from '@/domain/resource/patch'
+import { Value } from '@/domain/resource/entity'
 
 export type OptionPatch = {
   id: string // patch ID -- must be `id` to work with mui

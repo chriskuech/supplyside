@@ -8,7 +8,7 @@ import nextCache from 'next/cache'
 import { systemAccountId } from '@/lib/const'
 import prisma from '@/services/prisma'
 import { applyTemplate } from '@/domain/schema/template/actions'
-import { createResource } from '@/domain/resource/actions'
+import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 
 ImportMock.mockFunction(nextCache, 'revalidatePath', () => {})

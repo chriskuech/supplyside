@@ -1,8 +1,10 @@
 import { P, match } from 'ts-pattern'
+import { Prisma } from '@prisma/client'
 import { CreateFieldParams, Field, UpdateFieldDto } from './types'
 import prisma from '@/services/prisma'
-import { valueInclude } from '@/domain/resource/values/types'
-import { mapValueFromModel } from '@/domain/resource/values/mappers'
+import { ValueInput } from '@/domain/resource/patch'
+import { mapValueModelToEntity } from '@/domain/resource/mappers'
+import { valueInclude } from '@/domain/resource/model'
 
 export const createField = async (
   accountId: string,
@@ -59,7 +61,7 @@ export const readFields = async (accountId: string): Promise<Field[]> => {
     resourceType: f.resourceType,
     type: f.type,
     templateId: f.templateId,
-    defaultValue: mapValueFromModel(f.DefaultValue),
+    defaultValue: mapValueModelToEntity(f.DefaultValue),
   }))
 }
 
@@ -74,26 +76,76 @@ export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
         name: sanitizeColumnName(dto.name),
         description: dto.description,
         DefaultValue: {
-          update: {
-            boolean: dto.defaultValue.boolean,
-            string: dto.defaultValue.string,
-            date: dto.defaultValue.date,
-            optionId: dto.defaultValue.optionId,
-            number: dto.defaultValue.number,
-            fileId: dto.defaultValue.fileId,
-            Contact: match(dto.defaultValue.contact)
-              .with(null, () => ({ disconnect: true }))
-              .with(undefined, () => undefined)
-              .with(P.any, (c) => ({
-                upsert: {
-                  create: c,
-                  update: c,
+          update: match<ValueInput, Prisma.ValueUpdateInput>(dto.defaultValue)
+            .with({ contact: P.not(undefined) }, ({ contact }) => ({
+              Contact: {
+                update: {
+                  name: contact?.name ?? null,
+                  email: contact?.email ?? null,
+                  phone: contact?.phone ?? null,
+                  title: contact?.title ?? null,
                 },
-              }))
-              .exhaustive(),
-            userId: dto.defaultValue.userId,
-            resourceId: dto.defaultValue.resourceId,
-          },
+              },
+            }))
+            .with({ optionIds: P.not(undefined) }, (v) => ({
+              ValueOption: {
+                create: v.optionIds.map((id) => ({
+                  Option: {
+                    connect: {
+                      id,
+                    },
+                  },
+                })),
+              },
+            }))
+            .with({ fileIds: P.not(undefined) }, (v) => ({
+              Files: {
+                create: v.fileIds.map((id) => ({
+                  File: {
+                    connect: {
+                      id,
+                    },
+                  },
+                })),
+              },
+            }))
+            .with({ optionId: P.not(undefined) }, ({ optionId }) => ({
+              Option: optionId
+                ? {
+                    connect: {
+                      id: optionId,
+                    },
+                  }
+                : {
+                    disconnect: true,
+                  },
+            }))
+            .with({ fileId: P.not(undefined) }, ({ fileId }) => ({
+              File: fileId
+                ? {
+                    connect: {
+                      id: fileId,
+                    },
+                  }
+                : {
+                    disconnect: true,
+                  },
+            }))
+            .with({ resourceId: P.not(undefined) }, ({ resourceId }) => ({
+              Resource: resourceId
+                ? {
+                    connect: {
+                      id: resourceId,
+                    },
+                  }
+                : {
+                    disconnect: true,
+                  },
+            }))
+            .with({ userId: P.not(undefined) }, ({ userId }) => ({
+              User: userId ? { connect: { id: userId } } : { disconnect: true },
+            }))
+            .otherwise((v) => v),
         },
         isRequired: dto.isRequired,
         defaultToToday: dto.defaultToToday,

@@ -13,12 +13,13 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { Field } from '@/domain/schema/fields/types'
-import { ValueInput } from '@/domain/resource/values/types'
+import { Value } from '@/domain/resource/entity'
+import { emptyValue } from '@/domain/resource/entity'
 
 type Props = {
   field: Field
-  defaultValue: ValueInput
-  onChange: (dto: ValueInput) => void
+  defaultValue: Value
+  onChange: (dto: Value) => void
   isDisabled?: boolean
 }
 
@@ -35,19 +36,26 @@ export default function DefaultValueControl({
       <Checkbox
         id="default-field-defaultValue-control"
         checked={defaultValue?.boolean ?? false}
-        onChange={(e) => onChange({ boolean: e.target.checked })}
+        onChange={(e) => onChange({ ...emptyValue, boolean: e.target.checked })}
         disabled={isDisabled}
       />
     ))
     .with('Select', () => (
       <Select
         id="default-field-defaultValue-control"
-        value={defaultValue?.optionId ?? ''}
+        value={defaultValue?.option?.id ?? ''}
         disabled={isDisabled}
-        onChange={(e) => onChange({ optionId: e.target.value })}
+        onChange={(e) =>
+          onChange({
+            ...emptyValue,
+            option: options.find((o) => o.id === e.target.value) ?? null,
+          })
+        }
         endAdornment={
-          defaultValue?.optionId && (
-            <IconButton onClick={() => onChange({ optionId: null })}>
+          defaultValue?.option?.id && (
+            <IconButton
+              onClick={() => onChange({ ...emptyValue, option: null })}
+            >
               <Close fontSize="small" />
             </IconButton>
           )
@@ -65,7 +73,7 @@ export default function DefaultValueControl({
         id="default-field-defaultValue-control"
         disabled={isDisabled}
         value={defaultValue?.string ?? ''}
-        onChange={(e) => onChange({ string: e.target.value })}
+        onChange={(e) => onChange({ ...emptyValue, string: e.target.value })}
         multiline
         fullWidth
         minRows={3}
@@ -76,7 +84,7 @@ export default function DefaultValueControl({
         id="default-field-defaultValue-control"
         disabled={isDisabled}
         value={defaultValue?.string ?? ''}
-        onChange={(e) => onChange({ string: e.target.value })}
+        onChange={(e) => onChange({ ...emptyValue, string: e.target.value })}
       />
     ))
     .with('Number', () => (
@@ -84,7 +92,9 @@ export default function DefaultValueControl({
         id="default-field-defaultValue-control"
         disabled={isDisabled}
         value={defaultValue?.number ?? ''}
-        onChange={(e) => onChange({ number: parseInt(e.target.value) })}
+        onChange={(e) =>
+          onChange({ ...emptyValue, number: parseInt(e.target.value) })
+        }
         type="number"
       />
     ))
@@ -94,12 +104,14 @@ export default function DefaultValueControl({
         slotProps={{
           field: {
             clearable: true,
-            onClear: () => onChange({ date: null }),
+            onClear: () => onChange({ ...emptyValue, date: null }),
           },
         }}
         value={defaultValue?.date && dayjs.utc(defaultValue.date)}
         disabled={isDisabled}
-        onChange={(value) => onChange({ date: value?.toDate() ?? null })}
+        onChange={(value) =>
+          onChange({ ...emptyValue, date: value?.toDate() ?? null })
+        }
       />
     ))
     .otherwise(() => 'Not Supported')

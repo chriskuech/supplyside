@@ -14,7 +14,8 @@ import {
   Typography,
 } from '@mui/material'
 import { approveBill as approveBillAction } from './actions'
-import { Resource, selectResourceField } from '@/domain/resource/types'
+import { selectResourceField } from '@/domain/resource/extensions'
+import { Resource } from '@/domain/resource/entity'
 import {
   billStatusOptions,
   fields,
@@ -24,7 +25,7 @@ import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { Schema, selectSchemaField } from '@/domain/schema/types'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { User } from '@/domain/iam/user/types'
-import { isMissingRequiredFields } from '@/domain/resource/values/mappers'
+import { isMissingRequiredFields } from '@/domain/resource/mappers'
 import LoadingButton from '@/lib/ux/LoadingButton'
 import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
 

@@ -1,6 +1,6 @@
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
-import { selectResourceField } from '@/domain/resource/types'
+import { selectResourceField } from '@/domain/resource/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { getQuickBooksConfig } from '@/domain/quickBooks/util'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'

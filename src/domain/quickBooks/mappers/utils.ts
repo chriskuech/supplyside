@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import { match, P } from 'ts-pattern'
-import { Resource, selectResourceField } from '@/domain/resource/types'
+import { selectResourceField } from '@/domain/resource/extensions'
+import { Resource } from '@/domain/resource/entity'
 import { FieldTemplate } from '@/domain/schema/template/types'
 
 export const mapValue = (resource: Resource, field: FieldTemplate) => {

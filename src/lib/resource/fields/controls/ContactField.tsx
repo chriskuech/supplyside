@@ -12,15 +12,14 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { Contact } from '@prisma/client'
 import { FC, useEffect, useState } from 'react'
-import ContactCard from './ContactCard'
-import { UpdateContactDto } from '@/domain/resource/fields/actions'
+import ContactCard from '../views/ContactCard'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
+import { Contact } from '@/domain/resource/entity'
 
 export type ContactFieldProps = {
   contact: Contact | null
-  onChange: (contact: UpdateContactDto | null) => void
+  onChange: (contact: Contact | null) => void
   inline?: boolean
 }
 
@@ -80,12 +79,17 @@ export default function ContactField({
 
 type ContactFormProps = {
   contact: Contact | null
-  onChange: (dto: UpdateContactDto | null) => void
+  onChange: (dto: Contact | null) => void
   onCancel: () => void
 }
 
 const ContactForm: FC<ContactFormProps> = ({ contact, onChange, onCancel }) => {
-  const [dto, setDto] = useState<UpdateContactDto>({})
+  const [dto, setDto] = useState<Contact>({
+    email: null,
+    name: null,
+    phone: null,
+    title: null,
+  })
 
   useEffect(
     () =>
@@ -97,6 +101,7 @@ const ContactForm: FC<ContactFormProps> = ({ contact, onChange, onCancel }) => {
       }),
     [contact],
   )
+
   return (
     <Stack spacing={2} pt={2}>
       <TextField

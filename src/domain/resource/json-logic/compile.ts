@@ -61,7 +61,8 @@ const createPropertySubquery = (field: Field) =>
       () => /*sql*/ `
         SELECT "Contact"."name"
         FROM "ResourceField"
-        LEFT JOIN "Contact" ON "Contact"."valueId" = "ResourceField"."valueId"
+        LEFT JOIN "Value" ON "Value"."id" = "ResourceField"."valueId"
+        LEFT JOIN "Contact" ON "Contact"."id" = "Value"."contactId"
         WHERE "Resource"."id" = "ResourceField"."resourceId"
           AND "ResourceField"."fieldId" = '${field.id}'
       `,

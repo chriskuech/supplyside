@@ -4,7 +4,7 @@ import { Add } from '@mui/icons-material'
 import { Button, ButtonProps } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 import { createResource } from './actions'
-import { Data } from '@/domain/resource/types'
+import { Data } from '@/domain/resource/extensions'
 
 type Props = {
   type: ResourceType

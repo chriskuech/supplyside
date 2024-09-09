@@ -5,12 +5,12 @@ import { mapBill } from '../mappers/bill'
 import { accountQuerySchema, readBillSchema } from '../schemas'
 import { Bill } from '../types'
 import { upsertVendorOnQuickBooks } from './vendor'
-import { Resource, selectResourceField } from '@/domain/resource/types'
-import { readResource } from '@/domain/resource/actions'
+import { selectResourceField } from '@/domain/resource/extensions'
+import { Resource } from '@/domain/resource/entity'
+import { readResource, updateResourceField } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
 import { selectSchemaField } from '@/domain/schema/types'
-import { updateValue } from '@/domain/resource/fields/actions'
 import { ExpectedError } from '@/domain/errors'
 
 export const readBill = async (
@@ -57,7 +57,8 @@ const createBillOnQuickBooks = async (
 
   assert(quickBooksBillIdField, 'quickBooksBillId field not found')
 
-  await updateValue({
+  await updateResourceField({
+    accountId,
     resourceId: bill.id,
     fieldId: quickBooksBillIdField,
     value: { string: quickBooksBill.Bill.Id },

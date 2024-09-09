@@ -8,7 +8,7 @@ import { sendPo as domainSendPo } from '@/domain/order/sendPo'
 import { createPo as domainCreatePo } from '@/domain/order/createPo'
 import { transitionStatus } from '@/lib/resource/actions'
 import prisma from '@/services/prisma'
-import { mapValueFromResource } from '@/domain/resource/values/mappers'
+import { mapValueResourceModelToEntity } from '@/domain/resource/mappers'
 import { readSession } from '@/lib/session/actions'
 
 export const createPo = async (resourceId: string) => {
@@ -45,5 +45,5 @@ export const findOrderBills = async (resourceId: string) => {
     },
   })
 
-  return bills.map((bill) => mapValueFromResource(bill.Resource))
+  return bills.map((bill) => mapValueResourceModelToEntity(bill.Resource))
 }

@@ -2,10 +2,10 @@
 
 import { Download } from '@mui/icons-material'
 import { Tooltip, IconButton } from '@mui/material'
-import { ValueFile } from '@/domain/resource/values/types'
+import { File } from '@/domain/files/types'
 
 type Props = {
-  file: ValueFile
+  file: File
 }
 
 export default function DownloadPoControl({ file }: Props) {

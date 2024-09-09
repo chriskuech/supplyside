@@ -11,8 +11,8 @@ import {
   Dialog,
   IconButton,
 } from '@mui/material'
-import { Contact } from '@prisma/client'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
+import { Contact } from '@/domain/resource/entity'
 
 type Props = {
   contact: Contact | null
@@ -21,6 +21,18 @@ type Props = {
 
 type ContactProp = {
   contact: Contact
+}
+
+export default function ContactCard(props: Props) {
+  if (!props.contact) {
+    return <Typography>No contact</Typography>
+  }
+
+  return props.inline ? (
+    <InlineContact contact={props.contact} />
+  ) : (
+    <FullContactCard contact={props.contact} />
+  )
 }
 
 function FullContactCard({ contact }: ContactProp) {
@@ -94,17 +106,5 @@ function InlineContact({ contact }: ContactProp) {
         </Stack>
       </Card>
     </>
-  )
-}
-
-export default function ContactCard(props: Props) {
-  if (!props.contact) {
-    return <Typography>No contact</Typography>
-  }
-
-  return props.inline ? (
-    <InlineContact contact={props.contact} />
-  ) : (
-    <FullContactCard contact={props.contact} />
   )
 }
