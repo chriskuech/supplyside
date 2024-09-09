@@ -8,7 +8,7 @@ export default async function ItemsDetail({
 }: {
   params: { key: string }
 }) {
-  const { resource, schema } = await readDetailPageModel(
+  const { resource, schema, lineSchema } = await readDetailPageModel(
     'Item',
     key,
     `/items/${key}`,
@@ -16,6 +16,7 @@ export default async function ItemsDetail({
 
   return (
     <ResourceDetailPage
+      lineSchema={lineSchema}
       schema={schema}
       resource={resource}
       tools={[]}

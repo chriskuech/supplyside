@@ -5,12 +5,14 @@ import ResourceForm from '../ResourceForm'
 import ReadOnlyFieldsView from './ReadOnlyFieldsView'
 import LinesAndCosts from './LinesAndCosts'
 import DeleteResourceButton from './DeleteResourceButton'
-import { Schema } from '@/domain/schema/types'
+import DuplicateResourceButton from './DuplicateResourceButton'
+import { Schema, selectSchemaFieldUnsafe } from '@/domain/schema/types'
 import { Resource } from '@/domain/resource/entity'
 import { FieldTemplate } from '@/domain/schema/template/types'
 
 type Props = {
   schema: Schema
+  lineSchema: Schema
   resource: Resource
   name?: string | null
   tools: readonly ReactNode[]
@@ -21,6 +23,7 @@ type Props = {
 
 export default function ResourceDetailPage({
   schema,
+  lineSchema,
   resource,
   name,
   tools,
@@ -56,8 +59,13 @@ export default function ResourceDetailPage({
 
           {[
             ...tools,
+            <DuplicateResourceButton
+              key={DuplicateResourceButton.name}
+              resourceId={resource.id}
+              resourceType={resource.type}
+            />,
             <DeleteResourceButton
-              key="delete-resource-button"
+              key={DeleteResourceButton.name}
               resourceType={resource.type}
               resourceId={resource.id}
             />,
@@ -84,9 +92,13 @@ export default function ResourceDetailPage({
               lineQuery={{
                 '==': [{ var: backlinkField.name }, resource.id],
               }}
-              newLineInitialData={{
-                [backlinkField.name]: resource.id,
-              }}
+              newLineInitialData={[
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, backlinkField)
+                    .id,
+                  value: { resourceId: resource.id },
+                },
+              ]}
               isReadOnly={isReadOnly}
             />
           )}
