@@ -1,8 +1,9 @@
-import { Box, CssBaseline } from '@mui/material'
+import { Box, CssBaseline, Fab } from '@mui/material'
 import type { Metadata } from 'next'
 import { PropsWithChildren } from 'react'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import dynamic from 'next/dynamic'
+import { QuestionMark } from '@mui/icons-material'
 import AppBar from '@/lib/ux/appbar/AppBar'
 import MuiXLicense from '@/lib/ux/MuiXLicense'
 import 'source-map-support/register' // TODO: check if stack traces are correct in azure
@@ -40,6 +41,18 @@ export default async function RootLayout({
             <Box width="100vw" flexGrow={1}>
               {children}
             </Box>
+            <Fab
+              color="primary"
+              aria-label="Contact Support"
+              href="mailto:support@supplyside.io?subject=Support Request"
+              sx={{
+                position: 'fixed',
+                bottom: '2rem',
+                right: '2rem',
+              }}
+            >
+              <QuestionMark />
+            </Fab>
           </RootProvider>
         </AppRouterCacheProvider>
       </body>
