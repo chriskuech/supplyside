@@ -146,11 +146,15 @@ export const mapSchemaFieldToGridColDef = (
   renderCell: ({ value }) => {
     const children = match<FieldType>(field.type)
       .with('Checkbox', () => value?.boolean && <Check />)
-      .with('Contact', () => (
-        <Box onClick={(e) => e.stopPropagation()}>
-          <ContactCard contact={value?.contact ?? null} inline />
-        </Box>
-      ))
+      .with(
+        'Contact',
+        () =>
+          value?.contact && (
+            <Box onClick={(e) => e.stopPropagation()}>
+              <ContactCard contact={value.contact} inline />
+            </Box>
+          ),
+      )
       .with('MultiSelect', () => (
         <Stack gap={1} direction="row">
           {value?.options?.map((option) => (
@@ -158,9 +162,11 @@ export const mapSchemaFieldToGridColDef = (
           ))}
         </Stack>
       ))
-      .with('Resource', () => (
-        <ResourceFieldView resource={value?.resource ?? null} />
-      ))
+      .with(
+        'Resource',
+        () =>
+          value?.resource && <ResourceFieldView resource={value.resource} />,
+      )
       .with('Select', () => value?.option && <Chip label={value.option.name} />)
       .with('User', () => value?.user && <UserCard user={value.user} />)
       .otherwise(() => undefined)
@@ -178,6 +184,7 @@ export const mapSchemaFieldToGridColDef = (
   // Only called if `renderCell` returns `undefined`
   valueFormatter: (_, resource) => {
     const value = selectResourceField(resource, { fieldId: field.id })
+    const template = findTemplateField(field.templateId)
 
     const formatted = match<FieldType>(field.type)
       .with('Date', () => formatDate(value?.date) ?? undefined)
@@ -187,7 +194,11 @@ export const mapSchemaFieldToGridColDef = (
           currency: 'USD',
         }),
       )
-      .with('Number', () => value?.number)
+      .with('Number', () =>
+        template?.prefix && value?.number
+          ? `${template.prefix} ${value.number}`
+          : value?.number,
+      )
       .with(P.union('Text', 'Textarea'), () => value?.string)
       .otherwise(() => undefined)
 

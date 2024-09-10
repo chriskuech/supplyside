@@ -2,17 +2,17 @@
 
 import { fail } from 'assert'
 import { Prisma, ResourceType } from '@prisma/client'
-import { Ajv } from 'ajv'
-import { isArray } from 'remeda'
 import { readSchema } from '../schema/actions'
-import { mapSchemaToJsonSchema } from '../schema/json-schema'
 import { selectSchemaField } from '../schema/types'
 import { fields } from '../schema/template/system-fields'
 import { recalculateSubtotalCost } from './costs'
 import { selectResourceField } from './extensions'
-import { mapValueInputToPrismaValueCreate } from './mappers'
+import {
+  mapValueInputToPrismaValueCreate,
+  mapValueToValueInput,
+} from './mappers'
 import { mapValueInputToPrismaValueUpdate } from './mappers'
-import { Resource } from './entity'
+import { Resource, emptyValue } from './entity'
 import { ValueInput } from './patch'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
@@ -21,36 +21,29 @@ import { resourceInclude } from './model'
 import { handleResourceCreate, handleResourceUpdate } from './effects'
 import prisma from '@/services/prisma'
 
-const ajv = new Ajv()
+export type ResourceFieldInput = {
+  fieldId: string
+  value: ValueInput
+}
 
 export type CreateResourceParams = {
   accountId: string
   type: ResourceType
-  data?: Record<string, string | number | boolean | string[] | null>
+  fields?: ResourceFieldInput[]
 }
 
 export const createResource = async ({
   accountId,
   type,
-  data,
+  fields: resourceFields,
 }: CreateResourceParams): Promise<Resource> => {
   const schema = await readSchema({ accountId, resourceType: type })
-  const jsonSchema = mapSchemaToJsonSchema(schema)
-
-  if (data && !ajv.validate(jsonSchema, data)) {
-    throw new Error('invalid')
-  }
 
   const {
     _max: { key },
   } = await prisma().resource.aggregate({
-    where: {
-      accountId,
-      type,
-    },
-    _max: {
-      key: true,
-    },
+    where: { accountId, type },
+    _max: { key: true },
   })
 
   const resource = await prisma().resource.create({
@@ -67,60 +60,23 @@ export const createResource = async ({
         },
       },
       ResourceField: {
-        create: schema.allFields.map((f) => {
-          const dataValue = data?.[f.name]
+        create: schema.allFields.map((schemaField) => {
+          const resourceField = resourceFields?.find(
+            (rf) => rf.fieldId === schemaField.id,
+          )
 
           return {
             Field: {
               connect: {
-                id: f.id,
+                id: schemaField.id,
               },
             },
             Value: {
-              create: {
-                boolean:
-                  typeof dataValue === 'boolean' && f.type === 'Checkbox'
-                    ? dataValue
-                    : (f.defaultValue?.boolean ?? null),
-                date:
-                  f.type !== 'Date'
-                    ? null
-                    : typeof dataValue === 'string'
-                      ? dataValue
-                      : f.defaultToToday
-                        ? new Date()
-                        : (f.defaultValue?.date ?? null),
-                number:
-                  typeof dataValue === 'number' &&
-                  ['Number', 'Money'].includes(f.type)
-                    ? dataValue
-                    : (f.defaultValue?.number ?? null),
-                string:
-                  typeof dataValue === 'string' &&
-                  ['Text', 'Textarea'].includes(f.type)
-                    ? dataValue
-                    : (f.defaultValue?.string ?? null),
-                Resource:
-                  typeof dataValue === 'string' && f.type === 'Resource'
-                    ? { connect: { id: dataValue } }
-                    : undefined,
-                Option:
-                  typeof dataValue === 'string' && f.type === 'Select'
-                    ? { connect: { id: dataValue } }
-                    : f.defaultValue?.optionId
-                      ? { connect: { id: f.defaultValue.optionId } }
-                      : undefined,
-                Files:
-                  isArray(dataValue) &&
-                  typeof dataValue[0] === 'string' &&
-                  f.type === 'Files'
-                    ? { create: dataValue.map((fileId) => ({ fileId })) }
-                    : undefined,
-                User:
-                  typeof dataValue === 'string' && f.type === 'User'
-                    ? { connect: { id: dataValue } }
-                    : undefined,
-              } satisfies Prisma.ValueCreateWithoutResourceFieldValueInput,
+              create: mapValueInputToPrismaValueCreate(
+                resourceField?.value ??
+                  mapValueToValueInput(schemaField.type, emptyValue),
+                schemaField.defaultValue ?? undefined,
+              ),
             },
           }
         }),
@@ -206,7 +162,7 @@ export const readResources = async ({
 export type UpdateResourceParams = {
   accountId: string
   resourceId: string
-  fields: { fieldId: string; value: ValueInput }[]
+  fields: ResourceFieldInput[]
 }
 
 export const updateResource = async ({
@@ -306,11 +262,6 @@ export const updateResourceField = async ({
 }) =>
   await updateResource({
     accountId,
-    resourceId: resourceId,
-    fields: [
-      {
-        fieldId,
-        value,
-      },
-    ],
+    resourceId,
+    fields: [{ fieldId, value }],
   })

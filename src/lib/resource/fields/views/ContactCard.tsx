@@ -15,7 +15,7 @@ import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { Contact } from '@/domain/resource/entity'
 
 type Props = {
-  contact: Contact | null
+  contact: Contact
   inline?: boolean
 }
 
@@ -24,10 +24,6 @@ type ContactProp = {
 }
 
 export default function ContactCard(props: Props) {
-  if (!props.contact) {
-    return <Typography>No contact</Typography>
-  }
-
   return props.inline ? (
     <InlineContact contact={props.contact} />
   ) : (

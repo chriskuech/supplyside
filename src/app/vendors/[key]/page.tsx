@@ -10,7 +10,7 @@ export default async function VendorDetail({
 }: {
   params: { key: string }
 }) {
-  const { resource, schema } = await readDetailPageModel(
+  const { resource, schema, lineSchema } = await readDetailPageModel(
     'Vendor',
     key,
     `/vendors/${key}`,
@@ -30,6 +30,7 @@ export default async function VendorDetail({
 
   return (
     <ResourceDetailPage
+      lineSchema={lineSchema}
       schema={schema}
       resource={resource}
       name={name}

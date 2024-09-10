@@ -11,13 +11,15 @@ import {
   Typography,
 } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { debounce } from 'remeda'
 import { ResourceType } from '@prisma/client'
+import useSchema from '../schema/useSchema'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
 import Field from './fields/controls/Field'
-import { readResource, readSchema, updateResource } from './actions'
+import { updateResource } from './actions'
+import useResource from './useResource'
 import { Schema } from '@/domain/schema/types'
 import { selectResourceField } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
@@ -40,9 +42,11 @@ export default function ResourceForm({
 }: Props) {
   const columns = singleColumn ? 1 : 3
 
-  const [schema, setSchema] = useState<Schema | null>(defaultSchema ?? null)
-  const [resource, setResource] = useState<Resource | null>(
-    defaultResource ?? null,
+  const schema = useSchema(
+    resourceType ?? defaultSchema?.resourceType ?? fail(),
+  )
+  const [resource, setResource] = useResource(
+    resourceId ?? defaultResource ?? fail(),
   )
 
   const changeHandler = useMemo(
@@ -63,16 +67,6 @@ export default function ResourceForm({
       ).call,
     [],
   )
-
-  useEffect(() => {
-    if (!schema && resourceType) {
-      readSchema({ resourceType }).then(setSchema)
-    }
-
-    if (resourceId && resource?.id !== resourceId) {
-      readResource({ id: resourceId }).then(setResource)
-    }
-  }, [schema, resource?.id, resourceType, resourceId])
 
   useEffect(() => {
     resource && changeHandler(resource)

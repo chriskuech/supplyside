@@ -55,7 +55,11 @@ function Field(
     ))
     .with('Contact', () =>
       isReadOnly ? (
-        <ContactCard contact={value?.contact ?? null} inline={inline} />
+        value?.contact ? (
+          <ContactCard contact={value.contact} inline={inline} />
+        ) : (
+          '-'
+        )
       ) : (
         <ContactField
           contact={value?.contact ?? null}
