@@ -5,9 +5,9 @@ import { RedirectType, redirect } from 'next/navigation'
 import { testHas6Characters, testHasOneLetter } from './utils'
 import prisma from '@/services/prisma'
 import { readSession } from '@/lib/session/actions'
-import { ExpectedError } from '@/domain/errors'
+import { ExpectedError, handleExpectedErrors } from '@/domain/errors'
 
-export const updatePassword = async (password: string) => {
+const updatePassword = async (password: string) => {
   const { userId } = await readSession()
 
   if (!testHas6Characters(password) || !testHasOneLetter(password)) {
@@ -24,3 +24,5 @@ export const updatePassword = async (password: string) => {
 
   redirect('/', RedirectType.replace)
 }
+
+export const updatePasswordAction = handleExpectedErrors(updatePassword)
