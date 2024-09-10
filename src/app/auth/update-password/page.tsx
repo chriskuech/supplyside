@@ -1,19 +1,18 @@
-import { Box } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import UpdatePasswordForm from './UpdatePasswordForm'
 
 export default function UpdatePassword() {
   return (
-    <Box
-      width="100vw"
-      height="100%"
-      display="flex"
+    <Stack
       alignItems="center"
+      height="100%"
       justifyContent="center"
-      flexDirection="column"
+      gap={3}
+      paddingBottom={10}
     >
-      <Box width={500}>
-        <UpdatePasswordForm />
-      </Box>
-    </Box>
+      <Typography variant="h3">Reset your password</Typography>
+      <Typography>Create a new password for your account.</Typography>
+      <UpdatePasswordForm />
+    </Stack>
   )
 }
