@@ -1,12 +1,10 @@
-'use server'
-
-import { faker } from '@faker-js/faker'
-import { hash } from 'bcrypt'
-import { revalidatePath } from 'next/cache'
-import { User, mapUserModel, userInclude } from './types'
-import smtp from '@/services/smtp'
-import config from '@/services/config'
+import { v4 as uuid } from 'uuid'
+import { userInclude } from './model'
+import { mapUserModelToEntity } from './mappers'
+import { User } from './entity'
 import prisma from '@/services/prisma'
+import config from '@/services/config'
+import smtp from '@/services/smtp'
 
 const loginPath = '/auth/login'
 
@@ -21,14 +19,10 @@ export async function inviteUser({
   email,
   isAdmin,
 }: InviteUserParams): Promise<void> {
-  const password = faker.string.nanoid()
-
   await prisma().user.create({
     data: {
       email,
       accountId,
-      passwordHash: await hash(password, 12),
-      requirePasswordReset: true,
       isAdmin,
     },
   })
@@ -39,14 +33,40 @@ export async function inviteUser({
     TemplateAlias: 'user-invitation',
     TemplateModel: {
       invite_email: email,
-      invite_password: password,
       action_url: `${config().BASE_URL}${loginPath}`,
       product_url: config().BASE_URL,
     },
     MessageStream: 'outbound',
   })
+}
 
-  revalidatePath('')
+type VerifyEmailParams = {
+  email: string
+}
+
+export async function verifyEmail({ email }: VerifyEmailParams): Promise<void> {
+  const tokenLifespanInMinutes = 5
+
+  const tat = uuid()
+  const tatExpiresAt = new Date(Date.now() + 1000 * 60 * tokenLifespanInMinutes)
+
+  await prisma().user.update({
+    where: { email },
+    data: { tat, tatExpiresAt },
+  })
+
+  await smtp().sendEmailWithTemplate({
+    From: 'SupplySide <bot@supplyside.io>',
+    To: email,
+    TemplateAlias: 'email-verification',
+    TemplateModel: {
+      verify_email: email,
+      verify_token: tat,
+      action_url: `${config().BASE_URL}${loginPath}?email=${email}&token=${tat}`,
+      product_url: config().BASE_URL,
+    },
+    MessageStream: 'outbound',
+  })
 }
 
 type ReadUserParams = {
@@ -54,14 +74,12 @@ type ReadUserParams = {
 }
 
 export async function readUser({ userId }: ReadUserParams): Promise<User> {
-  revalidatePath('')
-
   const user = await prisma().user.findUniqueOrThrow({
     where: { id: userId },
     include: userInclude,
   })
 
-  return mapUserModel(user)
+  return mapUserModelToEntity(user)
 }
 
 type ReadUsersParams = { accountId: string }
@@ -69,8 +87,6 @@ type ReadUsersParams = { accountId: string }
 export async function readUsers({
   accountId,
 }: ReadUsersParams): Promise<User[]> {
-  revalidatePath('')
-
   const users = await prisma().user.findMany({
     where: {
       accountId,
@@ -81,7 +97,7 @@ export async function readUsers({
     orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
   })
 
-  return users.map(mapUserModel)
+  return users.map(mapUserModelToEntity)
 }
 
 type DeleteUserParams = { accountId: string; userId: string }
@@ -96,6 +112,4 @@ export async function deleteUser({
       id: userId,
     },
   })
-
-  revalidatePath('')
 }

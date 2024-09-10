@@ -1,9 +1,11 @@
 'use server'
 
-import { compare } from 'bcrypt'
 import { isMatching } from 'ts-pattern'
 import { isError } from 'remeda'
-import { Session, mapSessionModel, sessionIncludes } from './types'
+import { mapSessionModel } from './mappers'
+import { Session } from './entity'
+import { SessionCreationError } from './errors'
+import { sessionIncludes } from './model'
 import prisma from '@/services/prisma'
 import { systemAccountId } from '@/lib/const'
 
@@ -13,17 +15,33 @@ const lifespanInSeconds = 1000 * 60 * 24 * SESSION_LIFESPAN_IN_DAYS
 
 export const createSession = async (
   email: string,
-  password: string,
+  tat: string,
 ): Promise<Session> => {
   const user = await prisma().user.findUnique({
     where: { email },
   })
 
-  if (!user) throw new Error('No user in db')
-  if (!user.passwordHash) throw new Error('No password in db')
+  if (!user) {
+    throw new SessionCreationError('No user found with that email.')
+  }
 
-  const isMatch = await compare(password, user.passwordHash)
-  if (!isMatch) throw new Error('Password does not match')
+  if (!tat) {
+    throw new SessionCreationError(
+      'No token provided. Please retry with a valid token.',
+    )
+  }
+
+  if (!user.tatExpiresAt || user.tat !== tat) {
+    throw new SessionCreationError(
+      'The token provided is incorrect. Please retry with the correct token.',
+    )
+  }
+
+  if (user.tatExpiresAt < new Date()) {
+    throw new SessionCreationError(
+      'The token provided has expired. Please retry with a new token.',
+    )
+  }
 
   const expiresAt = new Date(Date.now() + lifespanInSeconds * 1000)
 
@@ -34,6 +52,14 @@ export const createSession = async (
       User: { connect: { id: user.id } },
     },
     include: sessionIncludes,
+  })
+
+  await prisma().user.update({
+    where: { id: user.id },
+    data: {
+      tat: null,
+      tatExpiresAt: null,
+    },
   })
 
   return mapSessionModel(session)

@@ -37,6 +37,7 @@ const isRefreshTokenValid = (token: QuickBooksToken) => {
   return expirationTime > currentTime
 }
 
+// TODO: this references `next` which is not available in the domain layer
 export const requireTokenWithRedirect = async (
   accountId: string,
 ): Promise<QuickBooksToken> => {

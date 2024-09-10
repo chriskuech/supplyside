@@ -1,7 +1,6 @@
-'use server'
-
 import { faker } from '@faker-js/faker'
-import { Account, accountInclude, mapAccountModel } from './types'
+import { Account, mapAccountModel } from './entity'
+import { accountInclude } from './model'
 import { applyTemplate } from '@/domain/schema/template/actions'
 import prisma from '@/services/prisma'
 

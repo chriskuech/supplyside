@@ -1,7 +1,6 @@
 import { fail } from 'assert'
 import { Cost, Prisma, ResourceType } from '@prisma/client'
 import { map, pipe, sum } from 'remeda'
-import { revalidatePath } from 'next/cache'
 import { selectResourceField } from './extensions'
 import { readResource, readResources, updateResourceField } from '.'
 import { readSchema } from '@/domain/schema/actions'
@@ -13,7 +12,6 @@ export const createCost = async (resourceId: string): Promise<void> => {
   await prisma().cost.create({
     data: { resourceId },
   })
-  revalidatePath('')
 }
 
 export const updateCost = async (id: string, data: Prisma.CostUpdateInput) => {
@@ -26,8 +24,6 @@ export const updateCost = async (id: string, data: Prisma.CostUpdateInput) => {
   })
 
   await recalculateItemizedCosts(cost.Resource.accountId, cost.resourceId)
-
-  revalidatePath('')
 }
 
 export const deleteCost = async (id: string): Promise<void> => {
@@ -39,7 +35,6 @@ export const deleteCost = async (id: string): Promise<void> => {
   })
 
   await recalculateItemizedCosts(cost.Resource.accountId, cost.resourceId)
-  revalidatePath('')
 }
 
 export const recalculateItemizedCosts = async (
@@ -69,7 +64,6 @@ export const recalculateItemizedCosts = async (
       ),
     },
   })
-  revalidatePath('')
 }
 
 export const recalculateSubtotalCost = async (
@@ -105,7 +99,6 @@ export const recalculateSubtotalCost = async (
       number: Number(subTotal), // TODO: this is ignoring that subTotal is bigint
     },
   })
-  revalidatePath('')
 }
 
 export const copyResourceCosts = async (
@@ -157,6 +150,4 @@ export const copyResourceCosts = async (
       }
     }),
   )
-
-  revalidatePath('')
 }

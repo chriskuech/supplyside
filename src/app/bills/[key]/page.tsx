@@ -137,7 +137,7 @@ export default async function BillsDetail({
                     selectResourceField(resource, fields.billStatus)?.option?.id
                   }
                   schema={schema}
-                  user={session.user}
+                  self={session.user}
                   resource={resource}
                 />
               </Stack>

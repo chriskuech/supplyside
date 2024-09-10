@@ -105,7 +105,7 @@ export const mapSchemaFieldToGridColDef = (
       .with(
         'User',
         () => (value) =>
-          value?.user?.fullName?.includes(query) ||
+          value?.user?.name?.includes(query) ||
           value?.user?.email.includes(query) ||
           false,
       )

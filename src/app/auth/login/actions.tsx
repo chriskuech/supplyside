@@ -1,22 +1,19 @@
 'use server'
 
 import { RedirectType, redirect } from 'next/navigation'
-import { z } from 'zod'
 import { createSession } from '@/lib/session/actions'
+import { verifyEmail } from '@/domain/iam/user'
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-})
+export const requestToken = verifyEmail
 
-export const handleLogin = async (state: unknown, formData: FormData) => {
-  const { email, password } = await schema.parseAsync({
-    email: formData.get('email')?.toString(),
-    password: formData.get('password')?.toString(),
-  })
+type LoginParams = {
+  email: string
+  token: string
+}
 
+export const login = async ({ email, token }: LoginParams) => {
   try {
-    await createSession(email, password)
+    await createSession(email, token)
 
     redirect('/', RedirectType.replace)
   } catch {

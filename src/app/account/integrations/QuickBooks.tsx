@@ -5,7 +5,7 @@ import {
   createQuickBooksSetupUrl,
   getQuickBooksConfig,
 } from '@/domain/quickBooks/util'
-import { Session } from '@/domain/iam/session/types'
+import { Session } from '@/domain/iam/session/entity'
 import { getQuickbooksToken } from '@/domain/quickBooks'
 
 type Props = {

@@ -9,9 +9,9 @@ import {
   createSession as domainCreateSession,
   readAndExtendSession as domainReadAndExtendSession,
   impersonate as domainImpersonate,
-} from '@/domain/iam/session/actions'
+} from '@/domain/iam/session'
 import config from '@/services/config'
-import { Session } from '@/domain/iam/session/types'
+import { Session } from '@/domain/iam/session/entity'
 
 const sessionIdCookieName = 'sessionId'
 
@@ -23,8 +23,8 @@ export const withSession = async <T>(
   return await handler(session)
 }
 
-export const createSession = async (email: string, password: string) => {
-  const session = await domainCreateSession(email, password)
+export const createSession = async (email: string, tat: string) => {
+  const session = await domainCreateSession(email, tat)
 
   cookies().set(sessionIdCookieName, session.id, {
     sameSite: true,
@@ -55,8 +55,6 @@ export const readSession = async () => {
 export const requireSessionWithRedirect = async (returnTo: string) => {
   try {
     const session = await readSession()
-
-    if (session.user.requirePasswordReset) redirect('/auth/update-password')
 
     if (!session.user.tsAndCsSignedAt) redirect('/auth/terms-and-conditions')
 

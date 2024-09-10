@@ -1,4 +1,4 @@
-import { Account as AccountCoreModel, Blob, Prisma } from '@prisma/client'
+import { AccountModel } from './model'
 import { getDownloadPath } from '@/domain/blobs'
 
 export type Account = {
@@ -10,14 +10,6 @@ export type Account = {
   logoBlobId: string | null
   quickBooksConnectedAt: Date | null
 }
-
-export type AccountModel = AccountCoreModel & {
-  LogoBlob: Blob | null
-}
-
-export const accountInclude = {
-  LogoBlob: true,
-} satisfies Prisma.AccountInclude
 
 export const mapAccountModel = (model: AccountModel): Account => ({
   id: model.id,
