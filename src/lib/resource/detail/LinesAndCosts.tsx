@@ -1,6 +1,6 @@
 import { Stack, Typography, Box } from '@mui/material'
 import { ResourceTable } from '../table'
-import ItemizedCostLines from './ItemizedCostLines'
+import ItemizedCostLines from '../costs/ItemizedCostLines'
 import { readSchema } from '@/domain/schema/actions'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { Resource } from '@/domain/resource/entity'
