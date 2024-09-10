@@ -1,5 +1,3 @@
-'use client'
-
 import { ok } from 'assert'
 import { range } from 'remeda'
 

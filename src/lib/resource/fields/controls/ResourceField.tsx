@@ -22,7 +22,6 @@ import {
   findResources as findResourcesRaw,
 } from '../../actions'
 import ResourceForm from '../../ResourceForm'
-import ResourceFieldView from '../views/ResourceFieldView'
 import { ValueResource } from '@/domain/resource/entity'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { mapResourceToValueResource } from '@/domain/resource/mappers'
@@ -58,10 +57,6 @@ function ResourceField(
       onChange(mapResourceToValueResource(resource))
       open()
     })
-
-  if (isReadOnly) {
-    return <ResourceFieldView resource={resource} />
-  }
 
   if (resource) {
     return (
@@ -106,6 +101,10 @@ function ResourceField(
         </Drawer>
       </>
     )
+  }
+
+  if (isReadOnly) {
+    return '-'
   }
 
   return (

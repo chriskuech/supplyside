@@ -96,9 +96,11 @@ export const mapSchemaFieldToGridColDef = (
           ))}
         </Stack>
       ))
-      .with('Resource', () => (
-        <ResourceFieldView resource={value?.resource ?? null} />
-      ))
+      .with(
+        'Resource',
+        () =>
+          value?.resource && <ResourceFieldView resource={value.resource} />,
+      )
       .with('Select', () => value?.option && <Chip label={value.option.name} />)
       .with('User', () => value?.user && <UserCard user={value.user} />)
       .otherwise(() => undefined)
