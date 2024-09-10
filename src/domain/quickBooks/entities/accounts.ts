@@ -8,6 +8,8 @@ import { readFields, updateField } from '@/domain/schema/fields'
 import { fields } from '@/domain/schema/template/system-fields'
 import { OptionPatch } from '@/domain/schema/fields/types'
 
+const PAYABLE_ACCOUNTS_TYPE = 'Accounts Payable'
+
 export const readAccount = async (
   accountId: string,
   id: string,
@@ -26,11 +28,17 @@ export const readAccount = async (
 export const upsertAccountsFromQuickBooks = async (
   accountId: string,
 ): Promise<void> => {
-  const quickBooksAccounts = await query(
+  const allQuickBooksAccounts = await query(
     accountId,
     { entity: 'Account' },
     accountQuerySchema,
   )
+
+  // removing payable accounts that can't be used for bills
+  const quickBooksAccounts =
+    allQuickBooksAccounts.QueryResponse.Account?.filter(
+      (a) => a.AccountType !== PAYABLE_ACCOUNTS_TYPE,
+    )
   const accountFields = await readFields(accountId)
   const quickBooksAccountField = accountFields.find(
     (field) => field.templateId === fields.quickBooksAccount.templateId,
@@ -39,9 +47,7 @@ export const upsertAccountsFromQuickBooks = async (
   assert(quickBooksAccountField, 'QuickBooks account field does not exist')
 
   const quickBooksAccountNames =
-    quickBooksAccounts.QueryResponse.Account?.map(
-      (account) => account.FullyQualifiedName,
-    ) ?? []
+    quickBooksAccounts?.map((account) => account.FullyQualifiedName) ?? []
 
   const currentAccounts = quickBooksAccountField.Option
   const accountsToAdd = quickBooksAccountNames.filter(
