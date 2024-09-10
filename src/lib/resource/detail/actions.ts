@@ -34,7 +34,7 @@ export const readDetailPageModel = async (
     }).catch(() => null),
     readSchema({
       accountId: session.accountId,
-      resourceType: resourceType,
+      resourceType,
     }),
   ])
 
