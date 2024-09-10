@@ -25,7 +25,7 @@ export default async function BillsDetail({
 }: {
   params: { key: string }
 }) {
-  const { session, resource, schema } = await readDetailPageModel(
+  const { session, resource, schema, lineSchema } = await readDetailPageModel(
     'Bill',
     key,
     `/bills/${key}`,
@@ -64,6 +64,7 @@ export default async function BillsDetail({
 
   return (
     <ResourceDetailPage
+      lineSchema={lineSchema}
       schema={schema}
       resource={resource}
       tools={[

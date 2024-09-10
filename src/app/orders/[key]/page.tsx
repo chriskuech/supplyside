@@ -37,6 +37,7 @@ export default async function OrderDetail({
     session: { user },
     resource,
     schema,
+    lineSchema,
   } = await readDetailPageModel('Order', key, `/orders/${key}`)
 
   const orderBills = (await findOrderBills(resource.id)) ?? []
@@ -64,6 +65,7 @@ export default async function OrderDetail({
 
   return (
     <ResourceDetailPage
+      lineSchema={lineSchema}
       schema={schema}
       resource={resource}
       tools={[

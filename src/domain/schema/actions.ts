@@ -1,11 +1,8 @@
 'use server'
 
-import {
-  Field as FieldModel,
-  Option,
-  ResourceType,
-  Value,
-} from '@prisma/client'
+import { Field as FieldModel, Option, ResourceType } from '@prisma/client'
+import { mapValueModelToEntity } from '../resource/mappers'
+import { ValueModel, valueInclude } from '../resource/model'
 import { Field, Schema } from './types'
 import prisma from '@/services/prisma'
 
@@ -31,7 +28,9 @@ export const readSchema = async ({
         include: {
           Field: {
             include: {
-              DefaultValue: true,
+              DefaultValue: {
+                include: valueInclude,
+              },
               Option: {
                 orderBy: {
                   order: 'asc',
@@ -50,7 +49,9 @@ export const readSchema = async ({
             include: {
               Field: {
                 include: {
-                  DefaultValue: true,
+                  DefaultValue: {
+                    include: valueInclude,
+                  },
                   Option: {
                     orderBy: {
                       order: 'asc',
@@ -96,7 +97,7 @@ export const readSchema = async ({
 const mapField = (
   model: FieldModel & {
     Option: Option[]
-    DefaultValue: Value | null
+    DefaultValue: ValueModel | null
   },
 ): Field => ({
   id: model.id,
@@ -110,7 +111,7 @@ const mapField = (
     templateId: o.templateId,
   })),
   resourceType: model.resourceType,
-  defaultValue: model.DefaultValue,
+  defaultValue: model.DefaultValue && mapValueModelToEntity(model.DefaultValue),
   defaultToToday: model.defaultToToday,
   isRequired: model.isRequired,
 })

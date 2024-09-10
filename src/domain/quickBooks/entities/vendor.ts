@@ -17,7 +17,10 @@ import {
   updateResourceField,
 } from '@/domain/resource'
 import { readSchema } from '@/domain/schema/actions'
-import { selectSchemaField } from '@/domain/schema/types'
+import {
+  selectSchemaField,
+  selectSchemaFieldUnsafe,
+} from '@/domain/schema/types'
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectResourceField } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
@@ -73,8 +76,7 @@ export const upsertVendorsFromQuickBooks = async (
     readSchema({ accountId, resourceType: 'Vendor' }),
   ])
 
-  const vendorNameField = selectSchemaField(vendorSchema, fields.name)
-  assert(vendorNameField, 'Vendor name field not found')
+  const vendorNameField = selectSchemaFieldUnsafe(vendorSchema, fields.name)
 
   const quickBooksVendorsToAdd = quickBooksVendors.filter(
     (quickBooksVendor) =>
@@ -118,10 +120,19 @@ export const upsertVendorsFromQuickBooks = async (
     await createResource({
       accountId,
       type: 'Vendor',
-      data: {
-        [fields.name.name]: quickBooksVendorToAdd.DisplayName,
-        [fields.quickBooksVendorId.name]: quickBooksVendorToAdd.Id,
-      },
+      fields: [
+        {
+          fieldId: selectSchemaFieldUnsafe(vendorSchema, fields.name).id,
+          value: { string: quickBooksVendorToAdd.DisplayName },
+        },
+        {
+          fieldId: selectSchemaFieldUnsafe(
+            vendorSchema,
+            fields.quickBooksVendorId,
+          ).id,
+          value: { string: quickBooksVendorToAdd.Id },
+        },
+      ],
     })
   }
 }

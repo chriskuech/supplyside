@@ -8,6 +8,8 @@ import prisma from '@/services/prisma'
 import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import smtp from '@/services/smtp'
+import { readSchema } from '@/domain/schema/actions'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/types'
 
 type FileParam = {
   content: string
@@ -22,6 +24,11 @@ type Params = {
 }
 
 const createBill = async (params: Params) => {
+  const bill = await readSchema({
+    accountId: params.accountId,
+    resourceType: 'Bill',
+  })
+
   const fileIds = await Promise.all(
     params.files.map(async (file) => {
       const { id: blobId } = await createBlob({
@@ -45,9 +52,12 @@ const createBill = async (params: Params) => {
   return await createResource({
     accountId: params.accountId,
     type: 'Bill',
-    data: {
-      [fields.billFiles.name]: fileIds,
-    },
+    fields: [
+      {
+        fieldId: selectSchemaFieldUnsafe(bill, fields.billFiles).id,
+        value: { fileIds },
+      },
+    ],
   })
 }
 

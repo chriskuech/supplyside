@@ -1,5 +1,6 @@
 'use client'
 
+import { fail } from 'assert'
 import {
   Autocomplete,
   Box,
@@ -25,6 +26,9 @@ import ResourceForm from '../../ResourceForm'
 import { ValueResource } from '@/domain/resource/entity'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { mapResourceToValueResource } from '@/domain/resource/mappers'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/types'
+import { fields } from '@/domain/schema/template/system-fields'
+import useSchema from '@/lib/schema/useSchema'
 
 type Props = {
   resource: ValueResource | null
@@ -42,17 +46,23 @@ function ResourceField(
 ) {
   const { isOpen, open, close } = useDisclosure()
 
+  const schema = useSchema(resourceType)
+
   const handleCreate = (nameOrNumber: string) =>
     createResource({
       type: resourceType,
-      data: match(resourceType)
-        .with(P.union('Vendor', 'Item'), () => ({
-          Name: nameOrNumber,
-        }))
-        .with(P.union('Bill', 'Order', 'Line'), () => ({
-          Number: nameOrNumber,
-        }))
-        .exhaustive(),
+      fields: [
+        {
+          fieldId: selectSchemaFieldUnsafe(
+            schema ?? fail('Schema not found'),
+            match(resourceType)
+              .with(P.union('Vendor', 'Item'), () => fields.name)
+              .with(P.union('Bill', 'Order', 'Line'), () => fields.number)
+              .exhaustive(),
+          ).id,
+          value: { string: nameOrNumber },
+        },
+      ],
     }).then((resource) => {
       onChange(mapResourceToValueResource(resource))
       open()
