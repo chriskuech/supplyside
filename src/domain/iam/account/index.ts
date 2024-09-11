@@ -1,7 +1,7 @@
-'use server'
-
 import { faker } from '@faker-js/faker'
-import { Account, accountInclude, mapAccountModel } from './types'
+import { Account } from './entity'
+import { mapAccountModelToEntity } from './mappers'
+import { accountInclude } from './model'
 import { applyTemplate } from '@/domain/schema/template/actions'
 import prisma from '@/services/prisma'
 
@@ -26,7 +26,7 @@ export const readAccount = async (accountId: string): Promise<Account> => {
     include: accountInclude,
   })
 
-  return mapAccountModel(model)
+  return mapAccountModelToEntity(model)
 }
 
 export const deleteAccount = async (accountId: string): Promise<void> => {

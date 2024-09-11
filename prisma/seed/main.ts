@@ -1,4 +1,3 @@
-import { hash } from 'bcrypt'
 import { z } from 'zod'
 import { config as loadDotenv } from 'dotenv'
 import { expand as expandDotenv } from 'dotenv-expand'
@@ -44,8 +43,6 @@ async function main() {
       email: config.DEV_EMAIL,
       firstName: config.DEV_FIRST_NAME,
       lastName: config.DEV_LAST_NAME,
-      passwordHash: await hash(config.DEV_PASSWORD, 12),
-      requirePasswordReset: false,
     },
   })
 
@@ -65,8 +62,6 @@ async function main() {
       email: `${devAlias}+${customerAccount.key}@${devDomain}`,
       firstName: config.DEV_FIRST_NAME,
       lastName: config.DEV_LAST_NAME,
-      passwordHash: await hash(config.DEV_PASSWORD, 12),
-      requirePasswordReset: false,
     },
   })
 

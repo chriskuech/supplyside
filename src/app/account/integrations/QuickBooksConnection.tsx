@@ -2,7 +2,7 @@ import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import QuickBooksSyncButton from './QuickBooksSyncButton'
 import QuickBooksDisconnectLink from './QuickBooksDisconnectLink'
-import { Session } from '@/domain/iam/session/types'
+import { Session } from '@/domain/iam/session/entity'
 import { getCompanyInfo } from '@/domain/quickBooks/entities/companyInfo'
 
 type Props = {

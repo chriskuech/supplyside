@@ -1,12 +1,27 @@
-import { Box } from '@mui/material'
+import { Box, Card, CardContent, Stack, Typography } from '@mui/material'
 import { redirect, RedirectType } from 'next/navigation'
-import LoginForm from './LoginForm'
+import { z } from 'zod'
+import Form from './Form'
 import { readSession } from '@/lib/session/actions'
+import RefreshOnFocus from '@/lib/ux/RefreshOnFocus'
+import Logo from '@/lib/ux/appbar/Logo'
 
-export default async function Login() {
+export default async function Login({
+  searchParams,
+}: {
+  searchParams: Record<string, string | unknown>
+}) {
+  const { data: { returnTo } = {} } = z
+    .object({
+      returnTo: z.string().startsWith('/').optional(),
+    })
+    .safeParse(searchParams)
+
+  // TODO: don't catch all--it can be inferred as a static page
   const session = await readSession().catch(() => null)
 
-  if (session) redirect('/', RedirectType.replace)
+  if (session)
+    redirect('/' + (returnTo && `rel=${returnTo}`), RedirectType.replace)
 
   return (
     <Box
@@ -17,9 +32,24 @@ export default async function Login() {
       justifyContent="center"
       flexDirection="column"
     >
-      <Box width={500}>
-        <LoginForm />
-      </Box>
+      <RefreshOnFocus />
+      <Card variant="elevation">
+        <CardContent>
+          <Stack width={400} spacing={5}>
+            <Box>
+              <Logo />
+            </Box>
+
+            <Typography variant="h5" textAlign="left">
+              Login
+            </Typography>
+
+            <Form returnTo={returnTo} />
+
+            <Box />
+          </Stack>
+        </CardContent>
+      </Card>
     </Box>
   )
 }

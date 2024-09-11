@@ -3,9 +3,9 @@ import { FieldType, Prisma } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { isArray, isNullish, pick } from 'remeda'
 import { fields } from '../schema/template/system-fields'
-import { mapUserModel } from '../iam/user/types'
 import { mapFile } from '../files/mapValueFile'
 import { Schema } from '../schema/types'
+import { mapUserModelToEntity } from '../user/mappers'
 import { Resource, Value, ValueResource } from './entity'
 import { ResourceModel, ValueModel, ValueResourceModel } from './model'
 import { selectResourceField } from './extensions'
@@ -67,7 +67,7 @@ export const mapValueModelToEntity = (model: ValueModel): Value => ({
   number: model.number,
   option: model.Option,
   options: model.ValueOption.map((vo) => vo.Option),
-  user: model.User && mapUserModel(model.User),
+  user: model.User && mapUserModelToEntity(model.User),
   resource: model.Resource && mapValueResourceModelToEntity(model.Resource),
   file: model.File ? mapFile(model.File) : null,
   files: model.Files.map(({ File: file }) => mapFile(file)),

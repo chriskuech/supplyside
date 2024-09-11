@@ -1,6 +1,6 @@
 import { Avatar, Stack, Typography } from '@mui/material'
 import NextImage from 'next/image'
-import { User } from '@/domain/iam/user/types'
+import { User } from '@/domain/user/entity'
 
 type Props = {
   user: User | null
@@ -20,7 +20,7 @@ export default function UserCard({ user }: Props) {
         </Avatar>
       )}
       <Stack>
-        <Typography>{user?.fullName}</Typography>
+        <Typography>{user?.name}</Typography>
         <Typography variant="caption">{user?.email}</Typography>
       </Stack>
     </Stack>

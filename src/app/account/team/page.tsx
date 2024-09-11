@@ -1,15 +1,16 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
 import UsersTable from './UsersTable'
 import InviteUserControl from './InviteUserControl'
-import { readUser, readUsers } from '@/domain/iam/user/actions'
+import { readSelf } from './actions'
 import { readSession } from '@/lib/session/actions'
+import { readUsers } from '@/domain/iam/user'
 
 export default async function Team() {
-  const { accountId, userId } = await readSession()
+  const { accountId } = await readSession()
 
-  const [users, user] = await Promise.all([
+  const [users, self] = await Promise.all([
     readUsers({ accountId }),
-    readUser({ userId }),
+    readSelf(),
   ])
 
   return (
@@ -27,7 +28,7 @@ export default async function Team() {
             <InviteUserControl />
           </Box>
         </Stack>
-        <UsersTable currentUser={user} users={users} />
+        <UsersTable currentUser={self} users={users} />
       </Stack>
     </Container>
   )

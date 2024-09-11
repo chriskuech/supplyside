@@ -11,6 +11,7 @@ import {
   Prisma,
   Cost,
 } from '@prisma/client'
+import { userInclude } from '../user/model'
 import { FileModel } from '@/domain/files/model'
 
 export type ResourceModel = Resource & {
@@ -56,9 +57,7 @@ export const valueInclude = {
   },
   Option: true,
   User: {
-    include: {
-      ImageBlob: true,
-    },
+    include: userInclude,
   },
   ValueOption: {
     include: {

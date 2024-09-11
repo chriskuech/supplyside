@@ -4,7 +4,7 @@ import { MenuItem, Select } from '@mui/material'
 import { ForwardedRef, forwardRef, useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
 import { readUsersAction } from './actions'
-import { User } from '@/domain/iam/user/types'
+import { User } from '@/domain/user/entity'
 
 type Props = {
   inputId: string
@@ -40,7 +40,7 @@ function UserField(
     >
       {users.map((u) => (
         <MenuItem key={u.id} value={u.id}>
-          {u.fullName}
+          {u.name}
         </MenuItem>
       ))}
     </Select>

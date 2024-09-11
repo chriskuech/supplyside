@@ -2,9 +2,9 @@ import { Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
 import Image from 'next/image'
 import { handleSaveSettings } from './actions'
-import { readAccount } from '@/domain/iam/account/actions'
 import { readSession } from '@/lib/session/actions'
 import config from '@/services/config'
+import { readAccount } from '@/domain/iam/account'
 
 export default async function InfoPage() {
   const { accountId } = await readSession()

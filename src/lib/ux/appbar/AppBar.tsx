@@ -120,7 +120,7 @@ export default async function AppBar() {
                 )}
 
                 <AccountMenu />
-                <UserMenu user={session.user} />
+                <UserMenu self={session.user} />
                 {session.accountId !== systemAccountId && <NavMenu />}
               </Stack>
             </>
