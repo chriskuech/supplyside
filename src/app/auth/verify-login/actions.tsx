@@ -1,7 +1,6 @@
 'use server'
 
 import { RedirectType, redirect } from 'next/navigation'
-import { revalidatePath } from 'next/cache'
 import { createSession } from '@/lib/session/actions'
 import { SessionCreationError } from '@/domain/iam/session/errors'
 
@@ -24,5 +23,3 @@ export const login = async ({ email, token, returnTo = '/' }: LoginParams) => {
     throw error
   }
 }
-
-export const refresh = async () => revalidatePath('')

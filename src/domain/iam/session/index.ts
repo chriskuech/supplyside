@@ -2,7 +2,7 @@
 
 import { isMatching } from 'ts-pattern'
 import { isError } from 'remeda'
-import { mapSessionModel } from './mappers'
+import { mapSessionModelToEntity } from './mappers'
 import { Session } from './entity'
 import { SessionCreationError } from './errors'
 import { sessionIncludes } from './model'
@@ -62,7 +62,7 @@ export const createSession = async (
     },
   })
 
-  return mapSessionModel(session)
+  return mapSessionModelToEntity(session)
 }
 
 export const readAndExtendSession = async (
@@ -77,7 +77,7 @@ export const readAndExtendSession = async (
       include: sessionIncludes,
     })
 
-    return mapSessionModel(session)
+    return mapSessionModelToEntity(session)
   } catch (error) {
     if (isError(error) && isMatching({ code: 'P2025' }, error)) return null
 
