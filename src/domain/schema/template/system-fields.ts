@@ -172,11 +172,11 @@ const _fields = {
     type: 'Date',
     description: 'Represents the latest delivery date',
   },
-  number: {
+  poNumber: {
     templateId: 'c056ca91-7f40-45d2-ae01-cd4bc66c09f2',
-    name: 'Number',
+    name: 'PO Number',
     type: 'Text',
-    description: 'Unique number for a specific resource',
+    description: 'Unique identifier for a Purchase Order',
   },
   order: {
     templateId: '2f1954ab-e156-4d23-a3da-45e8168fcfdd',

@@ -45,7 +45,7 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   const vendorName = selectResourceField(resource, fields.vendor)?.resource
     ?.name
   const issuedDate = selectResourceField(resource, fields.issuedDate)?.date
-  const number = selectResourceField(resource, fields.number)?.string
+  const number = selectResourceField(resource, fields.poNumber)?.string
 
   const input: Prisma.ValueCreateInput = {
     File: {

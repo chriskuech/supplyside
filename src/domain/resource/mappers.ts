@@ -33,7 +33,7 @@ export const mapResourceToValueResource = (
   key: resource.key,
   name:
     selectResourceField(resource, fields.name)?.string ??
-    selectResourceField(resource, fields.number)?.string ??
+    selectResourceField(resource, fields.poNumber)?.string ??
     fail('Resource type does not have a name or number field'),
 })
 
@@ -83,7 +83,7 @@ export const mapValueResourceModelToEntity = (
       (rf) =>
         rf.Field.templateId &&
         (
-          [fields.name.templateId, fields.number.templateId] as string[]
+          [fields.name.templateId, fields.poNumber.templateId] as string[]
         ).includes(rf.Field.templateId),
     )?.Value.string ?? '',
 })

@@ -42,8 +42,8 @@ export const handleResourceCreate = async ({
       accountId,
       resourceId: resource.id,
       fieldId:
-        selectSchemaField(schema, fields.number)?.id ??
-        fail(`"${fields.number.name}" field not found`),
+        selectSchemaField(schema, fields.poNumber)?.id ??
+        fail(`"${fields.poNumber.name}" field not found`),
       value: { string: resource.key.toString() },
     })
   }
