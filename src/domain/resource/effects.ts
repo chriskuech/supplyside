@@ -1,5 +1,5 @@
 import { fail } from 'assert'
-import { Field, Schema, selectSchemaField } from '../schema/types'
+import { SchemaField, Schema, selectSchemaField } from '../schema/types'
 import { readSchema } from '../schema/actions'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceField } from './extensions'
@@ -53,7 +53,7 @@ type HandleResourceUpdateParams = {
   accountId: string
   schema: Schema
   resource: Resource
-  updatedFields: { field: Field; value: Value }[]
+  updatedFields: { field: SchemaField; value: Value }[]
 }
 
 export const handleResourceUpdate = async ({

@@ -1,7 +1,7 @@
 import { JSONSchema7 } from 'json-schema'
 import { mapToObj } from 'remeda'
 import { P, match } from 'ts-pattern'
-import { Field, Schema } from '../types'
+import { SchemaField, Schema } from '../types'
 
 const datePattern = '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
 const emailPattern = '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'
@@ -13,7 +13,7 @@ export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
   type: 'object',
   properties: mapToObj(schema.allFields, (f) => [
     f.name,
-    match<Field, JSONSchema7>(f)
+    match<SchemaField, JSONSchema7>(f)
       .with({ type: 'Checkbox' }, () => ({
         type: ['boolean', 'null'],
         description: f.description ?? undefined,

@@ -9,7 +9,7 @@ import UserCard from '../fields/views/UserCard'
 import ResourceFieldView from '../fields/views/ResourceFieldView'
 import FieldGridEditCell from './FieldGridEditCell'
 import { Cell, Column, Display, Row } from './types'
-import { Field } from '@/domain/schema/types'
+import { SchemaField } from '@/domain/schema/types'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
 import { formatDate, formatMoney } from '@/lib/format'
 import { Value } from '@/domain/resource/entity'
@@ -17,7 +17,7 @@ import { selectResourceField } from '@/domain/resource/extensions'
 import { emptyValue } from '@/domain/resource/entity'
 
 export const mapSchemaFieldToGridColDef = (
-  field: Field,
+  field: SchemaField,
   options: {
     isEditable: boolean
   },
@@ -57,56 +57,84 @@ export const mapSchemaFieldToGridColDef = (
     return match<FieldType, null | GridApplyQuickFilter<Row, Cell>>(field.type)
       .with(
         'Checkbox',
-        () => (value) => value?.string?.includes(field.name) ?? false,
+        () => (value) =>
+          value?.string?.toLowerCase().includes(field.name.toLowerCase()) ??
+          false,
       )
       .with(
         'Contact',
         () => (value) =>
           (['name', 'title', 'email', 'phone'] as const).some(
-            (key) => value?.contact?.[key]?.includes(query) ?? false,
+            (key) =>
+              value?.contact?.[key]
+                ?.toLowerCase()
+                .includes(query.toLowerCase()) ?? false,
           ),
       )
       .with(
         'Date',
-        () => (value) => formatDate(value?.date)?.includes(query) ?? false,
+        () => (value) =>
+          formatDate(value?.date)
+            ?.toLowerCase()
+            .includes(query.toLowerCase()) ?? false,
       )
-      .with('File', () => (value) => value?.file?.name.includes(query) ?? false)
+      .with(
+        'File',
+        () => (value) =>
+          value?.file?.name.toLowerCase().includes(query.toLowerCase()) ??
+          false,
+      )
       .with(
         'Files',
         () => (value) =>
-          value?.files?.some((file) => file.name.includes(query)) ?? false,
+          value?.files?.some((file) =>
+            file.name.toLowerCase().includes(query.toLowerCase()),
+          ) ?? false,
       )
       .with(
         'Money',
-        () => (value) => formatMoney(value?.number)?.includes(query) ?? false,
+        () => (value) =>
+          formatMoney(value?.number)
+            ?.toLowerCase()
+            .includes(query.toLowerCase()) ?? false,
       )
       .with(
         'MultiSelect',
         () => (value) =>
-          value?.options?.some((option) => option.name.includes(query)) ??
-          false,
+          value?.options?.some((option) =>
+            option.name.toLowerCase().includes(query.toLowerCase()),
+          ) ?? false,
       )
       .with(
         'Number',
-        () => (value) => value?.number?.toString().includes(query) ?? false,
+        () => (value) =>
+          value?.number
+            ?.toString()
+            .toLowerCase()
+            .includes(query.toLowerCase()) ?? false,
       )
       .with(
         'Select',
-        () => (value) => value?.option?.name.includes(query) ?? false,
+        () => (value) =>
+          value?.option?.name.toLowerCase().includes(query.toLowerCase()) ??
+          false,
       )
       .with(
         P.union('Text', 'Textarea'),
-        () => (value) => value?.string?.includes(query) ?? false,
+        () => (value) =>
+          value?.string?.toLowerCase().includes(query.toLowerCase()) ?? false,
       )
       .with(
         'Resource',
-        () => (value) => value?.resource?.name.includes(query) ?? false,
+        () => (value) =>
+          value?.resource?.name.toLowerCase().includes(query.toLowerCase()) ??
+          false,
       )
       .with(
         'User',
         () => (value) =>
-          value?.user?.name?.includes(query) ||
-          value?.user?.email.includes(query) ||
+          value?.user?.name?.toLowerCase().includes(query.toLowerCase()) ||
+          value?.user?.email.toLowerCase().includes(query.toLowerCase()) ||
           false,
       )
       .exhaustive()

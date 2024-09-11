@@ -11,7 +11,7 @@ import {
   findTemplateField,
 } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema/actions'
-import { Field, selectSchemaField } from '@/domain/schema/types'
+import { SchemaField, selectSchemaField } from '@/domain/schema/types'
 import { FieldTemplate } from '@/domain/schema/template/types'
 
 export const copyLinkedResourceFields = async (
@@ -42,7 +42,7 @@ export const copyLinkedResourceFields = async (
     }),
   ])
 
-  const excludeDerivedFields = (f: Field) =>
+  const excludeDerivedFields = (f: SchemaField) =>
     !f.templateId || !findTemplateField(f.templateId)?.isDerived
 
   const thisFieldIds = thisSchema.allFields
