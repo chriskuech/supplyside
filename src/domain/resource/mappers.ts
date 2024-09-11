@@ -4,7 +4,7 @@ import { P, match } from 'ts-pattern'
 import { isArray, isNullish, pick } from 'remeda'
 import { fields } from '../schema/template/system-fields'
 import { mapFile } from '../files/mapValueFile'
-import { Schema } from '../schema/types'
+import { Schema, SchemaField } from '../schema/types'
 import { mapUserModelToEntity } from '../user/mappers'
 import { Resource, Value, ValueResource } from './entity'
 import { ResourceModel, ValueModel, ValueResourceModel } from './model'
@@ -173,7 +173,7 @@ export const mapValueInputToPrismaValueUpdate = (
 
 export const mapValueInputToPrismaValueCreate = (
   value: ValueInput,
-  defaultValue?: Value | undefined,
+  { defaultToToday, defaultValue }: SchemaField,
 ): Prisma.ValueCreateWithoutResourceFieldValueInput =>
   match<ValueInput, Prisma.ValueCreateWithoutResourceFieldValueInput>(value)
     .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
@@ -184,7 +184,11 @@ export const mapValueInputToPrismaValueCreate = (
       return contact ? { Contact: { create: contact } } : {}
     })
     .with({ date: P.not(undefined) }, ({ date: value }) => ({
-      date: value ?? defaultValue?.date ?? null,
+      date:
+        value ??
+        (defaultToToday ? new Date() : null) ??
+        defaultValue?.date ??
+        null,
     }))
     .with({ number: P.not(undefined) }, ({ number: value }) => ({
       number: value ?? defaultValue?.number ?? null,

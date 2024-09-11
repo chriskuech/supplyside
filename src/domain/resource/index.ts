@@ -75,7 +75,7 @@ export const createResource = async ({
               create: mapValueInputToPrismaValueCreate(
                 resourceField?.value ??
                   mapValueToValueInput(schemaField.type, emptyValue),
-                schemaField.defaultValue ?? undefined,
+                schemaField,
               ),
             },
           }
@@ -170,43 +170,48 @@ export const updateResource = async ({
   resourceId,
   fields,
 }: UpdateResourceParams) => {
+  const resource = await readResource({ accountId, id: resourceId })
+
+  const schema = await readSchema({ accountId, resourceType: resource.type })
+
   const model = await prisma().resource.update({
     where: { accountId, id: resourceId },
     data: {
       ResourceField: {
-        upsert: fields.map(
-          (field) =>
-            ({
-              where: {
-                resourceId_fieldId: {
-                  resourceId: resourceId,
-                  fieldId: field.fieldId,
-                },
+        upsert: fields.map((rf) => {
+          const sf =
+            schema.allFields.find((f) => f.id === rf.fieldId) ??
+            fail('Field not found in schema')
+
+          return {
+            where: {
+              resourceId_fieldId: {
+                resourceId: resourceId,
+                fieldId: rf.fieldId,
               },
-              create: {
-                Field: {
-                  connect: { id: field.fieldId },
-                },
-                Value: {
-                  create: mapValueInputToPrismaValueCreate(field.value),
-                },
+            },
+            create: {
+              Field: {
+                connect: { id: rf.fieldId },
               },
-              update: {
-                Value: {
-                  create: mapValueInputToPrismaValueCreate(field.value),
-                  update: mapValueInputToPrismaValueUpdate(field.value),
-                },
+              Value: {
+                create: mapValueInputToPrismaValueCreate(rf.value, sf),
               },
-            }) satisfies Prisma.ResourceFieldUpsertWithWhereUniqueWithoutResourceInput,
-        ),
+            },
+            update: {
+              Value: {
+                create: mapValueInputToPrismaValueCreate(rf.value, sf),
+                update: mapValueInputToPrismaValueUpdate(rf.value),
+              },
+            },
+          } satisfies Prisma.ResourceFieldUpsertWithWhereUniqueWithoutResourceInput
+        }),
       },
     },
     include: resourceInclude,
   })
 
   const entity = mapResourceModelToEntity(model)
-
-  const schema = await readSchema({ accountId, resourceType: entity.type })
 
   await handleResourceUpdate({
     accountId,
