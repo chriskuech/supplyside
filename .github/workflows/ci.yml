@@ -44,7 +44,7 @@ jobs:
             timestamp = (Get-Date).ToString('s')
           }
           | ConvertTo-Json
-          | Set-Content -Path src/api/system/health/build.json
+          | Set-Content -Path src/app/api/system/health/build.json
         env:
           SHA: ${{ github.sha }}
           GITHUB_EVENT_NUMBER: ${{ github.event.number }}
