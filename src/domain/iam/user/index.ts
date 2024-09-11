@@ -2,11 +2,13 @@ import { v4 as uuid } from 'uuid'
 import { userInclude } from './model'
 import { mapUserModelToEntity } from './mappers'
 import { User } from './entity'
-import prisma from '@/services/prisma'
+import { IamUserNotFoundError } from './errors'
+import prisma, { isPrismaError } from '@/services/prisma'
 import config from '@/services/config'
 import smtp from '@/services/smtp'
 
 const loginPath = '/auth/login'
+const verifyLoginPath = '/auth/verify-login'
 
 type InviteUserParams = {
   accountId: string
@@ -40,20 +42,32 @@ export async function inviteUser({
   })
 }
 
-type VerifyEmailParams = {
+export type StartEmailVerificationParams = {
   email: string
+  rel?: string
 }
 
-export async function verifyEmail({ email }: VerifyEmailParams): Promise<void> {
+export async function startEmailVerification({
+  email,
+  rel,
+}: StartEmailVerificationParams): Promise<void> {
   const tokenLifespanInMinutes = 5
 
   const tat = uuid()
   const tatExpiresAt = new Date(Date.now() + 1000 * 60 * tokenLifespanInMinutes)
 
-  await prisma().user.update({
-    where: { email },
-    data: { tat, tatExpiresAt },
-  })
+  try {
+    await prisma().user.update({
+      where: { email },
+      data: { tat, tatExpiresAt },
+    })
+  } catch (error) {
+    if (isPrismaError('notFound')(error)) {
+      throw new IamUserNotFoundError()
+    }
+
+    throw error
+  }
 
   await smtp().sendEmailWithTemplate({
     From: 'SupplySide <bot@supplyside.io>',
@@ -62,7 +76,9 @@ export async function verifyEmail({ email }: VerifyEmailParams): Promise<void> {
     TemplateModel: {
       verify_email: email,
       verify_token: tat,
-      action_url: `${config().BASE_URL}${loginPath}?email=${email}&token=${tat}`,
+      action_url:
+        `${config().BASE_URL}${verifyLoginPath}?email=${email}&token=${tat}` +
+        (rel ? `&rel=${rel}` : ''),
       product_url: config().BASE_URL,
     },
     MessageStream: 'outbound',
@@ -74,10 +90,14 @@ type ReadUserParams = {
 }
 
 export async function readUser({ userId }: ReadUserParams): Promise<User> {
-  const user = await prisma().user.findUniqueOrThrow({
+  const user = await prisma().user.findUnique({
     where: { id: userId },
     include: userInclude,
   })
+
+  if (!user) {
+    throw new IamUserNotFoundError()
+  }
 
   return mapUserModelToEntity(user)
 }

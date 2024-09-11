@@ -1,7 +1,8 @@
-import { Box, Typography } from '@mui/material'
+import { Alert, Box, Typography } from '@mui/material'
 import { redirect, RedirectType } from 'next/navigation'
 import { z } from 'zod'
-import LoginForm from './LoginForm'
+import LoginForm from '../login/LoginForm'
+import { login } from './actions'
 import { readSession } from '@/lib/session/actions'
 import RefreshOnFocus from '@/lib/ux/RefreshOnFocus'
 
@@ -10,16 +11,22 @@ export default async function Login({
 }: {
   searchParams: Record<string, string | unknown>
 }) {
-  const { data: { rel } = {} } = z
+  const { data: { rel, email, token } = {}, error: zodError } = z
     .object({
       rel: z.string().startsWith('/').optional(),
+      email: z.string().email().optional(),
+      token: z.string().uuid().optional(),
     })
     .safeParse(searchParams)
 
   // TODO: don't catch all--it can be inferred as a static page
   const session = await readSession().catch(() => null)
 
-  if (session) redirect('/' + (rel && `rel=${rel}`), RedirectType.replace)
+  if (session) redirect(rel ?? '/', RedirectType.replace)
+
+  const loginError =
+    email && token ? await login({ email, token, rel }) : undefined
+  const error = zodError?.message || loginError?.error
 
   return (
     <Box
@@ -31,10 +38,12 @@ export default async function Login({
       flexDirection="column"
     >
       <RefreshOnFocus />
+
       <Box width={500}>
         <Typography variant="h4" textAlign="left" gutterBottom>
-          Login
+          Enter Access Token
         </Typography>
+        {error && <Alert severity="error">{error}</Alert>}
         <LoginForm rel={rel} />
       </Box>
     </Box>

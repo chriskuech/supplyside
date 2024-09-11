@@ -1,22 +1,24 @@
 'use server'
 
-import { RedirectType, redirect } from 'next/navigation'
-import { createSession } from '@/lib/session/actions'
-import { verifyEmail } from '@/domain/iam/user'
+import { redirect } from 'next/navigation'
+import * as domain from '@/domain/iam/user'
+import { IamUserNotFoundError } from '@/domain/iam/user/errors'
 
-export const requestToken = verifyEmail
-
-type LoginParams = {
-  email: string
-  token: string
-}
-
-export const login = async ({ email, token }: LoginParams) => {
+export const startEmailVerification = async (
+  params: domain.StartEmailVerificationParams,
+): Promise<undefined | { error: string }> => {
   try {
-    await createSession(email, token)
+    await domain.startEmailVerification(params)
 
-    redirect('/', RedirectType.replace)
-  } catch {
-    return { error: 'Incorrect email or password' }
+    redirect(
+      `/auth/verify-login?email=${params.email}` +
+        (params.rel ? `&rel=${params.rel}` : ''),
+    )
+  } catch (error) {
+    if (error instanceof IamUserNotFoundError) {
+      return { error: 'User not found' }
+    }
+
+    throw error
   }
 }

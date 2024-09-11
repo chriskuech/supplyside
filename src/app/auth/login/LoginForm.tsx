@@ -1,55 +1,47 @@
 'use client'
 
-import { Cancel } from '@mui/icons-material'
-import { Grow, IconButton, Stack, Typography } from '@mui/material'
-import { FC, useState } from 'react'
-import EmailInput from './EmailInput'
-import TokenInput from './TokenInput'
-import { login, requestToken } from './actions'
+import { Forward } from '@mui/icons-material'
+import { IconButton, InputAdornment, TextField } from '@mui/material'
+import { FC, useCallback, useState } from 'react'
+import { startEmailVerification } from './actions'
 
 type Props = {
-  defaultEmail: string | undefined
+  rel?: string
 }
 
-const LoginForm: FC<Props> = ({ defaultEmail }) => {
-  const [email, setEmail] = useState(defaultEmail ?? '')
-  const [step, setStep] = useState<'email' | 'token' | 'submit'>(
-    defaultEmail ? 'token' : 'email',
-  )
+const LoginForm: FC<Props> = ({ rel }) => {
+  const [email, setEmail] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const handleSubmit = useCallback(async () => {
+    const result = await startEmailVerification({ email, rel })
+    if (result?.error) setErrorMessage(result.error)
+  }, [email, rel])
 
   return (
-    <Stack spacing={5} direction="column">
-      <Typography variant="h4" textAlign="left">
-        Login
-      </Typography>
-      <Grow in={step === 'email'}>
-        <EmailInput
-          defaultEmail={email}
-          onSubmit={async (email) => {
-            await requestToken({ email })
-            setEmail(email)
-            setStep('token')
-          }}
-        />
-      </Grow>
-      <Grow in={step === 'token'}>
-        <Stack direction="row">
-          <Typography flexGrow={1}>{email}</Typography>
-          <IconButton onClick={() => setStep('email')}>
-            <Cancel />
-          </IconButton>
-        </Stack>
-      </Grow>
-      <Grow in={step === 'token'}>
-        <Stack>
-          <Typography>
-            We just sent you an email with a temporary access token. Please
-            enter it here.
-          </Typography>
-          <TokenInput onSubmit={(token) => login({ email, token })} />
-        </Stack>
-      </Grow>
-    </Stack>
+    <TextField
+      label="Email"
+      type="email"
+      variant="outlined"
+      value={email}
+      onChange={(e) => {
+        setEmail(e.currentTarget.value)
+        setErrorMessage('')
+      }}
+      helperText={errorMessage}
+      onKeyUp={(e) => e.key === 'Enter' && handleSubmit()}
+      slotProps={{
+        input: {
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={handleSubmit} disabled={!email} edge="end">
+                <Forward />
+              </IconButton>
+            </InputAdornment>
+          ),
+        },
+      }}
+    />
   )
 }
 
