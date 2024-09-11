@@ -11,7 +11,7 @@ type Props = {
   returnTo?: string
 }
 
-const LoginForm: FC<Props> = ({ email, token: defaultToken, returnTo }) => {
+const Form: FC<Props> = ({ email, token: defaultToken, returnTo }) => {
   const [token, setToken] = useState(defaultToken ?? '')
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -54,4 +54,4 @@ const LoginForm: FC<Props> = ({ email, token: defaultToken, returnTo }) => {
   )
 }
 
-export default LoginForm
+export default Form

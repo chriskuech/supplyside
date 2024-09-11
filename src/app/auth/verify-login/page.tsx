@@ -11,12 +11,12 @@ import {
 import { redirect, RedirectType } from 'next/navigation'
 import { z } from 'zod'
 import NextLink from 'next/link'
-import LoginForm from './LoginForm'
+import Form from './Form'
 import { readSession } from '@/lib/session/actions'
 import RefreshOnFocus from '@/lib/ux/RefreshOnFocus'
 import Logo from '@/lib/ux/appbar/Logo'
 
-export default async function Login({
+export default async function VerifyLogin({
   searchParams,
 }: {
   searchParams: Record<string, string | unknown>
@@ -75,7 +75,7 @@ export default async function Login({
 
               {error && <Alert severity="error">{error}</Alert>}
 
-              <LoginForm
+              <Form
                 returnTo={returnTo}
                 email={email ?? fail('no email')}
                 token={token}

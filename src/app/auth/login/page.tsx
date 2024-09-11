@@ -1,7 +1,7 @@
 import { Box, Card, CardContent, Stack, Typography } from '@mui/material'
 import { redirect, RedirectType } from 'next/navigation'
 import { z } from 'zod'
-import LoginForm from './LoginForm'
+import Form from './Form'
 import { readSession } from '@/lib/session/actions'
 import RefreshOnFocus from '@/lib/ux/RefreshOnFocus'
 import Logo from '@/lib/ux/appbar/Logo'
@@ -44,7 +44,7 @@ export default async function Login({
               Login
             </Typography>
 
-            <LoginForm returnTo={returnTo} />
+            <Form returnTo={returnTo} />
 
             <Box />
           </Stack>

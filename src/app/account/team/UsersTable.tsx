@@ -7,7 +7,7 @@ import { Clear } from '@mui/icons-material'
 import { filter, fromEntries, keys, map, pipe } from 'remeda'
 import { deleteUser, updateUser } from './actions'
 import { systemAccountId } from '@/lib/const'
-import { User as IamUser } from '@/domain/iam/user/entity'
+import { User } from '@/domain/iam/user/entity'
 import { useConfirmation } from '@/lib/confirmation'
 
 /**
@@ -27,8 +27,8 @@ const diff = <T extends Record<string, unknown>>(
   ) as Partial<T>
 
 type Props = {
-  currentUser: IamUser
-  users: IamUser[] | undefined
+  currentUser: User
+  users: User[] | undefined
 }
 
 const UsersTable: FC<Props> = ({ currentUser, users }) => {
@@ -47,7 +47,7 @@ const UsersTable: FC<Props> = ({ currentUser, users }) => {
   const editable: boolean =
     currentUser?.isAdmin || currentUser?.accountId === systemAccountId
 
-  const columns: GridColDef<IamUser>[] = [
+  const columns: GridColDef<User>[] = [
     {
       field: 'email',
       headerName: 'Email',
