@@ -1,5 +1,5 @@
 import { fail } from 'assert'
-import { Cost, Prisma, ResourceType } from '@prisma/client'
+import { Cost, ResourceType } from '@prisma/client'
 import { map, pipe, sum } from 'remeda'
 import { selectResourceField } from './extensions'
 import { readResource, readResources, updateResourceField } from '.'
@@ -8,15 +8,57 @@ import prisma from '@/services/prisma'
 import { selectSchemaField } from '@/domain/schema/types'
 import { fields } from '@/domain/schema/template/system-fields'
 
-export const createCost = async (resourceId: string): Promise<void> => {
-  await prisma().cost.create({
-    data: { resourceId },
+export type CreateCostParams = {
+  accountId: string
+  resourceId: string
+}
+
+export const createCost = async ({
+  accountId,
+  resourceId,
+}: CreateCostParams): Promise<void> => {
+  await prisma().resource.update({
+    where: {
+      id: resourceId,
+      Account: {
+        id: accountId,
+      },
+    },
+    data: {
+      Cost: {
+        create: {},
+      },
+    },
   })
 }
 
-export const updateCost = async (id: string, data: Prisma.CostUpdateInput) => {
+export type UpdateCostParams = {
+  accountId: string
+  resourceId: string
+  costId: string
+  data: {
+    name?: string
+    isPercentage?: boolean
+    value?: number
+  }
+}
+
+export const updateCost = async ({
+  accountId,
+  resourceId,
+  costId,
+  data,
+}: UpdateCostParams) => {
   const cost = await prisma().cost.update({
-    where: { id },
+    where: {
+      id: costId,
+      Resource: {
+        id: resourceId,
+        Account: {
+          id: accountId,
+        },
+      },
+    },
     data,
     include: {
       Resource: true,
@@ -26,9 +68,27 @@ export const updateCost = async (id: string, data: Prisma.CostUpdateInput) => {
   await recalculateItemizedCosts(cost.Resource.accountId, cost.resourceId)
 }
 
-export const deleteCost = async (id: string): Promise<void> => {
+export type DeleteCostParams = {
+  accountId: string
+  resourceId: string
+  costId: string
+}
+
+export const deleteCost = async ({
+  accountId,
+  resourceId,
+  costId,
+}: DeleteCostParams): Promise<void> => {
   const cost = await prisma().cost.delete({
-    where: { id },
+    where: {
+      id: costId,
+      Resource: {
+        id: resourceId,
+        Account: {
+          id: accountId,
+        },
+      },
+    },
     include: {
       Resource: true,
     },

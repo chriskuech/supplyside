@@ -17,8 +17,8 @@ import {
 } from '@mui/material'
 import { Add, Clear } from '@mui/icons-material'
 import { match } from 'ts-pattern'
+import { createCost, deleteCost, updateCost } from './actions'
 import { Resource } from '@/domain/resource/entity'
-import { createCost, deleteCost, updateCost } from '@/domain/resource/costs'
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectResourceField } from '@/domain/resource/extensions'
 
@@ -79,7 +79,11 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                   <TextField
                     defaultValue={row.name}
                     onChange={(e) =>
-                      updateCost(row.id, { name: e.target.value })
+                      updateCost({
+                        resourceId: resource.id,
+                        costId: row.id,
+                        data: { name: e.target.value },
+                      })
                     }
                     placeholder="Description"
                     size="small"
@@ -91,8 +95,10 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                     sx={{ width: '100%', textAlign: 'left' }}
                     defaultValue={row.isPercentage ? '%' : '$'}
                     onChange={(e) =>
-                      updateCost(row.id, {
-                        isPercentage: e.target.value === '%',
+                      updateCost({
+                        resourceId: resource.id,
+                        costId: row.id,
+                        data: { isPercentage: e.target.value === '%' },
                       })
                     }
                     size="small"
@@ -106,8 +112,12 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                   <TextField
                     defaultValue={row.value}
                     onChange={(e) =>
-                      updateCost(row.id, {
-                        value: Number(e.target.value),
+                      updateCost({
+                        resourceId: resource.id,
+                        costId: row.id,
+                        data: {
+                          value: Number(e.target.value),
+                        },
                       })
                     }
                     type="number"
@@ -131,7 +141,14 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                 <TableCell>
                   <Box width={40}>
                     {!isReadOnly && (
-                      <IconButton onClick={() => deleteCost(row.id)}>
+                      <IconButton
+                        onClick={() =>
+                          deleteCost({
+                            resourceId: resource.id,
+                            costId: row.id,
+                          })
+                        }
+                      >
                         <Clear />
                       </IconButton>
                     )}
@@ -169,7 +186,10 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
 
       {!isReadOnly && (
         <Stack direction="row" justifyContent="end">
-          <Button onClick={() => createCost(resource.id)} startIcon={<Add />}>
+          <Button
+            onClick={() => createCost({ resourceId: resource.id })}
+            startIcon={<Add />}
+          >
             Itemized Cost
           </Button>
         </Stack>
