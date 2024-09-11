@@ -11,9 +11,7 @@ import {
   fields,
 } from '@/domain/schema/template/system-fields'
 import { transitionStatus } from '@/lib/resource/actions'
-import { useDisclosure } from '@/lib/hooks/useDisclosure'
-import { Schema, selectSchemaField } from '@/domain/schema/types'
-import FieldControl from '@/lib/resource/fields/FieldControl'
+import { Schema } from '@/domain/schema/types'
 import { User } from '@/domain/iam/user/entity'
 import { isMissingRequiredFields } from '@/domain/resource/mappers'
 import LoadingButton from '@/lib/ux/LoadingButton'
@@ -26,7 +24,6 @@ type Props = {
 }
 
 export default function CallToAction({ self, schema, resource }: Props) {
-  const { open, isOpen, close } = useDisclosure()
   const [{ isLoading }, approveBill] = useAsyncCallback(() =>
     approveBillAction(resource.id),
   )
