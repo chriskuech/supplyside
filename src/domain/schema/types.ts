@@ -6,16 +6,16 @@ import { Value } from '../resource/entity'
 export type Schema = {
   resourceType: ResourceType
   sections: Section[]
-  allFields: Field[]
+  allFields: SchemaField[]
 }
 
 export type Section = {
   id: string
   name: string
-  fields: Field[]
+  fields: SchemaField[]
 }
 
-export type Field = {
+export type SchemaField = {
   id: string
   templateId: string | null
   name: string

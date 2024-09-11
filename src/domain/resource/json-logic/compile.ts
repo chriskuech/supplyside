@@ -3,7 +3,7 @@ import { FieldType, Value } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { OrderBy, Where } from './types'
 import { mapUuidToBase64, sanitizeValue } from './sanitize'
-import { Schema, Field, selectSchemaField } from '@/domain/schema/types'
+import { Schema, SchemaField, selectSchemaField } from '@/domain/schema/types'
 
 export type MapToSqlParams = {
   accountId: string
@@ -54,7 +54,7 @@ const createWhere = (where: Where, schema: Schema) =>
 const createOrderBy = (orderBy: OrderBy[]) =>
   orderBy.map((o) => `${sanitizeValue(o.var)} ${o.dir}`).join(', ')
 
-const createPropertySubquery = (field: Field) =>
+const createPropertySubquery = (field: SchemaField) =>
   match(field.type)
     .with(
       'Contact',

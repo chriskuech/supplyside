@@ -3,7 +3,7 @@
 import { Field as FieldModel, Option, ResourceType } from '@prisma/client'
 import { mapValueModelToEntity } from '../resource/mappers'
 import { ValueModel, valueInclude } from '../resource/model'
-import { Field, Schema } from './types'
+import { SchemaField, Schema } from './types'
 import prisma from '@/services/prisma'
 
 export type ReadSchemaParams = {
@@ -99,7 +99,7 @@ const mapField = (
     Option: Option[]
     DefaultValue: ValueModel | null
   },
-): Field => ({
+): SchemaField => ({
   id: model.id,
   templateId: model.templateId,
   name: model.name,
