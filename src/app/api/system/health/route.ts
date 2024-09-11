@@ -10,6 +10,8 @@ const buildJsonSchema = z.object({
   timestamp: z.string().datetime(),
 })
 
+console.log({ build })
+
 export async function GET(req: NextRequest): Promise<NextResponse> {
   return NextResponse.json({
     timestamp: new Date().toISOString(),

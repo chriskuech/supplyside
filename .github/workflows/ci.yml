@@ -42,7 +42,7 @@ jobs:
           @{
             commit    = $env:SHA
             version   = $env:GITHUB_EVENT_NUMBER
-            timestamp = (Get-Date).ToString('s')
+            timestamp = Get-Date -Format 's'
           }
           | ConvertTo-Json
           | Set-Content -Path $path
