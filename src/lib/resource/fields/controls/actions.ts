@@ -7,8 +7,8 @@ import { ValueResource } from '@/domain/resource/entity'
 import { File, JsFile } from '@/domain/files/types'
 import { createFile } from '@/domain/files'
 import { withSession } from '@/lib/session/actions'
-import { readUsers } from '@/domain/iam/user/actions'
-import { User } from '@/domain/iam/user/types'
+import { readUsers } from '@/domain/user'
+import { User } from '@/domain/user/entity'
 
 type ResourceFieldActionParams = {
   resourceId: string

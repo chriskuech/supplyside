@@ -140,9 +140,12 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                             )
                             .with(
                               { fieldType: 'Resource' },
-                              ({ value: { resource } }) => (
-                                <ResourceFieldView resource={resource} />
-                              ),
+                              ({ value: { resource } }) =>
+                                resource ? (
+                                  <ResourceFieldView resource={resource} />
+                                ) : (
+                                  '-'
+                                ),
                             )
                             .with(undefined, () => '-')
                             .exhaustive()}

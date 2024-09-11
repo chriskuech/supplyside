@@ -14,14 +14,14 @@ import {
 } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 import { Value } from '@/domain/resource/entity'
-import { Field } from '@/domain/schema/types'
+import { SchemaField } from '@/domain/schema/types'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 
 type AssigneeControlProps = {
   resourceId: string
   resourceType: ResourceType
-  field: Field
+  field: SchemaField
   value: Value | undefined
 }
 
@@ -40,13 +40,13 @@ export default function AssigneeToolbarControl({
       <Tooltip
         title={
           assignee
-            ? `Assigned to ${assignee?.fullName ?? assignee?.email ?? '(No name)'}`
+            ? `Assigned to ${assignee?.name ?? assignee?.email ?? '(No name)'}`
             : `Assign the ${resourceType} to a user`
         }
       >
         <IconButton onClick={open}>
           <Avatar
-            alt={assignee?.fullName ?? ''}
+            alt={assignee?.name ?? ''}
             src={assignee?.profilePicPath ?? ''}
           >
             {!assignee && <AssignmentInd />}

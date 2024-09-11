@@ -1,5 +1,5 @@
 import { fail } from 'assert'
-import { Field, Schema, selectSchemaField } from '../schema/types'
+import { SchemaField, Schema, selectSchemaField } from '../schema/types'
 import { readSchema } from '../schema/actions'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceField } from './extensions'
@@ -7,6 +7,8 @@ import { recalculateItemizedCosts, recalculateSubtotalCost } from './costs'
 import { Resource, Value } from './entity'
 import { copyLinkedResourceFields } from './fields'
 import { updateResourceField } from '.'
+
+const millisecondsPerDay = 24 * 60 * 60 * 1000
 
 type HandleResourceCreateParams = {
   accountId: string
@@ -40,8 +42,8 @@ export const handleResourceCreate = async ({
       accountId,
       resourceId: resource.id,
       fieldId:
-        selectSchemaField(schema, fields.number)?.id ??
-        fail(`"${fields.number.name}" field not found`),
+        selectSchemaField(schema, fields.poNumber)?.id ??
+        fail(`"${fields.poNumber.name}" field not found`),
       value: { string: resource.key.toString() },
     })
   }
@@ -51,7 +53,7 @@ type HandleResourceUpdateParams = {
   accountId: string
   schema: Schema
   resource: Resource
-  updatedFields: { field: Field; value: Value }[]
+  updatedFields: { field: SchemaField; value: Value }[]
 }
 
 export const handleResourceUpdate = async ({
@@ -153,5 +155,36 @@ export const handleResourceUpdate = async ({
     updatedFields.some((rf) => rf.field.templateId === fields.order.templateId)
   ) {
     await recalculateSubtotalCost(accountId, 'Bill', resource.id)
+  }
+
+  // When the “Invoice Date” field or “Payment Terms” field changes,
+  // Given the “Invoice Date” field and “Payment Terms” fields are not null,
+  // Then set “Payment Due Date” = “Invoice Date” + “Payment Terms”
+  if (
+    resource.type === 'Bill' &&
+    updatedFields.some(
+      (rf) =>
+        rf.field.templateId === fields.invoiceDate.templateId ||
+        rf.field.templateId === fields.paymentTerms.templateId,
+    )
+  ) {
+    const invoiceDate = selectResourceField(resource, fields.invoiceDate)?.date
+    const paymentTerms = selectResourceField(
+      resource,
+      fields.paymentTerms,
+    )?.number
+
+    if (invoiceDate && paymentTerms) {
+      await updateResourceField({
+        accountId,
+        fieldId: selectSchemaField(schema, fields.paymentDueDate)?.id ?? fail(),
+        resourceId: resource.id,
+        value: {
+          date: new Date(
+            invoiceDate.getTime() + paymentTerms * millisecondsPerDay,
+          ),
+        },
+      })
+    }
   }
 }

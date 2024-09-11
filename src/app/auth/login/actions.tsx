@@ -1,25 +1,24 @@
 'use server'
 
-import { RedirectType, redirect } from 'next/navigation'
-import { z } from 'zod'
-import { createSession } from '@/lib/session/actions'
+import { redirect } from 'next/navigation'
+import * as domain from '@/domain/iam/user'
+import { IamUserNotFoundError } from '@/domain/iam/user/errors'
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
-})
-
-export const handleLogin = async (state: unknown, formData: FormData) => {
-  const { email, password } = await schema.parseAsync({
-    email: formData.get('email')?.toString(),
-    password: formData.get('password')?.toString(),
-  })
-
+export const startEmailVerification = async (
+  params: domain.StartEmailVerificationParams,
+): Promise<undefined | { error: string }> => {
   try {
-    await createSession(email, password)
+    await domain.startEmailVerification(params)
 
-    redirect('/', RedirectType.replace)
-  } catch {
-    return { error: 'Incorrect email or password' }
+    redirect(
+      `/auth/verify-login?email=${encodeURIComponent(params.email)}` +
+        (params.returnTo ? `&returnTo=${params.returnTo}` : ''),
+    )
+  } catch (error) {
+    if (error instanceof IamUserNotFoundError) {
+      return { error: 'User not found' }
+    }
+
+    throw error
   }
 }

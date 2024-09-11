@@ -22,7 +22,7 @@ import FileField from './FileField'
 import UserField from './UserField'
 import ResourceField from './ResourceField'
 import FilesField from './FilesField'
-import { Field as FieldModel } from '@/domain/schema/types'
+import { SchemaField as FieldModel } from '@/domain/schema/types'
 import { Value } from '@/domain/resource/entity'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
 import { emptyValue } from '@/domain/resource/entity'
@@ -55,7 +55,11 @@ function Field(
     ))
     .with('Contact', () =>
       isReadOnly ? (
-        <ContactCard contact={value?.contact ?? null} inline={inline} />
+        value?.contact ? (
+          <ContactCard contact={value.contact} inline={inline} />
+        ) : (
+          '-'
+        )
       ) : (
         <ContactField
           contact={value?.contact ?? null}

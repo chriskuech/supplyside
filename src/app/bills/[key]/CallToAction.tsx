@@ -11,19 +11,22 @@ import {
   fields,
 } from '@/domain/schema/template/system-fields'
 import { transitionStatus } from '@/lib/resource/actions'
-import { Schema } from '@/domain/schema/types'
-import { User } from '@/domain/iam/user/types'
+import { useDisclosure } from '@/lib/hooks/useDisclosure'
+import { Schema, selectSchemaField } from '@/domain/schema/types'
+import FieldControl from '@/lib/resource/fields/FieldControl'
+import { User } from '@/domain/iam/user/entity'
 import { isMissingRequiredFields } from '@/domain/resource/mappers'
 import LoadingButton from '@/lib/ux/LoadingButton'
 import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
 
 type Props = {
-  user: User
+  self: User
   schema: Schema
   resource: Resource
 }
 
-export default function CallToAction({ user, schema, resource }: Props) {
+export default function CallToAction({ self, schema, resource }: Props) {
+  const { open, isOpen, close } = useDisclosure()
   const [{ isLoading }, approveBill] = useAsyncCallback(() =>
     approveBillAction(resource.id),
   )
@@ -83,7 +86,7 @@ export default function CallToAction({ user, schema, resource }: Props) {
           size="large"
           sx={{ height: 'fit-content', fontSize: '1.2em' }}
           endIcon={<ArrowRight />}
-          disabled={!user.isApprover && !user.isGlobalAdmin}
+          disabled={!self.isApprover && !self.isGlobalAdmin}
           onClick={approveBill}
           isLoading={isLoading}
         >

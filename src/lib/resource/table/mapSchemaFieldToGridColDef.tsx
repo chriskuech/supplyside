@@ -9,7 +9,7 @@ import UserCard from '../fields/views/UserCard'
 import ResourceFieldView from '../fields/views/ResourceFieldView'
 import FieldGridEditCell from './FieldGridEditCell'
 import { Cell, Column, Display, Row } from './types'
-import { Field } from '@/domain/schema/types'
+import { SchemaField } from '@/domain/schema/types'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
 import { formatDate, formatMoney } from '@/lib/format'
 import { Value } from '@/domain/resource/entity'
@@ -17,7 +17,7 @@ import { selectResourceField } from '@/domain/resource/extensions'
 import { emptyValue } from '@/domain/resource/entity'
 
 export const mapSchemaFieldToGridColDef = (
-  field: Field,
+  field: SchemaField,
   options: {
     isEditable: boolean
   },
@@ -57,56 +57,84 @@ export const mapSchemaFieldToGridColDef = (
     return match<FieldType, null | GridApplyQuickFilter<Row, Cell>>(field.type)
       .with(
         'Checkbox',
-        () => (value) => value?.string?.includes(field.name) ?? false,
+        () => (value) =>
+          value?.string?.toLowerCase().includes(field.name.toLowerCase()) ??
+          false,
       )
       .with(
         'Contact',
         () => (value) =>
           (['name', 'title', 'email', 'phone'] as const).some(
-            (key) => value?.contact?.[key]?.includes(query) ?? false,
+            (key) =>
+              value?.contact?.[key]
+                ?.toLowerCase()
+                .includes(query.toLowerCase()) ?? false,
           ),
       )
       .with(
         'Date',
-        () => (value) => formatDate(value?.date)?.includes(query) ?? false,
+        () => (value) =>
+          formatDate(value?.date)
+            ?.toLowerCase()
+            .includes(query.toLowerCase()) ?? false,
       )
-      .with('File', () => (value) => value?.file?.name.includes(query) ?? false)
+      .with(
+        'File',
+        () => (value) =>
+          value?.file?.name.toLowerCase().includes(query.toLowerCase()) ??
+          false,
+      )
       .with(
         'Files',
         () => (value) =>
-          value?.files?.some((file) => file.name.includes(query)) ?? false,
+          value?.files?.some((file) =>
+            file.name.toLowerCase().includes(query.toLowerCase()),
+          ) ?? false,
       )
       .with(
         'Money',
-        () => (value) => formatMoney(value?.number)?.includes(query) ?? false,
+        () => (value) =>
+          formatMoney(value?.number)
+            ?.toLowerCase()
+            .includes(query.toLowerCase()) ?? false,
       )
       .with(
         'MultiSelect',
         () => (value) =>
-          value?.options?.some((option) => option.name.includes(query)) ??
-          false,
+          value?.options?.some((option) =>
+            option.name.toLowerCase().includes(query.toLowerCase()),
+          ) ?? false,
       )
       .with(
         'Number',
-        () => (value) => value?.number?.toString().includes(query) ?? false,
+        () => (value) =>
+          value?.number
+            ?.toString()
+            .toLowerCase()
+            .includes(query.toLowerCase()) ?? false,
       )
       .with(
         'Select',
-        () => (value) => value?.option?.name.includes(query) ?? false,
+        () => (value) =>
+          value?.option?.name.toLowerCase().includes(query.toLowerCase()) ??
+          false,
       )
       .with(
         P.union('Text', 'Textarea'),
-        () => (value) => value?.string?.includes(query) ?? false,
+        () => (value) =>
+          value?.string?.toLowerCase().includes(query.toLowerCase()) ?? false,
       )
       .with(
         'Resource',
-        () => (value) => value?.resource?.name.includes(query) ?? false,
+        () => (value) =>
+          value?.resource?.name.toLowerCase().includes(query.toLowerCase()) ??
+          false,
       )
       .with(
         'User',
         () => (value) =>
-          value?.user?.fullName?.includes(query) ||
-          value?.user?.email.includes(query) ||
+          value?.user?.name?.toLowerCase().includes(query.toLowerCase()) ||
+          value?.user?.email.toLowerCase().includes(query.toLowerCase()) ||
           false,
       )
       .exhaustive()
@@ -146,11 +174,15 @@ export const mapSchemaFieldToGridColDef = (
   renderCell: ({ value }) => {
     const children = match<FieldType>(field.type)
       .with('Checkbox', () => value?.boolean && <Check />)
-      .with('Contact', () => (
-        <Box onClick={(e) => e.stopPropagation()}>
-          <ContactCard contact={value?.contact ?? null} inline />
-        </Box>
-      ))
+      .with(
+        'Contact',
+        () =>
+          value?.contact && (
+            <Box onClick={(e) => e.stopPropagation()}>
+              <ContactCard contact={value.contact} inline />
+            </Box>
+          ),
+      )
       .with('MultiSelect', () => (
         <Stack gap={1} direction="row">
           {value?.options?.map((option) => (
@@ -158,9 +190,11 @@ export const mapSchemaFieldToGridColDef = (
           ))}
         </Stack>
       ))
-      .with('Resource', () => (
-        <ResourceFieldView resource={value?.resource ?? null} />
-      ))
+      .with(
+        'Resource',
+        () =>
+          value?.resource && <ResourceFieldView resource={value.resource} />,
+      )
       .with('Select', () => value?.option && <Chip label={value.option.name} />)
       .with('User', () => value?.user && <UserCard user={value.user} />)
       .otherwise(() => undefined)
@@ -178,6 +212,7 @@ export const mapSchemaFieldToGridColDef = (
   // Only called if `renderCell` returns `undefined`
   valueFormatter: (_, resource) => {
     const value = selectResourceField(resource, { fieldId: field.id })
+    const template = findTemplateField(field.templateId)
 
     const formatted = match<FieldType>(field.type)
       .with('Date', () => formatDate(value?.date) ?? undefined)
@@ -187,7 +222,11 @@ export const mapSchemaFieldToGridColDef = (
           currency: 'USD',
         }),
       )
-      .with('Number', () => value?.number)
+      .with('Number', () =>
+        template?.prefix && value?.number
+          ? `${template.prefix} ${value.number}`
+          : value?.number,
+      )
       .with(P.union('Text', 'Textarea'), () => value?.string)
       .otherwise(() => undefined)
 

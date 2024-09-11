@@ -13,23 +13,30 @@ import prisma from '@/services/prisma'
 import { ValueInput } from '@/domain/resource/patch'
 import { ValueResource } from '@/domain/resource/entity'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
-import { selectSchemaField } from '@/domain/schema/types'
-
-export const readSchema = async (
-  params: Omit<schemaDomain.ReadSchemaParams, 'accountId'>,
-) => {
-  const { accountId } = await readSession()
-
-  return schemaDomain.readSchema({ ...params, accountId })
-}
+import {
+  selectSchemaField,
+  selectSchemaFieldUnsafe,
+} from '@/domain/schema/types'
+import { fields } from '@/domain/schema/template/system-fields'
 
 export const createResource = async (
-  params: Pick<domain.CreateResourceParams, 'type' | 'data'>,
+  params: Pick<domain.CreateResourceParams, 'type' | 'fields'>,
 ): Promise<Resource> => {
   const { accountId, userId } = await readSession()
 
+  const schema = await schemaDomain.readSchema({
+    accountId,
+    resourceType: params.type,
+  })
+
   if (params.type === 'Order') {
-    params.data = { ...params.data, Assignee: userId }
+    params.fields = [
+      ...(params.fields ?? []),
+      {
+        fieldId: selectSchemaFieldUnsafe(schema, fields.assignee).id,
+        value: { userId },
+      },
+    ]
   }
 
   revalidatePath('')
@@ -159,8 +166,10 @@ export const updateResourceField = async (params: {
   fieldId: string
   value: ValueInput
 }) =>
-  withSession(({ accountId }) => {
+  withSession(async ({ accountId }) => {
+    const resource = await domain.updateResourceField({ ...params, accountId })
+
     revalidatePath('')
 
-    return domain.updateResourceField({ ...params, accountId })
+    return resource
   })

@@ -7,7 +7,7 @@ import { Clear } from '@mui/icons-material'
 import { filter, fromEntries, keys, map, pipe } from 'remeda'
 import { deleteUser, updateUser } from './actions'
 import { systemAccountId } from '@/lib/const'
-import { User } from '@/domain/iam/user/types'
+import { User } from '@/domain/iam/user/entity'
 import { useConfirmation } from '@/lib/confirmation'
 
 /**

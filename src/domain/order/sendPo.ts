@@ -29,7 +29,7 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   const po = selectResourceField(order, fields.document)?.file
   const assignee = selectResourceField(order, fields.assignee)?.user
   const vendor = selectResourceField(order, fields.vendor)?.resource
-  const number = selectResourceField(order, fields.number)?.string
+  const number = selectResourceField(order, fields.poNumber)?.string
   const date = selectResourceField(order, fields.issuedDate)?.date
 
   if (!po || !poRecipient?.email) return
@@ -46,8 +46,8 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   await smtp().sendEmailWithTemplate({
     From: 'SupplySide <bot@supplyside.io>',
     To: `${poRecipient.name} <${poRecipient.email}>`,
-    Cc: `${assignee?.fullName} <${assignee?.email}>`,
-    ReplyTo: `${assignee?.fullName} <${assignee?.email}>`,
+    Cc: `${assignee?.name} <${assignee?.email}>`,
+    ReplyTo: `${assignee?.name} <${assignee?.email}>`,
     TemplateAlias: 'new-po',
     TemplateModel: {
       // layout
@@ -58,7 +58,7 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
 
       // template
       supplier_user_name: poRecipient.name ?? '(No Name)',
-      buyer_user_name: assignee?.firstName ?? '(Unassigned)',
+      buyer_user_name: assignee?.name ?? '(Unassigned)',
       supplier_company_name: vendor?.name ?? '(No Vendor)',
       order_number: number ?? '(No Number)',
       date: date?.toLocaleDateString() ?? '(No Date)',
