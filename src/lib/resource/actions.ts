@@ -164,8 +164,10 @@ export const updateResourceField = async (params: {
   fieldId: string
   value: ValueInput
 }) =>
-  withSession(({ accountId }) => {
+  withSession(async ({ accountId }) => {
+    const resource = await domain.updateResourceField({ ...params, accountId })
+
     revalidatePath('')
 
-    return domain.updateResourceField({ ...params, accountId })
+    return resource
   })

@@ -77,8 +77,8 @@ export async function startEmailVerification({
       verify_email: email,
       verify_token: tat,
       action_url:
-        `${config().BASE_URL}${verifyLoginPath}?email=${email}&token=${tat}` +
-        (returnTo ? `&rel=${returnTo}` : ''),
+        `${config().BASE_URL}${verifyLoginPath}?email=${encodeURIComponent(email)}&token=${tat}` +
+        (returnTo ? `&returnTo=${returnTo}` : ''),
       product_url: config().BASE_URL,
     },
     MessageStream: 'outbound',
