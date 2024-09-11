@@ -3,7 +3,7 @@
 import { Field as FieldModel, Option, ResourceType } from '@prisma/client'
 import { mapValueModelToEntity } from '../resource/mappers'
 import { ValueModel, valueInclude } from '../resource/model'
-import { SchemaField, Schema } from './types'
+import { SchemaField, Schema } from './entity'
 import prisma from '@/services/prisma'
 
 export type ReadSchemaParams = {

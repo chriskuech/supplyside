@@ -26,10 +26,10 @@ import { FC } from 'react'
 import { z } from 'zod'
 import { isPlainObject } from 'remeda'
 import { Field, Section } from './actions'
-import { Field as FullField } from '@/domain/schema/fields/types'
+import { SchemaField } from '@/domain/schema/entity'
 
 type Props = {
-  fields: FullField[]
+  fields: SchemaField[]
   section: Section
   onChange: (fieldIds: string[]) => void
 }

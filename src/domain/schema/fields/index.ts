@@ -1,10 +1,17 @@
 import { P, match } from 'ts-pattern'
-import { Prisma } from '@prisma/client'
-import { CreateFieldParams, Field, UpdateFieldDto } from './types'
+import { FieldType, Prisma, ResourceType } from '@prisma/client'
+import { SchemaField } from '../entity'
 import prisma from '@/services/prisma'
 import { ValueInput } from '@/domain/resource/patch'
 import { mapValueModelToEntity } from '@/domain/resource/mappers'
 import { valueInclude } from '@/domain/resource/model'
+
+export type CreateFieldParams = {
+  name: string
+  type: FieldType
+  resourceType?: ResourceType
+  isRequired?: boolean
+}
 
 export const createField = async (
   accountId: string,
@@ -28,7 +35,7 @@ export const createField = async (
   })
 }
 
-export const readFields = async (accountId: string): Promise<Field[]> => {
+export const readFields = async (accountId: string): Promise<SchemaField[]> => {
   const fields = await prisma().field.findMany({
     where: {
       accountId,
@@ -54,9 +61,10 @@ export const readFields = async (accountId: string): Promise<Field[]> => {
     defaultToToday: f.defaultToToday,
     description: f.description,
     isRequired: f.isRequired,
-    Option: f.Option.map((o) => ({
+    options: f.Option.map((o) => ({
       id: o.id,
       name: o.name,
+      templateId: o.templateId,
     })),
     resourceType: f.resourceType,
     type: f.type,
@@ -64,6 +72,25 @@ export const readFields = async (accountId: string): Promise<Field[]> => {
     defaultValue: mapValueModelToEntity(f.DefaultValue),
   }))
 }
+
+export type UpdateFieldDto = {
+  id: string
+  name: string
+  description: string | null
+  options: OptionPatch[]
+  defaultValue: ValueInput
+  defaultToToday: boolean
+  isRequired?: boolean
+}
+
+export type OptionPatch = {
+  id: string // patch ID -- must be `id` to work with mui
+  name: string
+} & (
+  | { op: 'add' }
+  | { op: 'update'; optionId: string }
+  | { op: 'remove'; optionId: string }
+)
 
 export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
   await Promise.all([

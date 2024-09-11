@@ -12,7 +12,7 @@ import prisma from '@/services/prisma'
 import { readResource, readResources } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readBlob } from '@/domain/blobs'
-import { readSchema } from '@/domain/schema/actions'
+import { readSchema } from '@/domain/schema'
 import { selectResourceField } from '@/domain/resource/extensions'
 
 type Props = {

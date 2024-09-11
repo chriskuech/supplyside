@@ -26,7 +26,7 @@ import ResourceForm from '../../ResourceForm'
 import { ValueResource } from '@/domain/resource/entity'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { mapResourceToValueResource } from '@/domain/resource/mappers'
-import { selectSchemaFieldUnsafe } from '@/domain/schema/types'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import useSchema from '@/lib/schema/useSchema'
 

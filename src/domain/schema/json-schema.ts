@@ -1,7 +1,7 @@
 import { JSONSchema7 } from 'json-schema'
 import { mapToObj } from 'remeda'
 import { P, match } from 'ts-pattern'
-import { SchemaField, Schema } from '../types'
+import { SchemaField, Schema } from './entity'
 
 const datePattern = '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
 const emailPattern = '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'

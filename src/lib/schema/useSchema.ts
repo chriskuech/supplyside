@@ -1,7 +1,7 @@
 import { ResourceType } from '@prisma/client'
 import { useEffect, useState } from 'react'
 import { readSchema } from './actions'
-import { Schema } from '@/domain/schema/types'
+import { Schema } from '@/domain/schema/entity'
 
 const useSchema = (resourceType: ResourceType): Schema | null => {
   const [schema, setSchema] = useState<Schema | null>(null)

@@ -2,8 +2,8 @@
 
 import { fail } from 'assert'
 import { Prisma, ResourceType } from '@prisma/client'
-import { readSchema } from '../schema/actions'
-import { selectSchemaField } from '../schema/types'
+import { readSchema } from '../schema'
+import { selectSchemaField } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { recalculateSubtotalCost } from './costs'
 import { selectResourceField } from './extensions'

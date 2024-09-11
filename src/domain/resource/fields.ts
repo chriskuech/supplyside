@@ -3,6 +3,7 @@
 import { fail } from 'assert'
 import { ResourceType } from '@prisma/client'
 import { pick } from 'remeda'
+import { SchemaField } from '../schema/entity'
 import { copyResourceCosts } from './costs'
 import { readResource, readResources, updateResourceField } from '.'
 import prisma from '@/services/prisma'
@@ -10,8 +11,8 @@ import {
   fields,
   findTemplateField,
 } from '@/domain/schema/template/system-fields'
-import { readSchema } from '@/domain/schema/actions'
-import { SchemaField, selectSchemaField } from '@/domain/schema/types'
+import { readSchema } from '@/domain/schema'
+import { selectSchemaField } from '@/domain/schema/extensions'
 import { FieldTemplate } from '@/domain/schema/template/types'
 
 export const copyLinkedResourceFields = async (

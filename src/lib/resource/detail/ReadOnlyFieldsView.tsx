@@ -17,7 +17,7 @@ import ReadonlyTextarea from '../fields/views/ReadonlyTextarea'
 import ResourceFieldView from '../fields/views/ResourceFieldView'
 import UserCard from '../fields/views/UserCard'
 import ContactCard from '../fields/views/ContactCard'
-import { Schema } from '@/domain/schema/types'
+import { Schema } from '@/domain/schema/entity'
 import { Resource } from '@/domain/resource/entity'
 
 type Props = {
