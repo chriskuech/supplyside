@@ -1,5 +1,3 @@
-'use server'
-
 import { ReactNode } from 'react'
 import { readResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'

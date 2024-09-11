@@ -1,5 +1,3 @@
-'use server'
-
 import { fail } from 'assert'
 import { ResourceType } from '@prisma/client'
 import { pick } from 'remeda'

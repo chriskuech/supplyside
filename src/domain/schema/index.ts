@@ -1,9 +1,7 @@
-'use server'
-
-import { Field as FieldModel, Option, ResourceType } from '@prisma/client'
-import { mapValueModelToEntity } from '../resource/mappers'
-import { ValueModel, valueInclude } from '../resource/model'
-import { SchemaField, Schema } from './entity'
+import { ResourceType } from '@prisma/client'
+import { Schema } from './entity'
+import { mapFieldModelToEntity } from './mappers'
+import { schemaIncludes } from './model'
 import prisma from '@/services/prisma'
 
 export type ReadSchemaParams = {
@@ -23,53 +21,7 @@ export const readSchema = async ({
       resourceType,
       isSystem,
     },
-    include: {
-      SchemaField: {
-        include: {
-          Field: {
-            include: {
-              DefaultValue: {
-                include: valueInclude,
-              },
-              Option: {
-                orderBy: {
-                  order: 'asc',
-                },
-              },
-            },
-          },
-        },
-        orderBy: {
-          order: 'asc',
-        },
-      },
-      Section: {
-        include: {
-          SectionField: {
-            include: {
-              Field: {
-                include: {
-                  DefaultValue: {
-                    include: valueInclude,
-                  },
-                  Option: {
-                    orderBy: {
-                      order: 'asc',
-                    },
-                  },
-                },
-              },
-            },
-            orderBy: {
-              order: 'asc',
-            },
-          },
-        },
-        orderBy: {
-          order: 'asc',
-        },
-      },
-    },
+    include: schemaIncludes,
     orderBy: {
       isSystem: 'desc',
     },
@@ -82,7 +34,7 @@ export const readSchema = async ({
       .map((s) => ({
         id: s.id,
         name: s.name,
-        fields: s.SectionField.map((sf) => mapField(sf.Field)),
+        fields: s.SectionField.map((sf) => mapFieldModelToEntity(sf.Field)),
       })),
     allFields: [
       ...schemas.flatMap((s) => s.SchemaField).map((sf) => sf.Field),
@@ -90,28 +42,6 @@ export const readSchema = async ({
         .flatMap((s) => s.Section)
         .flatMap((s) => s.SectionField)
         .map((sf) => sf.Field),
-    ].map(mapField),
+    ].map(mapFieldModelToEntity),
   }
 }
-
-const mapField = (
-  model: FieldModel & {
-    Option: Option[]
-    DefaultValue: ValueModel | null
-  },
-): SchemaField => ({
-  id: model.id,
-  templateId: model.templateId,
-  name: model.name,
-  description: model.description,
-  type: model.type,
-  options: model.Option.map((o) => ({
-    id: o.id,
-    name: o.name,
-    templateId: o.templateId,
-  })),
-  resourceType: model.resourceType,
-  defaultValue: model.DefaultValue && mapValueModelToEntity(model.DefaultValue),
-  defaultToToday: model.defaultToToday,
-  isRequired: model.isRequired,
-})

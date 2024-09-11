@@ -1,9 +1,9 @@
 import { P, match } from 'ts-pattern'
 import { FieldType, Prisma, ResourceType } from '@prisma/client'
-import { SchemaField } from '../entity'
+import { SchemaField } from './entity'
+import { mapFieldModelToEntity } from './mappers'
 import prisma from '@/services/prisma'
 import { ValueInput } from '@/domain/resource/patch'
-import { mapValueModelToEntity } from '@/domain/resource/mappers'
 import { valueInclude } from '@/domain/resource/model'
 
 export type CreateFieldParams = {
@@ -55,22 +55,7 @@ export const readFields = async (accountId: string): Promise<SchemaField[]> => {
     },
   })
 
-  return fields.map((f) => ({
-    id: f.id,
-    name: f.name,
-    defaultToToday: f.defaultToToday,
-    description: f.description,
-    isRequired: f.isRequired,
-    options: f.Option.map((o) => ({
-      id: o.id,
-      name: o.name,
-      templateId: o.templateId,
-    })),
-    resourceType: f.resourceType,
-    type: f.type,
-    templateId: f.templateId,
-    defaultValue: mapValueModelToEntity(f.DefaultValue),
-  }))
+  return fields.map(mapFieldModelToEntity)
 }
 
 export type UpdateFieldDto = {

@@ -1,5 +1,3 @@
-'use server'
-
 import { fail } from 'assert'
 import { Prisma, ResourceType } from '@prisma/client'
 import { readSchema } from '../schema'

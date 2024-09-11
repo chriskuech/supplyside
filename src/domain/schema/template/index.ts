@@ -1,5 +1,3 @@
-'use server'
-
 import { fail } from 'assert'
 import { schemas } from './system-schemas'
 import { fields } from './system-fields'

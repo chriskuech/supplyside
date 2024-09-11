@@ -1,8 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable jsx-a11y/alt-text */
 
-'use server'
-
 import { ReactNode } from 'react'
 import { Cost, FieldType } from '@prisma/client'
 import { P, match } from 'ts-pattern'

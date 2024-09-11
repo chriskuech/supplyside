@@ -1,5 +1,3 @@
-'use server'
-
 import { isMatching } from 'ts-pattern'
 import { isError } from 'remeda'
 import { mapSessionModelToEntity } from './mappers'

@@ -1,5 +1,3 @@
-'use server'
-
 import { fail } from 'assert'
 import { Prisma } from '@prisma/client'
 import { createBlob } from '../blobs'
