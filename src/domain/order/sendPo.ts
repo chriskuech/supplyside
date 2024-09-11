@@ -29,7 +29,7 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   const po = selectResourceField(order, fields.document)?.file
   const assignee = selectResourceField(order, fields.assignee)?.user
   const vendor = selectResourceField(order, fields.vendor)?.resource
-  const number = selectResourceField(order, fields.number)?.string
+  const number = selectResourceField(order, fields.poNumber)?.string
   const date = selectResourceField(order, fields.issuedDate)?.date
 
   if (!po || !poRecipient?.email) return

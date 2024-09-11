@@ -112,7 +112,7 @@ async function main() {
         value: { userId: systemUser.id },
       },
       {
-        fieldId: selectSchemaFieldUnsafe(orderSchema, fields.number)?.id,
+        fieldId: selectSchemaFieldUnsafe(orderSchema, fields.poNumber)?.id,
         value: { string: '42' },
       },
       {
