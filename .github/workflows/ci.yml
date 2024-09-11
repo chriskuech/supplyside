@@ -38,13 +38,15 @@ jobs:
       - name: Create build.json
         shell: pwsh
         run: |
+          $path = 'src/app/api/system/health/build.json'
           @{
             commit    = $env:SHA
             version   = $env:GITHUB_EVENT_NUMBER
             timestamp = (Get-Date).ToString('s')
           }
           | ConvertTo-Json
-          | Set-Content -Path src/app/api/system/health/build.json
+          | Set-Content -Path $path
+          Get-Content -Path $path
         env:
           SHA: ${{ github.sha }}
           GITHUB_EVENT_NUMBER: ${{ github.event.number }}
