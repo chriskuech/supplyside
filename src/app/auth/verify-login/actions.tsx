@@ -8,14 +8,14 @@ import { SessionCreationError } from '@/domain/iam/session/errors'
 type LoginParams = {
   email: string
   token: string
-  rel?: string
+  returnTo?: string
 }
 
-export const login = async ({ email, token, rel = '/' }: LoginParams) => {
+export const login = async ({ email, token, returnTo = '/' }: LoginParams) => {
   try {
     await createSession(email, token)
 
-    redirect(rel, RedirectType.replace)
+    redirect(returnTo, RedirectType.replace)
   } catch (error) {
     if (error instanceof SessionCreationError) {
       return { error: error.message }

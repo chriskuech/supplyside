@@ -12,7 +12,7 @@ export const startEmailVerification = async (
 
     redirect(
       `/auth/verify-login?email=${params.email}` +
-        (params.rel ? `&rel=${params.rel}` : ''),
+        (params.returnTo ? `&rel=${params.returnTo}` : ''),
     )
   } catch (error) {
     if (error instanceof IamUserNotFoundError) {

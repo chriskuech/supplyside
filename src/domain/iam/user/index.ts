@@ -44,12 +44,12 @@ export async function inviteUser({
 
 export type StartEmailVerificationParams = {
   email: string
-  rel?: string
+  returnTo?: string
 }
 
 export async function startEmailVerification({
   email,
-  rel,
+  returnTo,
 }: StartEmailVerificationParams): Promise<void> {
   const tokenLifespanInMinutes = 5
 
@@ -78,7 +78,7 @@ export async function startEmailVerification({
       verify_token: tat,
       action_url:
         `${config().BASE_URL}${verifyLoginPath}?email=${email}&token=${tat}` +
-        (rel ? `&rel=${rel}` : ''),
+        (returnTo ? `&rel=${returnTo}` : ''),
       product_url: config().BASE_URL,
     },
     MessageStream: 'outbound',

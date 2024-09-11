@@ -6,17 +6,17 @@ import { FC, useCallback, useState } from 'react'
 import { startEmailVerification } from './actions'
 
 type Props = {
-  rel?: string
+  returnTo?: string
 }
 
-const LoginForm: FC<Props> = ({ rel }) => {
+const LoginForm: FC<Props> = ({ returnTo }) => {
   const [email, setEmail] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
   const handleSubmit = useCallback(async () => {
-    const result = await startEmailVerification({ email, rel })
+    const result = await startEmailVerification({ email, returnTo })
     if (result?.error) setErrorMessage(result.error)
-  }, [email, rel])
+  }, [email, returnTo])
 
   return (
     <TextField
@@ -28,6 +28,7 @@ const LoginForm: FC<Props> = ({ rel }) => {
         setEmail(e.currentTarget.value)
         setErrorMessage('')
       }}
+      error={!!errorMessage}
       helperText={errorMessage}
       onKeyUp={(e) => e.key === 'Enter' && handleSubmit()}
       slotProps={{

@@ -2,36 +2,36 @@
 
 import { Forward } from '@mui/icons-material'
 import { IconButton, InputAdornment, Stack, TextField } from '@mui/material'
-import { FC, useCallback, useState } from 'react'
+import { FC, useCallback, useEffect, useState } from 'react'
 import { login } from './actions'
 
 type Props = {
   email: string
-  rel?: string
+  token: string | undefined
+  returnTo?: string
 }
 
-const LoginForm: FC<Props> = ({ email, rel }) => {
-  const [token, setToken] = useState('')
+const LoginForm: FC<Props> = ({ email, token: defaultToken, returnTo }) => {
+  const [token, setToken] = useState(defaultToken ?? '')
   const [errorMessage, setErrorMessage] = useState('')
 
   const handleSubmit = useCallback(async () => {
-    const result = await login({ email, token, rel })
+    const result = await login({ email, token, returnTo })
     if (result?.error) setErrorMessage(result.error)
-  }, [email, rel, token])
+  }, [email, returnTo, token])
+
+  useEffect(() => {
+    if (defaultToken) handleSubmit()
+  }, [defaultToken, handleSubmit])
 
   return (
-    <Stack spacing={1}>
-      <TextField
-        label="Email"
-        type="email"
-        variant="outlined"
-        value={email}
-        disabled
-      />
+    <Stack spacing={2}>
+      <TextField type="email" variant="outlined" value={email} disabled />
       <TextField
         label="Access Token"
         variant="outlined"
         value={token}
+        error={!!errorMessage}
         onChange={(e) => {
           setToken(e.currentTarget.value)
           setErrorMessage('')

@@ -1,20 +1,30 @@
-import { Alert, Box, Typography } from '@mui/material'
+import { fail } from 'assert'
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  Link,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { redirect, RedirectType } from 'next/navigation'
 import { z } from 'zod'
-import LoginForm from '../login/LoginForm'
-import { login } from './actions'
+import NextLink from 'next/link'
+import LoginForm from './LoginForm'
 import { readSession } from '@/lib/session/actions'
 import RefreshOnFocus from '@/lib/ux/RefreshOnFocus'
+import Logo from '@/lib/ux/appbar/Logo'
 
 export default async function Login({
   searchParams,
 }: {
   searchParams: Record<string, string | unknown>
 }) {
-  const { data: { rel, email, token } = {}, error: zodError } = z
+  const { data: { returnTo, email, token } = {}, error: zodError } = z
     .object({
-      rel: z.string().startsWith('/').optional(),
-      email: z.string().email().optional(),
+      returnTo: z.string().startsWith('/').optional(),
+      email: z.string().email(),
       token: z.string().uuid().optional(),
     })
     .safeParse(searchParams)
@@ -22,11 +32,9 @@ export default async function Login({
   // TODO: don't catch all--it can be inferred as a static page
   const session = await readSession().catch(() => null)
 
-  if (session) redirect(rel ?? '/', RedirectType.replace)
+  if (session) redirect(returnTo ?? '/', RedirectType.replace)
 
-  const loginError =
-    email && token ? await login({ email, token, rel }) : undefined
-  const error = zodError?.message || loginError?.error
+  const error = zodError?.message
 
   return (
     <Box
@@ -39,12 +47,44 @@ export default async function Login({
     >
       <RefreshOnFocus />
 
-      <Box width={500}>
-        <Typography variant="h4" textAlign="left" gutterBottom>
-          Enter Access Token
-        </Typography>
-        {error && <Alert severity="error">{error}</Alert>}
-        <LoginForm rel={rel} />
+      <Box width={400}>
+        <Card variant="elevation">
+          <CardContent>
+            <Stack spacing={5}>
+              <Logo />
+
+              <Box>
+                <Typography variant="h5" textAlign="left" gutterBottom>
+                  Enter Access Token
+                </Typography>
+
+                <Typography variant="body2" textAlign="left">
+                  Please enter the access token sent to your email address to
+                  log in. If you didn&apos;t receive an email, please check your
+                  spam folder or{' '}
+                  <Link
+                    href="/auth/login"
+                    underline="always"
+                    component={NextLink}
+                  >
+                    request a new access token
+                  </Link>
+                  .
+                </Typography>
+              </Box>
+
+              {error && <Alert severity="error">{error}</Alert>}
+
+              <LoginForm
+                returnTo={returnTo}
+                email={email ?? fail('no email')}
+                token={token}
+              />
+
+              <Box />
+            </Stack>
+          </CardContent>
+        </Card>
       </Box>
     </Box>
   )
