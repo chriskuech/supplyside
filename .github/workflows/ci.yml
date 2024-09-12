@@ -114,3 +114,29 @@ jobs:
           docker pull supplyside.azurecr.io/app:${{ github.sha }}
           docker tag supplyside.azurecr.io/app:${{ github.sha }} supplyside.azurecr.io/app:integration
           docker push supplyside.azurecr.io/app:integration
+
+      - name: Wait for healthcheck
+        shell: pwsh
+        run: |
+          $timeoutInMinutes = 5
+          $waitInSeconds = 10
+
+          $timeout = (Get-Date).AddMinutes($timeoutInMinutes)
+
+          do {
+            Start-Sleep -Seconds $waitInSeconds
+            Write-Host "~" -NoNewline
+
+            $res = Invoke-RestMethod -Uri https://app-int.supplyside.io/api/system/health -Method Get -ErrorAction SilentlyContinue
+
+            if ($res -and $res.build.commit -eq $env:GITHUB_SHA) {
+              Write-Host "Deployment successful"
+              exit 0
+            }
+          } while ((Get-Date) -lt $timeout)
+
+          Write-Host "Deployment timed out after $timeoutInMinutes minutes"
+          exit 1
+
+        env:
+          SHA: ${{ github.sha }}
