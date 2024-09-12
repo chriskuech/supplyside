@@ -6,9 +6,9 @@ import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceField } from './extensions'
 import { recalculateItemizedCosts, recalculateSubtotalCost } from './costs'
-import { Resource, Value } from './entity'
 import { copyCosts, copyFields, copyLines } from './copy'
-import { updateResourceField } from '.'
+import { Resource, Value, ValueResource } from './entity'
+import { readResource, updateResourceField } from '.'
 import 'server-only'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
@@ -58,11 +58,16 @@ export const handleResourceCreate = async ({
   }
 }
 
+type FieldUpdate = {
+  field: SchemaField
+  value: Value
+}
+
 type HandleResourceUpdateParams = {
   accountId: string
   schema: Schema
   resource: Resource
-  updatedFields: { field: SchemaField; value: Value }[]
+  updatedFields: FieldUpdate[]
 }
 
 export const handleResourceUpdate = async ({
@@ -73,11 +78,16 @@ export const handleResourceUpdate = async ({
 }: HandleResourceUpdateParams) => {
   // When a Resource Field is updated,
   // Then copy the linked Resource's Fields
-  await Promise.all(
-    updatedFields
-      .filter((uf) => uf.field.type === 'Resource')
-      .map(async ({ field: { id: fieldId }, value }) => {
-        if (value?.resource) {
+  const updatedFieldsWithResourceType = updatedFields.filter(
+    (
+      uf: FieldUpdate,
+    ): uf is FieldUpdate & { value: { resource: ValueResource } } =>
+      !!uf.field.resourceType && !!uf.value.resource,
+  )
+  if (updatedFieldsWithResourceType.length) {
+    await Promise.all(
+      updatedFieldsWithResourceType.map(
+        async ({ field: { id: fieldId }, value }) => {
           await copyFields({
             accountId,
             fromResourceId: value.resource.id,
@@ -104,9 +114,12 @@ export const handleResourceUpdate = async ({
               },
             })
           }
-        }
-      }),
-  )
+        },
+      ),
+    )
+
+    resource = await readResource({ accountId, id: resource.id })
+  }
 
   // When the Line."Unit Cost" or Line."Quantity" or a new item is selected field is updated,
   // Then update Line."Total Cost"
@@ -132,6 +145,8 @@ export const handleResourceUpdate = async ({
         number: unitCost * quantity,
       },
     })
+
+    resource = await readResource({ accountId, id: resource.id })
   }
 
   // When the Line."Total Cost" field is updated,
@@ -151,6 +166,8 @@ export const handleResourceUpdate = async ({
     if (billId) {
       await recalculateSubtotalCost(accountId, 'Bill', billId)
     }
+
+    resource = await readResource({ accountId, id: resource.id })
   }
 
   // When the {Bill|Order}."Subtotal Cost" field is updated,
@@ -162,6 +179,8 @@ export const handleResourceUpdate = async ({
     )
   ) {
     await recalculateItemizedCosts(accountId, resource.id)
+
+    resource = await readResource({ accountId, id: resource.id })
   }
 
   // When the {Bill|Order}."Itemized Costs" or {Bill|Order}."Subtotal Cost" field is updated,
@@ -193,6 +212,8 @@ export const handleResourceUpdate = async ({
         number: itemizedCosts + subtotalCost,
       },
     })
+
+    resource = await readResource({ accountId, id: resource.id })
   }
 
   // When the Order field of a Bill resource has been updated (an Order has been linked to a Bill)
@@ -202,6 +223,8 @@ export const handleResourceUpdate = async ({
     updatedFields.some((rf) => rf.field.templateId === fields.order.templateId)
   ) {
     await recalculateSubtotalCost(accountId, 'Bill', resource.id)
+
+    resource = await readResource({ accountId, id: resource.id })
   }
 
   // When the “Invoice Date” field or “Payment Terms” field changes,
@@ -232,6 +255,8 @@ export const handleResourceUpdate = async ({
           ),
         },
       })
+
+      resource = await readResource({ accountId, id: resource.id })
     }
   }
 }
