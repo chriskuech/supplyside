@@ -11,7 +11,7 @@ import { Schema } from '@/domain/schema/entity'
 import { mapValueToValueInput } from '@/domain/resource/mappers'
 import { copyResourceCosts } from '@/domain/resource/costs'
 import { fields } from '@/domain/schema/template/system-fields'
-import { copyLines } from '@/domain/resource/extensions'
+import { copyLines } from '@/domain/resource'
 
 type DetailPageModel = {
   session: Session

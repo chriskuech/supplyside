@@ -4,7 +4,8 @@ import { SchemaField, Schema } from '../schema/entity'
 import { selectSchemaField } from '../schema/extensions'
 import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
-import { copyLines, selectResourceField } from './extensions'
+import { selectResourceField } from './extensions'
+import { copyLines } from '.'
 import {
   copyResourceCosts,
   recalculateItemizedCosts,

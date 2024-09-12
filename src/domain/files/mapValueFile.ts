@@ -1,5 +1,5 @@
 import { File } from '@/domain/files/types'
-import { getDownloadPath } from '@/domain/blobs'
+import { getDownloadPath } from '../blobs/util'
 import { FileModel } from '@/domain/files/model'
 
 export const mapFile = (file: FileModel): File => ({

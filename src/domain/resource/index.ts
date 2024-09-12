@@ -1,7 +1,11 @@
 import { fail } from 'assert'
 import { Prisma, ResourceType } from '@prisma/client'
 import { readSchema } from '../schema'
-import { selectSchemaField } from '../schema/extensions'
+import {
+  FieldRef,
+  selectSchemaField,
+  selectSchemaFieldUnsafe,
+} from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { recalculateSubtotalCost } from './costs'
 import { selectResourceField } from './extensions'
@@ -18,6 +22,7 @@ import { mapResourceModelToEntity } from './mappers'
 import { resourceInclude } from './model'
 import { handleResourceCreate, handleResourceUpdate } from './effects'
 import prisma from '@/services/prisma'
+import 'server-only'
 
 export type ResourceFieldInput = {
   fieldId: string
@@ -270,3 +275,45 @@ export const updateResourceField = async ({
     resourceId,
     fields: [{ fieldId, value }],
   })
+
+export const copyLines = async (
+  accountId: string,
+  sourceResourceId: string,
+  destinationResourceId: string,
+  backLinkFieldRef: FieldRef,
+) => {
+  const lineSchema = await readSchema({
+    accountId,
+    resourceType: 'Line',
+  })
+
+  const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
+
+  const lines = await readResources({
+    accountId,
+    type: 'Line',
+    where: {
+      '==': [{ var: backLinkField.name }, sourceResourceId],
+    },
+  })
+
+  // `createResource` is not (currently) parallelizable
+  for (const line of lines) {
+    await createResource({
+      accountId,
+      type: 'Line',
+      fields: [
+        ...line.fields
+          .filter(({ fieldId }) => fieldId !== backLinkField.id)
+          .map(({ fieldId, fieldType, value }) => ({
+            fieldId,
+            value: mapValueToValueInput(fieldType, value),
+          })),
+        {
+          fieldId: backLinkField.id,
+          value: { resourceId: destinationResourceId },
+        },
+      ],
+    })
+  }
+}

@@ -1,6 +1,6 @@
 import { AccountModel } from './model'
 import { Account } from './entity'
-import { getDownloadPath } from '@/domain/blobs'
+import { getDownloadPath } from '@/domain/blobs/util'
 
 export const mapAccountModelToEntity = (model: AccountModel): Account => ({
   id: model.id,
