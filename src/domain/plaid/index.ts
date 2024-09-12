@@ -1,4 +1,5 @@
 import { CountryCode, Products } from 'plaid'
+import { redirect } from 'next/navigation'
 import { plaidClient } from './util'
 import prisma from '@/services/prisma'
 import config from '@/services/config'
@@ -55,4 +56,24 @@ export const getPlaidToken = async (
   }
 
   return account.plaidToken
+}
+
+// TODO: this references `next` which is not available in the domain layer
+export const requireTokenWithRedirect = async (
+  accountId: string,
+): Promise<string> => {
+  const token = await getPlaidToken(accountId)
+
+  if (!token) {
+    redirect('account/integrations')
+  }
+
+  return token
+}
+
+export const getPlaidAccounts = async (accountId: string) => {
+  const token = await requireTokenWithRedirect(accountId)
+
+  const accounts = await plaidClient().accountsGet({ access_token: token })
+  return accounts.data.accounts
 }

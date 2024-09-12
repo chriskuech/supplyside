@@ -1,6 +1,6 @@
-import { Alert, Typography } from '@mui/material'
+import { Alert } from '@mui/material'
 import PlaidConnect from './PlaidConnect'
-import PlaidDisconnectLink from './PlaidDisconnectLink'
+import PlaidConnection from './PlaidConnection'
 import { getPlaidConfig } from '@/domain/plaid/util'
 import { Session } from '@/domain/iam/session/entity'
 import { getPlaidToken } from '@/domain/plaid'
@@ -16,13 +16,5 @@ export default async function Plaid({ session }: Props) {
 
   const plaidToken = await getPlaidToken(session.accountId)
 
-  return plaidToken ? (
-    <Typography variant="caption">
-      Connected at:{' '}
-      <strong>{session.account.plaidConnectedAt?.toLocaleDateString()}</strong>
-      . <PlaidDisconnectLink />
-    </Typography>
-  ) : (
-    <PlaidConnect />
-  )
+  return plaidToken ? <PlaidConnection session={session} /> : <PlaidConnect />
 }
