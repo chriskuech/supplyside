@@ -81,6 +81,7 @@ export const schemas: SchemaTemplate[] = [
         name: 'Order Info',
         fields: [
           fields.vendor,
+          fields.poRecipient,
           fields.orderDescription,
           fields.issuedDate,
           fields.orderNotes,
@@ -94,7 +95,6 @@ export const schemas: SchemaTemplate[] = [
         name: 'Shipping Info',
         fields: [
           fields.shippingAddress,
-          fields.poRecipient,
           fields.shippingMethod,
           fields.shippingAccountNumber,
           fields.incoterms,
