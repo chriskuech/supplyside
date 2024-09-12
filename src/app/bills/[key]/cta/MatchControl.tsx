@@ -21,6 +21,7 @@ import { Resource } from '@/domain/resource/entity'
 import { updateResourceField } from '@/lib/resource/actions'
 import { useResources } from '@/lib/resource/useResources'
 import { selectSchemaField } from '@/domain/schema/extensions'
+import useSchema from '@/lib/schema/useSchema'
 
 type Props = {
   schema: Schema
@@ -35,6 +36,8 @@ export default function MatchControl({ schema, resource }: Props) {
   const poNumber = selectResourceField(resource, fields.poNumber)?.string
   const vendorName = selectResourceField(resource, fields.vendor)?.resource
     ?.name
+
+  const orderSchema = useSchema('Order')
 
   const unlinkedOrders = useResources('Order', undefined)
 
@@ -84,11 +87,11 @@ export default function MatchControl({ schema, resource }: Props) {
                 <Box>Bill</Box>
               </Stack>
               <Box>
-                {!unlinkedOrders ? (
+                {!unlinkedOrders || !orderSchema ? (
                   <CircularProgress />
                 ) : (
                   <ResourceTable
-                    schema={schema}
+                    schema={orderSchema}
                     resources={unlinkedOrders}
                     initialState={{
                       filter: {
