@@ -34,14 +34,13 @@ export const readSchema = async ({
       .map((s) => ({
         id: s.id,
         name: s.name,
-        fields: s.SectionField.map((sf) => mapFieldModelToEntity(sf.Field)),
+        fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity),
       })),
     allFields: [
-      ...schemas.flatMap((s) => s.SchemaField).map((sf) => sf.Field),
-      ...schemas
-        .flatMap((s) => s.Section)
-        .flatMap((s) => s.SectionField)
-        .map((sf) => sf.Field),
-    ].map(mapFieldModelToEntity),
+      ...schemas.flatMap((s) => s.SchemaField),
+      ...schemas.flatMap((s) => s.Section).flatMap((s) => s.SectionField),
+    ]
+      .map((sf) => sf.Field)
+      .map(mapFieldModelToEntity),
   }
 }

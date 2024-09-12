@@ -1,23 +1,43 @@
-import { useEffect, useState } from 'react'
-import { readResource } from './actions'
-import { Resource } from '@/domain/resource/entity'
+'use client'
 
-const useResource = (resourceIdOrResource: string | Resource) => {
-  const [resource, setResource] = useState<Resource | null>(
-    typeof resourceIdOrResource === 'string' ? null : resourceIdOrResource,
-  )
+import { useCallback, useEffect, useState } from 'react'
+import { readResource, updateResource } from './actions'
+import { Resource } from '@/domain/resource/entity'
+import { mapValueToValueInput } from '@/domain/resource/mappers'
+
+const useResource = (resourceId: string) => {
+  const [resource, setLocalResource] = useState<Resource | null>()
   const [isLoading, setIsLoading] = useState(false)
+  const [isError, setIsError] = useState(false)
 
   useEffect(() => {
-    if (!isLoading && !resource && typeof resourceIdOrResource === 'string') {
+    if (!isLoading && !isError && resourceId !== resource?.id) {
       setIsLoading(true)
-      readResource({ id: resourceIdOrResource })
-        .then(setResource)
+      readResource({ id: resourceId })
+        .then(setLocalResource)
+        .catch(() => {
+          setIsError(true)
+          setLocalResource(null)
+        })
         .finally(() => setIsLoading(false))
     }
-  }, [isLoading, resource, resourceIdOrResource])
+  }, [isError, isLoading, resource, resourceId])
 
-  return [resource, setResource] as const
+  const setApiResource = useCallback(
+    (resource: Resource) =>
+      updateResource({
+        resourceId: resource.id,
+        fields: resource.fields.map(({ fieldId, fieldType, value }) => ({
+          fieldId,
+          value: mapValueToValueInput(fieldType, value),
+        })),
+      })
+        .then(setLocalResource)
+        .catch(() => setIsError(true)),
+    [],
+  )
+
+  return [resource, setApiResource] as const
 }
 
 export default useResource
