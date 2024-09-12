@@ -71,6 +71,9 @@ jobs:
       name: Integration
       url: https://app-int.supplyside.io
 
+    env:
+      BASE_URL: https://app-int.supplyside.io
+
     steps:
       - uses: actions/checkout@v4
 
@@ -139,10 +142,7 @@ jobs:
           exit 1
 
         env:
-          BASE_URL: ${{ github.jobs.deploy.environment.url }}
           SHA: ${{ github.sha }}
 
       - name: Apply configuration
         run: curl -X POST $BASE_URL/api/system/post-deployment
-        env:
-          BASE_URL: ${{ github.jobs.deploy.environment.url }}
