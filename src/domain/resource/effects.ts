@@ -12,7 +12,7 @@ import {
 } from './costs'
 import { Resource, Value } from './entity'
 import { copyLinkedResourceFields } from './fields'
-import { updateResourceField } from '.'
+import { readResource, updateResourceField } from '.'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 
@@ -96,14 +96,18 @@ export const handleResourceUpdate = async ({
       }),
   )
 
-  // When the Line."Unit Cost" or Line."Quantity" field is updated,
+  //There may be updated fields when copying linked resource fields
+  resource = await readResource({ accountId, id: resource.id })
+
+  // When the Line."Unit Cost" or Line."Quantity" or a new item is selected field is updated,
   // Then update Line."Total Cost"
   if (
     resource.type === 'Line' &&
     updatedFields.some(
       (rf) =>
         rf.field.templateId === fields.unitCost.templateId ||
-        rf.field.templateId === fields.quantity.templateId,
+        rf.field.templateId === fields.quantity.templateId ||
+        rf.value.resource?.type === 'Item',
     )
   ) {
     const totalCostFieldId =
