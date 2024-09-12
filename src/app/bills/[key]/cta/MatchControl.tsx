@@ -15,11 +15,12 @@ import { AddLink, Link } from '@mui/icons-material'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { selectResourceField } from '@/domain/resource/extensions'
 import { ResourceTable } from '@/lib/resource/table'
-import { Schema, selectSchemaField } from '@/domain/schema/types'
+import { Schema } from '@/domain/schema/entity'
 import { fields } from '@/domain/schema/template/system-fields'
 import { Resource } from '@/domain/resource/entity'
 import { updateResourceField } from '@/lib/resource/actions'
 import { useResources } from '@/lib/resource/useResources'
+import { selectSchemaField } from '@/domain/schema/extensions'
 
 type Props = {
   schema: Schema
@@ -31,9 +32,11 @@ export default function MatchControl({ schema, resource }: Props) {
 
   const order = selectResourceField(resource, fields.order)?.resource
 
-  const unlinkedOrders = useResources('Order', {
-    '==': [{ var: fields.bill.name }, null],
-  })
+  const poNumber = selectResourceField(resource, fields.poNumber)?.string
+  const vendorName = selectResourceField(resource, fields.vendor)?.resource
+    ?.name
+
+  const unlinkedOrders = useResources('Order', undefined)
 
   return (
     <>
@@ -91,9 +94,7 @@ export default function MatchControl({ schema, resource }: Props) {
                       filter: {
                         filterModel: {
                           items: [],
-                          quickFilterValues: [
-                            // TODO: put the initial filter here once we have the correct fields
-                          ],
+                          quickFilterValues: [poNumber, vendorName],
                         },
                       },
                     }}

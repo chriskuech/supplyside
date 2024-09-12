@@ -8,19 +8,20 @@ export const useResources = (
   resourceType: ResourceType,
   where: Where | undefined,
 ) => {
-  const [resources, setResources] = useState<Resource[] | null>(null)
+  const [resources, setResources] = useState<Resource[] | null>()
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => setResources(null), [where])
+  useEffect(() => setResources(undefined), [where])
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && resources === undefined) {
       setIsLoading(true)
       readResources({ type: resourceType, where })
         .then(setResources)
+        .catch(() => setResources(null))
         .finally(() => setIsLoading(false))
     }
-  }, [isLoading, where, resourceType])
+  }, [isLoading, where, resourceType, resources])
 
   return resources
 }
