@@ -1,5 +1,4 @@
 import { Avatar, Stack, Typography } from '@mui/material'
-import NextImage from 'next/image'
 import { User } from '@/domain/user/entity'
 
 type Props = {
@@ -10,14 +9,7 @@ export default function UserCard({ user }: Props) {
   return (
     <Stack direction="row" spacing={1}>
       {user?.profilePicPath && (
-        <Avatar>
-          <NextImage
-            height="20"
-            width="20"
-            src={user.profilePicPath}
-            alt="Profile pic"
-          />
-        </Avatar>
+        <Avatar src={user.profilePicPath} alt={user.name} />
       )}
       <Stack>
         <Typography>{user?.name}</Typography>
