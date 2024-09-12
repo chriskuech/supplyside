@@ -25,7 +25,6 @@ type Props = {
   resources: Resource[]
   isEditable?: boolean
   indexed?: boolean
-  initialQuery?: string[]
 } & Partial<DataGridProProps<Row>>
 
 export default function ResourceTable({
