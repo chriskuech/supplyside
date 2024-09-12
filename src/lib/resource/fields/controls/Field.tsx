@@ -79,7 +79,7 @@ function Field(
           },
         }}
         readOnly={isReadOnly}
-        defaultValue={value?.date && dayjs.utc(value.date)}
+        value={value?.date && dayjs.utc(value.date)}
         onChange={(value) =>
           onChange({ ...emptyValue, date: value?.toDate() ?? null })
         }
