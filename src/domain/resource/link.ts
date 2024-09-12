@@ -1,9 +1,13 @@
 import 'server-only'
+import { fail } from 'assert'
 import { ResourceType } from '@prisma/client'
-import { FieldRef } from '../schema/extensions'
+import { FieldRef, selectSchemaField } from '../schema/extensions'
+import { fields } from '../schema/template/system-fields'
+import { FieldTemplate } from '../schema/template/types'
+import { readSchema } from '../schema'
 import { cloneCosts } from './clone'
 import { copyFields } from './copy'
-import { readResource } from '.'
+import { readResource, readResources, updateResourceField } from '.'
 
 type LinkResourceParams = {
   accountId: string
@@ -16,7 +20,6 @@ export const linkResource = async ({
   accountId,
   fromResourceId,
   toResourceId,
-  backLinkFieldRef,
 }: LinkResourceParams & { backLinkFieldRef: FieldRef }) => {
   const [fromResource, toResource] = await Promise.all([
     readResource({
@@ -31,27 +34,54 @@ export const linkResource = async ({
 
   await copyFields({ accountId, fromResourceId, toResourceId })
 
-  const typesWithLines: ResourceType[] = ['Order', 'Bill']
-  if (
-    [fromResource.type, toResource.type].every((t) =>
-      typesWithLines.includes(t),
-    )
-  ) {
+  if (fromResource.type === 'Order' && toResource.type === 'Bill') {
     await cloneCosts({ accountId, fromResourceId, toResourceId })
     await linkLines({
       accountId,
       fromResourceId,
       toResourceId,
-      backLinkFieldRef,
+      fromResourceField: fields.order,
+      toResourceField: fields.bill,
     })
   }
+}
+
+type LinkLinesParams = {
+  accountId: string
+  fromResourceId: string
+  toResourceId: string
+  fromResourceField: FieldTemplate
+  toResourceField: FieldTemplate
 }
 
 const linkLines = async ({
   accountId,
   fromResourceId,
   toResourceId,
-  backLinkFieldRef,
-}: LinkResourceParams) => {
-  throw new Error('Not implemented')
+  fromResourceField,
+  toResourceField,
+}: LinkLinesParams) => {
+  const lineSchema = await readSchema({
+    accountId,
+    resourceType: ResourceType.Line,
+  })
+
+  const lines = await readResources({
+    accountId,
+    type: 'Line',
+    where: {
+      '==': [{ var: fromResourceField.name }, fromResourceId],
+    },
+  })
+
+  await Promise.all(
+    lines.map((line) =>
+      updateResourceField({
+        accountId,
+        resourceId: line.id,
+        fieldId: selectSchemaField(lineSchema, toResourceField)?.id ?? fail(),
+        value: { resourceId: toResourceId },
+      }),
+    ),
+  )
 }

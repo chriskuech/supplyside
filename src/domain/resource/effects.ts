@@ -23,24 +23,6 @@ export const handleResourceCreate = async ({
   schema,
   resource,
 }: HandleResourceCreateParams) => {
-  await Promise.all(
-    resource.fields
-      .filter(
-        ({ fieldId, value }) =>
-          selectSchemaField(schema, { fieldId })?.resourceType &&
-          value.resource?.id,
-      )
-      .flatMap(
-        async ({ fieldId, value }) =>
-          await linkResource({
-            accountId,
-            fromResourceId: value.resource?.id ?? fail(),
-            toResourceId: resource.id,
-            backLinkFieldRef: { fieldId },
-          }),
-      ),
-  )
-
   if (resource.type === 'Order') {
     await updateResourceField({
       accountId,
@@ -92,8 +74,6 @@ export const handleResourceUpdate = async ({
         },
       ),
     )
-
-    resource = await readResource({ accountId, id: resource.id })
   }
 
   // When the Line."Unit Cost" or Line."Quantity" or a new item is selected field is updated,
@@ -120,8 +100,6 @@ export const handleResourceUpdate = async ({
         number: unitCost * quantity,
       },
     })
-
-    resource = await readResource({ accountId, id: resource.id })
   }
 
   // When the Line."Total Cost" field is updated,
@@ -141,8 +119,6 @@ export const handleResourceUpdate = async ({
     if (billId) {
       await recalculateSubtotalCost(accountId, 'Bill', billId)
     }
-
-    resource = await readResource({ accountId, id: resource.id })
   }
 
   // When the {Bill|Order}."Subtotal Cost" field is updated,
@@ -154,8 +130,6 @@ export const handleResourceUpdate = async ({
     )
   ) {
     await recalculateItemizedCosts(accountId, resource.id)
-
-    resource = await readResource({ accountId, id: resource.id })
   }
 
   // When the {Bill|Order}."Itemized Costs" or {Bill|Order}."Subtotal Cost" field is updated,
@@ -187,8 +161,6 @@ export const handleResourceUpdate = async ({
         number: itemizedCosts + subtotalCost,
       },
     })
-
-    resource = await readResource({ accountId, id: resource.id })
   }
 
   // When the Order field of a Bill resource has been updated (an Order has been linked to a Bill)
@@ -230,8 +202,6 @@ export const handleResourceUpdate = async ({
           ),
         },
       })
-
-      resource = await readResource({ accountId, id: resource.id })
     }
   }
 }
