@@ -1,7 +1,7 @@
 import { isTruthy } from 'remeda'
 import { UserModel } from './model'
 import { User } from './entity'
-import { getDownloadPath } from '@/domain/blobs'
+import { getDownloadPath } from '@/domain/blobs/util'
 import { systemAccountId } from '@/lib/const'
 
 export const mapUserModelToEntity = (model: UserModel): User => ({

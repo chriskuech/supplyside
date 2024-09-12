@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { readResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectResourceField } from '@/domain/resource/extensions'
+import 'server-only'
 
 type Props = {
   accountId: string

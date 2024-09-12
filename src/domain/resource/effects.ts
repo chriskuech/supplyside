@@ -6,13 +6,13 @@ import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceField } from './extensions'
 import {
-  copyCosts,
   recalculateItemizedCosts,
   recalculateSubtotalCost,
 } from './costs'
 import { Resource, Value } from './entity'
 import { copyFields } from './fields'
-import { copyLines, updateResourceField } from '.'
+import { copyLines, readResource, updateResourceField } from '.'
+import 'server-only'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 
@@ -35,7 +35,7 @@ export const handleResourceCreate = async ({
           value.resource?.id,
       )
       .map(({ fieldId, value }) =>
-        copyLines(resource.id, value.resource?.id ?? fail()),
+        copyLines({resourceId: resource.id, value.resource?.id ?? fail()}),
       ),
   )
 

@@ -5,6 +5,7 @@ import { mapFieldModelToEntity } from './mappers'
 import prisma from '@/services/prisma'
 import { ValueInput } from '@/domain/resource/patch'
 import { valueInclude } from '@/domain/resource/model'
+import 'server-only'
 
 export type CreateFieldParams = {
   name: string

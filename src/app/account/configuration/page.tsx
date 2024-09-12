@@ -4,6 +4,7 @@ import SchemasControl from './schemas/SchemasControl'
 import AddFieldButton from './fields/AddFieldButton'
 import FieldsTable from './fields/FieldsTable'
 import { readFields } from './fields/actions'
+import 'server-only'
 
 export default async function Configuration() {
   const [fields, schemas] = await Promise.all([readFields(), readSchemas()])
