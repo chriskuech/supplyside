@@ -6,7 +6,7 @@ import { Box } from '@mui/material'
 import { useLayoutEffect, useRef } from 'react'
 import Field from '../fields/controls/Field'
 import { Cell, Display, Row } from './types'
-import { SchemaField as SchemaField } from '@/domain/schema/types'
+import { SchemaField as SchemaField } from '@/domain/schema/entity'
 import { selectResourceField } from '@/domain/resource/extensions'
 
 type Props = {

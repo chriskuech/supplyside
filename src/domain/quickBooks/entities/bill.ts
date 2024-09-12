@@ -9,8 +9,8 @@ import { selectResourceField } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { readResource, updateResourceField } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
-import { readSchema } from '@/domain/schema/actions'
-import { selectSchemaField } from '@/domain/schema/types'
+import { readSchema } from '@/domain/schema'
+import { selectSchemaField } from '@/domain/schema/extensions'
 import { ExpectedError } from '@/domain/errors'
 
 export const readBill = async (

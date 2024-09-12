@@ -2,17 +2,13 @@ import { z } from 'zod'
 import { config as loadDotenv } from 'dotenv'
 import { expand as expandDotenv } from 'dotenv-expand'
 import { ResourceType } from '@prisma/client'
-import { ImportMock } from 'ts-mock-imports'
-import nextCache from 'next/cache'
 import { systemAccountId } from '@/lib/const'
 import prisma from '@/services/prisma'
-import { applyTemplate } from '@/domain/schema/template/actions'
+import { applyTemplate } from '@/domain/schema/template'
 import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
-import { readSchema } from '@/domain/schema/actions'
-import { selectSchemaFieldUnsafe } from '@/domain/schema/types'
-
-ImportMock.mockFunction(nextCache, 'revalidatePath', () => {})
+import { readSchema } from '@/domain/schema'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 
 expandDotenv(loadDotenv())
 

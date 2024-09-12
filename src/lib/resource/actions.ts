@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation'
 import { ResourceType } from '@prisma/client'
 import { readSession, withSession } from '../session/actions'
 import * as domain from '@/domain/resource'
-import * as schemaDomain from '@/domain/schema/actions'
+import * as schemaDomain from '@/domain/schema'
 import { Resource } from '@/domain/resource/entity'
 import prisma from '@/services/prisma'
 import { ValueInput } from '@/domain/resource/patch'
@@ -16,7 +16,7 @@ import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
 import {
   selectSchemaField,
   selectSchemaFieldUnsafe,
-} from '@/domain/schema/types'
+} from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 
 export const createResource = async (

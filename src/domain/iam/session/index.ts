@@ -1,5 +1,3 @@
-'use server'
-
 import { mapSessionModelToEntity } from './mappers'
 import { Session } from './entity'
 import { SessionCreationError } from './errors'

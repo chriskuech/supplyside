@@ -1,8 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable jsx-a11y/alt-text */
 
-'use server'
-
 import { ReactNode } from 'react'
 import { Cost, FieldType } from '@prisma/client'
 import { P, match } from 'ts-pattern'
@@ -12,7 +10,7 @@ import prisma from '@/services/prisma'
 import { readResource, readResources } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readBlob } from '@/domain/blobs'
-import { readSchema } from '@/domain/schema/actions'
+import { readSchema } from '@/domain/schema'
 import { selectResourceField } from '@/domain/resource/extensions'
 
 type Props = {

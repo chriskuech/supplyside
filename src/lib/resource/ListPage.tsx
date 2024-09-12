@@ -6,7 +6,7 @@ import { ReactNode } from 'react'
 import CreateResourceButton from './CreateResourceButton'
 import { ResourceTable } from './table'
 import { readResources } from '@/domain/resource'
-import { readSchema } from '@/domain/schema/actions'
+import { readSchema } from '@/domain/schema'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 
 type Props = {

@@ -8,11 +8,8 @@ import {
   updateField as domainUpdateField,
   deleteField as domainDeleteField,
 } from '@/domain/schema/fields'
-import {
-  CreateFieldParams,
-  Field,
-  UpdateFieldDto,
-} from '@/domain/schema/fields/types'
+import { CreateFieldParams, UpdateFieldDto } from '@/domain/schema/fields'
+import { SchemaField } from '@/domain/schema/entity'
 
 export const createField = async (params: CreateFieldParams) => {
   const session = await readSession()
@@ -21,7 +18,7 @@ export const createField = async (params: CreateFieldParams) => {
   revalidatePath('')
 }
 
-export const readFields = async (): Promise<Field[]> => {
+export const readFields = async (): Promise<SchemaField[]> => {
   const session = await readSession()
   return domainReadFields(session.accountId)
 }

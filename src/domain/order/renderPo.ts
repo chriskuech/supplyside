@@ -1,5 +1,3 @@
-'use server'
-
 import puppeteer from 'puppeteer'
 // https://github.com/vercel/next.js/issues/43810
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment

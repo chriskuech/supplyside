@@ -3,7 +3,8 @@ import { FieldType, Value } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { OrderBy, Where } from './types'
 import { mapUuidToBase64, sanitizeValue } from './sanitize'
-import { Schema, SchemaField, selectSchemaField } from '@/domain/schema/types'
+import { Schema, SchemaField } from '@/domain/schema/entity'
+import { selectSchemaField } from '@/domain/schema/extensions'
 
 export type MapToSqlParams = {
   accountId: string

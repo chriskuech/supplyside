@@ -8,10 +8,10 @@ import { ExpandMore } from '@mui/icons-material'
 import AddSectionControl from './AddSectionControl'
 import { Schema } from './actions'
 import SchemaSectionsControl from './SchemaSectionsControl'
-import { Field } from '@/domain/schema/fields/types'
+import { SchemaField } from '@/domain/schema/entity'
 
 type Props = {
-  fields: Field[]
+  fields: SchemaField[]
   schemas: Schema[]
 }
 

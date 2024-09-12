@@ -12,7 +12,7 @@ import {
   DialogActions,
 } from '@mui/material'
 import { Value } from '@/domain/resource/entity'
-import { SchemaField } from '@/domain/schema/types'
+import { SchemaField } from '@/domain/schema/entity'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 

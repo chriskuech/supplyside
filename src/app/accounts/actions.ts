@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import * as account from '@/domain/iam/account'
-import { applyTemplate } from '@/domain/schema/template/actions'
+import { applyTemplate } from '@/domain/schema/template'
 import { systemAccountId } from '@/lib/const'
 import { readSession, impersonate } from '@/lib/session/actions'
 

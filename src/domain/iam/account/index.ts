@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { Account } from './entity'
 import { mapAccountModelToEntity } from './mappers'
 import { accountInclude } from './model'
-import { applyTemplate } from '@/domain/schema/template/actions'
+import { applyTemplate } from '@/domain/schema/template'
 import prisma from '@/services/prisma'
 
 export const createAccount = async (): Promise<void> => {

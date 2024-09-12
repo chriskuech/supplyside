@@ -9,18 +9,19 @@ import Modal from '@mui/material/Modal'
 import { FC, useState } from 'react'
 import UpdateFieldForm from './UpdateFieldForm'
 import { deleteField, updateField } from './actions'
-import { Field, UpdateFieldDto } from '@/domain/schema/fields/types'
+import { UpdateFieldDto } from '@/domain/schema/fields'
 import { useConfirmation } from '@/lib/confirmation'
+import { SchemaField } from '@/domain/schema/entity'
 
 type Props = {
-  fields: Field[]
+  fields: SchemaField[]
 }
 
 export default function FieldsTable({ fields }: Props) {
-  const [field, setField] = useState<Field>()
+  const [field, setField] = useState<SchemaField>()
   const confirm = useConfirmation()
 
-  const columns: GridColDef<Field>[] = [
+  const columns: GridColDef<SchemaField>[] = [
     {
       field: 'name',
       headerName: 'Name',
@@ -98,7 +99,7 @@ export default function FieldsTable({ fields }: Props) {
 
   return (
     <>
-      <DataGrid<Field>
+      <DataGrid<SchemaField>
         columns={columns}
         rows={fields}
         rowSelection={false}
@@ -114,7 +115,7 @@ export default function FieldsTable({ fields }: Props) {
 }
 
 const FieldModal: FC<{
-  field: Field | undefined
+  field: SchemaField | undefined
   onUpdate: (dto: UpdateFieldDto) => void
   onClose: () => void
 }> = ({ field, onUpdate, onClose }) => (

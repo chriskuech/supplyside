@@ -1,7 +1,7 @@
 import { ResourceType, Cost, FieldType } from '@prisma/client'
 import { File } from '../files/types'
 import { User } from '../user/entity'
-import { Option } from '../schema/types'
+import { Option } from '../schema/entity'
 
 export type Resource = {
   id: string

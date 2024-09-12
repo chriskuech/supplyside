@@ -1,5 +1,5 @@
 import { readSession } from '../session/actions'
-import * as schemaDomain from '@/domain/schema/actions'
+import * as schemaDomain from '@/domain/schema'
 
 export const readSchema = async (
   params: Omit<schemaDomain.ReadSchemaParams, 'accountId'>,
