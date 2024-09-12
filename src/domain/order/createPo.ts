@@ -1,12 +1,10 @@
-'use server'
-
 import { fail } from 'assert'
 import { Prisma } from '@prisma/client'
 import { createBlob } from '../blobs'
 import { fields } from '../schema/template/system-fields'
 import { readResource, updateResourceField } from '../resource'
-import { readSchema } from '../schema/actions'
-import { selectSchemaField } from '../schema/types'
+import { readSchema } from '../schema'
+import { selectSchemaField } from '../schema/extensions'
 import { selectResourceField } from '../resource/extensions'
 import { renderPo } from './renderPo'
 import prisma from '@/services/prisma'
@@ -45,7 +43,7 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   const vendorName = selectResourceField(resource, fields.vendor)?.resource
     ?.name
   const issuedDate = selectResourceField(resource, fields.issuedDate)?.date
-  const number = selectResourceField(resource, fields.number)?.string
+  const number = selectResourceField(resource, fields.poNumber)?.string
 
   const input: Prisma.ValueCreateInput = {
     File: {

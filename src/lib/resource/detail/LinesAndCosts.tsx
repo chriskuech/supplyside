@@ -1,12 +1,12 @@
 import { Stack, Typography, Box } from '@mui/material'
 import { ResourceTable } from '../table'
 import ItemizedCostLines from '../costs/ItemizedCostLines'
-import { readSchema } from '@/domain/schema/actions'
+import { readSchema } from '@/domain/schema'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { Resource } from '@/domain/resource/entity'
 import { Where } from '@/domain/resource/json-logic/types'
 import { ResourceFieldInput, readResources } from '@/domain/resource'
-import { Schema } from '@/domain/schema/types'
+import { Schema } from '@/domain/schema/entity'
 import { fields } from '@/domain/schema/template/system-fields'
 
 type Props = {

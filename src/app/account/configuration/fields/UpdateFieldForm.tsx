@@ -16,16 +16,13 @@ import { FieldType } from '@prisma/client'
 import OptionsControl from './OptionsControl'
 import ResourceTypeSelect from './ResourceTypeSelect'
 import DefaultValueControl from './DefaultValueControl'
-import {
-  Field,
-  OptionPatch,
-  UpdateFieldDto,
-} from '@/domain/schema/fields/types'
+import { OptionPatch, UpdateFieldDto } from '@/domain/schema/fields'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
-import { Value } from '@/domain/resource/entity'
+import { Value, emptyValue } from '@/domain/resource/entity'
+import { SchemaField } from '@/domain/schema/entity'
 
 type Props = {
-  field: Field
+  field: SchemaField
   onSubmit: (dto: UpdateFieldDto) => void
   onCancel: () => void
 }
@@ -36,14 +33,16 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
     field.description ?? '',
   )
   const [options, setOptions] = useState<OptionPatch[]>(
-    field.Option.map((o) => ({
+    field.options.map((o) => ({
       id: o.id,
       name: o.name,
       optionId: o.id,
       op: 'update',
     })),
   )
-  const [defaultValue, setDefaultValue] = useState<Value>(field.defaultValue)
+  const [defaultValue, setDefaultValue] = useState<Value>(
+    field.defaultValue ?? emptyValue,
+  )
 
   const [defaultToToday, setDefaultToToday] = useState<boolean>(
     field.defaultToToday,

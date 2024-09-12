@@ -3,9 +3,10 @@ import { userInclude } from './model'
 import { mapUserModelToEntity } from './mappers'
 import { User } from './entity'
 import { IamUserNotFoundError } from './errors'
-import prisma, { isPrismaError } from '@/services/prisma'
+import prisma from '@/services/prisma'
 import config from '@/services/config'
 import smtp from '@/services/smtp'
+import { isPrismaError } from '@/services/prisma-extensions'
 
 const loginPath = '/auth/login'
 const verifyLoginPath = '/auth/verify-login'
@@ -77,8 +78,8 @@ export async function startEmailVerification({
       verify_email: email,
       verify_token: tat,
       action_url:
-        `${config().BASE_URL}${verifyLoginPath}?email=${email}&token=${tat}` +
-        (returnTo ? `&rel=${returnTo}` : ''),
+        `${config().BASE_URL}${verifyLoginPath}?email=${encodeURIComponent(email)}&token=${tat}` +
+        (returnTo ? `&returnTo=${returnTo}` : ''),
       product_url: config().BASE_URL,
     },
     MessageStream: 'outbound',

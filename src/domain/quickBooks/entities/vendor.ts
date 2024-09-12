@@ -16,11 +16,11 @@ import {
   readResources,
   updateResourceField,
 } from '@/domain/resource'
-import { readSchema } from '@/domain/schema/actions'
+import { readSchema } from '@/domain/schema'
 import {
   selectSchemaField,
   selectSchemaFieldUnsafe,
-} from '@/domain/schema/types'
+} from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectResourceField } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'

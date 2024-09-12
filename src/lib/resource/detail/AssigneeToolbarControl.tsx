@@ -14,14 +14,14 @@ import {
 } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 import { Value } from '@/domain/resource/entity'
-import { Field } from '@/domain/schema/types'
+import { SchemaField } from '@/domain/schema/entity'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 
 type AssigneeControlProps = {
   resourceId: string
   resourceType: ResourceType
-  field: Field
+  field: SchemaField
   value: Value | undefined
 }
 

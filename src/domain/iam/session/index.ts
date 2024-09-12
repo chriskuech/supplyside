@@ -1,13 +1,10 @@
-'use server'
-
-import { isMatching } from 'ts-pattern'
-import { isError } from 'remeda'
 import { mapSessionModelToEntity } from './mappers'
 import { Session } from './entity'
 import { SessionCreationError } from './errors'
 import { sessionIncludes } from './model'
 import prisma from '@/services/prisma'
 import { systemAccountId } from '@/lib/const'
+import { isPrismaError } from '@/services/prisma-extensions'
 
 const SESSION_LIFESPAN_IN_DAYS = 7
 
@@ -79,7 +76,7 @@ export const readAndExtendSession = async (
 
     return mapSessionModelToEntity(session)
   } catch (error) {
-    if (isError(error) && isMatching({ code: 'P2025' }, error)) return null
+    if (isPrismaError('notFound')(error)) return null
 
     throw error
   }

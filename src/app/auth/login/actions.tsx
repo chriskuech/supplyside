@@ -11,8 +11,8 @@ export const startEmailVerification = async (
     await domain.startEmailVerification(params)
 
     redirect(
-      `/auth/verify-login?email=${params.email}` +
-        (params.returnTo ? `&rel=${params.returnTo}` : ''),
+      `/auth/verify-login?email=${encodeURIComponent(params.email)}` +
+        (params.returnTo ? `&returnTo=${params.returnTo}` : ''),
     )
   } catch (error) {
     if (error instanceof IamUserNotFoundError) {

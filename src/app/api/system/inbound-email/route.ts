@@ -8,8 +8,8 @@ import prisma from '@/services/prisma'
 import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import smtp from '@/services/smtp'
-import { readSchema } from '@/domain/schema/actions'
-import { selectSchemaFieldUnsafe } from '@/domain/schema/types'
+import { readSchema } from '@/domain/schema'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 
 type FileParam = {
   content: string

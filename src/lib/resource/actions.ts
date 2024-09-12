@@ -5,44 +5,42 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { ResourceType } from '@prisma/client'
-import { readSession, withSession } from '../session/actions'
+import { withSession } from '../session/actions'
 import * as domain from '@/domain/resource'
-import * as schemaDomain from '@/domain/schema/actions'
+import * as schemaDomain from '@/domain/schema'
 import { Resource } from '@/domain/resource/entity'
 import prisma from '@/services/prisma'
-import { ValueInput } from '@/domain/resource/patch'
 import { ValueResource } from '@/domain/resource/entity'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
 import {
   selectSchemaField,
   selectSchemaFieldUnsafe,
-} from '@/domain/schema/types'
+} from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 
 export const createResource = async (
   params: Pick<domain.CreateResourceParams, 'type' | 'fields'>,
-): Promise<Resource> => {
-  const { accountId, userId } = await readSession()
+): Promise<Resource> =>
+  await withSession(async ({ accountId, userId }) => {
+    const schema = await schemaDomain.readSchema({
+      accountId,
+      resourceType: params.type,
+    })
 
-  const schema = await schemaDomain.readSchema({
-    accountId,
-    resourceType: params.type,
+    if (params.type === 'Order') {
+      params.fields = [
+        ...(params.fields ?? []),
+        {
+          fieldId: selectSchemaFieldUnsafe(schema, fields.assignee).id,
+          value: { userId },
+        },
+      ]
+    }
+
+    revalidatePath('')
+
+    return domain.createResource({ ...params, accountId })
   })
-
-  if (params.type === 'Order') {
-    params.fields = [
-      ...(params.fields ?? []),
-      {
-        fieldId: selectSchemaFieldUnsafe(schema, fields.assignee).id,
-        value: { userId },
-      },
-    ]
-  }
-
-  revalidatePath('')
-
-  return domain.createResource({ ...params, accountId })
-}
 
 type ReadResourceParams = {
   type?: ResourceType
@@ -52,38 +50,44 @@ type ReadResourceParams = {
 
 export const readResource = async (
   params: ReadResourceParams,
-): Promise<Resource> => {
-  const { accountId } = await readSession()
+): Promise<Resource> =>
+  await withSession(
+    async ({ accountId }) =>
+      await domain.readResource({ ...params, accountId }),
+  )
 
-  return domain.readResource({ ...params, accountId })
-}
+export const readResources = async (
+  params: Omit<domain.ReadResourcesParams, 'accountId'>,
+): Promise<Resource[]> =>
+  await withSession(
+    async ({ accountId }) =>
+      await domain.readResources({ ...params, accountId }),
+  )
 
 export const updateResource = async (
   params: Omit<domain.UpdateResourceParams, 'accountId'>,
-): Promise<Resource> => {
-  const { accountId } = await readSession()
+): Promise<Resource> =>
+  await withSession(async ({ accountId }) => {
+    revalidatePath('')
 
-  revalidatePath('')
-
-  return domain.updateResource({ ...params, accountId })
-}
+    return domain.updateResource({ ...params, accountId })
+  })
 
 export const deleteResource = async ({
   resourceType,
   ...params
 }: Omit<domain.DeleteResourceParams, 'accountId'> & {
   resourceType?: ResourceType
-}): Promise<void> => {
-  const { accountId } = await readSession()
+}): Promise<void> =>
+  await withSession(async ({ accountId }) => {
+    revalidatePath('')
 
-  revalidatePath('')
+    await domain.deleteResource({ ...params, accountId })
 
-  await domain.deleteResource({ ...params, accountId })
+    if (!resourceType) return
 
-  if (!resourceType) return
-
-  redirect(`/${resourceType.toLowerCase()}s`)
-}
+    redirect(`/${resourceType.toLowerCase()}s`)
+  })
 
 export type FindResourcesParams = {
   resourceType: ResourceType
@@ -93,10 +97,9 @@ export type FindResourcesParams = {
 export const findResources = async ({
   resourceType,
   input,
-}: FindResourcesParams): Promise<ValueResource[]> => {
-  const { accountId } = await readSession()
-
-  const results = await prisma().$queryRaw`
+}: FindResourcesParams): Promise<ValueResource[]> =>
+  await withSession(async ({ accountId }) => {
+    const results = await prisma().$queryRaw`
     WITH "View" AS (
       SELECT
         "Resource".*,
@@ -107,7 +110,7 @@ export const findResources = async ({
       LEFT JOIN "Value" ON "ResourceField"."valueId" = "Value".id
       WHERE "Resource"."type" = ${resourceType}::"ResourceType"
         AND "Resource"."accountId" = ${accountId}::"uuid"
-        AND "Field"."name" IN ('Name', 'Number')
+        AND "Field"."templateId" IN (${fields.name.templateId}::uuid, ${fields.poNumber.templateId}::uuid)
         AND "Value"."string" <> ''
         AND "Value"."string" IS NOT NULL
     )
@@ -118,16 +121,16 @@ export const findResources = async ({
     LIMIT 15
   `
 
-  return z
-    .object({
-      id: z.string(),
-      type: z.nativeEnum(ResourceType),
-      name: z.string(),
-      key: z.number(),
-    })
-    .array()
-    .parse(results)
-}
+    return z
+      .object({
+        id: z.string(),
+        type: z.nativeEnum(ResourceType),
+        name: z.string(),
+        key: z.number(),
+      })
+      .array()
+      .parse(results)
+  })
 
 export const transitionStatus = async (
   resourceId: string,
@@ -137,6 +140,7 @@ export const transitionStatus = async (
   const { accountId, type: resourceType } = await readResource({
     id: resourceId,
   })
+
   const schema = await schemaDomain.readSchema({
     accountId,
     resourceType,
@@ -159,13 +163,13 @@ export const transitionStatus = async (
   revalidatePath('')
 }
 
-export const updateResourceField = async (params: {
-  resourceId: string
-  fieldId: string
-  value: ValueInput
-}) =>
-  withSession(({ accountId }) => {
+export const updateResourceField = async (
+  params: Omit<domain.UpdateResourceFieldParams, 'accountId'>,
+) =>
+  await withSession(async ({ accountId }) => {
+    const resource = await domain.updateResourceField({ ...params, accountId })
+
     revalidatePath('')
 
-    return domain.updateResourceField({ ...params, accountId })
+    return resource
   })

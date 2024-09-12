@@ -24,7 +24,7 @@ import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import { isMissingRequiredFields } from '@/domain/resource/mappers'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
-import { selectSchemaField } from '@/domain/schema/types'
+import { selectSchemaField } from '@/domain/schema/extensions'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 
@@ -165,7 +165,7 @@ export default async function OrderDetail({
                     <PreviewDraftPoButton resourceId={resource.id} />
                     <ApproveButton
                       resourceId={resource.id}
-                      isDisabled={!user.isApprover}
+                      isDisabled={!user.isApprover && !user.isGlobalAdmin}
                     />
                   </>
                 )}

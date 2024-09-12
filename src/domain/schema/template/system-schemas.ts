@@ -18,6 +18,7 @@ export const schemas: SchemaTemplate[] = [
       {
         name: 'Bill Info',
         fields: [
+          fields.poNumber,
           fields.billFiles,
           fields.vendor,
           fields.invoiceNumber,
@@ -66,7 +67,7 @@ export const schemas: SchemaTemplate[] = [
     resourceType: 'Order',
     fields: [
       fields.orderStatus,
-      fields.number,
+      fields.poNumber,
       fields.assignee,
       fields.document,
       fields.totalCost,

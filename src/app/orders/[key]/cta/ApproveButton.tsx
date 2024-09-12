@@ -18,8 +18,8 @@ type Props = {
 
 export default function ApproveButton({ resourceId, isDisabled }: Props) {
   const callback = (resourceId: string, status: OptionTemplate) =>
-    transitionStatusAction(resourceId, fields.orderStatus, status).then(() =>
-      createPo(resourceId),
+    createPo(resourceId).then(() =>
+      transitionStatusAction(resourceId, fields.orderStatus, status),
     )
 
   const [status, transitionStatus] = useAsyncCallback(callback)

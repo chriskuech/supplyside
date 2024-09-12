@@ -26,7 +26,7 @@ import ResourceForm from '../../ResourceForm'
 import { ValueResource } from '@/domain/resource/entity'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { mapResourceToValueResource } from '@/domain/resource/mappers'
-import { selectSchemaFieldUnsafe } from '@/domain/schema/types'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import useSchema from '@/lib/schema/useSchema'
 
@@ -57,7 +57,7 @@ function ResourceField(
             schema ?? fail('Schema not found'),
             match(resourceType)
               .with(P.union('Vendor', 'Item'), () => fields.name)
-              .with(P.union('Bill', 'Order', 'Line'), () => fields.number)
+              .with(P.union('Bill', 'Order', 'Line'), () => fields.poNumber)
               .exhaustive(),
           ).id,
           value: { string: nameOrNumber },
