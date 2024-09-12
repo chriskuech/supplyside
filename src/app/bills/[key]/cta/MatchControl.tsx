@@ -111,6 +111,7 @@ export default function MatchControl({ schema, resource }: Props) {
                   <CircularProgress />
                 ) : (
                   <ResourceTable
+                    tableKey={MatchControl.name}
                     schema={orderSchema}
                     resources={unlinkedOrders}
                     initialState={{
