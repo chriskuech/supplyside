@@ -11,9 +11,7 @@ export const handleProcessRowUpdate = async (newRow: Row, oldRow: Row) => {
       (oldField) => oldField.fieldId === newField.fieldId,
     )?.value
 
-    if (!oldValue) return true
-
-    return !isDeepEqual(newValue, oldValue)
+    return !isDeepEqual(oldValue, newValue)
   })
   if (!updatedFields.length) {
     return newRow
