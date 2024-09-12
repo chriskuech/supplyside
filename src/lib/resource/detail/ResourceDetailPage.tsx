@@ -62,11 +62,13 @@ export default function ResourceDetailPage({
 
           {[
             ...tools,
-            <DuplicateResourceButton
-              key={DuplicateResourceButton.name}
-              resourceId={resource.id}
-              resourceType={resource.type}
-            />,
+            resource.type !== 'Vendor' && (
+              <DuplicateResourceButton
+                key={DuplicateResourceButton.name}
+                resourceId={resource.id}
+                resourceType={resource.type}
+              />
+            ),
             <DeleteResourceButton
               key={DeleteResourceButton.name}
               resourceType={resource.type}
