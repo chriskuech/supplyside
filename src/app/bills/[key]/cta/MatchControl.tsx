@@ -62,7 +62,7 @@ export default function MatchControl({ schema, resource }: Props) {
           justifyContent: 'center',
         }}
       >
-        <Card sx={{ width: 1000 }}>
+        <Card sx={{ width: 1000, maxHeight: '90%' }}>
           <CardContent>
             <Stack spacing={4}>
               <Typography id="modal-modal-title" variant="h6" component="h2">
