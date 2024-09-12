@@ -1,6 +1,13 @@
-import { Box, Button, Link, Stack, TextField, Typography } from '@mui/material'
+import {
+  Avatar,
+  Box,
+  Button,
+  Link,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
-import Image from 'next/image'
 import { handleSaveSettings } from './actions'
 import { privacyPolicyUrl, termsOfServiceUrl } from '@/lib/const'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
@@ -25,17 +32,13 @@ export default async function SettingsPage() {
       </Box>
       <form action={handleSaveSettings}>
         <Stack spacing={2} direction="column">
-          {user?.profilePicPath && (
-            <Stack direction="row" justifyContent="center">
-              <Image
-                src={user.profilePicPath}
-                alt="Profile Picture"
-                style={{ borderRadius: '50%' }}
-                width={300}
-                height={300}
-              />
-            </Stack>
-          )}
+          <Stack direction="row" justifyContent="center">
+            <Avatar
+              alt="Profile picture"
+              src={user.profilePicPath ?? undefined}
+              sx={{ width: 300, height: 300 }}
+            />
+          </Stack>
 
           <Stack direction="row" justifyContent="center">
             <Button component="label" startIcon={<CloudUpload />}>

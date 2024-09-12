@@ -1,4 +1,11 @@
-import { Box, Button, Stack, TextField, Typography } from '@mui/material'
+import {
+  Avatar,
+  Box,
+  Button,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
 import Image from 'next/image'
 import { handleSaveSettings } from './actions'
@@ -28,14 +35,11 @@ export default async function InfoPage() {
       <form action={handleSaveSettings}>
         <Stack spacing={4} direction="column" alignItems="center">
           <Stack spacing={2} alignItems="center">
-            <Image
-              src={account?.logoPath ?? ''}
+            <Avatar
+              src={account?.logoPath ?? undefined}
               alt="Logo"
-              style={{ borderRadius: '50%', background: 'gray' }}
-              width={300}
-              height={300}
+              sx={{ width: 300, height: 300 }}
             />
-
             <Box>
               <Button component="label" startIcon={<CloudUpload />}>
                 Upload Logo
