@@ -6,6 +6,7 @@ import ReadOnlyFieldsView from './ReadOnlyFieldsView'
 import LinesAndCosts from './LinesAndCosts'
 import DeleteResourceButton from './DeleteResourceButton'
 import DuplicateResourceButton from './DuplicateResourceButton'
+import HandleJustCloned from './HandleJustCloned'
 import { Schema } from '@/domain/schema/entity'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { Resource } from '@/domain/resource/entity'
@@ -34,6 +35,7 @@ export default function ResourceDetailPage({
 }: Props) {
   return (
     <Stack>
+      <HandleJustCloned />
       <Container sx={{ py: 5 }}>
         {name && (
           <Stack direction="row" alignItems="center">
