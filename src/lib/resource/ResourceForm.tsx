@@ -33,7 +33,7 @@ export default function ResourceForm({
   const columns = singleColumn ? 1 : 3
 
   const schema = useSchema(resourceType)
-  const [resource, setResource] = useResource(resourceId)
+  const [resource, updateResource] = useResource(resourceId)
 
   if (!schema || !resource) return <CircularProgress />
 
@@ -117,12 +117,9 @@ export default function ResourceForm({
                                 fieldId: f.id,
                               })}
                               onChange={(value) =>
-                                setResource({
+                                updateResource({
                                   ...resource,
                                   fields: [
-                                    ...resource.fields.filter(
-                                      ({ fieldId }) => fieldId !== f.id,
-                                    ),
                                     {
                                       fieldId: f.id,
                                       fieldType: f.type,
