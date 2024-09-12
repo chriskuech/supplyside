@@ -127,7 +127,7 @@ jobs:
             Start-Sleep -Seconds $waitInSeconds
             Write-Host "~" -NoNewline
 
-            $res = Invoke-RestMethod -Uri https://app-int.supplyside.io/api/system/health -Method Get -ErrorAction SilentlyContinue
+            $res = Invoke-RestMethod -Uri ${{ job.environment.url }}/api/system/health -Method Get -ErrorAction SilentlyContinue
 
             if ($res -and $res.build.commit -eq $env:SHA) {
               Write-Host "\nDeployment successful"
@@ -137,6 +137,10 @@ jobs:
 
           Write-Host "\nDeployment timed out after $timeoutInMinutes minutes"
           exit 1
+
+      - name: Apply configuration
+        run: |
+          curl -X POST ${{ job.environment.url }}/api/system/post-deployment
 
         env:
           SHA: ${{ github.sha }}
