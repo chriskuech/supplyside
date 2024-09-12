@@ -23,7 +23,7 @@ export const copyLinkedResourceFields = async (
       where: { id: fieldId },
     })
 
-  if (!linkedResourceType || !linkedResourceId) return
+  if (!linkedResourceType) return
 
   const { accountId, type: thisResourceType } =
     await prisma().resource.findUniqueOrThrow({

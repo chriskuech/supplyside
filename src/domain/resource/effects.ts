@@ -1,10 +1,15 @@
 import { fail } from 'assert'
+import { ResourceType } from '@prisma/client'
 import { SchemaField, Schema } from '../schema/entity'
 import { selectSchemaField } from '../schema/extensions'
 import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
-import { selectResourceField } from './extensions'
-import { recalculateItemizedCosts, recalculateSubtotalCost } from './costs'
+import { copyLines, selectResourceField } from './extensions'
+import {
+  copyResourceCosts,
+  recalculateItemizedCosts,
+  recalculateSubtotalCost,
+} from './costs'
 import { Resource, Value } from './entity'
 import { copyLinkedResourceFields } from './fields'
 import { updateResourceField } from '.'
@@ -63,6 +68,34 @@ export const handleResourceUpdate = async ({
   resource,
   updatedFields,
 }: HandleResourceUpdateParams) => {
+  // When a Resource Field is updated,
+  // Then copy the linked Resource's Fields
+  await Promise.all(
+    updatedFields
+      .filter((uf) => uf.field.type === 'Resource')
+      .map(async ({ field: { id: fieldId }, value }) => {
+        if (value?.resource) {
+          await copyLinkedResourceFields(
+            resource.id,
+            fieldId,
+            value.resource.id,
+          )
+
+          const resourceTypes: ResourceType[] = ['Bill', 'Order']
+          if (
+            [value.resource.type, resource.type].every((type) =>
+              resourceTypes.includes(type),
+            )
+          ) {
+            await copyResourceCosts(value.resource.id, resource.id)
+            await copyLines(accountId, value.resource.id, resource.id, {
+              fieldId,
+            })
+          }
+        }
+      }),
+  )
+
   // When the Line."Unit Cost" or Line."Quantity" field is updated,
   // Then update Line."Total Cost"
   if (
