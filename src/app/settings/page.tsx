@@ -1,14 +1,5 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Link,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
-import { CloudUpload } from '@mui/icons-material'
-import { handleSaveSettings } from './actions'
+import { Box, Link, Stack, Typography } from '@mui/material'
+import Form from './Form'
 import { privacyPolicyUrl, termsOfServiceUrl } from '@/lib/const'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 
@@ -30,46 +21,7 @@ export default async function SettingsPage() {
           Personalize your profile and preferences.
         </Typography>
       </Box>
-      <form action={handleSaveSettings}>
-        <Stack spacing={2} direction="column">
-          <Stack direction="row" justifyContent="center">
-            <Avatar
-              alt="Profile picture"
-              src={user.profilePicPath ?? undefined}
-              sx={{ width: 300, height: 300 }}
-            />
-          </Stack>
-
-          <Stack direction="row" justifyContent="center">
-            <Button component="label" startIcon={<CloudUpload />}>
-              Upload Profile Pic
-              <input
-                style={{ display: 'none' }}
-                type="file"
-                name="file"
-                accept="image/*"
-              />
-            </Button>
-          </Stack>
-
-          <TextField
-            label="First Name"
-            name="firstName"
-            defaultValue={user?.firstName}
-            fullWidth
-          />
-          <TextField
-            label="Last Name"
-            name="lastName"
-            defaultValue={user?.lastName}
-            fullWidth
-          />
-
-          <Stack direction="row" justifyContent="center">
-            <Button type="submit">Save</Button>
-          </Stack>
-        </Stack>
-      </form>
+      <Form user={user} />
       <Typography variant="h5" pt={4}>
         More information
       </Typography>
