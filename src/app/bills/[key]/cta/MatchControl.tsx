@@ -59,9 +59,9 @@ export default function MatchControl({ schema, resource }: Props) {
           justifyContent: 'center',
         }}
       >
-        <Card sx={{ width: 350 }}>
+        <Card sx={{ width: 1000 }}>
           <CardContent>
-            <Stack spacing={2}>
+            <Stack spacing={4}>
               <Typography id="modal-modal-title" variant="h6" component="h2">
                 3-Way Match
               </Typography>

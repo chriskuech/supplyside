@@ -110,12 +110,12 @@ export default function ResourceTable({
             <GridToolbarQuickFilter
               quickFilterParser={(searchInput) =>
                 searchInput
-                  .split(',')
+                  .split(' ')
                   .map((value) => value.trim())
                   .filter(Boolean)
               }
               quickFilterFormatter={(quickFilterValues) =>
-                quickFilterValues.join(', ')
+                quickFilterValues.join(' ')
               }
               debounceMs={200} // time before applying the new quick filter value
             />
