@@ -3,15 +3,12 @@
 import { ResourceType } from '@prisma/client'
 import { notFound, redirect } from 'next/navigation'
 import { requireSessionWithRedirect, withSession } from '@/lib/session/actions'
-import { createResource, readResource } from '@/domain/resource'
+import { readResource } from '@/domain/resource'
 import { readSchema } from '@/domain/schema'
 import { Session } from '@/domain/iam/session/entity'
 import { Resource } from '@/domain/resource/entity'
 import { Schema } from '@/domain/schema/entity'
-import { mapValueToValueInput } from '@/domain/resource/mappers'
-import { copyResourceCosts } from '@/domain/resource/costs'
-import { fields } from '@/domain/schema/template/system-fields'
-import { copyLines } from '@/domain/resource/extensions'
+import { cloneResource as domainCloneResource } from '@/domain/resource'
 
 type DetailPageModel = {
   session: Session
@@ -53,31 +50,8 @@ export const readDetailPageModel = async (
 }
 
 export const cloneResource = async (resourceId: string) =>
-  withSession(async ({ accountId }) => {
-    const source = await readResource({ accountId, id: resourceId })
+  await withSession(async ({ accountId }) => {
+    const resource = await domainCloneResource(accountId, resourceId)
 
-    const destination = await createResource({
-      accountId,
-      type: source.type,
-      fields: source.fields.map(({ fieldId, fieldType, value }) => ({
-        fieldId,
-        value: mapValueToValueInput(fieldType, value),
-      })),
-    })
-
-    if (source.type === 'Order') {
-      await Promise.all([
-        copyLines(accountId, source.id, destination.id, fields.order),
-        copyResourceCosts(source.id, destination.id),
-      ])
-    }
-
-    if (source.type === 'Bill') {
-      await Promise.all([
-        copyLines(accountId, source.id, destination.id, fields.bill),
-        copyResourceCosts(source.id, destination.id),
-      ])
-    }
-
-    redirect(`/${destination.type.toLowerCase()}s/${destination.key}`)
+    redirect(`/${resource.type.toLowerCase()}s/${resource.key}?cloned`)
   })
