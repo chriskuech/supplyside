@@ -12,7 +12,7 @@ import {
   fields,
   orderStatusOptions,
 } from '../schema/template/system-fields'
-import { copyResourceCosts, recalculateSubtotalCost } from './costs'
+import { copyCosts, recalculateSubtotalCost } from './costs'
 import { selectResourceField } from './extensions'
 import {
   mapValueInputToPrismaValueCreate,
@@ -358,7 +358,7 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
 
       await Promise.all([
         copyLines(accountId, source.id, destination.id, fields.bill),
-        copyResourceCosts(source.id, destination.id),
+        copyCosts(source.id, destination.id),
       ])
 
       return destination
@@ -398,7 +398,7 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
 
       await Promise.all([
         copyLines(accountId, source.id, destination.id, fields.order),
-        copyResourceCosts(source.id, destination.id),
+        copyCosts(source.id, destination.id),
       ])
 
       return destination
@@ -415,7 +415,7 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
 
       await Promise.all([
         copyLines(accountId, source.id, destination.id, fields.order),
-        copyResourceCosts(source.id, destination.id),
+        copyCosts(source.id, destination.id),
       ])
 
       return destination

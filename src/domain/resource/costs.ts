@@ -161,7 +161,7 @@ export const recalculateSubtotalCost = async (
   })
 }
 
-export const copyResourceCosts = async (
+export const copyCosts = async (
   fromResourceId: string,
   toResourceId: string,
 ) => {

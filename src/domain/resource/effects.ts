@@ -6,13 +6,13 @@ import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceField } from './extensions'
 import {
-  copyResourceCosts,
+  copyCosts,
   recalculateItemizedCosts,
   recalculateSubtotalCost,
 } from './costs'
 import { Resource, Value } from './entity'
-import { copyLinkedResourceFields } from './fields'
-import { copyLines, readResource, updateResourceField } from '.'
+import { copyFields } from './fields'
+import { copyLines, updateResourceField } from '.'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 
@@ -35,11 +35,7 @@ export const handleResourceCreate = async ({
           value.resource?.id,
       )
       .map(({ fieldId, value }) =>
-        copyLinkedResourceFields(
-          resource.id,
-          fieldId,
-          value.resource?.id ?? fail(),
-        ),
+        copyLines(resource.id, value.resource?.id ?? fail()),
       ),
   )
 
@@ -75,11 +71,11 @@ export const handleResourceUpdate = async ({
       .filter((uf) => uf.field.type === 'Resource')
       .map(async ({ field: { id: fieldId }, value }) => {
         if (value?.resource) {
-          await copyLinkedResourceFields(
-            resource.id,
-            fieldId,
-            value.resource.id,
-          )
+          await copyFields({
+            accountId,
+            fromResourceId: value.resource.id,
+            toResourceId: resource.id,
+          })
 
           const resourceTypes: ResourceType[] = ['Bill', 'Order']
           if (
@@ -87,7 +83,7 @@ export const handleResourceUpdate = async ({
               resourceTypes.includes(type),
             )
           ) {
-            await copyResourceCosts(value.resource.id, resource.id)
+            await copyCosts(value.resource.id, resource.id)
             await copyLines(accountId, value.resource.id, resource.id, {
               fieldId,
             })
@@ -95,9 +91,6 @@ export const handleResourceUpdate = async ({
         }
       }),
   )
-
-  //There may be updated fields when copying linked resource fields
-  resource = await readResource({ accountId, id: resource.id })
 
   // When the Line."Unit Cost" or Line."Quantity" or a new item is selected field is updated,
   // Then update Line."Total Cost"
