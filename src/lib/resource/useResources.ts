@@ -3,6 +3,7 @@ import { ResourceType } from '@prisma/client'
 import { Resource } from '@/domain/resource/entity'
 import { readResources } from '@/lib/resource/actions'
 import { Where } from '@/domain/resource/json-logic/types'
+import 'client-only'
 
 export const useResources = (
   resourceType: ResourceType,

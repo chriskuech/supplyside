@@ -1,6 +1,5 @@
-'use client'
-
 import { ChangeEvent, useCallback, useState } from 'react'
+import 'client-only'
 
 export function useImagePreview() {
   const [image, setImage] = useState<string | null>(null)

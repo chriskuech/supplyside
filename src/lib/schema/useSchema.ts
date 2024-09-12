@@ -1,5 +1,4 @@
-'use client'
-
+import 'client-only'
 import { ResourceType } from '@prisma/client'
 import { useEffect, useState } from 'react'
 import { readSchema } from './actions'
