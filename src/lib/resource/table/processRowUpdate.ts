@@ -1,13 +1,26 @@
 import { enqueueSnackbar } from 'notistack'
+import { isDeepEqual } from 'remeda'
 import { updateResource } from '../actions'
 import { Row } from './types'
 import { mapValueToValueInput } from '@/domain/resource/mappers'
 
 export const handleProcessRowUpdate = async (newRow: Row, oldRow: Row) => {
+  const updatedFields = newRow.fields.filter((newField) => {
+    const newValue = newField.value
+    const oldValue = oldRow.fields.find(
+      (oldField) => oldField.fieldId === newField.fieldId,
+    )?.value
+
+    return !isDeepEqual(oldValue, newValue)
+  })
+  if (!updatedFields.length) {
+    return newRow
+  }
+
   try {
     const resource = await updateResource({
       resourceId: newRow.id,
-      fields: newRow.fields.map(({ fieldId, fieldType, value }) => ({
+      fields: updatedFields.map(({ fieldId, fieldType, value }) => ({
         fieldId,
         value: mapValueToValueInput(fieldType, value),
       })),
