@@ -74,6 +74,8 @@ export const requireTokenWithRedirect = async (
 export const getPlaidAccounts = async (accountId: string) => {
   const token = await requireTokenWithRedirect(accountId)
 
-  const accounts = await plaidClient().accountsGet({ access_token: token })
-  return accounts.data.accounts
+  const accountsResponse = await plaidClient().accountsGet({
+    access_token: token,
+  })
+  return accountsResponse.data.accounts
 }
