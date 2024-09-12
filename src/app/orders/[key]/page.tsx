@@ -165,7 +165,7 @@ export default async function OrderDetail({
                     <PreviewDraftPoButton resourceId={resource.id} />
                     <ApproveButton
                       resourceId={resource.id}
-                      isDisabled={!user.isApprover}
+                      isDisabled={!user.isApprover && !user.isGlobalAdmin}
                     />
                   </>
                 )}
