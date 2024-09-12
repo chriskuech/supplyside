@@ -16,4 +16,5 @@ export const mapAccountModelToEntity = (model: AccountModel): Account => ({
     }),
   logoBlobId: model.LogoBlob?.id ?? null,
   quickBooksConnectedAt: model.quickBooksConnectedAt,
+  plaidConnectedAt: model.plaidConnectedAt,
 })

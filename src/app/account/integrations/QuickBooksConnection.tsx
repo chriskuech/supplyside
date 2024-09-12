@@ -26,7 +26,7 @@ export default async function QuickBooksConnection({ session }: Props) {
       <Typography variant="caption">
         Connected at:{' '}
         <strong>
-          {session.account.quickBooksConnectedAt?.toLocaleTimeString()}
+          {session.account.quickBooksConnectedAt?.toLocaleDateString()}
         </strong>
         . <QuickBooksDisconnectLink />
       </Typography>

@@ -29,6 +29,8 @@ model Account {
   logoBlobId            String?   @unique @db.Uuid
   quickBooksConnectedAt DateTime?
   quickBooksToken       Json?
+  plaidConnectedAt      DateTime?
+  plaidToken            String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

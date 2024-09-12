@@ -13,6 +13,10 @@ const schema = z
     QUICKBOOKS_CLIENT_SECRET: z.string().min(1).optional(),
     QUICKBOOKS_CSRF_SECRET: z.string().min(1).optional(),
     QUICKBOOKS_ENVIRONMENT: z.enum(['sandbox', 'production']).optional(),
+
+    PLAID_ENV: z.enum(['sandbox', 'development', 'production']).optional(),
+    PLAID_CLIENT_ID: z.string().min(1).optional(),
+    PLAID_SECRET: z.string().min(1).optional(),
   })
   .transform((data) => ({
     ...data,

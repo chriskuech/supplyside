@@ -1,5 +1,6 @@
-import { Alert, Box, Stack, Typography } from '@mui/material'
+import { Alert, Stack, Typography } from '@mui/material'
 import QuickBooks from './QuickBooks'
+import Plaid from './Plaid'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 
 export default async function IntegrationsPage() {
@@ -13,10 +14,16 @@ export default async function IntegrationsPage() {
       {!session.user.isAdmin && !session.user.isGlobalAdmin ? (
         <Alert severity="error">You must be an admin to access this page</Alert>
       ) : (
-        <Box>
-          <Typography variant="h6">QuickBooks</Typography>
-          <QuickBooks session={session} />
-        </Box>
+        <>
+          <Stack>
+            <Typography variant="h6">QuickBooks</Typography>
+            <QuickBooks session={session} />
+          </Stack>
+          <Stack>
+            <Typography variant="h6">Plaid</Typography>
+            <Plaid session={session} />
+          </Stack>
+        </>
       )}
     </Stack>
   )
