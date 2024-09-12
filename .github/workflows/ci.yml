@@ -129,13 +129,13 @@ jobs:
 
             $res = Invoke-RestMethod -Uri https://app-int.supplyside.io/api/system/health -Method Get -ErrorAction SilentlyContinue
 
-            if ($res -and $res.build.commit -eq $env:GITHUB_SHA) {
-              Write-Host "Deployment successful"
+            if ($res -and $res.build.commit -eq $env:SHA) {
+              Write-Host "\nDeployment successful"
               exit 0
             }
           } while ((Get-Date) -lt $timeout)
 
-          Write-Host "Deployment timed out after $timeoutInMinutes minutes"
+          Write-Host "\nDeployment timed out after $timeoutInMinutes minutes"
           exit 1
 
         env:
