@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import { Blob } from '@prisma/client'
 import azblob from '@/services/azblob'
 import prisma from '@/services/prisma'
+import 'server-only'
 
 const containerName = 'app-data'
 
@@ -89,11 +90,3 @@ export const deleteBlob = async ({ accountId, blobId }: DeleteBlobParams) => {
 
   await prisma().blob.delete({ where: { accountId, id: blobId } })
 }
-
-export const getDownloadPath = (params: {
-  blobId: string
-  mimeType: string
-  fileName: string
-  isPreview?: boolean
-}): string =>
-  `/api/download/${encodeURIComponent(params.fileName)}?blobId=${params.blobId}${params.isPreview ? '&preview' : ''}`

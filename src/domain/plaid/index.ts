@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { plaidClient } from './util'
 import prisma from '@/services/prisma'
 import config from '@/services/config'
+import 'server-only'
 
 export const createLinkToken = async (accountId: string) => {
   const request = {

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { match } from 'ts-pattern'
 import singleton from './singleton'
+import 'server-only'
 
 const schema = z
   .object({

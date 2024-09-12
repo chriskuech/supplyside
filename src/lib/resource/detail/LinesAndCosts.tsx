@@ -8,6 +8,7 @@ import { Where } from '@/domain/resource/json-logic/types'
 import { ResourceFieldInput, readResources } from '@/domain/resource'
 import { Schema } from '@/domain/schema/entity'
 import { fields } from '@/domain/schema/template/system-fields'
+import 'server-only'
 
 type Props = {
   resource: Resource

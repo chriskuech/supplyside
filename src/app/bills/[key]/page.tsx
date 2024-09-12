@@ -19,6 +19,7 @@ import { selectSchemaField } from '@/domain/schema/extensions'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import { getQuickBooksConfig } from '@/domain/quickBooks/util'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
+import 'server-only'
 
 export default async function BillsDetail({
   params: { key },

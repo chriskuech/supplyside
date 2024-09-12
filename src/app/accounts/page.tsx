@@ -3,6 +3,7 @@ import AccountsTable from './AccountsTable'
 import CreateAccountButton from './CreateAccountButton'
 import prisma from '@/services/prisma'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
+import 'server-only'
 
 export default async function AdminPage() {
   const [{ user }, accounts] = await Promise.all([

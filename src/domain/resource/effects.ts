@@ -13,6 +13,7 @@ import {
 import { Resource, Value } from './entity'
 import { copyLinkedResourceFields } from './fields'
 import { copyLines, readResource, updateResourceField } from '.'
+import 'server-only'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 

@@ -1,3 +1,5 @@
+import 'server-only'
+
 /**
  * Ensures that--
  *   - no code runs at build time (via module import)
