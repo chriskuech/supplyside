@@ -7,7 +7,6 @@ import {
   Typography,
 } from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
-import Image from 'next/image'
 import { handleSaveSettings } from './actions'
 import { readSession } from '@/lib/session/actions'
 import config from '@/services/config'
