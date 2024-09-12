@@ -11,66 +11,29 @@ import {
   Typography,
 } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
-import { useEffect, useMemo } from 'react'
-import { debounce } from 'remeda'
 import { ResourceType } from '@prisma/client'
 import useSchema from '../schema/useSchema'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
 import Field from './fields/controls/Field'
-import { updateResource } from './actions'
 import useResource from './useResource'
-import { Schema } from '@/domain/schema/entity'
 import { selectResourceField } from '@/domain/resource/extensions'
-import { Resource } from '@/domain/resource/entity'
-import { mapValueToValueInput } from '@/domain/resource/mappers'
 
 type Props = {
-  resourceId?: string
-  resource?: Resource
-  schema?: Schema
-  resourceType?: ResourceType
+  resourceId: string
+  resourceType: ResourceType
   singleColumn?: boolean
 }
 
 export default function ResourceForm({
   resourceId,
   resourceType,
-  schema: defaultSchema,
-  resource: defaultResource,
   singleColumn,
 }: Props) {
   const columns = singleColumn ? 1 : 3
 
-  const schema = useSchema(
-    resourceType ?? defaultSchema?.resourceType ?? fail(),
-  )
-  const [resource, setResource] = useResource(
-    resourceId ?? defaultResource ?? fail(),
-  )
-
-  const changeHandler = useMemo(
-    () =>
-      debounce(
-        (resource: Resource) =>
-          updateResource({
-            resourceId: resource.id,
-            fields: resource.fields.map(({ fieldId, fieldType, value }) => ({
-              fieldId,
-              value: mapValueToValueInput(fieldType, value),
-            })),
-          }),
-        {
-          timing: 'trailing',
-          waitMs: 500,
-        },
-      ).call,
-    [],
-  )
-
-  useEffect(() => {
-    resource && changeHandler(resource)
-  }, [resource, changeHandler])
+  const schema = useSchema(resourceType)
+  const [resource, setResource] = useResource(resourceId)
 
   if (!schema || !resource) return <CircularProgress />
 

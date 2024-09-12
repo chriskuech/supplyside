@@ -85,7 +85,10 @@ export default function ResourceDetailPage({
           {isReadOnly ? (
             <ReadOnlyFieldsView schema={schema} resource={resource} />
           ) : (
-            <ResourceForm schema={schema} resource={resource} />
+            <ResourceForm
+              resourceType={schema.resourceType}
+              resourceId={resource.id}
+            />
           )}
           {backlinkField && (
             <LinesAndCosts

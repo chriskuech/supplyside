@@ -2,8 +2,9 @@ import { mapSessionModelToEntity } from './mappers'
 import { Session } from './entity'
 import { SessionCreationError } from './errors'
 import { sessionIncludes } from './model'
-import prisma, { isPrismaError } from '@/services/prisma'
+import prisma from '@/services/prisma'
 import { systemAccountId } from '@/lib/const'
+import { isPrismaError } from '@/services/prisma-extensions'
 
 const SESSION_LIFESPAN_IN_DAYS = 7
 
