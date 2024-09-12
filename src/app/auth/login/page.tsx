@@ -21,7 +21,10 @@ export default async function Login({
   const session = await readSession().catch(() => null)
 
   if (session)
-    redirect('/' + (returnTo && `returnTo=${returnTo}`), RedirectType.replace)
+    redirect(
+      '/' + (returnTo ? `returnTo=${returnTo}` : ''),
+      RedirectType.replace,
+    )
 
   return (
     <Box
