@@ -145,4 +145,4 @@ jobs:
           SHA: ${{ github.sha }}
 
       - name: Apply configuration
-        run: curl -X POST $env:BASE_URL/api/system/post-deployment
+        run: curl -X POST $BASE_URL/api/system/post-deployment
