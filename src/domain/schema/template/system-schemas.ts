@@ -18,11 +18,11 @@ export const schemas: SchemaTemplate[] = [
       {
         name: 'Bill Info',
         fields: [
-          fields.poNumber,
           fields.billFiles,
           fields.vendor,
           fields.invoiceNumber,
           fields.invoiceDate,
+          fields.poNumber,
           fields.billDescription,
         ],
       },
