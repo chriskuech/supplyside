@@ -4,7 +4,11 @@ import { selectSchemaField } from '../schema/extensions'
 import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceField } from './extensions'
-import { recalculateItemizedCosts, recalculateSubtotalCost } from './costs'
+import {
+  copyResourceCosts,
+  recalculateItemizedCosts,
+  recalculateSubtotalCost,
+} from './costs'
 import { Resource, Value } from './entity'
 import { copyLinkedResourceFields } from './fields'
 import { updateResourceField } from '.'
@@ -149,13 +153,22 @@ export const handleResourceUpdate = async ({
     })
   }
 
-  // When the Order field of a Bill resource has been updated (an Order has been linked to a Bill)
+  // When the "Order" field of a Bill resource has been updated (an Order has been linked to a Bill)
+  // Then copy Itemized Costs
   // Then recalculate the Bill."Subtotal Cost"
   if (
     resource.type === 'Bill' &&
     updatedFields.some((rf) => rf.field.templateId === fields.order.templateId)
   ) {
-    await recalculateSubtotalCost(accountId, 'Bill', resource.id)
+    const sourceResourceId = selectResourceField(resource, fields.order)
+      ?.resource?.id
+    const destinationResourceId = resource.id
+
+    if (sourceResourceId) {
+      await copyResourceCosts(sourceResourceId, destinationResourceId)
+    }
+
+    await recalculateSubtotalCost(accountId, 'Bill', destinationResourceId)
   }
 
   // When the “Invoice Date” field or “Payment Terms” field changes,
