@@ -3,9 +3,9 @@ import { Cost, ResourceType } from '@prisma/client'
 import { map, pipe, sum } from 'remeda'
 import { selectResourceField } from './extensions'
 import { readResource, readResources, updateResourceField } from '.'
-import { readSchema } from '@/domain/schema/actions'
+import { readSchema } from '@/domain/schema'
 import prisma from '@/services/prisma'
-import { selectSchemaField } from '@/domain/schema/types'
+import { selectSchemaField } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 
 export type CreateCostParams = {

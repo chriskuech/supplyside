@@ -11,7 +11,7 @@ import {
   fields,
 } from '@/domain/schema/template/system-fields'
 import { transitionStatus } from '@/lib/resource/actions'
-import { Schema } from '@/domain/schema/types'
+import { Schema } from '@/domain/schema/entity'
 import { User } from '@/domain/iam/user/entity'
 import { isMissingRequiredFields } from '@/domain/resource/mappers'
 import LoadingButton from '@/lib/ux/LoadingButton'

@@ -12,19 +12,19 @@ import { Close } from '@mui/icons-material'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { Field } from '@/domain/schema/fields/types'
+import { SchemaField } from '@/domain/schema/entity'
 import { Value } from '@/domain/resource/entity'
 import { emptyValue } from '@/domain/resource/entity'
 
 type Props = {
-  field: Field
+  field: SchemaField
   defaultValue: Value
   onChange: (dto: Value) => void
   isDisabled?: boolean
 }
 
 export default function DefaultValueControl({
-  field: { type, Option: options },
+  field: { type, options },
   defaultValue,
   onChange,
   isDisabled,

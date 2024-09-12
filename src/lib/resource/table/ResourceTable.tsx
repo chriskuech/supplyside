@@ -17,7 +17,7 @@ import { Row, Column } from './types'
 import { handleProcessRowUpdate } from './processRowUpdate'
 import { usePersistDatagridState } from './usePersistDatagridState'
 import { Resource } from '@/domain/resource/entity'
-import { Schema } from '@/domain/schema/types'
+import { Schema } from '@/domain/schema/entity'
 
 type Props = {
   tableKey?: string

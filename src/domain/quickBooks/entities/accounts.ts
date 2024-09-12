@@ -6,7 +6,7 @@ import { Account } from '../types'
 import { quickBooksClient } from '../util'
 import { readFields, updateField } from '@/domain/schema/fields'
 import { fields } from '@/domain/schema/template/system-fields'
-import { OptionPatch } from '@/domain/schema/fields/types'
+import { OptionPatch } from '@/domain/schema/fields'
 
 const PAYABLE_ACCOUNTS_TYPE = 'Accounts Payable'
 
@@ -49,10 +49,9 @@ export const upsertAccountsFromQuickBooks = async (
   const quickBooksAccountNames =
     quickBooksAccounts?.map((account) => account.FullyQualifiedName) ?? []
 
-  const currentAccounts = quickBooksAccountField.Option
   const accountsToAdd = quickBooksAccountNames.filter(
     (accountName) =>
-      !currentAccounts.some(
+      !quickBooksAccountField.options.some(
         (currentAccount) => currentAccount.name === accountName,
       ),
   )
@@ -68,7 +67,7 @@ export const upsertAccountsFromQuickBooks = async (
     id: quickBooksAccountField.id,
     name: quickBooksAccountField.name,
     defaultValue: {
-      optionId: quickBooksAccountField.defaultValue.option?.id ?? null,
+      optionId: quickBooksAccountField.defaultValue?.option?.id ?? null,
     },
     defaultToToday: quickBooksAccountField.defaultToToday,
     isRequired: quickBooksAccountField.isRequired,

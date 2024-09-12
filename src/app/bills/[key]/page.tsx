@@ -15,7 +15,7 @@ import {
 import { selectResourceField } from '@/domain/resource/extensions'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
-import { selectSchemaField } from '@/domain/schema/types'
+import { selectSchemaField } from '@/domain/schema/extensions'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import { getQuickBooksConfig } from '@/domain/quickBooks/util'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'

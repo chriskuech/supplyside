@@ -6,7 +6,8 @@ import ReadOnlyFieldsView from './ReadOnlyFieldsView'
 import LinesAndCosts from './LinesAndCosts'
 import DeleteResourceButton from './DeleteResourceButton'
 import DuplicateResourceButton from './DuplicateResourceButton'
-import { Schema, selectSchemaFieldUnsafe } from '@/domain/schema/types'
+import { Schema } from '@/domain/schema/entity'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { FieldTemplate } from '@/domain/schema/template/types'
 
@@ -84,7 +85,10 @@ export default function ResourceDetailPage({
           {isReadOnly ? (
             <ReadOnlyFieldsView schema={schema} resource={resource} />
           ) : (
-            <ResourceForm schema={schema} resource={resource} />
+            <ResourceForm
+              resourceType={schema.resourceType}
+              resourceId={resource.id}
+            />
           )}
           {backlinkField && (
             <LinesAndCosts

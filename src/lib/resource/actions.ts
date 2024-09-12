@@ -7,16 +7,15 @@ import { redirect } from 'next/navigation'
 import { ResourceType } from '@prisma/client'
 import { readSession, withSession } from '../session/actions'
 import * as domain from '@/domain/resource'
-import * as schemaDomain from '@/domain/schema/actions'
+import * as schemaDomain from '@/domain/schema'
 import { Resource } from '@/domain/resource/entity'
 import prisma from '@/services/prisma'
-import { ValueInput } from '@/domain/resource/patch'
 import { ValueResource } from '@/domain/resource/entity'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
 import {
   selectSchemaField,
   selectSchemaFieldUnsafe,
-} from '@/domain/schema/types'
+} from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 
 export const createResource = async (
@@ -109,7 +108,7 @@ export const findResources = async ({
       LEFT JOIN "Value" ON "ResourceField"."valueId" = "Value".id
       WHERE "Resource"."type" = ${resourceType}::"ResourceType"
         AND "Resource"."accountId" = ${accountId}::"uuid"
-        AND "Field"."name" IN ('Name', 'Number')
+        AND "Field"."templateId" IN (${fields.name.templateId}::uuid, ${fields.poNumber.templateId}::uuid)
         AND "Value"."string" <> ''
         AND "Value"."string" IS NOT NULL
     )
@@ -161,12 +160,10 @@ export const transitionStatus = async (
   revalidatePath('')
 }
 
-export const updateResourceField = async (params: {
-  resourceId: string
-  fieldId: string
-  value: ValueInput
-}) =>
-  withSession(async ({ accountId }) => {
+export const updateResourceField = async (
+  params: Omit<domain.UpdateResourceFieldParams, 'accountId'>,
+) =>
+  await withSession(async ({ accountId }) => {
     const resource = await domain.updateResourceField({ ...params, accountId })
 
     revalidatePath('')

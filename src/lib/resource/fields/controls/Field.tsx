@@ -22,7 +22,7 @@ import FileField from './FileField'
 import UserField from './UserField'
 import ResourceField from './ResourceField'
 import FilesField from './FilesField'
-import { SchemaField as FieldModel } from '@/domain/schema/types'
+import { SchemaField as FieldModel } from '@/domain/schema/entity'
 import { Value } from '@/domain/resource/entity'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
 import { emptyValue } from '@/domain/resource/entity'
@@ -79,7 +79,7 @@ function Field(
           },
         }}
         readOnly={isReadOnly}
-        defaultValue={value?.date && dayjs.utc(value.date)}
+        value={value?.date && dayjs.utc(value.date)}
         onChange={(value) =>
           onChange({ ...emptyValue, date: value?.toDate() ?? null })
         }

@@ -3,15 +3,15 @@
 import { ResourceType } from '@prisma/client'
 import { notFound, redirect } from 'next/navigation'
 import { requireSessionWithRedirect, withSession } from '@/lib/session/actions'
-import { createResource, readResource, readResources } from '@/domain/resource'
-import { readSchema } from '@/domain/schema/actions'
+import { createResource, readResource } from '@/domain/resource'
+import { readSchema } from '@/domain/schema'
 import { Session } from '@/domain/iam/session/entity'
 import { Resource } from '@/domain/resource/entity'
-import { Schema, selectSchemaFieldUnsafe } from '@/domain/schema/types'
+import { Schema } from '@/domain/schema/entity'
 import { mapValueToValueInput } from '@/domain/resource/mappers'
 import { copyResourceCosts } from '@/domain/resource/costs'
 import { fields } from '@/domain/schema/template/system-fields'
-import { FieldTemplate } from '@/domain/schema/template/types'
+import { copyLines } from '@/domain/resource/extensions'
 
 type DetailPageModel = {
   session: Session
@@ -81,48 +81,3 @@ export const cloneResource = async (resourceId: string) =>
 
     redirect(`/${destination.type.toLowerCase()}s/${destination.key}`)
   })
-
-const copyLines = async (
-  accountId: string,
-  sourceResourceId: string,
-  destinationResourceId: string,
-  backLinkFieldTemplate: FieldTemplate,
-) => {
-  const lineSchema = await readSchema({
-    accountId,
-    resourceType: 'Line',
-  })
-
-  const backLinkField = selectSchemaFieldUnsafe(
-    lineSchema,
-    backLinkFieldTemplate,
-  )
-
-  const lines = await readResources({
-    accountId,
-    type: 'Line',
-    where: {
-      '==': [{ var: backLinkField.name }, sourceResourceId],
-    },
-  })
-
-  // `createResource` is not (currently) parallelizable
-  for (const line of lines) {
-    await createResource({
-      accountId,
-      type: 'Line',
-      fields: [
-        ...line.fields
-          .filter(({ fieldId }) => fieldId !== backLinkField.id)
-          .map(({ fieldId, fieldType, value }) => ({
-            fieldId,
-            value: mapValueToValueInput(fieldType, value),
-          })),
-        {
-          fieldId: backLinkField.id,
-          value: { resourceId: destinationResourceId },
-        },
-      ],
-    })
-  }
-}
