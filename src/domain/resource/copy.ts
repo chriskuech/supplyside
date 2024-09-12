@@ -52,6 +52,7 @@ export const copyFields = async ({
       sf: selectSchemaField(fromSchema, rf) ?? fail(),
       tf: findTemplateField(rf.templateId),
     }))
+    .filter(({ sf }) => selectSchemaField(toSchema, sf))
     .filter(({ tf }) => !tf?.isDerived)
 
   const resource = await updateResource({
