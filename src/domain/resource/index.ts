@@ -184,7 +184,7 @@ export const updateResource = async ({
           return {
             where: {
               resourceId_fieldId: {
-                resourceId: resourceId,
+                resourceId,
                 fieldId: rf.fieldId,
               },
             },
@@ -252,17 +252,19 @@ export const deleteResource = async ({
   }
 }
 
+export type UpdateResourceFieldParams = {
+  accountId: string
+  resourceId: string
+  fieldId: string
+  value: ValueInput
+}
+
 export const updateResourceField = async ({
   accountId,
   resourceId,
   fieldId,
   value,
-}: {
-  accountId: string
-  resourceId: string
-  fieldId: string
-  value: ValueInput
-}) =>
+}: UpdateResourceFieldParams) =>
   await updateResource({
     accountId,
     resourceId,

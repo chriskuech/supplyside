@@ -1,26 +1,32 @@
 'use client'
 
-import { useCallback, useMemo } from 'react'
-import { debounce } from 'remeda'
+import { useCallback } from 'react'
 import { updateResourceField } from '../actions'
 import Field, { Props as FieldProps } from './controls/Field'
-import { ValueInput } from '@/domain/resource/patch'
+import { mapValueToValueInput } from '@/domain/resource/mappers'
+import { Value } from '@/domain/resource/entity'
 
-export default function FieldControl(props: Omit<FieldProps, 'onChange'>) {
+export default function FieldControl({
+  resourceId,
+  field,
+  ...fieldProps
+}: Omit<FieldProps, 'onChange'>) {
   const handleChange = useCallback(
-    (value: ValueInput) =>
+    (value: Value) =>
       updateResourceField({
-        resourceId: props.resourceId,
-        fieldId: props.field.id,
-        value,
+        resourceId,
+        fieldId: field.id,
+        value: mapValueToValueInput(field.type, value),
       }),
-    [props.field.id, props.resourceId],
+    [field.id, field.type, resourceId],
   )
 
-  const debouncedOnChange = useMemo(
-    () => debounce(handleChange, { waitMs: 200 }).call,
-    [handleChange],
+  return (
+    <Field
+      resourceId={resourceId}
+      field={field}
+      {...fieldProps}
+      onChange={handleChange}
+    />
   )
-
-  return <Field {...props} onChange={debouncedOnChange} />
 }

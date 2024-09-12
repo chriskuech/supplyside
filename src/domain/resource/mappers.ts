@@ -72,6 +72,7 @@ export const mapValueModelToEntity = (model: ValueModel): Value => ({
   file: model.File ? mapFile(model.File) : null,
   files: model.Files.map(({ File: file }) => mapFile(file)),
 })
+
 export const mapValueResourceModelToEntity = (
   resource: ValueResourceModel,
 ): ValueResource => ({
