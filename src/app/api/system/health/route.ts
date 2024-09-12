@@ -1,6 +1,6 @@
 'use server'
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import build from './build.json'
 
@@ -10,10 +10,11 @@ const buildJsonSchema = z.object({
   timestamp: z.string().datetime(),
 })
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
+export const dynamic = 'force-dynamic'
+
+export async function GET(): Promise<NextResponse> {
   return NextResponse.json({
     timestamp: new Date().toISOString(),
-    yourIp: req.ip,
     build: buildJsonSchema.passthrough().parse(build),
   })
 }
