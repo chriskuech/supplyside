@@ -6,4 +6,5 @@ export type Account = {
   logoPath: string | null
   logoBlobId: string | null
   quickBooksConnectedAt: Date | null
+  plaidConnectedAt: Date | null
 }
