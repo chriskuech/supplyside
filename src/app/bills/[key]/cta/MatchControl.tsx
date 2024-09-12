@@ -22,6 +22,7 @@ import { updateResourceField } from '@/lib/resource/actions'
 import { useResources } from '@/lib/resource/useResources'
 import { selectSchemaField } from '@/domain/schema/extensions'
 import useSchema from '@/lib/schema/useSchema'
+import { useConfirmation } from '@/lib/confirmation'
 
 type Props = {
   schema: Schema
@@ -30,6 +31,7 @@ type Props = {
 
 export default function MatchControl({ schema, resource }: Props) {
   const { open, isOpen, close } = useDisclosure()
+  const confirm = useConfirmation()
 
   const order = selectResourceField(resource, fields.order)?.resource
 
@@ -48,7 +50,25 @@ export default function MatchControl({ schema, resource }: Props) {
         size="large"
         sx={{ height: 'fit-content', fontSize: '1.2em' }}
         endIcon={order ? <Link /> : <AddLink />}
-        onClick={open}
+        onClick={
+          order
+            ? async () => {
+                const isConfirmed = await confirm({
+                  title: 'Unlink Order',
+                  content: 'Are you sure you want to unlink this Order?',
+                })
+
+                if (!isConfirmed) return
+
+                await updateResourceField({
+                  resourceId: resource.id,
+                  fieldId:
+                    selectSchemaField(schema, fields.order)?.id ?? fail(),
+                  value: { resourceId: null },
+                })
+              }
+            : open
+        }
       >
         {order ? 'Order Matched' : 'Match Order'}
       </Button>
@@ -91,6 +111,7 @@ export default function MatchControl({ schema, resource }: Props) {
                   <CircularProgress />
                 ) : (
                   <ResourceTable
+                    tableKey={MatchControl.name}
                     schema={orderSchema}
                     resources={unlinkedOrders}
                     initialState={{
