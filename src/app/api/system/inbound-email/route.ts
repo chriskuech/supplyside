@@ -1,5 +1,3 @@
-'use server'
-
 import { fail } from 'assert'
 import { NextRequest, NextResponse } from 'next/server'
 import { Message } from 'postmark'
@@ -10,6 +8,7 @@ import { fields } from '@/domain/schema/template/system-fields'
 import smtp from '@/services/smtp'
 import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
+import 'server-only'
 
 type FileParam = {
   content: string

@@ -1,5 +1,3 @@
-'use server'
-
 import { fail } from 'assert'
 import { Box, Button, Divider, Stack } from '@mui/material'
 import MAppBar from '@mui/material/AppBar'
@@ -15,6 +13,7 @@ import { systemAccountId } from '@/lib/const'
 import { readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
 import { SessionError } from '@/lib/session/types'
+import 'server-only'
 
 export default async function AppBar() {
   const session = await readSession().catch((e) =>

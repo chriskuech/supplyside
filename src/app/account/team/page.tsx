@@ -4,6 +4,7 @@ import InviteUserControl from './InviteUserControl'
 import { readSelf } from './actions'
 import { readSession } from '@/lib/session/actions'
 import { readUsers } from '@/domain/iam/user'
+import 'server-only'
 
 export default async function Team() {
   const { accountId } = await readSession()

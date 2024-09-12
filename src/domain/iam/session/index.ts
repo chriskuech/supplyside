@@ -5,6 +5,7 @@ import { sessionIncludes } from './model'
 import prisma from '@/services/prisma'
 import { systemAccountId } from '@/lib/const'
 import { isPrismaError } from '@/services/prisma-extensions'
+import 'server-only'
 
 const SESSION_LIFESPAN_IN_DAYS = 7
 

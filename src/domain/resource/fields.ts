@@ -12,6 +12,7 @@ import {
 import { readSchema } from '@/domain/schema'
 import { selectSchemaField } from '@/domain/schema/extensions'
 import { FieldTemplate } from '@/domain/schema/template/types'
+import 'server-only'
 
 export const copyLinkedResourceFields = async (
   resourceId: string,
