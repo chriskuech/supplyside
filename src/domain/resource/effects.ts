@@ -88,7 +88,7 @@ export const handleResourceUpdate = async ({
           await copyLinkedResourceFields(
             resource.id,
             fieldId,
-            value.resource?.id ?? fail(),
+            value.resource.id,
           )
 
           const resourceTypes: ResourceType[] = ['Bill', 'Order']
