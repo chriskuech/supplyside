@@ -1,13 +1,12 @@
 import { fail } from 'assert'
-import { ResourceType } from '@prisma/client'
 import { SchemaField, Schema } from '../schema/entity'
 import { selectSchemaField } from '../schema/extensions'
 import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceField } from './extensions'
 import { recalculateItemizedCosts, recalculateSubtotalCost } from './costs'
-import { copyCosts, copyFields, copyLines } from './copy'
 import { Resource, Value, ValueResource } from './entity'
+import { linkResource } from './link'
 import { readResource, updateResourceField } from '.'
 import 'server-only'
 
@@ -31,19 +30,15 @@ export const handleResourceCreate = async ({
           selectSchemaField(schema, { fieldId })?.resourceType &&
           value.resource?.id,
       )
-      .flatMap(({ fieldId, value }) => [
-        copyFields({
-          accountId,
-          fromResourceId: value.resource?.id ?? fail(),
-          toResourceId: resource.id,
-        }),
-        copyLines({
-          accountId,
-          fromResourceId: value.resource?.id ?? fail(),
-          toResourceId: resource.id,
-          backLinkFieldRef: { fieldId },
-        }),
-      ]),
+      .flatMap(
+        async ({ fieldId, value }) =>
+          await linkResource({
+            accountId,
+            fromResourceId: value.resource?.id ?? fail(),
+            toResourceId: resource.id,
+            backLinkFieldRef: { fieldId },
+          }),
+      ),
   )
 
   if (resource.type === 'Order') {
@@ -88,32 +83,12 @@ export const handleResourceUpdate = async ({
     await Promise.all(
       updatedFieldsWithResourceType.map(
         async ({ field: { id: fieldId }, value }) => {
-          await copyFields({
+          await linkResource({
             accountId,
             fromResourceId: value.resource.id,
             toResourceId: resource.id,
+            backLinkFieldRef: { fieldId },
           })
-
-          const resourceTypes: ResourceType[] = ['Bill', 'Order']
-          if (
-            [value.resource.type, resource.type].every((type) =>
-              resourceTypes.includes(type),
-            )
-          ) {
-            await copyCosts({
-              accountId,
-              fromResourceId: value.resource.id,
-              toResourceId: resource.id,
-            })
-            await copyLines({
-              accountId,
-              fromResourceId: value.resource.id,
-              toResourceId: resource.id,
-              backLinkFieldRef: {
-                fieldId,
-              },
-            })
-          }
         },
       ),
     )

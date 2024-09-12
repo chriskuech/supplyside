@@ -8,7 +8,7 @@ import { readSchema } from '@/domain/schema'
 import { Session } from '@/domain/iam/session/entity'
 import { Resource } from '@/domain/resource/entity'
 import { Schema } from '@/domain/schema/entity'
-import { cloneResource as domainCloneResource } from '@/domain/resource'
+import { cloneResource as domainCloneResource } from '@/domain/resource/clone'
 
 type DetailPageModel = {
   session: Session

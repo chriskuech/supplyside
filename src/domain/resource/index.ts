@@ -1,16 +1,8 @@
 import { fail } from 'assert'
 import { Prisma, ResourceType } from '@prisma/client'
-import { match } from 'ts-pattern'
 import { readSchema } from '../schema'
-import {
-  selectSchemaField,
-  selectSchemaFieldUnsafe,
-} from '../schema/extensions'
-import {
-  billStatusOptions,
-  fields,
-  orderStatusOptions,
-} from '../schema/template/system-fields'
+import { selectSchemaField } from '../schema/extensions'
+import { fields } from '../schema/template/system-fields'
 import { recalculateSubtotalCost } from './costs'
 import { selectResourceField } from './extensions'
 import {
@@ -25,7 +17,6 @@ import { OrderBy, Where } from './json-logic/types'
 import { mapResourceModelToEntity } from './mappers'
 import { resourceInclude } from './model'
 import { handleResourceCreate, handleResourceUpdate } from './effects'
-import { copyCosts, copyLines } from './copy'
 import prisma from '@/services/prisma'
 import 'server-only'
 
@@ -280,117 +271,3 @@ export const updateResourceField = async ({
     resourceId,
     fields: [{ fieldId, value }],
   })
-
-export const cloneResource = async (accountId: string, resourceId: string) => {
-  const source = await readResource({ accountId, id: resourceId })
-
-  const destination = await match(source.type)
-    .with('Bill', async () => {
-      const schema = await readSchema({
-        accountId,
-        resourceType: 'Bill',
-      })
-
-      const billStatusField = selectSchemaFieldUnsafe(schema, fields.billStatus)
-
-      const draftStatusOption =
-        billStatusField.options.find(
-          (o) => o.templateId === billStatusOptions.draft.templateId,
-        ) ?? fail('Draft status not found')
-
-      const destination = await createResource({
-        accountId,
-        type: source.type,
-        fields: [
-          ...source.fields
-            .filter((rf) => rf.fieldId !== billStatusField.id)
-            .map(({ fieldId, fieldType, value }) => ({
-              fieldId,
-              value: mapValueToValueInput(fieldType, value),
-            })),
-          {
-            fieldId: billStatusField.id,
-            value: { optionId: draftStatusOption?.id ?? null },
-          },
-        ],
-      })
-
-      await Promise.all([
-        copyLines({
-          accountId,
-          fromResourceId: source.id,
-          toResourceId: destination.id,
-          backLinkFieldRef: fields.bill,
-        }),
-        copyCosts({
-          accountId,
-          fromResourceId: source.id,
-          toResourceId: destination.id,
-        }),
-      ])
-
-      return destination
-    })
-    .with('Order', async () => {
-      const schema = await readSchema({
-        accountId,
-        resourceType: 'Order',
-      })
-
-      const orderStatusField = selectSchemaFieldUnsafe(
-        schema,
-        fields.orderStatus,
-      )
-
-      const draftStatusOption =
-        orderStatusField.options.find(
-          (o) => o.templateId === orderStatusOptions.draft.templateId,
-        ) ?? fail('Draft status not found')
-
-      const destination = await createResource({
-        accountId,
-        type: source.type,
-        fields: [
-          ...source.fields
-            .filter((rf) => rf.fieldId !== orderStatusField.id)
-            .map(({ fieldId, fieldType, value }) => ({
-              fieldId,
-              value: mapValueToValueInput(fieldType, value),
-            })),
-          {
-            fieldId: orderStatusField.id,
-            value: { optionId: draftStatusOption?.id ?? null },
-          },
-        ],
-      })
-
-      await Promise.all([
-        copyLines({
-          accountId,
-          fromResourceId: source.id,
-          toResourceId: destination.id,
-          backLinkFieldRef: fields.order,
-        }),
-        copyCosts({
-          accountId,
-          fromResourceId: source.id,
-          toResourceId: destination.id,
-        }),
-      ])
-
-      return destination
-    })
-    .otherwise(
-      async () =>
-        await createResource({
-          accountId,
-          type: source.type,
-          fields: source.fields.map(({ fieldId, fieldType, value }) => ({
-            fieldId,
-            value: mapValueToValueInput(fieldType, value),
-          })),
-        }),
-    )
-
-  return destination
-}
