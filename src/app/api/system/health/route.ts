@@ -2,6 +2,7 @@
 
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { cookies } from 'next/headers'
 import build from './build.json'
 
 const buildJsonSchema = z.object({
@@ -10,9 +11,9 @@ const buildJsonSchema = z.object({
   timestamp: z.string().datetime(),
 })
 
-export const dynamic = 'force-dynamic'
-
 export async function GET(): Promise<NextResponse> {
+  cookies() // TODO: this just forces it to be dynamic (?)
+
   return NextResponse.json({
     timestamp: new Date().toISOString(),
     build: buildJsonSchema.passthrough().parse(build),
