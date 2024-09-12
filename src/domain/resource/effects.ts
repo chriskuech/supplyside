@@ -5,13 +5,10 @@ import { selectSchemaField } from '../schema/extensions'
 import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceField } from './extensions'
-import {
-  recalculateItemizedCosts,
-  recalculateSubtotalCost,
-} from './costs'
+import { recalculateItemizedCosts, recalculateSubtotalCost } from './costs'
 import { Resource, Value } from './entity'
-import { copyFields } from './fields'
-import { copyLines, readResource, updateResourceField } from '.'
+import { copyCosts, copyFields, copyLines } from './copy'
+import { updateResourceField } from '.'
 import 'server-only'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
@@ -34,9 +31,19 @@ export const handleResourceCreate = async ({
           selectSchemaField(schema, { fieldId })?.resourceType &&
           value.resource?.id,
       )
-      .map(({ fieldId, value }) =>
-        copyLines({resourceId: resource.id, value.resource?.id ?? fail()}),
-      ),
+      .flatMap(({ fieldId, value }) => [
+        copyFields({
+          accountId,
+          fromResourceId: value.resource?.id ?? fail(),
+          toResourceId: resource.id,
+        }),
+        copyLines({
+          accountId,
+          fromResourceId: value.resource?.id ?? fail(),
+          toResourceId: resource.id,
+          backLinkFieldRef: { fieldId },
+        }),
+      ]),
   )
 
   if (resource.type === 'Order') {
@@ -83,9 +90,18 @@ export const handleResourceUpdate = async ({
               resourceTypes.includes(type),
             )
           ) {
-            await copyCosts(value.resource.id, resource.id)
-            await copyLines(accountId, value.resource.id, resource.id, {
-              fieldId,
+            await copyCosts({
+              accountId,
+              fromResourceId: value.resource.id,
+              toResourceId: resource.id,
+            })
+            await copyLines({
+              accountId,
+              fromResourceId: value.resource.id,
+              toResourceId: resource.id,
+              backLinkFieldRef: {
+                fieldId,
+              },
             })
           }
         }

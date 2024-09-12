@@ -3,7 +3,6 @@ import { Prisma, ResourceType } from '@prisma/client'
 import { match } from 'ts-pattern'
 import { readSchema } from '../schema'
 import {
-  FieldRef,
   selectSchemaField,
   selectSchemaFieldUnsafe,
 } from '../schema/extensions'
@@ -12,7 +11,7 @@ import {
   fields,
   orderStatusOptions,
 } from '../schema/template/system-fields'
-import { copyCosts, recalculateSubtotalCost } from './costs'
+import { recalculateSubtotalCost } from './costs'
 import { selectResourceField } from './extensions'
 import {
   mapValueInputToPrismaValueCreate,
@@ -26,6 +25,7 @@ import { OrderBy, Where } from './json-logic/types'
 import { mapResourceModelToEntity } from './mappers'
 import { resourceInclude } from './model'
 import { handleResourceCreate, handleResourceUpdate } from './effects'
+import { copyCosts, copyLines } from './copy'
 import prisma from '@/services/prisma'
 import 'server-only'
 
@@ -281,48 +281,6 @@ export const updateResourceField = async ({
     fields: [{ fieldId, value }],
   })
 
-export const copyLines = async (
-  accountId: string,
-  sourceResourceId: string,
-  destinationResourceId: string,
-  backLinkFieldRef: FieldRef,
-) => {
-  const lineSchema = await readSchema({
-    accountId,
-    resourceType: 'Line',
-  })
-
-  const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
-
-  const lines = await readResources({
-    accountId,
-    type: 'Line',
-    where: {
-      '==': [{ var: backLinkField.name }, sourceResourceId],
-    },
-  })
-
-  // `createResource` is not (currently) parallelizable
-  for (const line of lines) {
-    await createResource({
-      accountId,
-      type: 'Line',
-      fields: [
-        ...line.fields
-          .filter(({ fieldId }) => fieldId !== backLinkField.id)
-          .map(({ fieldId, fieldType, value }) => ({
-            fieldId,
-            value: mapValueToValueInput(fieldType, value),
-          })),
-        {
-          fieldId: backLinkField.id,
-          value: { resourceId: destinationResourceId },
-        },
-      ],
-    })
-  }
-}
-
 export const cloneResource = async (accountId: string, resourceId: string) => {
   const source = await readResource({ accountId, id: resourceId })
 
@@ -358,8 +316,17 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
       })
 
       await Promise.all([
-        copyLines(accountId, source.id, destination.id, fields.bill),
-        copyCosts(source.id, destination.id),
+        copyLines({
+          accountId,
+          fromResourceId: source.id,
+          toResourceId: destination.id,
+          backLinkFieldRef: fields.bill,
+        }),
+        copyCosts({
+          accountId,
+          fromResourceId: source.id,
+          toResourceId: destination.id,
+        }),
       ])
 
       return destination
@@ -398,8 +365,17 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
       })
 
       await Promise.all([
-        copyLines(accountId, source.id, destination.id, fields.order),
-        copyCosts(source.id, destination.id),
+        copyLines({
+          accountId,
+          fromResourceId: source.id,
+          toResourceId: destination.id,
+          backLinkFieldRef: fields.order,
+        }),
+        copyCosts({
+          accountId,
+          fromResourceId: source.id,
+          toResourceId: destination.id,
+        }),
       ])
 
       return destination
@@ -415,8 +391,17 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
       })
 
       await Promise.all([
-        copyLines(accountId, source.id, destination.id, fields.order),
-        copyCosts(source.id, destination.id),
+        copyLines({
+          accountId,
+          fromResourceId: source.id,
+          toResourceId: destination.id,
+          backLinkFieldRef: fields.order,
+        }),
+        copyCosts({
+          accountId,
+          fromResourceId: source.id,
+          toResourceId: destination.id,
+        }),
       ])
 
       return destination
