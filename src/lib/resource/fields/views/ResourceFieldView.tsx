@@ -8,7 +8,10 @@ type Props = {
 
 export default function ResourceFieldView({ resource }: Props) {
   return (
-    <Link component={NextLink} href={`/${resource.type}s/${resource.key}`}>
+    <Link
+      component={NextLink}
+      href={`/${resource.type.toLowerCase()}s/${resource.key}`}
+    >
       {resource.name ?? '-'}
     </Link>
   )
