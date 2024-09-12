@@ -5,7 +5,6 @@ import { selectSchemaField } from '../schema/extensions'
 import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceField } from './extensions'
-import { copyLines } from '.'
 import {
   copyResourceCosts,
   recalculateItemizedCosts,
@@ -13,7 +12,8 @@ import {
 } from './costs'
 import { Resource, Value } from './entity'
 import { copyLinkedResourceFields } from './fields'
-import { readResource, updateResourceField } from '.'
+import { copyLines, readResource, updateResourceField } from '.'
+import 'server-only'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 
