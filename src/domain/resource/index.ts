@@ -380,32 +380,17 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
 
       return destination
     })
-    .otherwise(async () => {
-      const destination = await createResource({
-        accountId,
-        type: source.type,
-        fields: source.fields.map(({ fieldId, fieldType, value }) => ({
-          fieldId,
-          value: mapValueToValueInput(fieldType, value),
-        })),
-      })
-
-      await Promise.all([
-        copyLines({
+    .otherwise(
+      async () =>
+        await createResource({
           accountId,
-          fromResourceId: source.id,
-          toResourceId: destination.id,
-          backLinkFieldRef: fields.order,
+          type: source.type,
+          fields: source.fields.map(({ fieldId, fieldType, value }) => ({
+            fieldId,
+            value: mapValueToValueInput(fieldType, value),
+          })),
         }),
-        copyCosts({
-          accountId,
-          fromResourceId: source.id,
-          toResourceId: destination.id,
-        }),
-      ])
-
-      return destination
-    })
+    )
 
   return destination
 }
