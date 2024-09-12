@@ -11,6 +11,7 @@ import {
 import { CircularProgress, IconButton } from '@mui/material'
 import { Clear } from '@mui/icons-material'
 import { useMemo } from 'react'
+import { z } from 'zod'
 import { deleteResource } from '../actions'
 import { mapSchemaFieldToGridColDef } from './mapSchemaFieldToGridColDef'
 import { Row, Column } from './types'
@@ -114,7 +115,12 @@ export default function ResourceTable({
                   .filter(Boolean)
               }
               quickFilterFormatter={(quickFilterValues) =>
-                quickFilterValues.join(' ')
+                z
+                  .array(z.string())
+                  .parse(quickFilterValues)
+                  .map((value) => value.trim())
+                  .filter(Boolean)
+                  .join(' ')
               }
               debounceMs={200} // time before applying the new quick filter value
             />
