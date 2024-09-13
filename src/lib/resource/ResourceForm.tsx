@@ -16,25 +16,25 @@ import useSchema from '../schema/useSchema'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
 import Field from './fields/controls/Field'
-import useResource from './useResource'
+import { updateResourceField } from './actions'
 import { selectResourceField } from '@/domain/resource/extensions'
+import { Resource } from '@/domain/resource/entity'
+import { mapValueToValueInput } from '@/domain/resource/mappers'
 
 type Props = {
-  resourceId: string
+  resource: Resource
   resourceType: ResourceType
   singleColumn?: boolean
 }
 
 export default function ResourceForm({
-  resourceId,
+  resource,
   resourceType,
   singleColumn,
 }: Props) {
   const columns = singleColumn ? 1 : 3
 
   const schema = useSchema(resourceType)
-  const [resource, updateResource] = useResource(resourceId)
-
   if (!schema || !resource) return <CircularProgress />
 
   return (
@@ -117,16 +117,10 @@ export default function ResourceForm({
                                 fieldId: f.id,
                               })}
                               onChange={(value) =>
-                                updateResource({
-                                  ...resource,
-                                  fields: [
-                                    {
-                                      fieldId: f.id,
-                                      fieldType: f.type,
-                                      templateId: f.templateId,
-                                      value,
-                                    },
-                                  ],
+                                updateResourceField({
+                                  resourceId: resource.id,
+                                  fieldId: f.id,
+                                  value: mapValueToValueInput(f.type, value),
                                 })
                               }
                             />

@@ -23,6 +23,7 @@ import {
   findResources as findResourcesRaw,
 } from '../../actions'
 import ResourceForm from '../../ResourceForm'
+import useResource from '../../useResource'
 import { ValueResource } from '@/domain/resource/entity'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { mapResourceToValueResource } from '@/domain/resource/mappers'
@@ -45,7 +46,6 @@ function ResourceField(
   ref: ForwardedRef<HTMLInputElement>,
 ) {
   const { isOpen, open, close } = useDisclosure()
-
   const schema = useSchema(resourceType)
 
   const handleCreate = (nameOrNumber: string) =>
@@ -98,16 +98,10 @@ function ResourceField(
           )}
         </Stack>
         <Drawer open={isOpen} onClose={close} anchor="right">
-          <Box p={2} minWidth={500}>
-            <Typography variant="h5" sx={{ p: 2 }} gutterBottom>
-              {resourceType} details
-            </Typography>
-            <ResourceForm
-              resourceId={resource.id}
-              resourceType={resourceType}
-              singleColumn
-            />
-          </Box>
+          <ResourceFieldDrawer
+            resourceType={resourceType}
+            valueResource={resource}
+          />
         </Drawer>
       </>
     )
@@ -124,6 +118,33 @@ function ResourceField(
       onUpdate={onChange}
       ref={ref}
     />
+  )
+}
+
+type ResourceFieldDrawerProps = {
+  valueResource: ValueResource
+  resourceType: ResourceType
+}
+
+const ResourceFieldDrawer = ({
+  valueResource,
+  resourceType,
+}: ResourceFieldDrawerProps) => {
+  const [resource] = useResource(valueResource?.id)
+
+  return (
+    resource && (
+      <Box p={2} minWidth={500}>
+        <Typography variant="h5" sx={{ p: 2 }} gutterBottom>
+          {resourceType} details
+        </Typography>
+        <ResourceForm
+          resource={resource}
+          resourceType={resourceType}
+          singleColumn
+        />
+      </Box>
+    )
   )
 }
 
