@@ -19,7 +19,7 @@
     "@faker-js/faker": "^9.0.0",
     "@mui/icons-material": "^6.1.0",
     "@mui/material": "^6.0.1",
-    "@mui/material-nextjs": "^6.0.2",
+    "@mui/material-nextjs": "^6.1.0",
     "@mui/x-data-grid": "^7.15.0",
     "@mui/x-data-grid-pro": "^7.16.0",
     "@mui/x-date-pickers": "^7.16.0",
