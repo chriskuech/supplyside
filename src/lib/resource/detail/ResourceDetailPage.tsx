@@ -91,7 +91,7 @@ export default function ResourceDetailPage({
           ) : (
             <ResourceForm
               resourceType={schema.resourceType}
-              resourceId={resource.id}
+              resource={resource}
             />
           )}
           {backlinkField && (

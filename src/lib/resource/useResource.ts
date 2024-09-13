@@ -4,12 +4,13 @@ import { readResource, updateResource } from './actions'
 import { Resource } from '@/domain/resource/entity'
 import { mapValueToValueInput } from '@/domain/resource/mappers'
 
-const useResource = (resourceId: string) => {
+const useResource = (resourceId?: string | null) => {
   const [resource, setLocalResource] = useState<Resource | null>()
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
 
   useEffect(() => {
+    if (!resourceId) return
     if (!isLoading && !isError && resourceId !== resource?.id) {
       setIsLoading(true)
       readResource({ id: resourceId })
