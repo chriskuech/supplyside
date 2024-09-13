@@ -174,7 +174,7 @@ export const handleResourceUpdate = async ({
     resource = await readResource({ accountId, id: resource.id })
   }
 
-  // When the “Invoice Date” field or “Payment Terms” field changes,
+  // When the Bill.“Invoice Date” field or Bill.“Payment Terms” field changes,
   // Given the “Invoice Date” field and “Payment Terms” fields are not null,
   // Then set “Payment Due Date” = “Invoice Date” + “Payment Terms”
   if (
