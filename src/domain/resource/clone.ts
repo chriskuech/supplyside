@@ -133,15 +133,16 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
 }
 
 export const cloneCosts = async ({
+  accountId,
   fromResourceId,
   toResourceId,
 }: ResourceCopyParams) => {
   const fromCosts = await prisma().cost.findMany({
-    where: { resourceId: fromResourceId },
+    where: { resourceId: fromResourceId, Resource: { accountId } },
   })
 
   await prisma().cost.deleteMany({
-    where: { resourceId: toResourceId },
+    where: { resourceId: toResourceId, Resource: { accountId } },
   })
 
   await prisma().cost.createMany({
