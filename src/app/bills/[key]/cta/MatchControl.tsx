@@ -114,14 +114,7 @@ export default function MatchControl({ schema, resource }: Props) {
                     tableKey={MatchControl.name}
                     schema={orderSchema}
                     resources={unlinkedOrders}
-                    initialState={{
-                      filter: {
-                        filterModel: {
-                          items: [],
-                          quickFilterValues: [poNumber, vendorName],
-                        },
-                      },
-                    }}
+                    initialQuery={`${poNumber} ${vendorName}`}
                     onRowClick={({
                       row, // `row` is coming in as `any` for some reason
                     }) =>
