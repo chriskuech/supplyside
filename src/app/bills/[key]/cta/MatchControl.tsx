@@ -130,7 +130,11 @@ export default function MatchControl({ schema, resource }: Props) {
                         fieldId:
                           selectSchemaField(schema, fields.order)?.id ?? fail(),
                         value: { resourceId: row.id },
-                      }).then(() => close())
+                      }).then(() => {
+                        //TODO: why is revalidatePath in `updateResourceField` not working?
+                        location.reload()
+                        close()
+                      })
                     }
                   />
                 )}
