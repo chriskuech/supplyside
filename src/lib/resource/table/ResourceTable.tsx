@@ -26,6 +26,7 @@ type Props = {
   resources: Resource[]
   isEditable?: boolean
   indexed?: boolean
+  initialQuery?: string
 } & Partial<DataGridProProps<Row>>
 
 export default function ResourceTable({
@@ -34,6 +35,7 @@ export default function ResourceTable({
   resources,
   isEditable = false,
   indexed,
+  initialQuery,
   ...props
 }: Props) {
   const { apiRef, initialState, saveStateToLocalstorage } =
@@ -97,7 +99,16 @@ export default function ResourceTable({
         window.location.href = `/${type.toLowerCase()}s/${key}`
       }}
       apiRef={apiRef}
-      initialState={{ ...initialState, preferencePanel: { open: false } }}
+      initialState={{
+        ...initialState,
+        filter: {
+          filterModel: {
+            items: [],
+            quickFilterValues: [initialQuery],
+          },
+        },
+        preferencePanel: { open: false },
+      }}
       onColumnVisibilityModelChange={saveStateToLocalstorage}
       onColumnWidthChange={saveStateToLocalstorage}
       onColumnOrderChange={saveStateToLocalstorage}
