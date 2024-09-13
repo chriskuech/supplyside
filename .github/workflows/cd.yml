@@ -13,6 +13,9 @@ jobs:
       name: Production
       url: https://app.supplyside.io
 
+    env:
+      BASE_URL: https://app.supplyside.io
+
     steps:
       - uses: actions/checkout@v4
 
@@ -56,3 +59,32 @@ jobs:
           docker pull supplyside.azurecr.io/app:integration
           docker tag supplyside.azurecr.io/app:integration supplyside.azurecr.io/app:production
           docker push supplyside.azurecr.io/app:production
+
+      - name: Wait for healthcheck
+        shell: pwsh
+        run: |
+          $timeoutInMinutes = 5
+          $waitInSeconds = 10
+
+          $timeout = (Get-Date).AddMinutes($timeoutInMinutes)
+
+          do {
+            Start-Sleep -Seconds $waitInSeconds
+            Write-Host "~" -NoNewline
+
+            $res = Invoke-RestMethod -Uri $env:BASE_URL/api/system/health -Method Get -ErrorAction SilentlyContinue
+
+            if ($res -and $res.build.commit -eq $env:SHA) {
+              Write-Host "\nDeployment successful"
+              exit 0
+            }
+          } while ((Get-Date) -lt $timeout)
+
+          Write-Host "\nDeployment timed out after $timeoutInMinutes minutes"
+          exit 1
+
+        env:
+          SHA: ${{ github.sha }}
+
+      - name: Apply configuration
+        run: curl -X POST $BASE_URL/api/system/post-deployment
