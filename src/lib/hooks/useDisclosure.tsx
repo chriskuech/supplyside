@@ -1,6 +1,5 @@
-'use client'
-
 import { useCallback, useState } from 'react'
+import 'client-only'
 
 export function useDisclosure() {
   const [isOpen, setIsOpen] = useState(false)

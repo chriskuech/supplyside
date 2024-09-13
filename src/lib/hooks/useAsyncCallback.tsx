@@ -1,6 +1,7 @@
 import { useSnackbar } from 'notistack'
 import { useCallback, useState } from 'react'
 import { isMatching } from 'ts-pattern'
+import 'client-only'
 
 export type UseAsyncState<T> = {
   data: T | undefined

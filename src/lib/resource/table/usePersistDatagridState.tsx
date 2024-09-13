@@ -1,5 +1,6 @@
 import { GridInitialState, useGridApiRef } from '@mui/x-data-grid-pro'
 import { useCallback, useLayoutEffect, useState } from 'react'
+import 'client-only'
 
 export const usePersistDatagridState = (storageKey: string | undefined) => {
   const apiRef = useGridApiRef()

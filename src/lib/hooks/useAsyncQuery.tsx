@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from 'react'
 import { Options, useAsyncCallback, UseAsyncState } from './useAsyncCallback'
+import 'client-only'
 
 type Props<Args extends unknown[], ResolvedType> = {
   deps: Args

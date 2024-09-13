@@ -1,5 +1,4 @@
-'use client'
-
+import 'client-only'
 import { useCallback, useEffect, useState } from 'react'
 import { readResource, updateResource } from './actions'
 import { Resource } from '@/domain/resource/entity'
