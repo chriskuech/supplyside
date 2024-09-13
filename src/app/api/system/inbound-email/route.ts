@@ -6,7 +6,6 @@ import prisma from '@/services/prisma'
 import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import smtp from '@/services/smtp'
-import { extractContent } from '@/domain/bill/extractData'
 import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import 'server-only'
@@ -62,9 +61,6 @@ const createBill = async (params: Params): Promise<Resource> => {
       },
     ],
   })
-
-  // TODO: this isn't the right place for this
-  await extractContent(params.accountId, bill.id)
 
   return bill
 }

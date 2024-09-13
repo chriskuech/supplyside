@@ -1,5 +1,6 @@
 export type File = {
   id: string
+  accountId: string
   blobId: string
   name: string
   contentType: string

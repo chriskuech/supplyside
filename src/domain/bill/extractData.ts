@@ -8,43 +8,87 @@ import {
   ChatCompletionContentPartImage,
   ChatCompletionContentPartText,
 } from 'openai/resources/index.mjs'
-import { readResource } from '../resource/actions'
-import { selectValue } from '../resource/types'
+import { zodResponseFormat } from 'openai/helpers/zod'
+import { z } from 'zod'
+import {
+  ResourceFieldInput,
+  readResource,
+  readResources,
+  updateResource,
+} from '../resource'
+import { selectResourceField } from '../resource/extensions'
 import { fields } from '../schema/template/system-fields'
-import { ValueFile } from '../resource/values/types'
-import { readBlob } from '@/domain/blobs/actions'
-import { readSchema } from '@/domain/schema/actions'
-import { mapSchemaToJsonSchema } from '@/domain/schema/json-schema/actions'
+import { File } from '../files/types'
+import { selectSchemaField } from '../schema/extensions'
+import { readSchema } from '../schema'
+import { readBlob } from '@/domain/blobs'
 import openai from '@/services/openai'
 
 const exec = promisify(execCallback)
 
-const functionName = 'extract_bill_content'
-
 const prompt = `
-You are a content extraction tool for a business critical application. Prior to this request, the user has uploaded bill/invoice documents from their email, so the documents may contain a mix of images, text, and html content.
-Extremely carefully extract the information from the images into the structured format defined by the function.
-Be conservative--if the data might be wrong, then don't include it in the output.
+You are a context extraction tool within a "Procure-to-Pay" B2B SaaS application. Your task is to extract relevant information from uploaded bill/invoice documents. The documents may contain a mix of images, text, and HTML content. Your goal is to extract the Purchase Order (PO) number and the Vendor ID, if available. If the data is uncertain or ambiguous, do not include it in the output.
+
+You will be provided with the following context:
+- A list of vendors with their IDs.
+- The content of the uploaded bill/invoice documents.
+
+Identify the Vendor by name in the bill/invoice documents and then lookup in the TSV vendor list provided by the user.
+
+All other files provided by the user are bill/invoice documents. Please respond with a JSON object containing the extracted information in the following format:
+{
+  "poNumber": "string or null",
+  "vendorId": "string or null"
+}
 `
 
-export const extractContent = async (accountId: string, resourceId: string) => {
-  const [schema, resource] = await Promise.all([
-    readSchema({ accountId, resourceType: 'Bill' }),
-    readResource({
-      id: resourceId,
-      accountId,
-      type: 'Bill',
-    }),
-  ])
+const ArgumentsSchema = z.object({
+  poNumber: z.string().nullish(),
+  vendorId: z.string().uuid().nullish(),
+})
 
-  const files =
-    selectValue(resource, fields.billFiles)?.files ?? fail('Files not found')
+export const extractContent = async (accountId: string, resourceId: string) => {
+  const billSchema = await readSchema({
+    accountId,
+    resourceType: 'Bill',
+  })
+
+  const resource = await readResource({
+    id: resourceId,
+    accountId,
+    type: 'Bill',
+  })
+
+  const vendors = await readResources({
+    accountId,
+    type: 'Vendor',
+  })
+
+  const vendorList =
+    'Vendor List\n\n' +
+    [
+      {
+        id: 'ID',
+        name: 'Name',
+      },
+      ...vendors.map((vendor) => ({
+        id: vendor.id,
+        name: selectResourceField(vendor, fields.name)?.string,
+      })),
+    ]
+      .filter(({ name }) => !!name)
+      .map(({ id, name }) => `${id}\t${name}`)
+      .join('\n')
+
+  const billFiles =
+    selectResourceField(resource, fields.billFiles)?.files ??
+    fail('Files not found')
 
   const completionParts: ChatCompletionContentPart[] = (
     await Promise.all(
-      files.map((file) =>
-        match(file.Blob.mimeType)
-          .with('application/pdf', () => readPdfToBase64s(file))
+      billFiles.map((file) =>
+        match(file.contentType)
+          .with('application/pdf', async () => await readPdfToBase64s(file))
           .with(P.union('image/png', 'image/jpeg', 'image/webp'), async () => [
             await readImageFileToBase64(file),
           ])
@@ -56,7 +100,8 @@ export const extractContent = async (accountId: string, resourceId: string) => {
     )
   ).flat()
 
-  const response = await openai().chat.completions.create({
+  const completion = await openai().beta.chat.completions.parse({
+    model: 'gpt-4o-2024-08-06',
     messages: [
       {
         role: 'system',
@@ -64,45 +109,57 @@ export const extractContent = async (accountId: string, resourceId: string) => {
       },
       {
         role: 'user',
-        content: completionParts,
+        content: [
+          {
+            type: 'text',
+            text: vendorList,
+          },
+          ...completionParts,
+        ],
       },
     ],
-    tools: [
-      {
-        type: 'function',
-        function: {
-          name: functionName,
-          description:
-            'Receives the extracted content Bill/Invoice data from the images and text content.',
-          parameters: mapSchemaToJsonSchema(schema),
-        },
-      },
-    ],
-    tool_choice: { type: 'function', function: { name: functionName } },
-    response_format: { type: 'json_object' },
-    model: 'gpt-4o', //gpt-4o, gpt-4o-mini or gpt-4-turbo to understand images.
-    temperature: 0, // max deterministic
-    top_p: 0.1, // top 10% of best tokens
+    response_format: zodResponseFormat(ArgumentsSchema, 'arguments'),
   })
 
-  const calls = response.choices[0].message.tool_calls
+  const data = completion.choices[0]?.message.parsed
 
-  assert(calls?.length === 1)
+  const poNumber = data?.poNumber
+  const vendorId = data?.vendorId
 
-  const [{ function: fn }] = calls
+  const poNumberFieldId =
+    selectSchemaField(billSchema, fields.poNumber)?.id ?? fail()
+  const vendorFieldId =
+    selectSchemaField(billSchema, fields.vendor)?.id ?? fail()
 
-  assert(fn.name === functionName)
+  const updatedFields: ResourceFieldInput[] = [
+    ...(poNumber
+      ? [
+          {
+            fieldId: poNumberFieldId,
+            value: { string: poNumber },
+          },
+        ]
+      : []),
+    ...(vendorId
+      ? [
+          {
+            fieldId: vendorFieldId,
+            value: { resourceId: vendorId },
+          },
+        ]
+      : []),
+  ]
 
-  const data = JSON.parse(fn.arguments)
+  if (!updatedFields.length) return
 
-  await updateResource(accountId, resourceId, data)
+  await updateResource({ resourceId, accountId, fields: updatedFields })
 }
 
 const readPdfToBase64s = async (
-  file: ValueFile,
+  file: File,
 ): Promise<ChatCompletionContentPartImage[]> => {
   const blob = await readBlob({
-    accountId: file.Blob.accountId,
+    accountId: file.accountId,
     blobId: file.blobId,
   })
 
@@ -135,10 +192,10 @@ const readPdfToBase64s = async (
 }
 
 const readImageFileToBase64 = async (
-  file: ValueFile,
+  file: File,
 ): Promise<ChatCompletionContentPartImage> => {
   const blob = await readBlob({
-    accountId: file.Blob.accountId,
+    accountId: file.accountId,
     blobId: file.blobId,
   })
 
@@ -147,17 +204,17 @@ const readImageFileToBase64 = async (
   return {
     type: 'image_url',
     image_url: {
-      url: `data:${file.Blob.mimeType};base64,${blob.buffer.toString('base64')}`,
+      url: `data:${file.contentType};base64,${blob.buffer.toString('base64')}`,
       detail: 'auto',
     },
   }
 }
 
 const readTextFileToString = async (
-  file: ValueFile,
+  file: File,
 ): Promise<ChatCompletionContentPartText> => {
   const blob = await readBlob({
-    accountId: file.Blob.accountId,
+    accountId: file.accountId,
     blobId: file.blobId,
   })
 
