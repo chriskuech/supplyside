@@ -4,7 +4,7 @@ import { readResource, updateResource } from './actions'
 import { Resource } from '@/domain/resource/entity'
 import { mapValueToValueInput } from '@/domain/resource/mappers'
 
-const useResource = (resourceId?: string | null) => {
+const useResource = (resourceId?: string) => {
   const [resource, setLocalResource] = useState<Resource | null>()
   const [isLoading, setIsLoading] = useState(false)
   const [isError, setIsError] = useState(false)
