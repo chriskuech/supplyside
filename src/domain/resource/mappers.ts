@@ -157,9 +157,9 @@ export const mapValueInputToPrismaValueUpdate = (
     )
     .with({ fileIds: P.not(undefined) }, ({ fileIds }) => ({
       Files: {
-        create: fileIds.map((fileId) => ({
-          File: { connect: { id: fileId } },
-        })),
+        // create: fileIds.map((fileId) => ({
+        //   File: { connect: { id: fileId } },
+        // })),
         deleteMany: {
           fileId: { notIn: fileIds },
         },
@@ -167,7 +167,7 @@ export const mapValueInputToPrismaValueUpdate = (
     }))
     .with({ optionIds: P.not(undefined) }, ({ optionIds }) => ({
       ValueOption: {
-        create: optionIds.map((id) => ({ Option: { connect: { id } } })),
+        // create: optionIds.map((id) => ({ Option: { connect: { id } } })),
         deleteMany: { optionId: { notIn: optionIds } },
       },
     }))
