@@ -116,9 +116,9 @@ export default function ResourceTable({
               }
               quickFilterFormatter={(quickFilterValues) =>
                 z
-                  .array(z.string())
+                  .array(z.string().nullable().optional())
                   .parse(quickFilterValues)
-                  .map((value) => value.trim())
+                  .map((value) => value?.trim())
                   .filter(Boolean)
                   .join(' ')
               }
