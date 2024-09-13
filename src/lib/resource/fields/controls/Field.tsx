@@ -41,6 +41,7 @@ export type Props = {
   value: Value | undefined
   onChange: (value: Value) => void
   inline?: boolean
+  withoutDebounce?: boolean
 }
 
 function Field(
@@ -51,6 +52,7 @@ function Field(
     value: incomingValue,
     onChange: incomingOnChange,
     inline,
+    withoutDebounce,
   }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
@@ -65,9 +67,13 @@ function Field(
     (value: Value) => {
       const newValue = { ...value, updatedAt: new Date() }
       setValue(newValue)
-      onChangeDebounced(newValue)
+      if (withoutDebounce) {
+        incomingOnChange(newValue)
+      } else {
+        onChangeDebounced(newValue)
+      }
     },
-    [onChangeDebounced],
+    [onChangeDebounced, withoutDebounce, incomingOnChange],
   )
 
   useEffect(() => {
