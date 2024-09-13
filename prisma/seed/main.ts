@@ -1,18 +1,14 @@
-import { hash } from 'bcrypt'
 import { z } from 'zod'
 import { config as loadDotenv } from 'dotenv'
 import { expand as expandDotenv } from 'dotenv-expand'
 import { ResourceType } from '@prisma/client'
-import { ImportMock } from 'ts-mock-imports'
-import nextCache from 'next/cache'
-import { faker } from '@faker-js/faker'
 import { systemAccountId } from '@/lib/const'
 import prisma from '@/services/prisma'
-import { applyTemplate } from '@/domain/schema/template/actions'
-import { createResource } from '@/domain/resource/actions'
+import { applyTemplate } from '@/domain/schema/template'
+import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
-
-ImportMock.mockFunction(nextCache, 'revalidatePath', () => {})
+import { readSchema } from '@/domain/schema'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 
 expandDotenv(loadDotenv())
 
@@ -28,7 +24,7 @@ const config = z
 const testId = '00000000-0000-0000-0000-000000000001'
 
 async function main() {
-  await prisma().account.create({
+  const systemAccount = await prisma().account.create({
     data: {
       id: systemAccountId,
       key: 'system',
@@ -36,27 +32,36 @@ async function main() {
     },
   })
 
-  const user = await prisma().user.create({
+  const systemUser = await prisma().user.create({
     data: {
-      id: systemAccountId,
-      accountId: systemAccountId,
+      id: systemAccount.id,
+      accountId: systemAccount.id,
       email: config.DEV_EMAIL,
       firstName: config.DEV_FIRST_NAME,
       lastName: config.DEV_LAST_NAME,
-      passwordHash: await hash(config.DEV_PASSWORD, 12),
-      requirePasswordReset: false,
     },
   })
 
-  const { id: accountId } = await prisma().account.create({
+  const [devAlias, devDomain] = config.DEV_EMAIL.split('@')
+
+  const customerAccount = await prisma().account.create({
     data: {
       id: testId,
-      key: faker.string.alpha({ casing: 'lower', length: 5 }),
+      key: 'test',
       name: `${config.DEV_FIRST_NAME}'s Test Company`,
     },
   })
 
-  await applyTemplate(accountId)
+  await prisma().user.create({
+    data: {
+      accountId: customerAccount.id,
+      email: `${devAlias}+${customerAccount.key}@${devDomain}`,
+      firstName: config.DEV_FIRST_NAME,
+      lastName: config.DEV_LAST_NAME,
+    },
+  })
+
+  await applyTemplate(customerAccount.id)
 
   const unitOfMeasureOption = await prisma().option.create({
     data: {
@@ -65,7 +70,7 @@ async function main() {
       Field: {
         connect: {
           accountId_templateId: {
-            accountId,
+            accountId: customerAccount.id,
             templateId: fields.unitOfMeasure.templateId,
           },
         },
@@ -73,60 +78,124 @@ async function main() {
     },
   })
 
+  const vendorSchema = await readSchema({
+    accountId: customerAccount.id,
+    resourceType: ResourceType.Vendor,
+  })
+
   const vendor = await createResource({
-    accountId,
+    accountId: customerAccount.id,
     type: ResourceType.Vendor,
-    data: {
-      [fields.name.name]: 'ACME Supplies',
-    },
+    fields: [
+      {
+        fieldId: selectSchemaFieldUnsafe(vendorSchema, fields.name)?.id,
+        value: { string: 'ACME Supplies' },
+      },
+    ],
+  })
+
+  const orderSchema = await readSchema({
+    accountId: customerAccount.id,
+    resourceType: ResourceType.Order,
   })
 
   const order = await createResource({
-    accountId,
+    accountId: customerAccount.id,
     type: ResourceType.Order,
-    data: {
-      [fields.assignee.name]: user.id,
-      [fields.number.name]: '42',
-      [fields.vendor.name]: vendor.id,
-    },
+    fields: [
+      {
+        fieldId: selectSchemaFieldUnsafe(orderSchema, fields.assignee)?.id,
+        value: { userId: systemUser.id },
+      },
+      {
+        fieldId: selectSchemaFieldUnsafe(orderSchema, fields.poNumber)?.id,
+        value: { string: '42' },
+      },
+      {
+        fieldId: selectSchemaFieldUnsafe(orderSchema, fields.vendor)?.id,
+        value: { resourceId: vendor.id },
+      },
+    ],
+  })
+
+  const itemSchema = await readSchema({
+    accountId: customerAccount.id,
+    resourceType: ResourceType.Item,
   })
 
   const item1 = await createResource({
-    accountId,
+    accountId: customerAccount.id,
     type: ResourceType.Item,
-    data: {
-      [fields.name.name]: 'Item Name 1',
-      [fields.itemDescription.name]: 'Item Desc 1',
-      [fields.unitOfMeasure.name]: unitOfMeasureOption.id,
-    },
+    fields: [
+      {
+        fieldId: selectSchemaFieldUnsafe(itemSchema, fields.name)?.id,
+        value: { string: 'Item Name 1' },
+      },
+      {
+        fieldId: selectSchemaFieldUnsafe(itemSchema, fields.itemDescription)
+          ?.id,
+        value: { string: 'Item Desc 1' },
+      },
+      {
+        fieldId: selectSchemaFieldUnsafe(itemSchema, fields.unitOfMeasure)?.id,
+        value: { optionId: unitOfMeasureOption.id },
+      },
+    ],
+  })
+
+  const lineSchema = await readSchema({
+    accountId: customerAccount.id,
+    resourceType: ResourceType.Line,
   })
 
   await createResource({
-    accountId,
+    accountId: customerAccount.id,
     type: ResourceType.Line,
-    data: {
-      [fields.order.name]: order.id,
-      [fields.item.name]: item1.id,
-    },
+    fields: [
+      {
+        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.order)?.id,
+        value: { resourceId: order.id },
+      },
+      {
+        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.item)?.id,
+        value: { resourceId: item1.id },
+      },
+    ],
   })
 
   const item2 = await createResource({
-    accountId,
+    accountId: customerAccount.id,
     type: ResourceType.Item,
-    data: {
-      [fields.name.name]: 'Item Name 2',
-      [fields.itemDescription.name]: 'Item Desc 2',
-      [fields.unitOfMeasure.name]: unitOfMeasureOption.id,
-    },
+    fields: [
+      {
+        fieldId: selectSchemaFieldUnsafe(itemSchema, fields.name)?.id,
+        value: { string: 'Item Name 2' },
+      },
+      {
+        fieldId: selectSchemaFieldUnsafe(itemSchema, fields.itemDescription)
+          ?.id,
+        value: { string: 'Item Desc 2' },
+      },
+      {
+        fieldId: selectSchemaFieldUnsafe(itemSchema, fields.unitOfMeasure)?.id,
+        value: { optionId: unitOfMeasureOption.id },
+      },
+    ],
   })
 
   await createResource({
-    accountId,
+    accountId: customerAccount.id,
     type: ResourceType.Line,
-    data: {
-      [fields.order.name]: order.id,
-      [fields.item.name]: item2.id,
-    },
+    fields: [
+      {
+        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.order)?.id,
+        value: { resourceId: order.id },
+      },
+      {
+        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.item)?.id,
+        value: { resourceId: item2.id },
+      },
+    ],
   })
 }
 

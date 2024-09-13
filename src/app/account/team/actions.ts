@@ -1,9 +1,16 @@
 'use server'
 
-import { inviteUser } from '@/domain/iam/user/actions'
-import { User } from '@/domain/iam/user/types'
+import { revalidatePath } from 'next/cache'
+import { inviteUser, readUser } from '@/domain/iam/user'
+import { User } from '@/domain/iam/user/entity'
 import { readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
+
+export const readSelf = async () => {
+  const { userId } = await readSession()
+
+  return await readUser({ userId })
+}
 
 type UpdateUserParams = { id: string } & Partial<User>
 
@@ -26,4 +33,6 @@ export const deleteUser = async (userId: string) => {
   const { accountId } = await readSession()
 
   await prisma().user.delete({ where: { accountId, id: userId } })
+
+  revalidatePath('')
 }

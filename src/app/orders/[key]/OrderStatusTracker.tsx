@@ -1,6 +1,7 @@
 import { match } from 'ts-pattern'
 import StatusTrackerView from '@/lib/ux/StatusTrackerView'
-import { Resource, selectValue } from '@/domain/resource/types'
+import { selectResourceField } from '@/domain/resource/extensions'
+import { Resource } from '@/domain/resource/entity'
 import {
   fields,
   orderStatusOptions,
@@ -27,7 +28,7 @@ type Props = {
 }
 
 export default function OrderStatusTracker({ resource }: Props) {
-  const value = selectValue(resource, fields.orderStatus)?.option
+  const value = selectResourceField(resource, fields.orderStatus)?.option
 
   if (!value) return '❌ Field value not found'
 

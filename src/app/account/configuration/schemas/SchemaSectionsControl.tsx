@@ -28,7 +28,6 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { z } from 'zod'
-import { Field } from '../fields/actions'
 import {
   Schema,
   Section,
@@ -37,9 +36,10 @@ import {
   updateSection,
 } from './actions'
 import SectionFieldsControl from './SectionFieldsControl'
+import { SchemaField } from '@/domain/schema/entity'
 
 type Props = {
-  fields: Field[]
+  fields: SchemaField[]
   schema: Schema
 }
 
@@ -99,7 +99,7 @@ export default function SchemaSectionsControl({ fields, schema }: Props) {
 }
 
 const SortableRow: FC<{
-  fields: Field[]
+  fields: SchemaField[]
   section: Section
 }> = ({ fields, section }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =

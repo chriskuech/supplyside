@@ -1,184 +1,32 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { FieldType, ResourceType } from '@prisma/client'
-import { P, match } from 'ts-pattern'
 import { readSession } from '@/lib/session/actions'
-import prisma from '@/services/prisma'
-import { Value, ValueInput, valueInclude } from '@/domain/resource/values/types'
-import { mapValueFromModel } from '@/domain/resource/values/mappers'
-
-export type OptionPatch = {
-  id: string // patch ID -- must be `id` to work with mui
-  name: string
-} & (
-  | { op: 'add' }
-  | { op: 'update'; optionId: string }
-  | { op: 'remove'; optionId: string }
-)
-
-export type Option = {
-  id: string
-  name: string
-}
-
-export type Field = {
-  id: string
-  name: string
-  type: FieldType
-  resourceType: ResourceType | null
-  Option: Option[]
-  defaultValue: Value
-  templateId: string | null
-}
-
-export type CreateFieldParams = {
-  name: string
-  type: FieldType
-  resourceType?: ResourceType
-}
+import {
+  createField as domainCreateField,
+  readFields as domainReadFields,
+  updateField as domainUpdateField,
+  deleteField as domainDeleteField,
+} from '@/domain/schema/fields'
+import { CreateFieldParams, UpdateFieldDto } from '@/domain/schema/fields'
+import { SchemaField } from '@/domain/schema/entity'
 
 export const createField = async (params: CreateFieldParams) => {
   const session = await readSession()
 
-  await prisma().field.create({
-    data: {
-      Account: {
-        connect: {
-          id: session.accountId,
-        },
-      },
-      DefaultValue: {
-        create: {},
-      },
-      name: sanitizeColumnName(params.name),
-      type: params.type,
-      resourceType: params.resourceType,
-    },
-  })
+  await domainCreateField(session.accountId, params)
   revalidatePath('')
 }
 
-export const readFields = async (): Promise<Field[]> => {
+export const readFields = async (): Promise<SchemaField[]> => {
   const session = await readSession()
-
-  const fields = await prisma().field.findMany({
-    where: {
-      accountId: session.accountId,
-    },
-    orderBy: {
-      name: 'asc',
-    },
-    select: {
-      id: true,
-      templateId: true,
-      type: true,
-      name: true,
-      resourceType: true,
-      DefaultValue: {
-        include: valueInclude,
-      },
-      Option: {
-        orderBy: {
-          order: 'asc',
-        },
-      },
-    },
-  })
-
-  return fields.map((f) => ({
-    ...f,
-    defaultValue: mapValueFromModel(f.DefaultValue),
-  }))
-}
-
-export type UpdateFieldDto = {
-  id: string
-  name: string
-  options: OptionPatch[]
-  defaultValue: ValueInput
+  return domainReadFields(session.accountId)
 }
 
 export const updateField = async (dto: UpdateFieldDto) => {
   const session = await readSession()
 
-  await Promise.all([
-    prisma().field.update({
-      where: {
-        id: dto.id,
-        accountId: session.accountId,
-      },
-      data: {
-        name: sanitizeColumnName(dto.name),
-        DefaultValue: {
-          update: {
-            boolean: dto.defaultValue.boolean,
-            string: dto.defaultValue.string,
-            date: dto.defaultValue.date,
-            optionId: dto.defaultValue.optionId,
-            number: dto.defaultValue.number,
-            fileId: dto.defaultValue.fileId,
-            Contact: match(dto.defaultValue.contact)
-              .with(null, () => ({ disconnect: true }))
-              .with(undefined, () => undefined)
-              .with(P.any, (c) => ({
-                upsert: {
-                  create: c,
-                  update: c,
-                },
-              }))
-              .exhaustive(),
-            userId: dto.defaultValue.userId,
-            resourceId: dto.defaultValue.resourceId,
-          },
-        },
-      },
-    }),
-    ...dto.options.map((o, i) =>
-      match(o)
-        .with({ op: 'add' }, (o) =>
-          prisma().option.create({
-            data: {
-              Field: {
-                connect: {
-                  id: dto.id,
-                  accountId: session.accountId,
-                },
-              },
-              name: o.name,
-              order: i,
-            },
-          }),
-        )
-        .with({ op: 'update' }, (o) =>
-          prisma().option.update({
-            where: {
-              id: o.optionId,
-              Field: {
-                id: dto.id,
-                accountId: session.accountId,
-              },
-            },
-            data: {
-              name: o.name,
-              order: i,
-            },
-          }),
-        )
-        .with({ op: 'remove' }, (o) =>
-          prisma().option.delete({
-            where: {
-              id: o.optionId,
-              Field: {
-                id: dto.id,
-                accountId: session.accountId,
-              },
-            },
-          }),
-        )
-        .exhaustive(),
-    ),
-  ])
+  await domainUpdateField(session.accountId, dto)
 
   revalidatePath('')
 }
@@ -186,13 +34,6 @@ export const updateField = async (dto: UpdateFieldDto) => {
 export const deleteField = async (fieldId: string) => {
   const session = await readSession()
 
-  await prisma().field.delete({
-    where: {
-      accountId: session.accountId,
-      id: fieldId,
-    },
-  })
+  await domainDeleteField(session.accountId, fieldId)
   revalidatePath('')
 }
-
-const sanitizeColumnName = (name: string) => name.replace('"', '')

@@ -1,12 +1,12 @@
 'use server'
 
-import { readSession } from '../session/actions'
-import * as domain from '@/domain/schema/actions'
+import { withSession } from '../session/actions'
+import * as schemaDomain from '@/domain/schema'
 
 export const readSchema = async (
-  params: Omit<domain.ReadSchemaParams, 'accountId'>,
-) => {
-  const { accountId } = await readSession()
-
-  return domain.readSchema({ ...params, accountId })
-}
+  params: Omit<schemaDomain.ReadSchemaParams, 'accountId'>,
+) =>
+  await withSession(
+    async ({ accountId }) =>
+      await schemaDomain.readSchema({ ...params, accountId }),
+  )

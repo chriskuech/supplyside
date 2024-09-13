@@ -1,9 +1,10 @@
-import { fail } from 'assert'
+import assert from 'assert'
 import { FieldType, Value } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { OrderBy, Where } from './types'
 import { mapUuidToBase64, sanitizeValue } from './sanitize'
-import { Schema, Field } from '@/domain/schema/types'
+import { Schema, SchemaField } from '@/domain/schema/entity'
+import { selectSchemaField } from '@/domain/schema/extensions'
 
 export type MapToSqlParams = {
   accountId: string
@@ -54,14 +55,15 @@ const createWhere = (where: Where, schema: Schema) =>
 const createOrderBy = (orderBy: OrderBy[]) =>
   orderBy.map((o) => `${sanitizeValue(o.var)} ${o.dir}`).join(', ')
 
-const createPropertySubquery = (field: Field) =>
+const createPropertySubquery = (field: SchemaField) =>
   match(field.type)
     .with(
       'Contact',
       () => /*sql*/ `
         SELECT "Contact"."name"
         FROM "ResourceField"
-        LEFT JOIN "Contact" ON "Contact"."valueId" = "ResourceField"."valueId"
+        LEFT JOIN "Value" ON "Value"."id" = "ResourceField"."valueId"
+        LEFT JOIN "Contact" ON "Contact"."id" = "Value"."contactId"
         WHERE "Resource"."id" = "ResourceField"."resourceId"
           AND "ResourceField"."fieldId" = '${field.id}'
       `,
@@ -116,11 +118,12 @@ const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
     .exhaustive()
 
 const resolveFieldNameToColumn = (fieldName: string, schema: Schema) => {
-  const field =
-    schema.allFields.find((f) => f.name === fieldName) ??
-    fail(
-      `Field with name "${fieldName}" not found in Schema ${schema.resourceType}`,
-    )
+  const field = selectSchemaField(schema, { name: fieldName })
+
+  assert(
+    field,
+    `Field with name "${fieldName}" not found in Schema ${schema.resourceType}`,
+  )
 
   return `"${mapUuidToBase64(field.id)}"`
 }

@@ -5,13 +5,13 @@ import {
   Typography,
 } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
-import { Field } from '../fields/actions'
 import AddSectionControl from './AddSectionControl'
 import { Schema } from './actions'
 import SchemaSectionsControl from './SchemaSectionsControl'
+import { SchemaField } from '@/domain/schema/entity'
 
 type Props = {
-  fields: Field[]
+  fields: SchemaField[]
   schemas: Schema[]
 }
 

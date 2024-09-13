@@ -22,22 +22,21 @@ import {
 } from '@mui/icons-material'
 import { useState } from 'react'
 import { useThemePreference } from '../DynamicThemeProvider'
-import { User } from '@/domain/iam/user/types'
+import { User } from '@/domain/iam/user/entity'
 
 type Props = {
-  user: User
+  self: User
 }
 
-export function UserMenu({ user }: Props) {
+export function UserMenu({ self: user }: Props) {
   const [themePreference, setThemePreference] = useThemePreference()
-
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
   return (
     <Stack justifyContent="center">
       <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
         <Avatar
-          alt={user.fullName}
+          alt={user.fullName ?? ''}
           src={user.profilePicPath ?? ''}
           sx={{ bgcolor: 'primary.main' }}
         />

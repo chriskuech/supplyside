@@ -1,33 +1,35 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
 import UsersTable from './UsersTable'
 import InviteUserControl from './InviteUserControl'
-import { readUser, readUsers } from '@/domain/iam/user/actions'
+import { readSelf } from './actions'
 import { readSession } from '@/lib/session/actions'
+import { readUsers } from '@/domain/iam/user'
+import 'server-only'
 
 export default async function Team() {
-  const { accountId, userId } = await readSession()
+  const { accountId } = await readSession()
 
-  const [users, user] = await Promise.all([
+  const [users, self] = await Promise.all([
     readUsers({ accountId }),
-    readUser({ userId }),
+    readSelf(),
   ])
 
   return (
-    <Container maxWidth={'md'} sx={{ marginTop: 5 }}>
-      <Stack spacing={5} direction={'column'}>
+    <Container maxWidth="md" sx={{ marginTop: 5 }}>
+      <Stack spacing={5} direction="column">
         <Stack
-          direction={'row'}
-          justifyContent={'space-between'}
-          alignItems={'start'}
+          direction="row"
+          justifyContent="space-between"
+          alignItems="start"
         >
-          <Typography variant={'h4'} textAlign={'left'}>
+          <Typography variant="h4" textAlign="left">
             Team
           </Typography>
           <Box width={300}>
             <InviteUserControl />
           </Box>
         </Stack>
-        <UsersTable currentUser={user} users={users} />
+        <UsersTable currentUser={self} users={users} />
       </Stack>
     </Container>
   )

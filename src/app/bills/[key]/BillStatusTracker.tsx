@@ -1,6 +1,7 @@
 import { match } from 'ts-pattern'
 import StatusTrackerView from '@/lib/ux/StatusTrackerView'
-import { Resource, selectValue } from '@/domain/resource/types'
+import { selectResourceField } from '@/domain/resource/extensions'
+import { Resource } from '@/domain/resource/entity'
 import {
   billStatusOptions,
   fields,
@@ -25,7 +26,7 @@ type Props = {
 }
 
 export default function BillStatusTracker({ resource }: Props) {
-  const value = selectValue(resource, fields.billStatus)?.option
+  const value = selectResourceField(resource, fields.billStatus)?.option
 
   if (!value) return '❌ Field value not found'
 

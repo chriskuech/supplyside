@@ -1,14 +1,16 @@
-'use server'
-
 import { fail } from 'assert'
 import { NextRequest, NextResponse } from 'next/server'
 import { Message } from 'postmark'
-import { createBlob } from '@/domain/blobs/actions'
+import { createBlob } from '@/domain/blobs'
 import prisma from '@/services/prisma'
-import { createResource } from '@/domain/resource/actions'
+import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import smtp from '@/services/smtp'
 import { extractContent } from '@/domain/bill/extractData'
+import { readSchema } from '@/domain/schema'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
+import 'server-only'
+import { Resource } from '@/domain/resource/entity'
 
 type FileParam = {
   content: string
@@ -22,7 +24,12 @@ type Params = {
   files: FileParam[]
 }
 
-const createBill = async (params: Params) => {
+const createBill = async (params: Params): Promise<Resource> => {
+  const billSchema = await readSchema({
+    accountId: params.accountId,
+    resourceType: 'Bill',
+  })
+
   const fileIds = await Promise.all(
     params.files.map(async (file) => {
       const { id: blobId } = await createBlob({
@@ -48,9 +55,12 @@ const createBill = async (params: Params) => {
   const bill = await createResource({
     accountId: params.accountId,
     type: 'Bill',
-    data: {
-      [fields.billFiles.name]: fileIds,
-    },
+    fields: [
+      {
+        fieldId: selectSchemaFieldUnsafe(billSchema, fields.billFiles).id,
+        value: { fileIds },
+      },
+    ],
   })
 
   // TODO: this isn't the right place for this

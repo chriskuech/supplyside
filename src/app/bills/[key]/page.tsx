@@ -1,32 +1,40 @@
 import { fail } from 'assert'
-import { Box, Container, Stack, Typography } from '@mui/material'
+import { Box, Container, Stack } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
-import Toolbar from './Toolbar'
 import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
-import ResourceFieldsControl from '@/lib/resource/ResourceFieldsControl'
+import OrderLink from './tools/OrderLink'
+import CancelControl from './tools/CancelControl'
+import EditControl from './tools/EditControl'
+import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import {
   billStatusOptions,
   fields,
 } from '@/domain/schema/template/system-fields'
-import { selectValue } from '@/domain/resource/types'
-import LinesAndCosts from '@/lib/resource/grid/LinesAndCosts'
+import { selectResourceField } from '@/domain/resource/extensions'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
+import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
+import { selectSchemaField } from '@/domain/schema/extensions'
+import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
+import { getQuickBooksConfig } from '@/domain/quickBooks/util'
+import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
+import 'server-only'
 
 export default async function BillsDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
-  const {
-    session: { user },
-    resource,
-    schema,
-  } = await readDetailPageModel('Bill', key)
+  const { session, resource, schema, lineSchema } = await readDetailPageModel(
+    'Bill',
+    key,
+    `/bills/${key}`,
+  )
 
   const status =
-    selectValue(resource, fields.billStatus)?.option ?? fail('Status not found')
+    selectResourceField(resource, fields.billStatus)?.option ??
+    fail('Status not found')
 
   const isDraft = status.templateId === billStatusOptions.draft.templateId
 
@@ -42,74 +50,103 @@ export default async function BillsDetail({
     .with(billStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
 
+  const order = selectResourceField(resource, fields.order)?.resource
+
+  const quickBooksBillId = selectResourceField(
+    resource,
+    fields.quickBooksBillId,
+  )?.string
+
+  const qbConfig = getQuickBooksConfig()
+  const quickBooksAppUrl =
+    quickBooksBillId && qbConfig
+      ? `${qbConfig.appBaseUrl}/app/bill?&txnId=${quickBooksBillId}`
+      : undefined
+
   return (
-    <Stack>
-      <Container sx={{ py: 5 }}>
-        <Stack direction="row" spacing={2} alignItems={'center'}>
-          <Typography variant="h3" flexGrow={1}>
-            <span style={{ opacity: 0.5 }}>Bill #</span>
-            <span>{key}</span>
-          </Typography>
-          <Toolbar
-            key={status.id}
-            schema={schema}
-            resource={resource}
-            isDraft={isDraft}
-          />
-        </Stack>
-      </Container>
-
-      <Stack direction={'row'} height={100}>
-        <Box
-          flexGrow={1}
-          height={70}
-          my={'15px'}
-          sx={{
-            background: `linear-gradient(90deg, ${statusColorStart} 0%, ${statusColorEnd} 100%)`,
-          }}
-        />
-        <Container sx={{ flexShrink: 0 }} disableGutters>
-          <Stack
-            direction={'row'}
-            sx={{ overflowX: 'hidden', height: 100 }}
-            alignItems={'center'}
-          >
-            <Box sx={{ borderRadius: 10, flexGrow: 1 }}>
-              <BillStatusTracker resource={resource} />
-            </Box>
-            <Stack
-              width={400}
-              flexShrink={0}
-              direction={'row'}
-              justifyContent={'end'}
-              alignItems={'center'}
-              spacing={2}
-              mr={3}
-            >
-              <CallToAction
-                key={selectValue(resource, fields.billStatus)?.option?.id}
-                schema={schema}
-                user={user}
-                resource={resource}
-              />
-            </Stack>
-          </Stack>
-        </Container>
-        <Box flexGrow={1} bgcolor={'transparent'} />
-      </Stack>
-
-      <Container sx={{ py: 5 }}>
-        <Stack spacing={5}>
-          <ResourceFieldsControl schema={schema} resource={resource} />
-          <LinesAndCosts
-            lineQuery={{ '==': [{ var: 'Bill' }, resource.id] }}
-            resource={resource}
-            newLineInitialData={{
-              [fields.bill.name]: resource.id,
+    <ResourceDetailPage
+      lineSchema={lineSchema}
+      schema={schema}
+      resource={resource}
+      tools={[
+        ...(quickBooksAppUrl
+          ? [
+              <QuickBooksLink
+                key={QuickBooksLink.name}
+                quickBooksAppUrl={quickBooksAppUrl}
+              />,
+            ]
+          : []),
+        ...(order ? [<OrderLink key={order.id} order={order} />] : []),
+        <AttachmentsToolbarControl
+          key={AttachmentsToolbarControl.name}
+          resourceId={resource.id}
+          resourceType="Bill"
+          field={
+            selectSchemaField(schema, fields.billAttachments) ??
+            fail('Field not found')
+          }
+          value={selectResourceField(resource, fields.billAttachments)}
+        />,
+        <AssigneeToolbarControl
+          key={AssigneeToolbarControl.name}
+          resourceId={resource.id}
+          resourceType="Bill"
+          field={
+            selectSchemaField(schema, fields.assignee) ??
+            fail('Field not found')
+          }
+          value={selectResourceField(resource, fields.assignee)}
+        />,
+        ...(!isDraft
+          ? [<EditControl key={EditControl.name} resourceId={resource.id} />]
+          : []),
+        <CancelControl key={CancelControl.name} resourceId={resource.id} />,
+      ]}
+      backlinkField={fields.bill}
+      isReadOnly={!isDraft}
+      actions={
+        <Stack direction="row" height={100}>
+          <Box
+            flexGrow={1}
+            height={70}
+            my="15px"
+            sx={{
+              background: `linear-gradient(90deg, ${statusColorStart} 0%, ${statusColorEnd} 100%)`,
             }}
           />
+          <Container sx={{ flexShrink: 0 }} disableGutters>
+            <Stack
+              direction="row"
+              sx={{ overflowX: 'hidden', height: 100 }}
+              alignItems="center"
+            >
+              <Box sx={{ borderRadius: 10, flexGrow: 1 }}>
+                <BillStatusTracker resource={resource} />
+              </Box>
+              <Stack
+                width={400}
+                flexShrink={0}
+                direction="row"
+                justifyContent="end"
+                alignItems="center"
+                spacing={2}
+                mr={3}
+              >
+                <CallToAction
+                  key={
+                    selectResourceField(resource, fields.billStatus)?.option?.id
+                  }
+                  schema={schema}
+                  self={session.user}
+                  resource={resource}
+                />
+              </Stack>
+            </Stack>
+          </Container>
+          <Box flexGrow={1} bgcolor="transparent" />
         </Stack>
-      </Container>
-    </Stack>
+      }
+    />
   )
 }

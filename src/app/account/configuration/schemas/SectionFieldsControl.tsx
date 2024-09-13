@@ -25,11 +25,11 @@ import { Box, Stack, TextField } from '@mui/material'
 import { FC } from 'react'
 import { z } from 'zod'
 import { isPlainObject } from 'remeda'
-import { Field as FullField } from '../fields/actions'
 import { Field, Section } from './actions'
+import { SchemaField } from '@/domain/schema/entity'
 
 type Props = {
-  fields: FullField[]
+  fields: SchemaField[]
   section: Section
   onChange: (fieldIds: string[]) => void
 }
@@ -136,7 +136,7 @@ const SortableChips: FC<{
       }}
     >
       <SortableContext items={fields} strategy={rectSortingStrategy}>
-        <Stack direction={'row'} gap={1} flexWrap={'wrap'}>
+        <Stack direction="row" gap={1} flexWrap="wrap">
           {fields.map((field) => (
             <SortableChip
               key={field.id}

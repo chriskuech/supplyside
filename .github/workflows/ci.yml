@@ -35,6 +35,22 @@ jobs:
           username: supplyside-github-actions
           password: ${{ secrets.ACR_TOKEN }}
 
+      - name: Create build.json
+        shell: pwsh
+        run: |
+          $path = 'src/app/api/system/health/build.json'
+          @{
+            commit    = $env:SHA
+            version   = $env:PR_NUMBER
+            timestamp = "$(Get-Date -Format 's')Z"
+          }
+          | ConvertTo-Json
+          | Set-Content -Path $path
+          Get-Content -Path $path
+        env:
+          SHA: ${{ github.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
       - name: Build and push container image to registry
         uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
         with:
@@ -54,6 +70,9 @@ jobs:
     environment:
       name: Integration
       url: https://app-int.supplyside.io
+
+    env:
+      BASE_URL: https://app-int.supplyside.io
 
     steps:
       - uses: actions/checkout@v4
@@ -98,3 +117,32 @@ jobs:
           docker pull supplyside.azurecr.io/app:${{ github.sha }}
           docker tag supplyside.azurecr.io/app:${{ github.sha }} supplyside.azurecr.io/app:integration
           docker push supplyside.azurecr.io/app:integration
+
+      - name: Wait for healthcheck
+        shell: pwsh
+        run: |
+          $timeoutInMinutes = 5
+          $waitInSeconds = 10
+
+          $timeout = (Get-Date).AddMinutes($timeoutInMinutes)
+
+          do {
+            Start-Sleep -Seconds $waitInSeconds
+            Write-Host "~" -NoNewline
+
+            $res = Invoke-RestMethod -Uri $env:BASE_URL/api/system/health -Method Get -ErrorAction SilentlyContinue
+
+            if ($res -and $res.build.commit -eq $env:SHA) {
+              Write-Host "\nDeployment successful"
+              exit 0
+            }
+          } while ((Get-Date) -lt $timeout)
+
+          Write-Host "\nDeployment timed out after $timeoutInMinutes minutes"
+          exit 1
+
+        env:
+          SHA: ${{ github.sha }}
+
+      - name: Apply configuration
+        run: curl -X POST $BASE_URL/api/system/post-deployment

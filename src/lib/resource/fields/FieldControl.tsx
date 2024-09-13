@@ -1,35 +1,32 @@
 'use client'
 
-import { useCallback, useMemo } from 'react'
-import { debounce } from 'remeda'
-import Field, { Props as FieldProps } from './Field'
-import { UpdateValueDto, updateValue } from '@/domain/resource/fields/actions'
+import { useCallback } from 'react'
+import { updateResourceField } from '../actions'
+import Field, { Props as FieldProps } from './controls/Field'
+import { mapValueToValueInput } from '@/domain/resource/mappers'
+import { Value } from '@/domain/resource/entity'
 
-type Props = Omit<FieldProps, 'onChange'> & {
-  onChange?: () => void
-}
-
-export default function FieldControl({ onChange, ...props }: Props) {
+export default function FieldControl({
+  resourceId,
+  field,
+  ...fieldProps
+}: Omit<FieldProps, 'onChange'>) {
   const handleChange = useCallback(
-    (value: UpdateValueDto['value']) =>
-      updateValue({
-        resourceId: props.resourceId,
-        fieldId: props.field.id,
-        value,
-      }).then(() => onChange?.()),
-    [onChange, props.field.id, props.resourceId],
-  )
-
-  const debouncedOnChange = useMemo(
-    () => debounce(handleChange, { waitMs: 200 }).call,
-    [handleChange],
+    (value: Value) =>
+      updateResourceField({
+        resourceId,
+        fieldId: field.id,
+        value: mapValueToValueInput(field.type, value),
+      }),
+    [field.id, field.type, resourceId],
   )
 
   return (
     <Field
-      {...props}
-      onChange={debouncedOnChange}
-      onUncontrolledChange={onChange}
+      resourceId={resourceId}
+      field={field}
+      {...fieldProps}
+      onChange={handleChange}
     />
   )
 }

@@ -22,11 +22,15 @@ model Session {
 }
 
 model Account {
-  id         String  @id @default(uuid()) @db.Uuid
-  key        String  @unique
-  name       String  @unique
-  address    String  @default("")
-  logoBlobId String? @unique @db.Uuid
+  id                    String    @id @default(uuid()) @db.Uuid
+  key                   String    @unique
+  name                  String    @unique
+  address               String    @default("")
+  logoBlobId            String?   @unique @db.Uuid
+  quickBooksConnectedAt DateTime?
+  quickBooksToken       Json?
+  plaidConnectedAt      DateTime?
+  plaidToken            String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -58,17 +62,17 @@ model Blob {
 }
 
 model User {
-  id                   String    @id @default(uuid()) @db.Uuid
-  accountId            String    @db.Uuid
-  email                String    @unique
-  firstName            String?
-  lastName             String?
-  tsAndCsSignedAt      DateTime?
-  passwordHash         String?
-  requirePasswordReset Boolean
-  imageBlobId          String?   @unique @db.Uuid
-  isAdmin              Boolean   @default(false)
-  isApprover           Boolean   @default(false)
+  id              String    @id @default(uuid()) @db.Uuid
+  accountId       String    @db.Uuid
+  email           String    @unique
+  firstName       String?
+  lastName        String?
+  tsAndCsSignedAt DateTime?
+  imageBlobId     String?   @unique @db.Uuid
+  isAdmin         Boolean   @default(false)
+  isApprover      Boolean   @default(false)
+  tat             String?
+  tatExpiresAt    DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -141,9 +145,12 @@ model Field {
   accountId      String        @db.Uuid
   type           FieldType
   name           String
+  description    String?
   resourceType   ResourceType?
   templateId     String?       @db.Uuid
   defaultValueId String        @db.Uuid
+  isRequired     Boolean       @default(false)
+  defaultToToday Boolean       @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -189,32 +196,34 @@ model File {
 }
 
 model Contact {
-  valueId String  @id @db.Uuid
-  name    String?
-  title   String?
-  email   String?
-  phone   String?
+  id    String  @id @default(uuid()) @db.Uuid
+  name  String?
+  title String?
+  email String?
+  phone String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Value Value @relation(fields: [valueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Value Value[]
 }
 
 model Value {
   id         String    @id @default(uuid()) @db.Uuid
   boolean    Boolean?
+  contactId  String?   @db.Uuid
   date       DateTime? @db.Date
+  fileId     String?   @db.Uuid
   number     Float?
-  string     String?
-  userId     String?   @db.Uuid
   optionId   String?   @db.Uuid
   resourceId String?   @db.Uuid
-  fileId     String?   @db.Uuid
+  string     String?
+  userId     String?   @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  Contact            Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   File               File?           @relation(fields: [fileId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   Files              ValueFile[]
   User               User?           @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
@@ -222,7 +231,6 @@ model Value {
   Resource           Resource?       @relation(fields: [resourceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   ValueOption        ValueOption[]
   ResourceFieldValue ResourceField[]
-  Contact            Contact?
   Field              Field[]
 }
 

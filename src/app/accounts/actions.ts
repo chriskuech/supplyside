@@ -1,15 +1,19 @@
 'use server'
 
+import assert from 'assert'
 import { revalidatePath } from 'next/cache'
-import * as account from '@/domain/iam/account/actions'
-import { applyTemplate } from '@/domain/schema/template/actions'
+import * as account from '@/domain/iam/account'
+import { applyTemplate } from '@/domain/schema/template'
 import { systemAccountId } from '@/lib/const'
-import * as iam from '@/lib/session/actions'
+import { readSession, impersonate } from '@/lib/session/actions'
 
 const authz = async () => {
-  const s = await iam.readSession()
+  const s = await readSession()
 
-  if (s?.accountId !== systemAccountId) throw new Error('Unauthorized')
+  assert(
+    s?.user.accountId === systemAccountId,
+    `Account ID ${s?.accountId} is not allowed to perform this action`,
+  )
 }
 
 export const refreshAccount = async (accountId: string) => {
@@ -31,6 +35,6 @@ export const deleteAccount = async (accountId: string) => {
 
 export const impersonateAccount = async (accountId: string) => {
   await authz()
-  await iam.impersonate(accountId)
+  await impersonate(accountId)
   revalidatePath('')
 }

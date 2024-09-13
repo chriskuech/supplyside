@@ -1,9 +1,9 @@
-import { Box, Button, Stack, TextField, Typography } from '@mui/material'
-import { CloudUpload } from '@mui/icons-material'
-import Image from 'next/image'
-import { handleSaveSettings } from './actions'
-import { readAccount } from '@/domain/iam/account/actions'
+import { Box, Stack, Typography } from '@mui/material'
+import Form from './Form'
 import { readSession } from '@/lib/session/actions'
+import { readAccount } from '@/domain/iam/account'
+import config from '@/services/config'
+import 'server-only'
 
 export default async function InfoPage() {
   const { accountId } = await readSession()
@@ -12,78 +12,19 @@ export default async function InfoPage() {
   return (
     <Stack
       spacing={2}
-      direction={'column'}
-      textAlign={'left'}
+      direction="column"
+      textAlign="left"
       my={5}
       mx="auto"
-      width={'fit-content'}
+      width="fit-content"
     >
       <Box>
-        <Typography variant={'h4'}>Info</Typography>
-        <Typography variant={'caption'}>
+        <Typography variant="h4">Info</Typography>
+        <Typography variant="caption">
           Provide your company information for use across the platform.
         </Typography>
       </Box>
-      <form action={handleSaveSettings}>
-        <Stack spacing={4} direction={'column'} alignItems={'center'}>
-          <Stack spacing={2} alignItems={'center'}>
-            <Image
-              src={account?.logoPath ?? ''}
-              alt="Logo"
-              style={{ borderRadius: '50%', background: 'gray' }}
-              width={300}
-              height={300}
-            />
-
-            <Box>
-              <Button component="label" startIcon={<CloudUpload />}>
-                Upload Logo
-                <input
-                  style={{ display: 'none' }}
-                  type="file"
-                  name="file"
-                  accept="image/*"
-                />
-              </Button>
-            </Box>
-          </Stack>
-
-          <TextField
-            label={'Company Name'}
-            variant={'outlined'}
-            fullWidth
-            required
-            margin={'normal'}
-            name="name"
-            defaultValue={account?.name}
-          />
-
-          <TextField
-            label={'Company ID'}
-            variant={'outlined'}
-            required
-            margin={'normal'}
-            name="key"
-            defaultValue={account?.key}
-          />
-
-          <TextField
-            label={'Company Address'}
-            variant={'outlined'}
-            fullWidth
-            multiline
-            minRows={3}
-            required
-            margin={'normal'}
-            name="address"
-            defaultValue={account?.address}
-          />
-
-          <Box>
-            <Button type="submit">Save</Button>
-          </Box>
-        </Stack>
-      </form>
+      <Form account={account} billsEmailDomain={config().BILLS_EMAIL_DOMAIN} />
     </Stack>
   )
 }

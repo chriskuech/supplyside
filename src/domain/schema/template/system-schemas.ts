@@ -11,6 +11,8 @@ export const schemas: SchemaTemplate[] = [
       fields.subtotalCost,
       fields.totalCost,
       fields.assignee,
+      fields.billAttachments,
+      fields.quickBooksBillId,
     ],
     sections: [
       {
@@ -20,8 +22,13 @@ export const schemas: SchemaTemplate[] = [
           fields.vendor,
           fields.invoiceNumber,
           fields.invoiceDate,
+          fields.poNumber,
           fields.billDescription,
         ],
+      },
+      {
+        name: 'Accounting Info',
+        fields: [fields.quickBooksAccount],
       },
       {
         name: 'Payment Info',
@@ -31,10 +38,6 @@ export const schemas: SchemaTemplate[] = [
           fields.paymentMethod,
           fields.currency,
         ],
-      },
-      {
-        name: fields.termsAndConditions.name,
-        fields: [fields.termsAndConditions],
       },
     ],
   },
@@ -64,19 +67,21 @@ export const schemas: SchemaTemplate[] = [
     resourceType: 'Order',
     fields: [
       fields.orderStatus,
-      fields.number,
+      fields.poNumber,
       fields.assignee,
       fields.document,
       fields.totalCost,
       fields.subtotalCost,
       fields.itemizedCosts,
       fields.trackingNumber,
+      fields.orderAttachments,
     ],
     sections: [
       {
         name: 'Order Info',
         fields: [
           fields.vendor,
+          fields.poRecipient,
           fields.orderDescription,
           fields.issuedDate,
           fields.orderNotes,
@@ -90,7 +95,6 @@ export const schemas: SchemaTemplate[] = [
         name: 'Shipping Info',
         fields: [
           fields.shippingAddress,
-          fields.poRecipient,
           fields.shippingMethod,
           fields.shippingAccountNumber,
           fields.incoterms,
@@ -105,7 +109,7 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'Vendor',
-    fields: [],
+    fields: [fields.quickBooksVendorId],
     sections: [
       {
         name: 'Summary',
@@ -117,7 +121,7 @@ export const schemas: SchemaTemplate[] = [
       },
       {
         name: 'Payment Info',
-        fields: [fields.paymentTerms, fields.preferredPaymentType],
+        fields: [fields.paymentTerms, fields.paymentMethod],
       },
     ],
   },

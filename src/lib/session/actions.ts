@@ -1,65 +1,75 @@
 'use server'
 
-import { ok } from 'assert'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { validate as isUuid } from 'uuid'
+import { InvalidSessionError, MissingSessionError } from './types'
 import {
   clearSession as domainClearSession,
   createSession as domainCreateSession,
-  readSession as domainReadSession,
   readAndExtendSession as domainReadAndExtendSession,
   impersonate as domainImpersonate,
-} from '@/domain/iam/session/actions'
+} from '@/domain/iam/session'
+import config from '@/services/config'
+import { Session } from '@/domain/iam/session/entity'
 
 const sessionIdCookieName = 'sessionId'
 
-export const createSession = async (email: string, password: string) => {
-  const session = await domainCreateSession(email, password)
+export const withSession = async <T>(
+  handler: (session: Session) => Promise<T>,
+): Promise<T> => {
+  const session = await readSession()
+
+  return await handler(session)
+}
+
+export const createSession = async (email: string, tat: string) => {
+  const session = await domainCreateSession(email, tat)
 
   cookies().set(sessionIdCookieName, session.id, {
     sameSite: true,
     secure: process.env.NODE_ENV !== 'development',
+    httpOnly: true,
+    domain: new URL(config().BASE_URL).hostname,
     expires: session.expiresAt,
   })
-}
-
-export const hasSession = () => {
-  const sessionId = cookies().get(sessionIdCookieName)?.value
-
-  if (!sessionId || !isUuid(sessionId)) return false
-
-  return domainReadSession(sessionId)
-    .then(() => true)
-    .catch(() => false)
 }
 
 export const readSession = async () => {
   const sessionId = cookies().get(sessionIdCookieName)?.value
 
-  ok(sessionId, '`sessionId` not found in cookies')
-  ok(isUuid(sessionId), '`sessionId` is not a valid UUID')
+  if (!sessionId)
+    throw new MissingSessionError('`sessionId` not found in cookies')
 
-  const session = await domainReadSession(sessionId)
+  if (!isUuid(sessionId))
+    throw new InvalidSessionError('`sessionId` is not a valid UUID')
+
+  const session = await domainReadAndExtendSession(sessionId)
+
+  if (!session) throw new MissingSessionError('`session` not found')
 
   return session
 }
 
 // this should be in a middleware, but https://github.com/vercel/next.js/issues/69002
-export const requireSessionWithRedirect = async () => {
-  const sessionId = cookies().get(sessionIdCookieName)?.value
-  if (!sessionId || !isUuid(sessionId)) return redirect('/auth/login')
+export const requireSessionWithRedirect = async (returnTo: string) => {
+  try {
+    const session = await readSession()
 
-  const session = await domainReadAndExtendSession(sessionId)
-  if (!session) return redirect('/auth/login')
+    if (!session.user.tsAndCsSignedAt) redirect('/auth/terms-and-conditions')
 
-  if (session.user.requirePasswordReset)
-    return redirect('/auth/update-password')
+    return session
+  } catch (e) {
+    if (e instanceof InvalidSessionError) {
+      redirect('/auth/logout')
+    }
 
-  if (!session.user.tsAndCsSignedAt)
-    return redirect('/auth/terms-and-conditions')
+    if (e instanceof MissingSessionError) {
+      redirect(`/auth/login?returnTo=${returnTo}`)
+    }
 
-  return session
+    throw e
+  }
 }
 
 export const clearSession = async () => {

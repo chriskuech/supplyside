@@ -8,7 +8,9 @@ type Props<Args extends unknown[], ResolvedType> = {
 export function useAsyncQuery<const Args extends unknown[], ResolvedType>(
   { fn, deps }: Props<Args, ResolvedType>,
   { showGenericError }: Options = { showGenericError: true },
-): UseAsyncState<ResolvedType> & { refetch: () => Promise<ResolvedType> } {
+): UseAsyncState<ResolvedType> & {
+  refetch: () => Promise<ResolvedType | undefined>
+} {
   const [status, triggerCallback] = useAsyncCallback(fn, {
     showGenericError,
   })

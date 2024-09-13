@@ -1,5 +1,3 @@
-'use server'
-
 import puppeteer from 'puppeteer'
 // https://github.com/vercel/next.js/issues/43810
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -8,9 +6,12 @@ import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.b
 import PoDocument from './doc/PoDocument'
 import PoDocumentFooter from '@/domain/order/doc/PoDocumentFooter'
 import singleton from '@/services/singleton'
+import 'server-only'
 
 const browser = singleton('browser', async (clear) => {
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox'],
+  })
 
   browser.once('disconnected', () => {
     browser.close()
@@ -48,7 +49,7 @@ export const renderPo = async (params: RenderPoParams) => {
       displayHeaderFooter: true,
       margin: {
         top: '35px',
-        bottom: '15px',
+        bottom: '35px',
         left: '15px',
         right: '15px',
       },

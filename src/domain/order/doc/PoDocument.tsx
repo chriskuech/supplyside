@@ -1,19 +1,18 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable jsx-a11y/alt-text */
 
-'use server'
-
 import { ReactNode } from 'react'
 import { Cost, FieldType } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { isTruthy } from 'remeda'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
 import prisma from '@/services/prisma'
-import { readResource, readResources } from '@/domain/resource/actions'
+import { readResource, readResources } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
-import { readBlob } from '@/domain/blobs/actions'
-import { readSchema } from '@/domain/schema/actions'
-import { selectValue } from '@/domain/resource/types'
+import { readBlob } from '@/domain/blobs'
+import { readSchema } from '@/domain/schema'
+import { selectResourceField } from '@/domain/resource/extensions'
+import 'server-only'
 
 type Props = {
   accountId: string
@@ -44,7 +43,7 @@ export default async function PoDocument({
     }),
   ])
 
-  const vendorId = selectValue(order, fields.vendor)?.resource?.id
+  const vendorId = selectResourceField(order, fields.vendor)?.resource?.id
 
   const vendor = vendorId
     ? await readResource({
@@ -75,7 +74,7 @@ export default async function PoDocument({
     ? `data:${blob?.mimeType};base64,${blob?.buffer.toString('base64')}`
     : undefined
 
-  const issuedDate = selectValue(order, fields.issuedDate)?.date
+  const issuedDate = selectResourceField(order, fields.issuedDate)?.date
 
   const formattedDate = issuedDate
     ? new Date(issuedDate).toLocaleDateString()
@@ -139,7 +138,7 @@ export default async function PoDocument({
                       ...styles.TopMarginClass,
                     }}
                   >
-                    {selectValue(order, fields.orderNotes)?.string}
+                    {selectResourceField(order, fields.orderNotes)?.string}
                   </td>
                 </tr>
               </tbody>
@@ -175,7 +174,7 @@ export default async function PoDocument({
                     Currency
                   </td>
                   <td style={styles.PaymentPadding}>
-                    {selectValue(order, fields.currency)?.option?.name}
+                    {selectResourceField(order, fields.currency)?.option?.name}
                   </td>
                 </tr>
                 <tr>
@@ -185,7 +184,10 @@ export default async function PoDocument({
                     Payment Terms
                   </td>
                   <td style={styles.PaymentPadding}>
-                    {selectValue(order, fields.paymentTerms)?.option?.name}
+                    {
+                      selectResourceField(order, fields.paymentTerms)?.option
+                        ?.name
+                    }
                   </td>
                 </tr>
                 <tr>
@@ -195,7 +197,9 @@ export default async function PoDocument({
                     Taxable
                   </td>
                   <td style={styles.PaymentPadding}>
-                    {selectValue(order, fields.taxable)?.boolean ? 'Yes' : 'No'}
+                    {selectResourceField(order, fields.taxable)?.boolean
+                      ? 'Yes'
+                      : 'No'}
                   </td>
                 </tr>
               </tbody>
@@ -231,7 +235,7 @@ export default async function PoDocument({
                       paddingBottom: '0px',
                     }}
                   >
-                    {selectValue(order, fields.vendor)?.resource?.name}
+                    {selectResourceField(order, fields.vendor)?.resource?.name}
                     <span
                       style={{
                         whiteSpace: 'pre-wrap',
@@ -241,7 +245,8 @@ export default async function PoDocument({
                       }}
                     >
                       {vendor &&
-                        selectValue(vendor, fields.primaryAddress)?.string}
+                        selectResourceField(vendor, fields.primaryAddress)
+                          ?.string}
                     </span>
                   </td>
                 </tr>
@@ -251,7 +256,8 @@ export default async function PoDocument({
                       <b>c/o:</b>
                     </u>
                     {vendor &&
-                      selectValue(vendor, fields.poRecipient)?.contact?.name}
+                      selectResourceField(vendor, fields.poRecipient)?.contact
+                        ?.name}
                   </td>
                 </tr>
               </tbody>
@@ -285,7 +291,7 @@ export default async function PoDocument({
                       whiteSpace: 'pre-wrap',
                     }}
                   >
-                    {selectValue(order, fields.shippingAddress)?.string}
+                    {selectResourceField(order, fields.shippingAddress)?.string}
                   </td>
                   <td style={{ padding: '3px 0px', verticalAlign: 'top' }}>
                     <table style={{ border: '0', margin: 0 }}>
@@ -299,8 +305,8 @@ export default async function PoDocument({
                             }}
                           >
                             {
-                              selectValue(order, fields.shippingMethod)?.option
-                                ?.name
+                              selectResourceField(order, fields.shippingMethod)
+                                ?.option?.name
                             }
                           </td>
                         </tr>
@@ -313,8 +319,10 @@ export default async function PoDocument({
                             }}
                           >
                             {
-                              selectValue(order, fields.shippingAccountNumber)
-                                ?.option?.name
+                              selectResourceField(
+                                order,
+                                fields.shippingAccountNumber,
+                              )?.option?.name
                             }
                           </td>
                         </tr>
@@ -326,7 +334,10 @@ export default async function PoDocument({
                               verticalAlign: 'top',
                             }}
                           >
-                            {selectValue(order, fields.incoterms)?.option?.name}
+                            {
+                              selectResourceField(order, fields.incoterms)
+                                ?.option?.name
+                            }
                           </td>
                         </tr>
                       </tbody>
@@ -355,7 +366,7 @@ export default async function PoDocument({
                         whiteSpace: 'pre-wrap',
                       }}
                     >
-                      {selectValue(order, fields.shippingNotes)?.string}
+                      {selectResourceField(order, fields.shippingNotes)?.string}
                     </p>
                   </td>
                 </tr>
@@ -388,7 +399,8 @@ export default async function PoDocument({
             <tbody>
               {await Promise.all(
                 lines.map(async (line, index) => {
-                  const itemId = selectValue(line, fields.item)?.resource?.id
+                  const itemId = selectResourceField(line, fields.item)
+                    ?.resource?.id
                   const item = itemId
                     ? await readResource({
                         accountId,
@@ -450,7 +462,7 @@ export default async function PoDocument({
                         .with('Text', () => fieldValue?.string || null)
                         .with('Textarea', () => fieldValue?.string || null)
                         .with('Select', () => fieldValue?.option?.name ?? null)
-                        .with('User', () => fieldValue?.user?.fullName ?? null)
+                        .with('User', () => fieldValue?.user?.name ?? null)
                         .with('Resource', () => null)
                         .exhaustive()
 
@@ -519,7 +531,8 @@ export default async function PoDocument({
                           }}
                         >
                           <div style={{ fontWeight: 'bold' }}>
-                            {item && selectValue(item, fields.name)?.string}
+                            {item &&
+                              selectResourceField(item, fields.name)?.string}
                           </div>
                           <div
                             style={{
@@ -530,21 +543,22 @@ export default async function PoDocument({
                             }}
                           >
                             {item &&
-                              selectValue(item, fields.itemDescription)?.string}
+                              selectResourceField(item, fields.itemDescription)
+                                ?.string}
                           </div>
                         </td>
                         <td style={tdStyle}>
                           {
-                            selectValue(line, fields.unitOfMeasure)?.option
-                              ?.name
+                            selectResourceField(line, fields.unitOfMeasure)
+                              ?.option?.name
                           }
                         </td>
 
                         <td style={tdStyle}>
-                          {selectValue(line, fields.quantity)?.number}
+                          {selectResourceField(line, fields.quantity)?.number}
                         </td>
                         <td style={tdStyle}>
-                          {selectValue(
+                          {selectResourceField(
                             line,
                             fields.unitCost,
                           )?.number?.toLocaleString('en-US', {
@@ -553,7 +567,7 @@ export default async function PoDocument({
                           })}
                         </td>
                         <td style={tdStyle}>
-                          {selectValue(
+                          {selectResourceField(
                             line,
                             fields.totalCost,
                           )?.number?.toLocaleString('en-US', {
@@ -629,7 +643,8 @@ export default async function PoDocument({
                     }}
                   >
                     {(
-                      selectValue(order, fields.subtotalCost)?.number || 0
+                      selectResourceField(order, fields.subtotalCost)?.number ||
+                      0
                     ).toLocaleString('en-US', {
                       style: 'currency',
                       currency: 'USD',
@@ -638,7 +653,7 @@ export default async function PoDocument({
                 </tr>
                 {order.costs.map((item: Cost, index: number) => {
                   const subtotal =
-                    selectValue(order, fields.subtotalCost)?.number || 0
+                    selectResourceField(order, fields.subtotalCost)?.number || 0
 
                   const costValue = item.isPercentage
                     ? subtotal * (item.value / 100)
@@ -691,7 +706,7 @@ export default async function PoDocument({
                       textAlign: 'right',
                     }}
                   >
-                    {selectValue(
+                    {selectResourceField(
                       order,
                       fields.totalCost,
                     )?.number?.toLocaleString('en-US', {
@@ -729,7 +744,7 @@ export default async function PoDocument({
                   whiteSpace: 'pre-wrap',
                 }}
               >
-                {selectValue(order, fields.termsAndConditions)?.string}
+                {selectResourceField(order, fields.termsAndConditions)?.string}
               </td>
             </tr>
           </tbody>

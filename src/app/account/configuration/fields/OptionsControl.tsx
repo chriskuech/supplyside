@@ -26,7 +26,7 @@ import { Box, Stack, TextField } from '@mui/material'
 import { FC } from 'react'
 import { faker } from '@faker-js/faker'
 import { P, match } from 'ts-pattern'
-import { OptionPatch } from './actions'
+import { OptionPatch } from '@/domain/schema/fields'
 
 type Props = {
   options: OptionPatch[]
@@ -186,7 +186,7 @@ const SortableChips: FC<{
       }}
     >
       <SortableContext items={values} strategy={rectSortingStrategy}>
-        <Stack direction={'row'} spacing={1} flexWrap={'wrap'}>
+        <Stack direction="row" spacing={1} flexWrap="wrap">
           {values
             .filter((v) => v.op !== 'remove')
             .map((value) => (

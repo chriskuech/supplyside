@@ -9,6 +9,8 @@ import { colors } from '@/lib/ux/colors'
 //  - Somehow support "elevation"-like text-shadow on `Typography` (currently hardcoded in ListPage)
 
 declare module '@mui/material/Button' {
+  // This is the official way to extend the Button component
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface ButtonPropsVariantOverrides {
     // gradient: true
   }
@@ -108,7 +110,6 @@ const base: ThemeOptions = {
             backgroundSize: '120%',
             backgroundPosition: '20%',
             '&:hover': {
-              marginTop: 2,
               backgroundPosition: '0%',
             },
             transition: 'all 0.15s',
@@ -122,7 +123,6 @@ const base: ThemeOptions = {
             backgroundSize: '120%',
             backgroundPosition: '20%',
             '&:hover': {
-              marginTop: 2,
               backgroundPosition: '0%',
             },
             transition: 'all 0.15s',

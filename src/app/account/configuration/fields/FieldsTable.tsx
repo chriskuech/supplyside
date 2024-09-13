@@ -1,23 +1,27 @@
 'use client'
 
 import { Clear } from '@mui/icons-material'
-import { Card, CardContent, IconButton } from '@mui/material'
+import { Card, CardContent, IconButton, Stack } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 import { FC, useState } from 'react'
 import UpdateFieldForm from './UpdateFieldForm'
-import { Field, UpdateFieldDto, deleteField, updateField } from './actions'
+import { deleteField, updateField } from './actions'
+import { UpdateFieldDto } from '@/domain/schema/fields'
+import { useConfirmation } from '@/lib/confirmation'
+import { SchemaField } from '@/domain/schema/entity'
 
 type Props = {
-  fields: Field[]
+  fields: SchemaField[]
 }
 
 export default function FieldsTable({ fields }: Props) {
-  const [field, setField] = useState<Field>()
+  const [field, setField] = useState<SchemaField>()
+  const confirm = useConfirmation()
 
-  const columns: GridColDef<Field>[] = [
+  const columns: GridColDef<SchemaField>[] = [
     {
       field: 'name',
       headerName: 'Name',
@@ -41,15 +45,50 @@ export default function FieldsTable({ fields }: Props) {
       editable: false,
     },
     {
+      field: 'isRequired',
+      headerName: 'Required',
+      type: 'boolean',
+      width: 100,
+      editable: false,
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      type: 'string',
+      width: 500,
+      editable: false,
+    },
+    {
       field: '_delete',
       headerName: 'Delete',
       type: 'actions',
       width: 75,
       sortable: false,
       disableColumnMenu: true,
+      flex: 1,
+      headerAlign: 'right',
+      align: 'right',
       renderCell: ({ row }) => (
         <IconButton
-          onClick={() => deleteField(row.id)}
+          onClick={async () => {
+            const isConfirmed = await confirm({
+              title: 'Delete Field',
+              content: (
+                <Stack spacing={2}>
+                  <Box>
+                    Are you sure you want to delete this Field? This will
+                    permanently delete any data associated with the Field.
+                  </Box>
+                  <Box>This action is not reversible.</Box>
+                </Stack>
+              ),
+              confirmButtonText: 'Delete',
+            })
+
+            if (!isConfirmed) return
+
+            await deleteField(row.id)
+          }}
           disabled={!!row.templateId}
         >
           <Clear />
@@ -60,7 +99,7 @@ export default function FieldsTable({ fields }: Props) {
 
   return (
     <>
-      <DataGrid<Field>
+      <DataGrid<SchemaField>
         columns={columns}
         rows={fields}
         rowSelection={false}
@@ -76,7 +115,7 @@ export default function FieldsTable({ fields }: Props) {
 }
 
 const FieldModal: FC<{
-  field: Field | undefined
+  field: SchemaField | undefined
   onUpdate: (dto: UpdateFieldDto) => void
   onClose: () => void
 }> = ({ field, onUpdate, onClose }) => (
@@ -88,6 +127,8 @@ const FieldModal: FC<{
         left: '50%',
         transform: 'translate(-50%, -50%)',
         width: 'fit-content',
+        maxHeight: '100%',
+        overflow: 'auto',
       }}
     >
       <Card>

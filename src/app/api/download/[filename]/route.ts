@@ -1,9 +1,8 @@
-'use server'
-
 import { NextRequest, NextResponse } from 'next/server'
-import { readBlob } from '@/domain/blobs/actions'
+import { readBlob } from '@/domain/blobs'
 import { readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
+import 'server-only'
 
 /**
  * /api/download/[filename]?blobId=<blobId>[&no-impersonation][&preview]
@@ -36,9 +35,13 @@ export async function GET(
     return NextResponse.json({ error: 'File not found' }, { status: 404 })
   }
 
+  const encoding = blob.mimeType.startsWith('text/') ? 'utf-8' : undefined
+
   return new NextResponse(blob.buffer, {
     headers: {
-      'Content-Type': blob.mimeType,
+      'Content-Type': encoding
+        ? `${blob.mimeType}; charset=${encoding}`
+        : blob.mimeType,
       ...(query.get('preview') === null
         ? { 'Content-Disposition': `attachment; filename=${filename}` }
         : undefined),

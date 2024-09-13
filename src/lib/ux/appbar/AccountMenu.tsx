@@ -4,7 +4,13 @@ import { IconButton, ListItemIcon, ListItemText, Stack } from '@mui/material'
 import Link from 'next/link'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import { Business, ContactMail, People, Settings } from '@mui/icons-material'
+import {
+  Business,
+  ContactMail,
+  IntegrationInstructions,
+  People,
+  Settings,
+} from '@mui/icons-material'
 import { useState } from 'react'
 
 export function AccountMenu() {
@@ -49,6 +55,16 @@ export function AccountMenu() {
             <Settings fontSize="small" />
           </ListItemIcon>
           <ListItemText>Configuration</ListItemText>
+        </MenuItem>
+        <MenuItem
+          href="/account/integrations"
+          component={Link}
+          onClick={() => setAnchorEl(null)}
+        >
+          <ListItemIcon>
+            <IntegrationInstructions fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Integrations</ListItemText>
         </MenuItem>
       </Menu>
     </Stack>

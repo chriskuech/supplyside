@@ -2,49 +2,66 @@
 
 import {
   Button,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
   Stack,
   TextField,
 } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FieldType } from '@prisma/client'
 import OptionsControl from './OptionsControl'
-import { Field, OptionPatch, UpdateFieldDto } from './actions'
 import ResourceTypeSelect from './ResourceTypeSelect'
 import DefaultValueControl from './DefaultValueControl'
-import { findField } from '@/domain/schema/template/system-fields'
-import { mapValueToInput } from '@/domain/resource/values/mappers'
-import { ValueInput } from '@/domain/resource/values/types'
+import { OptionPatch, UpdateFieldDto } from '@/domain/schema/fields'
+import { findTemplateField } from '@/domain/schema/template/system-fields'
+import { Value, emptyValue } from '@/domain/resource/entity'
+import { SchemaField } from '@/domain/schema/entity'
 
 type Props = {
-  field: Field
+  field: SchemaField
   onSubmit: (dto: UpdateFieldDto) => void
   onCancel: () => void
 }
 
 export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
   const [name, setName] = useState<string>(field.name)
+  const [description, setDescription] = useState<string>(
+    field.description ?? '',
+  )
   const [options, setOptions] = useState<OptionPatch[]>(
-    field.Option.map((o) => ({
+    field.options.map((o) => ({
       id: o.id,
       name: o.name,
       optionId: o.id,
       op: 'update',
     })),
   )
-  const [defaultValue, setDefaultValue] = useState<ValueInput>(
-    mapValueToInput(field.defaultValue),
+  const [defaultValue, setDefaultValue] = useState<Value>(
+    field.defaultValue ?? emptyValue,
   )
+
+  const [defaultToToday, setDefaultToToday] = useState<boolean>(
+    field.defaultToToday,
+  )
+
+  const [isRequired, setIsRequired] = useState<boolean>(field.isRequired)
+
+  useEffect(() => {
+    if (defaultToToday) {
+      setDefaultValue((state) => ({ ...state, date: null }))
+    }
+  }, [defaultToToday])
 
   const isValid = !!name
   const isDisabled = !!field.templateId
 
   return (
-    <Stack spacing={2} width={'fit-content'}>
-      <Stack direction={'row'} spacing={1}>
+    <Stack spacing={2} width="fit-content">
+      <Stack direction="row" spacing={1}>
         <TextField
           sx={{ width: 300 }}
           label="Name"
@@ -71,15 +88,23 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         </FormControl>
       </Stack>
 
+      <TextField
+        label="Description"
+        value={description}
+        fullWidth
+        onChange={(e) => setDescription(e.target.value)}
+        disabled={isDisabled}
+      />
+
       {(field.type === 'MultiSelect' || field.type === 'Select') && (
         <OptionsControl
           options={options}
           onChange={setOptions}
-          isDisabled={!!findField(field.templateId)?.options}
+          isDisabled={!!findTemplateField(field.templateId)?.options}
         />
       )}
 
-      <Stack direction={'row'} spacing={1} flexWrap={'wrap'}>
+      <Stack direction="row" spacing={1} flexWrap="wrap">
         {field.type === 'Resource' && (
           <FormControl sx={{ width: 150 }}>
             <InputLabel id="field-resource-type-label">
@@ -91,7 +116,8 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
           </FormControl>
         )}
       </Stack>
-      {!findField(field.templateId)?.defaultValue && (
+
+      {!findTemplateField(field.templateId)?.defaultValue && (
         <FormControl fullWidth>
           <InputLabel htmlFor="default-field-value-control">
             Default Value
@@ -100,11 +126,39 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
             field={field}
             defaultValue={defaultValue}
             onChange={setDefaultValue}
+            isDisabled={defaultToToday}
           />
         </FormControl>
       )}
 
-      <Stack justifyContent={'end'} direction={'row'} spacing={1}>
+      {field.type === FieldType.Date && (
+        <FormControl fullWidth>
+          <FormControlLabel
+            label="Default to Today"
+            control={
+              <Checkbox
+                checked={defaultToToday}
+                onChange={(e) => setDefaultToToday(e.target.checked)}
+              />
+            }
+          />
+        </FormControl>
+      )}
+
+      <FormControl fullWidth>
+        <FormControlLabel
+          label="Required"
+          control={
+            <Checkbox
+              disabled={isDisabled}
+              checked={isRequired}
+              onChange={(e) => setIsRequired(e.target.checked)}
+            />
+          }
+        />
+      </FormControl>
+
+      <Stack justifyContent="end" direction="row" spacing={1}>
         <Button variant="text" onClick={onCancel}>
           Cancel
         </Button>
@@ -115,8 +169,11 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
             onSubmit({
               id: field.id,
               name,
+              description: description?.trim() || null,
               options,
               defaultValue,
+              defaultToToday,
+              isRequired,
             })
           }
         >
