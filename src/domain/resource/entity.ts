@@ -31,6 +31,7 @@ export const emptyValue = {
   resource: null,
   files: [],
   options: [],
+  updatedAt: new Date(0),
 } as const satisfies Value
 
 export type Value = {
@@ -45,6 +46,7 @@ export type Value = {
   file: File | null
   files: File[]
   resource: ValueResource | null
+  updatedAt: Date
 }
 
 export type Contact = {
