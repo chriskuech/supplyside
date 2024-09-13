@@ -20,6 +20,7 @@ import { OptionPatch, UpdateFieldDto } from '@/domain/schema/fields'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
 import { Value, emptyValue } from '@/domain/resource/entity'
 import { SchemaField } from '@/domain/schema/entity'
+import { mapValueToValueInput } from '@/domain/resource/mappers'
 
 type Props = {
   field: SchemaField
@@ -171,7 +172,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
               name,
               description: description?.trim() || null,
               options,
-              defaultValue,
+              defaultValue: mapValueToValueInput(field.type, defaultValue),
               defaultToToday,
               isRequired,
             })
