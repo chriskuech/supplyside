@@ -79,7 +79,9 @@ function Field(
   useEffect(() => {
     if (
       incomingValue &&
-      (!value || incomingValue.updatedAt > value.updatedAt)
+      (!value ||
+        incomingValue.updatedAt > value.updatedAt ||
+        value.resource?.name !== incomingValue.resource?.name)
     ) {
       setValue(incomingValue)
     }
