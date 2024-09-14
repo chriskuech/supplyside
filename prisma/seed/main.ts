@@ -9,6 +9,7 @@ import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
+import 'server-only'
 
 expandDotenv(loadDotenv())
 

@@ -8,7 +8,8 @@
     "check:watch": "tsc --noEmit --watch --project .",
     "prebuild": "prisma generate --no-hints",
     "build": "next build",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "cp -R modules/* node_modules"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.24.0",
@@ -43,7 +44,6 @@
     "react-dom": "^18",
     "react-plaid-link": "^3.6.0",
     "remeda": "^2.12.0",
-    "server-only": "^0.0.1",
     "sharp": "^0.33.5",
     "ts-pattern": "^5.3.1",
     "uuid": "^10.0.0",
