@@ -7,7 +7,6 @@ import prisma from '@/services/prisma'
 import config from '@/services/config'
 import smtp from '@/services/smtp'
 import { isPrismaError } from '@/services/prisma-extensions'
-import 'server-only'
 
 const loginPath = '/auth/login'
 const verifyLoginPath = '/auth/verify-login'

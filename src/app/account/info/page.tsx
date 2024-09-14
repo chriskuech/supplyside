@@ -3,7 +3,6 @@ import Form from './Form'
 import { readSession } from '@/lib/session/actions'
 import { readAccount } from '@/domain/iam/account'
 import config from '@/services/config'
-import 'server-only'
 
 export default async function InfoPage() {
   const { accountId } = await readSession()

@@ -1,4 +1,3 @@
-import 'server-only'
 import { fail } from 'assert'
 import { match } from 'ts-pattern'
 import { FieldRef, selectSchemaFieldUnsafe } from '../schema/extensions'

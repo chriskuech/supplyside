@@ -18,7 +18,6 @@ import { mapResourceModelToEntity } from './mappers'
 import { resourceInclude } from './model'
 import { handleResourceCreate, handleResourceUpdate } from './effects'
 import prisma from '@/services/prisma'
-import 'server-only'
 
 export type ResourceFieldInput = {
   fieldId: string

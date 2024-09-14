@@ -8,7 +8,6 @@ import { fields } from '@/domain/schema/template/system-fields'
 import smtp from '@/services/smtp'
 import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
-import 'server-only'
 import { Resource } from '@/domain/resource/entity'
 
 type FileParam = {

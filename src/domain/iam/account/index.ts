@@ -4,7 +4,6 @@ import { mapAccountModelToEntity } from './mappers'
 import { accountInclude } from './model'
 import { applyTemplate } from '@/domain/schema/template'
 import prisma from '@/services/prisma'
-import 'server-only'
 
 export const createAccount = async (): Promise<void> => {
   const temporaryKey = faker.string.alpha({ casing: 'lower', length: 5 })

@@ -9,7 +9,6 @@ import { recalculateItemizedCosts, recalculateSubtotalCost } from './costs'
 import { Resource, Value, ValueResource } from './entity'
 import { linkResource } from './link'
 import { readResource, updateResourceField } from '.'
-import 'server-only'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 

@@ -3,7 +3,6 @@ import { Schema } from './entity'
 import { mapFieldModelToEntity } from './mappers'
 import { schemaIncludes } from './model'
 import prisma from '@/services/prisma'
-import 'server-only'
 
 export type ReadSchemaParams = {
   accountId: string

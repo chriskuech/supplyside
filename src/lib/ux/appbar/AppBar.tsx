@@ -13,7 +13,6 @@ import { systemAccountId } from '@/lib/const'
 import { readSession } from '@/lib/session/actions'
 import prisma from '@/services/prisma'
 import { SessionError } from '@/lib/session/types'
-import 'server-only'
 
 export default async function AppBar() {
   const session = await readSession().catch((e) =>

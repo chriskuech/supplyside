@@ -3,7 +3,6 @@ import { mapFile } from './mapValueFile'
 import { fileInclude } from './model'
 import { File as FileEntity } from './types'
 import prisma from '@/services/prisma'
-import 'server-only'
 
 type CreateFileParams = {
   accountId: string

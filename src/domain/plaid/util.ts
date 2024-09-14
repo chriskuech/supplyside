@@ -1,7 +1,6 @@
 import { fail } from 'assert'
 import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid'
 import config from '@/services/config'
-import 'server-only'
 
 export const getPlaidConfig = () => {
   const {

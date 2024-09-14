@@ -5,7 +5,6 @@ import { mapValueToValueInput } from './mappers'
 import { readResource, updateResource } from '.'
 import { readSchema } from '@/domain/schema'
 import { selectSchemaField } from '@/domain/schema/extensions'
-import 'server-only'
 
 export type ResourceCopyParams = {
   accountId: string
