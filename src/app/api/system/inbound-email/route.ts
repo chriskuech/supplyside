@@ -9,6 +9,7 @@ import smtp from '@/services/smtp'
 import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import 'server-only'
+import { Resource } from '@/domain/resource/entity'
 
 type FileParam = {
   content: string
@@ -22,8 +23,8 @@ type Params = {
   files: FileParam[]
 }
 
-const createBill = async (params: Params) => {
-  const bill = await readSchema({
+const createBill = async (params: Params): Promise<Resource> => {
+  const billSchema = await readSchema({
     accountId: params.accountId,
     resourceType: 'Bill',
   })
@@ -48,16 +49,20 @@ const createBill = async (params: Params) => {
     }),
   )
 
-  return await createResource({
+  console.log('Creating Bill', fileIds)
+
+  const bill = await createResource({
     accountId: params.accountId,
     type: 'Bill',
     fields: [
       {
-        fieldId: selectSchemaFieldUnsafe(bill, fields.billFiles).id,
+        fieldId: selectSchemaFieldUnsafe(billSchema, fields.billFiles).id,
         value: { fileIds },
       },
     ],
   })
+
+  return bill
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {

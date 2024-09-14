@@ -3,6 +3,7 @@ import { SchemaField, Schema } from '../schema/entity'
 import { selectSchemaField } from '../schema/extensions'
 import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
+import { extractContent } from '../bill/extractData'
 import { selectResourceField } from './extensions'
 import { recalculateItemizedCosts, recalculateSubtotalCost } from './costs'
 import { Resource, Value, ValueResource } from './entity'
@@ -203,5 +204,16 @@ export const handleResourceUpdate = async ({
         },
       })
     }
+  }
+
+  // When the "Bill Files" field is updated,
+  // Then extract their PO # and Vendor ID
+  if (
+    resource.type === 'Bill' &&
+    updatedFields.some(
+      (rf) => rf.field.templateId === fields.billFiles.templateId,
+    )
+  ) {
+    await extractContent(accountId, resource.id)
   }
 }
