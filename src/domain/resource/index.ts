@@ -49,7 +49,6 @@ export const createResource = async ({
       accountId,
       type,
       key: (key ?? 0) + 1,
-      revision: 0,
       Cost: {
         create: {
           name: 'Taxes',
@@ -108,13 +107,12 @@ export const readResource = async ({
   const model = await prisma().resource.findUniqueOrThrow({
     where: {
       id,
-      accountId_type_key_revision:
+      accountId_type_key:
         type && key
           ? {
               accountId,
               type,
               key,
-              revision: 0,
             }
           : undefined,
     },

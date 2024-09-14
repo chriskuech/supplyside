@@ -96,7 +96,6 @@ model Resource {
   accountId String       @db.Uuid
   type      ResourceType
   key       Int          @db.Integer
-  revision  Int          @db.Integer
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -106,7 +105,7 @@ model Resource {
   Value         Value[]
   Cost          Cost[]
 
-  @@unique([accountId, type, key, revision])
+  @@unique([accountId, type, key])
 }
 
 model ResourceField {
