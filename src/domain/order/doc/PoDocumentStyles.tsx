@@ -1,6 +1,5 @@
 import React from 'react'
 import { CSSProperties } from 'react'
-import 'server-only'
 
 export const PoDocumentStyles: React.FC = () => (
   <style>

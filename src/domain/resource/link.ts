@@ -1,4 +1,3 @@
-import 'server-only'
 import { fail } from 'assert'
 import { ResourceType } from '@prisma/client'
 import { FieldRef, selectSchemaField } from '../schema/extensions'
