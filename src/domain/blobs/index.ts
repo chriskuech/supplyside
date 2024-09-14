@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { Blob } from '@prisma/client'
 import azblob from '@/services/azblob'
 import prisma from '@/services/prisma'
-import 'server-only'
+import '@/server-only'
 
 const containerName = 'app-data'
 

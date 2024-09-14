@@ -6,7 +6,7 @@ import { ResourceTable } from './table'
 import { readResources } from '@/domain/resource'
 import { readSchema } from '@/domain/schema'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
-import 'server-only'
+import '@/server-only'
 
 type Props = {
   tableKey: string

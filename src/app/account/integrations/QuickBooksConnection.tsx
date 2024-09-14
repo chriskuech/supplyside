@@ -4,7 +4,7 @@ import QuickBooksSyncButton from './QuickBooksSyncButton'
 import QuickBooksDisconnectLink from './QuickBooksDisconnectLink'
 import { Session } from '@/domain/iam/session/entity'
 import { getCompanyInfo } from '@/domain/quickBooks/entities/companyInfo'
-import 'server-only'
+import '@/server-only'
 
 type Props = {
   session: Session

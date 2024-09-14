@@ -2,7 +2,7 @@ import { Box, Link, Stack, Typography } from '@mui/material'
 import Form from './Form'
 import { privacyPolicyUrl, termsOfServiceUrl } from '@/lib/const'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
-import 'server-only'
+import '@/server-only'
 
 export default async function SettingsPage() {
   const { user } = await requireSessionWithRedirect('/settings')

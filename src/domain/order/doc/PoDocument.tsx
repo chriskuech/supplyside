@@ -12,7 +12,7 @@ import { fields } from '@/domain/schema/template/system-fields'
 import { readBlob } from '@/domain/blobs'
 import { readSchema } from '@/domain/schema'
 import { selectResourceField } from '@/domain/resource/extensions'
-import 'server-only'
+import '@/server-only'
 
 type Props = {
   accountId: string

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { cookies } from 'next/headers'
 import build from './build.json'
-import 'server-only'
+import '@/server-only'
 
 const buildJsonSchema = z.object({
   commit: z.string().regex(/^[0-9a-f]{40}$/),

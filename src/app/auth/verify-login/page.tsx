@@ -15,7 +15,7 @@ import Form from './Form'
 import { readSession } from '@/lib/session/actions'
 import RefreshOnFocus from '@/lib/ux/RefreshOnFocus'
 import Logo from '@/lib/ux/appbar/Logo'
-import 'server-only'
+import '@/server-only'
 
 export default async function VerifyLogin({
   searchParams,

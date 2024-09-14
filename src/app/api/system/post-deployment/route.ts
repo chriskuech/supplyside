@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { applyTemplate } from '@/domain/schema/template'
-import 'server-only'
+import '@/server-only'
 import prisma from '@/services/prisma'
 import { systemAccountId } from '@/lib/const'
 

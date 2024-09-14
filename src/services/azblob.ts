@@ -1,7 +1,7 @@
 import { BlobServiceClient } from '@azure/storage-blob'
 import config from './config'
 import singleton from './singleton'
-import 'server-only'
+import '@/server-only'
 
 const azblob = singleton('azblob', () =>
   BlobServiceClient.fromConnectionString(

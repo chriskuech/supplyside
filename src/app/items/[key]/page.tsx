@@ -2,7 +2,7 @@ import { selectResourceField } from '@/domain/resource/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
-import 'server-only'
+import '@/server-only'
 
 export default async function ItemsDetail({
   params: { key },

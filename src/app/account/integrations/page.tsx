@@ -2,7 +2,7 @@ import { Alert, Stack, Typography } from '@mui/material'
 import QuickBooks from './QuickBooks'
 import Plaid from './Plaid'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
-import 'server-only'
+import '@/server-only'
 
 export default async function IntegrationsPage() {
   const session = await requireSessionWithRedirect('/account/integrations')

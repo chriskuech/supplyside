@@ -1,5 +1,5 @@
 import ListPage from '@/lib/resource/ListPage'
-import 'server-only'
+import '@/server-only'
 
 export default async function Vendors() {
   return (

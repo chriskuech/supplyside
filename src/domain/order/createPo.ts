@@ -8,7 +8,7 @@ import { selectSchemaField } from '../schema/extensions'
 import { selectResourceField } from '../resource/extensions'
 import { renderPo } from './renderPo'
 import prisma from '@/services/prisma'
-import 'server-only'
+import '@/server-only'
 
 type CreatePoParams = {
   accountId: string

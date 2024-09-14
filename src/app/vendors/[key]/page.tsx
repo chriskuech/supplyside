@@ -4,7 +4,7 @@ import { selectResourceField } from '@/domain/resource/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { getQuickBooksConfig } from '@/domain/quickBooks/util'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
-import 'server-only'
+import '@/server-only'
 
 export default async function VendorDetail({
   params: { key },

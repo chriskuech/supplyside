@@ -5,7 +5,7 @@ import { selectResourceField } from '../resource/extensions'
 import smtp from '@/services/smtp'
 import prisma from '@/services/prisma'
 import config from '@/services/config'
-import 'server-only'
+import '@/server-only'
 
 type SendPoParams = {
   accountId: string
