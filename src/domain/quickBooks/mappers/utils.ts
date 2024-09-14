@@ -8,20 +8,22 @@ export const mapValue = (resource: Resource, field: FieldTemplate) => {
   const fieldValue = selectResourceField(resource, field)
 
   return match(field.type)
-    .with('Checkbox', () => fieldValue?.boolean)
-    .with('Contact', () => fieldValue?.contact?.name)
+    .with('Checkbox', () => fieldValue?.value.boolean)
+    .with('Contact', () => fieldValue?.value.contact?.name)
     .with(
       'Date',
-      () => fieldValue?.date && dayjs(fieldValue.date).format('YYYY-MM-DDZ'),
+      () =>
+        fieldValue?.value.date &&
+        dayjs(fieldValue.value.date).format('YYYY-MM-DDZ'),
     )
-    .with(P.union('Money', 'Number'), () => fieldValue?.number)
+    .with(P.union('Money', 'Number'), () => fieldValue?.value.number)
     .with('MultiSelect', () =>
-      fieldValue?.options?.map((o) => o.name).join(' '),
+      fieldValue?.value.options?.map((o) => o.name).join(' '),
     )
-    .with(P.union('Text', 'Textarea'), () => fieldValue?.string)
-    .with('Select', () => fieldValue?.option?.name)
-    .with('User', () => fieldValue?.user?.name)
-    .with('Resource', () => fieldValue?.resource?.name)
+    .with(P.union('Text', 'Textarea'), () => fieldValue?.value.string)
+    .with('Select', () => fieldValue?.value.option?.name)
+    .with('User', () => fieldValue?.value.user?.name)
+    .with('Resource', () => fieldValue?.value.resource?.name)
     .with(P.union('Files', 'File'), () => undefined)
     .exhaustive()
 }

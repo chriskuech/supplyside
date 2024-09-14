@@ -5,15 +5,16 @@ import { readSchema } from '@/domain/schema'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { Resource } from '@/domain/resource/entity'
 import { Where } from '@/domain/resource/json-logic/types'
-import { ResourceFieldInput, readResources } from '@/domain/resource'
+import { readResources } from '@/domain/resource'
 import { Schema } from '@/domain/schema/entity'
 import { fields } from '@/domain/schema/template/system-fields'
 import 'server-only'
+import { ResourceFieldCreateInput } from '@/domain/resource/patch'
 
 type Props = {
   resource: Resource
   lineQuery: Where
-  newLineInitialData: ResourceFieldInput[]
+  newLineInitialData: ResourceFieldCreateInput[]
   isReadOnly?: boolean
 }
 

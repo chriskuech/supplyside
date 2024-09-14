@@ -1,34 +1,25 @@
+import 'server-only'
 import { fail } from 'assert'
-import { Prisma, ResourceType } from '@prisma/client'
+import { ResourceType } from '@prisma/client'
 import { readSchema } from '../schema'
 import { selectSchemaField } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { recalculateSubtotalCost } from './costs'
 import { selectResourceField } from './extensions'
-import {
-  mapValueInputToPrismaValueCreate,
-  mapValueToValueInput,
-} from './mappers'
-import { mapValueInputToPrismaValueUpdate } from './mappers'
-import { Resource, emptyValue } from './entity'
-import { ValueInput } from './patch'
+import { createPrismaValueCreate, createPrismaValueUpdate } from './mappers'
+import { Resource } from './entity'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
 import { mapResourceModelToEntity } from './mappers'
 import { resourceInclude } from './model'
 import { handleResourceCreate, handleResourceUpdate } from './effects'
+import { ResourceFieldCreateInput, ResourceFieldUpdateInput } from './patch'
 import prisma from '@/services/prisma'
-import 'server-only'
-
-export type ResourceFieldInput = {
-  fieldId: string
-  value: ValueInput
-}
 
 export type CreateResourceParams = {
   accountId: string
   type: ResourceType
-  fields?: ResourceFieldInput[]
+  fields?: ResourceFieldCreateInput[]
 }
 
 export const createResource = async ({
@@ -71,11 +62,10 @@ export const createResource = async ({
               },
             },
             Value: {
-              create: mapValueInputToPrismaValueCreate(
-                resourceField?.value ??
-                  mapValueToValueInput(schemaField.type, emptyValue),
+              create: createPrismaValueCreate({
                 schemaField,
-              ),
+                resourceField,
+              }),
             },
           }
         }),
@@ -161,65 +151,62 @@ export const readResources = async ({
 export type UpdateResourceParams = {
   accountId: string
   resourceId: string
-  fields: ResourceFieldInput[]
+  fields: ResourceFieldUpdateInput[]
 }
 
 export const updateResource = async ({
   accountId,
   resourceId,
   fields,
-}: UpdateResourceParams) => {
+}: UpdateResourceParams): Promise<Resource> => {
   const resource = await readResource({ accountId, id: resourceId })
 
   const schema = await readSchema({ accountId, resourceType: resource.type })
 
-  const model = await prisma().resource.update({
-    where: { accountId, id: resourceId },
-    data: {
-      ResourceField: {
-        upsert: fields.map((rf) => {
-          const sf =
-            schema.allFields.find((f) => f.id === rf.fieldId) ??
-            fail('Field not found in schema')
+  await Promise.all(
+    fields.map(async (resourceField) => {
+      const schemaField =
+        schema.allFields.find((f) => f.id === resourceField.fieldId) ??
+        fail('Field not found in schema')
 
-          return {
-            where: {
-              resourceId_fieldId: {
-                resourceId,
-                fieldId: rf.fieldId,
-              },
-            },
-            create: {
-              Field: {
-                connect: { id: rf.fieldId },
-              },
-              Value: {
-                create: mapValueInputToPrismaValueCreate(rf.value, sf),
-              },
-            },
-            update: {
-              Value: {
-                create: mapValueInputToPrismaValueCreate(rf.value, sf),
-                update: mapValueInputToPrismaValueUpdate(rf.value),
-              },
-            },
-          } satisfies Prisma.ResourceFieldUpsertWithWhereUniqueWithoutResourceInput
-        }),
-      },
-    },
-    include: resourceInclude,
-  })
+      await prisma().resourceField.upsert({
+        where: {
+          resourceId_fieldId: {
+            resourceId,
+            fieldId: resourceField.fieldId,
+          },
+        },
+        create: {
+          Resource: { connect: { id: resourceId } },
+          Field: { connect: { id: resourceField.fieldId } },
+          Value: {
+            create: createPrismaValueCreate({ resourceField, schemaField }),
+          },
+        },
+        update: {
+          Value: {
+            create: createPrismaValueCreate({ resourceField, schemaField }),
+            update: createPrismaValueUpdate({ resourceField, schemaField }),
+          },
+        },
+      })
+    }),
+  )
 
-  const entity = mapResourceModelToEntity(model)
+  const entity = await readResource({ accountId, id: resourceId })
 
   await handleResourceUpdate({
     accountId,
     schema,
     resource: entity,
-    updatedFields: fields.map((field) => ({
-      field: selectSchemaField(schema, field) ?? fail('Field not found'),
-      value: selectResourceField(entity, field) ?? fail('Value not found'),
-    })),
+    updatedFields: fields.map((field) => {
+      const rf =
+        selectResourceField(entity, field) ??
+        fail('ResourceField not found after update')
+      const sf =
+        selectSchemaField(schema, field) ?? fail('SchemaField not found')
+      return { valueId: rf.valueId, field: sf, value: rf.value }
+    }),
   })
 
   return await readResource({ accountId, id: resourceId })
@@ -241,12 +228,13 @@ export const deleteResource = async ({
 
   const entity = mapResourceModelToEntity(model)
   if (entity.type === 'Line') {
-    const orderId = selectResourceField(entity, fields.order)?.resource?.id
+    const orderId = selectResourceField(entity, fields.order)?.value.resource
+      ?.id
     if (orderId) {
       await recalculateSubtotalCost(accountId, 'Order', orderId)
     }
 
-    const billId = selectResourceField(entity, fields.bill)?.resource?.id
+    const billId = selectResourceField(entity, fields.bill)?.value.resource?.id
     if (billId) {
       await recalculateSubtotalCost(accountId, 'Bill', billId)
     }
@@ -256,18 +244,27 @@ export const deleteResource = async ({
 export type UpdateResourceFieldParams = {
   accountId: string
   resourceId: string
-  fieldId: string
-  value: ValueInput
+  resourceFieldInput: Omit<ResourceFieldUpdateInput, 'valueId'>
 }
 
 export const updateResourceField = async ({
   accountId,
   resourceId,
-  fieldId,
-  value,
-}: UpdateResourceFieldParams) =>
-  await updateResource({
+  resourceFieldInput,
+}: UpdateResourceFieldParams) => {
+  const resource = await readResource({ accountId, id: resourceId })
+
+  const resourceField = selectResourceField(resource, resourceFieldInput)
+
+  return await updateResource({
     accountId,
     resourceId,
-    fields: [{ fieldId, value }],
+    fields: [
+      {
+        ...resourceField,
+        valueId: resourceField?.valueId ?? null,
+        ...resourceFieldInput,
+      },
+    ],
   })
+}

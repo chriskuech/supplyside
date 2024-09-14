@@ -33,11 +33,11 @@ export default function MatchControl({ schema, resource }: Props) {
   const { open, isOpen, close } = useDisclosure()
   const confirm = useConfirmation()
 
-  const order = selectResourceField(resource, fields.order)?.resource
+  const order = selectResourceField(resource, fields.order)?.value.resource
 
-  const poNumber = selectResourceField(resource, fields.poNumber)?.string
-  const vendorName = selectResourceField(resource, fields.vendor)?.resource
-    ?.name
+  const poNumber = selectResourceField(resource, fields.poNumber)?.value.string
+  const vendorName = selectResourceField(resource, fields.vendor)?.value
+    .resource?.name
 
   const orderSchema = useSchema('Order')
 
@@ -62,9 +62,11 @@ export default function MatchControl({ schema, resource }: Props) {
 
                 await updateResourceField({
                   resourceId: resource.id,
-                  fieldId:
-                    selectSchemaField(schema, fields.order)?.id ?? fail(),
-                  value: { resourceId: null },
+                  resourceFieldInput: {
+                    fieldId:
+                      selectSchemaField(schema, fields.order)?.id ?? fail(),
+                    valueInput: { resourceId: null },
+                  },
                 })
               }
             : open
@@ -120,9 +122,12 @@ export default function MatchControl({ schema, resource }: Props) {
                     }) =>
                       updateResourceField({
                         resourceId: resource.id,
-                        fieldId:
-                          selectSchemaField(schema, fields.order)?.id ?? fail(),
-                        value: { resourceId: row.id },
+                        resourceFieldInput: {
+                          fieldId:
+                            selectSchemaField(schema, fields.order)?.id ??
+                            fail(),
+                          valueInput: { resourceId: row.id },
+                        },
                       }).then(() => close())
                     }
                   />

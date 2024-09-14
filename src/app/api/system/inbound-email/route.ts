@@ -54,7 +54,7 @@ const createBill = async (params: Params) => {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(bill, fields.billFiles).id,
-        value: { fileIds },
+        valueInput: { fileIds },
       },
     ],
   })

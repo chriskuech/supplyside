@@ -26,8 +26,10 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   await updateResourceField({
     accountId,
     resourceId,
-    fieldId: issuedDateFieldId,
-    value: { date: new Date() },
+    resourceFieldInput: {
+      fieldId: issuedDateFieldId,
+      valueInput: { date: new Date() },
+    },
   })
 
   const buffer = await renderPo({ accountId, resourceId })
@@ -41,10 +43,11 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
     readResource({ accountId, id: resourceId }),
   ])
 
-  const vendorName = selectResourceField(resource, fields.vendor)?.resource
-    ?.name
-  const issuedDate = selectResourceField(resource, fields.issuedDate)?.date
-  const number = selectResourceField(resource, fields.poNumber)?.string
+  const vendorName = selectResourceField(resource, fields.vendor)?.value
+    .resource?.name
+  const issuedDate = selectResourceField(resource, fields.issuedDate)?.value
+    .date
+  const number = selectResourceField(resource, fields.poNumber)?.value.string
 
   const input: Prisma.ValueCreateInput = {
     File: {

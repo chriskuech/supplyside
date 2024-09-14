@@ -104,7 +104,7 @@ export default function ResourceDetailPage({
                 {
                   fieldId: selectSchemaFieldUnsafe(lineSchema, backlinkField)
                     .id,
-                  value: { resourceId: resource.id },
+                  valueInput: { resourceId: resource.id },
                 },
               ]}
               isReadOnly={isReadOnly}

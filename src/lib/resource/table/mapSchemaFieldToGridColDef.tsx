@@ -17,24 +17,24 @@ import { selectResourceField } from '@/domain/resource/extensions'
 import { emptyValue } from '@/domain/resource/entity'
 
 export const mapSchemaFieldToGridColDef = (
-  field: SchemaField,
+  schemaField: SchemaField,
   options: {
     isEditable: boolean
   },
 ): Column => ({
-  field: field.id,
+  field: schemaField.id,
 
-  headerName: field.name,
+  headerName: schemaField.name,
 
-  headerAlign: match(field.type)
+  headerAlign: match(schemaField.type)
     .with(P.union('Number', 'Money', 'Checkbox'), () => 'right' as const)
     .otherwise(() => 'left' as const),
 
-  align: match(field.type)
+  align: match(schemaField.type)
     .with(P.union('Number', 'Money', 'Checkbox'), () => 'right' as const)
     .otherwise(() => 'left' as const),
 
-  width: match(field.type)
+  width: match(schemaField.type)
     .with('Resource', () => 440)
     .with(P.union('Select', 'MultiSelect'), () => 200)
     .with(P.union('Number', 'Money'), () => 130)
@@ -48,18 +48,21 @@ export const mapSchemaFieldToGridColDef = (
     .exhaustive(),
 
   editable:
-    options.isEditable && !findTemplateField(field.templateId)?.isDerived,
+    options.isEditable && !findTemplateField(schemaField.templateId)?.isDerived,
 
   type: 'custom',
 
   getApplyQuickFilterFn: (query) => {
     assert(typeof query === 'string', 'Query must be a string')
-    return match<FieldType, null | GridApplyQuickFilter<Row, Cell>>(field.type)
+    return match<FieldType, null | GridApplyQuickFilter<Row, Cell>>(
+      schemaField.type,
+    )
       .with(
         'Checkbox',
         () => (value) =>
-          value?.string?.toLowerCase().includes(field.name.toLowerCase()) ??
-          false,
+          value?.string
+            ?.toLowerCase()
+            .includes(schemaField.name.toLowerCase()) ?? false,
       )
       .with(
         'Contact',
@@ -141,38 +144,43 @@ export const mapSchemaFieldToGridColDef = (
   },
 
   valueGetter: (cell: Display, resource: Row): Value =>
-    selectResourceField(resource, { fieldId: field.id }) ?? emptyValue,
+    selectResourceField(resource, { fieldId: schemaField.id })?.value ??
+    emptyValue,
 
   // This function is called when a value is written to the row, prior to persisting the resource.
-  valueSetter: (value: Value | undefined = emptyValue, row: Row): Row =>
-    !selectResourceField(row, { fieldId: field.id })
+  valueSetter: (value: Value | undefined = emptyValue, row: Row): Row => {
+    const resourceField = selectResourceField(row, { fieldId: schemaField.id })
+
+    return !resourceField
       ? {
           ...row,
           fields: [
             ...row.fields,
             {
-              fieldId: field.id,
-              fieldType: field.type,
-              templateId: field.templateId,
+              valueId: null,
+              fieldId: schemaField.id,
+              fieldType: schemaField.type,
+              templateId: schemaField.templateId,
               value,
+              updatedAt: new Date(),
             },
           ],
         }
       : {
           ...row,
           fields: [
-            ...row.fields.filter((f) => f.fieldId !== field.id),
+            ...row.fields.filter((f) => f.fieldId !== schemaField.id),
             {
-              fieldId: field.id,
-              fieldType: field.type,
-              templateId: field.templateId,
+              ...resourceField,
               value,
+              updatedAt: new Date(),
             },
           ],
-        },
+        }
+  },
 
   renderCell: ({ value }) => {
-    const children = match<FieldType>(field.type)
+    const children = match<FieldType>(schemaField.type)
       .with('Checkbox', () => value?.boolean && <Check />)
       .with(
         'Contact',
@@ -211,23 +219,23 @@ export const mapSchemaFieldToGridColDef = (
 
   // Only called if `renderCell` returns `undefined`
   valueFormatter: (_, resource) => {
-    const value = selectResourceField(resource, { fieldId: field.id })
-    const template = findTemplateField(field.templateId)
+    const value = selectResourceField(resource, { fieldId: schemaField.id })
+    const template = findTemplateField(schemaField.templateId)
 
-    const formatted = match<FieldType>(field.type)
-      .with('Date', () => formatDate(value?.date) ?? undefined)
+    const formatted = match<FieldType>(schemaField.type)
+      .with('Date', () => formatDate(value?.value.date) ?? undefined)
       .with('Money', () =>
-        value?.number?.toLocaleString('en-US', {
+        value?.value.number?.toLocaleString('en-US', {
           style: 'currency',
           currency: 'USD',
         }),
       )
       .with('Number', () =>
-        template?.prefix && value?.number
-          ? `${template.prefix} ${value.number}`
-          : value?.number,
+        template?.prefix && value?.value.number
+          ? `${template.prefix} ${value.value.number}`
+          : value?.value.number,
       )
-      .with(P.union('Text', 'Textarea'), () => value?.string)
+      .with(P.union('Text', 'Textarea'), () => value?.value.string)
       .otherwise(() => undefined)
 
     return formatted ?? ''
@@ -235,7 +243,7 @@ export const mapSchemaFieldToGridColDef = (
 
   renderEditCell: (params) => (
     <Box display="flex" alignItems="center" height="100%" width="100%">
-      <FieldGridEditCell cellParams={params} field={field} />
+      <FieldGridEditCell cellParams={params} schemaField={schemaField} />
     </Box>
   ),
 })

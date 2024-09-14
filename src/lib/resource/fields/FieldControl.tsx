@@ -3,28 +3,28 @@
 import { useCallback } from 'react'
 import { updateResourceField } from '../actions'
 import Field, { Props as FieldProps } from './controls/Field'
-import { mapValueToValueInput } from '@/domain/resource/mappers'
-import { Value } from '@/domain/resource/entity'
+import { mapResourceFieldToResourceFieldUpdateInput } from '@/domain/resource/mappers'
+import { ResourceField } from '@/domain/resource/entity'
 
 export default function FieldControl({
   resourceId,
-  field,
+  schemaField,
   ...fieldProps
 }: Omit<FieldProps, 'onChange'>) {
   const handleChange = useCallback(
-    (value: Value) =>
+    (resourceField: ResourceField) =>
       updateResourceField({
         resourceId,
-        fieldId: field.id,
-        value: mapValueToValueInput(field.type, value),
+        resourceFieldInput:
+          mapResourceFieldToResourceFieldUpdateInput(resourceField),
       }),
-    [field.id, field.type, resourceId],
+    [resourceId],
   )
 
   return (
     <Field
       resourceId={resourceId}
-      field={field}
+      schemaField={schemaField}
       {...fieldProps}
       onChange={handleChange}
     />

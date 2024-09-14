@@ -82,8 +82,8 @@ export const upsertVendorsFromQuickBooks = async (
     (quickBooksVendor) =>
       !currentVendors.some(
         (vendor) =>
-          selectResourceField(vendor, fields.quickBooksVendorId)?.string ===
-          quickBooksVendor.Id,
+          selectResourceField(vendor, fields.quickBooksVendorId)?.value
+            .string === quickBooksVendor.Id,
       ),
   )
 
@@ -96,21 +96,23 @@ export const upsertVendorsFromQuickBooks = async (
     quickBooksVendorsToUpdate.map(async (quickBooksVendor) => {
       const vendor = currentVendors.find(
         (currentVendor) =>
-          selectResourceField(currentVendor, fields.quickBooksVendorId)
-            ?.string === quickBooksVendor.Id,
+          selectResourceField(currentVendor, fields.quickBooksVendorId)?.value
+            .string === quickBooksVendor.Id,
       )
 
       if (!vendor) return
 
-      const vendorName = selectResourceField(vendor, fields.name)?.string
+      const vendorName = selectResourceField(vendor, fields.name)?.value.string
 
       if (vendorName === quickBooksVendor.DisplayName) return
 
       return updateResourceField({
         accountId,
         resourceId: vendor.id,
-        fieldId: vendorNameField.id,
-        value: { string: quickBooksVendor.DisplayName },
+        resourceFieldInput: {
+          fieldId: vendorNameField.id,
+          valueInput: { string: quickBooksVendor.DisplayName },
+        },
       })
     }),
   )
@@ -123,14 +125,14 @@ export const upsertVendorsFromQuickBooks = async (
       fields: [
         {
           fieldId: selectSchemaFieldUnsafe(vendorSchema, fields.name).id,
-          value: { string: quickBooksVendorToAdd.DisplayName },
+          valueInput: { string: quickBooksVendorToAdd.DisplayName },
         },
         {
           fieldId: selectSchemaFieldUnsafe(
             vendorSchema,
             fields.quickBooksVendorId,
           ).id,
-          value: { string: quickBooksVendorToAdd.Id },
+          valueInput: { string: quickBooksVendorToAdd.Id },
         },
       ],
     })
@@ -167,8 +169,10 @@ const createVendorOnQuickBooks = async (
   await updateResourceField({
     accountId,
     resourceId: vendor.id,
-    fieldId: quickBooksVendorIdField,
-    value: { string: quickBooksVendor.Vendor.Id },
+    resourceFieldInput: {
+      fieldId: quickBooksVendorIdField,
+      valueInput: { string: quickBooksVendor.Vendor.Id },
+    },
   })
 
   return quickBooksVendor
@@ -183,7 +187,7 @@ const updateVendorOnQuickBooks = async (
   const quickBooksVendorId = selectResourceField(
     vendor,
     fields.quickBooksVendorId,
-  )?.string
+  )?.value.string
 
   assert(quickBooksVendorId, 'Vendor has no quickBooksVendorId')
 
@@ -222,7 +226,7 @@ export const upsertVendorOnQuickBooks = async (
   const quickBooksVendorId = selectResourceField(
     vendor,
     fields.quickBooksVendorId,
-  )?.string
+  )?.value.string
 
   if (quickBooksVendorId) {
     return updateVendorOnQuickBooks(accountId, vendor)

@@ -31,8 +31,9 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
   const theme = useTheme()
 
   const subtotalCost =
-    selectResourceField(resource, fields.subtotalCost)?.number ?? 0
-  const totalCost = selectResourceField(resource, fields.totalCost)?.number ?? 0
+    selectResourceField(resource, fields.subtotalCost)?.value.number ?? 0
+  const totalCost =
+    selectResourceField(resource, fields.totalCost)?.value.number ?? 0
 
   return (
     <Stack spacing={2}>

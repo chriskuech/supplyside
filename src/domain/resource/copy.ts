@@ -1,7 +1,7 @@
 import { fail } from 'assert'
 import { findTemplateField } from '../schema/template/system-fields'
 import { handleResourceUpdate } from './effects'
-import { mapValueToValueInput } from './mappers'
+import { mapResourceFieldToResourceFieldUpdateInput } from './mappers'
 import { readResource, updateResource } from '.'
 import { readSchema } from '@/domain/schema'
 import { selectSchemaField } from '@/domain/schema/extensions'
@@ -49,20 +49,22 @@ export const copyFields = async ({
     .filter(({ sf }) => selectSchemaField(toSchema, sf))
     .filter(({ tf }) => !tf?.isDerived)
 
-  const resource = await updateResource({
+  await updateResource({
     accountId,
     resourceId: toResourceId,
-    fields: fieldsToUpdate.map(({ rf, sf }) => ({
-      fieldId: sf.id,
-      value: mapValueToValueInput(sf.type, rf.value),
-    })),
+    fields: fieldsToUpdate.map(({ rf }) =>
+      mapResourceFieldToResourceFieldUpdateInput(rf),
+    ),
   })
+
+  const resource = await readResource({ accountId, id: toResourceId })
 
   await handleResourceUpdate({
     accountId,
     schema: toSchema,
     resource,
     updatedFields: fieldsToUpdate.map(({ sf, rf }) => ({
+      valueId: rf.valueId,
       field: sf,
       value: rf.value,
     })),

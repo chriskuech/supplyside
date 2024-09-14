@@ -10,10 +10,10 @@ import { selectResourceField } from '@/domain/resource/extensions'
 
 type Props = {
   cellParams: GridRenderEditCellParams<Row, Cell, Display>
-  field: SchemaField
+  schemaField: SchemaField
 }
 
-export default function FieldGridEditCell({ cellParams, field }: Props) {
+export default function FieldGridEditCell({ cellParams, schemaField }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const apiRef = useGridApiContext()
@@ -29,8 +29,8 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
       <Field
         withoutDebounce
         ref={inputRef}
-        field={field}
-        inputId={`${cellParams.row.id}${field.id}`}
+        schemaField={schemaField}
+        inputId={`${cellParams.row.id}${schemaField.id}`}
         onChange={(value) => {
           apiRef.current.setEditCellValue({
             id: cellParams.id,
@@ -40,7 +40,9 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
           })
         }}
         resourceId={cellParams.row.id}
-        value={selectResourceField(cellParams.row, { fieldId: field.id })}
+        resourceField={selectResourceField(cellParams.row, {
+          fieldId: schemaField.id,
+        })}
         inline
       />
     </Box>

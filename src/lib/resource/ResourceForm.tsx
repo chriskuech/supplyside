@@ -19,7 +19,7 @@ import Field from './fields/controls/Field'
 import { updateResourceField } from './actions'
 import { selectResourceField } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
-import { mapValueToValueInput } from '@/domain/resource/mappers'
+import { mapResourceFieldToResourceFieldUpdateInput } from '@/domain/resource/mappers'
 
 type Props = {
   resource: Resource
@@ -76,8 +76,8 @@ export default function ResourceForm({
                   <FieldControl
                     inputId={`rf-${singleField.id}`}
                     resourceId={resource.id}
-                    field={singleField ?? fail()}
-                    value={selectResourceField(resource, {
+                    schemaField={singleField ?? fail()}
+                    resourceField={selectResourceField(resource, {
                       fieldId: singleField.id,
                     })}
                   />
@@ -112,15 +112,17 @@ export default function ResourceForm({
                             <Field
                               inputId={`rf-${f.id}`}
                               resourceId={resource.id}
-                              field={f}
-                              value={selectResourceField(resource, {
+                              schemaField={f}
+                              resourceField={selectResourceField(resource, {
                                 fieldId: f.id,
                               })}
-                              onChange={(value) =>
+                              onChange={(resourceField) =>
                                 updateResourceField({
                                   resourceId: resource.id,
-                                  fieldId: f.id,
-                                  value: mapValueToValueInput(f.type, value),
+                                  resourceFieldInput:
+                                    mapResourceFieldToResourceFieldUpdateInput(
+                                      resourceField,
+                                    ),
                                 })
                               }
                             />

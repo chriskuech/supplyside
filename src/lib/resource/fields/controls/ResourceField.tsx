@@ -60,7 +60,7 @@ function ResourceField(
               .with(P.union('Bill', 'Order', 'Line'), () => fields.poNumber)
               .exhaustive(),
           ).id,
-          value: { string: nameOrNumber },
+          valueInput: { string: nameOrNumber },
         },
       ],
     }).then((resource) => {

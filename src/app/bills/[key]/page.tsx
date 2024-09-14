@@ -33,7 +33,7 @@ export default async function BillsDetail({
   )
 
   const status =
-    selectResourceField(resource, fields.billStatus)?.option ??
+    selectResourceField(resource, fields.billStatus)?.value.option ??
     fail('Status not found')
 
   const isDraft = status.templateId === billStatusOptions.draft.templateId
@@ -50,12 +50,12 @@ export default async function BillsDetail({
     .with(billStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
 
-  const order = selectResourceField(resource, fields.order)?.resource
+  const order = selectResourceField(resource, fields.order)?.value.resource
 
   const quickBooksBillId = selectResourceField(
     resource,
     fields.quickBooksBillId,
-  )?.string
+  )?.value.string
 
   const qbConfig = getQuickBooksConfig()
   const quickBooksAppUrl =
@@ -82,21 +82,21 @@ export default async function BillsDetail({
           key={AttachmentsToolbarControl.name}
           resourceId={resource.id}
           resourceType="Bill"
-          field={
+          schemaField={
             selectSchemaField(schema, fields.billAttachments) ??
             fail('Field not found')
           }
-          value={selectResourceField(resource, fields.billAttachments)}
+          resourceField={selectResourceField(resource, fields.billAttachments)}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
           resourceId={resource.id}
           resourceType="Bill"
-          field={
+          schemaField={
             selectSchemaField(schema, fields.assignee) ??
             fail('Field not found')
           }
-          value={selectResourceField(resource, fields.assignee)}
+          resourceField={selectResourceField(resource, fields.assignee)}
         />,
         ...(!isDraft
           ? [<EditControl key={EditControl.name} resourceId={resource.id} />]
@@ -135,7 +135,8 @@ export default async function BillsDetail({
               >
                 <CallToAction
                   key={
-                    selectResourceField(resource, fields.billStatus)?.option?.id
+                    selectResourceField(resource, fields.billStatus)?.value
+                      .option?.id
                   }
                   schema={schema}
                   self={session.user}

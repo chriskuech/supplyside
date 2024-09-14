@@ -19,7 +19,8 @@ export default async function PoDocumentFooter({
     type: 'Order',
   })
 
-  const issuedDate = selectResourceField(resource, fields.issuedDate)?.date
+  const issuedDate = selectResourceField(resource, fields.issuedDate)?.value
+    .date
 
   const formattedDate = issuedDate
     ? new Date(issuedDate).toLocaleDateString()

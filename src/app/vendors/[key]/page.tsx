@@ -17,11 +17,11 @@ export default async function VendorDetail({
     `/vendors/${key}`,
   )
 
-  const name = selectResourceField(resource, fields.name)?.string
+  const name = selectResourceField(resource, fields.name)?.value.string
   const quickBooksVendorId = selectResourceField(
     resource,
     fields.quickBooksVendorId,
-  )?.string
+  )?.value.string
   const qbConfig = getQuickBooksConfig()
 
   const quickBooksAppUrl =

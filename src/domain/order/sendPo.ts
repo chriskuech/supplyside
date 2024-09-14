@@ -26,12 +26,13 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
     }),
   ])
 
-  const poRecipient = selectResourceField(order, fields.poRecipient)?.contact
-  const po = selectResourceField(order, fields.document)?.file
-  const assignee = selectResourceField(order, fields.assignee)?.user
-  const vendor = selectResourceField(order, fields.vendor)?.resource
-  const number = selectResourceField(order, fields.poNumber)?.string
-  const date = selectResourceField(order, fields.issuedDate)?.date
+  const poRecipient = selectResourceField(order, fields.poRecipient)?.value
+    .contact
+  const po = selectResourceField(order, fields.document)?.value.file
+  const assignee = selectResourceField(order, fields.assignee)?.value.user
+  const vendor = selectResourceField(order, fields.vendor)?.value.resource
+  const number = selectResourceField(order, fields.poNumber)?.value.string
+  const date = selectResourceField(order, fields.issuedDate)?.value.date
 
   if (!po || !poRecipient?.email) return
 

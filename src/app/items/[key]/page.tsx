@@ -21,7 +21,7 @@ export default async function ItemsDetail({
       schema={schema}
       resource={resource}
       tools={[]}
-      name={selectResourceField(resource, fields.name)?.string}
+      name={selectResourceField(resource, fields.name)?.value.string}
     />
   )
 }

@@ -108,20 +108,22 @@ export const recalculateItemizedCosts = async (
   })
 
   const subtotal =
-    selectResourceField(resource, fields.subtotalCost)?.number ?? 0
+    selectResourceField(resource, fields.subtotalCost)?.value.number ?? 0
 
   await updateResourceField({
     accountId,
     resourceId,
-    fieldId: selectSchemaField(schema, fields.itemizedCosts)?.id ?? fail(),
-    value: {
-      number: pipe(
-        costs,
-        map((cost) =>
-          cost.isPercentage ? (cost.value * subtotal) / 100 : cost.value,
+    resourceFieldInput: {
+      fieldId: selectSchemaField(schema, fields.itemizedCosts)?.id ?? fail(),
+      valueInput: {
+        number: pipe(
+          costs,
+          map((cost) =>
+            cost.isPercentage ? (cost.value * subtotal) / 100 : cost.value,
+          ),
+          sum(),
         ),
-        sum(),
-      ),
+      },
     },
   })
 }
@@ -147,16 +149,20 @@ export const recalculateSubtotalCost = async (
 
   const subTotal = pipe(
     lines,
-    map((line) => selectResourceField(line, fields.totalCost)?.number ?? 0),
+    map(
+      (line) => selectResourceField(line, fields.totalCost)?.value.number ?? 0,
+    ),
     sum(),
   )
 
   await updateResourceField({
     accountId,
-    fieldId: selectSchemaField(schema, fields.subtotalCost)?.id ?? fail(),
     resourceId,
-    value: {
-      number: Number(subTotal), // TODO: this is ignoring that subTotal is bigint
+    resourceFieldInput: {
+      fieldId: selectSchemaField(schema, fields.subtotalCost)?.id ?? fail(),
+      valueInput: {
+        number: Number(subTotal), // TODO: this is ignoring that subTotal is bigint
+      },
     },
   })
 }

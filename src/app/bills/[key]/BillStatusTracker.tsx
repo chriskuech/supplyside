@@ -26,7 +26,7 @@ type Props = {
 }
 
 export default function BillStatusTracker({ resource }: Props) {
-  const value = selectResourceField(resource, fields.billStatus)?.option
+  const value = selectResourceField(resource, fields.billStatus)?.value.option
 
   if (!value) return '❌ Field value not found'
 

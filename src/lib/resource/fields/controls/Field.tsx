@@ -30,16 +30,19 @@ import UserField from './UserField'
 import ResourceField from './ResourceField'
 import FilesField from './FilesField'
 import { SchemaField } from '@/domain/schema/entity'
-import { Value } from '@/domain/resource/entity'
+import {
+  ResourceField as TResourceField,
+  Value,
+} from '@/domain/resource/entity'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
 import { emptyValue } from '@/domain/resource/entity'
 
 export type Props = {
   inputId: string
   resourceId: string
-  field: SchemaField
-  value: Value | undefined
-  onChange: (value: Value) => void
+  schemaField: SchemaField
+  resourceField: TResourceField | undefined
+  onChange: (value: TResourceField) => void
   inline?: boolean
   withoutDebounce?: boolean
 }
@@ -48,15 +51,17 @@ function Field(
   {
     inputId,
     resourceId,
-    field,
-    value: incomingValue,
+    schemaField,
+    resourceField: incomingResourceField,
     onChange: incomingOnChange,
     inline,
     withoutDebounce,
   }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
-  const [value, setValue] = useState<Value | undefined>(incomingValue)
+  const [resourceField, setResourceField] = useState<
+    TResourceField | undefined
+  >(incomingResourceField)
 
   const onChangeDebounced = useMemo(
     () => debounce(incomingOnChange, { timing: 'trailing', waitMs: 500 }).call,
@@ -65,36 +70,57 @@ function Field(
 
   const handleChange = useCallback(
     (value: Value) => {
-      const newValue = { ...value, updatedAt: new Date() }
-      setValue(newValue)
+      const newResourceField: TResourceField = resourceField
+        ? {
+            ...resourceField,
+            value,
+            updatedAt: new Date(),
+          }
+        : {
+            fieldId: schemaField.id,
+            fieldType: schemaField.type,
+            templateId: schemaField.templateId,
+            valueId: null,
+            value,
+            updatedAt: new Date(),
+          }
+      setResourceField(newResourceField)
+
       if (withoutDebounce) {
-        incomingOnChange(newValue)
+        incomingOnChange(newResourceField)
       } else {
-        onChangeDebounced(newValue)
+        onChangeDebounced(newResourceField)
       }
     },
-    [onChangeDebounced, withoutDebounce, incomingOnChange],
+    [
+      resourceField,
+      schemaField.id,
+      schemaField.type,
+      schemaField.templateId,
+      withoutDebounce,
+      incomingOnChange,
+      onChangeDebounced,
+    ],
   )
 
   useEffect(() => {
     if (
-      incomingValue &&
-      (!value ||
-        incomingValue.updatedAt > value.updatedAt ||
-        value.resource?.name !== incomingValue.resource?.name)
+      incomingResourceField &&
+      (!resourceField ||
+        incomingResourceField.updatedAt > resourceField.updatedAt)
     ) {
-      setValue(incomingValue)
+      setResourceField(incomingResourceField)
     }
-  }, [incomingValue, value])
+  }, [incomingResourceField, resourceField])
 
   dayjs.extend(utc)
 
-  return match(field.type)
+  return match(schemaField.type)
     .with('Checkbox', () => (
       <Checkbox
         inputRef={ref}
         id={inputId}
-        checked={value?.boolean ?? false}
+        checked={resourceField?.value?.boolean ?? false}
         onChange={(e) =>
           handleChange({ ...emptyValue, boolean: e.target.checked })
         }
@@ -102,7 +128,7 @@ function Field(
     ))
     .with('Contact', () => (
       <ContactField
-        contact={value?.contact ?? null}
+        contact={resourceField?.value?.contact ?? null}
         onChange={(contact) => handleChange({ ...emptyValue, contact })}
         inline={inline}
       />
@@ -117,7 +143,9 @@ function Field(
             onClear: () => handleChange({ ...emptyValue, date: null }),
           },
         }}
-        value={value?.date && dayjs.utc(value.date)}
+        value={
+          resourceField?.value?.date && dayjs.utc(resourceField.value.date)
+        }
         onChange={(value) =>
           handleChange({ ...emptyValue, date: value?.toDate() ?? null })
         }
@@ -126,14 +154,14 @@ function Field(
     .with('File', () => (
       <FileField
         resourceId={resourceId}
-        fieldId={field.id}
-        file={value?.file ?? null}
+        fieldId={schemaField.id}
+        file={resourceField?.value?.file ?? null}
         onChange={(file) => handleChange({ ...emptyValue, file })}
       />
     ))
     .with('Files', () => (
       <FilesField
-        files={value?.files ?? []}
+        files={resourceField?.value?.files ?? []}
         onChange={(files) => handleChange({ ...emptyValue, files })}
       />
     ))
@@ -143,7 +171,7 @@ function Field(
         id={inputId}
         fullWidth
         type="number"
-        value={value?.number ?? ''}
+        value={resourceField?.value?.number ?? ''}
         onChange={(e) =>
           handleChange({ ...emptyValue, number: parseFloat(e.target.value) })
         }
@@ -160,14 +188,14 @@ function Field(
         getOptionLabel={(o) => o.name}
         getOptionKey={(o) => o.id}
         renderInput={(props) => <TextField inputRef={ref} {...props} />}
-        options={field.options.filter(
+        options={schemaField.options.filter(
           (fieldOption) =>
-            !value?.options?.some(
+            !resourceField?.value?.options?.some(
               (valueOption) => fieldOption.id === valueOption.id,
             ),
         )}
-        defaultValue={field.options.filter((fieldOption) =>
-          value?.options?.some(
+        defaultValue={schemaField.options.filter((fieldOption) =>
+          resourceField?.value?.options?.some(
             (valueOption) => fieldOption.id === valueOption.id,
           ),
         )}
@@ -179,14 +207,14 @@ function Field(
         inputRef={ref}
         id={inputId}
         type="number"
-        value={value?.number ?? ''}
+        value={resourceField?.value?.number ?? ''}
         onChange={(e) =>
           handleChange({ ...emptyValue, number: parseFloat(e.target.value) })
         }
         InputProps={{
-          startAdornment: findTemplateField(field.templateId)?.prefix && (
+          startAdornment: findTemplateField(schemaField.templateId)?.prefix && (
             <InputAdornment position="start">
-              {findTemplateField(field.templateId)?.prefix}
+              {findTemplateField(schemaField.templateId)?.prefix}
             </InputAdornment>
           ),
         }}
@@ -198,15 +226,15 @@ function Field(
         id={inputId}
         fullWidth
         displayEmpty
-        value={value?.option?.id ?? ''}
+        value={resourceField?.value?.option?.id ?? ''}
         onChange={(e) => {
           const option =
-            field.options.find((o) => o.id === e.target.value) ?? null
+            schemaField.options.find((o) => o.id === e.target.value) ?? null
 
           handleChange({ ...emptyValue, option })
         }}
         endAdornment={
-          value?.option?.id && (
+          resourceField?.value?.option?.id && (
             <IconButton
               onClick={() => handleChange({ ...emptyValue, option: null })}
               sx={{ marginRight: 2 }}
@@ -217,7 +245,7 @@ function Field(
         }
       >
         <MenuItem value="">-</MenuItem>
-        {field.options.map((o) => (
+        {schemaField.options.map((o) => (
           <MenuItem key={o.id} value={o.id}>
             {o.name}
           </MenuItem>
@@ -229,7 +257,7 @@ function Field(
         inputRef={ref}
         id={inputId}
         fullWidth
-        value={value?.string ?? ''}
+        value={resourceField?.value?.string ?? ''}
         onChange={(e) =>
           handleChange({ ...emptyValue, string: e.target.value })
         }
@@ -242,7 +270,7 @@ function Field(
         multiline
         minRows={inline ? 1 : 3}
         fullWidth
-        value={value?.string ?? ''}
+        value={resourceField?.value?.string ?? ''}
         onChange={(e) =>
           handleChange({ ...emptyValue, string: e.target.value })
         }
@@ -252,7 +280,7 @@ function Field(
       <UserField
         ref={ref}
         inputId={inputId}
-        user={value?.user ?? null}
+        user={resourceField?.value?.user ?? null}
         onChange={(user) => handleChange({ ...emptyValue, user })}
       />
     ))
@@ -260,8 +288,8 @@ function Field(
       <ResourceField
         ref={ref}
         onChange={(resource) => handleChange({ ...emptyValue, resource })}
-        resourceType={field.resourceType ?? fail()}
-        resource={value?.resource ?? null}
+        resourceType={schemaField.resourceType ?? fail()}
+        resource={resourceField?.value?.resource ?? null}
       />
     ))
     .exhaustive()

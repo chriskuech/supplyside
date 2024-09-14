@@ -1,7 +1,8 @@
 import { ResourceType, Cost, FieldType } from '@prisma/client'
 import { File } from '../files/types'
 import { User } from '../user/entity'
-import { Option } from '../schema/entity'
+import { Option, SchemaField } from '../schema/entity'
+import { FieldTemplate } from '../schema/template/types'
 
 export type Resource = {
   id: string
@@ -16,7 +17,9 @@ export type ResourceField = {
   fieldId: string
   fieldType: FieldType
   templateId: string | null
+  valueId: string | null
   value: Value
+  updatedAt: Date
 }
 
 export const emptyValue = {
@@ -31,7 +34,6 @@ export const emptyValue = {
   resource: null,
   files: [],
   options: [],
-  updatedAt: new Date(0),
 } as const satisfies Value
 
 export type Value = {
@@ -46,7 +48,6 @@ export type Value = {
   file: File | null
   files: File[]
   resource: ValueResource | null
-  updatedAt: Date
 }
 
 export type Contact = {
@@ -61,4 +62,10 @@ export type ValueResource = {
   type: ResourceType
   name: string
   key: number
+}
+
+export type ExpandedResourceField = {
+  schemaField: SchemaField
+  resourceField: ResourceField
+  templateField: FieldTemplate | null
 }

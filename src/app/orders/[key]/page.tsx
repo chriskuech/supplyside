@@ -19,7 +19,6 @@ import {
   orderStatusOptions,
 } from '@/domain/schema/template/system-fields'
 import { selectResourceField } from '@/domain/resource/extensions'
-import { emptyValue } from '@/domain/resource/entity'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import { isMissingRequiredFields } from '@/domain/resource/mappers'
@@ -44,7 +43,7 @@ export default async function OrderDetail({
   const orderBills = (await findOrderBills(resource.id)) ?? []
 
   const status =
-    selectResourceField(resource, fields.orderStatus)?.option ??
+    selectResourceField(resource, fields.orderStatus)?.value?.option ??
     fail('Status not found')
 
   const isDraft = status.templateId === orderStatusOptions.draft.templateId
@@ -62,7 +61,7 @@ export default async function OrderDetail({
     .otherwise(() => yellow[800])
 
   const hasInvalidFields = isMissingRequiredFields(schema, resource)
-  const poFile = selectResourceField(resource, fields.document)?.file
+  const poFile = selectResourceField(resource, fields.document)?.value?.file
 
   return (
     <ResourceDetailPage
@@ -74,13 +73,11 @@ export default async function OrderDetail({
         <TrackingControl
           key={TrackingControl.name}
           resourceId={resource.id}
-          field={
+          schemaField={
             selectSchemaField(schema, fields.trackingNumber) ??
             fail('Field not found')
           }
-          value={
-            selectResourceField(resource, fields.trackingNumber) ?? emptyValue
-          }
+          resourceField={selectResourceField(resource, fields.trackingNumber)}
         />,
         ...(poFile ? [<PreviewPoControl key={poFile.id} file={poFile} />] : []),
         ...(poFile
@@ -90,21 +87,21 @@ export default async function OrderDetail({
           key={AttachmentsToolbarControl.name}
           resourceId={resource.id}
           resourceType="Order"
-          field={
+          schemaField={
             selectSchemaField(schema, fields.orderAttachments) ??
             fail('Field not found')
           }
-          value={selectResourceField(resource, fields.orderAttachments)}
+          resourceField={selectResourceField(resource, fields.orderAttachments)}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
           resourceId={resource.id}
           resourceType="Order"
-          field={
+          schemaField={
             selectSchemaField(schema, fields.assignee) ??
             fail('Field not found')
           }
-          value={selectResourceField(resource, fields.assignee) ?? emptyValue}
+          resourceField={selectResourceField(resource, fields.assignee)}
         />,
         ...(!isDraft
           ? [<EditControl key={EditControl.name} resourceId={resource.id} />]

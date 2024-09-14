@@ -4,12 +4,12 @@ import { Add } from '@mui/icons-material'
 import { Button, ButtonProps } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 import { createResource } from './actions'
-import { ResourceFieldInput } from '@/domain/resource'
+import { ResourceFieldCreateInput } from '@/domain/resource/patch'
 
 type Props = {
   type: ResourceType
   shouldRedirect?: boolean
-  fields?: ResourceFieldInput[]
+  fields?: ResourceFieldCreateInput[]
   buttonProps?: ButtonProps
 }
 

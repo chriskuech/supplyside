@@ -11,25 +11,25 @@ import {
   Button,
   DialogActions,
 } from '@mui/material'
-import { Value } from '@/domain/resource/entity'
+import { ResourceField } from '@/domain/resource/entity'
 import { SchemaField } from '@/domain/schema/entity'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 
 type TrackingControlProps = {
   resourceId: string
-  field: SchemaField
-  value: Value
+  schemaField: SchemaField
+  resourceField: ResourceField | undefined
 }
 
 export default function TrackingControl({
   resourceId,
-  field,
-  value,
+  schemaField,
+  resourceField,
 }: TrackingControlProps) {
   const { isOpen, open, close } = useDisclosure()
 
-  const { string: trackingNumber } = value
+  const { string: trackingNumber } = resourceField?.value ?? {}
 
   return (
     <>
@@ -50,10 +50,10 @@ export default function TrackingControl({
             Set the tracking number for this order.
           </DialogContentText>
           <FieldControl
-            inputId={`rf-${field.id}`}
+            inputId={`rf-${schemaField.id}`}
             resourceId={resourceId}
-            field={field}
-            value={value}
+            schemaField={schemaField}
+            resourceField={resourceField}
           />
         </DialogContent>
         <DialogContent>

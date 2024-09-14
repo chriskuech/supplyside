@@ -2,7 +2,7 @@ import 'client-only'
 import { useCallback, useEffect, useState } from 'react'
 import { readResource, updateResource } from './actions'
 import { Resource } from '@/domain/resource/entity'
-import { mapValueToValueInput } from '@/domain/resource/mappers'
+import { mapResourceFieldToResourceFieldUpdateInput } from '@/domain/resource/mappers'
 
 const useResource = (resourceId?: string) => {
   const [resource, setLocalResource] = useState<Resource | null>()
@@ -24,13 +24,10 @@ const useResource = (resourceId?: string) => {
   }, [isError, isLoading, resource, resourceId])
 
   const setApiResource = useCallback(
-    (resource: Resource) =>
+    ({ id: resourceId, fields }: Resource) =>
       updateResource({
-        resourceId: resource.id,
-        fields: resource.fields.map(({ fieldId, fieldType, value }) => ({
-          fieldId,
-          value: mapValueToValueInput(fieldType, value),
-        })),
+        resourceId,
+        fields: fields.map(mapResourceFieldToResourceFieldUpdateInput),
       })
         .then(setLocalResource)
         .catch(() => setIsError(true)),

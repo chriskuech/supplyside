@@ -32,7 +32,7 @@ export const createResource = async (
         ...(params.fields ?? []),
         {
           fieldId: selectSchemaFieldUnsafe(schema, fields.assignee).id,
-          value: { userId },
+          valueInput: { userId },
         },
       ]
     }
@@ -152,11 +152,13 @@ export const transitionStatus = async (
   await domain.updateResourceField({
     accountId,
     resourceId,
-    fieldId: field.id,
-    value: {
-      optionId:
-        field.options.find((o) => o.templateId === statusTemplate.templateId)
-          ?.id ?? fail('Option not found'),
+    resourceFieldInput: {
+      fieldId: field.id,
+      valueInput: {
+        optionId:
+          field.options.find((o) => o.templateId === statusTemplate.templateId)
+            ?.id ?? fail('Option not found'),
+      },
     },
   })
 

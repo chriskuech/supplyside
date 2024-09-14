@@ -28,7 +28,7 @@ type Props = {
 }
 
 export default function OrderStatusTracker({ resource }: Props) {
-  const value = selectResourceField(resource, fields.orderStatus)?.option
+  const value = selectResourceField(resource, fields.orderStatus)?.value.option
 
   if (!value) return '❌ Field value not found'
 

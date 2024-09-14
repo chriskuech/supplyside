@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from '@mui/material'
 import { ResourceType } from '@prisma/client'
-import { Value } from '@/domain/resource/entity'
+import { ResourceField } from '@/domain/resource/entity'
 import { SchemaField } from '@/domain/schema/entity'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
@@ -21,19 +21,19 @@ import FieldControl from '@/lib/resource/fields/FieldControl'
 type AssigneeControlProps = {
   resourceId: string
   resourceType: ResourceType
-  field: SchemaField
-  value: Value | undefined
+  schemaField: SchemaField
+  resourceField: ResourceField | undefined
 }
 
 export default function AssigneeToolbarControl({
   resourceType,
   resourceId,
-  field,
-  value,
+  schemaField,
+  resourceField,
 }: AssigneeControlProps) {
   const { isOpen, open, close } = useDisclosure()
 
-  const assignee = value?.user
+  const assignee = resourceField?.value?.user
 
   return (
     <>
@@ -62,10 +62,10 @@ export default function AssigneeToolbarControl({
             completion.
           </DialogContentText>
           <FieldControl
-            inputId={`rf-${field.id}`}
+            inputId={`rf-${schemaField.id}`}
             resourceId={resourceId}
-            field={field}
-            value={value}
+            schemaField={schemaField}
+            resourceField={resourceField}
           />
         </DialogContent>
         <DialogActions>

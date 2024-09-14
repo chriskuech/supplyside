@@ -60,8 +60,10 @@ const createBillOnQuickBooks = async (
   await updateResourceField({
     accountId,
     resourceId: bill.id,
-    fieldId: quickBooksBillIdField,
-    value: { string: quickBooksBill.Bill.Id },
+    resourceFieldInput: {
+      fieldId: quickBooksBillIdField,
+      valueInput: { string: quickBooksBill.Bill.Id },
+    },
   })
 
   return quickBooksBill
@@ -76,10 +78,8 @@ const updateBillOnQuickBooks = async (
   const token = await requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
 
-  const quickBooksBillId = selectResourceField(
-    bill,
-    fields.quickBooksBillId,
-  )?.string
+  const quickBooksBillId = selectResourceField(bill, fields.quickBooksBillId)
+    ?.value.string
 
   assert(quickBooksBillId, 'Bill has no quickBooksBillId')
 
@@ -111,10 +111,8 @@ const upsertBillOnQuickBooks = async (
   quickBooksAccountId: string,
   quickBooksVendorId: string,
 ): Promise<Bill> => {
-  const quickBooksBillId = selectResourceField(
-    bill,
-    fields.quickBooksBillId,
-  )?.string
+  const quickBooksBillId = selectResourceField(bill, fields.quickBooksBillId)
+    ?.value.string
 
   if (quickBooksBillId) {
     return updateBillOnQuickBooks(
@@ -142,7 +140,7 @@ export const syncBill = async (
   const quickBooksAccountName = selectResourceField(
     bill,
     fields.quickBooksAccount,
-  )?.option?.name
+  )?.value.option?.name
   assert(quickBooksAccountName, 'Account not set')
 
   const quickBooksAccountQuery = await query(
@@ -163,7 +161,7 @@ export const syncBill = async (
 
   const quickBooksAccountId = quickBooksAccountQuery.QueryResponse.Account[0].Id
 
-  const vendorId = selectResourceField(bill, fields.vendor)?.resource?.id
+  const vendorId = selectResourceField(bill, fields.vendor)?.value.resource?.id
   assert(vendorId, 'Vendor not set')
   const vendorResource = await readResource({ accountId, id: vendorId })
 

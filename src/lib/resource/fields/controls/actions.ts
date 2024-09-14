@@ -54,7 +54,7 @@ export const readResourceFieldFileAction = ({
   withSession(({ accountId }) =>
     readResource({ accountId, id: resourceId }).then(
       (resource) =>
-        selectResourceField(resource, { fieldId })?.file ?? undefined,
+        selectResourceField(resource, { fieldId })?.value.file ?? undefined,
     ),
   )
 
@@ -64,7 +64,8 @@ export const readResourceFieldFilesAction = ({
 }: ResourceFieldActionParams): Promise<File[] | undefined> =>
   withSession(({ accountId }) =>
     readResource({ accountId, id: resourceId }).then(
-      (resource) => selectResourceField(resource, { fieldId })?.files ?? [],
+      (resource) =>
+        selectResourceField(resource, { fieldId })?.value.files ?? [],
     ),
   )
 
@@ -75,7 +76,7 @@ export const readResourceFieldResourceAction = ({
   withSession(({ accountId }) =>
     readResource({ accountId, id: resourceId }).then(
       (resource) =>
-        selectResourceField(resource, { fieldId })?.resource ?? undefined,
+        selectResourceField(resource, { fieldId })?.value.resource ?? undefined,
     ),
   )
 

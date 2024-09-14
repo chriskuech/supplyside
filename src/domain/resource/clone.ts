@@ -8,7 +8,7 @@ import {
   orderStatusOptions,
 } from '../schema/template/system-fields'
 import { readSchema } from '../schema'
-import { mapValueToValueInput } from './mappers'
+import { mapResourceFieldToResourceFieldCreateInput } from './mappers'
 import { createResource, readResource, readResources } from '.'
 import prisma from '@/services/prisma'
 
@@ -41,13 +41,10 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
         fields: [
           ...source.fields
             .filter((rf) => rf.fieldId !== billStatusField.id)
-            .map(({ fieldId, fieldType, value }) => ({
-              fieldId,
-              value: mapValueToValueInput(fieldType, value),
-            })),
+            .map(mapResourceFieldToResourceFieldCreateInput),
           {
             fieldId: billStatusField.id,
-            value: { optionId: draftStatusOption?.id ?? null },
+            valueInput: { optionId: draftStatusOption?.id ?? null },
           },
         ],
       })
@@ -90,13 +87,10 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
         fields: [
           ...source.fields
             .filter((rf) => rf.fieldId !== orderStatusField.id)
-            .map(({ fieldId, fieldType, value }) => ({
-              fieldId,
-              value: mapValueToValueInput(fieldType, value),
-            })),
+            .map(mapResourceFieldToResourceFieldCreateInput),
           {
             fieldId: orderStatusField.id,
-            value: { optionId: draftStatusOption?.id ?? null },
+            valueInput: { optionId: draftStatusOption?.id ?? null },
           },
         ],
       })
@@ -122,10 +116,7 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
         await createResource({
           accountId,
           type: source.type,
-          fields: source.fields.map(({ fieldId, fieldType, value }) => ({
-            fieldId,
-            value: mapValueToValueInput(fieldType, value),
-          })),
+          fields: source.fields.map(mapResourceFieldToResourceFieldCreateInput),
         }),
     )
 
@@ -187,13 +178,10 @@ export const cloneLines = async ({
       fields: [
         ...line.fields
           .filter(({ fieldId }) => fieldId !== backLinkField.id)
-          .map(({ fieldId, fieldType, value }) => ({
-            fieldId,
-            value: mapValueToValueInput(fieldType, value),
-          })),
+          .map(mapResourceFieldToResourceFieldCreateInput),
         {
           fieldId: backLinkField.id,
-          value: { resourceId: toResourceId },
+          valueInput: { resourceId: toResourceId },
         },
       ],
     })

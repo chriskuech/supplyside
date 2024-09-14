@@ -1,6 +1,9 @@
 import { fail } from 'assert'
 import { SchemaField, Schema } from '../schema/entity'
-import { selectSchemaField } from '../schema/extensions'
+import {
+  selectSchemaField,
+  selectSchemaFieldUnsafe,
+} from '../schema/extensions'
 import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceField } from './extensions'
@@ -27,15 +30,16 @@ export const handleResourceCreate = async ({
     await updateResourceField({
       accountId,
       resourceId: resource.id,
-      fieldId:
-        selectSchemaField(schema, fields.poNumber)?.id ??
-        fail(`"${fields.poNumber.name}" field not found`),
-      value: { string: resource.key.toString() },
+      resourceFieldInput: {
+        fieldId: selectSchemaFieldUnsafe(schema, fields.poNumber)?.id,
+        valueInput: { string: resource.key.toString() },
+      },
     })
   }
 }
 
 type FieldUpdate = {
+  valueId: string | null
   field: SchemaField
   value: Value
 }
@@ -89,15 +93,19 @@ export const handleResourceUpdate = async ({
   ) {
     const totalCostFieldId =
       selectSchemaField(schema, fields.totalCost)?.id ?? fail()
-    const unitCost = selectResourceField(resource, fields.unitCost)?.number ?? 0
-    const quantity = selectResourceField(resource, fields.quantity)?.number ?? 0
+    const unitCost =
+      selectResourceField(resource, fields.unitCost)?.value.number ?? 0
+    const quantity =
+      selectResourceField(resource, fields.quantity)?.value.number ?? 0
 
     await updateResourceField({
       accountId,
-      fieldId: totalCostFieldId,
       resourceId: resource.id,
-      value: {
-        number: unitCost * quantity,
+      resourceFieldInput: {
+        fieldId: totalCostFieldId,
+        valueInput: {
+          number: unitCost * quantity,
+        },
       },
     })
   }
@@ -110,12 +118,14 @@ export const handleResourceUpdate = async ({
       (rf) => rf.field.templateId === fields.totalCost.templateId,
     )
   ) {
-    const orderId = selectResourceField(resource, fields.order)?.resource?.id
+    const orderId = selectResourceField(resource, fields.order)?.value.resource
+      ?.id
     if (orderId) {
       await recalculateSubtotalCost(accountId, 'Order', orderId)
     }
 
-    const billId = selectResourceField(resource, fields.bill)?.resource?.id
+    const billId = selectResourceField(resource, fields.bill)?.value.resource
+      ?.id
     if (billId) {
       await recalculateSubtotalCost(accountId, 'Bill', billId)
     }
@@ -149,16 +159,23 @@ export const handleResourceUpdate = async ({
     })
 
     const itemizedCosts =
-      selectResourceField(resource, fields.itemizedCosts)?.number ?? 0
+      selectResourceField(resource, fields.itemizedCosts)?.value.number ?? 0
     const subtotalCost =
-      selectResourceField(resource, fields.subtotalCost)?.number ?? 0
+      selectResourceField(resource, fields.subtotalCost)?.value.number ?? 0
+
+    const totalCostSchemaField = selectSchemaFieldUnsafe(
+      schema,
+      fields.totalCost,
+    )
 
     await updateResourceField({
       accountId,
-      fieldId: selectSchemaField(schema, fields.totalCost)?.id ?? fail(),
       resourceId: resource.id,
-      value: {
-        number: itemizedCosts + subtotalCost,
+      resourceFieldInput: {
+        fieldId: totalCostSchemaField.id,
+        valueInput: {
+          number: itemizedCosts + subtotalCost,
+        },
       },
     })
   }
@@ -185,21 +202,23 @@ export const handleResourceUpdate = async ({
         rf.field.templateId === fields.paymentTerms.templateId,
     )
   ) {
-    const invoiceDate = selectResourceField(resource, fields.invoiceDate)?.date
-    const paymentTerms = selectResourceField(
-      resource,
-      fields.paymentTerms,
-    )?.number
+    const invoiceDate = selectResourceField(resource, fields.invoiceDate)?.value
+      .date
+    const paymentTerms = selectResourceField(resource, fields.paymentTerms)
+      ?.value.number
 
     if (invoiceDate && paymentTerms) {
       await updateResourceField({
         accountId,
-        fieldId: selectSchemaField(schema, fields.paymentDueDate)?.id ?? fail(),
         resourceId: resource.id,
-        value: {
-          date: new Date(
-            invoiceDate.getTime() + paymentTerms * millisecondsPerDay,
-          ),
+        resourceFieldInput: {
+          fieldId:
+            selectSchemaField(schema, fields.paymentDueDate)?.id ?? fail(),
+          valueInput: {
+            date: new Date(
+              invoiceDate.getTime() + paymentTerms * millisecondsPerDay,
+            ),
+          },
         },
       })
     }

@@ -89,7 +89,7 @@ async function main() {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(vendorSchema, fields.name)?.id,
-        value: { string: 'ACME Supplies' },
+        valueInput: { string: 'ACME Supplies' },
       },
     ],
   })
@@ -105,15 +105,15 @@ async function main() {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(orderSchema, fields.assignee)?.id,
-        value: { userId: systemUser.id },
+        valueInput: { userId: systemUser.id },
       },
       {
         fieldId: selectSchemaFieldUnsafe(orderSchema, fields.poNumber)?.id,
-        value: { string: '42' },
+        valueInput: { string: '42' },
       },
       {
         fieldId: selectSchemaFieldUnsafe(orderSchema, fields.vendor)?.id,
-        value: { resourceId: vendor.id },
+        valueInput: { resourceId: vendor.id },
       },
     ],
   })
@@ -129,16 +129,16 @@ async function main() {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(itemSchema, fields.name)?.id,
-        value: { string: 'Item Name 1' },
+        valueInput: { string: 'Item Name 1' },
       },
       {
         fieldId: selectSchemaFieldUnsafe(itemSchema, fields.itemDescription)
           ?.id,
-        value: { string: 'Item Desc 1' },
+        valueInput: { string: 'Item Desc 1' },
       },
       {
         fieldId: selectSchemaFieldUnsafe(itemSchema, fields.unitOfMeasure)?.id,
-        value: { optionId: unitOfMeasureOption.id },
+        valueInput: { optionId: unitOfMeasureOption.id },
       },
     ],
   })
@@ -154,11 +154,11 @@ async function main() {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(lineSchema, fields.order)?.id,
-        value: { resourceId: order.id },
+        valueInput: { resourceId: order.id },
       },
       {
         fieldId: selectSchemaFieldUnsafe(lineSchema, fields.item)?.id,
-        value: { resourceId: item1.id },
+        valueInput: { resourceId: item1.id },
       },
     ],
   })
@@ -169,16 +169,16 @@ async function main() {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(itemSchema, fields.name)?.id,
-        value: { string: 'Item Name 2' },
+        valueInput: { string: 'Item Name 2' },
       },
       {
         fieldId: selectSchemaFieldUnsafe(itemSchema, fields.itemDescription)
           ?.id,
-        value: { string: 'Item Desc 2' },
+        valueInput: { string: 'Item Desc 2' },
       },
       {
         fieldId: selectSchemaFieldUnsafe(itemSchema, fields.unitOfMeasure)?.id,
-        value: { optionId: unitOfMeasureOption.id },
+        valueInput: { optionId: unitOfMeasureOption.id },
       },
     ],
   })
@@ -189,11 +189,11 @@ async function main() {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(lineSchema, fields.order)?.id,
-        value: { resourceId: order.id },
+        valueInput: { resourceId: order.id },
       },
       {
         fieldId: selectSchemaFieldUnsafe(lineSchema, fields.item)?.id,
-        value: { resourceId: item2.id },
+        valueInput: { resourceId: item2.id },
       },
     ],
   })

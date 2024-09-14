@@ -43,7 +43,7 @@ export default async function PoDocument({
     }),
   ])
 
-  const vendorId = selectResourceField(order, fields.vendor)?.resource?.id
+  const vendorId = selectResourceField(order, fields.vendor)?.value.resource?.id
 
   const vendor = vendorId
     ? await readResource({
@@ -74,7 +74,7 @@ export default async function PoDocument({
     ? `data:${blob?.mimeType};base64,${blob?.buffer.toString('base64')}`
     : undefined
 
-  const issuedDate = selectResourceField(order, fields.issuedDate)?.date
+  const issuedDate = selectResourceField(order, fields.issuedDate)?.value.date
 
   const formattedDate = issuedDate
     ? new Date(issuedDate).toLocaleDateString()
@@ -138,7 +138,10 @@ export default async function PoDocument({
                       ...styles.TopMarginClass,
                     }}
                   >
-                    {selectResourceField(order, fields.orderNotes)?.string}
+                    {
+                      selectResourceField(order, fields.orderNotes)?.value
+                        .string
+                    }
                   </td>
                 </tr>
               </tbody>
@@ -174,7 +177,10 @@ export default async function PoDocument({
                     Currency
                   </td>
                   <td style={styles.PaymentPadding}>
-                    {selectResourceField(order, fields.currency)?.option?.name}
+                    {
+                      selectResourceField(order, fields.currency)?.value.option
+                        ?.name
+                    }
                   </td>
                 </tr>
                 <tr>
@@ -185,8 +191,8 @@ export default async function PoDocument({
                   </td>
                   <td style={styles.PaymentPadding}>
                     {
-                      selectResourceField(order, fields.paymentTerms)?.option
-                        ?.name
+                      selectResourceField(order, fields.paymentTerms)?.value
+                        .option?.name
                     }
                   </td>
                 </tr>
@@ -197,7 +203,7 @@ export default async function PoDocument({
                     Taxable
                   </td>
                   <td style={styles.PaymentPadding}>
-                    {selectResourceField(order, fields.taxable)?.boolean
+                    {selectResourceField(order, fields.taxable)?.value.boolean
                       ? 'Yes'
                       : 'No'}
                   </td>
@@ -235,7 +241,10 @@ export default async function PoDocument({
                       paddingBottom: '0px',
                     }}
                   >
-                    {selectResourceField(order, fields.vendor)?.resource?.name}
+                    {
+                      selectResourceField(order, fields.vendor)?.value.resource
+                        ?.name
+                    }
                     <span
                       style={{
                         whiteSpace: 'pre-wrap',
@@ -246,7 +255,7 @@ export default async function PoDocument({
                     >
                       {vendor &&
                         selectResourceField(vendor, fields.primaryAddress)
-                          ?.string}
+                          ?.value.string}
                     </span>
                   </td>
                 </tr>
@@ -256,8 +265,8 @@ export default async function PoDocument({
                       <b>c/o:</b>
                     </u>
                     {vendor &&
-                      selectResourceField(vendor, fields.poRecipient)?.contact
-                        ?.name}
+                      selectResourceField(vendor, fields.poRecipient)?.value
+                        .contact?.name}
                   </td>
                 </tr>
               </tbody>
@@ -291,7 +300,10 @@ export default async function PoDocument({
                       whiteSpace: 'pre-wrap',
                     }}
                   >
-                    {selectResourceField(order, fields.shippingAddress)?.string}
+                    {
+                      selectResourceField(order, fields.shippingAddress)?.value
+                        .string
+                    }
                   </td>
                   <td style={{ padding: '3px 0px', verticalAlign: 'top' }}>
                     <table style={{ border: '0', margin: 0 }}>
@@ -306,7 +318,7 @@ export default async function PoDocument({
                           >
                             {
                               selectResourceField(order, fields.shippingMethod)
-                                ?.option?.name
+                                ?.value.option?.name
                             }
                           </td>
                         </tr>
@@ -322,7 +334,7 @@ export default async function PoDocument({
                               selectResourceField(
                                 order,
                                 fields.shippingAccountNumber,
-                              )?.option?.name
+                              )?.value.option?.name
                             }
                           </td>
                         </tr>
@@ -336,7 +348,7 @@ export default async function PoDocument({
                           >
                             {
                               selectResourceField(order, fields.incoterms)
-                                ?.option?.name
+                                ?.value.option?.name
                             }
                           </td>
                         </tr>
@@ -366,7 +378,10 @@ export default async function PoDocument({
                         whiteSpace: 'pre-wrap',
                       }}
                     >
-                      {selectResourceField(order, fields.shippingNotes)?.string}
+                      {
+                        selectResourceField(order, fields.shippingNotes)?.value
+                          .string
+                      }
                     </p>
                   </td>
                 </tr>
@@ -399,8 +414,8 @@ export default async function PoDocument({
             <tbody>
               {await Promise.all(
                 lines.map(async (line, index) => {
-                  const itemId = selectResourceField(line, fields.item)
-                    ?.resource?.id
+                  const itemId = selectResourceField(line, fields.item)?.value
+                    .resource?.id
                   const item = itemId
                     ? await readResource({
                         accountId,
@@ -532,7 +547,8 @@ export default async function PoDocument({
                         >
                           <div style={{ fontWeight: 'bold' }}>
                             {item &&
-                              selectResourceField(item, fields.name)?.string}
+                              selectResourceField(item, fields.name)?.value
+                                .string}
                           </div>
                           <div
                             style={{
@@ -544,24 +560,27 @@ export default async function PoDocument({
                           >
                             {item &&
                               selectResourceField(item, fields.itemDescription)
-                                ?.string}
+                                ?.value.string}
                           </div>
                         </td>
                         <td style={tdStyle}>
                           {
                             selectResourceField(line, fields.unitOfMeasure)
-                              ?.option?.name
+                              ?.value.option?.name
                           }
                         </td>
 
                         <td style={tdStyle}>
-                          {selectResourceField(line, fields.quantity)?.number}
+                          {
+                            selectResourceField(line, fields.quantity)?.value
+                              .number
+                          }
                         </td>
                         <td style={tdStyle}>
                           {selectResourceField(
                             line,
                             fields.unitCost,
-                          )?.number?.toLocaleString('en-US', {
+                          )?.value.number?.toLocaleString('en-US', {
                             style: 'currency',
                             currency: 'USD',
                           })}
@@ -570,7 +589,7 @@ export default async function PoDocument({
                           {selectResourceField(
                             line,
                             fields.totalCost,
-                          )?.number?.toLocaleString('en-US', {
+                          )?.value.number?.toLocaleString('en-US', {
                             style: 'currency',
                             currency: 'USD',
                           })}
@@ -643,8 +662,8 @@ export default async function PoDocument({
                     }}
                   >
                     {(
-                      selectResourceField(order, fields.subtotalCost)?.number ||
-                      0
+                      selectResourceField(order, fields.subtotalCost)?.value
+                        .number || 0
                     ).toLocaleString('en-US', {
                       style: 'currency',
                       currency: 'USD',
@@ -653,7 +672,8 @@ export default async function PoDocument({
                 </tr>
                 {order.costs.map((item: Cost, index: number) => {
                   const subtotal =
-                    selectResourceField(order, fields.subtotalCost)?.number || 0
+                    selectResourceField(order, fields.subtotalCost)?.value
+                      .number || 0
 
                   const costValue = item.isPercentage
                     ? subtotal * (item.value / 100)
@@ -709,7 +729,7 @@ export default async function PoDocument({
                     {selectResourceField(
                       order,
                       fields.totalCost,
-                    )?.number?.toLocaleString('en-US', {
+                    )?.value.number?.toLocaleString('en-US', {
                       style: 'currency',
                       currency: 'USD',
                     })}
@@ -744,7 +764,10 @@ export default async function PoDocument({
                   whiteSpace: 'pre-wrap',
                 }}
               >
-                {selectResourceField(order, fields.termsAndConditions)?.string}
+                {
+                  selectResourceField(order, fields.termsAndConditions)?.value
+                    .string
+                }
               </td>
             </tr>
           </tbody>
