@@ -4,7 +4,6 @@ import PlaidConnection from './PlaidConnection'
 import { getPlaidConfig } from '@/domain/plaid/util'
 import { Session } from '@/domain/iam/session/entity'
 import { getPlaidToken } from '@/domain/plaid'
-import 'server-only'
 
 type Props = {
   session: Session

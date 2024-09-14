@@ -6,7 +6,6 @@ import dynamic from 'next/dynamic'
 import { QuestionMark } from '@mui/icons-material'
 import AppBar from '@/lib/ux/appbar/AppBar'
 import MuiXLicense from '@/lib/ux/MuiXLicense'
-import 'server-only'
 import 'source-map-support/register' // TODO: check if stack traces are correct in azure
 
 const RootProvider = dynamic(() => import('@/lib/ux/RootProvider'), {
