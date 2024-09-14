@@ -1,5 +1,5 @@
 import { fail } from 'assert'
-import { Prisma, ResourceType } from '@prisma/client'
+import { ResourceType } from '@prisma/client'
 import { readSchema } from '../schema'
 import { selectSchemaField } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
@@ -170,47 +170,43 @@ export const updateResource = async ({
   fields,
 }: UpdateResourceParams) => {
   const resource = await readResource({ accountId, id: resourceId })
-
   const schema = await readSchema({ accountId, resourceType: resource.type })
 
-  const model = await prisma().resource.update({
-    where: { accountId, id: resourceId },
-    data: {
-      ResourceField: {
-        upsert: fields.map((rf) => {
-          const sf =
-            schema.allFields.find((f) => f.id === rf.fieldId) ??
-            fail('Field not found in schema')
+  await Promise.all(
+    fields.map(async ({ fieldId, value }) => {
+      const sf =
+        schema.allFields.find((f) => f.id === fieldId) ??
+        fail('Field not found in schema')
 
-          return {
-            where: {
-              resourceId_fieldId: {
-                resourceId,
-                fieldId: rf.fieldId,
-              },
-            },
-            create: {
-              Field: {
-                connect: { id: rf.fieldId },
-              },
-              Value: {
-                create: mapValueInputToPrismaValueCreate(rf.value, sf),
-              },
-            },
-            update: {
-              Value: {
-                create: mapValueInputToPrismaValueCreate(rf.value, sf),
-                update: mapValueInputToPrismaValueUpdate(rf.value),
-              },
-            },
-          } satisfies Prisma.ResourceFieldUpsertWithWhereUniqueWithoutResourceInput
-        }),
-      },
-    },
-    include: resourceInclude,
-  })
+      await prisma().resourceField.upsert({
+        where: {
+          resourceId_fieldId: {
+            resourceId,
+            fieldId,
+          },
+        },
+        create: {
+          Resource: {
+            connect: { id: resourceId },
+          },
+          Field: {
+            connect: { id: fieldId },
+          },
+          Value: {
+            create: mapValueInputToPrismaValueCreate(value, sf),
+          },
+        },
+        update: {
+          Value: {
+            create: mapValueInputToPrismaValueCreate(value, sf),
+            update: mapValueInputToPrismaValueUpdate(value),
+          },
+        },
+      })
+    }),
+  )
 
-  const entity = mapResourceModelToEntity(model)
+  const entity = await readResource({ accountId, id: resourceId })
 
   await handleResourceUpdate({
     accountId,
