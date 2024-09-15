@@ -3,6 +3,7 @@
 .env
 *.pfx
 *.pdf
+.tmp
 
 # IDK wy these keep appearing
 *.swp

@@ -1,3 +1,5 @@
+import { mkdir } from 'fs'
+import { fail } from 'assert'
 import { z } from 'zod'
 import { match } from 'ts-pattern'
 import singleton from './singleton'
@@ -17,6 +19,8 @@ const schema = z
     PLAID_ENV: z.enum(['sandbox', 'development', 'production']).optional(),
     PLAID_CLIENT_ID: z.string().min(1).optional(),
     PLAID_SECRET: z.string().min(1).optional(),
+
+    TEMP_PATH: z.string().min(1).default('/tmp/supplyside'),
   })
   .transform((data) => ({
     ...data,
@@ -29,6 +33,12 @@ const schema = z
 
 export type Config = z.infer<typeof schema>
 
-const config = singleton('config', (): Config => schema.parse(process.env))
+const config = singleton('config', (): Config => {
+  const c = schema.parse(process.env)
+
+  mkdir(c.TEMP_PATH, { recursive: true }, (err) => err && fail(err))
+
+  return c
+})
 
 export default config
