@@ -23,7 +23,7 @@ export const schemas: SchemaTemplate[] = [
           fields.invoiceNumber,
           fields.invoiceDate,
           fields.poNumber,
-          fields.billDescription,
+          fields.orderDescription,
         ],
       },
       {
