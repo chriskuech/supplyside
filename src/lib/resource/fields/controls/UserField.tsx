@@ -37,7 +37,7 @@ function UserField(
       getOptionLabel={(u) => u.name}
       options={users}
       renderInput={(params) => <TextField inputRef={ref} {...params} />}
-    ></Autocomplete>
+    />
   )
 }
 

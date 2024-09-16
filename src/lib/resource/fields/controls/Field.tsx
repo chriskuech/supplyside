@@ -195,11 +195,11 @@ function Field(
         fullWidth
         getOptionLabel={(option) => option.name}
         value={value?.option}
-        onChange={(e, value) => {
-          handleChange({ ...emptyValue, option: value })
+        onChange={(e, option) => {
+          handleChange({ ...emptyValue, option })
         }}
         renderInput={(params) => <TextField inputRef={ref} {...params} />}
-      ></Autocomplete>
+      />
     ))
     .with('Text', () => (
       <TextField
