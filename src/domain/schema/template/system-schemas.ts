@@ -20,6 +20,7 @@ export const schemas: SchemaTemplate[] = [
         fields: [
           fields.billFiles,
           fields.vendor,
+          fields.billingContact,
           fields.invoiceNumber,
           fields.invoiceDate,
           fields.poNumber,
@@ -117,7 +118,7 @@ export const schemas: SchemaTemplate[] = [
       },
       {
         name: 'Contacts',
-        fields: [fields.poRecipient],
+        fields: [fields.poRecipient, fields.billingContact],
       },
       {
         name: 'Payment Info',

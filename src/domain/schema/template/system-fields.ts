@@ -90,6 +90,11 @@ const _fields = {
       optionTemplateId: billStatusOptions.draft.templateId,
     },
   },
+  billingContact: {
+    templateId: 'de26b300-e05b-4d50-9289-3f940c7b0901',
+    name: 'Billing Contact',
+    type: 'Contact',
+  },
   currency: {
     templateId: '52b10289-99a0-4dfe-bb6b-6afca34e8501',
     name: 'Currency',
