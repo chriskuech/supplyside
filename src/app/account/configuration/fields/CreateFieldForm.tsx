@@ -80,7 +80,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
       <Stack direction="row" spacing={2}>
         {type === 'Resource' && (
           <FormControl sx={{ width: 150 }}>
-            <InputLabel id="field-resource-type-label">
+            <InputLabel id="field-resource-type-label" shrink={!!resourceType}>
               Resource Type
             </InputLabel>
             <ResourceTypeSelect
