@@ -4,6 +4,7 @@ export type JsonLogicValue = string | number | boolean | null
 type JsonLogic =
   | { '==': [JsonLogicVariable, JsonLogicValue] }
   | { '!=': [JsonLogicVariable, JsonLogicValue] }
+  | { and: JsonLogic[] }
 
 export type Where = JsonLogic
 

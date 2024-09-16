@@ -25,6 +25,9 @@ export const getInvalidVars = ({
 
 const extractVarsFromWhere = (where: Where): string[] =>
   match(where)
+    .with({ and: P.any }, ({ and: clauses }) =>
+      clauses.flatMap(extractVarsFromWhere),
+    )
     .with({ '==': P.any }, ({ '==': [{ var: var_ }] }) => [var_])
     .with({ '!=': P.any }, ({ '!=': [{ var: var_ }] }) => [var_])
     .exhaustive()
