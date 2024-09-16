@@ -33,6 +33,12 @@ export const handleResourceCreate = async ({
       value: { string: resource.key.toString() },
     })
   }
+
+  // When the "Bill Files" field is updated,
+  // Then extract their PO # and Vendor ID
+  if (resource.type === 'Bill') {
+    await extractContent(accountId, resource.id)
+  }
 }
 
 type FieldUpdate = {
