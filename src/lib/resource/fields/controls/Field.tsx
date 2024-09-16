@@ -4,17 +4,13 @@ import { fail } from 'assert'
 import {
   Autocomplete,
   Checkbox,
-  IconButton,
   InputAdornment,
-  MenuItem,
-  Select,
   TextField,
 } from '@mui/material'
 import { match } from 'ts-pattern'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
-import { Close } from '@mui/icons-material'
 import {
   ForwardedRef,
   forwardRef,
@@ -29,7 +25,7 @@ import FileField from './FileField'
 import UserField from './UserField'
 import ResourceField from './ResourceField'
 import FilesField from './FilesField'
-import { SchemaField } from '@/domain/schema/entity'
+import { Option, SchemaField } from '@/domain/schema/entity'
 import { Value } from '@/domain/resource/entity'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
 import { emptyValue } from '@/domain/resource/entity'
@@ -193,36 +189,17 @@ function Field(
       />
     ))
     .with('Select', () => (
-      <Select
-        inputRef={ref}
+      <Autocomplete<Option>
+        options={field.options}
         id={inputId}
         fullWidth
-        displayEmpty
-        value={value?.option?.id ?? ''}
-        onChange={(e) => {
-          const option =
-            field.options.find((o) => o.id === e.target.value) ?? null
-
+        getOptionLabel={(option) => option.name}
+        value={value?.option}
+        onChange={(e, option) => {
           handleChange({ ...emptyValue, option })
         }}
-        endAdornment={
-          value?.option?.id && (
-            <IconButton
-              onClick={() => handleChange({ ...emptyValue, option: null })}
-              sx={{ marginRight: 2 }}
-            >
-              <Close fontSize="small" />
-            </IconButton>
-          )
-        }
-      >
-        <MenuItem value="">-</MenuItem>
-        {field.options.map((o) => (
-          <MenuItem key={o.id} value={o.id}>
-            {o.name}
-          </MenuItem>
-        ))}
-      </Select>
+        renderInput={(params) => <TextField inputRef={ref} {...params} />}
+      />
     ))
     .with('Text', () => (
       <TextField

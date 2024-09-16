@@ -108,7 +108,10 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
       <Stack direction="row" spacing={1} flexWrap="wrap">
         {field.type === 'Resource' && (
           <FormControl sx={{ width: 150 }}>
-            <InputLabel id="field-resource-type-label">
+            <InputLabel
+              id="field-resource-type-label"
+              shrink={!!field.resourceType}
+            >
               Resource Type
             </InputLabel>
             <ResourceTypeSelect
@@ -120,7 +123,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
 
       {!findTemplateField(field.templateId)?.defaultValue && (
         <FormControl fullWidth>
-          <InputLabel htmlFor="default-field-value-control">
+          <InputLabel htmlFor="default-field-defaultValue-control">
             Default Value
           </InputLabel>
           <DefaultValueControl

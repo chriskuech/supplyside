@@ -1,4 +1,4 @@
-import { MenuItem, Select } from '@mui/material'
+import { Autocomplete, TextField } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 
 type Props = {
@@ -11,23 +11,14 @@ export default function ResourceTypeSelect({
   setResourceType,
 }: Props) {
   return (
-    <Select
+    <Autocomplete<ResourceType>
       size="small"
-      labelId="field-resource-type-label"
       fullWidth
-      label="Resource Type"
-      value={resourceType ?? ''}
+      options={Object.values(ResourceType)}
+      value={resourceType}
       disabled={!setResourceType}
-      onChange={(e) =>
-        setResourceType?.(e.target.value as ResourceType | undefined)
-      }
-    >
-      <MenuItem value={undefined}>&nbsp;</MenuItem>
-      {Object.values(ResourceType).map((rt) => (
-        <MenuItem value={rt} key={rt}>
-          {rt}
-        </MenuItem>
-      ))}
-    </Select>
+      onChange={(e, value) => setResourceType?.(value ?? undefined)}
+      renderInput={(params) => <TextField {...params} />}
+    ></Autocomplete>
   )
 }

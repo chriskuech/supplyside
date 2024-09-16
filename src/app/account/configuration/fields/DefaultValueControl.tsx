@@ -1,14 +1,7 @@
 'use client'
 
-import {
-  Checkbox,
-  IconButton,
-  MenuItem,
-  Select,
-  TextField,
-} from '@mui/material'
+import { Autocomplete, Checkbox, TextField } from '@mui/material'
 import { match } from 'ts-pattern'
-import { Close } from '@mui/icons-material'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -41,32 +34,20 @@ export default function DefaultValueControl({
       />
     ))
     .with('Select', () => (
-      <Select
+      <Autocomplete
         id="default-field-defaultValue-control"
-        value={defaultValue?.option?.id ?? ''}
+        value={defaultValue?.option}
         disabled={isDisabled}
-        onChange={(e) =>
+        onChange={(e, value) =>
           onChange({
             ...emptyValue,
-            option: options.find((o) => o.id === e.target.value) ?? null,
+            option: value,
           })
         }
-        endAdornment={
-          defaultValue?.option?.id && (
-            <IconButton
-              onClick={() => onChange({ ...emptyValue, option: null })}
-            >
-              <Close fontSize="small" />
-            </IconButton>
-          )
-        }
-      >
-        {options.map(({ id, name }) => (
-          <MenuItem key={id} value={id}>
-            {name}
-          </MenuItem>
-        ))}
-      </Select>
+        getOptionLabel={(option) => option.name}
+        options={options}
+        renderInput={(params) => <TextField {...params} />}
+      ></Autocomplete>
     ))
     .with('Textarea', () => (
       <TextField

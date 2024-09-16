@@ -1,6 +1,6 @@
 'use client'
 
-import { MenuItem, Select } from '@mui/material'
+import { Autocomplete, TextField } from '@mui/material'
 import { ForwardedRef, forwardRef, useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
 import { readUsersAction } from './actions'
@@ -28,22 +28,16 @@ function UserField(
   }, [])
 
   return (
-    <Select
-      inputRef={ref}
+    <Autocomplete<User>
       id={inputId}
       fullWidth
-      value={user?.id ?? ''}
+      value={user}
       readOnly={isReadOnly}
-      onChange={(e) =>
-        onChange(users.find((u) => u.id === e.target.value) ?? null)
-      }
-    >
-      {users.map((u) => (
-        <MenuItem key={u.id} value={u.id}>
-          {u.name}
-        </MenuItem>
-      ))}
-    </Select>
+      onChange={(e, value) => onChange(value)}
+      getOptionLabel={(u) => u.name}
+      options={users}
+      renderInput={(params) => <TextField inputRef={ref} {...params} />}
+    />
   )
 }
 

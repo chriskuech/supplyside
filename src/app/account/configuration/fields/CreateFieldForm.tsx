@@ -1,13 +1,12 @@
 'use client'
 
 import {
+  Autocomplete,
   Button,
   Checkbox,
   FormControl,
   FormControlLabel,
   InputLabel,
-  MenuItem,
-  Select,
   Stack,
   TextField,
 } from '@mui/material'
@@ -45,21 +44,13 @@ export default function CreateFieldForm({ onSubmit }: Props) {
         />
 
         <FormControl sx={{ width: 150 }}>
-          <InputLabel id="field-type-label">Type</InputLabel>
-          <Select
-            labelId="field-type-label"
+          <Autocomplete<FieldType>
             fullWidth
-            label="Type"
-            value={type ?? ''}
-            onChange={(e) => setType(e.target.value as FieldType | undefined)}
-          >
-            <MenuItem value={undefined}>&nbsp;</MenuItem>
-            {Object.values(FieldType).map((ft) => (
-              <MenuItem value={ft} key={ft}>
-                {ft}
-              </MenuItem>
-            ))}
-          </Select>
+            value={type}
+            options={Object.values(FieldType)}
+            onChange={(e, value) => setType(value ?? undefined)}
+            renderInput={(params) => <TextField {...params} label="Type" />}
+          ></Autocomplete>
         </FormControl>
 
         <FormControl sx={{ width: 'fit-content' }}>
@@ -89,7 +80,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
       <Stack direction="row" spacing={2}>
         {type === 'Resource' && (
           <FormControl sx={{ width: 150 }}>
-            <InputLabel id="field-resource-type-label">
+            <InputLabel id="field-resource-type-label" shrink={!!resourceType}>
               Resource Type
             </InputLabel>
             <ResourceTypeSelect
