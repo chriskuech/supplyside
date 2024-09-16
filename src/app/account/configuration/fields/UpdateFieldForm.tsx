@@ -120,7 +120,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
 
       {!findTemplateField(field.templateId)?.defaultValue && (
         <FormControl fullWidth>
-          <InputLabel htmlFor="default-field-value-control">
+          <InputLabel htmlFor="default-field-defaultValue-control">
             Default Value
           </InputLabel>
           <DefaultValueControl
