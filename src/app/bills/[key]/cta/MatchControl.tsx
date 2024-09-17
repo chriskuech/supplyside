@@ -12,6 +12,7 @@ import {
   Typography,
 } from '@mui/material'
 import { AddLink, Link } from '@mui/icons-material'
+import { isTruthy } from 'remeda'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { selectResourceField } from '@/domain/resource/extensions'
 import { ResourceTable } from '@/lib/resource/table'
@@ -114,7 +115,9 @@ export default function MatchControl({ schema, resource }: Props) {
                     tableKey={MatchControl.name}
                     schema={orderSchema}
                     resources={unlinkedOrders}
-                    initialQuery={`${poNumber} ${vendorName}`}
+                    initialQuery={[poNumber, vendorName]
+                      .filter(isTruthy)
+                      .join(' ')}
                     onRowClick={({
                       row, // `row` is coming in as `any` for some reason
                     }) =>
