@@ -1,4 +1,3 @@
-import assert from 'assert'
 import { resources } from '../schema/template/system-resources'
 import {
   updateTemplateId,
