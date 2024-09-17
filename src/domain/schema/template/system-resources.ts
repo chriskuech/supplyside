@@ -2,6 +2,7 @@ import { deepStrictEqual } from 'assert'
 import { entries, filter, flatMap, groupBy, map, mapValues, pipe } from 'remeda'
 import { ResourceTemplate } from './types'
 import { fields } from './system-fields'
+import config from '@/services/config'
 
 const _resources = {
   mcMasterCarrVendor: {
@@ -12,12 +13,12 @@ const _resources = {
       {
         field: fields.poRecipient,
         value: {
-          //TODO: complete
           contact: {
-            email: 'McMasterCarr@email.com',
-            name: 'Mc Master Carr',
-            phone: '+1111111111',
-            title: 'Title..',
+            email:
+              config().NODE_ENV === 'production' ? 'sales@mcmaster.com' : null,
+            name: null,
+            phone: '(562) 692-5911',
+            title: null,
           },
         },
       },
