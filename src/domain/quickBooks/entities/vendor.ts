@@ -22,7 +22,7 @@ import {
   selectSchemaFieldUnsafe,
 } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 
 export const readVendor = async (
@@ -82,7 +82,7 @@ export const upsertVendorsFromQuickBooks = async (
     (quickBooksVendor) =>
       !currentVendors.some(
         (vendor) =>
-          selectResourceField(vendor, fields.quickBooksVendorId)?.string ===
+          selectResourceFieldValue(vendor, fields.quickBooksVendorId)?.string ===
           quickBooksVendor.Id,
       ),
   )
@@ -96,13 +96,13 @@ export const upsertVendorsFromQuickBooks = async (
     quickBooksVendorsToUpdate.map(async (quickBooksVendor) => {
       const vendor = currentVendors.find(
         (currentVendor) =>
-          selectResourceField(currentVendor, fields.quickBooksVendorId)
+          selectResourceFieldValue(currentVendor, fields.quickBooksVendorId)
             ?.string === quickBooksVendor.Id,
       )
 
       if (!vendor) return
 
-      const vendorName = selectResourceField(vendor, fields.name)?.string
+      const vendorName = selectResourceFieldValue(vendor, fields.name)?.string
 
       if (vendorName === quickBooksVendor.DisplayName) return
 
@@ -180,7 +180,7 @@ const updateVendorOnQuickBooks = async (
 ): Promise<Vendor> => {
   const token = await requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
-  const quickBooksVendorId = selectResourceField(
+  const quickBooksVendorId = selectResourceFieldValue(
     vendor,
     fields.quickBooksVendorId,
   )?.string
@@ -219,7 +219,7 @@ export const upsertVendorOnQuickBooks = async (
   accountId: string,
   vendor: Resource,
 ): Promise<Vendor> => {
-  const quickBooksVendorId = selectResourceField(
+  const quickBooksVendorId = selectResourceFieldValue(
     vendor,
     fields.quickBooksVendorId,
   )?.string

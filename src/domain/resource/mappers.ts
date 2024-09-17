@@ -8,7 +8,7 @@ import { Schema, SchemaField } from '../schema/entity'
 import { mapUserModelToEntity } from '../user/mappers'
 import { Resource, Value, ValueResource } from './entity'
 import { ResourceModel, ValueModel, ValueResourceModel } from './model'
-import { selectResourceField } from './extensions'
+import { selectResourceFieldValue } from './extensions'
 import { ValueInput } from './patch'
 
 export const mapResourceModelToEntity = (model: ResourceModel): Resource => ({
@@ -32,8 +32,8 @@ export const mapResourceToValueResource = (
   type: resource.type,
   key: resource.key,
   name:
-    selectResourceField(resource, fields.name)?.string ??
-    selectResourceField(resource, fields.poNumber)?.string ??
+    selectResourceFieldValue(resource, fields.name)?.string ??
+    selectResourceFieldValue(resource, fields.poNumber)?.string ??
     fail('Resource type does not have a name or number field'),
 })
 
@@ -108,7 +108,7 @@ export const isMissingRequiredFields = (schema: Schema, resource: Resource) =>
       .with('MultiSelect', () => 'options')
       .exhaustive()
 
-    const value = selectResourceField(resource, { fieldId: field.id })?.[
+    const value = selectResourceFieldValue(resource, { fieldId: field.id })?.[
       valueColumnName
     ]
 

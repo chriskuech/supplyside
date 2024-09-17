@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import { AddLink, Link } from '@mui/icons-material'
 import { useDisclosure } from '@/lib/hooks/useDisclosure'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { ResourceTable } from '@/lib/resource/table'
 import { Schema } from '@/domain/schema/entity'
 import { fields } from '@/domain/schema/template/system-fields'
@@ -33,10 +33,10 @@ export default function MatchControl({ schema, resource }: Props) {
   const { open, isOpen, close } = useDisclosure()
   const confirm = useConfirmation()
 
-  const order = selectResourceField(resource, fields.order)?.resource
+  const order = selectResourceFieldValue(resource, fields.order)?.resource
 
-  const poNumber = selectResourceField(resource, fields.poNumber)?.string
-  const vendorName = selectResourceField(resource, fields.vendor)?.resource
+  const poNumber = selectResourceFieldValue(resource, fields.poNumber)?.string
+  const vendorName = selectResourceFieldValue(resource, fields.vendor)?.resource
     ?.name
 
   const orderSchema = useSchema('Order')

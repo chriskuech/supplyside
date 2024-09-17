@@ -5,7 +5,7 @@ import { mapBill } from '../mappers/bill'
 import { accountQuerySchema, readBillSchema } from '../schemas'
 import { Bill } from '../types'
 import { upsertVendorOnQuickBooks } from './vendor'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { readResource, updateResourceField } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
@@ -76,7 +76,7 @@ const updateBillOnQuickBooks = async (
   const token = await requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
 
-  const quickBooksBillId = selectResourceField(
+  const quickBooksBillId = selectResourceFieldValue(
     bill,
     fields.quickBooksBillId,
   )?.string
@@ -111,7 +111,7 @@ const upsertBillOnQuickBooks = async (
   quickBooksAccountId: string,
   quickBooksVendorId: string,
 ): Promise<Bill> => {
-  const quickBooksBillId = selectResourceField(
+  const quickBooksBillId = selectResourceFieldValue(
     bill,
     fields.quickBooksBillId,
   )?.string
@@ -139,7 +139,7 @@ export const syncBill = async (
 ): Promise<void> => {
   const bill = await readResource({ accountId, type: 'Bill', id: resourceId })
 
-  const quickBooksAccountName = selectResourceField(
+  const quickBooksAccountName = selectResourceFieldValue(
     bill,
     fields.quickBooksAccount,
   )?.option?.name
@@ -163,7 +163,7 @@ export const syncBill = async (
 
   const quickBooksAccountId = quickBooksAccountQuery.QueryResponse.Account[0].Id
 
-  const vendorId = selectResourceField(bill, fields.vendor)?.resource?.id
+  const vendorId = selectResourceFieldValue(bill, fields.vendor)?.resource?.id
   assert(vendorId, 'Vendor not set')
   const vendorResource = await readResource({ accountId, id: vendorId })
 

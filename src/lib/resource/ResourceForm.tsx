@@ -17,7 +17,7 @@ import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
 import Field from './fields/controls/Field'
 import { updateResourceField } from './actions'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { mapValueToValueInput } from '@/domain/resource/mappers'
 
@@ -77,7 +77,7 @@ export default function ResourceForm({
                     inputId={`rf-${singleField.id}`}
                     resourceId={resource.id}
                     field={singleField ?? fail()}
-                    value={selectResourceField(resource, {
+                    value={selectResourceFieldValue(resource, {
                       fieldId: singleField.id,
                     })}
                   />
@@ -113,7 +113,7 @@ export default function ResourceForm({
                               inputId={`rf-${f.id}`}
                               resourceId={resource.id}
                               field={f}
-                              value={selectResourceField(resource, {
+                              value={selectResourceFieldValue(resource, {
                                 fieldId: f.id,
                               })}
                               onChange={(value) =>

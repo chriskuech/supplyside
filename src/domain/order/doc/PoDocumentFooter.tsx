@@ -1,29 +1,10 @@
 import { ReactNode } from 'react'
-import { readResource } from '@/domain/resource'
-import { fields } from '@/domain/schema/template/system-fields'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { OrderViewModel } from './ViewModel'
 
-type Props = {
-  accountId: string
-  resourceId: string
-}
-
-export default async function PoDocumentFooter({
-  accountId,
-  resourceId,
-}: Props): Promise<ReactNode> {
-  const resource = await readResource({
-    accountId,
-    id: resourceId,
-    type: 'Order',
-  })
-
-  const issuedDate = selectResourceField(resource, fields.issuedDate)?.date
-
-  const formattedDate = issuedDate
-    ? new Date(issuedDate).toLocaleDateString()
-    : 'N/A'
-
+export default function PoDocumentFooter({
+  number,
+  issuedDate,
+}: OrderViewModel): ReactNode {
   return (
     <div
       style={{
@@ -36,9 +17,9 @@ export default async function PoDocumentFooter({
       }}
     >
       <div style={{ flexGrow: 1 }}>
-        <span>Order #{resource.key}</span>
+        <span>Order #{number}</span>
         <span style={{ margin: '0px 5px' }}>|</span>
-        <span>{formattedDate}</span>
+        <span>{issuedDate ?? 'N/A'}</span>
       </div>
 
       <div>

@@ -6,7 +6,7 @@ import { useLayoutEffect, useRef } from 'react'
 import Field from '../fields/controls/Field'
 import { Cell, Display, Row } from './types'
 import { SchemaField as SchemaField } from '@/domain/schema/entity'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 
 type Props = {
   cellParams: GridRenderEditCellParams<Row, Cell, Display>
@@ -40,7 +40,7 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
           })
         }}
         resourceId={cellParams.row.id}
-        value={selectResourceField(cellParams.row, { fieldId: field.id })}
+        value={selectResourceFieldValue(cellParams.row, { fieldId: field.id })}
         inline
       />
     </Box>

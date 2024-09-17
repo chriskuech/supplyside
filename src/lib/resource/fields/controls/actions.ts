@@ -1,7 +1,7 @@
 'use server'
 
 import { readResource } from '@/domain/resource'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { ValueResource } from '@/domain/resource/entity'
 import { File, JsFile } from '@/domain/files/types'
@@ -54,7 +54,7 @@ export const readResourceFieldFileAction = ({
   withSession(({ accountId }) =>
     readResource({ accountId, id: resourceId }).then(
       (resource) =>
-        selectResourceField(resource, { fieldId })?.file ?? undefined,
+        selectResourceFieldValue(resource, { fieldId })?.file ?? undefined,
     ),
   )
 
@@ -64,7 +64,7 @@ export const readResourceFieldFilesAction = ({
 }: ResourceFieldActionParams): Promise<File[] | undefined> =>
   withSession(({ accountId }) =>
     readResource({ accountId, id: resourceId }).then(
-      (resource) => selectResourceField(resource, { fieldId })?.files ?? [],
+      (resource) => selectResourceFieldValue(resource, { fieldId })?.files ?? [],
     ),
   )
 
@@ -75,7 +75,7 @@ export const readResourceFieldResourceAction = ({
   withSession(({ accountId }) =>
     readResource({ accountId, id: resourceId }).then(
       (resource) =>
-        selectResourceField(resource, { fieldId })?.resource ?? undefined,
+        selectResourceFieldValue(resource, { fieldId })?.resource ?? undefined,
     ),
   )
 

@@ -12,7 +12,7 @@ import {
   billStatusOptions,
   fields,
 } from '@/domain/schema/template/system-fields'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectSchemaField } from '@/domain/schema/extensions'
@@ -32,7 +32,7 @@ export default async function BillsDetail({
   )
 
   const status =
-    selectResourceField(resource, fields.billStatus)?.option ??
+    selectResourceFieldValue(resource, fields.billStatus)?.option ??
     fail('Status not found')
 
   const isDraft = status.templateId === billStatusOptions.draft.templateId
@@ -49,9 +49,9 @@ export default async function BillsDetail({
     .with(billStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
 
-  const order = selectResourceField(resource, fields.order)?.resource
+  const order = selectResourceFieldValue(resource, fields.order)?.resource
 
-  const quickBooksBillId = selectResourceField(
+  const quickBooksBillId = selectResourceFieldValue(
     resource,
     fields.quickBooksBillId,
   )?.string
@@ -85,7 +85,7 @@ export default async function BillsDetail({
             selectSchemaField(schema, fields.billAttachments) ??
             fail('Field not found')
           }
-          value={selectResourceField(resource, fields.billAttachments)}
+          value={selectResourceFieldValue(resource, fields.billAttachments)}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
@@ -95,7 +95,7 @@ export default async function BillsDetail({
             selectSchemaField(schema, fields.assignee) ??
             fail('Field not found')
           }
-          value={selectResourceField(resource, fields.assignee)}
+          value={selectResourceFieldValue(resource, fields.assignee)}
         />,
         ...(!isDraft
           ? [<EditControl key={EditControl.name} resourceId={resource.id} />]
@@ -134,7 +134,7 @@ export default async function BillsDetail({
               >
                 <CallToAction
                   key={
-                    selectResourceField(resource, fields.billStatus)?.option?.id
+                    selectResourceFieldValue(resource, fields.billStatus)?.option?.id
                   }
                   schema={schema}
                   self={session.user}

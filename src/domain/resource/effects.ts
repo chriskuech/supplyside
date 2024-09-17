@@ -4,7 +4,7 @@ import { selectSchemaField } from '../schema/extensions'
 import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
 import { extractContent } from '../bill/extractData'
-import { selectResourceField } from './extensions'
+import { selectResourceFieldValue } from './extensions'
 import { recalculateItemizedCosts, recalculateSubtotalCost } from './costs'
 import { Resource, Value, ValueResource } from './entity'
 import { linkResource } from './link'
@@ -95,8 +95,8 @@ export const handleResourceUpdate = async ({
   ) {
     const totalCostFieldId =
       selectSchemaField(schema, fields.totalCost)?.id ?? fail()
-    const unitCost = selectResourceField(resource, fields.unitCost)?.number ?? 0
-    const quantity = selectResourceField(resource, fields.quantity)?.number ?? 0
+    const unitCost = selectResourceFieldValue(resource, fields.unitCost)?.number ?? 0
+    const quantity = selectResourceFieldValue(resource, fields.quantity)?.number ?? 0
 
     await updateResourceField({
       accountId,
@@ -116,12 +116,12 @@ export const handleResourceUpdate = async ({
       (rf) => rf.field.templateId === fields.totalCost.templateId,
     )
   ) {
-    const orderId = selectResourceField(resource, fields.order)?.resource?.id
+    const orderId = selectResourceFieldValue(resource, fields.order)?.resource?.id
     if (orderId) {
       await recalculateSubtotalCost(accountId, 'Order', orderId)
     }
 
-    const billId = selectResourceField(resource, fields.bill)?.resource?.id
+    const billId = selectResourceFieldValue(resource, fields.bill)?.resource?.id
     if (billId) {
       await recalculateSubtotalCost(accountId, 'Bill', billId)
     }
@@ -155,9 +155,9 @@ export const handleResourceUpdate = async ({
     })
 
     const itemizedCosts =
-      selectResourceField(resource, fields.itemizedCosts)?.number ?? 0
+      selectResourceFieldValue(resource, fields.itemizedCosts)?.number ?? 0
     const subtotalCost =
-      selectResourceField(resource, fields.subtotalCost)?.number ?? 0
+      selectResourceFieldValue(resource, fields.subtotalCost)?.number ?? 0
 
     await updateResourceField({
       accountId,
@@ -191,8 +191,8 @@ export const handleResourceUpdate = async ({
         rf.field.templateId === fields.paymentTerms.templateId,
     )
   ) {
-    const invoiceDate = selectResourceField(resource, fields.invoiceDate)?.date
-    const paymentTerms = selectResourceField(
+    const invoiceDate = selectResourceFieldValue(resource, fields.invoiceDate)?.date
+    const paymentTerms = selectResourceFieldValue(
       resource,
       fields.paymentTerms,
     )?.number

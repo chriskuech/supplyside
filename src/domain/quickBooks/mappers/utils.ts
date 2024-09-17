@@ -1,11 +1,11 @@
 import dayjs from 'dayjs'
 import { match, P } from 'ts-pattern'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { FieldTemplate } from '@/domain/schema/template/types'
 
 export const mapValue = (resource: Resource, field: FieldTemplate) => {
-  const fieldValue = selectResourceField(resource, field)
+  const fieldValue = selectResourceFieldValue(resource, field)
 
   return match(field.type)
     .with('Checkbox', () => fieldValue?.boolean)

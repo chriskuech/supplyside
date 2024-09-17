@@ -4,7 +4,7 @@ import { readSchema } from '../schema'
 import { selectSchemaField } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { recalculateSubtotalCost } from './costs'
-import { selectResourceField } from './extensions'
+import { selectResourceFieldValue } from './extensions'
 import {
   mapValueInputToPrismaValueCreate,
   mapValueToValueInput,
@@ -211,7 +211,7 @@ export const updateResource = async ({
     resource: entity,
     updatedFields: fields.map((field) => ({
       field: selectSchemaField(schema, field) ?? fail('Field not found'),
-      value: selectResourceField(entity, field) ?? fail('Value not found'),
+      value: selectResourceFieldValue(entity, field) ?? fail('Value not found'),
     })),
   })
 
@@ -234,12 +234,12 @@ export const deleteResource = async ({
 
   const entity = mapResourceModelToEntity(model)
   if (entity.type === 'Line') {
-    const orderId = selectResourceField(entity, fields.order)?.resource?.id
+    const orderId = selectResourceFieldValue(entity, fields.order)?.resource?.id
     if (orderId) {
       await recalculateSubtotalCost(accountId, 'Order', orderId)
     }
 
-    const billId = selectResourceField(entity, fields.bill)?.resource?.id
+    const billId = selectResourceFieldValue(entity, fields.bill)?.resource?.id
     if (billId) {
       await recalculateSubtotalCost(accountId, 'Bill', billId)
     }

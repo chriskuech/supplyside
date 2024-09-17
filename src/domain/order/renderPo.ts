@@ -4,6 +4,7 @@ import puppeteer from 'puppeteer'
 /* @ts-expect-error */
 import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.browser.production'
 import PoDocument from './doc/PoDocument'
+import { createViewModel } from './createViewModel'
 import PoDocumentFooter from '@/domain/order/doc/PoDocumentFooter'
 import singleton from '@/services/singleton'
 
@@ -27,24 +28,26 @@ type RenderPoParams = {
   isPreview?: boolean
 }
 
-export const renderPo = async (params: RenderPoParams) => {
-  const [main, footer] = await Promise.all([
-    PoDocument(params),
-    PoDocumentFooter(params),
+export const renderPo = async ({
+  accountId,
+  resourceId,
+  isPreview,
+}: RenderPoParams) => {
+  const [model, page] = await Promise.all([
+    createViewModel(accountId, resourceId),
+    browser().then((browser) => browser.newPage()),
   ])
-
-  const page = await (await browser()).newPage()
 
   try {
     await page.setContent(
-      htmlDocument(ReactDom.renderToString(main), params.isPreview),
+      htmlDocument(ReactDom.renderToString(PoDocument(model)), isPreview),
       { timeout: 300 },
     )
 
     const buffer = await page.pdf({
       format: 'letter',
       headerTemplate: '<div></div>',
-      footerTemplate: ReactDom.renderToString(footer),
+      footerTemplate: ReactDom.renderToString(PoDocumentFooter(model)),
       displayHeaderFooter: true,
       margin: {
         top: '35px',

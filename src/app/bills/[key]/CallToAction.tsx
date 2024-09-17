@@ -4,7 +4,7 @@ import { ArrowRight } from '@mui/icons-material'
 import { Button, CircularProgress, Tooltip, Typography } from '@mui/material'
 import { approveBill as approveBillAction } from './actions'
 import MatchControl from './cta/MatchControl'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import {
   billStatusOptions,
@@ -30,7 +30,7 @@ export default function CallToAction({ self, schema, resource }: Props) {
 
   if (!resource) return <CircularProgress />
 
-  const billStatus = selectResourceField(resource, fields.billStatus)?.option
+  const billStatus = selectResourceFieldValue(resource, fields.billStatus)?.option
 
   const isDraft = billStatus?.templateId === billStatusOptions.draft.templateId
   const isSubmitted =
