@@ -71,13 +71,13 @@ export async function disconnect(accountId: string) {
     templateId: resources.mcMasterCarrVendor.templateId,
   })
 
-  assert(mcMasterCarrVendor, 'McMaster-Carr vendor not found')
-
-  await updateTemplateId({
-    accountId,
-    resourceId: mcMasterCarrVendor.id,
-    templateId: null,
-  })
+  if (mcMasterCarrVendor) {
+    await updateTemplateId({
+      accountId,
+      resourceId: mcMasterCarrVendor.id,
+      templateId: null,
+    })
+  }
 
   await prisma().account.update({
     where: { id: accountId },
