@@ -378,6 +378,7 @@ const _fields = {
     type: 'Select',
     description: "Magnitude of an item's quantity",
     options: Object.values(unitOfMeasureOptions),
+    isOptionsEditable: true,
   },
   unitCost: {
     templateId: '099a0fe9-85a4-4860-b874-49e5191b7ac2',
