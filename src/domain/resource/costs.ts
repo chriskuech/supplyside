@@ -1,7 +1,7 @@
 import { fail } from 'assert'
 import { ResourceType } from '@prisma/client'
 import { map, pipe, sum } from 'remeda'
-import { selectResourceField } from './extensions'
+import { selectResourceFieldValue } from './extensions'
 import { readResource, readResources, updateResourceField } from '.'
 import { readSchema } from '@/domain/schema'
 import prisma from '@/services/prisma'
@@ -108,7 +108,7 @@ export const recalculateItemizedCosts = async (
   })
 
   const subtotal =
-    selectResourceField(resource, fields.subtotalCost)?.number ?? 0
+    selectResourceFieldValue(resource, fields.subtotalCost)?.number ?? 0
 
   await updateResourceField({
     accountId,
@@ -147,7 +147,9 @@ export const recalculateSubtotalCost = async (
 
   const subTotal = pipe(
     lines,
-    map((line) => selectResourceField(line, fields.totalCost)?.number ?? 0),
+    map(
+      (line) => selectResourceFieldValue(line, fields.totalCost)?.number ?? 0,
+    ),
     sum(),
   )
 

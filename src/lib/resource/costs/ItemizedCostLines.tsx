@@ -20,7 +20,7 @@ import { match } from 'ts-pattern'
 import { createCost, deleteCost, updateCost } from './actions'
 import { Resource } from '@/domain/resource/entity'
 import { fields } from '@/domain/schema/template/system-fields'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 
 type Props = {
   resource: Resource
@@ -31,8 +31,9 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
   const theme = useTheme()
 
   const subtotalCost =
-    selectResourceField(resource, fields.subtotalCost)?.number ?? 0
-  const totalCost = selectResourceField(resource, fields.totalCost)?.number ?? 0
+    selectResourceFieldValue(resource, fields.subtotalCost)?.number ?? 0
+  const totalCost =
+    selectResourceFieldValue(resource, fields.totalCost)?.number ?? 0
 
   return (
     <Stack spacing={2}>

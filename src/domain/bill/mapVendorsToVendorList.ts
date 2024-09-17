@@ -1,5 +1,5 @@
 import { Resource } from '../resource/entity'
-import { selectResourceField } from '../resource/extensions'
+import { selectResourceFieldValue } from '../resource/extensions'
 import { fields } from '../schema/template/system-fields'
 
 export const mapVendorsToVendorList = (vendors: Resource[]) =>
@@ -11,7 +11,7 @@ export const mapVendorsToVendorList = (vendors: Resource[]) =>
     },
     ...vendors.map((vendor) => ({
       id: vendor.id,
-      name: selectResourceField(vendor, fields.name)?.string,
+      name: selectResourceFieldValue(vendor, fields.name)?.string,
     })),
   ]
     .filter(({ name }) => !!name)

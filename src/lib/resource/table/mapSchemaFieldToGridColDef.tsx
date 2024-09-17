@@ -13,7 +13,7 @@ import { SchemaField } from '@/domain/schema/entity'
 import { findTemplateField } from '@/domain/schema/template/system-fields'
 import { formatDate, formatMoney } from '@/lib/format'
 import { Value } from '@/domain/resource/entity'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { emptyValue } from '@/domain/resource/entity'
 
 export const mapSchemaFieldToGridColDef = (
@@ -141,11 +141,11 @@ export const mapSchemaFieldToGridColDef = (
   },
 
   valueGetter: (cell: Display, resource: Row): Value =>
-    selectResourceField(resource, { fieldId: field.id }) ?? emptyValue,
+    selectResourceFieldValue(resource, { fieldId: field.id }) ?? emptyValue,
 
   // This function is called when a value is written to the row, prior to persisting the resource.
   valueSetter: (value: Value | undefined = emptyValue, row: Row): Row =>
-    !selectResourceField(row, { fieldId: field.id })
+    !selectResourceFieldValue(row, { fieldId: field.id })
       ? {
           ...row,
           fields: [
@@ -211,7 +211,7 @@ export const mapSchemaFieldToGridColDef = (
 
   // Only called if `renderCell` returns `undefined`
   valueFormatter: (_, resource) => {
-    const value = selectResourceField(resource, { fieldId: field.id })
+    const value = selectResourceFieldValue(resource, { fieldId: field.id })
     const template = findTemplateField(field.templateId)
 
     const formatted = match<FieldType>(field.type)
