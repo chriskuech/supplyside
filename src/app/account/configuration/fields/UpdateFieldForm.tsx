@@ -13,6 +13,7 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { FieldType } from '@prisma/client'
+import { isTruthy } from 'remeda'
 import OptionsControl from './OptionsControl'
 import ResourceTypeSelect from './ResourceTypeSelect'
 import DefaultValueControl from './DefaultValueControl'
@@ -60,6 +61,8 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
   const isValid = !!name
   const isDisabled = !!field.templateId
 
+  const template = findTemplateField(field.templateId)
+
   return (
     <Stack spacing={2} width="fit-content">
       <Stack direction="row" spacing={1}>
@@ -101,7 +104,13 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         <OptionsControl
           options={options}
           onChange={setOptions}
-          isDisabled={!!findTemplateField(field.templateId)?.options}
+          isDisabled={!!template?.options && !template?.isOptionsEditable}
+          templateOptionIds={template?.options
+            ?.map(
+              (to) =>
+                field.options?.find((o) => o.templateId === to.templateId)?.id,
+            )
+            .filter(isTruthy)}
         />
       )}
 

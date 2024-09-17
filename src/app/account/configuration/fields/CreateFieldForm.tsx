@@ -50,7 +50,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
             options={Object.values(FieldType)}
             onChange={(e, value) => setType(value ?? undefined)}
             renderInput={(params) => <TextField {...params} label="Type" />}
-          ></Autocomplete>
+          />
         </FormControl>
 
         <FormControl sx={{ width: 'fit-content' }}>

@@ -24,6 +24,7 @@ export type FieldTemplate = {
   }
   isDerived?: boolean
   isRequired?: boolean
+  isOptionsEditable?: boolean
   defaultToToday?: boolean
   prefix?: string
 }

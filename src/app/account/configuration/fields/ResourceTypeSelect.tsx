@@ -19,6 +19,6 @@ export default function ResourceTypeSelect({
       disabled={!setResourceType}
       onChange={(e, value) => setResourceType?.(value ?? undefined)}
       renderInput={(params) => <TextField {...params} />}
-    ></Autocomplete>
+    />
   )
 }

@@ -2,8 +2,8 @@ import { deepStrictEqual } from 'assert'
 import { entries, filter, flatMap, groupBy, map, mapValues, pipe } from 'remeda'
 import { FieldTemplate } from './types'
 
-// Define a templateId on macOS with
-//   `uuidgen | awk '{print tolower($0)}'`
+// Gen a new templateId and copy it to the clipboard on macOS
+//   `uuidgen | awk '{print tolower($0)}' | tr -d '\n' | pbcopy`
 
 export const billStatusOptions = {
   draft: {
@@ -52,6 +52,57 @@ export const orderStatusOptions = {
   canceled: {
     templateId: 'e8b7c2c8-0b7b-4e9a-8e8d-7b2f5e1f6f4e',
     name: 'Canceled',
+  },
+}
+
+export const unitOfMeasureOptions = {
+  box: {
+    templateId: 'cae404de-3fdd-4bea-aff4-3b3e08ee6dd4',
+    name: 'box',
+  },
+  each: {
+    templateId: '06c5c8f9-5cd7-4c05-994e-ee9adb906390',
+    name: 'each',
+  },
+  yard: {
+    templateId: '74bc9dcb-54cd-4201-96a4-60420dd2eec4',
+    name: 'yard',
+  },
+  foot: {
+    templateId: '89f9c5b8-6be3-49b0-b979-b9275d98d5ac',
+    name: 'foot',
+  },
+  inch: {
+    templateId: '8193a87b-f009-4aa1-a65d-0ee37e63721d',
+    name: 'inch',
+  },
+  centimeter: {
+    templateId: '6ba976a9-1ec6-4a46-b91e-8197792488d9',
+    name: 'centimeter',
+  },
+  pack: {
+    templateId: '3cfcfe4d-88aa-42e9-b415-722d87797660',
+    name: 'pack',
+  },
+  pair: {
+    templateId: 'fdc4b46d-f46b-4856-b6f5-b8a15443f350',
+    name: 'pair',
+  },
+  roll: {
+    templateId: 'efa7b2c3-4930-45c3-a5b6-c17292df3e47',
+    name: 'roll',
+  },
+  squareInch: {
+    templateId: 'ad47b3eb-aa99-46f5-9602-d36731bd9a5d',
+    name: 'square inch',
+  },
+  set: {
+    templateId: '068c3985-2f31-4fcc-a5ea-e09d6dd2edb7',
+    name: 'set',
+  },
+  squareFoot: {
+    templateId: '1e7be07c-c121-4a6f-8af2-239e5da18a4e',
+    name: 'square foot',
   },
 }
 
@@ -326,6 +377,8 @@ const _fields = {
     name: 'Unit of Measure',
     type: 'Select',
     description: "Magnitude of an item's quantity",
+    options: Object.values(unitOfMeasureOptions),
+    isOptionsEditable: true,
   },
   unitCost: {
     templateId: '099a0fe9-85a4-4860-b874-49e5191b7ac2',
