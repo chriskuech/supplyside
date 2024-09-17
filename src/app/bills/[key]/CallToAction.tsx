@@ -30,7 +30,10 @@ export default function CallToAction({ self, schema, resource }: Props) {
 
   if (!resource) return <CircularProgress />
 
-  const billStatus = selectResourceFieldValue(resource, fields.billStatus)?.option
+  const billStatus = selectResourceFieldValue(
+    resource,
+    fields.billStatus,
+  )?.option
 
   const isDraft = billStatus?.templateId === billStatusOptions.draft.templateId
   const isSubmitted =

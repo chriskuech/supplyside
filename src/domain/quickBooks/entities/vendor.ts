@@ -82,8 +82,8 @@ export const upsertVendorsFromQuickBooks = async (
     (quickBooksVendor) =>
       !currentVendors.some(
         (vendor) =>
-          selectResourceFieldValue(vendor, fields.quickBooksVendorId)?.string ===
-          quickBooksVendor.Id,
+          selectResourceFieldValue(vendor, fields.quickBooksVendorId)
+            ?.string === quickBooksVendor.Id,
       ),
   )
 

@@ -64,7 +64,8 @@ export const readResourceFieldFilesAction = ({
 }: ResourceFieldActionParams): Promise<File[] | undefined> =>
   withSession(({ accountId }) =>
     readResource({ accountId, id: resourceId }).then(
-      (resource) => selectResourceFieldValue(resource, { fieldId })?.files ?? [],
+      (resource) =>
+        selectResourceFieldValue(resource, { fieldId })?.files ?? [],
     ),
   )
 

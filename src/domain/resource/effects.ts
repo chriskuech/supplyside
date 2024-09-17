@@ -95,8 +95,10 @@ export const handleResourceUpdate = async ({
   ) {
     const totalCostFieldId =
       selectSchemaField(schema, fields.totalCost)?.id ?? fail()
-    const unitCost = selectResourceFieldValue(resource, fields.unitCost)?.number ?? 0
-    const quantity = selectResourceFieldValue(resource, fields.quantity)?.number ?? 0
+    const unitCost =
+      selectResourceFieldValue(resource, fields.unitCost)?.number ?? 0
+    const quantity =
+      selectResourceFieldValue(resource, fields.quantity)?.number ?? 0
 
     await updateResourceField({
       accountId,
@@ -116,7 +118,8 @@ export const handleResourceUpdate = async ({
       (rf) => rf.field.templateId === fields.totalCost.templateId,
     )
   ) {
-    const orderId = selectResourceFieldValue(resource, fields.order)?.resource?.id
+    const orderId = selectResourceFieldValue(resource, fields.order)?.resource
+      ?.id
     if (orderId) {
       await recalculateSubtotalCost(accountId, 'Order', orderId)
     }
@@ -191,7 +194,10 @@ export const handleResourceUpdate = async ({
         rf.field.templateId === fields.paymentTerms.templateId,
     )
   ) {
-    const invoiceDate = selectResourceFieldValue(resource, fields.invoiceDate)?.date
+    const invoiceDate = selectResourceFieldValue(
+      resource,
+      fields.invoiceDate,
+    )?.date
     const paymentTerms = selectResourceFieldValue(
       resource,
       fields.paymentTerms,

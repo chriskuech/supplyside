@@ -147,7 +147,9 @@ export const recalculateSubtotalCost = async (
 
   const subTotal = pipe(
     lines,
-    map((line) => selectResourceFieldValue(line, fields.totalCost)?.number ?? 0),
+    map(
+      (line) => selectResourceFieldValue(line, fields.totalCost)?.number ?? 0,
+    ),
     sum(),
   )
 

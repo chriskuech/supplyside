@@ -134,7 +134,8 @@ export default async function BillsDetail({
               >
                 <CallToAction
                   key={
-                    selectResourceFieldValue(resource, fields.billStatus)?.option?.id
+                    selectResourceFieldValue(resource, fields.billStatus)
+                      ?.option?.id
                   }
                   schema={schema}
                   self={session.user}

@@ -25,7 +25,10 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
     }),
   ])
 
-  const poRecipient = selectResourceFieldValue(order, fields.poRecipient)?.contact
+  const poRecipient = selectResourceFieldValue(
+    order,
+    fields.poRecipient,
+  )?.contact
   const po = selectResourceFieldValue(order, fields.document)?.file
   const assignee = selectResourceFieldValue(order, fields.assignee)?.user
   const vendor = selectResourceFieldValue(order, fields.vendor)?.resource

@@ -4,7 +4,7 @@ import puppeteer from 'puppeteer'
 /* @ts-expect-error */
 import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.browser.production'
 import PoDocument from './doc/PoDocument'
-import { createViewModel } from './createViewModel'
+import { createViewModel } from './doc/createViewModel'
 import PoDocumentFooter from '@/domain/order/doc/PoDocumentFooter'
 import singleton from '@/services/singleton'
 

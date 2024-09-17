@@ -1,17 +1,17 @@
 import { P, match } from 'ts-pattern'
 import { FieldType } from '@prisma/client'
 import { isTruthy } from 'remeda'
-import { Resource, ResourceField } from '../resource/entity'
-import { readResource, readResources } from '../resource'
-import { readSchema } from '../schema'
+import { Resource, ResourceField } from '../../resource/entity'
+import { readResource, readResources } from '../../resource'
+import { readSchema } from '../../schema'
 import {
   FieldRef,
   selectResourceField,
   selectResourceFieldValue,
-} from '../resource/extensions'
-import { fields } from '../schema/template/system-fields'
-import { readBlob } from '../blobs'
-import { LineViewModel, OrderViewModel } from './doc/ViewModel'
+} from '../../resource/extensions'
+import { fields } from '../../schema/template/system-fields'
+import { readBlob } from '../../blobs'
+import { LineViewModel, OrderViewModel } from './ViewModel'
 import prisma from '@/services/prisma'
 
 export const createViewModel = async (

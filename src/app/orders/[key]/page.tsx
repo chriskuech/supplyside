@@ -78,7 +78,8 @@ export default async function OrderDetail({
             fail('Field not found')
           }
           value={
-            selectResourceFieldValue(resource, fields.trackingNumber) ?? emptyValue
+            selectResourceFieldValue(resource, fields.trackingNumber) ??
+            emptyValue
           }
         />,
         ...(poFile ? [<PreviewPoControl key={poFile.id} file={poFile} />] : []),
@@ -103,7 +104,9 @@ export default async function OrderDetail({
             selectSchemaField(schema, fields.assignee) ??
             fail('Field not found')
           }
-          value={selectResourceFieldValue(resource, fields.assignee) ?? emptyValue}
+          value={
+            selectResourceFieldValue(resource, fields.assignee) ?? emptyValue
+          }
         />,
         ...(!isDraft
           ? [<EditControl key={EditControl.name} resourceId={resource.id} />]
