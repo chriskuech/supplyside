@@ -104,7 +104,7 @@ export default function ResourceTable({
         filter: {
           filterModel: {
             items: [],
-            quickFilterValues: [initialQuery],
+            quickFilterValues: parseFilter(initialQuery ?? ''),
           },
         },
         preferencePanel: { open: false },
@@ -119,12 +119,7 @@ export default function ResourceTable({
             <GridToolbarColumnsButton />
             <GridToolbarFilterButton />
             <GridToolbarQuickFilter
-              quickFilterParser={(searchInput) =>
-                searchInput
-                  .split(' ')
-                  .map((value) => value.trim())
-                  .filter(Boolean)
-              }
+              quickFilterParser={parseFilter}
               quickFilterFormatter={(quickFilterValues) =>
                 z
                   .array(z.string().nullable().optional())
@@ -142,3 +137,9 @@ export default function ResourceTable({
     />
   )
 }
+
+const parseFilter = (searchInput: string) =>
+  searchInput
+    .split(' ')
+    .map((value) => value.trim())
+    .filter(Boolean)
