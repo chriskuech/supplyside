@@ -141,9 +141,7 @@ export default function PoDocument({
                   >
                     Taxable
                   </td>
-                  <td style={styles.PaymentPadding}>
-                    {taxable}
-                  </td>
+                  <td style={styles.PaymentPadding}>{taxable}</td>
                 </tr>
               </tbody>
             </table>
