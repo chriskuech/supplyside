@@ -27,12 +27,14 @@ export type ResourceFieldInput = {
 export type CreateResourceParams = {
   accountId: string
   type: ResourceType
+  templateId?: string
   fields?: ResourceFieldInput[]
 }
 
 export const createResource = async ({
   accountId,
   type,
+  templateId,
   fields: resourceFields,
 }: CreateResourceParams): Promise<Resource> => {
   const schema = await readSchema({ accountId, resourceType: type })
@@ -47,6 +49,7 @@ export const createResource = async ({
   const resource = await prisma().resource.create({
     data: {
       accountId,
+      templateId,
       type,
       key: (key ?? 0) + 1,
       Cost: {
@@ -264,3 +267,37 @@ export const updateResourceField = async ({
     resourceId,
     fields: [{ fieldId, value }],
   })
+
+export type UpdateTemplateIdParams = {
+  accountId: string
+  resourceId: string
+  templateId: string | null
+}
+
+export const updateTemplateId = async ({
+  accountId,
+  resourceId,
+  templateId,
+}: UpdateTemplateIdParams) => {
+  await prisma().resource.update({
+    where: { id: resourceId, accountId },
+    data: { templateId },
+  })
+}
+
+export type FindByTemplateIdParams = {
+  accountId: string
+  templateId: string
+}
+
+export const findByTemplateId = async ({
+  accountId,
+  templateId,
+}: FindByTemplateIdParams) => {
+  const resource = await prisma().resource.findFirst({
+    where: { accountId, templateId },
+  })
+  if (!resource) return null
+
+  return readResource({ accountId, id: resource.id })
+}

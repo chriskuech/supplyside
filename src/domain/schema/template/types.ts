@@ -1,4 +1,5 @@
 import { FieldType, ResourceType } from '@prisma/client'
+import { ValueInput } from '@/domain/resource/patch'
 
 export type SchemaTemplate = {
   resourceType: ResourceType
@@ -34,4 +35,13 @@ export type OptionTemplate = {
 
 export type FieldTemplateReference = {
   templateId: string
+}
+
+export type ResourceTemplate = {
+  templateId: string
+  type: ResourceType
+  fields: {
+    field: FieldTemplate
+    value: ValueInput
+  }[]
 }

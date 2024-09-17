@@ -114,7 +114,7 @@ export const findResources = async ({
         AND "Value"."string" <> ''
         AND "Value"."string" IS NOT NULL
     )
-    SELECT "id", "type", "key", "name"
+    SELECT "id", "type", "key", "name", "templateId"
     FROM "View"
     WHERE "name" ILIKE '%' || ${input} || '%' OR "name" % ${input} -- % operator uses pg_trgm for similarity matching
     ORDER BY similarity("name", ${input}) DESC
@@ -127,6 +127,7 @@ export const findResources = async ({
         type: z.nativeEnum(ResourceType),
         name: z.string(),
         key: z.number(),
+        templateId: z.string().nullable(),
       })
       .array()
       .parse(results)

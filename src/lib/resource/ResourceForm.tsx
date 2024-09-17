@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
 import { ResourceType } from '@prisma/client'
+import { useMemo } from 'react'
 import useSchema from '../schema/useSchema'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
@@ -20,6 +21,7 @@ import { updateResourceField } from './actions'
 import { selectResourceField } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { mapValueToValueInput } from '@/domain/resource/mappers'
+import { resources } from '@/domain/schema/template/system-resources'
 
 type Props = {
   resource: Resource
@@ -32,6 +34,16 @@ export default function ResourceForm({
   resourceType,
   singleColumn,
 }: Props) {
+  const disabledFieldTemplateIds = useMemo(
+    () =>
+      new Set(
+        Object.values(resources)
+          .find((r) => r.templateId === resource.templateId)
+          ?.fields.map((f) => f.field.templateId) ?? [],
+      ),
+    [resource.templateId],
+  )
+
   const columns = singleColumn ? 1 : 3
 
   const schema = useSchema(resourceType)
@@ -80,6 +92,11 @@ export default function ResourceForm({
                     value={selectResourceField(resource, {
                       fieldId: singleField.id,
                     })}
+                    disabled={
+                      !!resource.templateId &&
+                      !!singleField.templateId &&
+                      disabledFieldTemplateIds.has(singleField.templateId)
+                    }
                   />
                 </Box>
               ) : (
@@ -110,6 +127,11 @@ export default function ResourceForm({
                           </Typography>
                           <Box>
                             <Field
+                              disabled={
+                                !!resource.templateId &&
+                                !!f.templateId &&
+                                disabledFieldTemplateIds.has(f.templateId)
+                              }
                               inputId={`rf-${f.id}`}
                               resourceId={resource.id}
                               field={f}
