@@ -1,4 +1,5 @@
 import { fail } from 'assert'
+import { assert } from 'console'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 import { validate as isUuid } from 'uuid'
@@ -103,6 +104,34 @@ export const extractContent = async (accountId: string, resourceId: string) => {
 
   const poNumber = data?.poNumber
   const vendorId = data?.vendorId
+  const poNumberAsNumber = z.coerce
+    .number()
+    .int()
+    .positive()
+    .safeParse(poNumber)?.data
+  const [order, ...orders] =
+    poNumberAsNumber && vendorId
+      ? await readResources({
+          accountId,
+          type: 'Order',
+          where: {
+            and: [
+              {
+                '==': [
+                  { var: fields.poNumber.name },
+                  poNumberAsNumber.toString(),
+                ],
+              },
+              { '==': [{ var: fields.vendor.name }, vendorId] },
+            ],
+          },
+        })
+      : []
+
+  assert(
+    !orders.length,
+    `Found ${orders.length + 1} orders with PO Number ${poNumber}`,
+  )
 
   const updatedFields: ResourceFieldInput[] = [
     ...(poNumber
@@ -110,6 +139,14 @@ export const extractContent = async (accountId: string, resourceId: string) => {
           {
             fieldId: selectSchemaFieldUnsafe(billSchema, fields.poNumber).id,
             value: { string: poNumber },
+          },
+        ]
+      : []),
+    ...(order
+      ? [
+          {
+            fieldId: selectSchemaFieldUnsafe(billSchema, fields.order).id,
+            value: { resourceId: order.id },
           },
         ]
       : []),

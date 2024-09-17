@@ -38,8 +38,11 @@ export const createSql = ({
     ${orderBy ? `ORDER BY ${createOrderBy(orderBy)}` : ''}
   `
 
-const createWhere = (where: Where, schema: Schema) =>
+const createWhere = (where: Where, schema: Schema): string =>
   match(where)
+    .with({ and: P.any }, ({ and: clauses }) =>
+      clauses.map((c) => `(${createWhere(c, schema)})`).join(' AND '),
+    )
     .with(
       { '==': P.any },
       ({ '==': [{ var: var_ }, val] }) =>
