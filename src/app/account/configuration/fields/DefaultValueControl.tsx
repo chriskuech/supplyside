@@ -47,7 +47,7 @@ export default function DefaultValueControl({
         getOptionLabel={(option) => option.name}
         options={options}
         renderInput={(params) => <TextField {...params} />}
-      ></Autocomplete>
+      />
     ))
     .with('Textarea', () => (
       <TextField

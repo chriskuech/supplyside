@@ -32,12 +32,14 @@ type Props = {
   options: OptionPatch[]
   onChange: (values: OptionPatch[]) => void
   isDisabled?: boolean
+  templateOptionIds: string[] | undefined
 }
 
 export default function OptionsControl({
   options,
   onChange,
   isDisabled,
+  templateOptionIds,
 }: Props) {
   // I think this is wrong considering a option { op: 'remove' } will still show up here
   const optionNames = new Set(options.map((v) => v.name))
@@ -46,6 +48,7 @@ export default function OptionsControl({
     <Autocomplete<OptionPatch, true, boolean, true>
       multiple
       disabled={isDisabled}
+      disableClearable={isDisabled || !!templateOptionIds?.length}
       freeSolo
       options={[]}
       value={options}
@@ -90,6 +93,7 @@ export default function OptionsControl({
           values={values}
           onChange={onChange}
           isDisabled={isDisabled}
+          templateOptionIds={templateOptionIds}
         />
       )}
       renderInput={(params: AutocompleteRenderInputParams) => {
@@ -148,7 +152,8 @@ const SortableChips: FC<{
   values: OptionPatch[]
   onChange: (values: OptionPatch[]) => void
   isDisabled?: boolean
-}> = ({ values, onChange, isDisabled }) => {
+  templateOptionIds: string[] | undefined
+}> = ({ values, onChange, isDisabled, templateOptionIds }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -186,14 +191,17 @@ const SortableChips: FC<{
       }}
     >
       <SortableContext items={values} strategy={rectSortingStrategy}>
-        <Stack direction="row" spacing={1} flexWrap="wrap">
+        <Stack direction="row" gap={1} flexWrap="wrap">
           {values
             .filter((v) => v.op !== 'remove')
             .map((value) => (
               <SortableChip
                 key={value.id}
                 value={value}
-                isDisabled={isDisabled}
+                isDisabled={
+                  isDisabled ||
+                  templateOptionIds?.some((optionId) => optionId === value.id)
+                }
                 onRemove={(value) =>
                   onChange([
                     ...values.filter((v) => v.id !== value.id),
