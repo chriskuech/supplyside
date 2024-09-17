@@ -142,7 +142,7 @@ export default function PoDocument({
                     Taxable
                   </td>
                   <td style={styles.PaymentPadding}>
-                    {taxable ? 'Yes' : 'No'}
+                    {taxable}
                   </td>
                 </tr>
               </tbody>
