@@ -1,4 +1,5 @@
 import { fail } from 'assert'
+import { isNullish } from 'remeda'
 import { SchemaField, Schema } from '../schema/entity'
 import { selectSchemaField } from '../schema/extensions'
 import { readSchema } from '../schema'
@@ -203,7 +204,7 @@ export const handleResourceUpdate = async ({
       fields.paymentTerms,
     )?.number
 
-    if (invoiceDate && paymentTerms) {
+    if (!isNullish(invoiceDate) && !isNullish(paymentTerms)) {
       await updateResourceField({
         accountId,
         fieldId: selectSchemaField(schema, fields.paymentDueDate)?.id ?? fail(),
