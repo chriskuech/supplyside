@@ -1,26 +1,12 @@
-import puppeteer from 'puppeteer'
-// https://github.com/vercel/next.js/issues/43810
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-/* @ts-expect-error */
+import { readFile } from 'fs/promises'
+
+/* @ts-expect-error Workaround for https://github.com/vercel/next.js/issues/43810 */
 import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.browser.production'
-import PoDocument from './doc/PoDocument'
+
+import { exec, withTempDir } from '../os'
+import { createDataUrl } from '../blobs/util'
 import { createViewModel } from './doc/createViewModel'
-import PoDocumentFooter from '@/domain/order/doc/PoDocumentFooter'
-import singleton from '@/services/singleton'
-
-const browser = singleton('browser', async (clear) => {
-  const browser = await puppeteer.launch({
-    args: ['--no-sandbox'],
-  })
-
-  browser.once('disconnected', () => {
-    browser.close()
-    clear()
-    console.error('Puppeteer browser disconnected')
-  })
-
-  return browser
-})
+import PoDocument from './doc/PoDocument'
 
 type RenderPoParams = {
   accountId: string
@@ -32,38 +18,38 @@ export const renderPo = async ({
   accountId,
   resourceId,
   isPreview,
-}: RenderPoParams) => {
-  const [model, page] = await Promise.all([
-    createViewModel(accountId, resourceId),
-    browser().then((browser) => browser.newPage()),
-  ])
+}: RenderPoParams) =>
+  await withTempDir(async (path) => {
+    const viewModel = await createViewModel(accountId, resourceId)
 
-  try {
-    await page.setContent(
-      htmlDocument(ReactDom.renderToString(PoDocument(model)), isPreview),
-      { timeout: 300 },
+    const html = htmlDocument(
+      ReactDom.renderToString(PoDocument(viewModel)),
+      isPreview,
     )
 
-    const buffer = await page.pdf({
-      format: 'letter',
-      headerTemplate: '<div></div>',
-      footerTemplate: ReactDom.renderToString(PoDocumentFooter(model)),
-      displayHeaderFooter: true,
-      margin: {
-        top: '35px',
-        bottom: '35px',
-        left: '15px',
-        right: '15px',
-      },
-      printBackground: true,
-      timeout: 5_000,
+    const htmlDataUrl = createDataUrl({
+      mimeType: 'text/html',
+      buffer: Buffer.from(html),
     })
 
-    return buffer
-  } finally {
-    page.close()
-  }
-}
+    const command = `
+      wkhtmltopdf
+        --print-media-type
+        --dpi 300
+        --page-size Letter
+        --margin-top 10
+        --margin-bottom 10
+        --margin-left 10
+        --margin-right 10
+        --footer-left 'Order ${viewModel.number} | ${viewModel.issuedDate}'
+        --footer-right 'Page [page] of [topage]'
+        '${htmlDataUrl}'
+        '${path}/out.pdf'
+    `
+    await exec(command.replaceAll(/\s+/g, ' '))
+
+    return await readFile(`${path}/out.pdf`)
+  })
 
 const htmlDocument = (content: string, isPreview?: boolean) => `
   <!DOCTYPE html>
@@ -77,6 +63,7 @@ const htmlDocument = (content: string, isPreview?: boolean) => `
           font-family: Arial, sans-serif;
           margin: 0;
           padding: 0;
+          height: 100%;
         }
       </style>
     </head>

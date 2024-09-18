@@ -2,9 +2,15 @@
 /* eslint-disable jsx-a11y/alt-text */
 
 import { ReactNode } from 'react'
-import { isTruthy } from 'remeda'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
 import { OrderViewModel } from './ViewModel'
+
+const tdStyle = {
+  border: 0,
+  textAlign: 'right',
+  width: '100px',
+  verticalAlign: 'top',
+} as const
 
 export default function PoDocument({
   lines,
@@ -323,114 +329,101 @@ export default function PoDocument({
               </tr>
             </thead>
             <tbody>
-              {lines.map(async (line, index) => {
-                const lineAdditionalFieldsRows = line.additionalFields
-                  .map(({ key, value }, index) => (
-                    <tr key={index}>
-                      <td
-                        style={{
-                          border: 0,
-                          padding: '5px 8px',
-                          fontWeight: 600,
-                          width: '50%',
-                          verticalAlign: 'top',
-                        }}
-                      >
-                        {key}
-                      </td>
-                      <td
-                        style={{
-                          border: 0,
-                          padding: '5px 8px',
-                          textAlign: 'left',
-                          verticalAlign: 'top',
-                        }}
-                      >
-                        {value}
-                      </td>
-                    </tr>
-                  ))
-                  .filter(isTruthy)
-
-                const tdStyle = {
-                  border: 0,
-                  textAlign: 'right',
-                  width: '100px',
-                  verticalAlign: 'top',
-                } as const
-
-                return (
-                  <>
-                    <tr
+              {lines.map((line, index) => (
+                <>
+                  <tr
+                    style={{
+                      pageBreakInside: 'avoid',
+                      borderTop: '1px solid black',
+                    }}
+                  >
+                    <td
+                      rowSpan={2}
                       style={{
-                        pageBreakInside: 'avoid',
-                        borderTop: '1px solid black',
+                        borderRight: 0,
+                        fontWeight: 'bold',
+                        verticalAlign: 'top',
                       }}
                     >
-                      <td
-                        rowSpan={2}
+                      {index + 1}
+                    </td>
+                    <td
+                      rowSpan={2}
+                      style={{
+                        borderRight: 0,
+                        verticalAlign: 'top',
+                        borderLeft: 0,
+                        minWidth: '275px',
+                      }}
+                    >
+                      <div style={{ fontWeight: 'bold' }}>{line.itemName}</div>
+                      <div
                         style={{
-                          borderRight: 0,
-                          fontWeight: 'bold',
-                          verticalAlign: 'top',
+                          fontWeight: 'normal',
+                          color: '#575656',
+                          marginTop: '13px',
+                          whiteSpace: 'pre-wrap',
                         }}
                       >
-                        {index + 1}
-                      </td>
-                      <td
-                        rowSpan={2}
-                        style={{
-                          borderRight: 0,
-                          verticalAlign: 'top',
-                          borderLeft: 0,
-                          minWidth: '275px',
-                        }}
-                      >
-                        <div style={{ fontWeight: 'bold' }}>
-                          {line.itemName}
-                        </div>
-                        <div
+                        {line.itemDescription}
+                      </div>
+                    </td>
+                    <td style={tdStyle}>{line.unitOfMeasure}</td>
+                    <td style={tdStyle}>{line.quantity}</td>
+                    <td style={tdStyle}>{line.unitCost}</td>
+                    <td style={tdStyle}>{line.totalCost}</td>
+                  </tr>
+                  <tr>
+                    <td
+                      colSpan={4}
+                      style={{
+                        padding: 0,
+                        verticalAlign: 'top',
+                        border: 0,
+                      }}
+                    >
+                      {!!line.additionalFields.length && (
+                        <table
+                          id="line-additional-fields"
                           style={{
-                            fontWeight: 'normal',
-                            color: '#575656',
-                            marginTop: '13px',
-                            whiteSpace: 'pre-wrap',
+                            border: 'solid black',
+                            borderWidth: '1px 0px 0px 1px',
+                            margin: 0,
                           }}
                         >
-                          {line.itemDescription}
-                        </div>
-                      </td>
-                      <td style={tdStyle}>{line.unitOfMeasure}</td>
-                      <td style={tdStyle}>{line.quantity}</td>
-                      <td style={tdStyle}>{line.unitCost}</td>
-                      <td style={tdStyle}>{line.totalCost}</td>
-                    </tr>
-                    <tr>
-                      <td
-                        colSpan={4}
-                        style={{
-                          padding: 0,
-                          verticalAlign: 'top',
-                          border: 0,
-                        }}
-                      >
-                        {!!lineAdditionalFieldsRows.length && (
-                          <table
-                            id="line-additional-fields"
-                            style={{
-                              border: 'solid black',
-                              borderWidth: '1px 0px 0px 1px',
-                              margin: 0,
-                            }}
-                          >
-                            {lineAdditionalFieldsRows}
-                          </table>
-                        )}
-                      </td>
-                    </tr>
-                  </>
-                )
-              })}
+                          {line.additionalFields.map(
+                            ({ key, value }, index) => (
+                              <tr key={index}>
+                                <td
+                                  style={{
+                                    border: 0,
+                                    padding: '5px 8px',
+                                    fontWeight: 600,
+                                    width: '50%',
+                                    verticalAlign: 'top',
+                                  }}
+                                >
+                                  {key}
+                                </td>
+                                <td
+                                  style={{
+                                    border: 0,
+                                    padding: '5px 8px',
+                                    textAlign: 'left',
+                                    verticalAlign: 'top',
+                                  }}
+                                >
+                                  {value}
+                                </td>
+                              </tr>
+                            ),
+                          )}
+                        </table>
+                      )}
+                    </td>
+                  </tr>
+                </>
+              ))}
             </tbody>
           </table>
           {/* -- BEGIN: Lines -- */}

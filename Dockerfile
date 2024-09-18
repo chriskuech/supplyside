@@ -22,16 +22,13 @@ WORKDIR /app
 
 RUN apk add --no-cache \
   ca-certificates \
-  chromium \
   freetype \
   harfbuzz \
   nodejs \
   nss \
   poppler-utils \
-  ttf-freefont
-
-# Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+  ttf-freefont \
+  wkhtmltopdf
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
