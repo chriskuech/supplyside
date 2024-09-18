@@ -20,7 +20,7 @@ RUN npm run build
 FROM debian AS runner
 WORKDIR /app
 
-RUN apt add --no-cache \
+RUN apt install \
   ca-certificates \
   freetype \
   harfbuzz \
