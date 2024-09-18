@@ -85,7 +85,7 @@ export default function ResourceForm({
                     })}
                     disabled={
                       !!resource.templateId &&
-                      !!selectResourceField(resource, {
+                      !!selectResourceFieldValue(resource, {
                         fieldId: singleField.id,
                       })?.isSystemValue
                     }
@@ -121,7 +121,7 @@ export default function ResourceForm({
                             <Field
                               disabled={
                                 !!resource.templateId &&
-                                !!selectResourceField(resource, {
+                                !!selectResourceFieldValue(resource, {
                                   fieldId: f.id,
                                 })?.isSystemValue
                               }
