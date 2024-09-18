@@ -323,7 +323,7 @@ export default function PoDocument({
               </tr>
             </thead>
             <tbody>
-              {lines.map(async (line, index) => {
+              {lines.map((line, index) => {
                 const lineAdditionalFieldsRows = line.additionalFields
                   .map(({ key, value }, index) => (
                     <tr key={index}>
