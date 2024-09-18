@@ -3,10 +3,12 @@ import { ResourceType } from '@prisma/client'
 import { readSchema } from '../schema'
 import { selectSchemaField } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
+import { SchemaField } from '../schema/entity'
 import { recalculateSubtotalCost } from './costs'
-import { selectResourceField } from './extensions'
+import { selectResourceFieldValue } from './extensions'
 import {
   mapValueInputToPrismaValueCreate,
+  mapValueInputToPrismaValueWhere,
   mapValueToValueInput,
 } from './mappers'
 import { mapValueInputToPrismaValueUpdate } from './mappers'
@@ -178,6 +180,14 @@ export const updateResource = async ({
         schema.allFields.find((f) => f.id === fieldId) ??
         fail('Field not found in schema')
 
+      await checkForDuplicateResource(
+        sf,
+        accountId,
+        resource,
+        value,
+        resourceId,
+      )
+
       await prisma().resourceField.upsert({
         where: {
           resourceId_fieldId: {
@@ -214,7 +224,7 @@ export const updateResource = async ({
     resource: entity,
     updatedFields: fields.map((field) => ({
       field: selectSchemaField(schema, field) ?? fail('Field not found'),
-      value: selectResourceField(entity, field) ?? fail('Value not found'),
+      value: selectResourceFieldValue(entity, field) ?? fail('Value not found'),
     })),
   })
 
@@ -237,12 +247,12 @@ export const deleteResource = async ({
 
   const entity = mapResourceModelToEntity(model)
   if (entity.type === 'Line') {
-    const orderId = selectResourceField(entity, fields.order)?.resource?.id
+    const orderId = selectResourceFieldValue(entity, fields.order)?.resource?.id
     if (orderId) {
       await recalculateSubtotalCost(accountId, 'Order', orderId)
     }
 
-    const billId = selectResourceField(entity, fields.bill)?.resource?.id
+    const billId = selectResourceFieldValue(entity, fields.bill)?.resource?.id
     if (billId) {
       await recalculateSubtotalCost(accountId, 'Bill', billId)
     }
@@ -300,4 +310,38 @@ export const findByTemplateId = async ({
   if (!resource) return null
 
   return readResource({ accountId, id: resource.id })
+}
+
+async function checkForDuplicateResource(
+  sf: SchemaField,
+  accountId: string,
+  resource: Resource,
+  value: ValueInput,
+  resourceId: string,
+) {
+  if (sf.templateId === fields.name.templateId) {
+    const resourceExists = await prisma().resource.findFirst({
+      where: {
+        accountId,
+        type: resource.type,
+        ResourceField: {
+          some: {
+            Field: {
+              name: sf.name,
+            },
+            Value: mapValueInputToPrismaValueWhere(value),
+          },
+        },
+        NOT: {
+          id: resourceId,
+        },
+      },
+    })
+
+    if (resourceExists) {
+      throw new Error(
+        `Resource with ${sf.name}: ${Object.values(value)[0]} already exists.`,
+      )
+    }
+  }
 }

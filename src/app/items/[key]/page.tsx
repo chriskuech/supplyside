@@ -1,4 +1,4 @@
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
@@ -20,7 +20,7 @@ export default async function ItemsDetail({
       schema={schema}
       resource={resource}
       tools={[]}
-      name={selectResourceField(resource, fields.name)?.string}
+      name={selectResourceFieldValue(resource, fields.name)?.string}
     />
   )
 }

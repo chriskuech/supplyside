@@ -18,7 +18,7 @@ import {
   fields,
   orderStatusOptions,
 } from '@/domain/schema/template/system-fields'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { emptyValue } from '@/domain/resource/entity'
 import PreviewDraftPoButton from '@/app/orders/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
@@ -43,7 +43,7 @@ export default async function OrderDetail({
   const orderBills = (await findOrderBills(resource.id)) ?? []
 
   const status =
-    selectResourceField(resource, fields.orderStatus)?.option ??
+    selectResourceFieldValue(resource, fields.orderStatus)?.option ??
     fail('Status not found')
 
   const isDraft = status.templateId === orderStatusOptions.draft.templateId
@@ -61,7 +61,7 @@ export default async function OrderDetail({
     .otherwise(() => yellow[800])
 
   const hasInvalidFields = isMissingRequiredFields(schema, resource)
-  const poFile = selectResourceField(resource, fields.document)?.file
+  const poFile = selectResourceFieldValue(resource, fields.document)?.file
 
   return (
     <ResourceDetailPage
@@ -78,7 +78,8 @@ export default async function OrderDetail({
             fail('Field not found')
           }
           value={
-            selectResourceField(resource, fields.trackingNumber) ?? emptyValue
+            selectResourceFieldValue(resource, fields.trackingNumber) ??
+            emptyValue
           }
         />,
         ...(poFile ? [<PreviewPoControl key={poFile.id} file={poFile} />] : []),
@@ -93,7 +94,7 @@ export default async function OrderDetail({
             selectSchemaField(schema, fields.orderAttachments) ??
             fail('Field not found')
           }
-          value={selectResourceField(resource, fields.orderAttachments)}
+          value={selectResourceFieldValue(resource, fields.orderAttachments)}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
@@ -103,7 +104,9 @@ export default async function OrderDetail({
             selectSchemaField(schema, fields.assignee) ??
             fail('Field not found')
           }
-          value={selectResourceField(resource, fields.assignee) ?? emptyValue}
+          value={
+            selectResourceFieldValue(resource, fields.assignee) ?? emptyValue
+          }
         />,
         ...(!isDraft
           ? [<EditControl key={EditControl.name} resourceId={resource.id} />]

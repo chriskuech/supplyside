@@ -8,7 +8,7 @@ import { Schema, SchemaField } from '../schema/entity'
 import { mapUserModelToEntity } from '../user/mappers'
 import { Resource, Value, ValueResource } from './entity'
 import { ResourceModel, ValueModel, ValueResourceModel } from './model'
-import { selectResourceField } from './extensions'
+import { selectResourceFieldValue } from './extensions'
 import { ValueInput } from './patch'
 
 export const mapResourceModelToEntity = (model: ResourceModel): Resource => ({
@@ -34,8 +34,8 @@ export const mapResourceToValueResource = (
   templateId: resource.templateId,
   key: resource.key,
   name:
-    selectResourceField(resource, fields.name)?.string ??
-    selectResourceField(resource, fields.poNumber)?.string ??
+    selectResourceFieldValue(resource, fields.name)?.string ??
+    selectResourceFieldValue(resource, fields.poNumber)?.string ??
     fail('Resource type does not have a name or number field'),
 })
 
@@ -112,7 +112,7 @@ export const isMissingRequiredFields = (schema: Schema, resource: Resource) =>
       .with('MultiSelect', () => 'options')
       .exhaustive()
 
-    const value = selectResourceField(resource, { fieldId: field.id })?.[
+    const value = selectResourceFieldValue(resource, { fieldId: field.id })?.[
       valueColumnName
     ]
 
@@ -261,3 +261,45 @@ export const mapValueInputToPrismaValueCreate = (
 
   return { ...parsedValue, isSystemValue: value.isSystemValue }
 }
+
+export const mapValueInputToPrismaValueWhere = (value: ValueInput) =>
+  match<ValueInput>(value)
+    .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
+      boolean: value,
+    }))
+    .with({ contact: P.not(undefined) }, ({ contact: value }) => ({
+      Contact: {
+        name: value?.name ?? null,
+        title: value?.title ?? null,
+        email: value?.email ?? null,
+        phone: value?.phone ?? null,
+      },
+    }))
+    .with({ date: P.not(undefined) }, ({ date: value }) => ({
+      date: value,
+    }))
+    .with({ number: P.not(undefined) }, ({ number: value }) => ({
+      number: value,
+    }))
+    .with({ optionId: P.not(undefined) }, ({ optionId: value }) => ({
+      optionId: value,
+    }))
+    .with({ string: P.not(undefined) }, ({ string: value }) => ({
+      string: value,
+    }))
+    .with({ userId: P.not(undefined) }, ({ userId: value }) => ({
+      userId: value,
+    }))
+    .with({ fileId: P.not(undefined) }, ({ fileId: value }) => ({
+      fileId: value,
+    }))
+    .with({ resourceId: P.not(undefined) }, ({ resourceId: value }) => ({
+      resourceId: value,
+    }))
+    .with({ fileIds: P.not(undefined) }, ({ fileIds: value }) => ({
+      fileId: { in: value },
+    }))
+    .with({ optionIds: P.not(undefined) }, ({ optionIds: value }) => ({
+      optionId: { in: value },
+    }))
+    .exhaustive()

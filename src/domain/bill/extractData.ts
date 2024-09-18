@@ -9,7 +9,7 @@ import {
   readResources,
   updateResource,
 } from '../resource'
-import { selectResourceField } from '../resource/extensions'
+import { selectResourceFieldValue } from '../resource/extensions'
 import { fields } from '../schema/template/system-fields'
 import { selectSchemaFieldUnsafe } from '../schema/extensions'
 import { readSchema } from '../schema'
@@ -65,7 +65,7 @@ export const extractContent = async (accountId: string, resourceId: string) => {
   const vendorList = mapVendorsToVendorList(vendors)
 
   const billFiles =
-    selectResourceField(billResource, fields.billFiles)?.files ??
+    selectResourceFieldValue(billResource, fields.billFiles)?.files ??
     fail('Files not found')
 
   if (!billFiles.length) return

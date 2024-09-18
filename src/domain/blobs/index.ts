@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto'
-import { Blob } from '@prisma/client'
+import { Blob, BlobWithData } from './entity'
 import azblob from '@/services/azblob'
 import prisma from '@/services/prisma'
 
@@ -18,7 +18,10 @@ type CreateBlobParams = { accountId: string } & (
     }
 )
 
-export const createBlob = async ({ accountId, ...rest }: CreateBlobParams) => {
+export const createBlob = async ({
+  accountId,
+  ...rest
+}: CreateBlobParams): Promise<Blob> => {
   const blobName = randomUUID()
 
   const containerClient = azblob().getContainerClient(containerName)
@@ -51,7 +54,7 @@ type ReadBlobParams = {
 export const readBlob = async ({
   accountId,
   blobId,
-}: ReadBlobParams): Promise<(Blob & { buffer: Buffer }) | undefined> => {
+}: ReadBlobParams): Promise<BlobWithData | undefined> => {
   const blob = await prisma().blob.findUnique({
     where: { accountId, id: blobId },
   })
@@ -73,7 +76,10 @@ type DeleteBlobParams = {
   blobId: string
 }
 
-export const deleteBlob = async ({ accountId, blobId }: DeleteBlobParams) => {
+export const deleteBlob = async ({
+  accountId,
+  blobId,
+}: DeleteBlobParams): Promise<void> => {
   const blob = await prisma().blob.findUnique({
     where: { accountId, id: blobId },
   })

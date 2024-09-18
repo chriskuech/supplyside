@@ -14,6 +14,7 @@ import { MAX_ENTITIES_PER_PAGE } from '../constants'
 import {
   createResource,
   readResources,
+  updateResource,
   updateResourceField,
 } from '@/domain/resource'
 import { readSchema } from '@/domain/schema'
@@ -22,8 +23,9 @@ import {
   selectSchemaFieldUnsafe,
 } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
+import { findResources } from '@/lib/resource/actions'
 
 export const readVendor = async (
   accountId: string,
@@ -77,13 +79,17 @@ export const upsertVendorsFromQuickBooks = async (
   ])
 
   const vendorNameField = selectSchemaFieldUnsafe(vendorSchema, fields.name)
+  const quickBooksVendorIdField = selectSchemaFieldUnsafe(
+    vendorSchema,
+    fields.quickBooksVendorId,
+  )
 
   const quickBooksVendorsToAdd = quickBooksVendors.filter(
     (quickBooksVendor) =>
       !currentVendors.some(
         (vendor) =>
-          selectResourceField(vendor, fields.quickBooksVendorId)?.string ===
-          quickBooksVendor.Id,
+          selectResourceFieldValue(vendor, fields.quickBooksVendorId)
+            ?.string === quickBooksVendor.Id,
       ),
   )
 
@@ -96,13 +102,13 @@ export const upsertVendorsFromQuickBooks = async (
     quickBooksVendorsToUpdate.map(async (quickBooksVendor) => {
       const vendor = currentVendors.find(
         (currentVendor) =>
-          selectResourceField(currentVendor, fields.quickBooksVendorId)
+          selectResourceFieldValue(currentVendor, fields.quickBooksVendorId)
             ?.string === quickBooksVendor.Id,
       )
 
       if (!vendor) return
 
-      const vendorName = selectResourceField(vendor, fields.name)?.string
+      const vendorName = selectResourceFieldValue(vendor, fields.name)?.string
 
       if (vendorName === quickBooksVendor.DisplayName) return
 
@@ -117,23 +123,42 @@ export const upsertVendorsFromQuickBooks = async (
 
   // `Resource.key` is (currently) created transactionally and thus not parallelizable
   for (const quickBooksVendorToAdd of quickBooksVendorsToAdd) {
-    await createResource({
-      accountId,
-      type: 'Vendor',
-      fields: [
-        {
-          fieldId: selectSchemaFieldUnsafe(vendorSchema, fields.name).id,
-          value: { string: quickBooksVendorToAdd.DisplayName },
-        },
-        {
-          fieldId: selectSchemaFieldUnsafe(
-            vendorSchema,
-            fields.quickBooksVendorId,
-          ).id,
-          value: { string: quickBooksVendorToAdd.Id },
-        },
-      ],
+    const [vendor] = await findResources({
+      resourceType: 'Vendor',
+      input: quickBooksVendorToAdd.DisplayName,
     })
+
+    if (vendor && vendor.name === quickBooksVendorToAdd.DisplayName) {
+      await updateResource({
+        accountId,
+        resourceId: vendor.id,
+        fields: [
+          {
+            fieldId: quickBooksVendorIdField.id,
+            value: { string: quickBooksVendorToAdd.Id },
+          },
+          {
+            fieldId: vendorNameField.id,
+            value: { string: quickBooksVendorToAdd.DisplayName },
+          },
+        ],
+      })
+    } else {
+      await createResource({
+        accountId,
+        type: 'Vendor',
+        fields: [
+          {
+            fieldId: vendorNameField.id,
+            value: { string: quickBooksVendorToAdd.DisplayName },
+          },
+          {
+            fieldId: quickBooksVendorIdField.id,
+            value: { string: quickBooksVendorToAdd.Id },
+          },
+        ],
+      })
+    }
   }
 }
 
@@ -180,7 +205,7 @@ const updateVendorOnQuickBooks = async (
 ): Promise<Vendor> => {
   const token = await requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
-  const quickBooksVendorId = selectResourceField(
+  const quickBooksVendorId = selectResourceFieldValue(
     vendor,
     fields.quickBooksVendorId,
   )?.string
@@ -219,7 +244,7 @@ export const upsertVendorOnQuickBooks = async (
   accountId: string,
   vendor: Resource,
 ): Promise<Vendor> => {
-  const quickBooksVendorId = selectResourceField(
+  const quickBooksVendorId = selectResourceFieldValue(
     vendor,
     fields.quickBooksVendorId,
   )?.string

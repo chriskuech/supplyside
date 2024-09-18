@@ -12,12 +12,13 @@ import {
 } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
 import { ResourceType } from '@prisma/client'
+import { useSnackbar } from 'notistack'
 import useSchema from '../schema/useSchema'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
 import Field from './fields/controls/Field'
 import { updateResourceField } from './actions'
-import { selectResourceField } from '@/domain/resource/extensions'
+import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { mapValueToValueInput } from '@/domain/resource/mappers'
 
@@ -32,6 +33,8 @@ export default function ResourceForm({
   resourceType,
   singleColumn,
 }: Props) {
+  const { enqueueSnackbar } = useSnackbar()
+
   const columns = singleColumn ? 1 : 3
 
   const schema = useSchema(resourceType)
@@ -77,7 +80,7 @@ export default function ResourceForm({
                     inputId={`rf-${singleField.id}`}
                     resourceId={resource.id}
                     field={singleField ?? fail()}
-                    value={selectResourceField(resource, {
+                    value={selectResourceFieldValue(resource, {
                       fieldId: singleField.id,
                     })}
                     disabled={
@@ -125,7 +128,7 @@ export default function ResourceForm({
                               inputId={`rf-${f.id}`}
                               resourceId={resource.id}
                               field={f}
-                              value={selectResourceField(resource, {
+                              value={selectResourceFieldValue(resource, {
                                 fieldId: f.id,
                               })}
                               onChange={(value) =>
@@ -133,7 +136,11 @@ export default function ResourceForm({
                                   resourceId: resource.id,
                                   fieldId: f.id,
                                   value: mapValueToValueInput(f.type, value),
-                                })
+                                }).catch((error) =>
+                                  enqueueSnackbar(error.message, {
+                                    variant: 'error',
+                                  }),
+                                )
                               }
                             />
                           </Box>
