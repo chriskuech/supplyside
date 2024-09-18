@@ -7,6 +7,10 @@ import {
   createLinkToken,
   deletePlaidToken,
 } from '@/domain/plaid'
+import {
+  disconnect as domainDisconnectMcMasterCarr,
+  createConnection as domainCreateMcMasterCarrConnection,
+} from '@/domain/mcMasterCarr'
 
 export const syncDataFromQuickBooks = async () => {
   const session = await readSession()
@@ -29,5 +33,24 @@ export const createPlaidConnection = async (publicToken: string) => {
 export const disconnectPlaid = async () => {
   const session = await readSession()
   await deletePlaidToken(session.accountId)
+  revalidatePath('')
+}
+
+export const createMcMasterCarrConnection = async (
+  username: string,
+  password: string,
+) => {
+  const session = await readSession()
+  await domainCreateMcMasterCarrConnection(
+    session.accountId,
+    username,
+    password,
+  )
+  revalidatePath('')
+}
+
+export const disconnectMcMasterCarr = async () => {
+  const session = await readSession()
+  await domainDisconnectMcMasterCarr(session.accountId)
   revalidatePath('')
 }

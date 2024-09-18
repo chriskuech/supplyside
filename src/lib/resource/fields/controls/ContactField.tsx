@@ -21,12 +21,14 @@ export type ContactFieldProps = {
   contact: Contact | null
   onChange: (contact: Contact | null) => void
   inline?: boolean
+  disabled?: boolean
 }
 
 export default function ContactField({
   contact,
   onChange,
   inline,
+  disabled,
 }: ContactFieldProps) {
   const { isOpen, open, close } = useDisclosure()
 
@@ -60,16 +62,20 @@ export default function ContactField({
                 <Typography>{contact.name}</Typography>
               </>
             )}
-            <IconButton size="small" onClick={open}>
+            <IconButton size="small" onClick={open} disabled={disabled}>
               <Edit />
             </IconButton>
-            <IconButton size="small" onClick={() => onChange(null)}>
+            <IconButton
+              size="small"
+              onClick={() => onChange(null)}
+              disabled={disabled}
+            >
               <Clear />
             </IconButton>
           </Stack>
         </Stack>
       ) : (
-        <Button variant="text" onClick={open}>
+        <Button variant="text" onClick={open} disabled={disabled}>
           Add Contact
         </Button>
       )}

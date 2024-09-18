@@ -30,15 +30,15 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
         withoutDebounce
         ref={inputRef}
         field={field}
-        inputId={`${cellParams.row.id}${field.id}`}
-        onChange={(value) => {
+        inputId={cellParams.row.id + field.id}
+        onChange={(value) =>
           apiRef.current.setEditCellValue({
             id: cellParams.id,
             field: cellParams.field,
             value,
             debounceMs: 200,
           })
-        }}
+        }
         resourceId={cellParams.row.id}
         value={selectResourceFieldValue(cellParams.row, { fieldId: field.id })}
         inline

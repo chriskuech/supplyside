@@ -1,6 +1,7 @@
 import { Alert, Stack, Typography } from '@mui/material'
-import QuickBooks from './QuickBooks'
-import Plaid from './Plaid'
+import QuickBooks from './components/quickbooks/QuickBooks'
+import Plaid from './components/plaid/Plaid'
+import McMasterCarr from './components/mcMasterCarr/McMasterCarr'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 
 export default async function IntegrationsPage() {
@@ -22,6 +23,10 @@ export default async function IntegrationsPage() {
           <Stack>
             <Typography variant="h6">Plaid</Typography>
             <Plaid session={session} />
+          </Stack>
+          <Stack>
+            <Typography variant="h6">McMaster-Carr PunchOut</Typography>
+            <McMasterCarr session={session} />
           </Stack>
         </>
       )}

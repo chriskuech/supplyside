@@ -83,6 +83,7 @@ export default function ResourceForm({
                     value={selectResourceFieldValue(resource, {
                       fieldId: singleField.id,
                     })}
+                    disabled={!!resource.templateId && !!singleField.templateId}
                   />
                 </Box>
               ) : (
@@ -113,6 +114,7 @@ export default function ResourceForm({
                           </Typography>
                           <Box>
                             <Field
+                              disabled={!!resource.templateId && !!f.templateId}
                               inputId={`rf-${f.id}`}
                               resourceId={resource.id}
                               field={f}
