@@ -246,8 +246,10 @@ export const mapValueInputToPrismaValueCreate = (
     })
     .exhaustive()
 
-export const mapValueInputToPrismaValueWhere = (value: ValueInput) =>
-  match<ValueInput>(value)
+export const mapValueInputToPrismaValueWhere = (
+  value: ValueInput,
+): Prisma.ValueWhereInput =>
+  match<ValueInput, Prisma.ValueWhereInput>(value)
     .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
       boolean: value,
     }))
@@ -255,11 +257,11 @@ export const mapValueInputToPrismaValueWhere = (value: ValueInput) =>
       Contact: {
         name: {
           equals: value?.name ?? null,
-          mode: 'insensitive' as const,
+          mode: 'insensitive',
         },
         title: {
           equals: value?.title ?? null,
-          mode: 'insensitive' as const,
+          mode: 'insensitive',
         },
         email: value?.email ?? null,
         phone: value?.phone ?? null,
@@ -277,7 +279,7 @@ export const mapValueInputToPrismaValueWhere = (value: ValueInput) =>
     .with({ string: P.not(undefined) }, ({ string: value }) => ({
       string: {
         equals: value,
-        mode: 'insensitive' as const,
+        mode: 'insensitive',
       },
     }))
     .with({ userId: P.not(undefined) }, ({ userId: value }) => ({
