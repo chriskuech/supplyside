@@ -14,7 +14,7 @@ const _resources = (
       fields: [
         {
           field: fields.name,
-          value: { string: 'McMaster-Carr', isSystemValue: true },
+          value: { string: 'McMaster-Carr' },
         },
         {
           field: fields.poRecipient,
@@ -25,7 +25,6 @@ const _resources = (
               phone: '(562) 692-5911',
               title: null,
             },
-            isSystemValue: true,
           },
         },
       ],

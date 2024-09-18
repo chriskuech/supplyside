@@ -184,12 +184,7 @@ export const updateResource = async ({
         (resourceField) => resourceField.fieldId === fieldId,
       )
 
-      if (
-        resource.templateId &&
-        rf &&
-        rf.value.isSystemValue &&
-        !value.isSystemValue
-      ) {
+      if (resource.templateId && rf?.templateId) {
         throw new Error("Can't update a system value on a system resource")
       }
 
@@ -319,10 +314,11 @@ export const findByTemplateId = async ({
 }: FindByTemplateIdParams) => {
   const resource = await prisma().resource.findFirst({
     where: { accountId, templateId },
+    include: resourceInclude,
   })
   if (!resource) return null
 
-  return readResource({ accountId, id: resource.id })
+  return mapResourceModelToEntity(resource)
 }
 
 async function checkForDuplicateResource(
