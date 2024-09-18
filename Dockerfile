@@ -3,7 +3,7 @@
 # Build
 #
 
-FROM node:20-alpine AS builder
+FROM node:20-debian AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -20,7 +20,7 @@ RUN npm run build
 FROM debian AS runner
 WORKDIR /app
 
-RUN apt install \
+RUN apt install --yes \
   ca-certificates \
   freetype \
   harfbuzz \
