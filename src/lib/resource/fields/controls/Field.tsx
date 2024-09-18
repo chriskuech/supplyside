@@ -5,6 +5,7 @@ import {
   Autocomplete,
   Checkbox,
   InputAdornment,
+  Stack,
   TextField,
 } from '@mui/material'
 import { match } from 'ts-pattern'
@@ -198,7 +199,11 @@ function Field(
         onChange={(e, option) => {
           handleChange({ ...emptyValue, option })
         }}
-        renderInput={(params) => <TextField inputRef={ref} {...params} />}
+        renderInput={(params) => (
+          <Stack direction="row" alignItems="center">
+            <TextField inputRef={ref} {...params} />
+          </Stack>
+        )}
       />
     ))
     .with('Text', () => (
