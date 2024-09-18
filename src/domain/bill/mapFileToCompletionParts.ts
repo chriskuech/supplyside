@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { mkdir, readFile, readdir, rm, writeFile } from 'fs/promises'
+import { readFile, readdir, writeFile } from 'fs/promises'
 import { exec as execCallback } from 'child_process'
 import { promisify } from 'util'
 import {
@@ -10,7 +10,7 @@ import {
 import { P, match } from 'ts-pattern'
 import { File } from '../files/types'
 import { readBlob } from '../blobs'
-import config from '@/services/config'
+import { withTempDir } from '../os'
 
 const exec = promisify(execCallback)
 
@@ -37,22 +37,22 @@ const readPdfToBase64s = async (
 
   assert(blob)
 
-  const containerPath = `${config().TEMP_PATH}/${file.id}`
-  await mkdir(containerPath, { recursive: true })
+  return await withTempDir(async (path) => {
+    const inputPath = `${path}/in.pdf`
+    const outputFileNamePrefix = 'out'
+    const outputPath = `${path}/${outputFileNamePrefix}`
 
-  try {
-    const inputPath = `${containerPath}/in.pdf`
     await writeFile(inputPath, blob.buffer)
 
-    const outputFileNamePrefix = 'out'
-    const outputPath = `${containerPath}/${outputFileNamePrefix}`
     await exec(`pdftoppm -png "${inputPath}" "${outputPath}"`)
-    const containerFileNames = await readdir(containerPath)
+
+    const containerFileNames = await readdir(path)
+
     const base64s = await Promise.all(
       containerFileNames
         .filter((fileName) => fileName.startsWith(`${outputFileNamePrefix}-`))
         .map((pngFileName) =>
-          readFile(`${containerPath}/${pngFileName}`, { encoding: 'base64' }),
+          readFile(`${path}/${pngFileName}`, { encoding: 'base64' }),
         ),
     )
 
@@ -63,9 +63,7 @@ const readPdfToBase64s = async (
         detail: 'auto',
       },
     }))
-  } finally {
-    await rm(containerPath, { recursive: true, force: true })
-  }
+  })
 }
 
 const readImageFileToBase64 = async (
