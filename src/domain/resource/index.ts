@@ -282,7 +282,7 @@ async function checkForDuplicateResource(
   value: ValueInput,
   resourceId: string,
 ) {
-  if (['Name', 'Number'].includes(sf.name)) {
+  if (sf.templateId === fields.name.templateId) {
     const resourceExists = await prisma().resource.findFirst({
       where: {
         accountId,
