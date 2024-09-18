@@ -102,7 +102,7 @@ function Field(
     ))
     .with('Contact', () => (
       <ContactField
-        disabled
+        disabled={disabled}
         contact={value?.contact ?? null}
         onChange={(contact) => handleChange({ ...emptyValue, contact })}
         inline={inline}
