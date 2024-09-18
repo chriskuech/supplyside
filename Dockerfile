@@ -17,28 +17,18 @@ RUN npm run build
 # Release
 #
 
-FROM alpine AS runner
+FROM debian AS runner
 WORKDIR /app
 
-# Install dependencies
-RUN apk add --no-cache \
-  qt5-qtbase \
-  fontconfig \
-  libxrender \
-  libxext \
+RUN apt add --no-cache \
   ca-certificates \
-  curl \
-  && update-ca-certificates
-
-# Download wkhtmltopdf static binary
-RUN curl -LO https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox-alpine-0.12.6-1_linux-alpine-amd64.tar.xz \
-  && tar -xvf wkhtmltox-alpine-0.12.6-1_linux-alpine-amd64.tar.xz \
-  && mv wkhtmltox/bin/wkhtmltopdf /usr/local/bin/ \
-  && chmod +x /usr/local/bin/wkhtmltopdf \
-  && rm -rf wkhtmltox* 
-
-# Verify installation
-RUN wkhtmltopdf --version
+  freetype \
+  harfbuzz \
+  nodejs \
+  nss \
+  poppler-utils \
+  ttf-freefont \
+  wkhtmltopdf
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
