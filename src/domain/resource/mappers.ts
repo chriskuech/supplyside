@@ -245,3 +245,45 @@ export const mapValueInputToPrismaValueCreate = (
       }
     })
     .exhaustive()
+
+export const mapValueInputToPrismaValueWhere = (value: ValueInput) =>
+  match<ValueInput>(value)
+    .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
+      boolean: value,
+    }))
+    .with({ contact: P.not(undefined) }, ({ contact: value }) => ({
+      Contact: {
+        name: value?.name ?? null,
+        title: value?.title ?? null,
+        email: value?.email ?? null,
+        phone: value?.phone ?? null,
+      },
+    }))
+    .with({ date: P.not(undefined) }, ({ date: value }) => ({
+      date: value,
+    }))
+    .with({ number: P.not(undefined) }, ({ number: value }) => ({
+      number: value,
+    }))
+    .with({ optionId: P.not(undefined) }, ({ optionId: value }) => ({
+      optionId: value,
+    }))
+    .with({ string: P.not(undefined) }, ({ string: value }) => ({
+      string: value,
+    }))
+    .with({ userId: P.not(undefined) }, ({ userId: value }) => ({
+      userId: value,
+    }))
+    .with({ fileId: P.not(undefined) }, ({ fileId: value }) => ({
+      fileId: value,
+    }))
+    .with({ resourceId: P.not(undefined) }, ({ resourceId: value }) => ({
+      resourceId: value,
+    }))
+    .with({ fileIds: P.not(undefined) }, ({ fileIds: value }) => ({
+      fileId: { in: value },
+    }))
+    .with({ optionIds: P.not(undefined) }, ({ optionIds: value }) => ({
+      optionId: { in: value },
+    }))
+    .exhaustive()

@@ -3,10 +3,12 @@ import { ResourceType } from '@prisma/client'
 import { readSchema } from '../schema'
 import { selectSchemaField } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
+import { SchemaField } from '../schema/entity'
 import { recalculateSubtotalCost } from './costs'
 import { selectResourceFieldValue } from './extensions'
 import {
   mapValueInputToPrismaValueCreate,
+  mapValueInputToPrismaValueWhere,
   mapValueToValueInput,
 } from './mappers'
 import { mapValueInputToPrismaValueUpdate } from './mappers'
@@ -175,6 +177,14 @@ export const updateResource = async ({
         schema.allFields.find((f) => f.id === fieldId) ??
         fail('Field not found in schema')
 
+      await checkForDuplicateResource(
+        sf,
+        accountId,
+        resource,
+        value,
+        resourceId,
+      )
+
       await prisma().resourceField.upsert({
         where: {
           resourceId_fieldId: {
@@ -264,3 +274,37 @@ export const updateResourceField = async ({
     resourceId,
     fields: [{ fieldId, value }],
   })
+
+async function checkForDuplicateResource(
+  sf: SchemaField,
+  accountId: string,
+  resource: Resource,
+  value: ValueInput,
+  resourceId: string,
+) {
+  if (sf.templateId === fields.name.templateId) {
+    const resourceExists = await prisma().resource.findFirst({
+      where: {
+        accountId,
+        type: resource.type,
+        ResourceField: {
+          some: {
+            Field: {
+              name: sf.name,
+            },
+            Value: mapValueInputToPrismaValueWhere(value),
+          },
+        },
+        NOT: {
+          id: resourceId,
+        },
+      },
+    })
+
+    if (resourceExists) {
+      throw new Error(
+        `Resource with ${sf.name}: ${Object.values(value)[0]} already exists.`,
+      )
+    }
+  }
+}
