@@ -69,11 +69,13 @@ export default function ResourceDetailPage({
                 resourceType={resource.type}
               />
             ),
-            <DeleteResourceButton
-              key={DeleteResourceButton.name}
-              resourceType={resource.type}
-              resourceId={resource.id}
-            />,
+            !resource.templateId && (
+              <DeleteResourceButton
+                key={DeleteResourceButton.name}
+                resourceType={resource.type}
+                resourceId={resource.id}
+              />
+            ),
           ].map((tool, i) => (
             <Box height="min-content" key={i}>
               {tool}

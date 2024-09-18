@@ -1,4 +1,4 @@
-import { createPlaidLinkToken } from './actions'
+import { createPlaidLinkToken } from '../../actions'
 import PlaidConnectButton from './PlaidConnectButton'
 
 export default async function PlaidConnect() {

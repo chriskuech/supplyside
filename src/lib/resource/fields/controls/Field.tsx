@@ -39,6 +39,7 @@ export type Props = {
   onChange: (value: Value) => void
   inline?: boolean
   withoutDebounce?: boolean
+  disabled?: boolean
 }
 
 function Field(
@@ -50,6 +51,7 @@ function Field(
     onChange: incomingOnChange,
     inline,
     withoutDebounce,
+    disabled,
   }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
@@ -89,6 +91,7 @@ function Field(
   return match(field.type)
     .with('Checkbox', () => (
       <Checkbox
+        disabled={disabled}
         inputRef={ref}
         id={inputId}
         checked={value?.boolean ?? false}
@@ -99,6 +102,7 @@ function Field(
     ))
     .with('Contact', () => (
       <ContactField
+        disabled={disabled}
         contact={value?.contact ?? null}
         onChange={(contact) => handleChange({ ...emptyValue, contact })}
         inline={inline}
@@ -106,6 +110,7 @@ function Field(
     ))
     .with('Date', () => (
       <DatePicker
+        disabled={disabled}
         inputRef={ref}
         sx={{ width: '100%' }}
         slotProps={{
@@ -122,6 +127,7 @@ function Field(
     ))
     .with('File', () => (
       <FileField
+        isReadOnly={disabled}
         resourceId={resourceId}
         fieldId={field.id}
         file={value?.file ?? null}
@@ -130,12 +136,14 @@ function Field(
     ))
     .with('Files', () => (
       <FilesField
+        isReadOnly={disabled}
         files={value?.files ?? []}
         onChange={(files) => handleChange({ ...emptyValue, files })}
       />
     ))
     .with('Money', () => (
       <TextField
+        disabled={disabled}
         inputRef={ref}
         id={inputId}
         fullWidth
@@ -151,6 +159,7 @@ function Field(
     ))
     .with('MultiSelect', () => (
       <Autocomplete
+        disabled={disabled}
         id={inputId}
         multiple
         fullWidth
@@ -173,6 +182,7 @@ function Field(
     ))
     .with('Number', () => (
       <TextField
+        disabled={disabled}
         inputRef={ref}
         id={inputId}
         type="number"
@@ -191,6 +201,7 @@ function Field(
     ))
     .with('Select', () => (
       <Autocomplete<Option>
+        disabled={disabled}
         options={field.options}
         id={inputId}
         fullWidth
@@ -208,6 +219,7 @@ function Field(
     ))
     .with('Text', () => (
       <TextField
+        disabled={disabled}
         inputRef={ref}
         id={inputId}
         fullWidth
@@ -219,6 +231,7 @@ function Field(
     ))
     .with('Textarea', () => (
       <TextField
+        disabled={disabled}
         inputRef={ref}
         id={inputId}
         multiline
@@ -232,6 +245,7 @@ function Field(
     ))
     .with('User', () => (
       <UserField
+        isReadOnly={disabled}
         ref={ref}
         inputId={inputId}
         user={value?.user ?? null}
@@ -240,6 +254,7 @@ function Field(
     ))
     .with('Resource', () => (
       <ResourceField
+        isReadOnly={disabled}
         ref={ref}
         onChange={(resource) => handleChange({ ...emptyValue, resource })}
         resourceType={field.resourceType ?? fail()}

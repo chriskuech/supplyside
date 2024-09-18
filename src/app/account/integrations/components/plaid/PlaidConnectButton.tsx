@@ -1,7 +1,7 @@
 'use client'
 import { Button } from '@mui/material'
 import { usePlaidLink } from 'react-plaid-link'
-import { createPlaidConnection } from './actions'
+import { createPlaidConnection } from '../../actions'
 
 type Props = {
   linkToken: string

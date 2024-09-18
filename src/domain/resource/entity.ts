@@ -5,6 +5,7 @@ import { Option } from '../schema/entity'
 
 export type Resource = {
   id: string
+  templateId: string | null
   accountId: string
   type: ResourceType
   key: number
@@ -59,6 +60,7 @@ export type Contact = {
 export type ValueResource = {
   id: string
   type: ResourceType
+  templateId: string | null
   name: string
   key: number
 }

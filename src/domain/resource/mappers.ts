@@ -14,6 +14,7 @@ import { ValueInput } from './patch'
 export const mapResourceModelToEntity = (model: ResourceModel): Resource => ({
   id: model.id,
   accountId: model.accountId,
+  templateId: model.templateId,
   key: model.key,
   type: model.type,
   fields: model.ResourceField.map((rf) => ({
@@ -30,6 +31,7 @@ export const mapResourceToValueResource = (
 ): ValueResource => ({
   id: resource.id,
   type: resource.type,
+  templateId: resource.templateId,
   key: resource.key,
   name:
     selectResourceFieldValue(resource, fields.name)?.string ??
@@ -78,6 +80,7 @@ export const mapValueResourceModelToEntity = (
   resource: ValueResourceModel,
 ): ValueResource => ({
   id: resource.id,
+  templateId: resource.templateId,
   type: resource.type,
   key: resource.key,
   name:

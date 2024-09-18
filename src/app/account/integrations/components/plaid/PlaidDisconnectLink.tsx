@@ -1,7 +1,7 @@
 'use client'
 
 import { Link } from '@mui/material'
-import { disconnectPlaid } from './actions'
+import { disconnectPlaid } from '../../actions'
 import { useConfirmation } from '@/lib/confirmation'
 
 export default function PlaidDisconnectLink() {
