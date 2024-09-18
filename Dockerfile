@@ -20,14 +20,9 @@ RUN npm run build
 FROM debian AS runner
 WORKDIR /app
 
-RUN apt install --yes \
-  ca-certificates \
-  freetype \
-  harfbuzz \
+RUN apt update && apt install --yes \
   nodejs \
-  nss \
   poppler-utils \
-  ttf-freefont \
   wkhtmltopdf
 
 RUN addgroup --system --gid 1001 nodejs
