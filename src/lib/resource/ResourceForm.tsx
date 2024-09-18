@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
 import { ResourceType } from '@prisma/client'
+import { useSnackbar } from 'notistack'
 import useSchema from '../schema/useSchema'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
@@ -32,6 +33,8 @@ export default function ResourceForm({
   resourceType,
   singleColumn,
 }: Props) {
+  const { enqueueSnackbar } = useSnackbar()
+
   const columns = singleColumn ? 1 : 3
 
   const schema = useSchema(resourceType)
@@ -121,7 +124,11 @@ export default function ResourceForm({
                                   resourceId: resource.id,
                                   fieldId: f.id,
                                   value: mapValueToValueInput(f.type, value),
-                                })
+                                }).catch((error) =>
+                                  enqueueSnackbar(error.message, {
+                                    variant: 'error',
+                                  }),
+                                )
                               }
                             />
                           </Box>
