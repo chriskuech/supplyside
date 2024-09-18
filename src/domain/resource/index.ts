@@ -8,10 +8,10 @@ import { recalculateSubtotalCost } from './costs'
 import { selectResourceFieldValue } from './extensions'
 import {
   mapValueInputToPrismaValueCreate,
+  mapValueInputToPrismaValueUpdate,
   mapValueInputToPrismaValueWhere,
   mapValueToValueInput,
 } from './mappers'
-import { mapValueInputToPrismaValueUpdate } from './mappers'
 import { Resource, emptyValue } from './entity'
 import { ValueInput } from './patch'
 import { createSql } from './json-logic/compile'

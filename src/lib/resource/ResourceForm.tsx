@@ -124,11 +124,15 @@ export default function ResourceForm({
                                   resourceId: resource.id,
                                   fieldId: f.id,
                                   value: mapValueToValueInput(f.type, value),
-                                }).catch((error) =>
-                                  enqueueSnackbar(error.message, {
-                                    variant: 'error',
-                                  }),
-                                )
+                                }).catch((error) => {
+                                  console.error(error)
+                                  enqueueSnackbar(
+                                    "An error occurred while saving the field's value",
+                                    {
+                                      variant: 'error',
+                                    },
+                                  )
+                                })
                               }
                             />
                           </Box>
