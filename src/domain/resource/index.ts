@@ -180,6 +180,19 @@ export const updateResource = async ({
         schema.allFields.find((f) => f.id === fieldId) ??
         fail('Field not found in schema')
 
+      const rf = resource.fields.find(
+        (resourceField) => resourceField.fieldId === fieldId,
+      )
+
+      if (
+        resource.templateId &&
+        rf &&
+        rf.value.isSystemValue &&
+        !value.isSystemValue
+      ) {
+        throw new Error("Can't update a system value on a system resource")
+      }
+
       await checkForDuplicateResource(
         sf,
         accountId,
