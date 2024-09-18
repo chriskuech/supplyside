@@ -15,7 +15,7 @@ export async function createConnection(
   username: string,
   password: string,
 ) {
-  //TODO: check username and password is correct throw expected error otherwise
+  //TODO: check if username and password is correct throw expected error otherwise
 
   const [mcMasterCarrVendor] = await findResources({
     resourceType: 'Vendor',
