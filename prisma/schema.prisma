@@ -213,16 +213,17 @@ model Contact {
 }
 
 model Value {
-  id         String    @id @default(uuid()) @db.Uuid
-  boolean    Boolean?
-  contactId  String?   @db.Uuid
-  date       DateTime? @db.Date
-  fileId     String?   @db.Uuid
-  number     Float?
-  optionId   String?   @db.Uuid
-  resourceId String?   @db.Uuid
-  string     String?
-  userId     String?   @db.Uuid
+  id            String    @id @default(uuid()) @db.Uuid
+  boolean       Boolean?
+  contactId     String?   @db.Uuid
+  date          DateTime? @db.Date
+  fileId        String?   @db.Uuid
+  number        Float?
+  optionId      String?   @db.Uuid
+  resourceId    String?   @db.Uuid
+  string        String?
+  userId        String?   @db.Uuid
+  isSystemValue Boolean?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

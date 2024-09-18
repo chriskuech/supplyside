@@ -1,6 +1,6 @@
 import { Contact } from './entity'
 
-export type ValueInput =
+export type ValueInput = (
   | { boolean: boolean | null }
   | { contact: Contact | null }
   | { date: Date | null }
@@ -12,3 +12,4 @@ export type ValueInput =
   | { resourceId: string | null }
   | { string: string | null }
   | { userId: string | null }
+) & { isSystemValue?: boolean }

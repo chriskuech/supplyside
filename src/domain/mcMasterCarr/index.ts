@@ -23,7 +23,7 @@ export async function createConnection(
   })
 
   const vendorSchema = await readSchema({ accountId, resourceType: 'Vendor' })
-  const mcMasterCarrSystemResource = resources.mcMasterCarrVendor
+  const mcMasterCarrSystemResource = resources().mcMasterCarrVendor
 
   if (!mcMasterCarrVendor) {
     await createResource({
@@ -67,7 +67,7 @@ export async function createConnection(
 export async function disconnect(accountId: string) {
   const mcMasterCarrVendor = await findByTemplateId({
     accountId,
-    templateId: resources.mcMasterCarrVendor.templateId,
+    templateId: resources().mcMasterCarrVendor.templateId,
   })
 
   if (mcMasterCarrVendor) {

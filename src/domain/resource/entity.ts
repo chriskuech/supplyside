@@ -32,6 +32,7 @@ export const emptyValue = {
   resource: null,
   files: [],
   options: [],
+  isSystemValue: null,
   updatedAt: new Date(0),
 } as const satisfies Value
 
@@ -47,6 +48,7 @@ export type Value = {
   file: File | null
   files: File[]
   resource: ValueResource | null
+  isSystemValue: boolean | null
   updatedAt: Date
 }
 

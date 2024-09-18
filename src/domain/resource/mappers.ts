@@ -74,6 +74,7 @@ export const mapValueModelToEntity = (model: ValueModel): Value => ({
   file: model.File ? mapFile(model.File) : null,
   files: model.Files.map(({ File: file }) => mapFile(file)),
   updatedAt: model.updatedAt,
+  isSystemValue: model.isSystemValue,
 })
 
 export const mapValueResourceModelToEntity = (
@@ -120,8 +121,11 @@ export const isMissingRequiredFields = (schema: Schema, resource: Resource) =>
 
 export const mapValueInputToPrismaValueUpdate = (
   value: ValueInput,
-): Prisma.ValueUpdateWithoutResourceFieldValueInput =>
-  match<ValueInput, Prisma.ValueUpdateWithoutResourceFieldValueInput>(value)
+): Prisma.ValueUpdateWithoutResourceFieldValueInput => {
+  const parsedValue = match<
+    ValueInput,
+    Prisma.ValueUpdateWithoutResourceFieldValueInput
+  >(value)
     .with({ boolean: P.not(undefined) }, ({ boolean }) => ({ boolean }))
     .with({ contact: P.not(undefined) }, ({ contact }) =>
       contact
@@ -180,11 +184,17 @@ export const mapValueInputToPrismaValueUpdate = (
     }))
     .exhaustive()
 
+  return { ...parsedValue, isSystemValue: value.isSystemValue }
+}
+
 export const mapValueInputToPrismaValueCreate = (
   value: ValueInput,
   { defaultToToday, defaultValue }: SchemaField,
-): Prisma.ValueCreateWithoutResourceFieldValueInput =>
-  match<ValueInput, Prisma.ValueCreateWithoutResourceFieldValueInput>(value)
+): Prisma.ValueCreateWithoutResourceFieldValueInput => {
+  const parsedValue = match<
+    ValueInput,
+    Prisma.ValueCreateWithoutResourceFieldValueInput
+  >(value)
     .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
       boolean: value ?? defaultValue?.boolean ?? null,
     }))
@@ -248,3 +258,6 @@ export const mapValueInputToPrismaValueCreate = (
       }
     })
     .exhaustive()
+
+  return { ...parsedValue, isSystemValue: value.isSystemValue }
+}
