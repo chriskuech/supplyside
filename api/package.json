@@ -1,0 +1,11 @@
+{
+    "main": "src/index.ts",
+    "dependencies": {
+        "fastify": "^4.28.1",
+        "fastify-swagger": "^5.2.0",
+        "fastify-zod": "^1.4.0",
+        "reflect-metadata": "^0.2.2",
+        "tsyringe": "^4.8.0",
+        "zod": "^3.23.8"
+    }
+}
