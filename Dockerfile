@@ -3,7 +3,7 @@
 # Build
 #
 
-FROM node:20-debian AS builder
+FROM node:20 AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
