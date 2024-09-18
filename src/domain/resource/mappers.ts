@@ -253,8 +253,14 @@ export const mapValueInputToPrismaValueWhere = (value: ValueInput) =>
     }))
     .with({ contact: P.not(undefined) }, ({ contact: value }) => ({
       Contact: {
-        name: value?.name ?? null,
-        title: value?.title ?? null,
+        name: {
+          equals: value?.name ?? null,
+          mode: 'insensitive' as const,
+        },
+        title: {
+          equals: value?.title ?? null,
+          mode: 'insensitive' as const,
+        },
         email: value?.email ?? null,
         phone: value?.phone ?? null,
       },
@@ -269,7 +275,10 @@ export const mapValueInputToPrismaValueWhere = (value: ValueInput) =>
       optionId: value,
     }))
     .with({ string: P.not(undefined) }, ({ string: value }) => ({
-      string: value,
+      string: {
+        equals: value,
+        mode: 'insensitive' as const,
+      },
     }))
     .with({ userId: P.not(undefined) }, ({ userId: value }) => ({
       userId: value,
