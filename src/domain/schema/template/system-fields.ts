@@ -152,6 +152,12 @@ const _fields = {
     type: 'Select',
     description: 'Type of currency for the transaction',
   },
+  customer: {
+    templateId: '0e3369ca-99b1-4cb7-9a18-a2b10d70fed3',
+    name: 'Customer',
+    type: 'Select',
+    description: 'Primary customer for the transaction',
+  },
   document: {
     templateId: 'cb4a0c88-df20-485d-9881-e2c3b1b2b180',
     name: 'Document',
