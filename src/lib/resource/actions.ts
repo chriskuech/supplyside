@@ -167,23 +167,20 @@ export const transitionStatus = async (
 
 export const updateResourceField = async (
   params: Omit<domain.UpdateResourceFieldParams, 'accountId'>,
-): Promise<Resource | { error: string }> => {
-  try {
-    return await withSession(async ({ accountId }) => {
-      const resource = await domain.updateResourceField({
-        ...params,
-        accountId,
-      })
-
-      revalidatePath('')
-
-      return resource
+): Promise<Resource | { error: string }> =>
+  await withSession(async ({ accountId }) => {
+    const resource = await domain.updateResourceField({
+      ...params,
+      accountId,
     })
-  } catch (error) {
+
+    revalidatePath('')
+
+    return resource
+  }).catch((error) => {
     if (error instanceof DuplicateResourceError) {
       return { error: error.message }
     }
 
     throw error
-  }
-}
+  })
