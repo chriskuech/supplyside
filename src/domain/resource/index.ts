@@ -8,10 +8,10 @@ import { recalculateSubtotalCost } from './costs'
 import { selectResourceFieldValue } from './extensions'
 import {
   mapValueInputToPrismaValueCreate,
+  mapValueInputToPrismaValueUpdate,
   mapValueInputToPrismaValueWhere,
   mapValueToValueInput,
 } from './mappers'
-import { mapValueInputToPrismaValueUpdate } from './mappers'
 import { Resource, emptyValue } from './entity'
 import { ValueInput } from './patch'
 import { createSql } from './json-logic/compile'
@@ -19,6 +19,7 @@ import { OrderBy, Where } from './json-logic/types'
 import { mapResourceModelToEntity } from './mappers'
 import { resourceInclude } from './model'
 import { handleResourceCreate, handleResourceUpdate } from './effects'
+import { DuplicateResourceError } from './errors'
 import prisma from '@/services/prisma'
 
 export type ResourceFieldInput = {
@@ -348,9 +349,7 @@ async function checkForDuplicateResource(
     })
 
     if (resourceExists) {
-      throw new Error(
-        `Resource with ${sf.name}: ${Object.values(value)[0]} already exists.`,
-      )
+      throw new DuplicateResourceError(Object.values(value)[0])
     }
   }
 }

@@ -121,17 +121,19 @@ export default function ResourceForm({
                               value={selectResourceFieldValue(resource, {
                                 fieldId: f.id,
                               })}
-                              onChange={(value) =>
-                                updateResourceField({
+                              onChange={async (value) => {
+                                const result = await updateResourceField({
                                   resourceId: resource.id,
                                   fieldId: f.id,
                                   value: mapValueToValueInput(f.type, value),
-                                }).catch((error) =>
-                                  enqueueSnackbar(error.message, {
+                                })
+
+                                if ('error' in result) {
+                                  enqueueSnackbar(result.error, {
                                     variant: 'error',
-                                  }),
-                                )
-                              }
+                                  })
+                                }
+                              }}
                             />
                           </Box>
                         </Stack>
