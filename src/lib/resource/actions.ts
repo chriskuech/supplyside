@@ -17,6 +17,7 @@ import {
   selectSchemaFieldUnsafe,
 } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
+import { DuplicateResourceError } from '@/domain/resource/errors'
 
 export const createResource = async (
   params: Pick<domain.CreateResourceParams, 'type' | 'fields'>,
@@ -166,11 +167,23 @@ export const transitionStatus = async (
 
 export const updateResourceField = async (
   params: Omit<domain.UpdateResourceFieldParams, 'accountId'>,
-) =>
-  await withSession(async ({ accountId }) => {
-    const resource = await domain.updateResourceField({ ...params, accountId })
+): Promise<Resource | { error: string }> => {
+  try {
+    return await withSession(async ({ accountId }) => {
+      const resource = await domain.updateResourceField({
+        ...params,
+        accountId,
+      })
 
-    revalidatePath('')
+      revalidatePath('')
 
-    return resource
-  })
+      return resource
+    })
+  } catch (error) {
+    if (error instanceof DuplicateResourceError) {
+      return { error: error.message }
+    }
+
+    throw error
+  }
+}
