@@ -217,8 +217,10 @@ export const updateResource = async ({
         },
         update: {
           Value: {
-            create: mapValueInputToPrismaValueCreate(value, sf),
-            update: mapValueInputToPrismaValueUpdate(value),
+            upsert: {
+              create: mapValueInputToPrismaValueCreate(value, sf),
+              update: mapValueInputToPrismaValueUpdate(value),
+            },
           },
         },
       })
