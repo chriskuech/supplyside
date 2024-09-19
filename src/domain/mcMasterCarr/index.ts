@@ -36,14 +36,6 @@ export async function createConnection(
       })),
     })
   } else {
-    if (!mcMasterCarrVendor.templateId) {
-      await updateTemplateId({
-        accountId,
-        resourceId: mcMasterCarrVendor.id,
-        templateId: mcMasterCarrSystemResource.templateId,
-      })
-    }
-
     await updateResource({
       accountId,
       resourceId: mcMasterCarrVendor.id,
@@ -52,6 +44,14 @@ export async function createConnection(
         value: f.value,
       })),
     })
+
+    if (!mcMasterCarrVendor.templateId) {
+      await updateTemplateId({
+        accountId,
+        resourceId: mcMasterCarrVendor.id,
+        templateId: mcMasterCarrSystemResource.templateId,
+      })
+    }
   }
 
   await prisma().account.update({
