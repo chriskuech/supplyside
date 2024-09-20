@@ -13,6 +13,7 @@ import { fields } from '../../schema/template/system-fields'
 import { readBlob } from '../../blobs'
 import { LineViewModel, OrderViewModel } from './ViewModel'
 import prisma from '@/services/prisma'
+import { formatInlineAddress } from '@/lib/resource/fields/views/AddressCard'
 
 export const createViewModel = async (
   accountId: string,
@@ -142,6 +143,11 @@ const renderTemplateField = (
 
 const renderFieldValue = (resourceField: ResourceField | undefined) =>
   match<FieldType | undefined, string | null>(resourceField?.fieldType)
+    .with('Address', () =>
+      resourceField?.value?.address
+        ? formatInlineAddress(resourceField.value.address)
+        : null,
+    )
     .with('Checkbox', () =>
       match(resourceField?.value.boolean)
         .with(true, () => 'Yes')

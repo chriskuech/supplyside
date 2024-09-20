@@ -2,7 +2,7 @@ import { Home } from '@mui/icons-material'
 import { Card, Box, Typography } from '@mui/material'
 import { Address } from '@/domain/resource/entity'
 
-const formatInlineAddress = (address: Address): string => {
+export const formatInlineAddress = (address: Address): string => {
   const { streetAddress, city, state, zip, country } = address
 
   const stateZip = [state, zip].filter(Boolean).join(' ')
