@@ -2,15 +2,22 @@ import { Home } from '@mui/icons-material'
 import { Card, Box, Typography } from '@mui/material'
 import { Address } from '@/domain/resource/entity'
 
-const formatAddress = (address: Address): string => {
-  const parts = [
-    address.streetAddress,
-    address.city,
-    address.state,
-    address.zip,
-    address.country,
-  ].filter(Boolean)
-  return parts.join(', ')
+const formatInlineAddress = (address: Address): string => {
+  const { streetAddress, city, state, zip, country } = address
+
+  const stateZip = [state, zip].filter(Boolean).join(' ')
+
+  return [streetAddress, city, stateZip, country].filter(Boolean).join(', ')
+}
+
+const formatAddress = (address: Address) => {
+  const { streetAddress, city, state, zip, country } = address
+
+  const cityState = city && state ? `${city}, ${state}` : city || state
+
+  const cityStateZip = [cityState, zip].filter(Boolean).join(' ')
+
+  return { streetAddress, cityStateZip, country }
 }
 
 type Props = {
@@ -24,8 +31,10 @@ export default function AddressCard({ address, inline }: Props) {
   }
 
   if (inline) {
-    return <Typography>{formatAddress(address)}</Typography>
+    return <Typography>{formatInlineAddress(address)}</Typography>
   }
+
+  const { streetAddress, cityStateZip, country } = formatAddress(address)
 
   return (
     <Card variant="outlined">
@@ -34,14 +43,13 @@ export default function AddressCard({ address, inline }: Props) {
           <Home sx={{ color: 'action.active' }} />
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-          <Typography variant="body1">
-            {[address.streetAddress, address.city].filter(Boolean).join(', ')}
-          </Typography>
-          <Typography variant="body1">
-            {[address.state, address.zip, address.country]
-              .filter(Boolean)
-              .join(', ')}
-          </Typography>
+          {streetAddress && (
+            <Typography variant="body1">{streetAddress}</Typography>
+          )}
+          {cityStateZip && (
+            <Typography variant="body1">{cityStateZip}</Typography>
+          )}
+          {country && <Typography variant="body1">{country}</Typography>}
         </Box>
       </Box>
     </Card>
