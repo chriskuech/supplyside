@@ -89,6 +89,17 @@ export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
         description: dto.description,
         DefaultValue: {
           update: match<ValueInput, Prisma.ValueUpdateInput>(dto.defaultValue)
+            .with({ address: P.not(undefined) }, ({ address }) => ({
+              Address: {
+                update: {
+                  streetAddress: address?.streetAddress ?? null,
+                  city: address?.city ?? null,
+                  state: address?.state ?? null,
+                  zip: address?.zip ?? null,
+                  country: address?.country ?? null,
+                },
+              },
+            }))
             .with({ contact: P.not(undefined) }, ({ contact }) => ({
               Contact: {
                 update: {
