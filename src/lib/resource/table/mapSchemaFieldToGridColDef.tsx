@@ -7,6 +7,7 @@ import { GridApplyQuickFilter } from '@mui/x-data-grid/models/colDef/gridColDef'
 import ContactCard from '../fields/views/ContactCard'
 import UserCard from '../fields/views/UserCard'
 import ResourceFieldView from '../fields/views/ResourceFieldView'
+import AddressCard from '../fields/views/AddressCard'
 import FieldGridEditCell from './FieldGridEditCell'
 import { Cell, Column, Display, Row } from './types'
 import { SchemaField } from '@/domain/schema/entity'
@@ -45,6 +46,7 @@ export const mapSchemaFieldToGridColDef = (
     .with('Text', () => 300)
     .with('Textarea', () => 300)
     .with('User', () => 150)
+    .with('Address', () => 300)
     .exhaustive(),
 
   editable:
@@ -60,6 +62,16 @@ export const mapSchemaFieldToGridColDef = (
         () => (value) =>
           value?.string?.toLowerCase().includes(field.name.toLowerCase()) ??
           false,
+      )
+      .with(
+        'Address',
+        () => (value) =>
+          (['streetAddress', 'city', 'state', 'zip', 'country'] as const).some(
+            (key) =>
+              value?.address?.[key]
+                ?.toLowerCase()
+                .includes(query.toLowerCase()) ?? false,
+          ),
       )
       .with(
         'Contact',
@@ -173,6 +185,15 @@ export const mapSchemaFieldToGridColDef = (
 
   renderCell: ({ value }) => {
     const children = match<FieldType>(field.type)
+      .with(
+        'Address',
+        () =>
+          value?.address && (
+            <Box onClick={(e) => e.stopPropagation()}>
+              <AddressCard address={value.address} inline />
+            </Box>
+          ),
+      )
       .with('Checkbox', () => value?.boolean && <Check />)
       .with(
         'Contact',

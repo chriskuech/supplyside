@@ -1,4 +1,5 @@
 import {
+  Address,
   Blob,
   Contact,
   Field,
@@ -30,6 +31,7 @@ export type ValueResourceModel = Resource & {
 }
 
 export type ValueModel = Value & {
+  Address: Address | null
   Contact: Contact | null
   File: FileModel | null
   Option: Option | null
@@ -40,6 +42,7 @@ export type ValueModel = Value & {
 }
 
 export const valueInclude = {
+  Address: true,
   Contact: true,
   File: {
     include: {

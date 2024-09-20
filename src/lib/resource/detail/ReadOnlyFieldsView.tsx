@@ -17,6 +17,7 @@ import ReadonlyTextarea from '../fields/views/ReadonlyTextarea'
 import ResourceFieldView from '../fields/views/ResourceFieldView'
 import UserCard from '../fields/views/UserCard'
 import ContactCard from '../fields/views/ContactCard'
+import AddressCard from '../fields/views/AddressCard'
 import { Schema } from '@/domain/schema/entity'
 import { Resource } from '@/domain/resource/entity'
 
@@ -60,6 +61,13 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                               (rf) => rf.fieldId === field.id,
                             ),
                           )
+                            .with({ fieldType: 'Address' }, ({ value }) =>
+                              value?.address ? (
+                                <AddressCard address={value.address} inline />
+                              ) : (
+                                '-'
+                              ),
+                            )
                             .with(
                               { fieldType: 'Checkbox' },
                               ({ value: { boolean } }) =>
