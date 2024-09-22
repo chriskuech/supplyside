@@ -1,5 +1,5 @@
 import { Home } from '@mui/icons-material'
-import { Card, Box, Typography } from '@mui/material'
+import { Card, Box, Typography, Stack } from '@mui/material'
 import { Address } from '@/domain/resource/entity'
 
 export const formatInlineAddress = (address: Address): string => {
@@ -38,7 +38,7 @@ export default function AddressCard({ address, inline }: Props) {
 
   return (
     <Card variant="outlined">
-      <Box sx={{ display: 'flex', flexDirection: 'row', padding: 2 }}>
+      <Stack direction="row" p={2}>
         <Box sx={{ marginRight: 2 }}>
           <Home sx={{ color: 'action.active' }} />
         </Box>
@@ -51,7 +51,7 @@ export default function AddressCard({ address, inline }: Props) {
           )}
           {country && <Typography variant="body1">{country}</Typography>}
         </Box>
-      </Box>
+      </Stack>
     </Card>
   )
 }

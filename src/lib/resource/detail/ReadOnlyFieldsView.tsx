@@ -63,7 +63,7 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                           )
                             .with({ fieldType: 'Address' }, ({ value }) =>
                               value?.address ? (
-                                <AddressCard address={value.address} inline />
+                                <AddressCard address={value.address} />
                               ) : (
                                 '-'
                               ),

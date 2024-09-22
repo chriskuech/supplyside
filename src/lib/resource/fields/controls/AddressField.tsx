@@ -104,7 +104,7 @@ const AddressForm: FC<AddressFormProps> = ({ address, onChange, onCancel }) => {
     if (isAddressEmpty) {
       onChange(null)
     } else {
-      onChange(dto as Address)
+      onChange(dto)
     }
 
     onCancel()
