@@ -90,11 +90,11 @@ const AddressForm: FC<AddressFormProps> = ({ address, onChange, onCancel }) => {
 
   useEffect(() => {
     setDto({
-      streetAddress: address?.streetAddress ?? null,
-      city: address?.city ?? null,
-      state: address?.state ?? null,
-      zip: address?.zip ?? null,
-      country: address?.country ?? null,
+      streetAddress: address?.streetAddress?.trim() || null,
+      city: address?.city?.trim() || null,
+      state: address?.state?.trim() || null,
+      zip: address?.zip?.trim() || null,
+      country: address?.country?.trim() || null,
     })
   }, [address])
 

@@ -406,12 +406,6 @@ const _fields = {
     type: 'Textarea',
     description: 'Brief, internal description of the vendor',
   },
-  address: {
-    templateId: '17eef5da-4846-4eec-b7c8-b38f7fdeac8f',
-    name: 'Address',
-    type: 'Address',
-    description: 'Address information',
-  },
 } satisfies Record<string, FieldTemplate>
 
 export const fields: Record<keyof typeof _fields, FieldTemplate> = _fields

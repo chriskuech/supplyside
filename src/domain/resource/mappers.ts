@@ -284,11 +284,11 @@ export const mapValueInputToPrismaValueWhere = (
   match<ValueInput, Prisma.ValueWhereInput>(value)
     .with({ address: P.not(undefined) }, ({ address: value }) => ({
       Address: {
-        streetAddress: value?.streetAddress ?? null,
-        city: value?.city ?? null,
-        state: value?.state ?? null,
-        zip: value?.zip ?? null,
-        country: value?.country ?? null,
+        streetAddress: value?.streetAddress?.trim() || null,
+        city: value?.city?.trim() || null,
+        state: value?.state?.trim() || null,
+        zip: value?.zip?.trim() || null,
+        country: value?.country?.trim() || null,
       },
     }))
     .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
