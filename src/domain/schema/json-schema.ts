@@ -14,6 +14,16 @@ export const mapSchemaToJsonSchema = (schema: Schema): JSONSchema7 => ({
   properties: mapToObj(schema.allFields, (f) => [
     f.name,
     match<SchemaField, JSONSchema7>(f)
+      .with({ type: 'Address' }, () => ({
+        type: ['object', 'null'],
+        properties: {
+          streetAddress: { type: ['string', 'null'] },
+          city: { type: ['string', 'null'] },
+          state: { type: ['string', 'null'] },
+          zip: { type: ['string', 'null'] },
+          country: { type: ['string', 'null'] },
+        },
+      }))
       .with({ type: 'Checkbox' }, () => ({
         type: ['boolean', 'null'],
         description: f.description ?? undefined,

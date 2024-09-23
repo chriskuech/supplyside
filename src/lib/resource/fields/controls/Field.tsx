@@ -21,6 +21,7 @@ import {
   useState,
 } from 'react'
 import { debounce } from 'remeda'
+import AddressField from './AddressField'
 import ContactField from './ContactField'
 import FileField from './FileField'
 import UserField from './UserField'
@@ -89,6 +90,14 @@ function Field(
   dayjs.extend(utc)
 
   return match(field.type)
+    .with('Address', () => (
+      <AddressField
+        disabled={disabled}
+        address={value?.address ?? null}
+        onChange={(address) => handleChange({ ...emptyValue, address })}
+        inline={inline}
+      />
+    ))
     .with('Checkbox', () => (
       <Checkbox
         disabled={disabled}

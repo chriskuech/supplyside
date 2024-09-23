@@ -3,12 +3,16 @@ import { match, P } from 'ts-pattern'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { FieldTemplate } from '@/domain/schema/template/types'
+import { formatInlineAddress } from '@/lib/resource/fields/views/AddressCard'
 
 export const mapValue = (resource: Resource, field: FieldTemplate) => {
   const fieldValue = selectResourceFieldValue(resource, field)
 
   return match(field.type)
     .with('Checkbox', () => fieldValue?.boolean)
+    .with('Address', () =>
+      fieldValue?.address ? formatInlineAddress(fieldValue.address) : null,
+    )
     .with('Contact', () => fieldValue?.contact?.name)
     .with(
       'Date',

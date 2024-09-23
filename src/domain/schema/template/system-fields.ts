@@ -297,7 +297,7 @@ const _fields = {
   primaryAddress: {
     templateId: '58e1e7ae-2dab-44e2-b741-e47eddd7a626',
     name: 'Primary Address',
-    type: 'Textarea',
+    type: 'Address',
     description: "The vendor's primary physical address",
   },
   quantity: {
@@ -331,7 +331,7 @@ const _fields = {
   shippingAddress: {
     templateId: '848fe67b-ee4f-4c68-bdaa-3089622337f6',
     name: 'Shipping Address',
-    type: 'Textarea',
+    type: 'Address',
     description: 'Indicates the ship-to address on the order',
   },
   shippingMethod: {

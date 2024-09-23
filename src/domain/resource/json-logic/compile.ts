@@ -61,6 +61,23 @@ const createOrderBy = (orderBy: OrderBy[]) =>
 const createPropertySubquery = (field: SchemaField) =>
   match(field.type)
     .with(
+      'Address',
+      () => /*sql*/ `
+        SELECT json_build_object(
+          'streetAddress', "Address"."streetAddress",
+          'city', "Address"."city",
+          'state', "Address"."state",
+          'zip', "Address"."zip",
+          'country', "Address"."country"
+        )
+        FROM "ResourceField"
+        LEFT JOIN "Value" ON "Value"."id" = "ResourceField"."valueId"
+        LEFT JOIN "Address" ON "Address"."id" = "Value"."addressId"
+        WHERE "Resource"."id" = "ResourceField"."resourceId"
+          AND "ResourceField"."fieldId" = '${field.id}'
+      `,
+    )
+    .with(
       'Contact',
       () => /*sql*/ `
         SELECT "Contact"."name"
@@ -105,7 +122,7 @@ const createPropertySubquery = (field: SchemaField) =>
 
 type PrimitiveFieldType = Exclude<
   FieldType,
-  'Contact' | 'Files' | 'MultiSelect'
+  'Address' | 'Contact' | 'Files' | 'MultiSelect'
 >
 
 const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
