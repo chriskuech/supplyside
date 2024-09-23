@@ -92,21 +92,17 @@ export default async function AppBar() {
                         sx={{ mx: 2, height: '1em' }}
                       />
                     </Box>
-
-                    {['Vendors', 'Items'].map((item) => (
-                      <Button
-                        key={item}
-                        href={`/${item.toLowerCase()}`}
-                        disableElevation={true}
-                        component={Link}
-                        variant="text"
-                        sx={{
-                          display: { xs: 'none', lg: 'inherit' },
-                        }}
-                      >
-                        {item}
-                      </Button>
-                    ))}
+                    <Button
+                      href="/vendors"
+                      disableElevation
+                      component={Link}
+                      variant="text"
+                      sx={{
+                        display: { xs: 'none', lg: 'inherit' },
+                      }}
+                    >
+                      Vendors
+                    </Button>
 
                     <Box display="flex" alignItems="center">
                       <Divider
