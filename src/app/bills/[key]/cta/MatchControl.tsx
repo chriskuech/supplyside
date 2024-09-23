@@ -124,7 +124,8 @@ export default function MatchControl({ schema, resource }: Props) {
                       updateResourceField({
                         resourceId: resource.id,
                         fieldId:
-                          selectSchemaField(schema, fields.purchase)?.id ?? fail(),
+                          selectSchemaField(schema, fields.purchase)?.id ??
+                          fail(),
                         value: { resourceId: row.id },
                       }).then(() => close())
                     }

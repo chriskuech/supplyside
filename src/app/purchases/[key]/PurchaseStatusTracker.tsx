@@ -28,7 +28,10 @@ type Props = {
 }
 
 export default function PurchaseStatusTracker({ resource }: Props) {
-  const value = selectResourceFieldValue(resource, fields.purchaseStatus)?.option
+  const value = selectResourceFieldValue(
+    resource,
+    fields.purchaseStatus,
+  )?.option
 
   if (!value) return '❌ Field value not found'
 

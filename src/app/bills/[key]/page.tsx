@@ -76,7 +76,9 @@ export default async function BillsDetail({
               />,
             ]
           : []),
-        ...(purchase ? [<PurchaseLink key={purchase.id} purchase={purchase} />] : []),
+        ...(purchase
+          ? [<PurchaseLink key={purchase.id} purchase={purchase} />]
+          : []),
         <AttachmentsToolbarControl
           key={AttachmentsToolbarControl.name}
           resourceId={resource.id}

@@ -27,7 +27,8 @@ export default function ApproveButton({ resourceId, isDisabled }: Props) {
   return (
     <LoadingButton
       onClick={() =>
-        !isDisabled && transitionStatus(resourceId, purchaseStatusOptions.approved)
+        !isDisabled &&
+        transitionStatus(resourceId, purchaseStatusOptions.approved)
       }
       endIcon={<ArrowRight />}
       sx={{ height: 'fit-content', fontSize: '1.2em' }}

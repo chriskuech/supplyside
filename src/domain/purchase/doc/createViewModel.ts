@@ -16,19 +16,19 @@ import prisma from '@/services/prisma'
 
 export const createViewModel = async (
   accountId: string,
-  orderId: string,
+  purchaseId: string,
 ): Promise<PurchaseViewModel> => {
   const [order, lines, lineSchema, account] = await Promise.all([
     readResource({
       accountId,
-      id: orderId,
+      id: purchaseId,
       type: 'Purchase',
     }),
     readResources({
       accountId,
       type: 'Line',
       where: {
-        '==': [{ var: 'Purchase' }, orderId],
+        '==': [{ var: 'Purchase' }, purchaseId],
       },
     }),
     readSchema({ accountId, resourceType: 'Line' }),

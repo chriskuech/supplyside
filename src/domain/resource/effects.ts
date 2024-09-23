@@ -119,10 +119,10 @@ export const handleResourceUpdate = async ({
       (rf) => rf.field.templateId === fields.totalCost.templateId,
     )
   ) {
-    const orderId = selectResourceFieldValue(resource, fields.purchase)?.resource
-      ?.id
-    if (orderId) {
-      await recalculateSubtotalCost(accountId, 'Purchase', orderId)
+    const purchaseId = selectResourceFieldValue(resource, fields.purchase)
+      ?.resource?.id
+    if (purchaseId) {
+      await recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
     }
 
     const billId = selectResourceFieldValue(resource, fields.bill)?.resource?.id
@@ -177,7 +177,9 @@ export const handleResourceUpdate = async ({
   // Then recalculate the Bill."Subtotal Cost"
   if (
     resource.type === 'Bill' &&
-    updatedFields.some((rf) => rf.field.templateId === fields.purchase.templateId)
+    updatedFields.some(
+      (rf) => rf.field.templateId === fields.purchase.templateId,
+    )
   ) {
     await recalculateSubtotalCost(accountId, 'Bill', resource.id)
 
