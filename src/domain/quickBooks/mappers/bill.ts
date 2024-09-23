@@ -44,7 +44,7 @@ export const mapBill = (
     },
     Line: [
       {
-        Description: mapValue(billResource, fields.orderDescription),
+        Description: mapValue(billResource, fields.purchaseDescription),
         DetailType: ACCOUNT_BASED_EXPENSE,
         Amount: mapValue(billResource, fields.totalCost) ?? 0,
         AccountBasedExpenseLineDetail: {

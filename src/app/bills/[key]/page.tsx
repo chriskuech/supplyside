@@ -4,7 +4,7 @@ import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
 import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
-import OrderLink from './tools/OrderLink'
+import PurchaseLink from './tools/PurchaseLink'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
@@ -49,7 +49,7 @@ export default async function BillsDetail({
     .with(billStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
 
-  const order = selectResourceFieldValue(resource, fields.order)?.resource
+  const purchase = selectResourceFieldValue(resource, fields.purchase)?.resource
 
   const quickBooksBillId = selectResourceFieldValue(
     resource,
@@ -76,7 +76,7 @@ export default async function BillsDetail({
               />,
             ]
           : []),
-        ...(order ? [<OrderLink key={order.id} order={order} />] : []),
+        ...(purchase ? [<PurchaseLink key={purchase.id} purchase={purchase} />] : []),
         <AttachmentsToolbarControl
           key={AttachmentsToolbarControl.name}
           resourceId={resource.id}

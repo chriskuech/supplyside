@@ -4,7 +4,7 @@ import { Edit } from '@mui/icons-material'
 import { Box, Tooltip, IconButton } from '@mui/material'
 import {
   fields,
-  orderStatusOptions,
+  purchaseStatusOptions,
 } from '@/domain/schema/template/system-fields'
 import { transitionStatus } from '@/lib/resource/actions'
 
@@ -20,8 +20,8 @@ export default function EditControl({ resourceId }: Props) {
           onClick={() =>
             transitionStatus(
               resourceId,
-              fields.orderStatus,
-              orderStatusOptions.draft,
+              fields.purchaseStatus,
+              purchaseStatusOptions.draft,
             )
           }
           sx={{ '.MuiButtonBase-root': { m: 0, p: 0 } }}

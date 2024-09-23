@@ -1,44 +1,42 @@
 'use client'
 
 import { ArrowRight } from '@mui/icons-material'
+import { createPo } from '../actions'
 import { transitionStatus as transitionStatusAction } from '@/lib/resource/actions'
 import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
 import LoadingButton from '@/lib/ux/LoadingButton'
+import {
+  fields,
+  purchaseStatusOptions,
+} from '@/domain/schema/template/system-fields'
 import { OptionTemplate } from '@/domain/schema/template/types'
-import { fields } from '@/domain/schema/template/system-fields'
 
 type Props = {
   resourceId: string
-  statusOption: OptionTemplate
-  label: string
   isDisabled?: boolean
-  tooltip?: string
 }
 
-export default function StatusTransitionButton({
-  resourceId,
-  statusOption,
-  label,
-  isDisabled,
-  tooltip,
-}: Props) {
-  const [state, transitionStatus] = useAsyncCallback(transitionStatusAction)
+export default function ApproveButton({ resourceId, isDisabled }: Props) {
+  const callback = (resourceId: string, status: OptionTemplate) =>
+    createPo(resourceId).then(() =>
+      transitionStatusAction(resourceId, fields.purchaseStatus, status),
+    )
+
+  const [status, transitionStatus] = useAsyncCallback(callback)
 
   return (
     <LoadingButton
       onClick={() =>
-        !isDisabled &&
-        transitionStatus(resourceId, fields.orderStatus, statusOption)
+        !isDisabled && transitionStatus(resourceId, purchaseStatusOptions.approved)
       }
       endIcon={<ArrowRight />}
       sx={{ height: 'fit-content', fontSize: '1.2em' }}
       size="large"
       color="secondary"
       disabled={isDisabled}
-      isLoading={state.isLoading}
-      tooltip={tooltip}
+      isLoading={status.isLoading}
     >
-      {label}
+      Approve
     </LoadingButton>
   )
 }

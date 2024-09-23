@@ -24,7 +24,7 @@ export const handleResourceCreate = async ({
   schema,
   resource,
 }: HandleResourceCreateParams) => {
-  if (resource.type === 'Order') {
+  if (resource.type === 'Purchase') {
     await updateResourceField({
       accountId,
       resourceId: resource.id,
@@ -112,17 +112,17 @@ export const handleResourceUpdate = async ({
   }
 
   // When the Line."Total Cost" field is updated,
-  // Then update the {Bill|Order}."Subtotal Cost" field
+  // Then update the {Bill|Purchase}."Subtotal Cost" field
   if (
     resource.type === 'Line' &&
     updatedFields.some(
       (rf) => rf.field.templateId === fields.totalCost.templateId,
     )
   ) {
-    const orderId = selectResourceFieldValue(resource, fields.order)?.resource
+    const orderId = selectResourceFieldValue(resource, fields.purchase)?.resource
       ?.id
     if (orderId) {
-      await recalculateSubtotalCost(accountId, 'Order', orderId)
+      await recalculateSubtotalCost(accountId, 'Purchase', orderId)
     }
 
     const billId = selectResourceFieldValue(resource, fields.bill)?.resource?.id
@@ -131,10 +131,10 @@ export const handleResourceUpdate = async ({
     }
   }
 
-  // When the {Bill|Order}."Subtotal Cost" field is updated,
-  // Then recalculate the {Bill|Order}."Itemized Costs" field
+  // When the {Bill|Purchase}."Subtotal Cost" field is updated,
+  // Then recalculate the {Bill|Purchase}."Itemized Costs" field
   if (
-    ['Bill', 'Order'].includes(resource.type) &&
+    ['Bill', 'Purchase'].includes(resource.type) &&
     updatedFields.some(
       (rf) => rf.field.templateId === fields.subtotalCost.templateId,
     )
@@ -142,10 +142,10 @@ export const handleResourceUpdate = async ({
     await recalculateItemizedCosts(accountId, resource.id)
   }
 
-  // When the {Bill|Order}."Itemized Costs" or {Bill|Order}."Subtotal Cost" field is updated,
-  // Then update {Bill|Order}."Total Cost"
+  // When the {Bill|Purchase}."Itemized Costs" or {Bill|Purchase}."Subtotal Cost" field is updated,
+  // Then update {Bill|Purchase}."Total Cost"
   if (
-    ['Bill', 'Order'].includes(resource.type) &&
+    ['Bill', 'Purchase'].includes(resource.type) &&
     updatedFields.some(
       (rf) =>
         rf.field.templateId === fields.subtotalCost.templateId ||
@@ -173,11 +173,11 @@ export const handleResourceUpdate = async ({
     })
   }
 
-  // When the Order field of a Bill resource has been updated (an Order has been linked to a Bill)
+  // When the Purchase field of a Bill resource has been updated (an Purchase has been linked to a Bill)
   // Then recalculate the Bill."Subtotal Cost"
   if (
     resource.type === 'Bill' &&
-    updatedFields.some((rf) => rf.field.templateId === fields.order.templateId)
+    updatedFields.some((rf) => rf.field.templateId === fields.purchase.templateId)
   ) {
     await recalculateSubtotalCost(accountId, 'Bill', resource.id)
 

@@ -14,7 +14,7 @@ type SendPoParams = {
 export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   const [order, account] = await Promise.all([
     readResource({
-      type: 'Order',
+      type: 'Purchase',
       id: resourceId,
       accountId,
     }),

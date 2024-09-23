@@ -11,24 +11,24 @@ import {
 } from '../../resource/extensions'
 import { fields } from '../../schema/template/system-fields'
 import { readBlob } from '../../blobs'
-import { LineViewModel, OrderViewModel } from './ViewModel'
+import { LineViewModel, PurchaseViewModel } from './ViewModel'
 import prisma from '@/services/prisma'
 
 export const createViewModel = async (
   accountId: string,
   orderId: string,
-): Promise<OrderViewModel> => {
+): Promise<PurchaseViewModel> => {
   const [order, lines, lineSchema, account] = await Promise.all([
     readResource({
       accountId,
       id: orderId,
-      type: 'Order',
+      type: 'Purchase',
     }),
     readResources({
       accountId,
       type: 'Line',
       where: {
-        '==': [{ var: 'Order' }, orderId],
+        '==': [{ var: 'Purchase' }, orderId],
       },
     }),
     readSchema({ accountId, resourceType: 'Line' }),
@@ -99,7 +99,7 @@ export const createViewModel = async (
         } satisfies LineViewModel
       }),
     ),
-    notes: renderTemplateField(order, fields.orderNotes),
+    notes: renderTemplateField(order, fields.purchaseNotes),
     termsAndConditions: renderTemplateField(order, fields.termsAndConditions),
     subtotal: renderTemplateField(order, fields.subtotalCost),
     accountAddress: account.address,

@@ -6,19 +6,19 @@ import Link from 'next/link'
 import { ValueResource } from '@/domain/resource/entity'
 
 type Props = {
-  order: ValueResource
+  purchase: ValueResource
 }
 
-export default function OrderLink({ order }: Props) {
+export default function PurchaseLink({ purchase }: Props) {
   return (
     <Chip
       sx={{ py: 2, cursor: 'pointer' }}
       icon={<LinkIcon fontSize="large" />}
       component={Link}
-      href={`/orders/${order.key}`}
+      href={`/purchases/${purchase.key}`}
       label={
         <Typography sx={{ opacity: 0.8 }}>
-          Order #<strong>{order.key}</strong>
+          Purchase #<strong>{purchase.key}</strong>
         </Typography>
       }
     />

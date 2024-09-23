@@ -94,25 +94,25 @@ async function main() {
     ],
   })
 
-  const orderSchema = await readSchema({
+  const purchaseSchema = await readSchema({
     accountId: customerAccount.id,
-    resourceType: ResourceType.Order,
+    resourceType: ResourceType.Purchase,
   })
 
-  const order = await createResource({
+  const purchase = await createResource({
     accountId: customerAccount.id,
-    type: ResourceType.Order,
+    type: ResourceType.Purchase,
     fields: [
       {
-        fieldId: selectSchemaFieldUnsafe(orderSchema, fields.assignee).id,
+        fieldId: selectSchemaFieldUnsafe(purchaseSchema, fields.assignee).id,
         value: { userId: systemUser.id },
       },
       {
-        fieldId: selectSchemaFieldUnsafe(orderSchema, fields.poNumber).id,
+        fieldId: selectSchemaFieldUnsafe(purchaseSchema, fields.poNumber).id,
         value: { string: '42' },
       },
       {
-        fieldId: selectSchemaFieldUnsafe(orderSchema, fields.vendor).id,
+        fieldId: selectSchemaFieldUnsafe(purchaseSchema, fields.vendor).id,
         value: { resourceId: vendor.id },
       },
     ],
@@ -153,8 +153,8 @@ async function main() {
     type: ResourceType.Line,
     fields: [
       {
-        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.order).id,
-        value: { resourceId: order.id },
+        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase).id,
+        value: { resourceId: purchase.id },
       },
       {
         fieldId: selectSchemaFieldUnsafe(lineSchema, fields.item).id,
@@ -188,8 +188,8 @@ async function main() {
     type: ResourceType.Line,
     fields: [
       {
-        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.order).id,
-        value: { resourceId: order.id },
+        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase).id,
+        value: { resourceId: purchase.id },
       },
       {
         fieldId: selectSchemaFieldUnsafe(lineSchema, fields.item).id,

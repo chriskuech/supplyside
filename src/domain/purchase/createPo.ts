@@ -15,7 +15,7 @@ type CreatePoParams = {
 }
 
 export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
-  const schema = await readSchema({ accountId, resourceType: 'Order' })
+  const schema = await readSchema({ accountId, resourceType: 'Purchase' })
 
   const documentFieldId =
     selectSchemaField(schema, fields.document)?.id ?? fail()
@@ -48,7 +48,7 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   const input: Prisma.ValueCreateInput = {
     File: {
       create: {
-        name: `Order #${number} - ${issuedDate?.toDateString()} - ${vendorName}.pdf`,
+        name: `Purchase #${number} - ${issuedDate?.toDateString()} - ${vendorName}.pdf`,
         Account: {
           connect: {
             id: accountId,

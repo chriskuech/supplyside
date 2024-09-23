@@ -39,7 +39,9 @@ export default async function LinesAndCosts({
     allFields: lineSchema.allFields.filter(
       ({ templateId }) =>
         !templateId ||
-        ![fields.order.templateId, fields.bill.templateId].includes(templateId),
+        ![fields.purchase.templateId, fields.bill.templateId].includes(
+          templateId,
+        ),
     ),
   }
 

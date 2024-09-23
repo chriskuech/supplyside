@@ -2,10 +2,10 @@
 
 import {
   fields,
-  orderStatusOptions,
+  purchaseStatusOptions,
 } from '@/domain/schema/template/system-fields'
-import { sendPo as domainSendPo } from '@/domain/order/sendPo'
-import { createPo as domainCreatePo } from '@/domain/order/createPo'
+import { sendPo as domainSendPo } from '@/domain/purchase/sendPo'
+import { createPo as domainCreatePo } from '@/domain/purchase/createPo'
 import { transitionStatus } from '@/lib/resource/actions'
 import prisma from '@/services/prisma'
 import { mapValueResourceModelToEntity } from '@/domain/resource/mappers'
@@ -23,17 +23,20 @@ export const sendPo = async (resourceId: string) => {
   await domainSendPo({ accountId, resourceId })
   await transitionStatus(
     resourceId,
-    fields.orderStatus,
-    orderStatusOptions.ordered,
+    fields.purchaseStatus,
+    purchaseStatusOptions.ordered,
   )
 }
 
-export const findOrderBills = async (resourceId: string) => {
+export const findPurchaseBills = async (resourceId: string) => {
   const { accountId } = await readSession()
 
   const bills = await prisma().resourceField.findMany({
     where: {
-      Field: { templateId: fields.order.templateId, resourceType: 'Order' },
+      Field: {
+        templateId: fields.purchase.templateId,
+        resourceType: 'Purchase',
+      },
       Value: { resourceId },
       Resource: { accountId, type: 'Bill' },
     },

@@ -87,10 +87,10 @@ model User {
 }
 
 enum ResourceType {
-  Line
-  Item
-  Order
   Bill
+  Item
+  Line
+  Purchase
   Vendor
 }
 
