@@ -51,7 +51,6 @@ export const schemas: SchemaTemplate[] = [
           fields.name,
           fields.customerDescription,
           fields.primaryAddress,
-          fields.primaryContact,
         ],
       },
       {
