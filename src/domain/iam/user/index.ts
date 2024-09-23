@@ -24,7 +24,7 @@ export async function inviteUser({
 }: InviteUserParams): Promise<void> {
   await prisma().user.create({
     data: {
-      email,
+      email: email.toLowerCase(),
       accountId,
       isAdmin,
     },
