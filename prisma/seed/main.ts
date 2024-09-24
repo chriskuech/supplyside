@@ -2,15 +2,18 @@ import { z } from 'zod'
 import { config as loadDotenv } from 'dotenv'
 import { expand as expandDotenv } from 'dotenv-expand'
 import { ResourceType } from '@prisma/client'
+import { container } from 'tsyringe'
 import { systemAccountId } from '@/lib/const'
-import prisma from '@/integrations/prisma'
 import { applyTemplate } from '@/domain/schema/template'
 import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
+import { PrismaService } from '@/integrations/PrismaService'
 
 expandDotenv(loadDotenv())
+
+const prisma = container.resolve(PrismaService)
 
 const config = z
   .object({
@@ -24,7 +27,7 @@ const config = z
 const testId = '00000000-0000-0000-0000-000000000001'
 
 async function main() {
-  const systemAccount = await prisma().account.create({
+  const systemAccount = await prisma.account.create({
     data: {
       id: systemAccountId,
       key: 'system',
@@ -32,7 +35,7 @@ async function main() {
     },
   })
 
-  const systemUser = await prisma().user.create({
+  const systemUser = await prisma.user.create({
     data: {
       id: systemAccount.id,
       accountId: systemAccount.id,
@@ -44,7 +47,7 @@ async function main() {
 
   const [devAlias, devDomain] = config.DEV_EMAIL.split('@')
 
-  const customerAccount = await prisma().account.create({
+  const customerAccount = await prisma.account.create({
     data: {
       id: testId,
       key: 'test',
@@ -52,7 +55,7 @@ async function main() {
     },
   })
 
-  await prisma().user.create({
+  await prisma.user.create({
     data: {
       accountId: customerAccount.id,
       email: `${devAlias}+${customerAccount.key}@${devDomain}`,
@@ -63,7 +66,7 @@ async function main() {
 
   await applyTemplate(customerAccount.id)
 
-  const unitOfMeasureOption = await prisma().option.create({
+  const unitOfMeasureOption = await prisma.option.create({
     data: {
       order: 0,
       name: 'My UNIT',

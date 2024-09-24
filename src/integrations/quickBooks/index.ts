@@ -3,12 +3,13 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import CSRF from 'csrf'
 import { Prisma } from '@prisma/client'
+import { container } from 'tsyringe'
+import { PrismaService } from '../PrismaService'
 import { QuickBooksToken, quickbooksTokenSchema } from './schemas'
 import { getQuickBooksConfigUnsafe, quickBooksClient } from './util'
 import { QueryOptions } from './types'
 import { upsertAccountsFromQuickBooks } from './entities/accounts'
 import { upsertVendorsFromQuickBooks } from './entities/vendor'
-import prisma from '@/integrations/prisma'
 
 export const baseUrl = (realmId: string) => {
   const { apiBaseUrl } = getQuickBooksConfigUnsafe()
@@ -54,9 +55,10 @@ const updateQuickBooksToken = async (
   accountId: string,
   quickBooksToken: Token,
 ) => {
+  const prisma = container.resolve(PrismaService)
   const token = cleanToken(quickBooksToken)
 
-  await prisma().account.update({
+  await prisma.account.update({
     where: { id: accountId },
     data: {
       quickBooksConnectedAt: new Date(),
@@ -66,7 +68,9 @@ const updateQuickBooksToken = async (
 }
 
 export const deleteQuickBooksToken = async (accountId: string) => {
-  await prisma().account.update({
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.account.update({
     where: { id: accountId },
     data: {
       quickBooksConnectedAt: null,
@@ -79,6 +83,7 @@ export const createQuickBooksConnection = async (
   accountId: string,
   url: string,
 ) => {
+  const prisma = container.resolve(PrismaService)
   const { csrfSecret } = getQuickBooksConfigUnsafe()
 
   const tokenExchange = await quickBooksClient().createToken(url)
@@ -94,7 +99,7 @@ export const createQuickBooksConnection = async (
 
   const token = cleanToken(tokenExchange.token)
 
-  await prisma().account.update({
+  await prisma.account.update({
     where: { id: accountId },
     data: {
       quickBooksConnectedAt: new Date(),
@@ -106,7 +111,8 @@ export const createQuickBooksConnection = async (
 export const getQuickbooksToken = async (
   accountId: string,
 ): Promise<QuickBooksToken | null> => {
-  const account = await prisma().account.findUniqueOrThrow({
+  const prisma = container.resolve(PrismaService)
+  const account = await prisma.account.findUniqueOrThrow({
     where: { id: accountId },
   })
 

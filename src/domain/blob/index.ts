@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto'
-import { container, singleton } from 'tsyringe'
+import { singleton } from 'tsyringe'
 import { BlobServiceClient } from '@azure/storage-blob'
 import { Blob, BlobWithData } from './entity'
-import prisma from '@/integrations/prisma'
 import ConfigService from '@/integrations/ConfigService'
+import { PrismaService } from '@/integrations/PrismaService'
 
 const containerName = 'app-data'
 
@@ -11,9 +11,10 @@ const containerName = 'app-data'
 export default class BlobService {
   private readonly client: BlobServiceClient
 
-  constructor() {
-    const { config } = container.resolve(ConfigService)
-
+  constructor(
+    { config }: ConfigService,
+    private readonly prisma: PrismaService,
+  ) {
     this.client = BlobServiceClient.fromConnectionString(
       config.AZURE_STORAGE_CONNECTION_STRING,
     )
@@ -47,7 +48,7 @@ export default class BlobService {
       .getBlockBlobClient(blobName)
       .uploadData(buffer, { blobHTTPHeaders: { blobContentType: type } })
 
-    const blob = await prisma().blob.create({
+    const blob = await this.prisma.blob.create({
       data: {
         accountId: accountId,
         mimeType: type.toLowerCase(),
@@ -65,7 +66,7 @@ export default class BlobService {
     accountId: string
     blobId: string
   }): Promise<BlobWithData | undefined> {
-    const blob = await prisma().blob.findUnique({
+    const blob = await this.prisma.blob.findUnique({
       where: { accountId, id: blobId },
     })
 
@@ -88,7 +89,7 @@ export default class BlobService {
     accountId: string
     blobId: string
   }): Promise<void> {
-    const blob = await prisma().blob.findUnique({
+    const blob = await this.prisma.blob.findUnique({
       where: { accountId, id: blobId },
     })
 
@@ -101,6 +102,6 @@ export default class BlobService {
       .getBlockBlobClient(blob.name)
       .deleteIfExists()
 
-    await prisma().blob.delete({ where: { accountId, id: blobId } })
+    await this.prisma.blob.delete({ where: { accountId, id: blobId } })
   }
 }

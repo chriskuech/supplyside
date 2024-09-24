@@ -1,3 +1,5 @@
+import { container } from 'tsyringe'
+import { PrismaService } from '../PrismaService'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { readSchema } from '@/domain/schema'
 import {
@@ -7,7 +9,6 @@ import {
   updateResource,
 } from '@/domain/resource'
 import { resources } from '@/domain/schema/template/system-resources'
-import prisma from '@/integrations/prisma'
 import { findResources } from '@/lib/resource/actions'
 
 export async function createConnection(
@@ -15,6 +16,8 @@ export async function createConnection(
   username: string,
   password: string,
 ) {
+  const prisma = container.resolve(PrismaService)
+
   //TODO: check if username and password is correct throw expected error otherwise
 
   const [mcMasterCarrVendor] = await findResources({
@@ -54,7 +57,7 @@ export async function createConnection(
     }
   }
 
-  await prisma().account.update({
+  await prisma.account.update({
     where: { id: accountId },
     data: {
       mcMasterCarrConnectedAt: new Date(),
@@ -65,6 +68,8 @@ export async function createConnection(
 }
 
 export async function disconnect(accountId: string) {
+  const prisma = container.resolve(PrismaService)
+
   const mcMasterCarrVendor = await findByTemplateId({
     accountId,
     templateId: resources().mcMasterCarrVendor.templateId,
@@ -78,7 +83,7 @@ export async function disconnect(accountId: string) {
     })
   }
 
-  await prisma().account.update({
+  await prisma.account.update({
     where: { id: accountId },
     data: {
       mcMasterCarrUsername: null,

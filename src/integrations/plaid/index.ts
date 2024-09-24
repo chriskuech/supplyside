@@ -1,8 +1,8 @@
 import { CountryCode, Products } from 'plaid'
 import { redirect } from 'next/navigation'
 import { container } from 'tsyringe'
+import { PrismaService } from '../PrismaService'
 import { plaidClient } from './util'
-import prisma from '@/integrations/prisma'
 import ConfigService from '@/integrations/ConfigService'
 
 export const createLinkToken = async (accountId: string) => {
@@ -24,11 +24,13 @@ export const createLinkToken = async (accountId: string) => {
 }
 
 export async function createConnection(accountId: string, publicToken: string) {
+  const prisma = container.resolve(PrismaService)
+
   const exchangeResponse = await plaidClient().itemPublicTokenExchange({
     public_token: publicToken,
   })
 
-  await prisma().account.update({
+  await prisma.account.update({
     where: { id: accountId },
     data: {
       plaidConnectedAt: new Date(),
@@ -38,7 +40,9 @@ export async function createConnection(accountId: string, publicToken: string) {
 }
 
 export async function deletePlaidToken(accountId: string) {
-  await prisma().account.update({
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.account.update({
     where: { id: accountId },
     data: {
       plaidConnectedAt: null,
@@ -50,7 +54,9 @@ export async function deletePlaidToken(accountId: string) {
 export const getPlaidToken = async (
   accountId: string,
 ): Promise<string | null> => {
-  const account = await prisma().account.findUniqueOrThrow({
+  const prisma = container.resolve(PrismaService)
+
+  const account = await prisma.account.findUniqueOrThrow({
     where: { id: accountId },
   })
 

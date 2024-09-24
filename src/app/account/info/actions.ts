@@ -5,15 +5,16 @@ import { isEmpty } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { container } from 'tsyringe'
-import prisma from '@/integrations/prisma'
 import { readSession } from '@/lib/session/actions'
 import BlobService from '@/domain/blob'
+import { PrismaService } from '@/integrations/PrismaService'
 
 type ClientErrors = Record<string, string[]>
 
 export const handleSaveSettings = async (
   formData: FormData,
 ): Promise<ClientErrors | undefined> => {
+  const prisma = container.resolve(PrismaService)
   const blobService = container.resolve(BlobService)
   const { accountId } = await readSession()
 
@@ -43,7 +44,7 @@ export const handleSaveSettings = async (
   }
 
   if (!isEmpty(data)) {
-    await prisma().account.update({
+    await prisma.account.update({
       where: { id: accountId },
       data,
     })

@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
 import { renderPo } from '@/domain/purchase/renderPo'
-import prisma from '@/integrations/prisma'
+import { PrismaService } from '@/integrations/PrismaService'
 
 /**
  * /api/preview-po?resourceId=<resourceId>
  */
 export async function GET(req: NextRequest): Promise<NextResponse> {
+  const prisma = container.resolve(PrismaService)
+
   const query = new URL(req.url).searchParams
 
   const session = await readSession()
@@ -24,7 +27,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const resource = await prisma().resource.findUnique({
+  const resource = await prisma.resource.findUnique({
     where: {
       id: resourceId,
     },

@@ -8,7 +8,7 @@ import { selectSchemaField } from '../schema/extensions'
 import { selectResourceFieldValue } from '../resource/extensions'
 import BlobService from '../blob'
 import { renderPo } from './renderPo'
-import prisma from '@/integrations/prisma'
+import { PrismaService } from '@/integrations/PrismaService'
 
 type CreatePoParams = {
   accountId: string
@@ -17,6 +17,7 @@ type CreatePoParams = {
 
 export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   const blobService = container.resolve(BlobService)
+  const prisma = container.resolve(PrismaService)
 
   const schema = await readSchema({ accountId, resourceType: 'Purchase' })
 
@@ -66,7 +67,7 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
     },
   }
 
-  await prisma().resourceField.upsert({
+  await prisma.resourceField.upsert({
     where: {
       Resource: {
         accountId,

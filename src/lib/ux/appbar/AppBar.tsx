@@ -4,6 +4,7 @@ import MAppBar from '@mui/material/AppBar'
 import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 import Link from 'next/link'
+import { container } from 'tsyringe'
 import { UserMenu } from './UserMenu'
 import { AccountMenu } from './AccountMenu'
 import { NavMenu } from './NavMenu'
@@ -11,15 +12,17 @@ import Logo from './Logo'
 import ImpersonationControl from './ImpersonationControl'
 import { systemAccountId } from '@/lib/const'
 import { readSession } from '@/lib/session/actions'
-import prisma from '@/integrations/prisma'
 import { SessionError } from '@/lib/session/types'
+import { PrismaService } from '@/integrations/PrismaService'
 
 export default async function AppBar() {
   const session = await readSession().catch((e) =>
     e instanceof SessionError ? null : fail(e),
   )
 
-  const accounts = await prisma().account.findMany({
+  const prisma = container.resolve(PrismaService)
+
+  const accounts = await prisma.account.findMany({
     orderBy: {
       name: 'asc',
     },

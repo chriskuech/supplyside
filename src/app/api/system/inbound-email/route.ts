@@ -2,7 +2,6 @@ import { fail } from 'assert'
 import { NextRequest, NextResponse } from 'next/server'
 import { Message } from 'postmark'
 import { container } from 'tsyringe'
-import prisma from '@/integrations/prisma'
 import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema'
@@ -10,6 +9,7 @@ import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { Resource } from '@/domain/resource/entity'
 import BlobService from '@/domain/blob'
 import SmtpService from '@/integrations/SmtpService'
+import { PrismaService } from '@/integrations/PrismaService'
 
 type FileParam = {
   content: string
@@ -25,6 +25,7 @@ type Params = {
 
 const createBill = async (params: Params): Promise<Resource> => {
   const blobService = container.resolve(BlobService)
+  const prisma = container.resolve(PrismaService)
 
   const billSchema = await readSchema({
     accountId: params.accountId,
@@ -39,7 +40,7 @@ const createBill = async (params: Params): Promise<Resource> => {
         type: file.contentType,
       })
 
-      const { id: fileId } = await prisma().file.create({
+      const { id: fileId } = await prisma.file.create({
         data: {
           accountId: params.accountId,
           name: file.fileName,
@@ -68,6 +69,7 @@ const createBill = async (params: Params): Promise<Resource> => {
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
+  const prisma = container.resolve(PrismaService)
   const smtpService = container.resolve(SmtpService)
 
   const body: Message = await req.json()
@@ -75,7 +77,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // for some reason this is (sometimes?) wrapped in quotes
   const accountKey = body.To?.split('@').shift()?.replace(/^"/, '') ?? fail()
 
-  const account = await prisma().account.findUnique({
+  const account = await prisma.account.findUnique({
     where: { key: accountKey },
   })
 

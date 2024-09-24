@@ -1,7 +1,8 @@
 import { fail } from 'assert'
+import { container } from 'tsyringe'
 import { schemas } from './system-schemas'
 import { fields } from './system-fields'
-import prisma from '@/integrations/prisma'
+import { PrismaService } from '@/integrations/PrismaService'
 
 export const applyTemplate = async (accountId: string) => {
   await applyFields(accountId)
@@ -9,7 +10,9 @@ export const applyTemplate = async (accountId: string) => {
 }
 
 const applyFields = async (accountId: string) => {
-  await prisma().field.deleteMany({
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.field.deleteMany({
     where: {
       accountId,
       AND: [
@@ -36,7 +39,7 @@ const applyFields = async (accountId: string) => {
     resourceType,
     defaultToToday,
   } of Object.values(fields)) {
-    const { id: fieldId } = await prisma().field.upsert({
+    const { id: fieldId } = await prisma.field.upsert({
       where: {
         accountId_templateId: {
           accountId,
@@ -71,7 +74,7 @@ const applyFields = async (accountId: string) => {
     })
 
     const upsertingOptions = options?.map(({ templateId, ...option }, order) =>
-      prisma().option.upsert({
+      prisma.option.upsert({
         where: {
           fieldId_templateId: {
             fieldId,
@@ -93,7 +96,7 @@ const applyFields = async (accountId: string) => {
 
     const cleaningOptions =
       options &&
-      prisma().option.deleteMany({
+      prisma.option.deleteMany({
         where: {
           fieldId,
           templateId: { not: null },
@@ -112,7 +115,7 @@ const applyFields = async (accountId: string) => {
         options?.find((o) => o.templateId === defaultValue?.optionTemplateId)
           ?.templateId ?? fail()
 
-      await prisma().field.update({
+      await prisma.field.update({
         where: { id: fieldId },
         data: {
           DefaultValue: {
@@ -146,7 +149,9 @@ const applyFields = async (accountId: string) => {
 }
 
 const applySchemas = async (accountId: string) => {
-  await prisma().schema.deleteMany({
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.schema.deleteMany({
     where: {
       accountId,
       isSystem: true,
@@ -155,7 +160,7 @@ const applySchemas = async (accountId: string) => {
 
   await Promise.all(
     schemas.map(async ({ resourceType, fields, sections }) => {
-      await prisma().schema.create({
+      await prisma.schema.create({
         data: {
           accountId,
           isSystem: true,

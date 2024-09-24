@@ -5,11 +5,11 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { ResourceType } from '@prisma/client'
+import { container } from 'tsyringe'
 import { withSession } from '../session/actions'
 import * as domain from '@/domain/resource'
 import * as schemaDomain from '@/domain/schema'
 import { Resource } from '@/domain/resource/entity'
-import prisma from '@/integrations/prisma'
 import { ValueResource } from '@/domain/resource/entity'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
 import {
@@ -18,6 +18,7 @@ import {
 } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { DuplicateResourceError } from '@/domain/resource/errors'
+import { PrismaService } from '@/integrations/PrismaService'
 
 export const createResource = async (
   params: Pick<domain.CreateResourceParams, 'type' | 'fields'>,
@@ -98,9 +99,11 @@ export type FindResourcesParams = {
 export const findResources = async ({
   resourceType,
   input,
-}: FindResourcesParams): Promise<ValueResource[]> =>
-  await withSession(async ({ accountId }) => {
-    const results = await prisma().$queryRaw`
+}: FindResourcesParams): Promise<ValueResource[]> => {
+  const prisma = container.resolve(PrismaService)
+
+  return await withSession(async ({ accountId }) => {
+    const results = await prisma.$queryRaw`
     WITH "View" AS (
       SELECT
         "Resource".*,
@@ -133,6 +136,7 @@ export const findResources = async ({
       .array()
       .parse(results)
   })
+}
 
 export const transitionStatus = async (
   resourceId: string,

@@ -1,12 +1,13 @@
 import { fail } from 'assert'
 import { ResourceType } from '@prisma/client'
 import { map, pipe, sum } from 'remeda'
+import { container } from 'tsyringe'
 import { selectResourceFieldValue } from './extensions'
 import { readResource, readResources, updateResourceField } from '.'
 import { readSchema } from '@/domain/schema'
-import prisma from '@/integrations/prisma'
 import { selectSchemaField } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
+import { PrismaService } from '@/integrations/PrismaService'
 
 export type CreateCostParams = {
   accountId: string
@@ -17,7 +18,9 @@ export const createCost = async ({
   accountId,
   resourceId,
 }: CreateCostParams): Promise<void> => {
-  await prisma().resource.update({
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.resource.update({
     where: {
       id: resourceId,
       Account: {
@@ -49,7 +52,9 @@ export const updateCost = async ({
   costId,
   data,
 }: UpdateCostParams) => {
-  const cost = await prisma().cost.update({
+  const prisma = container.resolve(PrismaService)
+
+  const cost = await prisma.cost.update({
     where: {
       id: costId,
       Resource: {
@@ -79,7 +84,9 @@ export const deleteCost = async ({
   resourceId,
   costId,
 }: DeleteCostParams): Promise<void> => {
-  const cost = await prisma().cost.delete({
+  const prisma = container.resolve(PrismaService)
+
+  const cost = await prisma.cost.delete({
     where: {
       id: costId,
       Resource: {
@@ -101,9 +108,11 @@ export const recalculateItemizedCosts = async (
   accountId: string,
   resourceId: string,
 ) => {
+  const prisma = container.resolve(PrismaService)
+
   const resource = await readResource({ accountId, id: resourceId })
   const schema = await readSchema({ accountId, resourceType: resource.type })
-  const costs = await prisma().cost.findMany({
+  const costs = await prisma.cost.findMany({
     where: { resourceId },
   })
 

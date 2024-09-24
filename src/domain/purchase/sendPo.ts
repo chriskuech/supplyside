@@ -3,9 +3,9 @@ import { readResource } from '../resource'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceFieldValue } from '../resource/extensions'
 import BlobService from '../blob'
-import prisma from '@/integrations/prisma'
 import SmtpService from '@/integrations/SmtpService'
 import ConfigService from '@/integrations/ConfigService'
+import { PrismaService } from '@/integrations/PrismaService'
 
 type SendPoParams = {
   accountId: string
@@ -15,6 +15,7 @@ type SendPoParams = {
 export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   const blobService = container.resolve(BlobService)
   const { config } = container.resolve(ConfigService)
+  const prisma = container.resolve(PrismaService)
   const smtpService = container.resolve(SmtpService)
 
   const [order, account] = await Promise.all([
@@ -23,7 +24,7 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
       id: resourceId,
       accountId,
     }),
-    prisma().account.findUniqueOrThrow({
+    prisma.account.findUniqueOrThrow({
       where: {
         id: accountId,
       },
