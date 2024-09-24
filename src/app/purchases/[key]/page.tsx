@@ -43,8 +43,6 @@ export default async function PurchaseDetail({
     lineSchema,
   } = await readDetailPageModel('Purchase', key, `/purchases/${key}`)
 
-  //TODO: refactor to a separate file and show spinner
-  //TODO: check mcMaster cookie expiration?? sometimes it requires you to log in
   const vendorTemplateId = selectResourceFieldValue(resource, fields.vendor)
     ?.resource?.templateId
   const isVendorMcMasterCarr =
