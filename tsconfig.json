@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -12,7 +16,6 @@
     "isolatedModules": true,
     "noErrorTruncation": true,
     "useUnknownInCatchVariables": true,
-    "target": "ES5",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "downlevelIteration": true,
@@ -24,7 +27,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
   "include": [
@@ -34,7 +39,13 @@
     "./types",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"],
-  "types": ["intuit-oauth", "reflect-metadata"],
-  "typeRoots": ["./node_modules/@types"]
+  "exclude": [
+    "node_modules"
+  ],
+  "types": [
+    "intuit-oauth"
+  ],
+  "typeRoots": [
+    "./node_modules/@types"
+  ]
 }
