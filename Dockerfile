@@ -11,6 +11,10 @@ RUN npm ci
 
 COPY . .
 
+# Next runs code to identify imports at build time, so we need to set this runtime env var
+# https://github.com/vercel/next.js/discussions/46805
+ENV NODE_OPTIONS="--require reflect-metadata"
+
 RUN npm run build
 
 ##
