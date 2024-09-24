@@ -11,7 +11,7 @@ import Logo from './Logo'
 import ImpersonationControl from './ImpersonationControl'
 import { systemAccountId } from '@/lib/const'
 import { readSession } from '@/lib/session/actions'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 import { SessionError } from '@/lib/session/types'
 
 export default async function AppBar() {

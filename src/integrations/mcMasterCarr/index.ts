@@ -1,13 +1,13 @@
-import { resources } from '../schema/template/system-resources'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
+import { readSchema } from '@/domain/schema'
 import {
   updateTemplateId,
   createResource,
   findByTemplateId,
   updateResource,
-} from '../resource'
-import { selectSchemaFieldUnsafe } from '../schema/extensions'
-import { readSchema } from '../schema'
-import prisma from '@/services/prisma'
+} from '@/domain/resource'
+import { resources } from '@/domain/schema/template/system-resources'
+import prisma from '@/integrations/prisma'
 import { findResources } from '@/lib/resource/actions'
 
 export async function createConnection(

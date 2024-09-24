@@ -6,7 +6,7 @@ import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.b
 import PoDocument from './doc/PoDocument'
 import { createViewModel } from './doc/createViewModel'
 import PoDocumentFooter from '@/domain/order/doc/PoDocumentFooter'
-import singleton from '@/services/singleton'
+import singleton from '@/integrations/singleton'
 
 const browser = singleton('browser', async (clear) => {
   const browser = await puppeteer.launch({

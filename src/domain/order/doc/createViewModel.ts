@@ -10,9 +10,9 @@ import {
   selectResourceFieldValue,
 } from '../../resource/extensions'
 import { fields } from '../../schema/template/system-fields'
-import { readBlob } from '../../blobs'
+import { readBlob } from '../../blob'
 import { LineViewModel, OrderViewModel } from './ViewModel'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 import { formatInlineAddress } from '@/lib/resource/fields/views/AddressCard'
 
 export const createViewModel = async (

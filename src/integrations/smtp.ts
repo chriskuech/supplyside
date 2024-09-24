@@ -1,6 +1,6 @@
 import { ServerClient } from 'postmark'
-import config from '@/services/config'
-import singleton from '@/services/singleton'
+import config from '@/integrations/config'
+import singleton from '@/integrations/singleton'
 
 const smtp = singleton(
   'smtp',

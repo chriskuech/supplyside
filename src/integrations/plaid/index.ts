@@ -1,8 +1,8 @@
 import { CountryCode, Products } from 'plaid'
 import { redirect } from 'next/navigation'
 import { plaidClient } from './util'
-import prisma from '@/services/prisma'
-import config from '@/services/config'
+import prisma from '@/integrations/prisma'
+import config from '@/integrations/config'
 
 export const createLinkToken = async (accountId: string) => {
   const request = {

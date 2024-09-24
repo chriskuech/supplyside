@@ -2,7 +2,7 @@ import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import PlaidDisconnectLink from './PlaidDisconnectLink'
 import { Session } from '@/domain/iam/session/entity'
-import { getPlaidAccounts } from '@/domain/plaid'
+import { getPlaidAccounts } from '@/integrations/plaid'
 
 type Props = {
   session: Session

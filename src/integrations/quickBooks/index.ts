@@ -8,7 +8,7 @@ import { getQuickBooksConfigUnsafe, quickBooksClient } from './util'
 import { QueryOptions } from './types'
 import { upsertAccountsFromQuickBooks } from './entities/accounts'
 import { upsertVendorsFromQuickBooks } from './entities/vendor'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 
 export const baseUrl = (realmId: string) => {
   const { apiBaseUrl } = getQuickBooksConfigUnsafe()

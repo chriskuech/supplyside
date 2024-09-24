@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { Blob, BlobWithData } from './entity'
-import azblob from '@/services/azblob'
-import prisma from '@/services/prisma'
+import azblob from '@/integrations/azblob'
+import prisma from '@/integrations/prisma'
 
 const containerName = 'app-data'
 

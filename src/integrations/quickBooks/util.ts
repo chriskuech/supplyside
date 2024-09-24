@@ -2,7 +2,7 @@ import { fail } from 'assert'
 import OAuthClient, { Token } from 'intuit-oauth'
 import Csrf from 'csrf'
 import QuickbooksOauthClient from 'intuit-oauth'
-import config from '@/services/config'
+import config from '@/integrations/config'
 
 export const createQuickBooksSetupUrl = () => {
   const { csrfSecret } = getQuickBooksConfigUnsafe()

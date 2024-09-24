@@ -13,7 +13,7 @@ import {
   Cost,
 } from '@prisma/client'
 import { userInclude } from '../user/model'
-import { FileModel } from '@/domain/files/model'
+import { FileModel } from '@/domain/file/model'
 
 export type ResourceModel = Resource & {
   Cost: Cost[]
