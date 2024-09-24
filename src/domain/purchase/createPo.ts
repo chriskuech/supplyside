@@ -1,11 +1,12 @@
 import { fail } from 'assert'
 import { Prisma } from '@prisma/client'
-import { createBlob } from '../blob'
+import { container } from 'tsyringe'
 import { fields } from '../schema/template/system-fields'
 import { readResource, updateResourceField } from '../resource'
 import { readSchema } from '../schema'
 import { selectSchemaField } from '../schema/extensions'
 import { selectResourceFieldValue } from '../resource/extensions'
+import BlobService from '../blob'
 import { renderPo } from './renderPo'
 import prisma from '@/integrations/prisma'
 
@@ -15,6 +16,8 @@ type CreatePoParams = {
 }
 
 export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
+  const blobService = container.resolve(BlobService)
+
   const schema = await readSchema({ accountId, resourceType: 'Purchase' })
 
   const documentFieldId =
@@ -32,7 +35,7 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   const buffer = await renderPo({ accountId, resourceId })
 
   const [blob, resource] = await Promise.all([
-    createBlob({
+    blobService.createBlob({
       accountId,
       buffer,
       type: 'application/pdf',

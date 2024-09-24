@@ -1,12 +1,13 @@
 import { v4 as uuid } from 'uuid'
+import { container } from 'tsyringe'
 import { userInclude } from './model'
 import { mapUserModelToEntity } from './mappers'
 import { User } from './entity'
 import { IamUserNotFoundError } from './errors'
 import prisma from '@/integrations/prisma'
 import config from '@/integrations/config'
-import smtp from '@/integrations/smtp'
 import { isPrismaError } from '@/integrations/prisma-extensions'
+import SmtpService from '@/integrations/SmtpService'
 
 const loginPath = '/auth/login'
 const verifyLoginPath = '/auth/verify-login'
@@ -22,6 +23,8 @@ export async function inviteUser({
   email,
   isAdmin,
 }: InviteUserParams): Promise<void> {
+  const smtpService = container.resolve(SmtpService)
+
   await prisma().user.create({
     data: {
       email: email.toLowerCase(),
@@ -30,7 +33,7 @@ export async function inviteUser({
     },
   })
 
-  await smtp().sendEmailWithTemplate({
+  await smtpService.sendEmailWithTemplate({
     From: 'SupplySide <bot@supplyside.io>',
     To: email,
     TemplateAlias: 'user-invitation',
@@ -54,6 +57,7 @@ export async function startEmailVerification({
 }: StartEmailVerificationParams): Promise<void> {
   const tokenLifespanInMinutes = 5
 
+  const smtpService = container.resolve(SmtpService)
   const tat = uuid()
   const tatExpiresAt = new Date(Date.now() + 1000 * 60 * tokenLifespanInMinutes)
 
@@ -70,7 +74,7 @@ export async function startEmailVerification({
     throw error
   }
 
-  await smtp().sendEmailWithTemplate({
+  await smtpService.sendEmailWithTemplate({
     From: 'SupplySide <bot@supplyside.io>',
     To: email,
     TemplateAlias: 'email-verification',

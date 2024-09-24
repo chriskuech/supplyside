@@ -1,14 +1,15 @@
 import { fail } from 'assert'
 import { NextRequest, NextResponse } from 'next/server'
 import { Message } from 'postmark'
-import { createBlob } from '@/domain/blob'
+import { container } from 'tsyringe'
 import prisma from '@/integrations/prisma'
 import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
-import smtp from '@/integrations/smtp'
 import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { Resource } from '@/domain/resource/entity'
+import BlobService from '@/domain/blob'
+import SmtpService from '@/integrations/SmtpService'
 
 type FileParam = {
   content: string
@@ -23,6 +24,8 @@ type Params = {
 }
 
 const createBill = async (params: Params): Promise<Resource> => {
+  const blobService = container.resolve(BlobService)
+
   const billSchema = await readSchema({
     accountId: params.accountId,
     resourceType: 'Bill',
@@ -30,7 +33,7 @@ const createBill = async (params: Params): Promise<Resource> => {
 
   const fileIds = await Promise.all(
     params.files.map(async (file) => {
-      const { id: blobId } = await createBlob({
+      const { id: blobId } = await blobService.createBlob({
         accountId: params.accountId,
         buffer: Buffer.from(file.content, file.encoding),
         type: file.contentType,
@@ -65,6 +68,8 @@ const createBill = async (params: Params): Promise<Resource> => {
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
+  const smtpService = container.resolve(SmtpService)
+
   const body: Message = await req.json()
 
   // for some reason this is (sometimes?) wrapped in quotes
@@ -75,7 +80,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   })
 
   if (!account) {
-    await smtp().sendEmail({
+    await smtpService.sendEmail({
       From: 'SupplySide <bot@supplyside.io>',
       To: body.From,
       Subject: "We couldn't process your email",

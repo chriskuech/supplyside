@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readBlob } from '@/domain/blob'
+import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
 import prisma from '@/integrations/prisma'
+import BlobService from '@/domain/blob'
 
 /**
  * /api/download/[filename]?blobId=<blobId>[&no-impersonation][&preview]
@@ -10,6 +11,8 @@ export async function GET(
   req: NextRequest,
   { params: { filename } }: { params: { filename: string } },
 ): Promise<NextResponse> {
+  const blobService = container.resolve(BlobService)
+
   const query = new URL(req.url).searchParams
 
   const blobId = query.get('blobId')
@@ -29,7 +32,7 @@ export async function GET(
         })
       : session
 
-  const blob = await readBlob({ accountId, blobId })
+  const blob = await blobService.readBlob({ accountId, blobId })
   if (!blob) {
     return NextResponse.json({ error: 'File not found' }, { status: 404 })
   }

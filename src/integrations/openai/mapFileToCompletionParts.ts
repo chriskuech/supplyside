@@ -8,9 +8,10 @@ import {
   ChatCompletionContentPartText,
 } from 'openai/resources/index.mjs'
 import { P, match } from 'ts-pattern'
+import { container } from 'tsyringe'
 import { File } from '@/domain/file/types'
-import { readBlob } from '@/domain/blob'
 import config from '@/integrations/config'
+import BlobService from '@/domain/blob'
 
 const exec = promisify(execCallback)
 
@@ -30,7 +31,9 @@ export const mapFileToCompletionParts = (
 const readPdfToBase64s = async (
   file: File,
 ): Promise<ChatCompletionContentPartImage[]> => {
-  const blob = await readBlob({
+  const blobService = container.resolve(BlobService)
+
+  const blob = await blobService.readBlob({
     accountId: file.accountId,
     blobId: file.blobId,
   })
@@ -71,7 +74,9 @@ const readPdfToBase64s = async (
 const readImageFileToBase64 = async (
   file: File,
 ): Promise<ChatCompletionContentPartImage> => {
-  const blob = await readBlob({
+  const blobService = container.resolve(BlobService)
+
+  const blob = await blobService.readBlob({
     accountId: file.accountId,
     blobId: file.blobId,
   })
@@ -90,7 +95,9 @@ const readImageFileToBase64 = async (
 const readTextFileToString = async (
   file: File,
 ): Promise<ChatCompletionContentPartText> => {
-  const blob = await readBlob({
+  const blobService = container.resolve(BlobService)
+
+  const blob = await blobService.readBlob({
     accountId: file.accountId,
     blobId: file.blobId,
   })

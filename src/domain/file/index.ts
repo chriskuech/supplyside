@@ -1,4 +1,5 @@
-import { createBlob } from '../blob'
+import { container } from 'tsyringe'
+import BlobService from '../blob'
 import { mapFile } from './mapValueFile'
 import { fileInclude } from './model'
 import { File as FileEntity } from './types'
@@ -15,7 +16,9 @@ export const createFile = async ({
   name,
   file,
 }: CreateFileParams): Promise<FileEntity> => {
-  const { id: blobId } = await createBlob({ accountId, file })
+  const blobService = container.resolve(BlobService)
+
+  const { id: blobId } = await blobService.createBlob({ accountId, file })
 
   const fileEntity = await prisma().file.create({
     data: {
