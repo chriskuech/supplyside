@@ -117,9 +117,7 @@ export const CxmlSchema = z.object({
                       .array(),
                     Description: z
                       .object({
-                        //TODO: is optional???
                         _: z.string(),
-                        // .optional()
                         $: z.object({
                           'xml:lang': z.string(),
                         }),
