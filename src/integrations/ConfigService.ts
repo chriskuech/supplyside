@@ -1,8 +1,6 @@
-import { mkdir } from 'fs'
-import { fail } from 'assert'
 import { z } from 'zod'
 import { match } from 'ts-pattern'
-import singleton from './singleton'
+import { singleton } from 'tsyringe'
 
 const schema = z
   .object({
@@ -33,12 +31,7 @@ const schema = z
 
 export type Config = z.infer<typeof schema>
 
-const config = singleton('config', (): Config => {
-  const c = schema.parse(process.env)
-
-  mkdir(c.TEMP_PATH, { recursive: true }, (err) => err && fail(err))
-
-  return c
-})
-
-export default config
+@singleton()
+export default class ConfigService {
+  readonly config: Config = schema.parse(process.env)
+}

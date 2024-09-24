@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { validate as isUuid } from 'uuid'
+import { container } from 'tsyringe'
 import { InvalidSessionError, MissingSessionError } from './types'
 import {
   clearSession as domainClearSession,
@@ -10,8 +11,8 @@ import {
   readAndExtendSession as domainReadAndExtendSession,
   impersonate as domainImpersonate,
 } from '@/domain/iam/session'
-import config from '@/integrations/config'
 import { Session } from '@/domain/iam/session/entity'
+import ConfigService from '@/integrations/ConfigService'
 
 const sessionIdCookieName = 'sessionId'
 
@@ -24,13 +25,15 @@ export const withSession = async <T>(
 }
 
 export const createSession = async (email: string, tat: string) => {
+  const { config } = container.resolve(ConfigService)
+
   const session = await domainCreateSession(email, tat)
 
   cookies().set(sessionIdCookieName, session.id, {
     sameSite: true,
     secure: process.env.NODE_ENV !== 'development',
     httpOnly: true,
-    domain: new URL(config().BASE_URL).hostname,
+    domain: new URL(config.BASE_URL).hostname,
     expires: session.expiresAt,
   })
 }

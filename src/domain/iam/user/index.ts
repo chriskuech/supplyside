@@ -5,9 +5,9 @@ import { mapUserModelToEntity } from './mappers'
 import { User } from './entity'
 import { IamUserNotFoundError } from './errors'
 import prisma from '@/integrations/prisma'
-import config from '@/integrations/config'
 import { isPrismaError } from '@/integrations/prisma-extensions'
 import SmtpService from '@/integrations/SmtpService'
+import ConfigService from '@/integrations/ConfigService'
 
 const loginPath = '/auth/login'
 const verifyLoginPath = '/auth/verify-login'
@@ -24,6 +24,7 @@ export async function inviteUser({
   isAdmin,
 }: InviteUserParams): Promise<void> {
   const smtpService = container.resolve(SmtpService)
+  const { config } = container.resolve(ConfigService)
 
   await prisma().user.create({
     data: {
@@ -39,8 +40,8 @@ export async function inviteUser({
     TemplateAlias: 'user-invitation',
     TemplateModel: {
       invite_email: email,
-      action_url: `${config().BASE_URL}${loginPath}`,
-      product_url: config().BASE_URL,
+      action_url: `${config.BASE_URL}${loginPath}`,
+      product_url: config.BASE_URL,
     },
     MessageStream: 'outbound',
   })
@@ -58,6 +59,8 @@ export async function startEmailVerification({
   const tokenLifespanInMinutes = 5
 
   const smtpService = container.resolve(SmtpService)
+  const { config } = container.resolve(ConfigService)
+
   const tat = uuid()
   const tatExpiresAt = new Date(Date.now() + 1000 * 60 * tokenLifespanInMinutes)
 
@@ -82,9 +85,9 @@ export async function startEmailVerification({
       verify_email: email,
       verify_token: tat,
       action_url:
-        `${config().BASE_URL}${verifyLoginPath}?email=${encodeURIComponent(email)}&token=${tat}` +
+        `${config.BASE_URL}${verifyLoginPath}?email=${encodeURIComponent(email)}&token=${tat}` +
         (returnTo ? `&returnTo=${returnTo}` : ''),
-      product_url: config().BASE_URL,
+      product_url: config.BASE_URL,
     },
     MessageStream: 'outbound',
   })

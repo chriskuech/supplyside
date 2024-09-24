@@ -4,8 +4,8 @@ import { fields } from '../schema/template/system-fields'
 import { selectResourceFieldValue } from '../resource/extensions'
 import BlobService from '../blob'
 import prisma from '@/integrations/prisma'
-import config from '@/integrations/config'
 import SmtpService from '@/integrations/SmtpService'
+import ConfigService from '@/integrations/ConfigService'
 
 type SendPoParams = {
   accountId: string
@@ -14,6 +14,7 @@ type SendPoParams = {
 
 export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   const blobService = container.resolve(BlobService)
+  const { config } = container.resolve(ConfigService)
   const smtpService = container.resolve(SmtpService)
 
   const [order, account] = await Promise.all([
@@ -61,7 +62,7 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
       buyer_logo_base64: logoBlob?.buffer.toString('base64'),
       buyer_logo_contenttype: logoBlob?.mimeType,
       buyer_company_name: account.name,
-      product_url: config().BASE_URL,
+      product_url: config.BASE_URL,
 
       // template
       supplier_user_name: poRecipient.name ?? '(No Name)',

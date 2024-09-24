@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto'
-import { singleton } from 'tsyringe'
+import { container, singleton } from 'tsyringe'
 import { BlobServiceClient } from '@azure/storage-blob'
 import { Blob, BlobWithData } from './entity'
 import prisma from '@/integrations/prisma'
-import config from '@/integrations/config'
+import ConfigService from '@/integrations/ConfigService'
 
 const containerName = 'app-data'
 
@@ -12,8 +12,10 @@ export default class BlobService {
   private readonly client: BlobServiceClient
 
   constructor() {
+    const { config } = container.resolve(ConfigService)
+
     this.client = BlobServiceClient.fromConnectionString(
-      config().AZURE_STORAGE_CONNECTION_STRING,
+      config.AZURE_STORAGE_CONNECTION_STRING,
     )
   }
 

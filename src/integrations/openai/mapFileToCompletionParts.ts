@@ -10,8 +10,8 @@ import {
 import { P, match } from 'ts-pattern'
 import { container } from 'tsyringe'
 import { File } from '@/domain/file/types'
-import config from '@/integrations/config'
 import BlobService from '@/domain/blob'
+import ConfigService from '@/integrations/ConfigService'
 
 const exec = promisify(execCallback)
 
@@ -32,6 +32,7 @@ const readPdfToBase64s = async (
   file: File,
 ): Promise<ChatCompletionContentPartImage[]> => {
   const blobService = container.resolve(BlobService)
+  const { config } = container.resolve(ConfigService)
 
   const blob = await blobService.readBlob({
     accountId: file.accountId,
@@ -40,7 +41,7 @@ const readPdfToBase64s = async (
 
   assert(blob)
 
-  const containerPath = `${config().TEMP_PATH}/${file.id}`
+  const containerPath = `${config.TEMP_PATH}/${file.id}`
   await mkdir(containerPath, { recursive: true })
 
   try {

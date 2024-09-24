@@ -1,10 +1,13 @@
 import { CountryCode, Products } from 'plaid'
 import { redirect } from 'next/navigation'
+import { container } from 'tsyringe'
 import { plaidClient } from './util'
 import prisma from '@/integrations/prisma'
-import config from '@/integrations/config'
+import ConfigService from '@/integrations/ConfigService'
 
 export const createLinkToken = async (accountId: string) => {
+  const { config } = container.resolve(ConfigService)
+
   const request = {
     user: {
       client_user_id: accountId,
@@ -12,7 +15,7 @@ export const createLinkToken = async (accountId: string) => {
     client_name: 'Supply Side',
     products: [Products.Auth],
     language: 'en',
-    redirect_uri: `${config().BASE_URL}/account/integrations`,
+    redirect_uri: `${config.BASE_URL}/account/integrations`,
     country_codes: [CountryCode.Us],
   }
 

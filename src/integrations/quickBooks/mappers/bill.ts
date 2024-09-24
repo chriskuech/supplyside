@@ -1,8 +1,10 @@
+import { container } from 'tsyringe'
 import { ACCOUNT_BASED_EXPENSE } from '../constants'
 import { mapValue } from './utils'
 import { Resource } from '@/domain/resource/entity'
 import { fields } from '@/domain/schema/template/system-fields'
-import config from '@/integrations/config'
+import config from '@/integrations/ConfigService'
+import ConfigService from '@/integrations/ConfigService'
 
 const fieldsMap = [
   {
@@ -28,6 +30,8 @@ export const mapBill = (
   quickBooksAccountId: string,
   quickBooksVendorId: string,
 ) => {
+  const { config } = container.resolve(ConfigService)
+
   const quickBooksBill = fieldsMap.reduce(
     (bill, fieldMap) => ({
       ...bill,
@@ -38,7 +42,7 @@ export const mapBill = (
 
   return {
     ...quickBooksBill,
-    PrivateNote: `${config().BASE_URL}/bills/${billResource.key}`,
+    PrivateNote: `${config.BASE_URL}/bills/${billResource.key}`,
     VendorRef: {
       value: quickBooksVendorId,
     },
