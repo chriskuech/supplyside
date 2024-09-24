@@ -1,10 +1,34 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { CSSProperties } from 'react'
 
-export const PoDocumentStyles: React.FC = () => (
+interface PoDocumentStylesProps {
+  number: string | null
+  issuedDate: string | null
+}
+
+export const PoDocumentStyles: FC<PoDocumentStylesProps> = ({
+  number,
+  issuedDate,
+}) => (
   <style>
     {`
+      @page {
+        @bottom-left {
+          margin-bottom: 5mm;
+          content: "Order ${number} | ${issuedDate}";
+          font-size: 10px;
+          font-family: Arial, sans-serif;
+        }
+
+        @bottom-right {
+          margin-bottom: 5mm;
+          content: "Page " counter(page) " of " counter(pages);
+          font-size: 10px;
+          font-family: Arial, sans-serif;
+        }
+      }
       table {
+        height: 100%;
         width: 100%;
         border-collapse: collapse;
         margin-bottom: 0px;

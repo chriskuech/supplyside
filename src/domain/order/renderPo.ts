@@ -32,17 +32,11 @@ export const renderPo = async ({
       buffer: Buffer.from(html),
     })
 
+    //     --footer-left 'Order ${viewModel.number} | ${viewModel.issuedDate}'
+    // --footer-right 'Page [page] of [topage]'
+
     const command = `
-      wkhtmltopdf
-        --print-media-type
-        --dpi 300
-        --page-size Letter
-        --margin-top 10
-        --margin-bottom 10
-        --margin-left 10
-        --margin-right 10
-        --footer-left 'Order ${viewModel.number} | ${viewModel.issuedDate}'
-        --footer-right 'Page [page] of [topage]'
+      weasyprint
         '${htmlDataUrl}'
         '${path}/out.pdf'
     `
@@ -58,12 +52,16 @@ const htmlDocument = (content: string, isPreview?: boolean) => `
       <meta charset="UTF-8">
       <title>Purchase Order</title>
       <style>
+        @page {
+          size: Letter;
+          margin: 15px;
+        }
         body {
           ${isPreview ? `background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(watermark)}');` : ''}
-          font-family: Arial, sans-serif;
           margin: 0;
           padding: 0;
           height: 100%;
+          font-family: Arial, sans-serif;
         }
       </style>
     </head>

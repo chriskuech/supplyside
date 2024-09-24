@@ -36,9 +36,11 @@ export default function PoDocument({
   poRecipientName,
   vendorPrimaryAddress,
 }: OrderViewModel): ReactNode {
+  console.log(notes, currency, paymentTerms, taxable)
+
   return (
     <div>
-      <PoDocumentStyles />
+      <PoDocumentStyles number={number} issuedDate={issuedDate} />
       <div style={{ ...styles.HeaderCssClass, padding: '0px 20px' }}>
         <div style={{ flex: '1' }}>
           {logoBlobDataUrl && (
@@ -73,84 +75,66 @@ export default function PoDocument({
         <div style={{ whiteSpace: 'pre' }}>{accountAddress}</div>
       </div>
       <div style={{ padding: '20px' }}>
-        <div style={styles.HeaderCssClass}>
-          <div style={{ flex: '1', ...styles.MarginBottomForTable }}>
-            <table
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 260px',
+            gap: '20px',
+            marginBottom: '20px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid',
+            }}
+          >
+            <div
               style={{
-                border: '1px solid',
-                minHeight: '100px',
+                fontWeight: 'bold',
+                ...styles.BgColorHeader,
+                padding: '4px 8px',
+                borderBottom: '1px solid',
               }}
             >
-              <thead>
-                <tr style={styles.BgColorHeader}>
-                  <th>Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td
-                    rowSpan={3}
-                    style={{
-                      verticalAlign: 'top',
-                      whiteSpace: 'pre-wrap',
-                      ...styles.TopMarginClass,
-                    }}
-                  >
-                    {notes}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+              Notes
+            </div>
+            <div
+              style={{
+                whiteSpace: 'pre-wrap',
+                padding: '4px 8px',
+              }}
+            >
+              {notes}
+            </div>
           </div>
           <div
             style={{
-              minWidth: '260px',
-              marginLeft: '20px',
-              ...styles.MarginBottomForTable,
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid',
             }}
           >
-            <table
+            <div
               style={{
-                border: '1px solid',
-                minHeight: '100px',
+                fontWeight: 'bold',
+                ...styles.BgColorHeader,
+                padding: '4px 8px',
+                borderBottom: '1px solid',
               }}
             >
-              <thead>
-                <tr style={styles.BgColorHeader}>
-                  <th colSpan={3}>Payment Terms</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td
-                    style={{
-                      border: 0,
-                      padding: '3px 8px 2px',
-                      fontWeight: '600',
-                    }}
-                  >
-                    Currency
-                  </td>
-                  <td style={styles.PaymentPadding}>{currency}</td>
-                </tr>
-                <tr>
-                  <td
-                    style={{ border: 0, padding: '2px 8px', fontWeight: '600' }}
-                  >
-                    Payment Terms
-                  </td>
-                  <td style={styles.PaymentPadding}>{paymentTerms}</td>
-                </tr>
-                <tr>
-                  <td
-                    style={{ border: 0, padding: '2px 8px', fontWeight: '600' }}
-                  >
-                    Taxable
-                  </td>
-                  <td style={styles.PaymentPadding}>{taxable}</td>
-                </tr>
-              </tbody>
-            </table>
+              Payment Terms
+            </div>
+            <div style={{ padding: '4px 8px', fontWeight: 'bold' }}>
+              Currency {currency}
+            </div>
+            <div style={{ padding: '4px 8px', fontWeight: 'bold' }}>
+              Payment Terms {paymentTerms}
+            </div>
+            <div style={{ padding: '4px 8px', fontWeight: 'bold' }}>
+              Taxable {taxable}
+            </div>
           </div>
         </div>
         <div style={styles.HeaderCssClass}>
