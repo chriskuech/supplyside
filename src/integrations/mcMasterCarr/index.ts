@@ -9,6 +9,7 @@ import prisma from '../prisma'
 import config from '../config'
 import { getMcMasterCarrConfigUnsafe } from './utils'
 import { CxmlSchema, posrResponseSchema, renderTemplateParams } from './types'
+import { McMasterInvalidCredentials } from './errors'
 import { resources } from '@/domain/schema/template/system-resources'
 import {
   updateTemplateId,
@@ -33,7 +34,14 @@ export async function createConnection(
   username: string,
   password: string,
 ) {
-  //TODO: check if username and password is correct throw expected error otherwise
+  const validCredentials = await credentialsAreValid(
+    accountId,
+    username,
+    password,
+  )
+
+  if (!validCredentials)
+    throw new McMasterInvalidCredentials('Invalid credentials')
 
   const [mcMasterCarrVendor] = await findResources({
     accountId,
@@ -106,6 +114,40 @@ export async function disconnect(accountId: string) {
       mcMasterCarrConnectedAt: null,
     },
   })
+}
+
+async function credentialsAreValid(
+  accountId: string,
+  username: string,
+  password: string,
+) {
+  const { secret, supplierDomain, supplierIdentity, posrUrl } =
+    getMcMasterCarrConfigUnsafe()
+
+  const currentDateTime = new Date().toISOString()
+  const punchoutSetupRequest = renderTemplate({
+    type: 'posr',
+    data: {
+      payloadId: `${currentDateTime}@mcmaster.com`,
+      punchOutCustomerDomain: password,
+      punchOutCustomerName: username,
+      punchOutClientDomain: supplierDomain,
+      clientName: supplierIdentity,
+      punchOutSharedSecret: secret,
+      buyerCookie: accountId,
+      poomReturnEndpoint: `${config().BASE_URL}/api/integrations/mcmaster`,
+    },
+  })
+
+  const rawResponse = await sendRequest(posrUrl, punchoutSetupRequest)
+  if (!rawResponse) throw new Error('No response from McMaster')
+
+  const responseObject: unknown = await parseStringPromise(rawResponse)
+
+  const response = posrResponseSchema.parse(responseObject)
+  const statusCode = response.cXML.Response[0]?.Status[0].$.code
+
+  return statusCode === '200'
 }
 
 // TODO: this references `next` which is not available in the domain layer
