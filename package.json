@@ -25,10 +25,12 @@
     "@mui/x-date-pickers": "^7.18.0",
     "@prisma/client": "^5.19.1",
     "@types/json-schema": "^7.0.15",
+    "@types/xml2js": "^0.4.14",
     "ajv": "^8.17.1",
     "bcrypt": "^5.1.1",
     "client-only": "^0.0.1",
     "dayjs": "^1.11.13",
+    "handlebars": "^4.7.8",
     "intuit-oauth": "^4.1.2",
     "inversify": "^6.0.2",
     "next": "14.2.13",
@@ -46,6 +48,7 @@
     "sharp": "^0.33.5",
     "ts-pattern": "^5.3.1",
     "uuid": "^10.0.0",
+    "xml2js": "^0.6.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {

@@ -27,6 +27,9 @@ import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectSchemaField } from '@/domain/schema/extensions'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
+import { resources } from '@/domain/schema/template/system-resources'
+import { readResources } from '@/domain/resource'
+import { createPunchOutServiceRequest } from '@/integrations/mcMasterCarr'
 
 export default async function PurchaseDetail({
   params: { key },
@@ -34,11 +37,57 @@ export default async function PurchaseDetail({
   params: { key: string }
 }) {
   const {
-    session: { user },
+    session: { user, accountId },
     resource,
     schema,
     lineSchema,
   } = await readDetailPageModel('Purchase', key, `/purchases/${key}`)
+
+  //TODO: refactor to a separate file and show spinner
+  //TODO: check mcMaster cookie expiration?? sometimes it requires you to log in
+  const vendorTemplateId = selectResourceFieldValue(resource, fields.vendor)
+    ?.resource?.templateId
+  const isVendorMcMasterCarr =
+    vendorTemplateId === resources().mcMasterCarrVendor.templateId
+  const orderLines = await readResources({
+    accountId: resource.accountId,
+    type: 'Line',
+    where: {
+      '==': [{ var: fields.purchase.name }, resource.id],
+    },
+  })
+  const orderHasLines = orderLines.length > 0
+  if (isVendorMcMasterCarr && !orderHasLines) {
+    let punchoutSessionUrl = selectResourceFieldValue(
+      resource,
+      fields.punchoutSessionUrl,
+    )?.string
+
+    if (!punchoutSessionUrl) {
+      punchoutSessionUrl = await createPunchOutServiceRequest(
+        accountId,
+        resource.id,
+      )
+    }
+
+    return (
+      <iframe
+        src={punchoutSessionUrl}
+        style={{
+          position: 'fixed',
+          // top: 0,
+          // left: 0,
+          // border: 0,
+          // width: '100vw',
+          // height: '100vh',
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        Your browser does not support iFrames.
+      </iframe>
+    )
+  }
 
   const orderBills = (await findPurchaseBills(resource.id)) ?? []
 

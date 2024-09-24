@@ -313,6 +313,11 @@ const _fields = {
     type: 'Contact',
     description: 'Primary contact for orders',
   },
+  punchoutSessionUrl: {
+    templateId: '51955a67-a243-4544-992a-3d15720e4a2d',
+    name: 'Punchout Session URL',
+    type: 'Text',
+  },
   quantity: {
     templateId: '8c04f743-23a3-417f-8fd9-98cd5ffa4a67',
     name: 'Quantity',

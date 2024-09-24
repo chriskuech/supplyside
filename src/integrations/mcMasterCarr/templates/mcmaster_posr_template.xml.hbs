@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cXML
+  SYSTEM "http://xml.cxml.org/schemas/cXML/1.2.019/cXML.dtd">
+<cXML timestamp="2013-09-09T10:57:28-05:00" 
+      xml:lang="en-US"
+      payloadID="{{payloadId}}">
+   <Header>
+        <From>
+            <Credential domain="{{punchOutCustomerDomain}}">
+                <Identity>{{punchOutCustomerName}}</Identity>
+            </Credential>
+        </From>
+        <To>
+            <Credential domain="{{punchOutClientDomain}}">
+                <Identity>{{clientName}}</Identity>
+            </Credential>
+        </To>
+        <Sender>
+            <Credential domain="{{punchOutCustomerDomain}}">
+                <Identity>{{punchOutCustomerName}}</Identity>
+                <SharedSecret>{{punchOutSharedSecret}}</SharedSecret>
+            </Credential>
+            <UserAgent>SupplySide</UserAgent>
+        </Sender>
+    </Header>
+    {{!-- TODO: is this ok? --}}
+    <Request deploymentMode="test">
+        <PunchOutSetupRequest operation="create">
+            <BuyerCookie>{{buyerCookie}}</BuyerCookie> 
+            <BrowserFormPost>
+                <URL>{{poomReturnEndpoint}}</URL>
+            </BrowserFormPost>
+        </PunchOutSetupRequest>
+    </Request>
+</cXML>
