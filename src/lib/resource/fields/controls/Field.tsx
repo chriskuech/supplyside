@@ -266,7 +266,9 @@ function Field(
         isReadOnly={disabled}
         ref={ref}
         onChange={(resource) => handleChange({ ...emptyValue, resource })}
-        resourceType={field.resourceType ?? fail()}
+        resourceType={
+          field.resourceType ?? fail('Resource type not found on Field')
+        }
         resource={value?.resource ?? null}
       />
     ))

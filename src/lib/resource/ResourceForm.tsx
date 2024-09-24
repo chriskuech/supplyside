@@ -79,7 +79,10 @@ export default function ResourceForm({
                   <FieldControl
                     inputId={`rf-${singleField.id}`}
                     resourceId={resource.id}
-                    field={singleField ?? fail()}
+                    field={
+                      singleField ??
+                      fail('Assumed a single field was asserted above')
+                    }
                     value={selectResourceFieldValue(resource, {
                       fieldId: singleField.id,
                     })}

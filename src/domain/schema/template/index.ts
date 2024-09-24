@@ -113,7 +113,7 @@ const applyFields = async (accountId: string) => {
     if (defaultValue?.optionTemplateId) {
       const templateId =
         options?.find((o) => o.templateId === defaultValue?.optionTemplateId)
-          ?.templateId ?? fail()
+          ?.templateId ?? fail('Option not found')
 
       await prisma.field.update({
         where: { id: fieldId },

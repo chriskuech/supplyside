@@ -1,4 +1,4 @@
-import { fail } from 'assert'
+import assert from 'assert'
 import { NextRequest, NextResponse } from 'next/server'
 import { Message } from 'postmark'
 import { container } from 'tsyringe'
@@ -75,7 +75,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const body: Message = await req.json()
 
   // for some reason this is (sometimes?) wrapped in quotes
-  const accountKey = body.To?.split('@').shift()?.replace(/^"/, '') ?? fail()
+  const accountKey = body.To?.split('@').shift()?.replace(/^"/, '')
+
+  assert(accountKey, 'Account key not found in To: ' + body.To)
 
   const account = await prisma.account.findUnique({
     where: { key: accountKey },
@@ -92,8 +94,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ error: 'Account does not exist' })
   }
-
-  const { id: accountId } = account
 
   const attachments: FileParam[] | undefined = body.Attachments?.map(
     (attachment) => ({
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       : null
 
   const bill = await createBill({
-    accountId,
+    accountId: account.id,
     files: [...(email ? [email] : []), ...(attachments ?? [])],
   })
 

@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { parseStringPromise } from 'xml2js'
+import { container } from 'tsyringe'
 import { processPoom } from '@/integrations/mcMasterCarr'
-import config from '@/integrations/config'
+import ConfigService from '@/integrations/ConfigService'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const { config } = container.resolve(ConfigService)
+
   const cxmlUrlEncoded = await request.text()
   const cxmlUrlDecoded = decodeURIComponent(cxmlUrlEncoded)
   const cxml = cxmlUrlDecoded
@@ -22,7 +25,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               // Check if the current frame is not the topmost frame
               if (window !== window.top) { 
                 // Change location of the parent frame
-                window.top.location.href = "${config().BASE_URL}/purchases";
+                window.top.location.href = "${config.BASE_URL}/purchases";
               }
             };
           </script>

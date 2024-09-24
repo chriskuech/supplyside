@@ -50,7 +50,7 @@ export default class BlobService {
 
     const blob = await this.prisma.blob.create({
       data: {
-        accountId: accountId,
+        accountId,
         mimeType: type.toLowerCase(),
         name: blobName,
       },

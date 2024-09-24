@@ -1,11 +1,10 @@
-import { fail } from 'assert'
 import { ResourceType } from '@prisma/client'
 import { map, pipe, sum } from 'remeda'
 import { container } from 'tsyringe'
 import { selectResourceFieldValue } from './extensions'
 import { readResource, readResources, updateResourceField } from '.'
 import { readSchema } from '@/domain/schema'
-import { selectSchemaField } from '@/domain/schema/extensions'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { PrismaService } from '@/integrations/PrismaService'
 
@@ -122,7 +121,7 @@ export const recalculateItemizedCosts = async (
   await updateResourceField({
     accountId,
     resourceId,
-    fieldId: selectSchemaField(schema, fields.itemizedCosts)?.id ?? fail(),
+    fieldId: selectSchemaFieldUnsafe(schema, fields.itemizedCosts).id,
     value: {
       number: pipe(
         costs,
@@ -164,7 +163,7 @@ export const recalculateSubtotalCost = async (
 
   await updateResourceField({
     accountId,
-    fieldId: selectSchemaField(schema, fields.subtotalCost)?.id ?? fail(),
+    fieldId: selectSchemaFieldUnsafe(schema, fields.subtotalCost)?.id,
     resourceId,
     value: {
       number: Number(subTotal), // TODO: this is ignoring that subTotal is bigint
