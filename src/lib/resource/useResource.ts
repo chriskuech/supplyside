@@ -27,6 +27,7 @@ const useResource = (resourceId?: string) => {
     (resource: Resource) =>
       updateResource({
         resourceId: resource.id,
+        resourceType: resource.type,
         fields: resource.fields.map(({ fieldId, fieldType, value }) => ({
           fieldId,
           value: mapValueToValueInput(fieldType, value),

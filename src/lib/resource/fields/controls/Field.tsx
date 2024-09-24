@@ -21,6 +21,7 @@ import {
   useState,
 } from 'react'
 import { debounce } from 'remeda'
+import { ResourceType } from '@prisma/client'
 import ContactField from './ContactField'
 import FileField from './FileField'
 import UserField from './UserField'
@@ -33,6 +34,7 @@ import { emptyValue } from '@/domain/resource/entity'
 
 export type Props = {
   inputId: string
+  resourceType: ResourceType
   resourceId: string
   field: SchemaField
   value: Value | undefined

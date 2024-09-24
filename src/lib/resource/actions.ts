@@ -153,6 +153,7 @@ export const transitionStatus = async (
 
   await domain.updateResourceField({
     accountId,
+    resourceType,
     resourceId,
     fieldId: field.id,
     value: {

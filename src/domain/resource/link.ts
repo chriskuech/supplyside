@@ -77,6 +77,7 @@ const linkLines = async ({
     lines.map((line) =>
       updateResourceField({
         accountId,
+        resourceType: 'Line',
         resourceId: line.id,
         fieldId: selectSchemaField(lineSchema, toResourceField)?.id ?? fail(),
         value: { resourceId: toResourceId },

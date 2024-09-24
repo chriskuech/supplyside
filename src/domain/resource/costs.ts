@@ -34,6 +34,7 @@ export const createCost = async ({
 
 export type UpdateCostParams = {
   accountId: string
+  resourceType: ResourceType
   resourceId: string
   costId: string
   data: {
@@ -45,6 +46,7 @@ export type UpdateCostParams = {
 
 export const updateCost = async ({
   accountId,
+  resourceType,
   resourceId,
   costId,
   data,
@@ -65,17 +67,23 @@ export const updateCost = async ({
     },
   })
 
-  await recalculateItemizedCosts(cost.Resource.accountId, cost.resourceId)
+  await recalculateItemizedCosts(
+    cost.Resource.accountId,
+    resourceType,
+    cost.resourceId,
+  )
 }
 
 export type DeleteCostParams = {
   accountId: string
+  resourceType: ResourceType
   resourceId: string
   costId: string
 }
 
 export const deleteCost = async ({
   accountId,
+  resourceType,
   resourceId,
   costId,
 }: DeleteCostParams): Promise<void> => {
@@ -94,15 +102,23 @@ export const deleteCost = async ({
     },
   })
 
-  await recalculateItemizedCosts(cost.Resource.accountId, cost.resourceId)
+  await recalculateItemizedCosts(
+    cost.Resource.accountId,
+    resourceType,
+    cost.resourceId,
+  )
 }
 
 export const recalculateItemizedCosts = async (
   accountId: string,
+  resourceType: ResourceType,
   resourceId: string,
 ) => {
-  const resource = await readResource({ accountId, id: resourceId })
-  const schema = await readSchema({ accountId, resourceType: resource.type })
+  const [schema, resource] = await Promise.all([
+    readSchema({ accountId, resourceType }),
+    readResource({ accountId, id: resourceId }),
+  ])
+
   const costs = await prisma().cost.findMany({
     where: { resourceId },
   })
@@ -112,6 +128,7 @@ export const recalculateItemizedCosts = async (
 
   await updateResourceField({
     accountId,
+    resourceType,
     resourceId,
     fieldId: selectSchemaField(schema, fields.itemizedCosts)?.id ?? fail(),
     value: {
@@ -155,6 +172,7 @@ export const recalculateSubtotalCost = async (
 
   await updateResourceField({
     accountId,
+    resourceType,
     fieldId: selectSchemaField(schema, fields.subtotalCost)?.id ?? fail(),
     resourceId,
     value: {

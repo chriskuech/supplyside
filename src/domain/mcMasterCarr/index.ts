@@ -2,8 +2,8 @@ import { resources } from '../schema/template/system-resources'
 import {
   updateTemplateId,
   createResource,
-  findByTemplateId,
   updateResource,
+  readResource,
 } from '../resource'
 import { selectSchemaFieldUnsafe } from '../schema/extensions'
 import { readSchema } from '../schema'
@@ -15,7 +15,7 @@ export async function createConnection(
   username: string,
   password: string,
 ) {
-  //TODO: check if username and password is correct throw expected error otherwise
+  // TODO: check if username and password is correct throw expected error otherwise
 
   const [mcMasterCarrVendor] = await findResources({
     resourceType: 'Vendor',
@@ -38,6 +38,7 @@ export async function createConnection(
   } else {
     await updateResource({
       accountId,
+      resourceType: 'Vendor',
       resourceId: mcMasterCarrVendor.id,
       fields: mcMasterCarrSystemResource.fields.map((f) => ({
         fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).id,
@@ -65,7 +66,7 @@ export async function createConnection(
 }
 
 export async function disconnect(accountId: string) {
-  const mcMasterCarrVendor = await findByTemplateId({
+  const mcMasterCarrVendor = await readResource({
     accountId,
     templateId: resources().mcMasterCarrVendor.templateId,
   })

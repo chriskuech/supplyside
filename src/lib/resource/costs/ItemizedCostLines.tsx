@@ -82,6 +82,7 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                     onChange={(e) =>
                       updateCost({
                         resourceId: resource.id,
+                        resourceType: resource.type,
                         costId: row.id,
                         data: { name: e.target.value },
                       })
@@ -98,6 +99,7 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                     onChange={(e) =>
                       updateCost({
                         resourceId: resource.id,
+                        resourceType: resource.type,
                         costId: row.id,
                         data: { isPercentage: e.target.value === '%' },
                       })
@@ -115,6 +117,7 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                     onChange={(e) =>
                       updateCost({
                         resourceId: resource.id,
+                        resourceType: resource.type,
                         costId: row.id,
                         data: {
                           value: Number(e.target.value),
@@ -146,6 +149,7 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                         onClick={() =>
                           deleteCost({
                             resourceId: resource.id,
+                            resourceType: resource.type,
                             costId: row.id,
                           })
                         }

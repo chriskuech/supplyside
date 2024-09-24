@@ -114,6 +114,7 @@ export const upsertVendorsFromQuickBooks = async (
 
       return updateResourceField({
         accountId,
+        resourceType: 'Vendor',
         resourceId: vendor.id,
         fieldId: vendorNameField.id,
         value: { string: quickBooksVendor.DisplayName },
@@ -131,6 +132,7 @@ export const upsertVendorsFromQuickBooks = async (
     if (vendor && vendor.name === quickBooksVendorToAdd.DisplayName) {
       await updateResource({
         accountId,
+        resourceType: 'Vendor',
         resourceId: vendor.id,
         fields: [
           {
@@ -191,6 +193,7 @@ const createVendorOnQuickBooks = async (
 
   await updateResourceField({
     accountId,
+    resourceType: 'Vendor',
     resourceId: vendor.id,
     fieldId: quickBooksVendorIdField,
     value: { string: quickBooksVendor.Vendor.Id },

@@ -51,6 +51,7 @@ export default function TrackingControl({
           </DialogContentText>
           <FieldControl
             inputId={`rf-${field.id}`}
+            resourceType="Order"
             resourceId={resourceId}
             field={field}
             value={value}

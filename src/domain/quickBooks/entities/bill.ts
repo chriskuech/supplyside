@@ -59,6 +59,7 @@ const createBillOnQuickBooks = async (
 
   await updateResourceField({
     accountId,
+    resourceType: 'Bill',
     resourceId: bill.id,
     fieldId: quickBooksBillIdField,
     value: { string: quickBooksBill.Bill.Id },

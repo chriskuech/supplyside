@@ -1,7 +1,7 @@
 'use server'
 
 import { Prisma, ResourceType } from '@prisma/client'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { difference } from 'remeda'
 import prisma from '@/services/prisma'
 import { readSession } from '@/lib/session/actions'
@@ -110,7 +110,7 @@ export const updateSchema = async (dto: {
     },
   })
 
-  revalidatePath('')
+  revalidateTag('schema')
 }
 
 export const createSection = async (dto: {

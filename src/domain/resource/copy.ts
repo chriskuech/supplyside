@@ -1,6 +1,5 @@
 import { fail } from 'assert'
 import { findTemplateField } from '../schema/template/system-fields'
-import { handleResourceUpdate } from './effects'
 import { mapValueToValueInput } from './mappers'
 import { readResource, updateResource } from '.'
 import { readSchema } from '@/domain/schema'
@@ -16,7 +15,7 @@ export const copyFields = async ({
   accountId,
   fromResourceId,
   toResourceId,
-}: ResourceCopyParams) => {
+}: ResourceCopyParams): Promise<void> => {
   const [fromResource, toResource] = await Promise.all([
     readResource({
       accountId,
@@ -48,22 +47,13 @@ export const copyFields = async ({
     .filter(({ sf }) => selectSchemaField(toSchema, sf))
     .filter(({ tf }) => !tf?.isDerived)
 
-  const resource = await updateResource({
+  await updateResource({
     accountId,
+    resourceType: toResource.type,
     resourceId: toResourceId,
     fields: fieldsToUpdate.map(({ rf, sf }) => ({
       fieldId: sf.id,
       value: mapValueToValueInput(sf.type, rf.value),
-    })),
-  })
-
-  await handleResourceUpdate({
-    accountId,
-    schema: toSchema,
-    resource,
-    updatedFields: fieldsToUpdate.map(({ sf, rf }) => ({
-      field: sf,
-      value: rf.value,
     })),
   })
 }

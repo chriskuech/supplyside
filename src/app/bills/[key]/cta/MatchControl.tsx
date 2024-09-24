@@ -62,6 +62,7 @@ export default function MatchControl({ schema, resource }: Props) {
                 if (!isConfirmed) return
 
                 await updateResourceField({
+                  resourceType: resource.type,
                   resourceId: resource.id,
                   fieldId:
                     selectSchemaField(schema, fields.order)?.id ?? fail(),
@@ -122,6 +123,7 @@ export default function MatchControl({ schema, resource }: Props) {
                       row, // `row` is coming in as `any` for some reason
                     }) =>
                       updateResourceField({
+                        resourceType: resource.type,
                         resourceId: resource.id,
                         fieldId:
                           selectSchemaField(schema, fields.order)?.id ?? fail(),

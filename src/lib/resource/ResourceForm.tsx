@@ -123,6 +123,7 @@ export default function ResourceForm({
                               })}
                               onChange={async (value) => {
                                 const result = await updateResourceField({
+                                  resourceType: resource.type,
                                   resourceId: resource.id,
                                   fieldId: f.id,
                                   value: mapValueToValueInput(f.type, value),

@@ -15,11 +15,13 @@ export const createField = async (params: CreateFieldParams) => {
   const session = await readSession()
 
   await domainCreateField(session.accountId, params)
+
   revalidatePath('')
 }
 
 export const readFields = async (): Promise<SchemaField[]> => {
   const session = await readSession()
+
   return domainReadFields(session.accountId)
 }
 
@@ -35,5 +37,6 @@ export const deleteField = async (fieldId: string) => {
   const session = await readSession()
 
   await domainDeleteField(session.accountId, fieldId)
+
   revalidatePath('')
 }

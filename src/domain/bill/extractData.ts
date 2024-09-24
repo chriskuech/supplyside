@@ -162,5 +162,10 @@ export const extractContent = async (accountId: string, resourceId: string) => {
 
   if (!updatedFields.length) return
 
-  await updateResource({ resourceId, accountId, fields: updatedFields })
+  await updateResource({
+    resourceId,
+    resourceType: 'Bill',
+    accountId,
+    fields: updatedFields,
+  })
 }

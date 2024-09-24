@@ -24,6 +24,7 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
 
   await updateResourceField({
     accountId,
+    resourceType: 'Order',
     resourceId,
     fieldId: issuedDateFieldId,
     value: { date: new Date() },

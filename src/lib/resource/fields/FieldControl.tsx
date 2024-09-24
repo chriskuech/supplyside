@@ -7,6 +7,7 @@ import { mapValueToValueInput } from '@/domain/resource/mappers'
 import { Value } from '@/domain/resource/entity'
 
 export default function FieldControl({
+  resourceType,
   resourceId,
   field,
   ...fieldProps
@@ -15,14 +16,16 @@ export default function FieldControl({
     (value: Value) =>
       updateResourceField({
         resourceId,
+        resourceType,
         fieldId: field.id,
         value: mapValueToValueInput(field.type, value),
       }),
-    [field.id, field.type, resourceId],
+    [field.id, field.type, resourceId, resourceType],
   )
 
   return (
     <Field
+      resourceType={resourceType}
       resourceId={resourceId}
       field={field}
       {...fieldProps}

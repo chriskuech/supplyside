@@ -1,3 +1,4 @@
+import { fail } from 'assert'
 import { P, match } from 'ts-pattern'
 import { ResourceField, Value } from './entity'
 
@@ -20,3 +21,9 @@ export const selectResourceField = (
       resource.fields.find((field) => field.fieldId === fieldId),
     )
     .exhaustive()
+
+export const selectResourceFieldUnsafe = (
+  resource: { fields: ResourceField[] },
+  fieldRef: { templateId: string } | { fieldId: string },
+): ResourceField =>
+  selectResourceField(resource, fieldRef) ?? fail('Field not found')
