@@ -9,6 +9,8 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer, dev }) =>
+    isServer && !dev ? { ...config, devtool: 'source-map' } : config,
 }
 
 export default nextConfig
