@@ -11,6 +11,7 @@ import {
   disconnect as domainDisconnectMcMasterCarr,
   createConnection as domainCreateMcMasterCarrConnection,
 } from '@/integrations/mcMasterCarr'
+import { McMasterInvalidCredentials } from '@/integrations/mcMasterCarr/errors'
 
 export const syncDataFromQuickBooks = async () => {
   const session = await readSession()
@@ -41,11 +42,21 @@ export const createMcMasterCarrConnection = async (
   password: string,
 ) => {
   const session = await readSession()
-  await domainCreateMcMasterCarrConnection(
-    session.accountId,
-    username,
-    password,
-  )
+
+  try {
+    await domainCreateMcMasterCarrConnection(
+      session.accountId,
+      username,
+      password,
+    )
+  } catch (e) {
+    if (e instanceof McMasterInvalidCredentials) {
+      return { error: true, message: e.message }
+    }
+
+    throw e
+  }
+
   revalidatePath('')
 }
 
