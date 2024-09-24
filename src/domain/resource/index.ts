@@ -1,5 +1,6 @@
 import { fail } from 'assert'
-import { ResourceType } from '@prisma/client'
+import { Prisma, ResourceType } from '@prisma/client'
+import { z } from 'zod'
 import { container } from 'tsyringe'
 import { readSchema } from '../schema'
 import { selectSchemaField } from '../schema/extensions'
@@ -13,7 +14,7 @@ import {
   mapValueInputToPrismaValueWhere,
   mapValueToValueInput,
 } from './mappers'
-import { Resource, emptyValue } from './entity'
+import { Resource, ValueResource, emptyValue } from './entity'
 import { ValueInput } from './patch'
 import { createSql } from './json-logic/compile'
 import { OrderBy, Where } from './json-logic/types'
@@ -372,4 +373,57 @@ async function checkForDuplicateResource(
       throw new DuplicateResourceError(Object.values(value)[0])
     }
   }
+}
+
+export type FindResourcesParams = {
+  accountId: string
+  resourceType: ResourceType
+  input: string
+  exact?: boolean
+}
+
+export const findResources = async ({
+  accountId,
+  resourceType,
+  input,
+  exact,
+}: FindResourcesParams): Promise<ValueResource[]> => {
+  const prisma = container.resolve(PrismaService)
+
+  const results = await prisma.$queryRaw`
+    WITH "View" AS (
+      SELECT
+        "Resource".*,
+        "Value"."string" AS "name"
+      FROM "Resource"
+      LEFT JOIN "ResourceField" ON "Resource".id = "ResourceField"."resourceId"
+      LEFT JOIN "Field" ON "ResourceField"."fieldId" = "Field".id
+      LEFT JOIN "Value" ON "ResourceField"."valueId" = "Value".id
+      WHERE "Resource"."type" = ${resourceType}::"ResourceType"
+        AND "Resource"."accountId" = ${accountId}::"uuid"
+        AND "Field"."templateId" IN (${fields.name.templateId}::uuid, ${fields.poNumber.templateId}::uuid)
+        AND "Value"."string" <> ''
+        AND "Value"."string" IS NOT NULL
+    )
+    SELECT "id", "type", "key", "name", "templateId"
+    FROM "View"
+    ${
+      exact
+        ? Prisma.sql`WHERE "name" = ${input}`
+        : Prisma.sql`WHERE "name" ILIKE '%' || ${input} || '%' OR "name" % ${input} -- % operator uses pg_trgm for similarity matching`
+    }
+    ORDER BY similarity("name", ${input}) DESC
+    LIMIT 15
+  `
+
+  return z
+    .object({
+      id: z.string(),
+      type: z.nativeEnum(ResourceType),
+      name: z.string(),
+      key: z.number(),
+      templateId: z.string().nullable(),
+    })
+    .array()
+    .parse(results)
 }

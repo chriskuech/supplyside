@@ -13,6 +13,7 @@ import { handleNotFoundError } from '../errors'
 import { MAX_ENTITIES_PER_PAGE } from '../constants'
 import {
   createResource,
+  findResources,
   readResources,
   updateResource,
   updateResourceField,
@@ -25,7 +26,6 @@ import {
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
-import { findResources } from '@/lib/resource/actions'
 
 export const readVendor = async (
   accountId: string,
@@ -124,11 +124,13 @@ export const upsertVendorsFromQuickBooks = async (
   // `Resource.key` is (currently) created transactionally and thus not parallelizable
   for (const quickBooksVendorToAdd of quickBooksVendorsToAdd) {
     const [vendor] = await findResources({
+      accountId,
       resourceType: 'Vendor',
       input: quickBooksVendorToAdd.DisplayName,
+      exact: true,
     })
 
-    if (vendor && vendor.name === quickBooksVendorToAdd.DisplayName) {
+    if (vendor) {
       await updateResource({
         accountId,
         resourceId: vendor.id,

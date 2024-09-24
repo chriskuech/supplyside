@@ -18,6 +18,11 @@ const schema = z
     PLAID_CLIENT_ID: z.string().min(1).optional(),
     PLAID_SECRET: z.string().min(1).optional(),
 
+    PUNCHOUT_MCMASTER_SUPPLIER_DOMAIN: z.string().min(1).optional(),
+    PUNCHOUT_MCMASTER_SUPPLIER_IDENTITY: z.string().min(1).optional(),
+    PUNCHOUT_MCMASTER_SHARED_SECRET: z.string().min(1).optional(),
+    PUNCHOUT_MCMASTER_POSR_URL: z.string().min(1).optional(),
+
     TEMP_PATH: z.string().min(1).default('/tmp/supplyside'),
   })
   .transform((data) => ({

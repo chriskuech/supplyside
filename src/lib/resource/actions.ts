@@ -1,11 +1,9 @@
 'use server'
 
 import { fail } from 'assert'
-import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { ResourceType } from '@prisma/client'
-import { container } from 'tsyringe'
 import { withSession } from '../session/actions'
 import * as domain from '@/domain/resource'
 import * as schemaDomain from '@/domain/schema'
@@ -18,7 +16,6 @@ import {
 } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { DuplicateResourceError } from '@/domain/resource/errors'
-import { PrismaService } from '@/integrations/PrismaService'
 
 export const createResource = async (
   params: Pick<domain.CreateResourceParams, 'type' | 'fields'>,
@@ -94,49 +91,17 @@ export const deleteResource = async ({
 export type FindResourcesParams = {
   resourceType: ResourceType
   input: string
+  exact?: boolean
 }
 
 export const findResources = async ({
   resourceType,
   input,
-}: FindResourcesParams): Promise<ValueResource[]> => {
-  const prisma = container.resolve(PrismaService)
-
-  return await withSession(async ({ accountId }) => {
-    const results = await prisma.$queryRaw`
-    WITH "View" AS (
-      SELECT
-        "Resource".*,
-        "Value"."string" AS "name"
-      FROM "Resource"
-      LEFT JOIN "ResourceField" ON "Resource".id = "ResourceField"."resourceId"
-      LEFT JOIN "Field" ON "ResourceField"."fieldId" = "Field".id
-      LEFT JOIN "Value" ON "ResourceField"."valueId" = "Value".id
-      WHERE "Resource"."type" = ${resourceType}::"ResourceType"
-        AND "Resource"."accountId" = ${accountId}::"uuid"
-        AND "Field"."templateId" IN (${fields.name.templateId}::uuid, ${fields.poNumber.templateId}::uuid)
-        AND "Value"."string" <> ''
-        AND "Value"."string" IS NOT NULL
-    )
-    SELECT "id", "type", "key", "name", "templateId"
-    FROM "View"
-    WHERE "name" ILIKE '%' || ${input} || '%' OR "name" % ${input} -- % operator uses pg_trgm for similarity matching
-    ORDER BY similarity("name", ${input}) DESC
-    LIMIT 15
-  `
-
-    return z
-      .object({
-        id: z.string(),
-        type: z.nativeEnum(ResourceType),
-        name: z.string(),
-        key: z.number(),
-        templateId: z.string().nullable(),
-      })
-      .array()
-      .parse(results)
-  })
-}
+  exact,
+}: FindResourcesParams): Promise<ValueResource[]> =>
+  await withSession(({ accountId }) =>
+    domain.findResources({ accountId, input, resourceType, exact }),
+  )
 
 export const transitionStatus = async (
   resourceId: string,

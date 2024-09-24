@@ -27,6 +27,9 @@ import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectSchemaField } from '@/domain/schema/extensions'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
+import { resources } from '@/domain/schema/template/system-resources'
+import { readResources } from '@/domain/resource'
+import { createPunchOutServiceRequest } from '@/integrations/mcMasterCarr'
 
 export default async function PurchaseDetail({
   params: { key },
@@ -34,11 +37,50 @@ export default async function PurchaseDetail({
   params: { key: string }
 }) {
   const {
-    session: { user },
+    session: { user, accountId },
     resource,
     schema,
     lineSchema,
   } = await readDetailPageModel('Purchase', key, `/purchases/${key}`)
+
+  const vendorTemplateId = selectResourceFieldValue(resource, fields.vendor)
+    ?.resource?.templateId
+  const isVendorMcMasterCarr =
+    vendorTemplateId === resources().mcMasterCarrVendor.templateId
+  const purchaseLines = await readResources({
+    accountId: resource.accountId,
+    type: 'Line',
+    where: {
+      '==': [{ var: fields.purchase.name }, resource.id],
+    },
+  })
+  const purchaseHasLines = purchaseLines.length > 0
+  if (isVendorMcMasterCarr && !purchaseHasLines) {
+    let punchoutSessionUrl = selectResourceFieldValue(
+      resource,
+      fields.punchoutSessionUrl,
+    )?.string
+
+    if (!punchoutSessionUrl) {
+      punchoutSessionUrl = await createPunchOutServiceRequest(
+        accountId,
+        resource.id,
+      )
+    }
+
+    return (
+      <iframe
+        src={punchoutSessionUrl}
+        style={{
+          position: 'fixed',
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        Your browser does not support iFrames.
+      </iframe>
+    )
+  }
 
   const orderBills = (await findPurchaseBills(resource.id)) ?? []
 
