@@ -3,7 +3,6 @@ import { ACCOUNT_BASED_EXPENSE } from '../constants'
 import { mapValue } from './utils'
 import { Resource } from '@/domain/resource/entity'
 import { fields } from '@/domain/schema/template/system-fields'
-import config from '@/integrations/ConfigService'
 import ConfigService from '@/integrations/ConfigService'
 
 const fieldsMap = [

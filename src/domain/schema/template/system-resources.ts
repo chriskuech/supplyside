@@ -3,7 +3,6 @@ import { entries, filter, flatMap, groupBy, map, mapValues, pipe } from 'remeda'
 import { container } from 'tsyringe'
 import { ResourceTemplate } from './types'
 import { fields } from './system-fields'
-import config from '@/integrations/ConfigService'
 import ConfigService from '@/integrations/ConfigService'
 
 const _resources = (
