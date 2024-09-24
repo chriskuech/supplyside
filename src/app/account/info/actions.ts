@@ -4,15 +4,18 @@ import { Prisma } from '@prisma/client'
 import { isEmpty } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import prisma from '@/integrations/prisma'
-import { createBlob } from '@/domain/blob'
+import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
+import BlobService from '@/domain/blob'
+import { PrismaService } from '@/integrations/PrismaService'
 
 type ClientErrors = Record<string, string[]>
 
 export const handleSaveSettings = async (
   formData: FormData,
 ): Promise<ClientErrors | undefined> => {
+  const prisma = container.resolve(PrismaService)
+  const blobService = container.resolve(BlobService)
   const { accountId } = await readSession()
 
   const result = z
@@ -35,13 +38,13 @@ export const handleSaveSettings = async (
 
   const file = formData.get('file')
   if (file && typeof file !== 'string' && file.size > 0) {
-    const { id: logoBlobId } = await createBlob({ accountId, file })
+    const { id: logoBlobId } = await blobService.createBlob({ accountId, file })
 
     data['LogoBlob'] = { connect: { id: logoBlobId } }
   }
 
   if (!isEmpty(data)) {
-    await prisma().account.update({
+    await prisma.account.update({
       where: { id: accountId },
       data,
     })

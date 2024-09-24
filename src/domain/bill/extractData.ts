@@ -3,6 +3,7 @@ import { assert } from 'console'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 import { validate as isUuid } from 'uuid'
+import { container } from 'tsyringe'
 import {
   ResourceFieldInput,
   readResource,
@@ -15,7 +16,7 @@ import { selectSchemaFieldUnsafe } from '../schema/extensions'
 import { readSchema } from '../schema'
 import { mapFileToCompletionParts } from '../../integrations/openai/mapFileToCompletionParts'
 import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
-import openai from '@/integrations/openai/openai'
+import OpenAiService from '@/integrations/openai/openai'
 
 const prompt = `
 You are a context extraction tool within a "Procure-to-Pay" B2B SaaS application.
@@ -46,6 +47,8 @@ const ExtractedBillDataSchema = z.object({
 })
 
 export const extractContent = async (accountId: string, resourceId: string) => {
+  const openai = container.resolve(OpenAiService)
+
   const [billSchema, billResource, vendors] = await Promise.all([
     readSchema({
       accountId,
@@ -76,7 +79,7 @@ export const extractContent = async (accountId: string, resourceId: string) => {
 
   if (!completionParts.length) return
 
-  const completion = await openai().beta.chat.completions.parse({
+  const completion = await openai.beta.chat.completions.parse({
     model: 'gpt-4o-2024-08-06',
     messages: [
       {

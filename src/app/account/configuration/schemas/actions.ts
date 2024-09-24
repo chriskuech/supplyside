@@ -3,8 +3,9 @@
 import { Prisma, ResourceType } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { difference } from 'remeda'
-import prisma from '@/integrations/prisma'
+import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
+import { PrismaService } from '@/integrations/PrismaService'
 
 export type Field = {
   id: string
@@ -26,8 +27,9 @@ export type Schema = {
 
 export const readSchemas = async (): Promise<Schema[]> => {
   const { accountId } = await readSession()
+  const prisma = container.resolve(PrismaService)
 
-  const existingSchemas = await prisma().schema.findMany({
+  const existingSchemas = await prisma.schema.findMany({
     where: { accountId, isSystem: false },
     select: {
       resourceType: true,
@@ -40,7 +42,7 @@ export const readSchemas = async (): Promise<Schema[]> => {
   )
 
   missingResourceTypes.length &&
-    (await prisma().schema.createMany({
+    (await prisma.schema.createMany({
       data: missingResourceTypes.map<Prisma.SchemaCreateManyInput>(
         (resourceType) => ({
           accountId,
@@ -50,7 +52,7 @@ export const readSchemas = async (): Promise<Schema[]> => {
       ),
     }))
 
-  return await prisma().schema.findMany({
+  return await prisma.schema.findMany({
     where: { accountId, isSystem: false },
     select: {
       id: true,
@@ -90,8 +92,9 @@ export const updateSchema = async (dto: {
   sectionIds: string[]
 }) => {
   const { accountId } = await readSession()
+  const prisma = container.resolve(PrismaService)
 
-  await prisma().schema.update({
+  await prisma.schema.update({
     where: {
       accountId,
       id: dto.schemaId,
@@ -117,7 +120,9 @@ export const createSection = async (dto: {
   schemaId: string
   name: string
 }) => {
-  await prisma().section.create({
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.section.create({
     data: {
       schemaId: dto.schemaId,
       name: dto.name,
@@ -134,9 +139,10 @@ export const updateSection = async (dto: {
   fieldIds: string[]
 }) => {
   const { accountId } = await readSession()
+  const prisma = container.resolve(PrismaService)
 
   await Promise.all([
-    prisma().sectionField.deleteMany({
+    prisma.sectionField.deleteMany({
       where: {
         sectionId: dto.sectionId,
         fieldId: {
@@ -144,7 +150,7 @@ export const updateSection = async (dto: {
         },
       },
     }),
-    prisma().section.update({
+    prisma.section.update({
       where: {
         id: dto.sectionId,
         Schema: {
@@ -179,8 +185,9 @@ export const updateSection = async (dto: {
 
 export const deleteSection = async (sectionId: string) => {
   const { accountId } = await readSession()
+  const prisma = container.resolve(PrismaService)
 
-  await prisma().section.delete({
+  await prisma.section.delete({
     where: {
       id: sectionId,
       Schema: {

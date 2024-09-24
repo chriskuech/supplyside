@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server'
+import { container } from 'tsyringe'
 import { applyTemplate } from '@/domain/schema/template'
-import prisma from '@/integrations/prisma'
 import { systemAccountId } from '@/lib/const'
+import { PrismaService } from '@/integrations/PrismaService'
 
 export const dynamic = 'force-dynamic'
 
 // TODO: basic auth
 export async function POST(): Promise<NextResponse> {
-  const accounts = await prisma().account.findMany({
+  const prisma = container.resolve(PrismaService)
+
+  const accounts = await prisma.account.findMany({
     where: {
       id: {
         not: {

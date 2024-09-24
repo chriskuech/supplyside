@@ -1,10 +1,11 @@
+import { container } from 'tsyringe'
 import { mapSessionModelToEntity } from './mappers'
 import { Session } from './entity'
 import { SessionCreationError } from './errors'
 import { sessionIncludes } from './model'
-import prisma from '@/integrations/prisma'
 import { systemAccountId } from '@/lib/const'
 import { isPrismaError } from '@/integrations/prisma-extensions'
+import { PrismaService } from '@/integrations/PrismaService'
 
 const SESSION_LIFESPAN_IN_DAYS = 7
 
@@ -14,7 +15,9 @@ export const createSession = async (
   email: string,
   tat: string,
 ): Promise<Session> => {
-  const user = await prisma().user.findUnique({
+  const prisma = container.resolve(PrismaService)
+
+  const user = await prisma.user.findUnique({
     where: { email },
   })
 
@@ -42,7 +45,7 @@ export const createSession = async (
 
   const expiresAt = new Date(Date.now() + lifespanInSeconds * 1000)
 
-  const session = await prisma().session.create({
+  const session = await prisma.session.create({
     data: {
       expiresAt,
       Account: { connect: { id: user.accountId } },
@@ -51,7 +54,7 @@ export const createSession = async (
     include: sessionIncludes,
   })
 
-  await prisma().user.update({
+  await prisma.user.update({
     where: { id: user.id },
     data: {
       tat: null,
@@ -66,7 +69,9 @@ export const readAndExtendSession = async (
   sessionId: string,
 ): Promise<Session | null> => {
   try {
-    const session = await prisma().session.update({
+    const prisma = container.resolve(PrismaService)
+
+    const session = await prisma.session.update({
       where: { id: sessionId, revokedAt: null },
       data: {
         expiresAt: new Date(Date.now() + lifespanInSeconds * 1000),
@@ -83,14 +88,18 @@ export const readAndExtendSession = async (
 }
 
 export const clearSession = async (sessionId: string) => {
-  await prisma().session.update({
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.session.update({
     where: { id: sessionId },
     data: { revokedAt: new Date() },
   })
 }
 
 export const impersonate = async (sessionId: string, accountId: string) => {
-  await prisma().session.update({
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.session.update({
     where: {
       id: sessionId,
       User: {

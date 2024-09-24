@@ -1,5 +1,6 @@
 import { fail } from 'assert'
 import { match } from 'ts-pattern'
+import { container } from 'tsyringe'
 import { FieldRef, selectSchemaFieldUnsafe } from '../schema/extensions'
 import {
   billStatusOptions,
@@ -9,7 +10,7 @@ import {
 import { readSchema } from '../schema'
 import { mapValueToValueInput } from './mappers'
 import { createResource, readResource, readResources } from '.'
-import prisma from '@/integrations/prisma'
+import { PrismaService } from '@/integrations/PrismaService'
 
 type ResourceCopyParams = {
   accountId: string
@@ -136,18 +137,20 @@ export const cloneCosts = async ({
   fromResourceId,
   toResourceId,
 }: ResourceCopyParams) => {
-  const fromCosts = await prisma().cost.findMany({
+  const prisma = container.resolve(PrismaService)
+
+  const fromCosts = await prisma.cost.findMany({
     where: { resourceId: fromResourceId, Resource: { accountId } },
     orderBy: {
       createdAt: 'asc',
     },
   })
 
-  await prisma().cost.deleteMany({
+  await prisma.cost.deleteMany({
     where: { resourceId: toResourceId, Resource: { accountId } },
   })
 
-  await prisma().cost.createMany({
+  await prisma.cost.createMany({
     data: fromCosts.map(({ name, isPercentage, value }) => ({
       resourceId: toResourceId,
       name,

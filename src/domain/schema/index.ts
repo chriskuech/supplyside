@@ -1,8 +1,9 @@
 import { ResourceType } from '@prisma/client'
+import { container } from 'tsyringe'
 import { Schema } from './entity'
 import { mapFieldModelToEntity } from './mappers'
 import { schemaIncludes } from './model'
-import prisma from '@/integrations/prisma'
+import { PrismaService } from '@/integrations/PrismaService'
 
 export type ReadSchemaParams = {
   accountId: string
@@ -15,7 +16,9 @@ export const readSchema = async ({
   resourceType,
   isSystem,
 }: ReadSchemaParams): Promise<Schema> => {
-  const schemas = await prisma().schema.findMany({
+  const prisma = container.resolve(PrismaService)
+
+  const schemas = await prisma.schema.findMany({
     where: {
       accountId,
       resourceType,

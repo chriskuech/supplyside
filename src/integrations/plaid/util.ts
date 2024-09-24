@@ -1,13 +1,16 @@
 import { fail } from 'assert'
 import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid'
-import config from '@/integrations/config'
+import { container } from 'tsyringe'
+import ConfigService from '../ConfigService'
 
 export const getPlaidConfig = () => {
   const {
-    PLAID_ENV: environment,
-    PLAID_CLIENT_ID: clientId,
-    PLAID_SECRET: clientSecret,
-  } = config()
+    config: {
+      PLAID_ENV: environment,
+      PLAID_CLIENT_ID: clientId,
+      PLAID_SECRET: clientSecret,
+    },
+  } = container.resolve(ConfigService)
 
   if (!clientId || !clientSecret || !environment) {
     return null

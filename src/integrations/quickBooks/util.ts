@@ -2,7 +2,8 @@ import { fail } from 'assert'
 import OAuthClient, { Token } from 'intuit-oauth'
 import Csrf from 'csrf'
 import QuickbooksOauthClient from 'intuit-oauth'
-import config from '@/integrations/config'
+import { container } from 'tsyringe'
+import ConfigService from '@/integrations/ConfigService'
 
 export const createQuickBooksSetupUrl = () => {
   const { csrfSecret } = getQuickBooksConfigUnsafe()
@@ -24,12 +25,14 @@ export const quickBooksClient = (token?: Token) =>
 
 export const getQuickBooksConfig = () => {
   const {
-    QUICKBOOKS_CLIENT_ID: clientId,
-    QUICKBOOKS_CLIENT_SECRET: clientSecret,
-    QUICKBOOKS_CSRF_SECRET: csrfSecret,
-    QUICKBOOKS_ENVIRONMENT: environment,
-    BASE_URL,
-  } = config()
+    config: {
+      QUICKBOOKS_CLIENT_ID: clientId,
+      QUICKBOOKS_CLIENT_SECRET: clientSecret,
+      QUICKBOOKS_CSRF_SECRET: csrfSecret,
+      QUICKBOOKS_ENVIRONMENT: environment,
+      BASE_URL,
+    },
+  } = container.resolve(ConfigService)
 
   if (!clientId || !clientSecret || !csrfSecret || !environment) {
     return null

@@ -1,7 +1,6 @@
-import { fail } from 'assert'
 import { isNullish } from 'remeda'
 import { SchemaField, Schema } from '../schema/entity'
-import { selectSchemaField } from '../schema/extensions'
+import { selectSchemaFieldUnsafe } from '../schema/extensions'
 import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
 import { extractContent } from '../bill/extractData'
@@ -28,9 +27,7 @@ export const handleResourceCreate = async ({
     await updateResourceField({
       accountId,
       resourceId: resource.id,
-      fieldId:
-        selectSchemaField(schema, fields.poNumber)?.id ??
-        fail(`"${fields.poNumber.name}" field not found`),
+      fieldId: selectSchemaFieldUnsafe(schema, fields.poNumber).id,
       value: { string: resource.key.toString() },
     })
   }
@@ -94,8 +91,10 @@ export const handleResourceUpdate = async ({
         rf.value.resource?.type === 'Item',
     )
   ) {
-    const totalCostFieldId =
-      selectSchemaField(schema, fields.totalCost)?.id ?? fail()
+    const totalCostFieldId = selectSchemaFieldUnsafe(
+      schema,
+      fields.totalCost,
+    ).id
     const unitCost =
       selectResourceFieldValue(resource, fields.unitCost)?.number ?? 0
     const quantity =
@@ -165,7 +164,7 @@ export const handleResourceUpdate = async ({
 
     await updateResourceField({
       accountId,
-      fieldId: selectSchemaField(schema, fields.totalCost)?.id ?? fail(),
+      fieldId: selectSchemaFieldUnsafe(schema, fields.totalCost).id,
       resourceId: resource.id,
       value: {
         number: itemizedCosts + subtotalCost,
@@ -209,7 +208,7 @@ export const handleResourceUpdate = async ({
     if (!isNullish(invoiceDate) && !isNullish(paymentTerms)) {
       await updateResourceField({
         accountId,
-        fieldId: selectSchemaField(schema, fields.paymentDueDate)?.id ?? fail(),
+        fieldId: selectSchemaFieldUnsafe(schema, fields.paymentDueDate).id,
         resourceId: resource.id,
         value: {
           date: new Date(

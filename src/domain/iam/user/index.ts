@@ -1,12 +1,13 @@
 import { v4 as uuid } from 'uuid'
+import { container } from 'tsyringe'
 import { userInclude } from './model'
 import { mapUserModelToEntity } from './mappers'
 import { User } from './entity'
 import { IamUserNotFoundError } from './errors'
-import prisma from '@/integrations/prisma'
-import config from '@/integrations/config'
-import smtp from '@/integrations/smtp'
 import { isPrismaError } from '@/integrations/prisma-extensions'
+import SmtpService from '@/integrations/SmtpService'
+import ConfigService from '@/integrations/ConfigService'
+import { PrismaService } from '@/integrations/PrismaService'
 
 const loginPath = '/auth/login'
 const verifyLoginPath = '/auth/verify-login'
@@ -22,7 +23,11 @@ export async function inviteUser({
   email,
   isAdmin,
 }: InviteUserParams): Promise<void> {
-  await prisma().user.create({
+  const smtpService = container.resolve(SmtpService)
+  const { config } = container.resolve(ConfigService)
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.user.create({
     data: {
       email: email.toLowerCase(),
       accountId,
@@ -30,14 +35,14 @@ export async function inviteUser({
     },
   })
 
-  await smtp().sendEmailWithTemplate({
+  await smtpService.sendEmailWithTemplate({
     From: 'SupplySide <bot@supplyside.io>',
     To: email,
     TemplateAlias: 'user-invitation',
     TemplateModel: {
       invite_email: email,
-      action_url: `${config().BASE_URL}${loginPath}`,
-      product_url: config().BASE_URL,
+      action_url: `${config.BASE_URL}${loginPath}`,
+      product_url: config.BASE_URL,
     },
     MessageStream: 'outbound',
   })
@@ -54,11 +59,15 @@ export async function startEmailVerification({
 }: StartEmailVerificationParams): Promise<void> {
   const tokenLifespanInMinutes = 5
 
+  const smtpService = container.resolve(SmtpService)
+  const { config } = container.resolve(ConfigService)
+  const prisma = container.resolve(PrismaService)
+
   const tat = uuid()
   const tatExpiresAt = new Date(Date.now() + 1000 * 60 * tokenLifespanInMinutes)
 
   try {
-    await prisma().user.update({
+    await prisma.user.update({
       where: { email },
       data: { tat, tatExpiresAt },
     })
@@ -70,7 +79,7 @@ export async function startEmailVerification({
     throw error
   }
 
-  await smtp().sendEmailWithTemplate({
+  await smtpService.sendEmailWithTemplate({
     From: 'SupplySide <bot@supplyside.io>',
     To: email,
     TemplateAlias: 'email-verification',
@@ -78,9 +87,9 @@ export async function startEmailVerification({
       verify_email: email,
       verify_token: tat,
       action_url:
-        `${config().BASE_URL}${verifyLoginPath}?email=${encodeURIComponent(email)}&token=${tat}` +
+        `${config.BASE_URL}${verifyLoginPath}?email=${encodeURIComponent(email)}&token=${tat}` +
         (returnTo ? `&returnTo=${returnTo}` : ''),
-      product_url: config().BASE_URL,
+      product_url: config.BASE_URL,
     },
     MessageStream: 'outbound',
   })
@@ -91,7 +100,9 @@ type ReadUserParams = {
 }
 
 export async function readUser({ userId }: ReadUserParams): Promise<User> {
-  const user = await prisma().user.findUnique({
+  const prisma = container.resolve(PrismaService)
+
+  const user = await prisma.user.findUnique({
     where: { id: userId },
     include: userInclude,
   })
@@ -108,7 +119,9 @@ type ReadUsersParams = { accountId: string }
 export async function readUsers({
   accountId,
 }: ReadUsersParams): Promise<User[]> {
-  const users = await prisma().user.findMany({
+  const prisma = container.resolve(PrismaService)
+
+  const users = await prisma.user.findMany({
     where: {
       accountId,
     },
@@ -127,7 +140,9 @@ export async function deleteUser({
   userId,
   accountId,
 }: DeleteUserParams): Promise<void> {
-  await prisma().user.delete({
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.user.delete({
     where: {
       accountId,
       id: userId,

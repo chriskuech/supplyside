@@ -11,6 +11,10 @@ RUN npm ci
 
 COPY . .
 
+# Next runs code to identify imports at build time, so we need to set this runtime env var
+# https://github.com/vercel/next.js/discussions/46805
+ENV NODE_OPTIONS="--require reflect-metadata --require source-map-support/register"
+
 RUN npm run build
 
 ##
@@ -49,6 +53,9 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+
+# https://github.com/vercel/next.js/discussions/46805
+ENV NODE_OPTIONS="--require reflect-metadata --require source-map-support/register"
 
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output

@@ -1,10 +1,12 @@
-import { fail } from 'assert'
 import { findTemplateField } from '../schema/template/system-fields'
 import { handleResourceUpdate } from './effects'
 import { mapValueToValueInput } from './mappers'
 import { readResource, updateResource } from '.'
 import { readSchema } from '@/domain/schema'
-import { selectSchemaField } from '@/domain/schema/extensions'
+import {
+  selectSchemaField,
+  selectSchemaFieldUnsafe,
+} from '@/domain/schema/extensions'
 
 export type ResourceCopyParams = {
   accountId: string
@@ -42,7 +44,7 @@ export const copyFields = async ({
   const fieldsToUpdate = fromResource.fields
     .map((rf) => ({
       rf,
-      sf: selectSchemaField(fromSchema, rf) ?? fail(),
+      sf: selectSchemaFieldUnsafe(fromSchema, rf),
       tf: findTemplateField(rf.templateId),
     }))
     .filter(({ sf }) => selectSchemaField(toSchema, sf))

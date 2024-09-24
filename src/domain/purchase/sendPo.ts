@@ -1,10 +1,11 @@
-import { readBlob } from '../blob'
+import { container } from 'tsyringe'
 import { readResource } from '../resource'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceFieldValue } from '../resource/extensions'
-import smtp from '@/integrations/smtp'
-import prisma from '@/integrations/prisma'
-import config from '@/integrations/config'
+import BlobService from '../blob'
+import SmtpService from '@/integrations/SmtpService'
+import ConfigService from '@/integrations/ConfigService'
+import { PrismaService } from '@/integrations/PrismaService'
 
 type SendPoParams = {
   accountId: string
@@ -12,13 +13,18 @@ type SendPoParams = {
 }
 
 export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
+  const blobService = container.resolve(BlobService)
+  const { config } = container.resolve(ConfigService)
+  const prisma = container.resolve(PrismaService)
+  const smtpService = container.resolve(SmtpService)
+
   const [order, account] = await Promise.all([
     readResource({
       type: 'Purchase',
       id: resourceId,
       accountId,
     }),
-    prisma().account.findUniqueOrThrow({
+    prisma.account.findUniqueOrThrow({
       where: {
         id: accountId,
       },
@@ -38,15 +44,15 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   if (!po || !poRecipient?.email) return
 
   const [poBlob, logoBlob] = await Promise.all([
-    readBlob({ accountId, blobId: po.blobId }),
+    blobService.readBlob({ accountId, blobId: po.blobId }),
     account.logoBlobId
-      ? readBlob({ accountId, blobId: account.logoBlobId })
+      ? blobService.readBlob({ accountId, blobId: account.logoBlobId })
       : undefined,
   ])
 
   if (!poBlob) return
 
-  await smtp().sendEmailWithTemplate({
+  await smtpService.sendEmailWithTemplate({
     From: 'SupplySide <bot@supplyside.io>',
     To: `${poRecipient.name} <${poRecipient.email}>`,
     Cc: `${assignee?.name} <${assignee?.email}>`,
@@ -57,7 +63,7 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
       buyer_logo_base64: logoBlob?.buffer.toString('base64'),
       buyer_logo_contenttype: logoBlob?.mimeType,
       buyer_company_name: account.name,
-      product_url: config().BASE_URL,
+      product_url: config.BASE_URL,
 
       // template
       supplier_user_name: poRecipient.name ?? '(No Name)',

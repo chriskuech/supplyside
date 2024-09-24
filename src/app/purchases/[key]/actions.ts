@@ -1,5 +1,6 @@
 'use server'
 
+import { container } from 'tsyringe'
 import {
   fields,
   purchaseStatusOptions,
@@ -7,9 +8,9 @@ import {
 import { sendPo as domainSendPo } from '@/domain/purchase/sendPo'
 import { createPo as domainCreatePo } from '@/domain/purchase/createPo'
 import { transitionStatus } from '@/lib/resource/actions'
-import prisma from '@/integrations/prisma'
 import { mapValueResourceModelToEntity } from '@/domain/resource/mappers'
 import { readSession } from '@/lib/session/actions'
+import { PrismaService } from '@/integrations/PrismaService'
 
 export const createPo = async (resourceId: string) => {
   const { accountId } = await readSession()
@@ -30,8 +31,9 @@ export const sendPo = async (resourceId: string) => {
 
 export const findPurchaseBills = async (resourceId: string) => {
   const { accountId } = await readSession()
+  const prisma = container.resolve(PrismaService)
 
-  const bills = await prisma().resourceField.findMany({
+  const bills = await prisma.resourceField.findMany({
     where: {
       Field: {
         templateId: fields.purchase.templateId,

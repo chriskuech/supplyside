@@ -1,13 +1,13 @@
-import { fail } from 'assert'
 import { Prisma } from '@prisma/client'
-import { createBlob } from '../blob'
+import { container } from 'tsyringe'
 import { fields } from '../schema/template/system-fields'
 import { readResource, updateResourceField } from '../resource'
 import { readSchema } from '../schema'
-import { selectSchemaField } from '../schema/extensions'
+import { selectSchemaFieldUnsafe } from '../schema/extensions'
 import { selectResourceFieldValue } from '../resource/extensions'
+import BlobService from '../blob'
 import { renderPo } from './renderPo'
-import prisma from '@/integrations/prisma'
+import { PrismaService } from '@/integrations/PrismaService'
 
 type CreatePoParams = {
   accountId: string
@@ -15,12 +15,16 @@ type CreatePoParams = {
 }
 
 export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
+  const blobService = container.resolve(BlobService)
+  const prisma = container.resolve(PrismaService)
+
   const schema = await readSchema({ accountId, resourceType: 'Purchase' })
 
-  const documentFieldId =
-    selectSchemaField(schema, fields.document)?.id ?? fail()
-  const issuedDateFieldId =
-    selectSchemaField(schema, fields.issuedDate)?.id ?? fail()
+  const documentFieldId = selectSchemaFieldUnsafe(schema, fields.document).id
+  const issuedDateFieldId = selectSchemaFieldUnsafe(
+    schema,
+    fields.issuedDate,
+  ).id
 
   await updateResourceField({
     accountId,
@@ -32,7 +36,7 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   const buffer = await renderPo({ accountId, resourceId })
 
   const [blob, resource] = await Promise.all([
-    createBlob({
+    blobService.createBlob({
       accountId,
       buffer,
       type: 'application/pdf',
@@ -63,7 +67,7 @@ export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
     },
   }
 
-  await prisma().resourceField.upsert({
+  await prisma.resourceField.upsert({
     where: {
       Resource: {
         accountId,

@@ -3,9 +3,10 @@
 import { Prisma } from '@prisma/client'
 import { isEmpty } from 'remeda'
 import { revalidatePath } from 'next/cache'
-import prisma from '@/integrations/prisma'
-import { createBlob } from '@/domain/blob'
+import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
+import BlobService from '@/domain/blob'
+import { PrismaService } from '@/integrations/PrismaService'
 
 type ClientErrors = Record<string, string>
 
@@ -13,6 +14,9 @@ export const handleSaveSettings = async (
   formData: FormData,
 ): Promise<ClientErrors | undefined> => {
   const { accountId, userId } = await readSession()
+  const prisma = container.resolve(PrismaService)
+
+  const blobService = container.resolve(BlobService)
 
   const firstName = formData.get('firstName')
   const lastName = formData.get('lastName')
@@ -23,7 +27,10 @@ export const handleSaveSettings = async (
   const update: Prisma.UserUpdateInput = {}
 
   if (file && typeof file !== 'string' && file.size > 0) {
-    const { id: imageBlobId } = await createBlob({ accountId, file })
+    const { id: imageBlobId } = await blobService.createBlob({
+      accountId,
+      file,
+    })
 
     update['ImageBlob'] = { connect: { id: imageBlobId } }
   }
@@ -49,7 +56,7 @@ export const handleSaveSettings = async (
   }
 
   if (!isEmpty(update) && isEmpty(errors)) {
-    await prisma().user.update({
+    await prisma.user.update({
       where: { id: userId },
       data: update,
     })

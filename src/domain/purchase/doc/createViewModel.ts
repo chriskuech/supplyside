@@ -1,6 +1,7 @@
 import { P, match } from 'ts-pattern'
 import { FieldType } from '@prisma/client'
 import { isTruthy } from 'remeda'
+import { container } from 'tsyringe'
 import { Resource, ResourceField } from '../../resource/entity'
 import { readResource, readResources } from '../../resource'
 import { readSchema } from '../../schema'
@@ -11,14 +12,17 @@ import {
 } from '../../resource/extensions'
 import { fields } from '../../schema/template/system-fields'
 import { LineViewModel, PurchaseViewModel } from './ViewModel'
-import { readBlob } from '@/domain/blob'
-import prisma from '@/integrations/prisma'
 import { formatInlineAddress } from '@/lib/resource/fields/views/AddressCard'
+import BlobService from '@/domain/blob'
+import { PrismaService } from '@/integrations/PrismaService'
 
 export const createViewModel = async (
   accountId: string,
   purchaseId: string,
 ): Promise<PurchaseViewModel> => {
+  const blobService = container.resolve(BlobService)
+  const prisma = container.resolve(PrismaService)
+
   const [order, lines, lineSchema, account] = await Promise.all([
     readResource({
       accountId,
@@ -33,7 +37,7 @@ export const createViewModel = async (
       },
     }),
     readSchema({ accountId, resourceType: 'Line' }),
-    prisma().account.findUniqueOrThrow({
+    prisma.account.findUniqueOrThrow({
       where: { id: accountId },
     }),
   ])
@@ -49,7 +53,7 @@ export const createViewModel = async (
     : undefined
 
   const blob = account.logoBlobId
-    ? await readBlob({
+    ? await blobService.readBlob({
         accountId: account.id,
         blobId: account.logoBlobId,
       })

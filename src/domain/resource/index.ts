@@ -1,6 +1,7 @@
 import { fail } from 'assert'
 import { Prisma, ResourceType } from '@prisma/client'
 import { z } from 'zod'
+import { container } from 'tsyringe'
 import { readSchema } from '../schema'
 import { selectSchemaField } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
@@ -21,7 +22,7 @@ import { mapResourceModelToEntity } from './mappers'
 import { resourceInclude } from './model'
 import { handleResourceCreate, handleResourceUpdate } from './effects'
 import { DuplicateResourceError } from './errors'
-import prisma from '@/integrations/prisma'
+import { PrismaService } from '@/integrations/PrismaService'
 
 export type ResourceFieldInput = {
   fieldId: string
@@ -41,16 +42,18 @@ export const createResource = async ({
   templateId,
   fields: resourceFields,
 }: CreateResourceParams): Promise<Resource> => {
+  const prisma = container.resolve(PrismaService)
+
   const schema = await readSchema({ accountId, resourceType: type })
 
   const {
     _max: { key },
-  } = await prisma().resource.aggregate({
+  } = await prisma.resource.aggregate({
     where: { accountId, type },
     _max: { key: true },
   })
 
-  const resource = await prisma().resource.create({
+  const resource = await prisma.resource.create({
     data: {
       accountId,
       templateId,
@@ -111,7 +114,9 @@ export const readResource = async ({
   key,
   id,
 }: ReadResourceParams): Promise<Resource> => {
-  const model = await prisma().resource.findUniqueOrThrow({
+  const prisma = container.resolve(PrismaService)
+
+  const model = await prisma.resource.findUniqueOrThrow({
     where: {
       id,
       accountId_type_key:
@@ -142,12 +147,14 @@ export const readResources = async ({
   where,
   orderBy,
 }: ReadResourcesParams): Promise<Resource[]> => {
+  const prisma = container.resolve(PrismaService)
+
   const schema = await readSchema({ accountId, resourceType: type })
   const sql = createSql({ accountId, schema, where, orderBy })
 
-  const results: { _id: string }[] = await prisma().$queryRawUnsafe(sql)
+  const results: { _id: string }[] = await prisma.$queryRawUnsafe(sql)
 
-  const models = await prisma().resource.findMany({
+  const models = await prisma.resource.findMany({
     where: {
       accountId,
       type,
@@ -173,6 +180,8 @@ export const updateResource = async ({
   resourceId,
   fields,
 }: UpdateResourceParams) => {
+  const prisma = container.resolve(PrismaService)
+
   const resource = await readResource({ accountId, id: resourceId })
   const schema = await readSchema({ accountId, resourceType: resource.type })
 
@@ -198,7 +207,7 @@ export const updateResource = async ({
         resourceId,
       )
 
-      await prisma().resourceField.upsert({
+      await prisma.resourceField.upsert({
         where: {
           resourceId_fieldId: {
             resourceId,
@@ -252,7 +261,9 @@ export const deleteResource = async ({
   accountId,
   id,
 }: DeleteResourceParams): Promise<void> => {
-  const model = await prisma().resource.delete({
+  const prisma = container.resolve(PrismaService)
+
+  const model = await prisma.resource.delete({
     where: { id, accountId },
     include: resourceInclude,
   })
@@ -302,7 +313,9 @@ export const updateTemplateId = async ({
   resourceId,
   templateId,
 }: UpdateTemplateIdParams) => {
-  await prisma().resource.update({
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.resource.update({
     where: { id: resourceId, accountId },
     data: { templateId },
   })
@@ -317,7 +330,9 @@ export const findByTemplateId = async ({
   accountId,
   templateId,
 }: FindByTemplateIdParams) => {
-  const resource = await prisma().resource.findFirst({
+  const prisma = container.resolve(PrismaService)
+
+  const resource = await prisma.resource.findFirst({
     where: { accountId, templateId },
     include: resourceInclude,
   })
@@ -334,7 +349,9 @@ async function checkForDuplicateResource(
   resourceId: string,
 ) {
   if (sf.templateId === fields.name.templateId) {
-    const resourceExists = await prisma().resource.findFirst({
+    const prisma = container.resolve(PrismaService)
+
+    const resourceExists = await prisma.resource.findFirst({
       where: {
         accountId,
         type: resource.type,
@@ -371,7 +388,9 @@ export const findResources = async ({
   input,
   exact,
 }: FindResourcesParams): Promise<ValueResource[]> => {
-  const results = await prisma().$queryRaw`
+  const prisma = container.resolve(PrismaService)
+
+  const results = await prisma.$queryRaw`
     WITH "View" AS (
       SELECT
         "Resource".*,

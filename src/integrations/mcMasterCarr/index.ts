@@ -1,12 +1,13 @@
 import { readFileSync } from 'fs'
 import path from 'path'
 import { fail } from 'assert'
+import { container } from 'tsyringe'
 import { redirect } from 'next/navigation'
 import handlebars from 'handlebars'
 import { parseStringPromise } from 'xml2js'
 import { match } from 'ts-pattern'
-import prisma from '../prisma'
-import config from '../config'
+import { PrismaService } from '../PrismaService'
+import ConfigService from '../ConfigService'
 import { getMcMasterCarrConfigUnsafe } from './utils'
 import {
   cxmlSchema,
@@ -38,6 +39,8 @@ export async function createConnection(
   username: string,
   password: string,
 ) {
+  const prisma = container.resolve(PrismaService)
+
   const validCredentials = await credentialsAreValid(
     accountId,
     username,
@@ -86,7 +89,7 @@ export async function createConnection(
     }
   }
 
-  await prisma().account.update({
+  await prisma.account.update({
     where: { id: accountId },
     data: {
       mcMasterCarrConnectedAt: new Date(),
@@ -97,6 +100,8 @@ export async function createConnection(
 }
 
 export async function disconnect(accountId: string) {
+  const prisma = container.resolve(PrismaService)
+
   const mcMasterCarrVendor = await findByTemplateId({
     accountId,
     templateId: resources().mcMasterCarrVendor.templateId,
@@ -110,7 +115,7 @@ export async function disconnect(accountId: string) {
     })
   }
 
-  await prisma().account.update({
+  await prisma.account.update({
     where: { id: accountId },
     data: {
       mcMasterCarrUsername: null,
@@ -146,18 +151,21 @@ async function credentialsAreValid(
 
 // TODO: this references `next` which is not available in the domain layer
 async function getCredentials(accountId: string) {
+  const prisma = container.resolve(PrismaService)
+  const { config } = container.resolve(ConfigService)
+
   const {
     mcMasterCarrUsername,
     mcMasterCarrConnectedAt,
     mcMasterCarrPassword,
-  } = await prisma().account.findFirstOrThrow({ where: { id: accountId } })
+  } = await prisma.account.findFirstOrThrow({ where: { id: accountId } })
 
   if (
     !mcMasterCarrUsername ||
     !mcMasterCarrConnectedAt ||
     !mcMasterCarrPassword
   ) {
-    redirect(`${config().BASE_URL}/account/integrations`)
+    redirect(`${config.BASE_URL}/account/integrations`)
   }
 
   return { mcMasterCarrUsername, mcMasterCarrPassword }
@@ -213,6 +221,7 @@ async function createPunchOutServiceRequestBody(
   mcMasterCarrUsername: string,
   mcMasterCarrPassword: string,
 ): Promise<string> {
+  const { config } = container.resolve(ConfigService)
   const { secret, supplierDomain, supplierIdentity } =
     getMcMasterCarrConfigUnsafe()
 
@@ -226,7 +235,7 @@ async function createPunchOutServiceRequestBody(
       clientName: supplierIdentity,
       punchOutSharedSecret: secret,
       buyerCookie: `${resourceId}|${accountId}`,
-      poomReturnEndpoint: `${config().BASE_URL}/api/integrations/mcmaster`,
+      poomReturnEndpoint: `${config.BASE_URL}/api/integrations/mcmaster`,
     },
   })
 

@@ -1,6 +1,5 @@
 'use client'
 
-import { fail } from 'assert'
 import {
   Box,
   Button,
@@ -21,7 +20,7 @@ import { fields } from '@/domain/schema/template/system-fields'
 import { Resource } from '@/domain/resource/entity'
 import { updateResourceField } from '@/lib/resource/actions'
 import { useResources } from '@/lib/resource/useResources'
-import { selectSchemaField } from '@/domain/schema/extensions'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import useSchema from '@/lib/schema/useSchema'
 import { useConfirmation } from '@/lib/confirmation'
 import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
@@ -37,7 +36,7 @@ export default function MatchControl({ schema, resource }: Props) {
     async (resourceId: string) =>
       updateResourceField({
         resourceId: resource.id,
-        fieldId: selectSchemaField(schema, fields.purchase)?.id ?? fail(),
+        fieldId: selectSchemaFieldUnsafe(schema, fields.purchase).id,
         value: { resourceId },
       }).then(() => close()),
   )
@@ -72,8 +71,7 @@ export default function MatchControl({ schema, resource }: Props) {
 
                 await updateResourceField({
                   resourceId: resource.id,
-                  fieldId:
-                    selectSchemaField(schema, fields.purchase)?.id ?? fail(),
+                  fieldId: selectSchemaFieldUnsafe(schema, fields.purchase).id,
                   value: { resourceId: null },
                 })
               }

@@ -1,6 +1,5 @@
-import { fail } from 'assert'
 import { ResourceType } from '@prisma/client'
-import { FieldRef, selectSchemaField } from '../schema/extensions'
+import { FieldRef, selectSchemaFieldUnsafe } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { FieldTemplate } from '../schema/template/types'
 import { readSchema } from '../schema'
@@ -78,7 +77,7 @@ const linkLines = async ({
       updateResourceField({
         accountId,
         resourceId: line.id,
-        fieldId: selectSchemaField(lineSchema, toResourceField)?.id ?? fail(),
+        fieldId: selectSchemaFieldUnsafe(lineSchema, toResourceField).id,
         value: { resourceId: toResourceId },
       }),
     ),

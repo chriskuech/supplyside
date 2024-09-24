@@ -1,10 +1,11 @@
 import { P, match } from 'ts-pattern'
 import { FieldType, Prisma, ResourceType } from '@prisma/client'
+import { container } from 'tsyringe'
 import { SchemaField } from './entity'
 import { mapFieldModelToEntity } from './mappers'
-import prisma from '@/integrations/prisma'
 import { ValueInput } from '@/domain/resource/patch'
 import { valueInclude } from '@/domain/resource/model'
+import { PrismaService } from '@/integrations/PrismaService'
 
 export type CreateFieldParams = {
   name: string
@@ -17,7 +18,9 @@ export const createField = async (
   accountId: string,
   params: CreateFieldParams,
 ) => {
-  await prisma().field.create({
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.field.create({
     data: {
       Account: {
         connect: {
@@ -36,7 +39,9 @@ export const createField = async (
 }
 
 export const readFields = async (accountId: string): Promise<SchemaField[]> => {
-  const fields = await prisma().field.findMany({
+  const prisma = container.resolve(PrismaService)
+
+  const fields = await prisma.field.findMany({
     where: {
       accountId,
     },
@@ -78,8 +83,10 @@ export type OptionPatch = {
 )
 
 export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
+  const prisma = container.resolve(PrismaService)
+
   await Promise.all([
-    prisma().field.update({
+    prisma.field.update({
       where: {
         id: dto.id,
         accountId,
@@ -177,7 +184,7 @@ export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
     ...dto.options.map((o, i) =>
       match(o)
         .with({ op: 'add' }, (o) =>
-          prisma().option.create({
+          prisma.option.create({
             data: {
               Field: {
                 connect: {
@@ -191,7 +198,7 @@ export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
           }),
         )
         .with({ op: 'update' }, (o) =>
-          prisma().option.update({
+          prisma.option.update({
             where: {
               id: o.optionId,
               Field: {
@@ -206,7 +213,7 @@ export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
           }),
         )
         .with({ op: 'remove' }, (o) =>
-          prisma().option.delete({
+          prisma.option.delete({
             where: {
               id: o.optionId,
               Field: {
@@ -222,7 +229,9 @@ export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
 }
 
 export const deleteField = async (accountId: string, fieldId: string) => {
-  await prisma().field.delete({
+  const prisma = container.resolve(PrismaService)
+
+  await prisma.field.delete({
     where: {
       accountId: accountId,
       id: fieldId,

@@ -1,12 +1,14 @@
 import { Box, Stack, Typography } from '@mui/material'
+import { container } from 'tsyringe'
 import Form from './Form'
 import { readSession } from '@/lib/session/actions'
 import { readAccount } from '@/domain/iam/account'
-import config from '@/integrations/config'
+import ConfigService from '@/integrations/ConfigService'
 
 export default async function InfoPage() {
   const { accountId } = await readSession()
   const account = await readAccount(accountId)
+  const { config } = container.resolve(ConfigService)
 
   return (
     <Stack
@@ -23,7 +25,7 @@ export default async function InfoPage() {
           Provide your company information for use across the platform.
         </Typography>
       </Box>
-      <Form account={account} billsEmailDomain={config().BILLS_EMAIL_DOMAIN} />
+      <Form account={account} billsEmailDomain={config.BILLS_EMAIL_DOMAIN} />
     </Stack>
   )
 }

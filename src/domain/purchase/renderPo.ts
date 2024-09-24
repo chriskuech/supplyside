@@ -3,20 +3,14 @@ import puppeteer from 'puppeteer'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 /* @ts-expect-error */
 import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.browser.production'
+import { cache } from 'react'
 import PoDocument from './doc/PoDocument'
 import { createViewModel } from './doc/createViewModel'
 import PoDocumentFooter from '@/domain/purchase/doc/PoDocumentFooter'
-import singleton from '@/integrations/singleton'
 
-const browser = singleton('browser', async (clear) => {
+const browser = cache(async () => {
   const browser = await puppeteer.launch({
     args: ['--no-sandbox'],
-  })
-
-  browser.once('disconnected', () => {
-    browser.close()
-    clear()
-    console.error('Puppeteer browser disconnected')
   })
 
   return browser
