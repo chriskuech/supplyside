@@ -1,6 +1,7 @@
-import { Contact } from './entity'
+import { Address, Contact } from './entity'
 
 export type ValueInput =
+  | { address: Address | null }
   | { boolean: boolean | null }
   | { contact: Contact | null }
   | { date: Date | null }

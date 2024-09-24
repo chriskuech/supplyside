@@ -43,6 +43,27 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
+    resourceType: 'Customer',
+    sections: [
+      {
+        name: 'Summary',
+        fields: [
+          fields.name,
+          fields.customerDescription,
+          fields.primaryAddress,
+        ],
+      },
+      {
+        name: 'Contacts',
+        fields: [fields.primaryContact],
+      },
+      {
+        name: 'Payment Info',
+        fields: [fields.paymentTerms, fields.paymentMethod],
+      },
+    ],
+  },
+  {
     resourceType: 'Item',
     sections: [
       {

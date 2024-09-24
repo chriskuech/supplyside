@@ -4,7 +4,7 @@ import { Close, Download, UploadFile, Visibility } from '@mui/icons-material'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useRef } from 'react'
 import { uploadFile } from './actions'
-import { File } from '@/domain/files/types'
+import { File } from '@/domain/file/types'
 
 type Props = {
   resourceId: string

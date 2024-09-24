@@ -11,7 +11,7 @@ import { readResource, updateResourceField } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema'
 import { selectSchemaField } from '@/domain/schema/extensions'
-import { ExpectedError } from '@/domain/errors'
+import { QuickBooksExpectedError } from '@/integrations/quickBooks/errors'
 
 export const readBill = async (
   accountId: string,
@@ -156,7 +156,7 @@ export const syncBill = async (
 
   assert(
     quickBooksAccountQuery.QueryResponse.Account,
-    new ExpectedError(
+    new QuickBooksExpectedError(
       'Accounting category does not exist or is not active in QuickBooks',
     ),
   )

@@ -2,7 +2,7 @@ import { ResourceType } from '@prisma/client'
 import { Schema } from './entity'
 import { mapFieldModelToEntity } from './mappers'
 import { schemaIncludes } from './model'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 
 export type ReadSchemaParams = {
   accountId: string

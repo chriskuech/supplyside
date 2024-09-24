@@ -1,6 +1,6 @@
 import { fail } from 'assert'
 import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid'
-import config from '@/services/config'
+import config from '@/integrations/config'
 
 export const getPlaidConfig = () => {
   const {

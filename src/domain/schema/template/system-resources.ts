@@ -2,7 +2,7 @@ import { deepStrictEqual } from 'assert'
 import { entries, filter, flatMap, groupBy, map, mapValues, pipe } from 'remeda'
 import { ResourceTemplate } from './types'
 import { fields } from './system-fields'
-import config from '@/services/config'
+import config from '@/integrations/config'
 
 const _resources = (
   environment: 'development' | 'integration' | 'production',

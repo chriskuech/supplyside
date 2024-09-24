@@ -2,7 +2,7 @@ import { ACCOUNT_BASED_EXPENSE } from '../constants'
 import { mapValue } from './utils'
 import { Resource } from '@/domain/resource/entity'
 import { fields } from '@/domain/schema/template/system-fields'
-import config from '@/services/config'
+import config from '@/integrations/config'
 
 const fieldsMap = [
   {

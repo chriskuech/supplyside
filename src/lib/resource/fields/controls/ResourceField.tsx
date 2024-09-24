@@ -56,8 +56,8 @@ function ResourceField(
           fieldId: selectSchemaFieldUnsafe(
             schema ?? fail('Schema not found'),
             match(resourceType)
-              .with(P.union('Vendor', 'Item'), () => fields.name)
-              .with(P.union('Bill', 'Purchase', 'Line'), () => fields.poNumber)
+              .with(P.union('Customer', 'Item', 'Vendor'), () => fields.name)
+              .with(P.union('Bill', 'Line', 'Purchase'), () => fields.poNumber)
               .exhaustive(),
           ).id,
           value: { string: nameOrNumber },

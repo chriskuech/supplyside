@@ -2,7 +2,7 @@ import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
-import { getQuickBooksConfig } from '@/domain/quickBooks/util'
+import { getQuickBooksConfig } from '@/integrations/quickBooks/util'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
 
 export default async function VendorDetail({

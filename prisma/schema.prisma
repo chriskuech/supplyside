@@ -87,9 +87,11 @@ model User {
 }
 
 enum ResourceType {
+  Customer
   Bill
   Item
   Line
+  Order
   Purchase
   Vendor
 }
@@ -129,6 +131,7 @@ model ResourceField {
 }
 
 enum FieldType {
+  Address
   Checkbox
   Contact
   Date
@@ -199,6 +202,20 @@ model File {
   ValueFile ValueFile[]
 }
 
+model Address {
+  id            String  @id @default(uuid()) @db.Uuid
+  streetAddress String?
+  city          String?
+  state         String?
+  zip           String?
+  country       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Value Value[]
+}
+
 model Contact {
   id    String  @id @default(uuid()) @db.Uuid
   name  String?
@@ -214,6 +231,7 @@ model Contact {
 
 model Value {
   id         String    @id @default(uuid()) @db.Uuid
+  addressId  String?   @db.Uuid
   boolean    Boolean?
   contactId  String?   @db.Uuid
   date       DateTime? @db.Date
@@ -227,6 +245,7 @@ model Value {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  Address            Address?        @relation(fields: [addressId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   Contact            Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   File               File?           @relation(fields: [fileId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   Files              ValueFile[]

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import config from '@/services/config'
-import { deleteQuickBooksToken } from '@/domain/quickBooks'
+import config from '@/integrations/config'
+import { deleteQuickBooksToken } from '@/integrations/quickBooks'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 
 export async function GET({ url }: NextRequest): Promise<NextResponse> {

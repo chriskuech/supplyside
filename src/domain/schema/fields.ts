@@ -2,7 +2,7 @@ import { P, match } from 'ts-pattern'
 import { FieldType, Prisma, ResourceType } from '@prisma/client'
 import { SchemaField } from './entity'
 import { mapFieldModelToEntity } from './mappers'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 import { ValueInput } from '@/domain/resource/patch'
 import { valueInclude } from '@/domain/resource/model'
 
@@ -89,6 +89,17 @@ export const updateField = async (accountId: string, dto: UpdateFieldDto) => {
         description: dto.description,
         DefaultValue: {
           update: match<ValueInput, Prisma.ValueUpdateInput>(dto.defaultValue)
+            .with({ address: P.not(undefined) }, ({ address }) => ({
+              Address: {
+                update: {
+                  streetAddress: address?.streetAddress?.trim() || null,
+                  city: address?.city?.trim() || null,
+                  state: address?.state?.trim() || null,
+                  zip: address?.zip?.trim() || null,
+                  country: address?.country?.trim() || null,
+                },
+              },
+            }))
             .with({ contact: P.not(undefined) }, ({ contact }) => ({
               Contact: {
                 update: {

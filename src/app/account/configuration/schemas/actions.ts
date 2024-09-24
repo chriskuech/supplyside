@@ -3,7 +3,7 @@
 import { Prisma, ResourceType } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { difference } from 'remeda'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 import { readSession } from '@/lib/session/actions'
 
 export type Field = {

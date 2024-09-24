@@ -24,6 +24,7 @@ import { useResources } from '@/lib/resource/useResources'
 import { selectSchemaField } from '@/domain/schema/extensions'
 import useSchema from '@/lib/schema/useSchema'
 import { useConfirmation } from '@/lib/confirmation'
+import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
 
 type Props = {
   schema: Schema
@@ -32,6 +33,14 @@ type Props = {
 
 export default function MatchControl({ schema, resource }: Props) {
   const { open, isOpen, close } = useDisclosure()
+  const [{ isLoading }, callback] = useAsyncCallback(
+    async (resourceId: string) =>
+      updateResourceField({
+        resourceId: resource.id,
+        fieldId: selectSchemaField(schema, fields.purchase)?.id ?? fail(),
+        value: { resourceId },
+      }).then(() => close()),
+  )
   const confirm = useConfirmation()
 
   const purchase = selectResourceFieldValue(resource, fields.purchase)?.resource
@@ -104,7 +113,7 @@ export default function MatchControl({ schema, resource }: Props) {
                 <Box>Receipt</Box>
                 <Link />
                 <Box>Purchase</Box>
-                <AddLink />
+                {isLoading ? <CircularProgress /> : <AddLink />}
                 <Box>Bill</Box>
               </Stack>
               <Box>
@@ -120,20 +129,14 @@ export default function MatchControl({ schema, resource }: Props) {
                       .join(' ')}
                     onRowClick={({
                       row, // `row` is coming in as `any` for some reason
-                    }) =>
-                      updateResourceField({
-                        resourceId: resource.id,
-                        fieldId:
-                          selectSchemaField(schema, fields.purchase)?.id ??
-                          fail(),
-                        value: { resourceId: row.id },
-                      }).then(() => close())
-                    }
+                    }) => !isLoading && callback(row.id)}
                   />
                 )}
               </Box>
               <Stack direction="row" sx={{ justifyContent: 'end' }}>
-                <Button onClick={close}>Close</Button>
+                <Button onClick={close} disabled={!isLoading}>
+                  Close
+                </Button>
               </Stack>
             </Stack>
           </CardContent>

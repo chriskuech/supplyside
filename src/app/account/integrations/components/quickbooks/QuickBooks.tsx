@@ -4,9 +4,9 @@ import QuickBooksConnection from './QuickBooksConnection'
 import {
   createQuickBooksSetupUrl,
   getQuickBooksConfig,
-} from '@/domain/quickBooks/util'
+} from '@/integrations/quickBooks/util'
 import { Session } from '@/domain/iam/session/entity'
-import { getQuickbooksToken } from '@/domain/quickBooks'
+import { getQuickbooksToken } from '@/integrations/quickBooks'
 
 type Props = {
   session: Session

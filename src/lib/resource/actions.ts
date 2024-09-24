@@ -9,7 +9,7 @@ import { withSession } from '../session/actions'
 import * as domain from '@/domain/resource'
 import * as schemaDomain from '@/domain/schema'
 import { Resource } from '@/domain/resource/entity'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 import { ValueResource } from '@/domain/resource/entity'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
 import {

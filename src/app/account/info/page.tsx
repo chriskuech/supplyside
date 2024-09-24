@@ -2,7 +2,7 @@ import { Box, Stack, Typography } from '@mui/material'
 import Form from './Form'
 import { readSession } from '@/lib/session/actions'
 import { readAccount } from '@/domain/iam/account'
-import config from '@/services/config'
+import config from '@/integrations/config'
 
 export default async function InfoPage() {
   const { accountId } = await readSession()

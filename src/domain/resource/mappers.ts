@@ -3,7 +3,7 @@ import { FieldType, Prisma } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { isArray, isNullish, pick } from 'remeda'
 import { fields } from '../schema/template/system-fields'
-import { mapFile } from '../files/mapValueFile'
+import { mapFile } from '../file/mapValueFile'
 import { Schema, SchemaField } from '../schema/entity'
 import { mapUserModelToEntity } from '../user/mappers'
 import { Resource, Value, ValueResource } from './entity'
@@ -44,6 +44,17 @@ export const mapValueToValueInput = (
   value: Value,
 ): ValueInput =>
   match<FieldType, ValueInput>(fieldType)
+    .with('Address', () => ({
+      address: value.address
+        ? pick(value.address, [
+            'streetAddress',
+            'city',
+            'state',
+            'zip',
+            'country',
+          ])
+        : null,
+    }))
     .with('Checkbox', () => ({ boolean: value.boolean }))
     .with('Date', () => ({ date: value.date }))
     .with('File', () => ({ fileId: value.file?.id ?? null }))
@@ -62,6 +73,7 @@ export const mapValueToValueInput = (
     .exhaustive()
 
 export const mapValueModelToEntity = (model: ValueModel): Value => ({
+  address: model.Address,
   boolean: model.boolean,
   contact: model.Contact,
   date: model.date,
@@ -98,6 +110,7 @@ export const isMissingRequiredFields = (schema: Schema, resource: Resource) =>
     if (!field.isRequired) return false
 
     const valueColumnName = match<FieldType, keyof Value>(field.type)
+      .with('Address', () => 'address')
       .with('Checkbox', () => 'boolean')
       .with('Date', () => 'date')
       .with('File', () => 'file')
@@ -122,6 +135,18 @@ export const mapValueInputToPrismaValueUpdate = (
   value: ValueInput,
 ): Prisma.ValueUpdateWithoutResourceFieldValueInput =>
   match<ValueInput, Prisma.ValueUpdateWithoutResourceFieldValueInput>(value)
+    .with({ address: P.not(undefined) }, ({ address }) =>
+      address && Object.values(address).some(Boolean)
+        ? {
+            Address: {
+              upsert: {
+                create: address,
+                update: address,
+              },
+            },
+          }
+        : { Address: { delete: true, disconnect: true } },
+    )
     .with({ boolean: P.not(undefined) }, ({ boolean }) => ({ boolean }))
     .with({ contact: P.not(undefined) }, ({ contact }) =>
       contact
@@ -185,6 +210,10 @@ export const mapValueInputToPrismaValueCreate = (
   { defaultToToday, defaultValue }: SchemaField,
 ): Prisma.ValueCreateWithoutResourceFieldValueInput =>
   match<ValueInput, Prisma.ValueCreateWithoutResourceFieldValueInput>(value)
+    .with({ address: P.not(undefined) }, ({ address: value }) => {
+      const address = value ?? defaultValue?.address ?? null
+      return address ? { Address: { create: address } } : {}
+    })
     .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
       boolean: value ?? defaultValue?.boolean ?? null,
     }))
@@ -253,6 +282,15 @@ export const mapValueInputToPrismaValueWhere = (
   value: ValueInput,
 ): Prisma.ValueWhereInput =>
   match<ValueInput, Prisma.ValueWhereInput>(value)
+    .with({ address: P.not(undefined) }, ({ address: value }) => ({
+      Address: {
+        streetAddress: value?.streetAddress?.trim() || null,
+        city: value?.city?.trim() || null,
+        state: value?.state?.trim() || null,
+        zip: value?.zip?.trim() || null,
+        country: value?.country?.trim() || null,
+      },
+    }))
     .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
       boolean: value,
     }))

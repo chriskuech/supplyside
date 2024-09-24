@@ -1,5 +1,5 @@
 import { OpenAI } from 'openai'
-import singleton from './singleton'
+import singleton from '../singleton'
 
 const openai = singleton(
   'openai',

@@ -7,7 +7,7 @@ import {
 import { sendPo as domainSendPo } from '@/domain/purchase/sendPo'
 import { createPo as domainCreatePo } from '@/domain/purchase/createPo'
 import { transitionStatus } from '@/lib/resource/actions'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 import { mapValueResourceModelToEntity } from '@/domain/resource/mappers'
 import { readSession } from '@/lib/session/actions'
 

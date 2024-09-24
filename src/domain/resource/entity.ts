@@ -1,5 +1,5 @@
 import { ResourceType, Cost, FieldType } from '@prisma/client'
-import { File } from '../files/types'
+import { File } from '../file/types'
 import { User } from '../user/entity'
 import { Option } from '../schema/entity'
 
@@ -21,6 +21,7 @@ export type ResourceField = {
 }
 
 export const emptyValue = {
+  address: null,
   boolean: null,
   contact: null,
   date: null,
@@ -36,6 +37,7 @@ export const emptyValue = {
 } as const satisfies Value
 
 export type Value = {
+  address: Address | null
   boolean: boolean | null
   contact: Contact | null
   date: Date | null
@@ -48,6 +50,14 @@ export type Value = {
   files: File[]
   resource: ValueResource | null
   updatedAt: Date
+}
+
+export type Address = {
+  streetAddress: string | null
+  city: string | null
+  state: string | null
+  zip: string | null
+  country: string | null
 }
 
 export type Contact = {

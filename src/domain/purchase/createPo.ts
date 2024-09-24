@@ -1,13 +1,13 @@
 import { fail } from 'assert'
 import { Prisma } from '@prisma/client'
-import { createBlob } from '../blobs'
+import { createBlob } from '../blob'
 import { fields } from '../schema/template/system-fields'
 import { readResource, updateResourceField } from '../resource'
 import { readSchema } from '../schema'
 import { selectSchemaField } from '../schema/extensions'
 import { selectResourceFieldValue } from '../resource/extensions'
 import { renderPo } from './renderPo'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 
 type CreatePoParams = {
   accountId: string

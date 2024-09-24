@@ -1,4 +1,4 @@
-import { getDownloadPath } from '../blobs/util'
+import { getDownloadPath } from '../blob/util'
 import { User } from './entity'
 import { UserModel } from './model'
 

@@ -1,9 +1,9 @@
 import { Alert } from '@mui/material'
 import PlaidConnect from './PlaidConnect'
 import PlaidConnection from './PlaidConnection'
-import { getPlaidConfig } from '@/domain/plaid/util'
+import { getPlaidConfig } from '@/integrations/plaid/util'
 import { Session } from '@/domain/iam/session/entity'
-import { getPlaidToken } from '@/domain/plaid'
+import { getPlaidToken } from '@/integrations/plaid'
 
 type Props = {
   session: Session

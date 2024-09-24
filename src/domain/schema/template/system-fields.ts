@@ -155,8 +155,15 @@ const _fields = {
   customer: {
     templateId: '0e3369ca-99b1-4cb7-9a18-a2b10d70fed3',
     name: 'Customer',
-    type: 'Select',
+    type: 'Resource',
+    resourceType: 'Customer',
     description: 'Primary customer for the transaction',
+  },
+  customerDescription: {
+    templateId: '79a53e8a-5b96-4759-8b81-5cdeda01ed34',
+    name: 'Customer Description',
+    type: 'Textarea',
+    description: 'Brief, identifiable description of the customer',
   },
   document: {
     templateId: 'cb4a0c88-df20-485d-9881-e2c3b1b2b180',
@@ -297,8 +304,14 @@ const _fields = {
   primaryAddress: {
     templateId: '58e1e7ae-2dab-44e2-b741-e47eddd7a626',
     name: 'Primary Address',
-    type: 'Textarea',
+    type: 'Address',
     description: "The vendor's primary physical address",
+  },
+  primaryContact: {
+    templateId: 'b36205ce-50b8-45cf-beb2-c2ad927aeb34',
+    name: 'Primary Contact',
+    type: 'Contact',
+    description: 'Primary contact for orders',
   },
   quantity: {
     templateId: '8c04f743-23a3-417f-8fd9-98cd5ffa4a67',
@@ -331,7 +344,7 @@ const _fields = {
   shippingAddress: {
     templateId: '848fe67b-ee4f-4c68-bdaa-3089622337f6',
     name: 'Shipping Address',
-    type: 'Textarea',
+    type: 'Address',
     description: 'Indicates the ship-to address on the order',
   },
   shippingMethod: {

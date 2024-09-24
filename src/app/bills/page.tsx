@@ -1,7 +1,7 @@
 import BillsInboxControl from './BillsInboxControl'
 import ListPage from '@/lib/resource/ListPage'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
-import config from '@/services/config'
+import config from '@/integrations/config'
 
 export default async function Bills() {
   const { account } = await requireSessionWithRedirect('/bills')

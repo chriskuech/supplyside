@@ -8,9 +8,9 @@ import {
   ChatCompletionContentPartText,
 } from 'openai/resources/index.mjs'
 import { P, match } from 'ts-pattern'
-import { File } from '../files/types'
-import { readBlob } from '../blobs'
-import config from '@/services/config'
+import { File } from '@/domain/file/types'
+import { readBlob } from '@/domain/blob'
+import config from '@/integrations/config'
 
 const exec = promisify(execCallback)
 
