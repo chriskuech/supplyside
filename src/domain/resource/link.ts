@@ -33,13 +33,13 @@ export const linkResource = async ({
 
   await copyFields({ accountId, fromResourceId, toResourceId })
 
-  if (fromResource.type === 'Order' && toResource.type === 'Bill') {
+  if (fromResource.type === 'Purchase' && toResource.type === 'Bill') {
     await cloneCosts({ accountId, fromResourceId, toResourceId })
     await linkLines({
       accountId,
       fromResourceId,
       toResourceId,
-      fromResourceField: fields.order,
+      fromResourceField: fields.purchase,
       toResourceField: fields.bill,
     })
   }

@@ -28,7 +28,7 @@ export default function StatusTransitionButton({
     <LoadingButton
       onClick={() =>
         !isDisabled &&
-        transitionStatus(resourceId, fields.orderStatus, statusOption)
+        transitionStatus(resourceId, fields.purchaseStatus, statusOption)
       }
       endIcon={<ArrowRight />}
       sx={{ height: 'fit-content', fontSize: '1.2em' }}

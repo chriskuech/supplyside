@@ -4,7 +4,7 @@ import { FieldRef, selectSchemaFieldUnsafe } from '../schema/extensions'
 import {
   billStatusOptions,
   fields,
-  orderStatusOptions,
+  purchaseStatusOptions,
 } from '../schema/template/system-fields'
 import { readSchema } from '../schema'
 import { mapValueToValueInput } from './mappers'
@@ -67,20 +67,20 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
 
       return destination
     })
-    .with('Order', async () => {
+    .with('Purchase', async () => {
       const schema = await readSchema({
         accountId,
-        resourceType: 'Order',
+        resourceType: 'Purchase',
       })
 
       const orderStatusField = selectSchemaFieldUnsafe(
         schema,
-        fields.orderStatus,
+        fields.purchaseStatus,
       )
 
       const draftStatusOption =
         orderStatusField.options.find(
-          (o) => o.templateId === orderStatusOptions.draft.templateId,
+          (o) => o.templateId === purchaseStatusOptions.draft.templateId,
         ) ?? fail('Draft status not found')
 
       const destination = await createResource({
@@ -105,7 +105,7 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
           accountId,
           fromResourceId: source.id,
           toResourceId: destination.id,
-          backLinkFieldRef: fields.order,
+          backLinkFieldRef: fields.purchase,
         }),
         cloneCosts({
           accountId,

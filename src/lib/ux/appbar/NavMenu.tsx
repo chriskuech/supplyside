@@ -23,7 +23,7 @@ export function NavMenu() {
         open={!!anchorEl}
         onClose={() => setAnchorEl(null)}
       >
-        {['Orders', 'Lines', 'Bills', 'Vendors', 'Items'].map((item) => (
+        {['Purchases', 'Lines', 'Bills', 'Vendors', 'Items'].map((item) => (
           <MenuItem key={item} href={`/${item.toLowerCase()}`} component={Link}>
             {item}
           </MenuItem>

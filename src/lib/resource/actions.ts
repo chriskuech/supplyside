@@ -28,7 +28,7 @@ export const createResource = async (
       resourceType: params.type,
     })
 
-    if (params.type === 'Order') {
+    if (params.type === 'Purchase') {
       params.fields = [
         ...(params.fields ?? []),
         {

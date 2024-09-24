@@ -7,7 +7,7 @@ import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
 import LoadingButton from '@/lib/ux/LoadingButton'
 import {
   fields,
-  orderStatusOptions,
+  purchaseStatusOptions,
 } from '@/domain/schema/template/system-fields'
 import { OptionTemplate } from '@/domain/schema/template/types'
 
@@ -19,7 +19,7 @@ type Props = {
 export default function ApproveButton({ resourceId, isDisabled }: Props) {
   const callback = (resourceId: string, status: OptionTemplate) =>
     createPo(resourceId).then(() =>
-      transitionStatusAction(resourceId, fields.orderStatus, status),
+      transitionStatusAction(resourceId, fields.purchaseStatus, status),
     )
 
   const [status, transitionStatus] = useAsyncCallback(callback)
@@ -27,7 +27,8 @@ export default function ApproveButton({ resourceId, isDisabled }: Props) {
   return (
     <LoadingButton
       onClick={() =>
-        !isDisabled && transitionStatus(resourceId, orderStatusOptions.approved)
+        !isDisabled &&
+        transitionStatus(resourceId, purchaseStatusOptions.approved)
       }
       endIcon={<ArrowRight />}
       sx={{ height: 'fit-content', fontSize: '1.2em' }}

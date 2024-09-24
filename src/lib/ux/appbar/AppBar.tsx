@@ -65,7 +65,7 @@ export default async function AppBar() {
 
                 {session.accountId !== systemAccountId && (
                   <>
-                    {['Orders', 'Lines', 'Bills'].map((item) => (
+                    {['Purchases', 'Lines', 'Bills'].map((item) => (
                       <Button
                         key={item}
                         href={`/${item.toLowerCase()}`}

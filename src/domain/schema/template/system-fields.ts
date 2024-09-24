@@ -28,7 +28,7 @@ export const billStatusOptions = {
   },
 }
 
-export const orderStatusOptions = {
+export const purchaseStatusOptions = {
   draft: {
     templateId: '84c65f46-b8dd-43bf-9bbe-537b816fdeb5',
     name: 'Draft',
@@ -241,38 +241,38 @@ const _fields = {
     type: 'Text',
     description: 'Unique identifier for a Purchase Order',
   },
-  order: {
+  purchase: {
     templateId: '2f1954ab-e156-4d23-a3da-45e8168fcfdd',
-    name: 'Order',
+    name: 'Purchase',
     type: 'Resource',
-    resourceType: 'Order',
+    resourceType: 'Purchase',
     description: 'Contains all info related to a specific order',
   },
-  orderAttachments: {
+  purchaseAttachments: {
     templateId: '3a0f3e04-b4ac-4266-9d4e-bac5091d0922',
-    name: 'Order Attachments',
+    name: 'Purchase Attachments',
     type: 'Files',
   },
-  orderDescription: {
+  purchaseDescription: {
     templateId: 'f7b4e0f7-e1e7-4e1e-abad-4e0f7e1e7e5d',
-    name: 'Order Description',
+    name: 'Purchase Description',
     type: 'Textarea',
     description: 'Brief, identifiable internal order description',
   },
-  orderNotes: {
+  purchaseNotes: {
     templateId: '3749e137-c1d8-474a-9539-ba9b82cd6e94',
-    name: 'Order Notes',
+    name: 'Purchase Notes',
     type: 'Textarea',
-    description: 'Order notes included in the purchase order header',
+    description: 'Purchase notes included in the purchase order header',
   },
-  orderStatus: {
+  purchaseStatus: {
     templateId: 'd51e1004-c999-4ac1-8692-ff3d966c5dc3',
-    name: 'Order Status',
+    name: 'Purchase Status',
     type: 'Select',
     description: 'Lifecycle states of an order',
-    options: Object.values(orderStatusOptions),
+    options: Object.values(purchaseStatusOptions),
     defaultValue: {
-      optionTemplateId: orderStatusOptions.draft.templateId,
+      optionTemplateId: purchaseStatusOptions.draft.templateId,
     },
   },
   paymentDueDate: {
@@ -431,7 +431,7 @@ export const findTemplateField = (templateId: string | null | undefined) =>
 // Ensure that the templateIds are unique
 deepStrictEqual(
   pipe(
-    [fields, billStatusOptions, orderStatusOptions],
+    [fields, billStatusOptions, purchaseStatusOptions],
     flatMap((e) => Object.values(e)),
     map((e) => e.templateId),
     groupBy((e) => e),

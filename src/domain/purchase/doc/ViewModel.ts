@@ -1,4 +1,4 @@
-export type OrderViewModel = {
+export type PurchaseViewModel = {
   vendorName: string | null
   accountName: string | null
   accountAddress: string | null

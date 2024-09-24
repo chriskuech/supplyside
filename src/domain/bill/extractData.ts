@@ -35,7 +35,7 @@ const ExtractedBillDataSchema = z.object({
     .string()
     .nullish()
     .describe(
-      'The Purchase Order Number. This is a unique identifier for the Order associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.',
+      'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.',
     ),
   vendorId: z
     .string()
@@ -109,11 +109,11 @@ export const extractContent = async (accountId: string, resourceId: string) => {
     .int()
     .positive()
     .safeParse(poNumber)?.data
-  const [order, ...orders] =
+  const [pruchase, ...purchases] =
     poNumberAsNumber && vendorId
       ? await readResources({
           accountId,
-          type: 'Order',
+          type: 'Purchase',
           where: {
             and: [
               {
@@ -129,8 +129,8 @@ export const extractContent = async (accountId: string, resourceId: string) => {
       : []
 
   assert(
-    !orders.length,
-    `Found ${orders.length + 1} orders with PO Number ${poNumber}`,
+    !purchases.length,
+    `Found ${purchases.length + 1} Purchases with PO Number ${poNumber}`,
   )
 
   const updatedFields: ResourceFieldInput[] = [
@@ -142,11 +142,11 @@ export const extractContent = async (accountId: string, resourceId: string) => {
           },
         ]
       : []),
-    ...(order
+    ...(pruchase
       ? [
           {
-            fieldId: selectSchemaFieldUnsafe(billSchema, fields.order).id,
-            value: { resourceId: order.id },
+            fieldId: selectSchemaFieldUnsafe(billSchema, fields.purchase).id,
+            value: { resourceId: pruchase.id },
           },
         ]
       : []),

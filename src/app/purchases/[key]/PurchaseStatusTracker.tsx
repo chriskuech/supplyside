@@ -4,31 +4,34 @@ import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import {
   fields,
-  orderStatusOptions,
+  purchaseStatusOptions,
 } from '@/domain/schema/template/system-fields'
 
 const happyPath: string[] = [
-  orderStatusOptions.draft.name,
-  orderStatusOptions.submitted.name,
-  orderStatusOptions.approved.name,
-  orderStatusOptions.ordered.name,
-  orderStatusOptions.received.name,
+  purchaseStatusOptions.draft.name,
+  purchaseStatusOptions.submitted.name,
+  purchaseStatusOptions.approved.name,
+  purchaseStatusOptions.ordered.name,
+  purchaseStatusOptions.received.name,
 ]
 
 const sadPath: string[] = [
-  orderStatusOptions.draft.name,
-  orderStatusOptions.submitted.name,
-  orderStatusOptions.approved.name,
-  orderStatusOptions.ordered.name,
-  orderStatusOptions.canceled.name,
+  purchaseStatusOptions.draft.name,
+  purchaseStatusOptions.submitted.name,
+  purchaseStatusOptions.approved.name,
+  purchaseStatusOptions.ordered.name,
+  purchaseStatusOptions.canceled.name,
 ]
 
 type Props = {
   resource: Resource
 }
 
-export default function OrderStatusTracker({ resource }: Props) {
-  const value = selectResourceFieldValue(resource, fields.orderStatus)?.option
+export default function PurchaseStatusTracker({ resource }: Props) {
+  const value = selectResourceFieldValue(
+    resource,
+    fields.purchaseStatus,
+  )?.option
 
   if (!value) return '❌ Field value not found'
 

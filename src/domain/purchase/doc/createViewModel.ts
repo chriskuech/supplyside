@@ -10,26 +10,26 @@ import {
   selectResourceFieldValue,
 } from '../../resource/extensions'
 import { fields } from '../../schema/template/system-fields'
-import { readBlob } from '../../blob'
-import { LineViewModel, OrderViewModel } from './ViewModel'
+import { LineViewModel, PurchaseViewModel } from './ViewModel'
+import { readBlob } from '@/domain/blob'
 import prisma from '@/integrations/prisma'
 import { formatInlineAddress } from '@/lib/resource/fields/views/AddressCard'
 
 export const createViewModel = async (
   accountId: string,
-  orderId: string,
-): Promise<OrderViewModel> => {
+  purchaseId: string,
+): Promise<PurchaseViewModel> => {
   const [order, lines, lineSchema, account] = await Promise.all([
     readResource({
       accountId,
-      id: orderId,
-      type: 'Order',
+      id: purchaseId,
+      type: 'Purchase',
     }),
     readResources({
       accountId,
       type: 'Line',
       where: {
-        '==': [{ var: 'Order' }, orderId],
+        '==': [{ var: 'Purchase' }, purchaseId],
       },
     }),
     readSchema({ accountId, resourceType: 'Line' }),
@@ -100,7 +100,7 @@ export const createViewModel = async (
         } satisfies LineViewModel
       }),
     ),
-    notes: renderTemplateField(order, fields.orderNotes),
+    notes: renderTemplateField(order, fields.purchaseNotes),
     termsAndConditions: renderTemplateField(order, fields.termsAndConditions),
     subtotal: renderTemplateField(order, fields.subtotalCost),
     accountAddress: account.address,

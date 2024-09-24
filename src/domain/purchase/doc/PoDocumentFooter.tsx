@@ -1,10 +1,10 @@
 import { ReactNode } from 'react'
-import { OrderViewModel } from './ViewModel'
+import { PurchaseViewModel } from './ViewModel'
 
 export default function PoDocumentFooter({
   number,
   issuedDate,
-}: OrderViewModel): ReactNode {
+}: PurchaseViewModel): ReactNode {
   return (
     <div
       style={{
@@ -17,7 +17,7 @@ export default function PoDocumentFooter({
       }}
     >
       <div style={{ flexGrow: 1 }}>
-        <span>Order #{number}</span>
+        <span>Purchase #{number}</span>
         <span style={{ margin: '0px 5px' }}>|</span>
         <span>{issuedDate ?? 'N/A'}</span>
       </div>

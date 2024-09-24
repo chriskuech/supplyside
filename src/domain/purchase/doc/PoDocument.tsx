@@ -4,7 +4,7 @@
 import { ReactNode } from 'react'
 import { isTruthy } from 'remeda'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
-import { OrderViewModel } from './ViewModel'
+import { PurchaseViewModel } from './ViewModel'
 
 export default function PoDocument({
   lines,
@@ -29,7 +29,7 @@ export default function PoDocument({
   shippingNotes,
   poRecipientName,
   vendorPrimaryAddress,
-}: OrderViewModel): ReactNode {
+}: PurchaseViewModel): ReactNode {
   return (
     <div>
       <PoDocumentStyles />
@@ -58,7 +58,7 @@ export default function PoDocument({
           >
             PURCHASE ORDER
           </h1>
-          Order #{number} <span style={{ margin: '0px 5px' }}>|</span>{' '}
+          Purchase #{number} <span style={{ margin: '0px 5px' }}>|</span>{' '}
           {issuedDate ?? 'N/A'}
         </div>
       </div>

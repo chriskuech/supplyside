@@ -5,22 +5,22 @@ import { CancelOutlined } from '@mui/icons-material'
 import { transitionStatus } from '@/lib/resource/actions'
 import {
   fields,
-  orderStatusOptions,
+  purchaseStatusOptions,
 } from '@/domain/schema/template/system-fields'
 
 type Props = {
   resourceId: string
 }
 
-export default function CancelOrderControl({ resourceId }: Props) {
+export default function CancelControl({ resourceId }: Props) {
   return (
-    <Tooltip title="Cancel Order">
+    <Tooltip title="Cancel Purchase">
       <IconButton
         onClick={() =>
           transitionStatus(
             resourceId,
-            fields.orderStatus,
-            orderStatusOptions.canceled,
+            fields.purchaseStatus,
+            purchaseStatusOptions.canceled,
           )
         }
         sx={{ '.MuiButtonBase-root': { m: 0, p: 0 } }}
