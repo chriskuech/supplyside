@@ -1,7 +1,7 @@
 'use server'
 
-import { ExpectedError } from '@/domain/errors'
-import { syncBill } from '@/domain/quickBooks/entities/bill'
+import { QuickBooksExpectedError } from '@/integrations/quickBooks/errors'
+import { syncBill } from '@/integrations/quickBooks/entities/bill'
 import {
   billStatusOptions,
   fields,
@@ -12,8 +12,9 @@ import { readSession } from '@/lib/session/actions'
 export const approveBill = async (billResourceId: string) => {
   //TODO: make actions middleware to avoid repeting same logic on all actions
   try {
-    const session = await readSession()
-    await syncBill(session.accountId, billResourceId)
+    const { accountId } = await readSession()
+
+    await syncBill(accountId, billResourceId)
 
     await transitionStatus(
       billResourceId,
@@ -21,7 +22,7 @@ export const approveBill = async (billResourceId: string) => {
       billStatusOptions.approved,
     )
   } catch (e) {
-    if (e instanceof ExpectedError) {
+    if (e instanceof QuickBooksExpectedError) {
       return { error: true, message: e.message }
     }
 

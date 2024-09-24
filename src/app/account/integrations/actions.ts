@@ -1,16 +1,16 @@
 'use server'
 import { revalidatePath } from 'next/cache'
 import { readSession } from '@/lib/session/actions'
-import { syncDataFromQuickBooks as domainSyncDataFromQuickBooks } from '@/domain/quickBooks'
+import { syncDataFromQuickBooks as domainSyncDataFromQuickBooks } from '@/integrations/quickBooks'
 import {
   createConnection,
   createLinkToken,
   deletePlaidToken,
-} from '@/domain/plaid'
+} from '@/integrations/plaid'
 import {
   disconnect as domainDisconnectMcMasterCarr,
   createConnection as domainCreateMcMasterCarrConnection,
-} from '@/domain/mcMasterCarr'
+} from '@/integrations/mcMasterCarr'
 
 export const syncDataFromQuickBooks = async () => {
   const session = await readSession()

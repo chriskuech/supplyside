@@ -11,7 +11,7 @@ import {
 } from '@mui/material'
 import { useRef } from 'react'
 import { uploadFiles } from './actions'
-import { File } from '@/domain/files/types'
+import { File } from '@/domain/file/types'
 
 type Props = {
   files: File[]

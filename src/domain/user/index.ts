@@ -1,7 +1,7 @@
 import { User } from './entity'
 import { mapUserModelToEntity } from './mappers'
 import { userInclude } from './model'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 
 export type ReadUserParams = {
   accountId: string

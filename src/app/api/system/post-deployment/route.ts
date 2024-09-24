@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { applyTemplate } from '@/domain/schema/template'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 import { systemAccountId } from '@/lib/const'
 
 export const dynamic = 'force-dynamic'

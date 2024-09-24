@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { inviteUser, readUser } from '@/domain/iam/user'
 import { User } from '@/domain/iam/user/entity'
 import { readSession } from '@/lib/session/actions'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 
 export const readSelf = async () => {
   const { userId } = await readSession()

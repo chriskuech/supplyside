@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readBlob } from '@/domain/blobs'
+import { readBlob } from '@/domain/blob'
 import { readSession } from '@/lib/session/actions'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 
 /**
  * /api/download/[filename]?blobId=<blobId>[&no-impersonation][&preview]

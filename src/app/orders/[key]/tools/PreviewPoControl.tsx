@@ -2,7 +2,7 @@
 
 import { Visibility } from '@mui/icons-material'
 import { Tooltip, IconButton } from '@mui/material'
-import { File } from '@/domain/files/types'
+import { File } from '@/domain/file/types'
 
 type Props = {
   file: File

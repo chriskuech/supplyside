@@ -1,5 +1,5 @@
 import { ResourceType, Cost, FieldType } from '@prisma/client'
-import { File } from '../files/types'
+import { File } from '../file/types'
 import { User } from '../user/entity'
 import { Option } from '../schema/entity'
 

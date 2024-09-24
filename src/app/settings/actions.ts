@@ -3,8 +3,8 @@
 import { Prisma } from '@prisma/client'
 import { isEmpty } from 'remeda'
 import { revalidatePath } from 'next/cache'
-import prisma from '@/services/prisma'
-import { createBlob } from '@/domain/blobs'
+import prisma from '@/integrations/prisma'
+import { createBlob } from '@/domain/blob'
 import { readSession } from '@/lib/session/actions'
 
 type ClientErrors = Record<string, string>

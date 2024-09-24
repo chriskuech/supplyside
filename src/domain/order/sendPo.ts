@@ -1,10 +1,10 @@
-import { readBlob } from '../blobs'
+import { readBlob } from '../blob'
 import { readResource } from '../resource'
 import { fields } from '../schema/template/system-fields'
 import { selectResourceFieldValue } from '../resource/extensions'
-import smtp from '@/services/smtp'
-import prisma from '@/services/prisma'
-import config from '@/services/config'
+import smtp from '@/integrations/smtp'
+import prisma from '@/integrations/prisma'
+import config from '@/integrations/config'
 
 type SendPoParams = {
   accountId: string

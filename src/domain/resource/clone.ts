@@ -9,7 +9,7 @@ import {
 import { readSchema } from '../schema'
 import { mapValueToValueInput } from './mappers'
 import { createResource, readResource, readResources } from '.'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 
 type ResourceCopyParams = {
   accountId: string

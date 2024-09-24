@@ -13,9 +13,9 @@ import { selectResourceFieldValue } from '../resource/extensions'
 import { fields } from '../schema/template/system-fields'
 import { selectSchemaFieldUnsafe } from '../schema/extensions'
 import { readSchema } from '../schema'
-import { mapFileToCompletionParts } from './mapFileToCompletionParts'
-import { mapVendorsToVendorList } from './mapVendorsToVendorList'
-import openai from '@/services/openai'
+import { mapFileToCompletionParts } from '../../integrations/openai/mapFileToCompletionParts'
+import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
+import openai from '@/integrations/openai/openai'
 
 const prompt = `
 You are a context extraction tool within a "Procure-to-Pay" B2B SaaS application.

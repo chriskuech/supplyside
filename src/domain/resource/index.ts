@@ -20,7 +20,7 @@ import { mapResourceModelToEntity } from './mappers'
 import { resourceInclude } from './model'
 import { handleResourceCreate, handleResourceUpdate } from './effects'
 import { DuplicateResourceError } from './errors'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 
 export type ResourceFieldInput = {
   fieldId: string

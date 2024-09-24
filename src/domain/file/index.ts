@@ -1,8 +1,8 @@
-import { createBlob } from '../blobs'
+import { createBlob } from '../blob'
 import { mapFile } from './mapValueFile'
 import { fileInclude } from './model'
 import { File as FileEntity } from './types'
-import prisma from '@/services/prisma'
+import prisma from '@/integrations/prisma'
 
 type CreateFileParams = {
   accountId: string
