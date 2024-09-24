@@ -6,8 +6,9 @@ import config from '@/integrations/config'
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const cxmlUrlEncoded = await request.text()
   const cxmlUrlDecoded = decodeURIComponent(cxmlUrlEncoded)
-  let cxml = cxmlUrlDecoded.replace('cxml-urlencoded=', '')
-  cxml = cxml.replaceAll('+', ' ')
+  const cxml = cxmlUrlDecoded
+    .replace('cxml-urlencoded=', '')
+    .replaceAll('+', ' ')
   const cxmlString = await parseStringPromise(cxml)
   await processPoom(cxmlString)
 

@@ -99,7 +99,7 @@ export const findResources = async ({
   input,
   exact,
 }: FindResourcesParams): Promise<ValueResource[]> =>
-  await withSession(async ({ accountId }) =>
+  await withSession(({ accountId }) =>
     domain.findResources({ accountId, input, resourceType, exact }),
   )
 

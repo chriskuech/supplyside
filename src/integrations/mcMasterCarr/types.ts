@@ -25,7 +25,7 @@ export const posrResponseSchema = z.object({
   }),
 })
 
-export const CxmlSchema = z.object({
+export const cxmlSchema = z.object({
   cXML: z.object({
     $: z.object({
       timestamp: z.string().transform((value) => new Date(value)),
@@ -152,8 +152,7 @@ export const CxmlSchema = z.object({
   }),
 })
 
-export type renderTemplateParams = {
-  type: 'posr'
+export type RenderPOSRTemplateParams = {
   data: {
     payloadId: string
     punchOutCustomerDomain: string

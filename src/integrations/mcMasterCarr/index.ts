@@ -8,7 +8,11 @@ import { match } from 'ts-pattern'
 import prisma from '../prisma'
 import config from '../config'
 import { getMcMasterCarrConfigUnsafe } from './utils'
-import { CxmlSchema, posrResponseSchema, renderTemplateParams } from './types'
+import {
+  cxmlSchema,
+  posrResponseSchema,
+  RenderPOSRTemplateParams,
+} from './types'
 import { McMasterInvalidCredentials } from './errors'
 import { resources } from '@/domain/schema/template/system-resources'
 import {
@@ -214,7 +218,6 @@ async function createPunchOutServiceRequestBody(
 
   const currentDateTime = new Date().toISOString()
   const renderedPunchoutSetupRequest = renderTemplate({
-    type: 'posr',
     data: {
       payloadId: `${currentDateTime}@mcmaster.com`,
       punchOutCustomerDomain: mcMasterCarrPassword,
@@ -230,11 +233,11 @@ async function createPunchOutServiceRequestBody(
   return renderedPunchoutSetupRequest
 }
 
-function renderTemplate({ type, data }: renderTemplateParams): string {
+function renderTemplate({ data }: RenderPOSRTemplateParams): string {
   const templateFile = readFileSync(
     path.resolve(
       process.cwd(),
-      `./src/integrations/mcMasterCarr/templates/mcmaster_${type}_template.xml.hbs`,
+      `./src/integrations/mcMasterCarr/templates/mcmaster_posr_template.xml.hbs`,
     ),
     { encoding: 'utf-8' },
   )
@@ -255,7 +258,7 @@ async function sendRequest(url: string, body: string) {
 }
 
 function parseCxml(cxmlString: string) {
-  const poomCxml = CxmlSchema.parse(cxmlString)
+  const poomCxml = cxmlSchema.parse(cxmlString)
 
   const [orderId, accountId] =
     poomCxml.cXML.Message[0]?.PunchOutOrderMessage[0]?.BuyerCookie[0]?.split(
