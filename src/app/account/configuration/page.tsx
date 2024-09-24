@@ -37,8 +37,8 @@ export default async function Configuration() {
             <Typography variant="caption">
               Modify the schema of your data. Schemas are comprised of Sections
               that appear as accordions on their respective pages. Sections can
-              be drag-and-drop reordered within a Schema, and Fields can be
-              drag-and-drop reordered within a Section.
+              be drag-and-drop repurchased within a Schema, and Fields can be
+              drag-and-drop repurchased within a Section.
             </Typography>
           </Box>
           <Box>

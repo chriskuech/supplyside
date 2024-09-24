@@ -14,7 +14,9 @@ type Props = {
 
 export default function SkipButton({ resourceId }: Props) {
   return (
-    <Tooltip title="Skip to Ordered status without emailing the PO.">
+    <Tooltip
+      title={`Skip to ${purchaseStatusOptions.purchased.name} status without emailing the PO.`}
+    >
       <Button
         sx={{ fontSize: '1.2em' }}
         endIcon={<ArrowRight />}
@@ -23,7 +25,7 @@ export default function SkipButton({ resourceId }: Props) {
           transitionStatus(
             resourceId,
             fields.purchaseStatus,
-            purchaseStatusOptions.ordered,
+            purchaseStatusOptions.purchased,
           )
         }
       >

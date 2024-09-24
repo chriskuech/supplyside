@@ -11,7 +11,7 @@ const happyPath: string[] = [
   purchaseStatusOptions.draft.name,
   purchaseStatusOptions.submitted.name,
   purchaseStatusOptions.approved.name,
-  purchaseStatusOptions.ordered.name,
+  purchaseStatusOptions.purchased.name,
   purchaseStatusOptions.received.name,
 ]
 
@@ -19,7 +19,7 @@ const sadPath: string[] = [
   purchaseStatusOptions.draft.name,
   purchaseStatusOptions.submitted.name,
   purchaseStatusOptions.approved.name,
-  purchaseStatusOptions.ordered.name,
+  purchaseStatusOptions.purchased.name,
   purchaseStatusOptions.canceled.name,
 ]
 

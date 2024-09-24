@@ -177,7 +177,7 @@ export default async function PurchaseDetail({
                   </>
                 )}
                 {status.templateId ===
-                  purchaseStatusOptions.ordered.templateId && (
+                  purchaseStatusOptions.purchased.templateId && (
                   <StatusTransitionButton
                     resourceId={resource.id}
                     statusOption={purchaseStatusOptions.received}

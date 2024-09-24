@@ -24,7 +24,7 @@ export const sendPo = async (resourceId: string) => {
   await transitionStatus(
     resourceId,
     fields.purchaseStatus,
-    purchaseStatusOptions.ordered,
+    purchaseStatusOptions.purchased,
   )
 }
 

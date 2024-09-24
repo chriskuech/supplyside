@@ -41,9 +41,9 @@ export const purchaseStatusOptions = {
     templateId: '9946f309-a3e4-4fdf-991a-cc9d3df80ec0',
     name: 'Approved',
   },
-  ordered: {
+  purchased: {
     templateId: '37551c24-8610-4952-abcb-a9e54c086272',
-    name: 'Ordered',
+    name: 'Purchased',
   },
   received: {
     templateId: 'f3f9b5a6-6b0e-4d4d-8d4e-2f7f3b1b7a3a',
