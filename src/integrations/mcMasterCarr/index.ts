@@ -121,25 +121,15 @@ async function credentialsAreValid(
   username: string,
   password: string,
 ) {
-  const { secret, supplierDomain, supplierIdentity, posrUrl } =
-    getMcMasterCarrConfigUnsafe()
+  const { posrUrl } = getMcMasterCarrConfigUnsafe()
+  const body = await createPunchOutServiceRequestBody(
+    accountId,
+    '',
+    username,
+    password,
+  )
 
-  const currentDateTime = new Date().toISOString()
-  const punchoutSetupRequest = renderTemplate({
-    type: 'posr',
-    data: {
-      payloadId: `${currentDateTime}@mcmaster.com`,
-      punchOutCustomerDomain: password,
-      punchOutCustomerName: username,
-      punchOutClientDomain: supplierDomain,
-      clientName: supplierIdentity,
-      punchOutSharedSecret: secret,
-      buyerCookie: accountId,
-      poomReturnEndpoint: `${config().BASE_URL}/api/integrations/mcmaster`,
-    },
-  })
-
-  const rawResponse = await sendRequest(posrUrl, punchoutSetupRequest)
+  const rawResponse = await sendRequest(posrUrl, body)
   if (!rawResponse) throw new Error('No response from McMaster')
 
   const responseObject: unknown = await parseStringPromise(rawResponse)
@@ -174,7 +164,14 @@ export async function createPunchOutServiceRequest(
   resourceId: string,
 ): Promise<string> {
   const { posrUrl } = getMcMasterCarrConfigUnsafe()
-  const body = await createPunchOutServiceRequestBody(accountId, resourceId)
+  const { mcMasterCarrPassword, mcMasterCarrUsername } =
+    await getCredentials(accountId)
+  const body = await createPunchOutServiceRequestBody(
+    accountId,
+    resourceId,
+    mcMasterCarrUsername,
+    mcMasterCarrPassword,
+  )
 
   const rawResponse = await sendRequest(posrUrl, body)
   if (!rawResponse) throw new Error('No response from McMaster')
@@ -209,10 +206,9 @@ export async function createPunchOutServiceRequest(
 async function createPunchOutServiceRequestBody(
   accountId: string,
   resourceId: string,
+  mcMasterCarrUsername: string,
+  mcMasterCarrPassword: string,
 ): Promise<string> {
-  const { mcMasterCarrPassword, mcMasterCarrUsername } =
-    await getCredentials(accountId)
-
   const { secret, supplierDomain, supplierIdentity } =
     getMcMasterCarrConfigUnsafe()
 
