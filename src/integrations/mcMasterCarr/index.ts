@@ -146,9 +146,12 @@ export async function createPunchOutServiceRequest(
     throw new Error('punchout session url not found')
   }
 
-  const orderSchema = await readSchema({ accountId, resourceType: 'Purchase' })
+  const purchaseSchema = await readSchema({
+    accountId,
+    resourceType: 'Purchase',
+  })
   const fieldId = selectSchemaFieldUnsafe(
-    orderSchema,
+    purchaseSchema,
     fields.punchoutSessionUrl,
   ).id
   await updateResourceField({
@@ -222,9 +225,6 @@ function parseCxml(cxmlString: string) {
     )
   if (!orderId || !accountId) throw new Error('Invalid Buyer Cookie')
 
-  //TODO: delete?
-  // const toDomain = poomCxml.cXML.Header[0]?.To[0]?.Credential[0]?.$?.domain
-  // const toIdentity = poomCxml.cXML.Header[0]?.To[0]?.Credential[0]?.Identity[0]
   const senderDomain =
     poomCxml.cXML.Header[0]?.Sender[0]?.Credential[0]?.$?.domain
   const senderIdentity =
@@ -277,10 +277,13 @@ export async function processPoom(cxmlString: string) {
 
   authenticatePoom(sender.domain, sender.identity, sender.sharedSecret)
 
-  const orderSchema = await readSchema({ accountId, resourceType: 'Purchase' })
+  const purchaseSchema = await readSchema({
+    accountId,
+    resourceType: 'Purchase',
+  })
 
   const issuedDateFieldId = selectSchemaFieldUnsafe(
-    orderSchema,
+    purchaseSchema,
     fields.issuedDate,
   ).id
   await updateResourceField({
@@ -373,7 +376,7 @@ export async function processPoom(cxmlString: string) {
     })
 
     // Updating the resource to trigger calculations
-    //TODO: update createResource to trigger them
+    //TODO: update createResource to trigger calculations
     updateResource({
       accountId,
       resourceId: createdLine.id,
