@@ -49,15 +49,15 @@ export default async function PurchaseDetail({
     ?.resource?.templateId
   const isVendorMcMasterCarr =
     vendorTemplateId === resources().mcMasterCarrVendor.templateId
-  const orderLines = await readResources({
+  const purchaseLines = await readResources({
     accountId: resource.accountId,
     type: 'Line',
     where: {
       '==': [{ var: fields.purchase.name }, resource.id],
     },
   })
-  const orderHasLines = orderLines.length > 0
-  if (isVendorMcMasterCarr && !orderHasLines) {
+  const purchaseHasLines = purchaseLines.length > 0
+  if (isVendorMcMasterCarr && !purchaseHasLines) {
     let punchoutSessionUrl = selectResourceFieldValue(
       resource,
       fields.punchoutSessionUrl,
@@ -75,11 +75,6 @@ export default async function PurchaseDetail({
         src={punchoutSessionUrl}
         style={{
           position: 'fixed',
-          // top: 0,
-          // left: 0,
-          // border: 0,
-          // width: '100vw',
-          // height: '100vh',
           width: '100%',
           height: '100%',
         }}
