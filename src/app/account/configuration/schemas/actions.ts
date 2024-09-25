@@ -1,11 +1,11 @@
 'use server'
 
-import { Prisma, ResourceType } from '@prisma/client'
+import { ResourceType } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
-import { difference } from 'remeda'
 import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
-import { PrismaService } from '@/integrations/PrismaService'
+import { SchemaSectionService } from '@/domain/schema/SchemaSectionService'
+import { SchemaService } from '@/domain/schema'
 
 export type Field = {
   id: string
@@ -27,64 +27,8 @@ export type Schema = {
 
 export const readSchemas = async (): Promise<Schema[]> => {
   const { accountId } = await readSession()
-  const prisma = container.resolve(PrismaService)
 
-  const existingSchemas = await prisma.schema.findMany({
-    where: { accountId, isSystem: false },
-    select: {
-      resourceType: true,
-    },
-  })
-
-  const missingResourceTypes = difference(
-    Object.values(ResourceType),
-    existingSchemas.map((schema) => schema.resourceType),
-  )
-
-  missingResourceTypes.length &&
-    (await prisma.schema.createMany({
-      data: missingResourceTypes.map<Prisma.SchemaCreateManyInput>(
-        (resourceType) => ({
-          accountId,
-          resourceType,
-          isSystem: false,
-        }),
-      ),
-    }))
-
-  return await prisma.schema.findMany({
-    where: { accountId, isSystem: false },
-    select: {
-      id: true,
-      resourceType: true,
-      Section: {
-        select: {
-          id: true,
-          name: true,
-          SectionField: {
-            select: {
-              Field: {
-                select: {
-                  id: true,
-                  name: true,
-                  templateId: true,
-                },
-              },
-            },
-            orderBy: {
-              order: 'asc',
-            },
-          },
-        },
-        orderBy: {
-          order: 'asc',
-        },
-      },
-    },
-    orderBy: {
-      resourceType: 'asc',
-    },
-  })
+  return await container.resolve(SchemaService).readSchemas(accountId)
 }
 
 export const updateSchema = async (dto: {
@@ -92,26 +36,10 @@ export const updateSchema = async (dto: {
   sectionIds: string[]
 }) => {
   const { accountId } = await readSession()
-  const prisma = container.resolve(PrismaService)
 
-  await prisma.schema.update({
-    where: {
-      accountId,
-      id: dto.schemaId,
-    },
-    data: {
-      Section: {
-        update: dto.sectionIds.map((sectionId, i) => ({
-          where: {
-            id: sectionId,
-          },
-          data: {
-            order: i,
-          },
-        })),
-      },
-    },
-  })
+  await container
+    .resolve(SchemaSectionService)
+    .updateSchema(accountId, dto.schemaId, dto.sectionIds)
 
   revalidatePath('')
 }
@@ -120,15 +48,9 @@ export const createSection = async (dto: {
   schemaId: string
   name: string
 }) => {
-  const prisma = container.resolve(PrismaService)
+  // TODO: this is missing accountId
 
-  await prisma.section.create({
-    data: {
-      schemaId: dto.schemaId,
-      name: dto.name,
-      order: 0,
-    },
-  })
+  await container.resolve(SchemaSectionService).createSection(dto)
 
   revalidatePath('')
 }
@@ -139,62 +61,20 @@ export const updateSection = async (dto: {
   fieldIds: string[]
 }) => {
   const { accountId } = await readSession()
-  const prisma = container.resolve(PrismaService)
 
-  await Promise.all([
-    prisma.sectionField.deleteMany({
-      where: {
-        sectionId: dto.sectionId,
-        fieldId: {
-          notIn: dto.fieldIds,
-        },
-      },
-    }),
-    prisma.section.update({
-      where: {
-        id: dto.sectionId,
-        Schema: {
-          accountId,
-        },
-      },
-      data: {
-        name: dto.name,
-        SectionField: {
-          upsert: dto.fieldIds.map((fieldId, i) => ({
-            where: {
-              sectionId_fieldId: {
-                sectionId: dto.sectionId,
-                fieldId,
-              },
-            },
-            create: {
-              fieldId,
-              order: i,
-            },
-            update: {
-              order: i,
-            },
-          })),
-        },
-      },
-    }),
-  ])
+  await container
+    .resolve(SchemaSectionService)
+    .updateSection({ accountId, ...dto })
 
   revalidatePath('')
 }
 
 export const deleteSection = async (sectionId: string) => {
   const { accountId } = await readSession()
-  const prisma = container.resolve(PrismaService)
 
-  await prisma.section.delete({
-    where: {
-      id: sectionId,
-      Schema: {
-        accountId,
-      },
-    },
-  })
+  await container
+    .resolve(SchemaSectionService)
+    .deleteSection(accountId, sectionId)
 
   revalidatePath('')
 }

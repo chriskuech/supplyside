@@ -3,9 +3,12 @@
 import { revalidatePath } from 'next/cache'
 import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
-import { CreateFieldParams, UpdateFieldDto } from '@/domain/schema/fields'
+import {
+  CreateFieldParams,
+  UpdateFieldDto,
+  SchemaFieldService,
+} from '@/domain/schema/SchemaFieldService'
 import { SchemaField } from '@/domain/schema/entity'
-import { SchemaFieldService } from '@/domain/schema/fields'
 
 export const createField = async (params: CreateFieldParams) => {
   const session = await readSession()

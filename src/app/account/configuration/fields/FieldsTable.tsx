@@ -9,7 +9,7 @@ import Modal from '@mui/material/Modal'
 import { FC, useState } from 'react'
 import UpdateFieldForm from './UpdateFieldForm'
 import { deleteField, updateField } from './actions'
-import { UpdateFieldDto } from '@/domain/schema/fields'
+import { UpdateFieldDto } from '@/domain/schema/SchemaFieldService'
 import { useConfirmation } from '@/lib/confirmation'
 import { SchemaField } from '@/domain/schema/entity'
 

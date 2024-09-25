@@ -1,5 +1,6 @@
-import { ResourceType } from '@prisma/client'
+import { Prisma, ResourceType } from '@prisma/client'
 import { singleton } from 'tsyringe'
+import { difference } from 'remeda'
 import { Schema } from './entity'
 import { mapFieldModelToEntity } from './mappers'
 import { schemaIncludes } from './model'
@@ -44,5 +45,64 @@ export class SchemaService {
         .map((sf) => sf.Field)
         .map(mapFieldModelToEntity),
     }
+  }
+
+  async readSchemas(accountId: string) {
+    const existingSchemas = await this.prisma.schema.findMany({
+      where: { accountId, isSystem: false },
+      select: {
+        resourceType: true,
+      },
+    })
+
+    const missingResourceTypes = difference(
+      Object.values(ResourceType),
+      existingSchemas.map((schema) => schema.resourceType),
+    )
+
+    missingResourceTypes.length &&
+      (await this.prisma.schema.createMany({
+        data: missingResourceTypes.map<Prisma.SchemaCreateManyInput>(
+          (resourceType) => ({
+            accountId,
+            resourceType,
+            isSystem: false,
+          }),
+        ),
+      }))
+
+    return await this.prisma.schema.findMany({
+      where: { accountId, isSystem: false },
+      select: {
+        id: true,
+        resourceType: true,
+        Section: {
+          select: {
+            id: true,
+            name: true,
+            SectionField: {
+              select: {
+                Field: {
+                  select: {
+                    id: true,
+                    name: true,
+                    templateId: true,
+                  },
+                },
+              },
+              orderBy: {
+                order: 'asc',
+              },
+            },
+          },
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+      orderBy: {
+        resourceType: 'asc',
+      },
+    })
   }
 }

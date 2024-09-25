@@ -6,7 +6,10 @@ import { accountQuerySchema, readAccountSchema } from './schemas'
 import { Account } from './types'
 import { QuickBooksClientService } from './QuickBooksClientService'
 import { fields } from '@/domain/schema/template/system-fields'
-import { OptionPatch, SchemaFieldService } from '@/domain/schema/fields'
+import {
+  OptionPatch,
+  SchemaFieldService,
+} from '@/domain/schema/SchemaFieldService'
 
 const PAYABLE_ACCOUNTS_TYPE = 'Accounts Payable'
 
