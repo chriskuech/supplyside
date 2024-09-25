@@ -19,13 +19,13 @@ type ResourceCopyParams = {
 }
 
 @singleton()
-export class ResourceCopyService {
+export class ResourceCloneService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly schemaService: SchemaService,
   ) {}
 
-  cloneResource = async (accountId: string, resourceId: string) => {
+  async cloneResource(accountId: string, resourceId: string) {
     const source = await readResource({ accountId, id: resourceId })
 
     const destination = await match(source.type)

@@ -9,7 +9,7 @@ import { Session } from '@/domain/session/entity'
 import { Resource } from '@/domain/resource/entity'
 import { Schema } from '@/domain/schema/entity'
 import { SchemaService } from '@/domain/schema'
-import { ResourceCopyService } from '@/domain/resource/clone'
+import { ResourceCloneService } from '@/domain/resource/clone'
 
 type DetailPageModel = {
   session: Session
@@ -48,7 +48,7 @@ export const readDetailPageModel = async (
 
 export const cloneResource = async (resourceId: string) =>
   await withSession(async ({ accountId }) => {
-    const cloneService = container.resolve(ResourceCopyService)
+    const cloneService = container.resolve(ResourceCloneService)
 
     const resource = await cloneService.cloneResource(accountId, resourceId)
 

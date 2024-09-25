@@ -7,8 +7,8 @@ import { extractContent } from '../bill/extractData'
 import { SchemaService } from '../schema'
 import { selectResourceFieldValue } from './extensions'
 import { Resource, Value, ValueResource } from './entity'
-import { linkResource } from './link'
 import { CostService } from './costs'
+import { ResourceLinkService } from './link'
 import { readResource, updateResourceField } from '.'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
@@ -60,6 +60,7 @@ export const handleResourceUpdate = async ({
 }: HandleResourceUpdateParams) => {
   const schemaService = container.resolve(SchemaService)
   const costService = container.resolve(CostService)
+  const linkService = container.resolve(ResourceLinkService)
 
   // When a Resource Field is updated,
   // Then copy the linked Resource's Fields
@@ -73,7 +74,7 @@ export const handleResourceUpdate = async ({
     await Promise.all(
       updatedFieldsWithResourceType.map(
         async ({ field: { id: fieldId }, value }) => {
-          await linkResource({
+          await linkService.linkResource({
             accountId,
             fromResourceId: value.resource.id,
             toResourceId: resource.id,

@@ -1,11 +1,11 @@
 import { ResourceType } from '@prisma/client'
-import { container } from 'tsyringe'
+import { container, singleton } from 'tsyringe'
 import { FieldRef, selectSchemaFieldUnsafe } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { FieldTemplate } from '../schema/template/types'
 import { SchemaService } from '../schema'
-import { copyFields } from './copy'
-import { ResourceCopyService } from './clone'
+import { ResourceCloneService } from './clone'
+import { ResourceCopyService } from './copy'
 import { readResource, readResources, updateResourceField } from '.'
 
 type LinkResourceParams = {
@@ -15,35 +15,49 @@ type LinkResourceParams = {
   backLinkFieldRef: FieldRef
 }
 
-export const linkResource = async ({
-  accountId,
-  fromResourceId,
-  toResourceId,
-}: LinkResourceParams & { backLinkFieldRef: FieldRef }) => {
-  const cloneService = container.resolve(ResourceCopyService)
+@singleton()
+export class ResourceLinkService {
+  constructor(
+    private readonly resourceCopyService: ResourceCopyService,
+    private readonly cloneService: ResourceCloneService,
+  ) {}
 
-  const [fromResource, toResource] = await Promise.all([
-    readResource({
-      accountId,
-      id: fromResourceId,
-    }),
-    readResource({
-      accountId,
-      id: toResourceId,
-    }),
-  ])
+  linkResource = async ({
+    accountId,
+    fromResourceId,
+    toResourceId,
+  }: LinkResourceParams & { backLinkFieldRef: FieldRef }) => {
+    const [fromResource, toResource] = await Promise.all([
+      readResource({
+        accountId,
+        id: fromResourceId,
+      }),
+      readResource({
+        accountId,
+        id: toResourceId,
+      }),
+    ])
 
-  await copyFields({ accountId, fromResourceId, toResourceId })
-
-  if (fromResource.type === 'Purchase' && toResource.type === 'Bill') {
-    await cloneService.cloneCosts({ accountId, fromResourceId, toResourceId })
-    await linkLines({
+    await this.resourceCopyService.copyFields({
       accountId,
       fromResourceId,
       toResourceId,
-      fromResourceField: fields.purchase,
-      toResourceField: fields.bill,
     })
+
+    if (fromResource.type === 'Purchase' && toResource.type === 'Bill') {
+      await this.cloneService.cloneCosts({
+        accountId,
+        fromResourceId,
+        toResourceId,
+      })
+      await linkLines({
+        accountId,
+        fromResourceId,
+        toResourceId,
+        fromResourceField: fields.purchase,
+        toResourceField: fields.bill,
+      })
+    }
   }
 }
 

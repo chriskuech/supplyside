@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import path from 'path'
 import { fail } from 'assert'
-import { container, singleton } from 'tsyringe'
+import { singleton } from 'tsyringe'
 import { redirect } from 'next/navigation'
 import handlebars from 'handlebars'
 import { parseStringPromise } from 'xml2js'
@@ -249,7 +249,6 @@ export class McMasterService {
     mcMasterCarrUsername: string,
     mcMasterCarrPassword: string,
   ): Promise<string> {
-    const { config } = container.resolve(ConfigService)
     const { secret, supplierDomain, supplierIdentity } =
       this.getMcMasterCarrConfigUnsafe()
 
@@ -263,7 +262,7 @@ export class McMasterService {
       clientName: supplierIdentity,
       punchOutSharedSecret: secret,
       buyerCookie: `${resourceId}|${accountId}`,
-      poomReturnEndpoint: `${config.BASE_URL}/api/integrations/mcmaster`,
+      poomReturnEndpoint: `${this.configService.config.BASE_URL}/api/integrations/mcmaster`,
     })
 
     return renderedPunchoutSetupRequest
