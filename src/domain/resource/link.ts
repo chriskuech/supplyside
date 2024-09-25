@@ -1,5 +1,5 @@
 import { ResourceType } from '@prisma/client'
-import { container, singleton } from 'tsyringe'
+import { singleton } from 'tsyringe'
 import { FieldRef, selectSchemaFieldUnsafe } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { FieldTemplate } from '../schema/template/types'
@@ -15,11 +15,20 @@ type LinkResourceParams = {
   backLinkFieldRef: FieldRef
 }
 
+type LinkLinesParams = {
+  accountId: string
+  fromResourceId: string
+  toResourceId: string
+  fromResourceField: FieldTemplate
+  toResourceField: FieldTemplate
+}
+
 @singleton()
 export class ResourceLinkService {
   constructor(
     private readonly resourceCopyService: ResourceCopyService,
     private readonly cloneService: ResourceCloneService,
+    private readonly schemaService: SchemaService,
   ) {}
 
   linkResource = async ({
@@ -50,7 +59,7 @@ export class ResourceLinkService {
         fromResourceId,
         toResourceId,
       })
-      await linkLines({
+      await this.linkLines({
         accountId,
         fromResourceId,
         toResourceId,
@@ -59,46 +68,36 @@ export class ResourceLinkService {
       })
     }
   }
-}
 
-type LinkLinesParams = {
-  accountId: string
-  fromResourceId: string
-  toResourceId: string
-  fromResourceField: FieldTemplate
-  toResourceField: FieldTemplate
-}
-
-const linkLines = async ({
-  accountId,
-  fromResourceId,
-  toResourceId,
-  fromResourceField,
-  toResourceField,
-}: LinkLinesParams) => {
-  const schemaService = container.resolve(SchemaService)
-
-  const lineSchema = await schemaService.readSchema(
+  async linkLines({
     accountId,
-    ResourceType.Line,
-  )
+    fromResourceId,
+    toResourceId,
+    fromResourceField,
+    toResourceField,
+  }: LinkLinesParams) {
+    const lineSchema = await this.schemaService.readSchema(
+      accountId,
+      ResourceType.Line,
+    )
 
-  const lines = await readResources({
-    accountId,
-    type: 'Line',
-    where: {
-      '==': [{ var: fromResourceField.name }, fromResourceId],
-    },
-  })
+    const lines = await readResources({
+      accountId,
+      type: 'Line',
+      where: {
+        '==': [{ var: fromResourceField.name }, fromResourceId],
+      },
+    })
 
-  await Promise.all(
-    lines.map((line) =>
-      updateResourceField({
-        accountId,
-        resourceId: line.id,
-        fieldId: selectSchemaFieldUnsafe(lineSchema, toResourceField).id,
-        value: { resourceId: toResourceId },
-      }),
-    ),
-  )
+    await Promise.all(
+      lines.map((line) =>
+        updateResourceField({
+          accountId,
+          resourceId: line.id,
+          fieldId: selectSchemaFieldUnsafe(lineSchema, toResourceField).id,
+          value: { resourceId: toResourceId },
+        }),
+      ),
+    )
+  }
 }

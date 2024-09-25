@@ -13,10 +13,10 @@ import {
 import { selectResourceFieldValue } from '../resource/extensions'
 import { fields } from '../schema/template/system-fields'
 import { selectSchemaFieldUnsafe } from '../schema/extensions'
-import { mapFileToCompletionParts } from '../../integrations/openai/mapFileToCompletionParts'
 import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
 import { SchemaService } from '../schema'
 import OpenAiService from '@/integrations/openai/openai'
+import { CompletionPartsService } from '@/integrations/openai/mapFileToCompletionParts'
 
 const prompt = `
 You are a context extraction tool within a "Procure-to-Pay" B2B SaaS application.
@@ -49,6 +49,7 @@ const ExtractedBillDataSchema = z.object({
 export const extractContent = async (accountId: string, resourceId: string) => {
   const openai = container.resolve(OpenAiService)
   const schemaService = container.resolve(SchemaService)
+  const completionPartsService = container.resolve(CompletionPartsService)
 
   const [billSchema, billResource, vendors] = await Promise.all([
     schemaService.readSchema(accountId, 'Bill'),
@@ -72,7 +73,9 @@ export const extractContent = async (accountId: string, resourceId: string) => {
   if (!billFiles.length) return
 
   const completionParts = (
-    await Promise.all(billFiles.map(mapFileToCompletionParts))
+    await Promise.all(
+      billFiles.map(completionPartsService.mapFileToCompletionParts),
+    )
   ).flat()
 
   if (!completionParts.length) return
