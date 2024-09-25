@@ -48,8 +48,9 @@ export async function createConnection(
     password,
   )
 
-  if (!validCredentials)
+  if (!validCredentials) {
     throw new McMasterInvalidCredentials('Invalid credentials')
+  }
 
   const [mcMasterCarrVendor] = await findResources({
     accountId,
@@ -226,23 +227,22 @@ async function createPunchOutServiceRequestBody(
     getMcMasterCarrConfigUnsafe()
 
   const currentDateTime = new Date().toISOString()
+
   const renderedPunchoutSetupRequest = renderTemplate({
-    data: {
-      payloadId: `${currentDateTime}@mcmaster.com`,
-      punchOutCustomerDomain: mcMasterCarrPassword,
-      punchOutCustomerName: mcMasterCarrUsername,
-      punchOutClientDomain: supplierDomain,
-      clientName: supplierIdentity,
-      punchOutSharedSecret: secret,
-      buyerCookie: `${resourceId}|${accountId}`,
-      poomReturnEndpoint: `${config.BASE_URL}/api/integrations/mcmaster`,
-    },
+    payloadId: `${currentDateTime}@mcmaster.com`,
+    punchOutCustomerDomain: mcMasterCarrPassword,
+    punchOutCustomerName: mcMasterCarrUsername,
+    punchOutClientDomain: supplierDomain,
+    clientName: supplierIdentity,
+    punchOutSharedSecret: secret,
+    buyerCookie: `${resourceId}|${accountId}`,
+    poomReturnEndpoint: `${config.BASE_URL}/api/integrations/mcmaster`,
   })
 
   return renderedPunchoutSetupRequest
 }
 
-function renderTemplate({ data }: RenderPOSRTemplateParams): string {
+function renderTemplate(data: RenderPOSRTemplateParams): string {
   const templateFile = readFileSync(
     path.resolve(
       process.cwd(),

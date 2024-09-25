@@ -13,16 +13,16 @@ import { fields } from '../../schema/template/system-fields'
 import { LineViewModel, PurchaseViewModel } from './ViewModel'
 import { formatInlineAddress } from '@/lib/resource/fields/views/AddressCard'
 import BlobService from '@/domain/blob'
-import { PrismaService } from '@/integrations/PrismaService'
 import { SchemaService } from '@/domain/schema'
+import { AccountService } from '@/domain/account'
 
 export const createViewModel = async (
   accountId: string,
   purchaseId: string,
 ): Promise<PurchaseViewModel> => {
   const blobService = container.resolve(BlobService)
-  const prisma = container.resolve(PrismaService)
   const schemaService = container.resolve(SchemaService)
+  const accountService = container.resolve(AccountService)
 
   const [order, lines, lineSchema, account] = await Promise.all([
     readResource({
@@ -38,9 +38,7 @@ export const createViewModel = async (
       },
     }),
     schemaService.readSchema(accountId, 'Line'),
-    prisma.account.findUniqueOrThrow({
-      where: { id: accountId },
-    }),
+    accountService.read(accountId),
   ])
 
   const vendorId = selectResourceFieldValue(order, fields.vendor)?.resource?.id

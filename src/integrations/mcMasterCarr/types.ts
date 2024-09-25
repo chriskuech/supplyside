@@ -153,14 +153,12 @@ export const cxmlSchema = z.object({
 })
 
 export type RenderPOSRTemplateParams = {
-  data: {
-    payloadId: string
-    punchOutCustomerDomain: string
-    punchOutCustomerName: string
-    punchOutClientDomain: string
-    clientName: string
-    punchOutSharedSecret: string
-    buyerCookie: string
-    poomReturnEndpoint: string
-  }
+  payloadId: string
+  punchOutCustomerDomain: string
+  punchOutCustomerName: string
+  punchOutClientDomain: string
+  clientName: string
+  punchOutSharedSecret: string
+  buyerCookie: string
+  poomReturnEndpoint: string
 }

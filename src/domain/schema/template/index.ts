@@ -1,204 +1,208 @@
 import { fail } from 'assert'
-import { container } from 'tsyringe'
+import { container, singleton } from 'tsyringe'
 import { schemas } from './system-schemas'
 import { fields } from './system-fields'
 import { PrismaService } from '@/integrations/PrismaService'
 
-export const applyTemplate = async (accountId: string) => {
-  await applyFields(accountId)
-  await applySchemas(accountId)
-}
+@singleton()
+export class TemplateService {
+  constructor(private readonly prisma: PrismaService) {}
 
-const applyFields = async (accountId: string) => {
-  const prisma = container.resolve(PrismaService)
+  async applyTemplate(accountId: string) {
+    await this.applyFields(accountId)
+    await this.applySchemas(accountId)
+  }
 
-  await prisma.field.deleteMany({
-    where: {
-      accountId,
-      AND: [
-        {
-          templateId: { not: null },
-        },
-        {
-          templateId: {
-            notIn: Object.values(fields).map((f) => f.templateId),
-          },
-        },
-      ],
-    },
-  })
-
-  for (const {
-    templateId,
-    options,
-    defaultValue,
-    isRequired,
-    name,
-    description,
-    type,
-    resourceType,
-    defaultToToday,
-  } of Object.values(fields)) {
-    const { id: fieldId } = await prisma.field.upsert({
+  private async applyFields(accountId: string) {
+    await this.prisma.field.deleteMany({
       where: {
-        accountId_templateId: {
-          accountId,
-          templateId,
-        },
-      },
-      create: {
-        Account: {
-          connect: {
-            id: accountId,
+        accountId,
+        AND: [
+          {
+            templateId: { not: null },
           },
-        },
-        DefaultValue: {
-          create: {},
-        },
-        templateId,
-        name,
-        description: description ?? null,
-        type,
-        resourceType,
-        isRequired,
-        defaultToToday,
-      },
-      update: {
-        name,
-        isRequired: !!isRequired,
-        description: description ?? null,
-        type,
-        resourceType,
-        defaultToToday,
+          {
+            templateId: {
+              notIn: Object.values(fields).map((f) => f.templateId),
+            },
+          },
+        ],
       },
     })
 
-    const upsertingOptions = options?.map(({ templateId, ...option }, order) =>
-      prisma.option.upsert({
+    for (const {
+      templateId,
+      options,
+      defaultValue,
+      isRequired,
+      name,
+      description,
+      type,
+      resourceType,
+      defaultToToday,
+    } of Object.values(fields)) {
+      const { id: fieldId } = await this.prisma.field.upsert({
         where: {
-          fieldId_templateId: {
-            fieldId,
+          accountId_templateId: {
+            accountId,
             templateId,
           },
         },
         create: {
-          fieldId,
+          Account: {
+            connect: {
+              id: accountId,
+            },
+          },
+          DefaultValue: {
+            create: {},
+          },
           templateId,
-          order,
-          name: option.name,
+          name,
+          description: description ?? null,
+          type,
+          resourceType,
+          isRequired,
+          defaultToToday,
         },
         update: {
-          order,
-          name: option.name,
-        },
-      }),
-    )
-
-    const cleaningOptions =
-      options &&
-      prisma.option.deleteMany({
-        where: {
-          fieldId,
-          templateId: { not: null },
-          NOT: {
-            templateId: {
-              in: options?.map(({ templateId }) => templateId),
-            },
-          },
-        },
-      })
-
-    await Promise.all([cleaningOptions, ...(upsertingOptions ?? [])])
-
-    if (defaultValue?.optionTemplateId) {
-      const templateId =
-        options?.find((o) => o.templateId === defaultValue?.optionTemplateId)
-          ?.templateId ?? fail('Option not found')
-
-      await prisma.field.update({
-        where: { id: fieldId },
-        data: {
-          DefaultValue: {
-            upsert: {
-              create: {
-                Option: {
-                  connect: {
-                    fieldId_templateId: {
-                      fieldId,
-                      templateId,
-                    },
-                  },
-                },
-              },
-              update: {
-                Option: {
-                  connect: {
-                    fieldId_templateId: {
-                      fieldId,
-                      templateId,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      })
-    }
-  }
-}
-
-const applySchemas = async (accountId: string) => {
-  const prisma = container.resolve(PrismaService)
-
-  await prisma.schema.deleteMany({
-    where: {
-      accountId,
-      isSystem: true,
-    },
-  })
-
-  await Promise.all(
-    schemas.map(async ({ resourceType, fields, sections }) => {
-      await prisma.schema.create({
-        data: {
-          accountId,
-          isSystem: true,
+          name,
+          isRequired: !!isRequired,
+          description: description ?? null,
+          type,
           resourceType,
-          SchemaField: {
-            create: fields?.map(({ templateId }, order) => ({
-              order,
-              Field: {
-                connect: {
-                  accountId_templateId: {
-                    accountId,
-                    templateId,
-                  },
-                },
+          defaultToToday,
+        },
+      })
+
+      const upsertingOptions = options?.map(
+        ({ templateId, ...option }, order) =>
+          this.prisma.option.upsert({
+            where: {
+              fieldId_templateId: {
+                fieldId,
+                templateId,
               },
-            })),
-          },
-          Section: {
-            create: sections?.map(({ name, fields }, order) => ({
-              name,
+            },
+            create: {
+              fieldId,
+              templateId,
               order,
-              SectionField: {
-                create: fields.map(({ templateId }, order) => ({
-                  order,
-                  Field: {
+              name: option.name,
+            },
+            update: {
+              order,
+              name: option.name,
+            },
+          }),
+      )
+
+      const cleaningOptions =
+        options &&
+        this.prisma.option.deleteMany({
+          where: {
+            fieldId,
+            templateId: { not: null },
+            NOT: {
+              templateId: {
+                in: options?.map(({ templateId }) => templateId),
+              },
+            },
+          },
+        })
+
+      await Promise.all([cleaningOptions, ...(upsertingOptions ?? [])])
+
+      if (defaultValue?.optionTemplateId) {
+        const templateId =
+          options?.find((o) => o.templateId === defaultValue?.optionTemplateId)
+            ?.templateId ?? fail('Option not found')
+
+        await this.prisma.field.update({
+          where: { id: fieldId },
+          data: {
+            DefaultValue: {
+              upsert: {
+                create: {
+                  Option: {
                     connect: {
-                      accountId_templateId: {
-                        accountId,
+                      fieldId_templateId: {
+                        fieldId,
                         templateId,
                       },
                     },
                   },
-                })),
+                },
+                update: {
+                  Option: {
+                    connect: {
+                      fieldId_templateId: {
+                        fieldId,
+                        templateId,
+                      },
+                    },
+                  },
+                },
               },
-            })),
+            },
           },
-        },
-      })
-    }),
-  )
+        })
+      }
+    }
+  }
+
+  private async applySchemas(accountId: string) {
+    const prisma = container.resolve(PrismaService)
+
+    await prisma.schema.deleteMany({
+      where: {
+        accountId,
+        isSystem: true,
+      },
+    })
+
+    await Promise.all(
+      schemas.map(async ({ resourceType, fields, sections }) => {
+        await prisma.schema.create({
+          data: {
+            accountId,
+            isSystem: true,
+            resourceType,
+            SchemaField: {
+              create: fields?.map(({ templateId }, order) => ({
+                order,
+                Field: {
+                  connect: {
+                    accountId_templateId: {
+                      accountId,
+                      templateId,
+                    },
+                  },
+                },
+              })),
+            },
+            Section: {
+              create: sections?.map(({ name, fields }, order) => ({
+                name,
+                order,
+                SectionField: {
+                  create: fields.map(({ templateId }, order) => ({
+                    order,
+                    Field: {
+                      connect: {
+                        accountId_templateId: {
+                          accountId,
+                          templateId,
+                        },
+                      },
+                    },
+                  })),
+                },
+              })),
+            },
+          },
+        })
+      }),
+    )
+  }
 }

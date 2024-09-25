@@ -4,7 +4,7 @@ import { expand as expandDotenv } from 'dotenv-expand'
 import { ResourceType } from '@prisma/client'
 import { container } from 'tsyringe'
 import { systemAccountId } from '@/lib/const'
-import { applyTemplate } from '@/domain/schema/template'
+import { TemplateService } from '@/domain/schema/template'
 import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
@@ -15,6 +15,7 @@ expandDotenv(loadDotenv())
 
 const prisma = container.resolve(PrismaService)
 const schemaService = container.resolve(SchemaService)
+const templateService = container.resolve(TemplateService)
 
 const config = z
   .object({
@@ -65,7 +66,7 @@ async function main() {
     },
   })
 
-  await applyTemplate(customerAccount.id)
+  await templateService.applyTemplate(customerAccount.id)
 
   const unitOfMeasureOption = await prisma.option.create({
     data: {

@@ -3,10 +3,10 @@
 import assert from 'assert'
 import { revalidatePath } from 'next/cache'
 import { container } from 'tsyringe'
-import { applyTemplate } from '@/domain/schema/template'
 import { systemAccountId } from '@/lib/const'
 import { readSession, impersonate } from '@/lib/session/actions'
 import { AccountService } from '@/domain/account'
+import { TemplateService } from '@/domain/schema/template'
 
 const authz = async () => {
   const s = await readSession()
@@ -18,8 +18,10 @@ const authz = async () => {
 }
 
 export const refreshAccount = async (accountId: string) => {
+  const templateService = container.resolve(TemplateService)
+
   await authz()
-  await applyTemplate(accountId)
+  await templateService.applyTemplate(accountId)
 }
 
 export const createAccount = async () => {
