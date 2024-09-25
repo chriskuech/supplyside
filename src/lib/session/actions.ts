@@ -31,7 +31,7 @@ export const createSession = async (email: string, tat: string) => {
 
   cookies().set(sessionIdCookieName, session.id, {
     sameSite: true,
-    secure: process.env.NODE_ENV !== 'development',
+    secure: config.NODE_ENV !== 'development',
     httpOnly: true,
     domain: new URL(config.BASE_URL).hostname,
     expires: session.expiresAt,

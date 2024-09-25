@@ -13,24 +13,16 @@ import ImpersonationControl from './ImpersonationControl'
 import { systemAccountId } from '@/lib/const'
 import { readSession } from '@/lib/session/actions'
 import { SessionError } from '@/lib/session/types'
-import { PrismaService } from '@/integrations/PrismaService'
+import { AccountService } from '@/domain/account'
 
 export default async function AppBar() {
   const session = await readSession().catch((e) =>
     e instanceof SessionError ? null : fail(e),
   )
 
-  const prisma = container.resolve(PrismaService)
+  const accountService = container.resolve(AccountService)
 
-  const accounts = await prisma.account.findMany({
-    orderBy: {
-      name: 'asc',
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-  })
+  const accounts = await accountService.list()
 
   return (
     <MAppBar>
