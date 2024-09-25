@@ -24,9 +24,7 @@ export class PlaidService {
   }
 
   async getPlaidToken(accountId: string): Promise<string | null> {
-    const prisma = container.resolve(PrismaService)
-
-    const account = await prisma.account.findUniqueOrThrow({
+    const account = await this.prisma.account.findUniqueOrThrow({
       where: { id: accountId },
     })
 

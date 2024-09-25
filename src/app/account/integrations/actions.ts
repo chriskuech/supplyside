@@ -4,17 +4,15 @@ import { revalidatePath } from 'next/cache'
 import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
 import { syncDataFromQuickBooks as domainSyncDataFromQuickBooks } from '@/integrations/quickBooks'
-import {
-  disconnect as domainDisconnectMcMasterCarr,
-  createConnection as domainCreateMcMasterCarrConnection,
-} from '@/integrations/mcMasterCarr'
 import { McMasterInvalidCredentials } from '@/integrations/mcMasterCarr/errors'
 import { PlaidService } from '@/integrations/plaid'
+import { McMasterService } from '@/integrations/mcMasterCarr'
 
 export const syncDataFromQuickBooks = async () => {
   const { accountId } = await readSession()
 
   await domainSyncDataFromQuickBooks(accountId)
+
   revalidatePath('')
 }
 
@@ -44,10 +42,12 @@ export const createMcMasterCarrConnection = async (
   username: string,
   password: string,
 ) => {
+  const mcMasterService = container.resolve(McMasterService)
+
   const session = await readSession()
 
   try {
-    await domainCreateMcMasterCarrConnection(
+    await mcMasterService.createConnection(
       session.accountId,
       username,
       password,
@@ -64,9 +64,11 @@ export const createMcMasterCarrConnection = async (
 }
 
 export const disconnectMcMasterCarr = async () => {
+  const mcMasterService = container.resolve(McMasterService)
+
   const { accountId } = await readSession()
 
-  await domainDisconnectMcMasterCarr(accountId)
+  await mcMasterService.disconnect(accountId)
 
   revalidatePath('')
 }

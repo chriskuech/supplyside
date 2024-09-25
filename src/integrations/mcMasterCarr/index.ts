@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import path from 'path'
 import { fail } from 'assert'
-import { container } from 'tsyringe'
+import { container, singleton } from 'tsyringe'
 import { redirect } from 'next/navigation'
 import handlebars from 'handlebars'
 import { parseStringPromise } from 'xml2js'
@@ -34,97 +34,169 @@ import {
 } from '@/domain/schema/template/system-fields'
 import { SchemaService } from '@/domain/schema'
 
-export async function createConnection(
-  accountId: string,
-  username: string,
-  password: string,
-) {
-  const prisma = container.resolve(PrismaService)
-  const schemaService = container.resolve(SchemaService)
+@singleton()
+export class McMasterService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly schemaService: SchemaService,
+  ) {}
 
-  const validCredentials = await credentialsAreValid(
-    accountId,
-    username,
-    password,
-  )
+  async createConnection(
+    accountId: string,
+    username: string,
+    password: string,
+  ) {
+    const validCredentials = await credentialsAreValid(
+      accountId,
+      username,
+      password,
+    )
 
-  if (!validCredentials) {
-    throw new McMasterInvalidCredentials('Invalid credentials')
+    if (!validCredentials) {
+      throw new McMasterInvalidCredentials('Invalid credentials')
+    }
+
+    const [mcMasterCarrVendor] = await findResources({
+      accountId,
+      resourceType: 'Vendor',
+      input: 'McMaster-Carr',
+      exact: true,
+    })
+
+    const vendorSchema = await this.schemaService.readSchema(
+      accountId,
+      'Vendor',
+    )
+    const mcMasterCarrSystemResource = resources().mcMasterCarrVendor
+
+    if (!mcMasterCarrVendor) {
+      await createResource({
+        accountId,
+        type: 'Vendor',
+        templateId: mcMasterCarrSystemResource.templateId,
+        fields: mcMasterCarrSystemResource.fields.map((f) => ({
+          fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).id,
+          value: f.value,
+        })),
+      })
+    } else {
+      await updateResource({
+        accountId,
+        resourceId: mcMasterCarrVendor.id,
+        fields: mcMasterCarrSystemResource.fields.map((f) => ({
+          fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).id,
+          value: f.value,
+        })),
+      })
+
+      if (!mcMasterCarrVendor.templateId) {
+        await updateTemplateId({
+          accountId,
+          resourceId: mcMasterCarrVendor.id,
+          templateId: mcMasterCarrSystemResource.templateId,
+        })
+      }
+    }
+
+    await this.prisma.account.update({
+      where: { id: accountId },
+      data: {
+        mcMasterCarrConnectedAt: new Date(),
+        mcMasterCarrUsername: username,
+        mcMasterCarrPassword: password,
+      },
+    })
   }
 
-  const [mcMasterCarrVendor] = await findResources({
-    accountId,
-    resourceType: 'Vendor',
-    input: 'McMaster-Carr',
-    exact: true,
-  })
-
-  const vendorSchema = await schemaService.readSchema(accountId, 'Vendor')
-  const mcMasterCarrSystemResource = resources().mcMasterCarrVendor
-
-  if (!mcMasterCarrVendor) {
-    await createResource({
+  async disconnect(accountId: string) {
+    const mcMasterCarrVendor = await findByTemplateId({
       accountId,
-      type: 'Vendor',
-      templateId: mcMasterCarrSystemResource.templateId,
-      fields: mcMasterCarrSystemResource.fields.map((f) => ({
-        fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).id,
-        value: f.value,
-      })),
-    })
-  } else {
-    await updateResource({
-      accountId,
-      resourceId: mcMasterCarrVendor.id,
-      fields: mcMasterCarrSystemResource.fields.map((f) => ({
-        fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).id,
-        value: f.value,
-      })),
+      templateId: resources().mcMasterCarrVendor.templateId,
     })
 
-    if (!mcMasterCarrVendor.templateId) {
+    if (mcMasterCarrVendor) {
       await updateTemplateId({
         accountId,
         resourceId: mcMasterCarrVendor.id,
-        templateId: mcMasterCarrSystemResource.templateId,
+        templateId: null,
       })
     }
-  }
 
-  await prisma.account.update({
-    where: { id: accountId },
-    data: {
-      mcMasterCarrConnectedAt: new Date(),
-      mcMasterCarrUsername: username,
-      mcMasterCarrPassword: password,
-    },
-  })
-}
-
-export async function disconnect(accountId: string) {
-  const prisma = container.resolve(PrismaService)
-
-  const mcMasterCarrVendor = await findByTemplateId({
-    accountId,
-    templateId: resources().mcMasterCarrVendor.templateId,
-  })
-
-  if (mcMasterCarrVendor) {
-    await updateTemplateId({
-      accountId,
-      resourceId: mcMasterCarrVendor.id,
-      templateId: null,
+    await this.prisma.account.update({
+      where: { id: accountId },
+      data: {
+        mcMasterCarrUsername: null,
+        mcMasterCarrPassword: null,
+        mcMasterCarrConnectedAt: null,
+      },
     })
   }
 
-  await prisma.account.update({
-    where: { id: accountId },
-    data: {
-      mcMasterCarrUsername: null,
-      mcMasterCarrPassword: null,
-      mcMasterCarrConnectedAt: null,
-    },
-  })
+  async createPunchOutServiceRequest(
+    accountId: string,
+    resourceId: string,
+  ): Promise<string> {
+    const { posrUrl } = getMcMasterCarrConfigUnsafe()
+    const { mcMasterCarrPassword, mcMasterCarrUsername } =
+      await this.getCredentials(accountId)
+    const body = await createPunchOutServiceRequestBody(
+      accountId,
+      resourceId,
+      mcMasterCarrUsername,
+      mcMasterCarrPassword,
+    )
+
+    const rawResponse = await sendRequest(posrUrl, body)
+    if (!rawResponse) throw new Error('No response from McMaster')
+
+    const responseObject: unknown = await parseStringPromise(rawResponse)
+
+    const response = posrResponseSchema.parse(responseObject)
+    const punchoutSessionUrl =
+      response.cXML.Response[0]?.PunchOutSetupResponse[0]?.StartPage[0]?.URL[0]
+    if (!punchoutSessionUrl) {
+      throw new Error('punchout session url not found')
+    }
+
+    const purchaseSchema = await this.schemaService.readSchema(
+      accountId,
+      'Purchase',
+    )
+    const fieldId = selectSchemaFieldUnsafe(
+      purchaseSchema,
+      fields.punchoutSessionUrl,
+    ).id
+    await updateResourceField({
+      accountId,
+      resourceId,
+      fieldId,
+      value: { string: punchoutSessionUrl },
+    })
+
+    return punchoutSessionUrl
+  }
+
+  // TODO: this references `next` which is not available in the domain layer
+  private async getCredentials(accountId: string) {
+    const prisma = container.resolve(PrismaService)
+    const { config } = container.resolve(ConfigService)
+
+    const {
+      mcMasterCarrUsername,
+      mcMasterCarrConnectedAt,
+      mcMasterCarrPassword,
+    } = await prisma.account.findFirstOrThrow({ where: { id: accountId } })
+
+    if (
+      !mcMasterCarrUsername ||
+      !mcMasterCarrConnectedAt ||
+      !mcMasterCarrPassword
+    ) {
+      redirect(`${config.BASE_URL}/account/integrations`)
+    }
+
+    return { mcMasterCarrUsername, mcMasterCarrPassword }
+  }
 }
 
 async function credentialsAreValid(
@@ -149,71 +221,6 @@ async function credentialsAreValid(
   const statusCode = response.cXML.Response[0]?.Status[0].$.code
 
   return statusCode === '200'
-}
-
-// TODO: this references `next` which is not available in the domain layer
-async function getCredentials(accountId: string) {
-  const prisma = container.resolve(PrismaService)
-  const { config } = container.resolve(ConfigService)
-
-  const {
-    mcMasterCarrUsername,
-    mcMasterCarrConnectedAt,
-    mcMasterCarrPassword,
-  } = await prisma.account.findFirstOrThrow({ where: { id: accountId } })
-
-  if (
-    !mcMasterCarrUsername ||
-    !mcMasterCarrConnectedAt ||
-    !mcMasterCarrPassword
-  ) {
-    redirect(`${config.BASE_URL}/account/integrations`)
-  }
-
-  return { mcMasterCarrUsername, mcMasterCarrPassword }
-}
-
-export async function createPunchOutServiceRequest(
-  accountId: string,
-  resourceId: string,
-): Promise<string> {
-  const schemaService = container.resolve(SchemaService)
-
-  const { posrUrl } = getMcMasterCarrConfigUnsafe()
-  const { mcMasterCarrPassword, mcMasterCarrUsername } =
-    await getCredentials(accountId)
-  const body = await createPunchOutServiceRequestBody(
-    accountId,
-    resourceId,
-    mcMasterCarrUsername,
-    mcMasterCarrPassword,
-  )
-
-  const rawResponse = await sendRequest(posrUrl, body)
-  if (!rawResponse) throw new Error('No response from McMaster')
-
-  const responseObject: unknown = await parseStringPromise(rawResponse)
-
-  const response = posrResponseSchema.parse(responseObject)
-  const punchoutSessionUrl =
-    response.cXML.Response[0]?.PunchOutSetupResponse[0]?.StartPage[0]?.URL[0]
-  if (!punchoutSessionUrl) {
-    throw new Error('punchout session url not found')
-  }
-
-  const purchaseSchema = await schemaService.readSchema(accountId, 'Purchase')
-  const fieldId = selectSchemaFieldUnsafe(
-    purchaseSchema,
-    fields.punchoutSessionUrl,
-  ).id
-  await updateResourceField({
-    accountId,
-    resourceId,
-    fieldId,
-    value: { string: punchoutSessionUrl },
-  })
-
-  return punchoutSessionUrl
 }
 
 async function createPunchOutServiceRequestBody(
