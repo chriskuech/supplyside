@@ -4,8 +4,8 @@ import { FieldRef, selectSchemaFieldUnsafe } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { FieldTemplate } from '../schema/template/types'
 import { SchemaService } from '../schema'
-import { cloneCosts } from './clone'
 import { copyFields } from './copy'
+import { ResourceCopyService } from './clone'
 import { readResource, readResources, updateResourceField } from '.'
 
 type LinkResourceParams = {
@@ -20,6 +20,8 @@ export const linkResource = async ({
   fromResourceId,
   toResourceId,
 }: LinkResourceParams & { backLinkFieldRef: FieldRef }) => {
+  const cloneService = container.resolve(ResourceCopyService)
+
   const [fromResource, toResource] = await Promise.all([
     readResource({
       accountId,
@@ -34,7 +36,7 @@ export const linkResource = async ({
   await copyFields({ accountId, fromResourceId, toResourceId })
 
   if (fromResource.type === 'Purchase' && toResource.type === 'Bill') {
-    await cloneCosts({ accountId, fromResourceId, toResourceId })
+    await cloneService.cloneCosts({ accountId, fromResourceId, toResourceId })
     await linkLines({
       accountId,
       fromResourceId,

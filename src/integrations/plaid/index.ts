@@ -1,18 +1,24 @@
 import { CountryCode, Products } from 'plaid'
 import { redirect } from 'next/navigation'
-import { container, singleton } from 'tsyringe'
+import { singleton } from 'tsyringe'
 import { PrismaService } from '../PrismaService'
-import { plaidClient } from './util'
-import ConfigService from '@/integrations/ConfigService'
+import ConfigService from '../ConfigService'
+import { PlaidConfigService } from './util'
 
 @singleton()
 export class PlaidService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly plaidConfigService: PlaidConfigService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async createConnection(accountId: string, publicToken: string) {
-    const exchangeResponse = await plaidClient().itemPublicTokenExchange({
-      public_token: publicToken,
-    })
+    const exchangeResponse = await this.plaidConfigService
+      .plaidClient()
+      .itemPublicTokenExchange({
+        public_token: publicToken,
+      })
 
     await this.prisma.account.update({
       where: { id: accountId },
@@ -57,8 +63,6 @@ export class PlaidService {
   }
 
   async createLinkToken(accountId: string) {
-    const { config } = container.resolve(ConfigService)
-
     const request = {
       user: {
         client_user_id: accountId,
@@ -66,20 +70,25 @@ export class PlaidService {
       client_name: 'Supply Side',
       products: [Products.Auth],
       language: 'en',
-      redirect_uri: `${config.BASE_URL}/account/integrations`,
+      redirect_uri: `${this.configService.config.BASE_URL}/account/integrations`,
       country_codes: [CountryCode.Us],
     }
 
-    const linkTokenResponse = await plaidClient().linkTokenCreate(request)
+    const linkTokenResponse = await this.plaidConfigService
+      .plaidClient()
+      .linkTokenCreate(request)
     return linkTokenResponse.data
   }
 
   async getPlaidAccounts(accountId: string) {
     const token = await this.requireTokenWithRedirect(accountId)
 
-    const accountsResponse = await plaidClient().accountsGet({
-      access_token: token,
-    })
+    const accountsResponse = await this.plaidConfigService
+      .plaidClient()
+      .accountsGet({
+        access_token: token,
+      })
+
     return accountsResponse.data.accounts
   }
 }

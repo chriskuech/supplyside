@@ -2,9 +2,9 @@ import { Alert } from '@mui/material'
 import { container } from 'tsyringe'
 import PlaidConnect from './PlaidConnect'
 import PlaidConnection from './PlaidConnection'
-import { getPlaidConfig } from '@/integrations/plaid/util'
 import { Session } from '@/domain/session/entity'
 import { PlaidService } from '@/integrations/plaid'
+import { PlaidConfigService } from '@/integrations/plaid/util'
 
 type Props = {
   session: Session
@@ -12,8 +12,9 @@ type Props = {
 
 export default async function Plaid({ session }: Props) {
   const plaidService = container.resolve(PlaidService)
+  const plaidConfigService = container.resolve(PlaidConfigService)
 
-  if (!getPlaidConfig()) {
+  if (!plaidConfigService.getPlaidConfig()) {
     return <Alert severity="error">Plaid is not enabled on this system</Alert>
   }
 

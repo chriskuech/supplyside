@@ -1,41 +1,46 @@
 import { fail } from 'assert'
 import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid'
-import { container } from 'tsyringe'
+import { singleton } from 'tsyringe'
 import ConfigService from '../ConfigService'
 
-export const getPlaidConfig = () => {
-  const {
-    config: {
-      PLAID_ENV: environment,
-      PLAID_CLIENT_ID: clientId,
-      PLAID_SECRET: clientSecret,
-    },
-  } = container.resolve(ConfigService)
+@singleton()
+export class PlaidConfigService {
+  constructor(private readonly configService: ConfigService) {}
 
-  if (!clientId || !clientSecret || !environment) {
-    return null
+  getPlaidConfig() {
+    const {
+      config: {
+        PLAID_ENV: environment,
+        PLAID_CLIENT_ID: clientId,
+        PLAID_SECRET: clientSecret,
+      },
+    } = this.configService
+
+    if (!clientId || !clientSecret || !environment) {
+      return null
+    }
+
+    return { clientId, clientSecret, environment }
   }
 
-  return {
-    clientId,
-    clientSecret,
-    environment,
+  getPlaidConfigUnsafe() {
+    return this.getPlaidConfig() ?? fail('Plaid not configured')
+  }
+
+  plaidClient() {
+    const config = this.getPlaidConfigUnsafe()
+
+    return new PlaidApi(
+      new Configuration({
+        basePath: PlaidEnvironments[config.environment],
+        baseOptions: {
+          headers: {
+            'PLAID-CLIENT-ID': config.clientId,
+            'PLAID-SECRET': config.clientSecret,
+            'Plaid-Version': '2020-09-14',
+          },
+        },
+      }),
+    )
   }
 }
-
-export const getPlaidConfigUnsafe = () =>
-  getPlaidConfig() ?? fail('Plaid not configured')
-
-export const plaidClient = () =>
-  new PlaidApi(
-    new Configuration({
-      basePath: PlaidEnvironments[getPlaidConfigUnsafe().environment],
-      baseOptions: {
-        headers: {
-          'PLAID-CLIENT-ID': getPlaidConfigUnsafe().clientId,
-          'PLAID-SECRET': getPlaidConfigUnsafe().clientSecret,
-          'Plaid-Version': '2020-09-14',
-        },
-      },
-    }),
-  )

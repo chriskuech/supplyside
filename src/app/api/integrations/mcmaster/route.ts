@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { parseStringPromise } from 'xml2js'
 import { container } from 'tsyringe'
-import { processPoom } from '@/integrations/mcMasterCarr'
 import ConfigService from '@/integrations/ConfigService'
+import { McMasterService } from '@/integrations/mcMasterCarr'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const { config } = container.resolve(ConfigService)
+  const mcMasterCarrService = container.resolve(McMasterService)
 
   const cxmlUrlEncoded = await request.text()
   const cxmlUrlDecoded = decodeURIComponent(cxmlUrlEncoded)
@@ -13,7 +14,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     .replace('cxml-urlencoded=', '')
     .replaceAll('+', ' ')
   const cxmlString = await parseStringPromise(cxml)
-  await processPoom(cxmlString)
+  await mcMasterCarrService.processPoom(cxmlString)
 
   return new NextResponse(
     `

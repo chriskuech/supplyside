@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { container, singleton } from 'tsyringe'
+import { singleton } from 'tsyringe'
 import { TemplateService } from '../schema/template'
 import { Account } from './entity'
 import { mapAccountModelToEntity } from './mappers'
@@ -16,11 +16,12 @@ export type UpdateAccountInput = {
 
 @singleton()
 export class AccountService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly templateService: TemplateService,
+  ) {}
 
   async create(): Promise<void> {
-    const templateService = container.resolve(TemplateService)
-
     const temporaryKey = faker.string.alpha({ casing: 'lower', length: 5 })
 
     const { id: accountId } = await this.prisma.account.create({
@@ -30,7 +31,7 @@ export class AccountService {
       },
     })
 
-    await templateService.applyTemplate(accountId)
+    await this.templateService.applyTemplate(accountId)
   }
 
   async read(accountId: string): Promise<Account> {

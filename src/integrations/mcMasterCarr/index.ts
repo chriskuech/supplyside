@@ -8,7 +8,6 @@ import { parseStringPromise } from 'xml2js'
 import { match } from 'ts-pattern'
 import { PrismaService } from '../PrismaService'
 import ConfigService from '../ConfigService'
-import { getMcMasterCarrConfigUnsafe } from './utils'
 import {
   cxmlSchema,
   posrResponseSchema,
@@ -39,6 +38,7 @@ export class McMasterService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly schemaService: SchemaService,
+    private readonly configService: ConfigService,
   ) {}
 
   async createConnection(
@@ -46,7 +46,7 @@ export class McMasterService {
     username: string,
     password: string,
   ) {
-    const validCredentials = await credentialsAreValid(
+    const validCredentials = await this.credentialsAreValid(
       accountId,
       username,
       password,
@@ -136,10 +136,10 @@ export class McMasterService {
     accountId: string,
     resourceId: string,
   ): Promise<string> {
-    const { posrUrl } = getMcMasterCarrConfigUnsafe()
+    const { posrUrl } = await this.getMcMasterCarrConfigUnsafe()
     const { mcMasterCarrPassword, mcMasterCarrUsername } =
       await this.getCredentials(accountId)
-    const body = await createPunchOutServiceRequestBody(
+    const body = await this.createPunchOutServiceRequestBody(
       accountId,
       resourceId,
       mcMasterCarrUsername,
@@ -178,75 +178,241 @@ export class McMasterService {
 
   // TODO: this references `next` which is not available in the domain layer
   private async getCredentials(accountId: string) {
-    const prisma = container.resolve(PrismaService)
-    const { config } = container.resolve(ConfigService)
-
     const {
       mcMasterCarrUsername,
       mcMasterCarrConnectedAt,
       mcMasterCarrPassword,
-    } = await prisma.account.findFirstOrThrow({ where: { id: accountId } })
+    } = await this.prisma.account.findFirstOrThrow({ where: { id: accountId } })
 
     if (
       !mcMasterCarrUsername ||
       !mcMasterCarrConnectedAt ||
       !mcMasterCarrPassword
     ) {
-      redirect(`${config.BASE_URL}/account/integrations`)
+      redirect(`${this.configService.config.BASE_URL}/account/integrations`)
     }
 
     return { mcMasterCarrUsername, mcMasterCarrPassword }
   }
-}
 
-async function credentialsAreValid(
-  accountId: string,
-  username: string,
-  password: string,
-) {
-  const { posrUrl } = getMcMasterCarrConfigUnsafe()
-  const body = await createPunchOutServiceRequestBody(
-    accountId,
-    '',
-    username,
-    password,
-  )
+  getMcMasterCarrConfig() {
+    const {
+      PUNCHOUT_MCMASTER_POSR_URL: posrUrl,
+      PUNCHOUT_MCMASTER_SHARED_SECRET: secret,
+      PUNCHOUT_MCMASTER_SUPPLIER_DOMAIN: supplierDomain,
+      PUNCHOUT_MCMASTER_SUPPLIER_IDENTITY: supplierIdentity,
+    } = this.configService.config
 
-  const rawResponse = await sendRequest(posrUrl, body)
-  if (!rawResponse) throw new Error('No response from McMaster')
+    if (!posrUrl || !secret || !supplierDomain || !supplierIdentity) {
+      return null
+    }
 
-  const responseObject: unknown = await parseStringPromise(rawResponse)
+    return {
+      posrUrl,
+      secret,
+      supplierDomain,
+      supplierIdentity,
+    }
+  }
 
-  const response = posrResponseSchema.parse(responseObject)
-  const statusCode = response.cXML.Response[0]?.Status[0].$.code
+  getMcMasterCarrConfigUnsafe() {
+    return this.getMcMasterCarrConfig() ?? fail('McMaster-Carr not configured')
+  }
 
-  return statusCode === '200'
-}
+  async credentialsAreValid(
+    accountId: string,
+    username: string,
+    password: string,
+  ) {
+    const { posrUrl } = await this.getMcMasterCarrConfigUnsafe()
+    const body = await this.createPunchOutServiceRequestBody(
+      accountId,
+      '',
+      username,
+      password,
+    )
 
-async function createPunchOutServiceRequestBody(
-  accountId: string,
-  resourceId: string,
-  mcMasterCarrUsername: string,
-  mcMasterCarrPassword: string,
-): Promise<string> {
-  const { config } = container.resolve(ConfigService)
-  const { secret, supplierDomain, supplierIdentity } =
-    getMcMasterCarrConfigUnsafe()
+    const rawResponse = await sendRequest(posrUrl, body)
+    if (!rawResponse) throw new Error('No response from McMaster')
 
-  const currentDateTime = new Date().toISOString()
+    const responseObject: unknown = await parseStringPromise(rawResponse)
 
-  const renderedPunchoutSetupRequest = renderTemplate({
-    payloadId: `${currentDateTime}@mcmaster.com`,
-    punchOutCustomerDomain: mcMasterCarrPassword,
-    punchOutCustomerName: mcMasterCarrUsername,
-    punchOutClientDomain: supplierDomain,
-    clientName: supplierIdentity,
-    punchOutSharedSecret: secret,
-    buyerCookie: `${resourceId}|${accountId}`,
-    poomReturnEndpoint: `${config.BASE_URL}/api/integrations/mcmaster`,
-  })
+    const response = posrResponseSchema.parse(responseObject)
+    const statusCode = response.cXML.Response[0]?.Status[0].$.code
 
-  return renderedPunchoutSetupRequest
+    return statusCode === '200'
+  }
+
+  async createPunchOutServiceRequestBody(
+    accountId: string,
+    resourceId: string,
+    mcMasterCarrUsername: string,
+    mcMasterCarrPassword: string,
+  ): Promise<string> {
+    const { config } = container.resolve(ConfigService)
+    const { secret, supplierDomain, supplierIdentity } =
+      this.getMcMasterCarrConfigUnsafe()
+
+    const currentDateTime = new Date().toISOString()
+
+    const renderedPunchoutSetupRequest = renderTemplate({
+      payloadId: `${currentDateTime}@mcmaster.com`,
+      punchOutCustomerDomain: mcMasterCarrPassword,
+      punchOutCustomerName: mcMasterCarrUsername,
+      punchOutClientDomain: supplierDomain,
+      clientName: supplierIdentity,
+      punchOutSharedSecret: secret,
+      buyerCookie: `${resourceId}|${accountId}`,
+      poomReturnEndpoint: `${config.BASE_URL}/api/integrations/mcmaster`,
+    })
+
+    return renderedPunchoutSetupRequest
+  }
+
+  authenticatePoom(
+    senderDomain: string,
+    senderIdentity: string,
+    sharedSecret: string,
+  ): void {
+    const { secret, supplierDomain, supplierIdentity } =
+      this.getMcMasterCarrConfigUnsafe()
+
+    if (
+      senderIdentity !== supplierIdentity ||
+      senderDomain !== supplierDomain ||
+      sharedSecret !== secret
+    )
+      throw new Error('Not authenticated')
+  }
+
+  async processPoom(cxmlString: string) {
+    const { items, orderDate, orderId, sender, accountId } =
+      parseCxml(cxmlString)
+
+    this.authenticatePoom(sender.domain, sender.identity, sender.sharedSecret)
+
+    const purchaseSchema = await this.schemaService.readSchema(
+      accountId,
+      'Purchase',
+    )
+
+    const issuedDateFieldId = selectSchemaFieldUnsafe(
+      purchaseSchema,
+      fields.issuedDate,
+    ).id
+    await updateResourceField({
+      accountId,
+      resourceId: orderId,
+      fieldId: issuedDateFieldId,
+      value: {
+        date: orderDate,
+      },
+    })
+
+    for (const item of items) {
+      const { description, quantity, unitOfMeasure, unitPrice } = item
+
+      // TODO: Should we match by id?
+      const [matchedItem] = await findResources({
+        accountId,
+        resourceType: 'Item',
+        input: description,
+        exact: true,
+      })
+
+      let matchedItemId = matchedItem?.id
+
+      if (!matchedItemId) {
+        const itemSchema = await this.schemaService.readSchema(
+          accountId,
+          'Item',
+        )
+        const nameFieldId = selectSchemaFieldUnsafe(itemSchema, fields.name).id
+        const itemUnitofMesureFieldId = selectSchemaFieldUnsafe(
+          itemSchema,
+          fields.unitOfMeasure,
+        ).id
+        const itemUnitOfMeasureOptionId = selectSchemaFieldOptionUnsafe(
+          itemSchema,
+          fields.unitOfMeasure,
+          unitOfMeasure,
+        ).id
+
+        const newResource = await createResource({
+          accountId,
+          type: 'Item',
+          fields: [
+            { fieldId: nameFieldId, value: { string: description } },
+            {
+              fieldId: itemUnitofMesureFieldId,
+              value: { optionId: itemUnitOfMeasureOptionId },
+            },
+          ],
+        })
+        matchedItemId = newResource.id
+      }
+
+      const lineSchema = await this.schemaService.readSchema(accountId, 'Line')
+      const itemFieldId = selectSchemaFieldUnsafe(lineSchema, fields.item).id
+      const orderFieldId = selectSchemaFieldUnsafe(
+        lineSchema,
+        fields.purchase,
+      ).id
+      const quantityFieldId = selectSchemaFieldUnsafe(
+        lineSchema,
+        fields.quantity,
+      ).id
+      const unitPriceFieldId = selectSchemaFieldUnsafe(
+        lineSchema,
+        fields.unitCost,
+      ).id
+      const lineUnitofMesureFieldId = selectSchemaFieldUnsafe(
+        lineSchema,
+        fields.unitOfMeasure,
+      ).id
+      const lineUnitOfMeasureOptionId = selectSchemaFieldOptionUnsafe(
+        lineSchema,
+        fields.unitOfMeasure,
+        unitOfMeasure,
+      ).id
+
+      const createdLine = await createResource({
+        accountId,
+        type: 'Line',
+        fields: [
+          {
+            fieldId: itemFieldId,
+            value: { resourceId: matchedItemId },
+          },
+          {
+            fieldId: orderFieldId,
+            value: { resourceId: orderId },
+          },
+          {
+            fieldId: lineUnitofMesureFieldId,
+            value: { optionId: lineUnitOfMeasureOptionId },
+          },
+        ],
+      })
+
+      // Updating the resource to trigger calculations
+      //TODO: update createResource to trigger calculations
+      updateResource({
+        accountId,
+        resourceId: createdLine.id,
+        fields: [
+          {
+            fieldId: quantityFieldId,
+            value: { number: quantity },
+          },
+          {
+            fieldId: unitPriceFieldId,
+            value: { number: unitPrice },
+          },
+        ],
+      })
+    }
+  }
 }
 
 function renderTemplate(data: RenderPOSRTemplateParams): string {
@@ -327,140 +493,4 @@ function parseCxml(cxmlString: string) {
     items,
     sender: { domain: senderDomain, identity: senderIdentity, sharedSecret },
   }
-}
-
-export async function processPoom(cxmlString: string) {
-  const schemaService = container.resolve(SchemaService)
-
-  const { items, orderDate, orderId, sender, accountId } = parseCxml(cxmlString)
-
-  authenticatePoom(sender.domain, sender.identity, sender.sharedSecret)
-
-  const purchaseSchema = await schemaService.readSchema(accountId, 'Purchase')
-
-  const issuedDateFieldId = selectSchemaFieldUnsafe(
-    purchaseSchema,
-    fields.issuedDate,
-  ).id
-  await updateResourceField({
-    accountId,
-    resourceId: orderId,
-    fieldId: issuedDateFieldId,
-    value: {
-      date: orderDate,
-    },
-  })
-
-  for (const item of items) {
-    const { description, quantity, unitOfMeasure, unitPrice } = item
-
-    // TODO: Should we match by id?
-    const [matchedItem] = await findResources({
-      accountId,
-      resourceType: 'Item',
-      input: description,
-      exact: true,
-    })
-
-    let matchedItemId = matchedItem?.id
-
-    if (!matchedItemId) {
-      const itemSchema = await schemaService.readSchema(accountId, 'Item')
-      const nameFieldId = selectSchemaFieldUnsafe(itemSchema, fields.name).id
-      const itemUnitofMesureFieldId = selectSchemaFieldUnsafe(
-        itemSchema,
-        fields.unitOfMeasure,
-      ).id
-      const itemUnitOfMeasureOptionId = selectSchemaFieldOptionUnsafe(
-        itemSchema,
-        fields.unitOfMeasure,
-        unitOfMeasure,
-      ).id
-
-      const newResource = await createResource({
-        accountId,
-        type: 'Item',
-        fields: [
-          { fieldId: nameFieldId, value: { string: description } },
-          {
-            fieldId: itemUnitofMesureFieldId,
-            value: { optionId: itemUnitOfMeasureOptionId },
-          },
-        ],
-      })
-      matchedItemId = newResource.id
-    }
-
-    const lineSchema = await schemaService.readSchema(accountId, 'Line')
-    const itemFieldId = selectSchemaFieldUnsafe(lineSchema, fields.item).id
-    const orderFieldId = selectSchemaFieldUnsafe(lineSchema, fields.purchase).id
-    const quantityFieldId = selectSchemaFieldUnsafe(
-      lineSchema,
-      fields.quantity,
-    ).id
-    const unitPriceFieldId = selectSchemaFieldUnsafe(
-      lineSchema,
-      fields.unitCost,
-    ).id
-    const lineUnitofMesureFieldId = selectSchemaFieldUnsafe(
-      lineSchema,
-      fields.unitOfMeasure,
-    ).id
-    const lineUnitOfMeasureOptionId = selectSchemaFieldOptionUnsafe(
-      lineSchema,
-      fields.unitOfMeasure,
-      unitOfMeasure,
-    ).id
-
-    const createdLine = await createResource({
-      accountId,
-      type: 'Line',
-      fields: [
-        {
-          fieldId: itemFieldId,
-          value: { resourceId: matchedItemId },
-        },
-        {
-          fieldId: orderFieldId,
-          value: { resourceId: orderId },
-        },
-        {
-          fieldId: lineUnitofMesureFieldId,
-          value: { optionId: lineUnitOfMeasureOptionId },
-        },
-      ],
-    })
-
-    // Updating the resource to trigger calculations
-    //TODO: update createResource to trigger calculations
-    updateResource({
-      accountId,
-      resourceId: createdLine.id,
-      fields: [
-        {
-          fieldId: quantityFieldId,
-          value: { number: quantity },
-        },
-        {
-          fieldId: unitPriceFieldId,
-          value: { number: unitPrice },
-        },
-      ],
-    })
-  }
-}
-
-function authenticatePoom(
-  senderDomain: string,
-  senderIdentity: string,
-  sharedSecret: string,
-): void {
-  const { secret, supplierDomain, supplierIdentity } =
-    getMcMasterCarrConfigUnsafe()
-  if (
-    senderIdentity !== supplierIdentity ||
-    senderDomain !== supplierDomain ||
-    sharedSecret !== secret
-  )
-    throw new Error('Not authenticated')
 }
