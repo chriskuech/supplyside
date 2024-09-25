@@ -1,5 +1,6 @@
 'use server'
 
+import { container } from 'tsyringe'
 import { readResource } from '@/domain/resource'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
@@ -7,8 +8,8 @@ import { ValueResource } from '@/domain/resource/entity'
 import { File, JsFile } from '@/domain/file/types'
 import { createFile } from '@/domain/file'
 import { withSession } from '@/lib/session/actions'
-import { readUsers } from '@/domain/user'
 import { User } from '@/domain/user/entity'
+import { UserService } from '@/domain/user'
 
 type ResourceFieldActionParams = {
   resourceId: string
@@ -88,4 +89,4 @@ export const readResourceAction = ({
   withSession(({ accountId }) => readResource({ accountId, id: resourceId }))
 
 export const readUsersAction = (): Promise<User[]> =>
-  withSession(({ accountId }) => readUsers({ accountId }))
+  withSession(({ accountId }) => container.resolve(UserService).list(accountId))
