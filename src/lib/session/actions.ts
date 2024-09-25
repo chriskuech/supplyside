@@ -5,14 +5,9 @@ import { redirect } from 'next/navigation'
 import { validate as isUuid } from 'uuid'
 import { container } from 'tsyringe'
 import { InvalidSessionError, MissingSessionError } from './types'
-import {
-  clearSession as domainClearSession,
-  createSession as domainCreateSession,
-  readAndExtendSession as domainReadAndExtendSession,
-  impersonate as domainImpersonate,
-} from '@/domain/session'
 import { Session } from '@/domain/session/entity'
 import ConfigService from '@/integrations/ConfigService'
+import { SessionService } from '@/domain/session'
 
 const sessionIdCookieName = 'sessionId'
 
@@ -26,8 +21,9 @@ export const withSession = async <T>(
 
 export const createSession = async (email: string, tat: string) => {
   const { config } = container.resolve(ConfigService)
+  const sessionService = container.resolve(SessionService)
 
-  const session = await domainCreateSession(email, tat)
+  const session = await sessionService.createSession(email, tat)
 
   cookies().set(sessionIdCookieName, session.id, {
     sameSite: true,
@@ -39,6 +35,8 @@ export const createSession = async (email: string, tat: string) => {
 }
 
 export const readSession = async () => {
+  const sessionService = container.resolve(SessionService)
+
   const sessionId = cookies().get(sessionIdCookieName)?.value
 
   if (!sessionId)
@@ -47,7 +45,7 @@ export const readSession = async () => {
   if (!isUuid(sessionId))
     throw new InvalidSessionError('`sessionId` is not a valid UUID')
 
-  const session = await domainReadAndExtendSession(sessionId)
+  const session = await sessionService.readAndExtendSession(sessionId)
 
   if (!session) throw new MissingSessionError('`session` not found')
 
@@ -76,6 +74,8 @@ export const requireSessionWithRedirect = async (returnTo: string) => {
 }
 
 export const clearSession = async () => {
+  const sessionService = container.resolve(SessionService)
+
   const sessionId = cookies().get(sessionIdCookieName)?.value
 
   if (!sessionId) return
@@ -84,13 +84,15 @@ export const clearSession = async () => {
 
   if (!isUuid(sessionId)) return
 
-  await domainClearSession(sessionId)
+  await sessionService.clearSession(sessionId)
 }
 
 export const impersonate = async (accountId: string) => {
+  const sessionService = container.resolve(SessionService)
+
   const session = await readSession()
 
-  await domainImpersonate(session.id, accountId)
+  await sessionService.impersonate(session.id, accountId)
 
   redirect('/')
 }
