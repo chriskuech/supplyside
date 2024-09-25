@@ -2,24 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
 import { renderPo } from '@/domain/purchase/renderPo'
-import { PrismaService } from '@/integrations/PrismaService'
+import { ResourceService } from '@/domain/resource/service'
 
 /**
  * /api/preview-po?resourceId=<resourceId>
  */
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const prisma = container.resolve(PrismaService)
+  const resourceService = container.resolve(ResourceService)
 
   const query = new URL(req.url).searchParams
-
-  const session = await readSession()
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const { accountId } = session
-
   const resourceId = query.get('resourceId')
+
+  const { accountId } = await readSession()
+
   if (!resourceId) {
     return NextResponse.json(
       { error: '`resourceId` is required' },
@@ -27,11 +22,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const resource = await prisma.resource.findUnique({
-    where: {
-      id: resourceId,
-    },
-  })
+  const resource = await resourceService.read(accountId, 'Purchase', resourceId)
+
   if (!resource) {
     return NextResponse.json({ error: 'Resource not found' }, { status: 404 })
   } else if (resource.accountId !== accountId) {
