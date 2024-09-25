@@ -4,12 +4,12 @@ import { Message } from 'postmark'
 import { container } from 'tsyringe'
 import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
-import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { Resource } from '@/domain/resource/entity'
 import SmtpService from '@/integrations/SmtpService'
 import { FileService } from '@/domain/file'
 import { AccountService } from '@/domain/account'
+import { SchemaService } from '@/domain/schema'
 
 type FileParam = {
   content: string
@@ -25,11 +25,9 @@ type Params = {
 
 const createBill = async (params: Params): Promise<Resource> => {
   const fileService = container.resolve(FileService)
+  const schemaService = container.resolve(SchemaService)
 
-  const billSchema = await readSchema({
-    accountId: params.accountId,
-    resourceType: 'Bill',
-  })
+  const billSchema = await schemaService.readSchema(params.accountId, 'Bill')
 
   const fileIds = await Promise.all(
     params.files.map(async (file) => {

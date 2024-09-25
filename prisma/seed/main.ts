@@ -7,13 +7,14 @@ import { systemAccountId } from '@/lib/const'
 import { applyTemplate } from '@/domain/schema/template'
 import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
-import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { PrismaService } from '@/integrations/PrismaService'
+import { SchemaService } from '@/domain/schema'
 
 expandDotenv(loadDotenv())
 
 const prisma = container.resolve(PrismaService)
+const schemaService = container.resolve(SchemaService)
 
 const config = z
   .object({
@@ -81,10 +82,10 @@ async function main() {
     },
   })
 
-  const vendorSchema = await readSchema({
-    accountId: customerAccount.id,
-    resourceType: ResourceType.Vendor,
-  })
+  const vendorSchema = await schemaService.readSchema(
+    customerAccount.id,
+    ResourceType.Vendor,
+  )
 
   const vendor = await createResource({
     accountId: customerAccount.id,
@@ -97,10 +98,10 @@ async function main() {
     ],
   })
 
-  const purchaseSchema = await readSchema({
-    accountId: customerAccount.id,
-    resourceType: ResourceType.Purchase,
-  })
+  const purchaseSchema = await schemaService.readSchema(
+    customerAccount.id,
+    ResourceType.Purchase,
+  )
 
   const purchase = await createResource({
     accountId: customerAccount.id,
@@ -121,10 +122,10 @@ async function main() {
     ],
   })
 
-  const itemSchema = await readSchema({
-    accountId: customerAccount.id,
-    resourceType: ResourceType.Item,
-  })
+  const itemSchema = await schemaService.readSchema(
+    customerAccount.id,
+    ResourceType.Item,
+  )
 
   const item1 = await createResource({
     accountId: customerAccount.id,
@@ -146,10 +147,10 @@ async function main() {
     ],
   })
 
-  const lineSchema = await readSchema({
-    accountId: customerAccount.id,
-    resourceType: ResourceType.Line,
-  })
+  const lineSchema = await schemaService.readSchema(
+    customerAccount.id,
+    ResourceType.Line,
+  )
 
   await createResource({
     accountId: customerAccount.id,

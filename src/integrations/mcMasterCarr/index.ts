@@ -24,7 +24,6 @@ import {
   findResources,
   updateResourceField,
 } from '@/domain/resource'
-import { readSchema } from '@/domain/schema'
 import {
   selectSchemaFieldOptionUnsafe,
   selectSchemaFieldUnsafe,
@@ -33,6 +32,7 @@ import {
   fields,
   unitOfMeasureOptions,
 } from '@/domain/schema/template/system-fields'
+import { SchemaService } from '@/domain/schema'
 
 export async function createConnection(
   accountId: string,
@@ -40,6 +40,7 @@ export async function createConnection(
   password: string,
 ) {
   const prisma = container.resolve(PrismaService)
+  const schemaService = container.resolve(SchemaService)
 
   const validCredentials = await credentialsAreValid(
     accountId,
@@ -57,7 +58,7 @@ export async function createConnection(
     exact: true,
   })
 
-  const vendorSchema = await readSchema({ accountId, resourceType: 'Vendor' })
+  const vendorSchema = await schemaService.readSchema(accountId, 'Vendor')
   const mcMasterCarrSystemResource = resources().mcMasterCarrVendor
 
   if (!mcMasterCarrVendor) {
@@ -175,6 +176,8 @@ export async function createPunchOutServiceRequest(
   accountId: string,
   resourceId: string,
 ): Promise<string> {
+  const schemaService = container.resolve(SchemaService)
+
   const { posrUrl } = getMcMasterCarrConfigUnsafe()
   const { mcMasterCarrPassword, mcMasterCarrUsername } =
     await getCredentials(accountId)
@@ -197,10 +200,7 @@ export async function createPunchOutServiceRequest(
     throw new Error('punchout session url not found')
   }
 
-  const purchaseSchema = await readSchema({
-    accountId,
-    resourceType: 'Purchase',
-  })
+  const purchaseSchema = await schemaService.readSchema(accountId, 'Purchase')
   const fieldId = selectSchemaFieldUnsafe(
     purchaseSchema,
     fields.punchoutSessionUrl,
@@ -323,14 +323,13 @@ function parseCxml(cxmlString: string) {
 }
 
 export async function processPoom(cxmlString: string) {
+  const schemaService = container.resolve(SchemaService)
+
   const { items, orderDate, orderId, sender, accountId } = parseCxml(cxmlString)
 
   authenticatePoom(sender.domain, sender.identity, sender.sharedSecret)
 
-  const purchaseSchema = await readSchema({
-    accountId,
-    resourceType: 'Purchase',
-  })
+  const purchaseSchema = await schemaService.readSchema(accountId, 'Purchase')
 
   const issuedDateFieldId = selectSchemaFieldUnsafe(
     purchaseSchema,
@@ -359,7 +358,7 @@ export async function processPoom(cxmlString: string) {
     let matchedItemId = matchedItem?.id
 
     if (!matchedItemId) {
-      const itemSchema = await readSchema({ accountId, resourceType: 'Item' })
+      const itemSchema = await schemaService.readSchema(accountId, 'Item')
       const nameFieldId = selectSchemaFieldUnsafe(itemSchema, fields.name).id
       const itemUnitofMesureFieldId = selectSchemaFieldUnsafe(
         itemSchema,
@@ -385,7 +384,7 @@ export async function processPoom(cxmlString: string) {
       matchedItemId = newResource.id
     }
 
-    const lineSchema = await readSchema({ accountId, resourceType: 'Line' })
+    const lineSchema = await schemaService.readSchema(accountId, 'Line')
     const itemFieldId = selectSchemaFieldUnsafe(lineSchema, fields.item).id
     const orderFieldId = selectSchemaFieldUnsafe(lineSchema, fields.purchase).id
     const quantityFieldId = selectSchemaFieldUnsafe(

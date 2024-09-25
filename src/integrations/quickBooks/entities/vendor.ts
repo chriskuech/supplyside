@@ -1,5 +1,6 @@
 import assert from 'assert'
 import { difference, range } from 'remeda'
+import { container } from 'tsyringe'
 import { baseUrl, query, requireTokenWithRedirect } from '..'
 import {
   countQuerySchema,
@@ -18,7 +19,6 @@ import {
   updateResource,
   updateResourceField,
 } from '@/domain/resource'
-import { readSchema } from '@/domain/schema'
 import {
   selectSchemaField,
   selectSchemaFieldUnsafe,
@@ -26,6 +26,7 @@ import {
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
+import { SchemaService } from '@/domain/schema'
 
 export const readVendor = async (
   accountId: string,
@@ -45,6 +46,8 @@ export const readVendor = async (
 export const upsertVendorsFromQuickBooks = async (
   accountId: string,
 ): Promise<void> => {
+  const schemaService = container.resolve(SchemaService)
+
   const quickBooksVendorsCount = await query(
     accountId,
     { entity: 'Vendor', getCount: true },
@@ -75,7 +78,7 @@ export const upsertVendorsFromQuickBooks = async (
 
   const [currentVendors, vendorSchema] = await Promise.all([
     readResources({ accountId, type: 'Vendor' }),
-    readSchema({ accountId, resourceType: 'Vendor' }),
+    schemaService.readSchema(accountId, 'Vendor'),
   ])
 
   const vendorNameField = selectSchemaFieldUnsafe(vendorSchema, fields.name)
@@ -168,7 +171,10 @@ const createVendorOnQuickBooks = async (
   accountId: string,
   vendor: Resource,
 ): Promise<Vendor> => {
+  const schemaService = container.resolve(SchemaService)
+
   const token = await requireTokenWithRedirect(accountId)
+
   const client = quickBooksClient(token)
   const body = mapVendor(vendor)
 
@@ -183,7 +189,7 @@ const createVendorOnQuickBooks = async (
     })
     .then((data) => readVendorSchema.parse(data.json))
 
-  const vendorSchema = await readSchema({ accountId, resourceType: 'Vendor' })
+  const vendorSchema = await schemaService.readSchema(accountId, 'Vendor')
   const quickBooksVendorIdField = selectSchemaField(
     vendorSchema,
     fields.quickBooksVendorId,

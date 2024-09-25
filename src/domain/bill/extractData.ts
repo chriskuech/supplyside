@@ -13,9 +13,9 @@ import {
 import { selectResourceFieldValue } from '../resource/extensions'
 import { fields } from '../schema/template/system-fields'
 import { selectSchemaFieldUnsafe } from '../schema/extensions'
-import { readSchema } from '../schema'
 import { mapFileToCompletionParts } from '../../integrations/openai/mapFileToCompletionParts'
 import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
+import { SchemaService } from '../schema'
 import OpenAiService from '@/integrations/openai/openai'
 
 const prompt = `
@@ -48,12 +48,10 @@ const ExtractedBillDataSchema = z.object({
 
 export const extractContent = async (accountId: string, resourceId: string) => {
   const openai = container.resolve(OpenAiService)
+  const schemaService = container.resolve(SchemaService)
 
   const [billSchema, billResource, vendors] = await Promise.all([
-    readSchema({
-      accountId,
-      resourceType: 'Bill',
-    }),
+    schemaService.readSchema(accountId, 'Bill'),
     readResource({
       id: resourceId,
       accountId,

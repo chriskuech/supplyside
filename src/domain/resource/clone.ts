@@ -7,7 +7,7 @@ import {
   fields,
   purchaseStatusOptions,
 } from '../schema/template/system-fields'
-import { readSchema } from '../schema'
+import { SchemaService } from '../schema'
 import { mapValueToValueInput } from './mappers'
 import { createResource, readResource, readResources } from '.'
 import { PrismaService } from '@/integrations/PrismaService'
@@ -19,14 +19,13 @@ type ResourceCopyParams = {
 }
 
 export const cloneResource = async (accountId: string, resourceId: string) => {
+  const schemaService = container.resolve(SchemaService)
+
   const source = await readResource({ accountId, id: resourceId })
 
   const destination = await match(source.type)
     .with('Bill', async () => {
-      const schema = await readSchema({
-        accountId,
-        resourceType: 'Bill',
-      })
+      const schema = await schemaService.readSchema(accountId, 'Bill')
 
       const billStatusField = selectSchemaFieldUnsafe(schema, fields.billStatus)
 
@@ -69,10 +68,7 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
       return destination
     })
     .with('Purchase', async () => {
-      const schema = await readSchema({
-        accountId,
-        resourceType: 'Purchase',
-      })
+      const schema = await schemaService.readSchema(accountId, 'Purchase')
 
       const orderStatusField = selectSchemaFieldUnsafe(
         schema,
@@ -166,10 +162,9 @@ export const cloneLines = async ({
   toResourceId,
   backLinkFieldRef,
 }: ResourceCopyParams & { backLinkFieldRef: FieldRef }) => {
-  const lineSchema = await readSchema({
-    accountId,
-    resourceType: 'Line',
-  })
+  const schemaService = container.resolve(SchemaService)
+
+  const lineSchema = await schemaService.readSchema(accountId, 'Line')
 
   const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
 

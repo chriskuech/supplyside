@@ -2,10 +2,10 @@ import { Prisma } from '@prisma/client'
 import { container } from 'tsyringe'
 import { fields } from '../schema/template/system-fields'
 import { readResource, updateResourceField } from '../resource'
-import { readSchema } from '../schema'
 import { selectSchemaFieldUnsafe } from '../schema/extensions'
 import { selectResourceFieldValue } from '../resource/extensions'
 import BlobService from '../blob'
+import { SchemaService } from '../schema'
 import { renderPo } from './renderPo'
 import { PrismaService } from '@/integrations/PrismaService'
 
@@ -17,8 +17,9 @@ type CreatePoParams = {
 export const createPo = async ({ accountId, resourceId }: CreatePoParams) => {
   const blobService = container.resolve(BlobService)
   const prisma = container.resolve(PrismaService)
+  const schemaService = container.resolve(SchemaService)
 
-  const schema = await readSchema({ accountId, resourceType: 'Purchase' })
+  const schema = await schemaService.readSchema(accountId, 'Purchase')
 
   const documentFieldId = selectSchemaFieldUnsafe(schema, fields.document).id
   const issuedDateFieldId = selectSchemaFieldUnsafe(

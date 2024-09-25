@@ -1,9 +1,9 @@
 import { ResourceType } from '@prisma/client'
 import { map, pipe, sum } from 'remeda'
 import { container } from 'tsyringe'
+import { SchemaService } from '../schema'
 import { selectResourceFieldValue } from './extensions'
 import { readResource, readResources, updateResourceField } from '.'
-import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { PrismaService } from '@/integrations/PrismaService'
@@ -108,9 +108,10 @@ export const recalculateItemizedCosts = async (
   resourceId: string,
 ) => {
   const prisma = container.resolve(PrismaService)
+  const schemaService = container.resolve(SchemaService)
 
   const resource = await readResource({ accountId, id: resourceId })
-  const schema = await readSchema({ accountId, resourceType: resource.type })
+  const schema = await schemaService.readSchema(accountId, resource.type)
   const costs = await prisma.cost.findMany({
     where: { resourceId },
   })
@@ -139,11 +140,9 @@ export const recalculateSubtotalCost = async (
   resourceType: ResourceType,
   resourceId: string,
 ) => {
-  const schema = await readSchema({
-    accountId,
-    resourceType,
-    isSystem: true,
-  })
+  const schemaService = container.resolve(SchemaService)
+
+  const schema = await schemaService.readSchema(accountId, resourceType, true)
 
   const lines = await readResources({
     accountId,

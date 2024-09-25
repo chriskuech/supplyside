@@ -1,8 +1,9 @@
 import { ResourceType } from '@prisma/client'
+import { container } from 'tsyringe'
 import { FieldRef, selectSchemaFieldUnsafe } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { FieldTemplate } from '../schema/template/types'
-import { readSchema } from '../schema'
+import { SchemaService } from '../schema'
 import { cloneCosts } from './clone'
 import { copyFields } from './copy'
 import { readResource, readResources, updateResourceField } from '.'
@@ -59,10 +60,12 @@ const linkLines = async ({
   fromResourceField,
   toResourceField,
 }: LinkLinesParams) => {
-  const lineSchema = await readSchema({
+  const schemaService = container.resolve(SchemaService)
+
+  const lineSchema = await schemaService.readSchema(
     accountId,
-    resourceType: ResourceType.Line,
-  })
+    ResourceType.Line,
+  )
 
   const lines = await readResources({
     accountId,

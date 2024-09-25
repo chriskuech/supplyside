@@ -1,4 +1,5 @@
 import assert from 'assert'
+import { container } from 'tsyringe'
 import { baseUrl, query, requireTokenWithRedirect } from '..'
 import { quickBooksClient } from '../util'
 import { mapBill } from '../mappers/bill'
@@ -9,9 +10,9 @@ import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { readResource, updateResourceField } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
-import { readSchema } from '@/domain/schema'
 import { selectSchemaField } from '@/domain/schema/extensions'
 import { QuickBooksExpectedError } from '@/integrations/quickBooks/errors'
+import { SchemaService } from '@/domain/schema'
 
 export const readBill = async (
   accountId: string,
@@ -34,6 +35,8 @@ const createBillOnQuickBooks = async (
   quickBooksAccountId: string,
   quickBooksVendorId: string,
 ): Promise<Bill> => {
+  const schemaService = container.resolve(SchemaService)
+
   const token = await requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
   const body = mapBill(bill, quickBooksAccountId, quickBooksVendorId)
@@ -49,7 +52,8 @@ const createBillOnQuickBooks = async (
     })
     .then((data) => readBillSchema.parse(data.json))
 
-  const vendorSchema = await readSchema({ accountId, resourceType: 'Bill' })
+  const vendorSchema = await schemaService.readSchema(accountId, 'Bill')
+
   const quickBooksBillIdField = selectSchemaField(
     vendorSchema,
     fields.quickBooksBillId,

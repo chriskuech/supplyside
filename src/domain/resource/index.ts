@@ -2,10 +2,10 @@ import { fail } from 'assert'
 import { Prisma, ResourceType } from '@prisma/client'
 import { z } from 'zod'
 import { container } from 'tsyringe'
-import { readSchema } from '../schema'
 import { selectSchemaField } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { SchemaField } from '../schema/entity'
+import { SchemaService } from '../schema'
 import { recalculateSubtotalCost } from './costs'
 import { selectResourceFieldValue } from './extensions'
 import {
@@ -43,8 +43,9 @@ export const createResource = async ({
   fields: resourceFields,
 }: CreateResourceParams): Promise<Resource> => {
   const prisma = container.resolve(PrismaService)
+  const schemaService = container.resolve(SchemaService)
 
-  const schema = await readSchema({ accountId, resourceType: type })
+  const schema = await schemaService.readSchema(accountId, type)
 
   const {
     _max: { key },
@@ -148,8 +149,9 @@ export const readResources = async ({
   orderBy,
 }: ReadResourcesParams): Promise<Resource[]> => {
   const prisma = container.resolve(PrismaService)
+  const schemaService = container.resolve(SchemaService)
 
-  const schema = await readSchema({ accountId, resourceType: type })
+  const schema = await schemaService.readSchema(accountId, type)
   const sql = createSql({ accountId, schema, where, orderBy })
 
   const results: { _id: string }[] = await prisma.$queryRawUnsafe(sql)
@@ -181,9 +183,10 @@ export const updateResource = async ({
   fields,
 }: UpdateResourceParams) => {
   const prisma = container.resolve(PrismaService)
+  const schemaService = container.resolve(SchemaService)
 
   const resource = await readResource({ accountId, id: resourceId })
-  const schema = await readSchema({ accountId, resourceType: resource.type })
+  const schema = await schemaService.readSchema(accountId, resource.type)
 
   await Promise.all(
     fields.map(async ({ fieldId, value }) => {

@@ -4,7 +4,6 @@ import { isTruthy } from 'remeda'
 import { container } from 'tsyringe'
 import { Resource, ResourceField } from '../../resource/entity'
 import { readResource, readResources } from '../../resource'
-import { readSchema } from '../../schema'
 import {
   FieldRef,
   selectResourceField,
@@ -15,6 +14,7 @@ import { LineViewModel, PurchaseViewModel } from './ViewModel'
 import { formatInlineAddress } from '@/lib/resource/fields/views/AddressCard'
 import BlobService from '@/domain/blob'
 import { PrismaService } from '@/integrations/PrismaService'
+import { SchemaService } from '@/domain/schema'
 
 export const createViewModel = async (
   accountId: string,
@@ -22,6 +22,7 @@ export const createViewModel = async (
 ): Promise<PurchaseViewModel> => {
   const blobService = container.resolve(BlobService)
   const prisma = container.resolve(PrismaService)
+  const schemaService = container.resolve(SchemaService)
 
   const [order, lines, lineSchema, account] = await Promise.all([
     readResource({
@@ -36,7 +37,7 @@ export const createViewModel = async (
         '==': [{ var: 'Purchase' }, purchaseId],
       },
     }),
-    readSchema({ accountId, resourceType: 'Line' }),
+    schemaService.readSchema(accountId, 'Line'),
     prisma.account.findUniqueOrThrow({
       where: { id: accountId },
     }),

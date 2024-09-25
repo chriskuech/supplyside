@@ -2,13 +2,14 @@
 
 import { ResourceType } from '@prisma/client'
 import { notFound, redirect } from 'next/navigation'
+import { container } from 'tsyringe'
 import { requireSessionWithRedirect, withSession } from '@/lib/session/actions'
 import { readResource } from '@/domain/resource'
-import { readSchema } from '@/domain/schema'
 import { Session } from '@/domain/session/entity'
 import { Resource } from '@/domain/resource/entity'
 import { Schema } from '@/domain/schema/entity'
 import { cloneResource as domainCloneResource } from '@/domain/resource/clone'
+import { SchemaService } from '@/domain/schema'
 
 type DetailPageModel = {
   session: Session
@@ -22,6 +23,8 @@ export const readDetailPageModel = async (
   rawKey: unknown,
   path: string,
 ): Promise<DetailPageModel> => {
+  const schemaService = container.resolve(SchemaService)
+
   const key = Number(rawKey)
 
   if (isNaN(key)) notFound()
@@ -34,14 +37,8 @@ export const readDetailPageModel = async (
       type: resourceType,
       key,
     }).catch(() => null),
-    readSchema({
-      accountId: session.accountId,
-      resourceType,
-    }),
-    readSchema({
-      accountId: session.accountId,
-      resourceType: 'Line',
-    }),
+    schemaService.readSchema(session.accountId, resourceType),
+    schemaService.readSchema(session.accountId, 'Line'),
   ])
 
   if (!resource) notFound()

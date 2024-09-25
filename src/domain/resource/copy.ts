@@ -1,8 +1,9 @@
+import { container } from 'tsyringe'
 import { findTemplateField } from '../schema/template/system-fields'
+import { SchemaService } from '../schema'
 import { handleResourceUpdate } from './effects'
 import { mapValueToValueInput } from './mappers'
 import { readResource, updateResource } from '.'
-import { readSchema } from '@/domain/schema'
 import {
   selectSchemaField,
   selectSchemaFieldUnsafe,
@@ -19,6 +20,8 @@ export const copyFields = async ({
   fromResourceId,
   toResourceId,
 }: ResourceCopyParams) => {
+  const schemaService = container.resolve(SchemaService)
+
   const [fromResource, toResource] = await Promise.all([
     readResource({
       accountId,
@@ -31,14 +34,8 @@ export const copyFields = async ({
   ])
 
   const [fromSchema, toSchema] = await Promise.all([
-    readSchema({
-      accountId,
-      resourceType: fromResource.type,
-    }),
-    readSchema({
-      accountId,
-      resourceType: toResource.type,
-    }),
+    schemaService.readSchema(accountId, fromResource.type),
+    schemaService.readSchema(accountId, toResource.type),
   ])
 
   const fieldsToUpdate = fromResource.fields

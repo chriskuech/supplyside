@@ -4,9 +4,9 @@ import { fail } from 'assert'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { ResourceType } from '@prisma/client'
+import { container } from 'tsyringe'
 import { withSession } from '../session/actions'
 import * as domain from '@/domain/resource'
-import * as schemaDomain from '@/domain/schema'
 import { Resource } from '@/domain/resource/entity'
 import { ValueResource } from '@/domain/resource/entity'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
@@ -16,15 +16,15 @@ import {
 } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { DuplicateResourceError } from '@/domain/resource/errors'
+import { SchemaService } from '@/domain/schema'
 
 export const createResource = async (
   params: Pick<domain.CreateResourceParams, 'type' | 'fields'>,
 ): Promise<Resource> =>
   await withSession(async ({ accountId, userId }) => {
-    const schema = await schemaDomain.readSchema({
-      accountId,
-      resourceType: params.type,
-    })
+    const schema = await container
+      .resolve(SchemaService)
+      .readSchema(accountId, params.type)
 
     if (params.type === 'Purchase') {
       params.fields = [
@@ -108,15 +108,13 @@ export const transitionStatus = async (
   fieldTemplate: FieldTemplate,
   statusTemplate: OptionTemplate,
 ) => {
+  const schemaService = container.resolve(SchemaService)
+
   const { accountId, type: resourceType } = await readResource({
     id: resourceId,
   })
 
-  const schema = await schemaDomain.readSchema({
-    accountId,
-    resourceType,
-    isSystem: true,
-  })
+  const schema = await schemaService.readSchema(accountId, resourceType, true)
   const field =
     selectSchemaField(schema, fieldTemplate) ?? fail('Field not found')
 

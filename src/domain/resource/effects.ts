@@ -1,9 +1,10 @@
 import { isNullish } from 'remeda'
+import { container } from 'tsyringe'
 import { SchemaField, Schema } from '../schema/entity'
 import { selectSchemaFieldUnsafe } from '../schema/extensions'
-import { readSchema } from '../schema'
 import { fields } from '../schema/template/system-fields'
 import { extractContent } from '../bill/extractData'
+import { SchemaService } from '../schema'
 import { selectResourceFieldValue } from './extensions'
 import { recalculateItemizedCosts, recalculateSubtotalCost } from './costs'
 import { Resource, Value, ValueResource } from './entity'
@@ -57,6 +58,8 @@ export const handleResourceUpdate = async ({
   resource,
   updatedFields,
 }: HandleResourceUpdateParams) => {
+  const schemaService = container.resolve(SchemaService)
+
   // When a Resource Field is updated,
   // Then copy the linked Resource's Fields
   const updatedFieldsWithResourceType = updatedFields.filter(
@@ -151,11 +154,11 @@ export const handleResourceUpdate = async ({
         rf.field.templateId === fields.itemizedCosts.templateId,
     )
   ) {
-    const schema = await readSchema({
+    const schema = await schemaService.readSchema(
       accountId,
-      resourceType: resource.type,
-      isSystem: true,
-    })
+      resource.type,
+      true,
+    )
 
     const itemizedCosts =
       selectResourceFieldValue(resource, fields.itemizedCosts)?.number ?? 0
