@@ -6,10 +6,10 @@ import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { ValueResource } from '@/domain/resource/entity'
 import { File, JsFile } from '@/domain/file/types'
-import { createFile } from '@/domain/file'
 import { withSession } from '@/lib/session/actions'
 import { User } from '@/domain/user/entity'
 import { UserService } from '@/domain/user'
+import { FileService } from '@/domain/file'
 
 type ResourceFieldActionParams = {
   resourceId: string
@@ -18,12 +18,13 @@ type ResourceFieldActionParams = {
 
 export const uploadFile = async (formData: FormData) =>
   withSession(async ({ accountId }) => {
+    const fileService = container.resolve(FileService)
+
     const file = formData.get('file')
 
     if (!file || typeof file === 'string' || file.size === 0) return
 
-    return await createFile({
-      accountId,
+    return await fileService.create(accountId, {
       name: file.name,
       file,
     })
@@ -31,6 +32,8 @@ export const uploadFile = async (formData: FormData) =>
 
 export const uploadFiles = async (formData: FormData) =>
   withSession(async ({ accountId }) => {
+    const fileService = container.resolve(FileService)
+
     const files = formData.getAll('files')
 
     if (files.length === 0) return
@@ -39,8 +42,7 @@ export const uploadFiles = async (formData: FormData) =>
       files
         .filter((file): file is JsFile => typeof file !== 'string')
         .map((file) =>
-          createFile({
-            accountId,
+          fileService.create(accountId, {
             name: file.name,
             file,
           }),

@@ -1,34 +1,41 @@
-import { container } from 'tsyringe'
+import { singleton } from 'tsyringe'
 import BlobService from '../blob'
 import { mapFile } from './mapValueFile'
 import { fileInclude } from './model'
 import { File as FileEntity } from './types'
 import { PrismaService } from '@/integrations/PrismaService'
 
-type CreateFileParams = {
-  accountId: string
-  name: string
-  file: File
-}
+@singleton()
+export class FileService {
+  constructor(
+    private readonly blobService: BlobService,
+    private readonly prisma: PrismaService,
+  ) {}
 
-export const createFile = async ({
-  accountId,
-  name,
-  file,
-}: CreateFileParams): Promise<FileEntity> => {
-  const blobService = container.resolve(BlobService)
-  const prisma = container.resolve(PrismaService)
-
-  const { id: blobId } = await blobService.createBlob({ accountId, file })
-
-  const fileEntity = await prisma.file.create({
-    data: {
-      accountId,
-      blobId,
+  async create(
+    accountId: string,
+    {
       name,
+      file,
+    }: {
+      name: string
+      file: File
     },
-    include: fileInclude,
-  })
+  ): Promise<FileEntity> {
+    const { id: blobId } = await this.blobService.createBlob({
+      accountId,
+      file,
+    })
 
-  return mapFile(fileEntity)
+    const fileEntity = await this.prisma.file.create({
+      data: {
+        accountId,
+        blobId,
+        name,
+      },
+      include: fileInclude,
+    })
+
+    return mapFile(fileEntity)
+  }
 }
