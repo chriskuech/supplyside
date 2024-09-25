@@ -16,4 +16,20 @@ export class UserService {
 
     return users.map(mapUserModelToEntity)
   }
+
+  async update(
+    accountId: string,
+    userId: string,
+    data: {
+      firstName?: string
+      lastName?: string
+      imageBlobId?: string
+      tsAndCsSignedAt?: Date
+    },
+  ) {
+    await this.prisma.user.update({
+      where: { id: userId, accountId },
+      data,
+    })
+  }
 }

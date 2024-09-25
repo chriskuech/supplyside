@@ -3,17 +3,14 @@
 import { RedirectType, redirect } from 'next/navigation'
 import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
-import { PrismaService } from '@/integrations/PrismaService'
+import { UserService } from '@/domain/user'
 
 export const acceptTermsAndConditions = async () => {
-  const { userId } = await readSession()
-  const prisma = container.resolve(PrismaService)
+  const { accountId, userId } = await readSession()
+  const userService = container.resolve(UserService)
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      tsAndCsSignedAt: new Date(),
-    },
+  await userService.update(accountId, userId, {
+    tsAndCsSignedAt: new Date(),
   })
 
   redirect('/', RedirectType.replace)
