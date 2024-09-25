@@ -1,7 +1,9 @@
 'use client'
-import { Avatar, Button, Stack, TextField } from '@mui/material'
+
+import { Avatar, Button, Stack, TextField, Typography } from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
-import { handleSaveSettings } from './actions'
+import { useState } from 'react'
+import { Errors, handleSaveSettings } from './actions'
 import { User } from '@/domain/user/entity'
 import { useImagePreview } from '@/lib/hooks/useImagePreview'
 
@@ -11,9 +13,10 @@ type Props = {
 
 export default function Form({ user }: Props) {
   const { handleImageChange, image } = useImagePreview()
+  const [errors, setErrors] = useState<Errors>()
 
   return (
-    <form action={handleSaveSettings}>
+    <form action={(formData) => handleSaveSettings(formData).then(setErrors)}>
       <Stack spacing={2} direction="column">
         <Stack direction="row" justifyContent="center">
           <Avatar
@@ -22,6 +25,11 @@ export default function Form({ user }: Props) {
             sx={{ width: 300, height: 300 }}
           />
         </Stack>
+        {errors?.file && (
+          <Typography color="error" textAlign="center">
+            {errors.file.join(', ')}
+          </Typography>
+        )}
 
         <Stack direction="row" justifyContent="center">
           <Button component="label" startIcon={<CloudUpload />}>
@@ -41,12 +49,16 @@ export default function Form({ user }: Props) {
           name="firstName"
           defaultValue={user?.firstName}
           fullWidth
+          error={!!errors?.firstName}
+          helperText={errors?.firstName}
         />
         <TextField
           label="Last Name"
           name="lastName"
           defaultValue={user?.lastName}
           fullWidth
+          error={!!errors?.lastName}
+          helperText={errors?.lastName}
         />
 
         <Stack direction="row" justifyContent="center">

@@ -7,6 +7,13 @@ import { applyTemplate } from '@/domain/schema/template'
 import { PrismaService } from '@/integrations/PrismaService'
 import { systemAccountId } from '@/lib/const'
 
+export type UpdateAccountInput = {
+  name?: string
+  key?: string
+  address?: string
+  logoBlobId?: string
+}
+
 @singleton()
 export class AccountService {
   constructor(private readonly prisma: PrismaService) {}
@@ -62,6 +69,13 @@ export class AccountService {
     })
 
     return models.map(mapAccountModelToEntity)
+  }
+
+  async update(accountId: string, data: UpdateAccountInput) {
+    await this.prisma.account.update({
+      where: { id: accountId },
+      data,
+    })
   }
 
   async delete(accountId: string): Promise<void> {

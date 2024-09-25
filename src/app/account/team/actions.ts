@@ -5,12 +5,6 @@ import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
 import { UpdateUserInput, UserService } from '@/domain/user'
 
-export const readSelf = async () => {
-  const { accountId, userId } = await readSession()
-
-  return await container.resolve(UserService).read(accountId, userId)
-}
-
 export const updateUser = async (userId: string, data: UpdateUserInput) => {
   const { accountId } = await readSession()
 

@@ -67,7 +67,7 @@ export class UserService {
 
   async update(accountId: string, userId: string, data: UpdateUserInput) {
     await this.prisma.user.update({
-      where: { id: userId, accountId },
+      where: { accountId, id: userId },
       data,
     })
   }
