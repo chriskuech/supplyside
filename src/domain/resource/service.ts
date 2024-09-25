@@ -20,4 +20,31 @@ export class ResourceService {
 
     return mapResourceModelToEntity(model)
   }
+
+  async findBacklinks(
+    accountId: string,
+    resourceType: ResourceType,
+    linkedToResourceId: string,
+  ) {
+    const models = await this.prisma.resource.findMany({
+      where: {
+        accountId,
+        type: resourceType,
+        Value: {
+          some: {
+            ResourceFieldValue: {
+              some: {
+                Resource: {
+                  id: linkedToResourceId,
+                },
+              },
+            },
+          },
+        },
+      },
+      include: resourceInclude,
+    })
+
+    return models.map(mapResourceModelToEntity)
+  }
 }
