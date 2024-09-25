@@ -1,3 +1,4 @@
+import { singleton } from 'tsyringe'
 import { mapSessionModelToEntity } from './mappers'
 import { SessionCreationError } from './errors'
 import { sessionIncludes } from './model'
@@ -10,6 +11,7 @@ const SESSION_LIFESPAN_IN_DAYS = 7
 
 const lifespanInSeconds = 1000 * 60 * 24 * SESSION_LIFESPAN_IN_DAYS
 
+@singleton()
 export class SessionService {
   constructor(private readonly prisma: PrismaService) {}
 
