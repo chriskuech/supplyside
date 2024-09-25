@@ -1,9 +1,9 @@
-import puppeteer from 'puppeteer'
+import { readFile } from 'fs/promises'
+
 // https://github.com/vercel/next.js/issues/43810
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 /* @ts-expect-error */
 import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.browser.production'
-import { cache } from 'react'
 import { singleton } from 'tsyringe'
 import { isTruthy } from 'remeda'
 import { P, match } from 'ts-pattern'
@@ -19,18 +19,11 @@ import {
 } from '../resource/extensions'
 import { fields } from '../schema/template/system-fields'
 import { Resource, ResourceField } from '../resource/entity'
+import { exec, withTempDir } from '../os'
+import { createDataUrl } from '../blob/util'
 import PoDocument from './doc/PoDocument'
 import { LineViewModel, PurchaseViewModel } from './doc/ViewModel'
-import PoDocumentFooter from '@/domain/purchase/doc/PoDocumentFooter'
 import { formatInlineAddress } from '@/lib/resource/fields/views/AddressCard'
-
-const browser = cache(async () => {
-  const browser = await puppeteer.launch({
-    args: ['--no-sandbox'],
-  })
-
-  return browser
-})
 
 type RenderPoParams = {
   accountId: string
@@ -48,36 +41,31 @@ export class PoRenderingService {
   ) {}
 
   async renderPo({ accountId, resourceId, isPreview }: RenderPoParams) {
-    const [model, page] = await Promise.all([
-      this.createViewModel(accountId, resourceId),
-      browser().then((browser) => browser.newPage()),
-    ])
+    return await withTempDir(async (path) => {
+      const viewModel = await this.createViewModel(accountId, resourceId)
 
-    try {
-      await page.setContent(
-        htmlDocument(ReactDom.renderToString(PoDocument(model)), isPreview),
-        { timeout: 300 },
+      const html = htmlDocument(
+        ReactDom.renderToString(PoDocument(viewModel)),
+        isPreview,
       )
 
-      const buffer = await page.pdf({
-        format: 'letter',
-        headerTemplate: '<div></div>',
-        footerTemplate: ReactDom.renderToString(PoDocumentFooter(model)),
-        displayHeaderFooter: true,
-        margin: {
-          top: '35px',
-          bottom: '35px',
-          left: '15px',
-          right: '15px',
-        },
-        printBackground: true,
-        timeout: 5_000,
+      const htmlDataUrl = createDataUrl({
+        mimeType: 'text/html',
+        buffer: Buffer.from(html),
       })
 
-      return buffer
-    } finally {
-      page.close()
-    }
+      //     --footer-left 'Order ${viewModel.number} | ${viewModel.issuedDate}'
+      // --footer-right 'Page [page] of [topage]'
+
+      const command = `
+    weasyprint
+      '${htmlDataUrl}'
+      '${path}/out.pdf'
+  `
+      await exec(command.replaceAll(/\s+/g, ' '))
+
+      return await readFile(`${path}/out.pdf`)
+    })
   }
 
   async createViewModel(
@@ -210,11 +198,16 @@ const htmlDocument = (content: string, isPreview?: boolean) => `
       <meta charset="UTF-8">
       <title>Purchase Order</title>
       <style>
+        @page {
+          size: Letter;
+          margin: 15px;
+        }
         body {
           ${isPreview ? `background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(watermark)}');` : ''}
-          font-family: Arial, sans-serif;
           margin: 0;
           padding: 0;
+          height: 100%;
+          font-family: Arial, sans-serif;
         }
       </style>
     </head>
