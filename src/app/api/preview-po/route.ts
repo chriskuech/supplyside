@@ -4,6 +4,8 @@ import { readSession } from '@/lib/session/actions'
 import { ResourceService } from '@/domain/resource'
 import { PoRenderingService } from '@/domain/purchase/PoRenderingService'
 
+export const dynamic = 'force-dynamic'
+
 /**
  * /api/preview-po?resourceId=<resourceId>
  */
