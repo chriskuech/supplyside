@@ -2,9 +2,9 @@ import assert from 'assert'
 import { container } from 'tsyringe'
 import { QuickBooksService, baseUrl } from '..'
 import { quickBooksClient } from '../util'
-import { mapBill } from '../mappers/bill'
 import { accountQuerySchema, readBillSchema } from '../schemas'
 import { Bill } from '../types'
+import { QuickBooksBillService } from '../mappers/bill'
 import { upsertVendorOnQuickBooks } from './vendor'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
@@ -38,10 +38,15 @@ const createBillOnQuickBooks = async (
 ): Promise<Bill> => {
   const schemaService = container.resolve(SchemaService)
   const quickBooksService = container.resolve(QuickBooksService)
+  const quickBooksBillService = container.resolve(QuickBooksBillService)
 
   const token = await quickBooksService.requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
-  const body = mapBill(bill, quickBooksAccountId, quickBooksVendorId)
+  const body = quickBooksBillService.mapBill(
+    bill,
+    quickBooksAccountId,
+    quickBooksVendorId,
+  )
 
   const quickBooksBill = await client
     .makeApiCall({
@@ -80,6 +85,8 @@ const updateBillOnQuickBooks = async (
   quickBooksVendorId: string,
 ): Promise<Bill> => {
   const quickBooksService = container.resolve(QuickBooksService)
+  const quickBooksBillService = container.resolve(QuickBooksBillService)
+
   const token = await quickBooksService.requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
 
@@ -93,7 +100,11 @@ const updateBillOnQuickBooks = async (
   //TODO: bill can be deleted on QB, do we recreate it?
   const quickBooksBill = await readBill(accountId, quickBooksBillId)
 
-  const billBody = mapBill(bill, quickBooksAccountId, quickBooksVendorId)
+  const billBody = quickBooksBillService.mapBill(
+    bill,
+    quickBooksAccountId,
+    quickBooksVendorId,
+  )
 
   const body = {
     ...quickBooksBill.Bill,
