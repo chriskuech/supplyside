@@ -5,6 +5,8 @@ import InviteUserControl from './InviteUserControl'
 import { readSession } from '@/lib/session/actions'
 import { UserService } from '@/domain/user'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Team() {
   const userService = container.resolve(UserService)
 

@@ -5,6 +5,8 @@ import { readSession } from '@/lib/session/actions'
 import ConfigService from '@/integrations/ConfigService'
 import { AccountService } from '@/domain/account'
 
+export const dynamic = 'force-dynamic'
+
 export default async function InfoPage() {
   const accountService = container.resolve(AccountService)
   const { config } = container.resolve(ConfigService)

@@ -2,10 +2,6 @@ import { Alert } from '@mui/material'
 import { container } from 'tsyringe'
 import QuickBooksConnectButton from './QuickBooksConnectButton'
 import QuickBooksConnection from './QuickBooksConnection'
-import {
-  createQuickBooksSetupUrl,
-  getQuickBooksConfig,
-} from '@/integrations/quickBooks/util'
 import { Session } from '@/domain/session/entity'
 import { QuickBooksService } from '@/integrations/quickBooks'
 
@@ -16,19 +12,16 @@ type Props = {
 export default async function Quickbooks({ session }: Props) {
   const quickBooksService = container.resolve(QuickBooksService)
 
-  if (!getQuickBooksConfig()) {
+  if (!quickBooksService.isEnabled) {
     return (
       <Alert severity="error">QuickBooks is not enabled on this system</Alert>
     )
   }
 
-  const quickBooksToken = await quickBooksService.getQuickbooksToken(
-    session.accountId,
-  )
+  const isConnected = await quickBooksService.isConnected(session.accountId)
+  if (!isConnected) {
+    return <QuickBooksConnectButton url={quickBooksService.setupUrl} />
+  }
 
-  return quickBooksToken ? (
-    <QuickBooksConnection session={session} />
-  ) : (
-    <QuickBooksConnectButton url={createQuickBooksSetupUrl()} />
-  )
+  return <QuickBooksConnection session={session} />
 }

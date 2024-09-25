@@ -3,15 +3,15 @@
 import { revalidatePath } from 'next/cache'
 import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
-import { syncDataFromQuickBooks as domainSyncDataFromQuickBooks } from '@/integrations/quickBooks'
 import { McMasterInvalidCredentials } from '@/integrations/mcMasterCarr/errors'
 import { PlaidService } from '@/integrations/plaid'
 import { McMasterService } from '@/integrations/mcMasterCarr'
+import { QuickBooksService } from '@/integrations/quickBooks'
 
 export const syncDataFromQuickBooks = async () => {
   const { accountId } = await readSession()
 
-  await domainSyncDataFromQuickBooks(accountId)
+  await container.resolve(QuickBooksService).pullData(accountId)
 
   revalidatePath('')
 }

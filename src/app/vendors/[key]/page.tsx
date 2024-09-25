@@ -1,15 +1,18 @@
+import { container } from 'tsyringe'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
-import { getQuickBooksConfig } from '@/integrations/quickBooks/util'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
+import { QuickBooksService } from '@/integrations/quickBooks'
 
 export default async function VendorDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
+  const quickBooksService = container.resolve(QuickBooksService)
+
   const { resource, schema, lineSchema } = await readDetailPageModel(
     'Vendor',
     key,
@@ -21,12 +24,10 @@ export default async function VendorDetail({
     resource,
     fields.quickBooksVendorId,
   )?.string
-  const qbConfig = getQuickBooksConfig()
 
-  const quickBooksAppUrl =
-    quickBooksVendorId && qbConfig
-      ? `${qbConfig.appBaseUrl}/app/vendordetail?nameId=${quickBooksVendorId}`
-      : undefined
+  const quickBooksAppUrl = quickBooksVendorId
+    ? quickBooksService.getVendorUrl(quickBooksVendorId)
+    : undefined
 
   return (
     <ResourceDetailPage

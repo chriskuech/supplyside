@@ -2,6 +2,7 @@ import { fail } from 'assert'
 import { Box, Container, Stack } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
+import { container } from 'tsyringe'
 import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
 import PurchaseLink from './tools/PurchaseLink'
@@ -17,14 +18,16 @@ import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectSchemaField } from '@/domain/schema/extensions'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
-import { getQuickBooksConfig } from '@/integrations/quickBooks/util'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
+import { QuickBooksService } from '@/integrations/quickBooks'
 
 export default async function BillsDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
+  const quickBooksService = container.resolve(QuickBooksService)
+
   const { session, resource, schema, lineSchema } = await readDetailPageModel(
     'Bill',
     key,
@@ -56,11 +59,9 @@ export default async function BillsDetail({
     fields.quickBooksBillId,
   )?.string
 
-  const qbConfig = getQuickBooksConfig()
-  const quickBooksAppUrl =
-    quickBooksBillId && qbConfig
-      ? `${qbConfig.appBaseUrl}/app/bill?&txnId=${quickBooksBillId}`
-      : undefined
+  const quickBooksAppUrl = quickBooksBillId
+    ? quickBooksService.getBillUrl(quickBooksBillId)
+    : undefined
 
   return (
     <ResourceDetailPage

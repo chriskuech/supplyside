@@ -4,6 +4,8 @@ import Plaid from './components/plaid/Plaid'
 import McMasterCarr from './components/mcMasterCarr/McMasterCarr'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 
+export const dynamic = 'force-dynamic'
+
 export default async function IntegrationsPage() {
   const session = await requireSessionWithRedirect('/account/integrations')
 
