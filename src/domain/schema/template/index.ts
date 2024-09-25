@@ -1,5 +1,5 @@
 import { fail } from 'assert'
-import { container, singleton } from 'tsyringe'
+import { singleton } from 'tsyringe'
 import { schemas } from './system-schemas'
 import { fields } from './system-fields'
 import { PrismaService } from '@/integrations/PrismaService'
@@ -152,9 +152,7 @@ export class TemplateService {
   }
 
   private async applySchemas(accountId: string) {
-    const prisma = container.resolve(PrismaService)
-
-    await prisma.schema.deleteMany({
+    await this.prisma.schema.deleteMany({
       where: {
         accountId,
         isSystem: true,
@@ -163,7 +161,7 @@ export class TemplateService {
 
     await Promise.all(
       schemas.map(async ({ resourceType, fields, sections }) => {
-        await prisma.schema.create({
+        await this.prisma.schema.create({
           data: {
             accountId,
             isSystem: true,
