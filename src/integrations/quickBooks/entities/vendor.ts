@@ -1,7 +1,7 @@
 import assert from 'assert'
 import { difference, range } from 'remeda'
 import { container } from 'tsyringe'
-import { baseUrl, query, requireTokenWithRedirect } from '..'
+import { QuickBooksService, baseUrl } from '..'
 import {
   countQuerySchema,
   readVendorSchema,
@@ -32,7 +32,9 @@ export const readVendor = async (
   accountId: string,
   id: string,
 ): Promise<Vendor> => {
-  const token = await requireTokenWithRedirect(accountId)
+  const quickBooksService = container.resolve(QuickBooksService)
+
+  const token = await quickBooksService.requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
 
   return client
@@ -47,8 +49,9 @@ export const upsertVendorsFromQuickBooks = async (
   accountId: string,
 ): Promise<void> => {
   const schemaService = container.resolve(SchemaService)
+  const quickBooksService = container.resolve(QuickBooksService)
 
-  const quickBooksVendorsCount = await query(
+  const quickBooksVendorsCount = await quickBooksService.query(
     accountId,
     { entity: 'Vendor', getCount: true },
     countQuerySchema,
@@ -60,7 +63,7 @@ export const upsertVendorsFromQuickBooks = async (
 
   const vendorResponses = await Promise.all(
     range(0, numberOfRequests).map((i) =>
-      query(
+      quickBooksService.query(
         accountId,
         {
           entity: 'Vendor',
@@ -172,8 +175,9 @@ const createVendorOnQuickBooks = async (
   vendor: Resource,
 ): Promise<Vendor> => {
   const schemaService = container.resolve(SchemaService)
+  const quickBooksService = container.resolve(QuickBooksService)
 
-  const token = await requireTokenWithRedirect(accountId)
+  const token = await quickBooksService.requireTokenWithRedirect(accountId)
 
   const client = quickBooksClient(token)
   const body = mapVendor(vendor)
@@ -211,7 +215,8 @@ const updateVendorOnQuickBooks = async (
   accountId: string,
   vendor: Resource,
 ): Promise<Vendor> => {
-  const token = await requireTokenWithRedirect(accountId)
+  const quickBooksService = container.resolve(QuickBooksService)
+  const token = await quickBooksService.requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
   const quickBooksVendorId = selectResourceFieldValue(
     vendor,

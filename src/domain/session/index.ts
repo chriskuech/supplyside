@@ -1,4 +1,3 @@
-import { container } from 'tsyringe'
 import { mapSessionModelToEntity } from './mappers'
 import { SessionCreationError } from './errors'
 import { sessionIncludes } from './model'
@@ -65,9 +64,7 @@ export class SessionService {
 
   async readAndExtendSession(sessionId: string): Promise<Session | null> {
     try {
-      const prisma = container.resolve(PrismaService)
-
-      const session = await prisma.session.update({
+      const session = await this.prisma.session.update({
         where: { id: sessionId, revokedAt: null },
         data: {
           expiresAt: new Date(Date.now() + lifespanInSeconds * 1000),

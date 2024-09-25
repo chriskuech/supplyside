@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { container } from 'tsyringe'
-import { createQuickBooksConnection } from '@/integrations/quickBooks'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 import ConfigService from '@/integrations/ConfigService'
+import { QuickBooksService } from '@/integrations/quickBooks'
 
 export async function GET({ url }: NextRequest): Promise<NextResponse> {
-  const session = await requireSessionWithRedirect(url)
   const { config } = container.resolve(ConfigService)
+  const quickBooksService = container.resolve(QuickBooksService)
 
-  await createQuickBooksConnection(session.accountId, url)
+  const { accountId } = await requireSessionWithRedirect(url)
+
+  await quickBooksService.createQuickBooksConnection(accountId, url)
 
   return NextResponse.redirect(`${config.BASE_URL}/account/integrations`)
 }

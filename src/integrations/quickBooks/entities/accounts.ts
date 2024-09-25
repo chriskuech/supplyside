@@ -1,7 +1,7 @@
 import assert from 'assert'
 import { faker } from '@faker-js/faker'
 import { container } from 'tsyringe'
-import { baseUrl, query, requireTokenWithRedirect } from '..'
+import { QuickBooksService, baseUrl } from '..'
 import { accountQuerySchema, readAccountSchema } from '../schemas'
 import { Account } from '../types'
 import { quickBooksClient } from '../util'
@@ -14,7 +14,8 @@ export const readAccount = async (
   accountId: string,
   id: string,
 ): Promise<Account> => {
-  const token = await requireTokenWithRedirect(accountId)
+  const quickBooksService = container.resolve(QuickBooksService)
+  const token = await quickBooksService.requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
 
   return client
@@ -29,8 +30,9 @@ export const upsertAccountsFromQuickBooks = async (
   accountId: string,
 ): Promise<void> => {
   const schemaFieldService = container.resolve(SchemaFieldService)
+  const quickBooksService = container.resolve(QuickBooksService)
 
-  const allQuickBooksAccounts = await query(
+  const allQuickBooksAccounts = await quickBooksService.query(
     accountId,
     { entity: 'Account' },
     accountQuerySchema,

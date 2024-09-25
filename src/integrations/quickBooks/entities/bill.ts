@@ -1,6 +1,6 @@
 import assert from 'assert'
 import { container } from 'tsyringe'
-import { baseUrl, query, requireTokenWithRedirect } from '..'
+import { QuickBooksService, baseUrl } from '..'
 import { quickBooksClient } from '../util'
 import { mapBill } from '../mappers/bill'
 import { accountQuerySchema, readBillSchema } from '../schemas'
@@ -18,7 +18,8 @@ export const readBill = async (
   accountId: string,
   id: string,
 ): Promise<Bill> => {
-  const token = await requireTokenWithRedirect(accountId)
+  const quickBooksService = container.resolve(QuickBooksService)
+  const token = await quickBooksService.requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
 
   return client
@@ -36,8 +37,9 @@ const createBillOnQuickBooks = async (
   quickBooksVendorId: string,
 ): Promise<Bill> => {
   const schemaService = container.resolve(SchemaService)
+  const quickBooksService = container.resolve(QuickBooksService)
 
-  const token = await requireTokenWithRedirect(accountId)
+  const token = await quickBooksService.requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
   const body = mapBill(bill, quickBooksAccountId, quickBooksVendorId)
 
@@ -77,7 +79,8 @@ const updateBillOnQuickBooks = async (
   quickBooksAccountId: string,
   quickBooksVendorId: string,
 ): Promise<Bill> => {
-  const token = await requireTokenWithRedirect(accountId)
+  const quickBooksService = container.resolve(QuickBooksService)
+  const token = await quickBooksService.requireTokenWithRedirect(accountId)
   const client = quickBooksClient(token)
 
   const quickBooksBillId = selectResourceFieldValue(
@@ -141,6 +144,8 @@ export const syncBill = async (
   accountId: string,
   resourceId: string,
 ): Promise<void> => {
+  const quickBooksService = container.resolve(QuickBooksService)
+
   const bill = await readResource({ accountId, type: 'Bill', id: resourceId })
 
   const quickBooksAccountName = selectResourceFieldValue(
@@ -149,7 +154,7 @@ export const syncBill = async (
   )?.option?.name
   assert(quickBooksAccountName, 'Account not set')
 
-  const quickBooksAccountQuery = await query(
+  const quickBooksAccountQuery = await quickBooksService.query(
     accountId,
     {
       entity: 'Account',
