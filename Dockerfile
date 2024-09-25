@@ -23,21 +23,7 @@ RUN npm run build
 FROM debian AS runner
 WORKDIR /app
 
-RUN apt update && apt install --yes \
-  nodejs \
-  poppler-utils \
-  python3-venv \
-  python3-pip \
-  python3-cffi \
-  python3-brotli \
-  libpango-1.0-0 \
-  libharfbuzz0b \
-  libpangoft2-1.0-0
-
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
-RUN pip3 install weasyprint
+RUN apt update && apt install --yes nodejs poppler-utils weasyprint
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

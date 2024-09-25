@@ -2,12 +2,15 @@ import { promisify } from 'util'
 import { exec as execCallback } from 'child_process'
 import { mkdir } from 'fs/promises'
 import { v4 as uuid } from 'uuid'
-import config from '@/services/config'
+import { container } from 'tsyringe'
+import ConfigService from '@/integrations/ConfigService'
 
 export const withTempDir = async <T>(
   fn: (path: string) => Promise<T>,
 ): Promise<T> => {
-  const path = `${config().TEMP_PATH}/${uuid()}`
+  const { config } = container.resolve(ConfigService)
+
+  const path = `${config.TEMP_PATH}/${uuid()}`
 
   try {
     await mkdir(path, { recursive: true })
