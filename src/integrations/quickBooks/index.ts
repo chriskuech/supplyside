@@ -3,13 +3,13 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import CSRF from 'csrf'
 import { Prisma } from '@prisma/client'
-import { singleton } from 'tsyringe'
+import { container, singleton } from 'tsyringe'
 import { PrismaService } from '../PrismaService'
 import { QuickBooksToken, quickbooksTokenSchema } from './schemas'
 import { getQuickBooksConfigUnsafe, quickBooksClient } from './util'
 import { QueryOptions } from './types'
+import { QuickBooksVendorService } from './entities/vendor'
 import { upsertAccountsFromQuickBooks } from './entities/accounts'
-import { upsertVendorsFromQuickBooks } from './entities/vendor'
 
 @singleton()
 export class QuickBooksService {
@@ -155,8 +155,10 @@ const isRefreshTokenValid = (token: QuickBooksToken) => {
 export const syncDataFromQuickBooks = async (
   accountId: string,
 ): Promise<void> => {
+  const quickBooksVendorService = container.resolve(QuickBooksVendorService)
+
   await Promise.all([
     upsertAccountsFromQuickBooks(accountId),
-    upsertVendorsFromQuickBooks(accountId),
+    quickBooksVendorService.upsertVendorsFromQuickBooks(accountId),
   ])
 }

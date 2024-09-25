@@ -5,7 +5,7 @@ import { quickBooksClient } from '../util'
 import { accountQuerySchema, readBillSchema } from '../schemas'
 import { Bill } from '../types'
 import { QuickBooksBillService } from '../mappers/bill'
-import { upsertVendorOnQuickBooks } from './vendor'
+import { QuickBooksVendorService } from './vendor'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { readResource, updateResourceField } from '@/domain/resource'
@@ -156,6 +156,7 @@ export const syncBill = async (
   resourceId: string,
 ): Promise<void> => {
   const quickBooksService = container.resolve(QuickBooksService)
+  const quickBooksVendorService = container.resolve(QuickBooksVendorService)
 
   const bill = await readResource({ accountId, type: 'Bill', id: resourceId })
 
@@ -187,10 +188,11 @@ export const syncBill = async (
   assert(vendorId, 'Vendor not set')
   const vendorResource = await readResource({ accountId, id: vendorId })
 
-  const quickBooksVendor = await upsertVendorOnQuickBooks(
-    accountId,
-    vendorResource,
-  )
+  const quickBooksVendor =
+    await quickBooksVendorService.upsertVendorOnQuickBooks(
+      accountId,
+      vendorResource,
+    )
   const quickBooksVendorId = quickBooksVendor.Vendor.Id
 
   await upsertBillOnQuickBooks(
