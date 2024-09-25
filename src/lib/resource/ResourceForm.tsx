@@ -79,10 +79,14 @@ export default function ResourceForm({
                   <FieldControl
                     inputId={`rf-${singleField.id}`}
                     resourceId={resource.id}
-                    field={singleField ?? fail()}
+                    field={
+                      singleField ??
+                      fail('Assumed a single field was asserted above')
+                    }
                     value={selectResourceFieldValue(resource, {
                       fieldId: singleField.id,
                     })}
+                    disabled={!!resource.templateId && !!singleField.templateId}
                   />
                 </Box>
               ) : (
@@ -113,23 +117,26 @@ export default function ResourceForm({
                           </Typography>
                           <Box>
                             <Field
+                              disabled={!!resource.templateId && !!f.templateId}
                               inputId={`rf-${f.id}`}
                               resourceId={resource.id}
                               field={f}
                               value={selectResourceFieldValue(resource, {
                                 fieldId: f.id,
                               })}
-                              onChange={(value) =>
-                                updateResourceField({
+                              onChange={async (value) => {
+                                const result = await updateResourceField({
                                   resourceId: resource.id,
                                   fieldId: f.id,
                                   value: mapValueToValueInput(f.type, value),
-                                }).catch((error) =>
-                                  enqueueSnackbar(error.message, {
+                                })
+
+                                if ('error' in result) {
+                                  enqueueSnackbar(result.error, {
                                     variant: 'error',
-                                  }),
-                                )
-                              }
+                                  })
+                                }
+                              }}
                             />
                           </Box>
                         </Stack>

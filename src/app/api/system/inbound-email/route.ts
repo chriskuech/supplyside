@@ -1,14 +1,15 @@
-import { fail } from 'assert'
+import assert from 'assert'
 import { NextRequest, NextResponse } from 'next/server'
 import { Message } from 'postmark'
-import { createBlob } from '@/domain/blobs'
-import prisma from '@/services/prisma'
-import { createResource } from '@/domain/resource'
+import { container } from 'tsyringe'
 import { fields } from '@/domain/schema/template/system-fields'
-import smtp from '@/services/smtp'
-import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { Resource } from '@/domain/resource/entity'
+import SmtpService from '@/integrations/SmtpService'
+import { FileService } from '@/domain/file'
+import { AccountService } from '@/domain/account'
+import { SchemaService } from '@/domain/schema'
+import { ResourceService } from '@/domain/resource'
 
 type FileParam = {
   content: string
@@ -23,26 +24,22 @@ type Params = {
 }
 
 const createBill = async (params: Params): Promise<Resource> => {
-  const billSchema = await readSchema({
-    accountId: params.accountId,
-    resourceType: 'Bill',
-  })
+  const fileService = container.resolve(FileService)
+  const resourceService = container.resolve(ResourceService)
+  const schemaService = container.resolve(SchemaService)
+
+  const billSchema = await schemaService.readSchema(params.accountId, 'Bill')
 
   const fileIds = await Promise.all(
     params.files.map(async (file) => {
-      const { id: blobId } = await createBlob({
-        accountId: params.accountId,
-        buffer: Buffer.from(file.content, file.encoding),
-        type: file.contentType,
-      })
-
-      const { id: fileId } = await prisma().file.create({
-        data: {
-          accountId: params.accountId,
+      const { id: fileId } = await fileService.createFromBuffer(
+        params.accountId,
+        {
           name: file.fileName,
-          blobId,
+          buffer: Buffer.from(file.content, file.encoding),
+          contentType: file.contentType,
         },
-      })
+      )
 
       return fileId
     }),
@@ -50,7 +47,7 @@ const createBill = async (params: Params): Promise<Resource> => {
 
   console.log('Creating Bill', fileIds)
 
-  const bill = await createResource({
+  const bill = await resourceService.createResource({
     accountId: params.accountId,
     type: 'Bill',
     fields: [
@@ -65,17 +62,20 @@ const createBill = async (params: Params): Promise<Resource> => {
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
+  const accountService = container.resolve(AccountService)
+  const smtpService = container.resolve(SmtpService)
+
   const body: Message = await req.json()
 
   // for some reason this is (sometimes?) wrapped in quotes
-  const accountKey = body.To?.split('@').shift()?.replace(/^"/, '') ?? fail()
+  const accountKey = body.To?.split('@').shift()?.replace(/^"/, '')
 
-  const account = await prisma().account.findUnique({
-    where: { key: accountKey },
-  })
+  assert(accountKey, 'Account key not found in To: ' + body.To)
+
+  const account = await accountService.readByKey(accountKey)
 
   if (!account) {
-    await smtp().sendEmail({
+    await smtpService.sendEmail({
       From: 'SupplySide <bot@supplyside.io>',
       To: body.From,
       Subject: "We couldn't process your email",
@@ -85,8 +85,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ error: 'Account does not exist' })
   }
-
-  const { id: accountId } = account
 
   const attachments: FileParam[] | undefined = body.Attachments?.map(
     (attachment) => ({
@@ -114,7 +112,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       : null
 
   const bill = await createBill({
-    accountId,
+    accountId: account.id,
     files: [...(email ? [email] : []), ...(attachments ?? [])],
   })
 

@@ -26,7 +26,7 @@ import { Box, Stack, TextField } from '@mui/material'
 import { FC } from 'react'
 import { faker } from '@faker-js/faker'
 import { P, match } from 'ts-pattern'
-import { OptionPatch } from '@/domain/schema/fields'
+import { OptionPatch } from '@/domain/schema/SchemaFieldService'
 
 type Props = {
   options: OptionPatch[]

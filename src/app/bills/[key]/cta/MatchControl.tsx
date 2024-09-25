@@ -1,6 +1,5 @@
 'use client'
 
-import { fail } from 'assert'
 import {
   Box,
   Button,
@@ -21,9 +20,10 @@ import { fields } from '@/domain/schema/template/system-fields'
 import { Resource } from '@/domain/resource/entity'
 import { updateResourceField } from '@/lib/resource/actions'
 import { useResources } from '@/lib/resource/useResources'
-import { selectSchemaField } from '@/domain/schema/extensions'
+import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import useSchema from '@/lib/schema/useSchema'
 import { useConfirmation } from '@/lib/confirmation'
+import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
 
 type Props = {
   schema: Schema
@@ -32,46 +32,53 @@ type Props = {
 
 export default function MatchControl({ schema, resource }: Props) {
   const { open, isOpen, close } = useDisclosure()
+  const [{ isLoading }, callback] = useAsyncCallback(
+    async (resourceId: string) =>
+      updateResourceField({
+        resourceId: resource.id,
+        fieldId: selectSchemaFieldUnsafe(schema, fields.purchase).id,
+        value: { resourceId },
+      }).then(() => close()),
+  )
   const confirm = useConfirmation()
 
-  const order = selectResourceFieldValue(resource, fields.order)?.resource
+  const purchase = selectResourceFieldValue(resource, fields.purchase)?.resource
 
   const poNumber = selectResourceFieldValue(resource, fields.poNumber)?.string
   const vendorName = selectResourceFieldValue(resource, fields.vendor)?.resource
     ?.name
 
-  const orderSchema = useSchema('Order')
+  const purchaseSchema = useSchema('Purchase')
 
-  const unlinkedOrders = useResources('Order', undefined)
+  const unlinkedPurchases = useResources('Purchase', undefined)
 
   return (
     <>
       <Button
-        color={order ? 'success' : 'secondary'}
+        color={purchase ? 'success' : 'secondary'}
         size="large"
         sx={{ height: 'fit-content', fontSize: '1.2em' }}
-        endIcon={order ? <Link /> : <AddLink />}
+        endIcon={purchase ? <Link /> : <AddLink />}
         onClick={
-          order
+          purchase
             ? async () => {
                 const isConfirmed = await confirm({
-                  title: 'Unlink Order',
-                  content: 'Are you sure you want to unlink this Order?',
+                  title: 'Unlink Purchase',
+                  content: 'Are you sure you want to unlink this Purchase?',
                 })
 
                 if (!isConfirmed) return
 
                 await updateResourceField({
                   resourceId: resource.id,
-                  fieldId:
-                    selectSchemaField(schema, fields.order)?.id ?? fail(),
+                  fieldId: selectSchemaFieldUnsafe(schema, fields.purchase).id,
                   value: { resourceId: null },
                 })
               }
             : open
         }
       >
-        {order ? 'Order Matched' : 'Match Order'}
+        {purchase ? 'Purchase Matched' : 'Match Purchase'}
       </Button>
 
       <Modal
@@ -93,7 +100,7 @@ export default function MatchControl({ schema, resource }: Props) {
                 id="modal-modal-description"
                 sx={{ mt: 2, whiteSpace: 'wrap' }}
               >
-                Match your Order to the Bill to complete the 3-way match.
+                Match your Purchase to the Bill to complete the 3-way match.
               </Typography>
               <Stack
                 direction="row"
@@ -103,36 +110,31 @@ export default function MatchControl({ schema, resource }: Props) {
               >
                 <Box>Receipt</Box>
                 <Link />
-                <Box>Order</Box>
-                <AddLink />
+                <Box>Purchase</Box>
+                {isLoading ? <CircularProgress /> : <AddLink />}
                 <Box>Bill</Box>
               </Stack>
               <Box>
-                {!unlinkedOrders || !orderSchema ? (
+                {!unlinkedPurchases || !purchaseSchema ? (
                   <CircularProgress />
                 ) : (
                   <ResourceTable
                     tableKey={MatchControl.name}
-                    schema={orderSchema}
-                    resources={unlinkedOrders}
+                    schema={purchaseSchema}
+                    resources={unlinkedPurchases}
                     initialQuery={[poNumber, vendorName]
                       .filter(isTruthy)
                       .join(' ')}
                     onRowClick={({
                       row, // `row` is coming in as `any` for some reason
-                    }) =>
-                      updateResourceField({
-                        resourceId: resource.id,
-                        fieldId:
-                          selectSchemaField(schema, fields.order)?.id ?? fail(),
-                        value: { resourceId: row.id },
-                      }).then(() => close())
-                    }
+                    }) => !isLoading && callback(row.id)}
                   />
                 )}
               </Box>
               <Stack direction="row" sx={{ justifyContent: 'end' }}>
-                <Button onClick={close}>Close</Button>
+                <Button onClick={close} disabled={!isLoading}>
+                  Close
+                </Button>
               </Stack>
             </Stack>
           </CardContent>

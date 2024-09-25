@@ -2,9 +2,10 @@ import { fail } from 'assert'
 import { Box, Container, Stack } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
+import { container } from 'tsyringe'
 import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
-import OrderLink from './tools/OrderLink'
+import PurchaseLink from './tools/PurchaseLink'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
@@ -17,14 +18,16 @@ import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectSchemaField } from '@/domain/schema/extensions'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
-import { getQuickBooksConfig } from '@/domain/quickBooks/util'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
+import { QuickBooksService } from '@/integrations/quickBooks'
 
 export default async function BillsDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
+  const quickBooksService = container.resolve(QuickBooksService)
+
   const { session, resource, schema, lineSchema } = await readDetailPageModel(
     'Bill',
     key,
@@ -49,18 +52,16 @@ export default async function BillsDetail({
     .with(billStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
 
-  const order = selectResourceFieldValue(resource, fields.order)?.resource
+  const purchase = selectResourceFieldValue(resource, fields.purchase)?.resource
 
   const quickBooksBillId = selectResourceFieldValue(
     resource,
     fields.quickBooksBillId,
   )?.string
 
-  const qbConfig = getQuickBooksConfig()
-  const quickBooksAppUrl =
-    quickBooksBillId && qbConfig
-      ? `${qbConfig.appBaseUrl}/app/bill?&txnId=${quickBooksBillId}`
-      : undefined
+  const quickBooksAppUrl = quickBooksBillId
+    ? quickBooksService.getBillUrl(quickBooksBillId)
+    : undefined
 
   return (
     <ResourceDetailPage
@@ -76,7 +77,9 @@ export default async function BillsDetail({
               />,
             ]
           : []),
-        ...(order ? [<OrderLink key={order.id} order={order} />] : []),
+        ...(purchase
+          ? [<PurchaseLink key={purchase.id} purchase={purchase} />]
+          : []),
         <AttachmentsToolbarControl
           key={AttachmentsToolbarControl.name}
           resourceId={resource.id}

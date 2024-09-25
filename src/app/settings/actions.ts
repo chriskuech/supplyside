@@ -1,61 +1,56 @@
 'use server'
 
-import { Prisma } from '@prisma/client'
-import { isEmpty } from 'remeda'
+import { isTruthy } from 'remeda'
 import { revalidatePath } from 'next/cache'
-import prisma from '@/services/prisma'
-import { createBlob } from '@/domain/blobs'
+import { container } from 'tsyringe'
+import { z } from 'zod'
 import { readSession } from '@/lib/session/actions'
+import BlobService from '@/domain/blob'
+import { UserService } from '@/domain/user'
 
-type ClientErrors = Record<string, string>
+const schema = z.object({
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().min(1).optional(),
+  file: z
+    .instanceof(File)
+    .transform((file) => (file.size > 0 ? file : undefined))
+    .optional(),
+})
+
+export type Dto = z.infer<typeof schema>
+
+export type Errors = z.typeToFlattenedError<Dto>['fieldErrors']
 
 export const handleSaveSettings = async (
   formData: FormData,
-): Promise<ClientErrors | undefined> => {
-  const { accountId, userId } = await readSession()
+): Promise<Errors | undefined> => {
+  const blobService = container.resolve(BlobService)
+  const userService = container.resolve(UserService)
 
-  const firstName = formData.get('firstName')
-  const lastName = formData.get('lastName')
-  const file = formData.get('file')
+  const {
+    // use the non-impersonated accountId and userId
+    user: { accountId, id: userId },
+  } = await readSession()
 
-  const errors: Record<string, string> = {}
+  const result = schema.safeParse(Object.fromEntries(formData.entries()))
 
-  const update: Prisma.UserUpdateInput = {}
-
-  if (file && typeof file !== 'string' && file.size > 0) {
-    const { id: imageBlobId } = await createBlob({ accountId, file })
-
-    update['ImageBlob'] = { connect: { id: imageBlobId } }
+  if (!result.success) {
+    return result.error.flatten().fieldErrors
   }
 
-  if (firstName !== null) {
-    if (typeof firstName !== 'string') {
-      errors['firstName'] = 'First name must be a string'
-    } else if (!firstName.trim()) {
-      errors['firstName'] = 'First name must not be empty'
-    } else {
-      update['firstName'] = firstName
-    }
+  const { firstName, lastName, file } = result.data
+
+  const imageBlobId = file
+    ? await blobService.createBlob({ accountId, file }).then(({ id }) => id)
+    : undefined
+
+  const data = { firstName, lastName, imageBlobId }
+
+  if (!Object.values(data).some(isTruthy)) {
+    return
   }
 
-  if (lastName !== null) {
-    if (typeof lastName !== 'string') {
-      errors['lastName'] = 'Last name must be a string'
-    } else if (!lastName.trim()) {
-      errors['lastName'] = 'Last name must not be empty'
-    } else {
-      update['lastName'] = lastName
-    }
-  }
+  await userService.update(accountId, userId, data)
 
-  if (!isEmpty(update) && isEmpty(errors)) {
-    await prisma().user.update({
-      where: { id: userId },
-      data: update,
-    })
-
-    revalidatePath('')
-  } else {
-    return errors
-  }
+  revalidatePath('')
 }

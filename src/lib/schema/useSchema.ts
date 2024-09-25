@@ -15,7 +15,7 @@ const useSchema = (resourceType: ResourceType): Schema | null | undefined => {
       resourceType !== schema?.resourceType
     ) {
       setIsLoading(true)
-      readSchema({ resourceType })
+      readSchema(resourceType)
         .then(setSchema)
         .catch(() => setSchema(null))
         .finally(() => setIsLoading(false))

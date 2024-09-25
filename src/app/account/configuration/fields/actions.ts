@@ -1,32 +1,39 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
 import {
-  createField as domainCreateField,
-  readFields as domainReadFields,
-  updateField as domainUpdateField,
-  deleteField as domainDeleteField,
-} from '@/domain/schema/fields'
-import { CreateFieldParams, UpdateFieldDto } from '@/domain/schema/fields'
+  CreateFieldParams,
+  UpdateFieldDto,
+  SchemaFieldService,
+} from '@/domain/schema/SchemaFieldService'
 import { SchemaField } from '@/domain/schema/entity'
 
 export const createField = async (params: CreateFieldParams) => {
   const session = await readSession()
 
-  await domainCreateField(session.accountId, params)
+  await container
+    .resolve(SchemaFieldService)
+    .createField(session.accountId, params)
+
   revalidatePath('')
 }
 
 export const readFields = async (): Promise<SchemaField[]> => {
   const session = await readSession()
-  return domainReadFields(session.accountId)
+
+  return await container
+    .resolve(SchemaFieldService)
+    .readFields(session.accountId)
 }
 
 export const updateField = async (dto: UpdateFieldDto) => {
   const session = await readSession()
 
-  await domainUpdateField(session.accountId, dto)
+  await container
+    .resolve(SchemaFieldService)
+    .updateField(session.accountId, dto)
 
   revalidatePath('')
 }
@@ -34,6 +41,9 @@ export const updateField = async (dto: UpdateFieldDto) => {
 export const deleteField = async (fieldId: string) => {
   const session = await readSession()
 
-  await domainDeleteField(session.accountId, fieldId)
+  await container
+    .resolve(SchemaFieldService)
+    .deleteField(session.accountId, fieldId)
+
   revalidatePath('')
 }

@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import config from '@/services/config'
-import { deleteQuickBooksToken } from '@/domain/quickBooks'
+import { container } from 'tsyringe'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
+import ConfigService from '@/integrations/ConfigService'
+import { QuickBooksService } from '@/integrations/quickBooks'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET({ url }: NextRequest): Promise<NextResponse> {
-  const session = await requireSessionWithRedirect(url)
+  const { config } = container.resolve(ConfigService)
+  const quickBooksService = container.resolve(QuickBooksService)
 
-  await deleteQuickBooksToken(session.accountId)
+  const { accountId } = await requireSessionWithRedirect(url)
 
-  return NextResponse.redirect(`${config().BASE_URL}/account/integrations`)
+  await quickBooksService.disconnect(accountId)
+
+  return NextResponse.redirect(`${config.BASE_URL}/account/integrations`)
 }

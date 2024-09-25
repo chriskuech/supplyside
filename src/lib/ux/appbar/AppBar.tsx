@@ -4,6 +4,7 @@ import MAppBar from '@mui/material/AppBar'
 import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 import Link from 'next/link'
+import { container } from 'tsyringe'
 import { UserMenu } from './UserMenu'
 import { AccountMenu } from './AccountMenu'
 import { NavMenu } from './NavMenu'
@@ -11,23 +12,17 @@ import Logo from './Logo'
 import ImpersonationControl from './ImpersonationControl'
 import { systemAccountId } from '@/lib/const'
 import { readSession } from '@/lib/session/actions'
-import prisma from '@/services/prisma'
 import { SessionError } from '@/lib/session/types'
+import { AccountService } from '@/domain/account'
 
 export default async function AppBar() {
   const session = await readSession().catch((e) =>
     e instanceof SessionError ? null : fail(e),
   )
 
-  const accounts = await prisma().account.findMany({
-    orderBy: {
-      name: 'asc',
-    },
-    select: {
-      id: true,
-      name: true,
-    },
-  })
+  const accountService = container.resolve(AccountService)
+
+  const accounts = await accountService.list()
 
   return (
     <MAppBar>
@@ -65,7 +60,7 @@ export default async function AppBar() {
 
                 {session.accountId !== systemAccountId && (
                   <>
-                    {['Orders', 'Lines', 'Bills'].map((item) => (
+                    {['Purchases', 'Lines', 'Bills'].map((item) => (
                       <Button
                         key={item}
                         href={`/${item.toLowerCase()}`}
@@ -92,21 +87,17 @@ export default async function AppBar() {
                         sx={{ mx: 2, height: '1em' }}
                       />
                     </Box>
-
-                    {['Vendors', 'Items'].map((item) => (
-                      <Button
-                        key={item}
-                        href={`/${item.toLowerCase()}`}
-                        disableElevation={true}
-                        component={Link}
-                        variant="text"
-                        sx={{
-                          display: { xs: 'none', lg: 'inherit' },
-                        }}
-                      >
-                        {item}
-                      </Button>
-                    ))}
+                    <Button
+                      href="/vendors"
+                      disableElevation
+                      component={Link}
+                      variant="text"
+                      sx={{
+                        display: { xs: 'none', lg: 'inherit' },
+                      }}
+                    >
+                      Vendors
+                    </Button>
 
                     <Box display="flex" alignItems="center">
                       <Divider

@@ -1,11 +1,12 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 import { ReactNode } from 'react'
+import { container } from 'tsyringe'
 import CreateResourceButton from './CreateResourceButton'
 import { ResourceTable } from './table'
-import { readResources } from '@/domain/resource'
-import { readSchema } from '@/domain/schema'
+import { ResourceService } from '@/domain/resource'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
+import { SchemaService } from '@/domain/schema'
 
 type Props = {
   tableKey: string
@@ -20,10 +21,13 @@ export default async function ListPage({
   path,
   callToActions = [],
 }: Props) {
+  const schemaService = container.resolve(SchemaService)
+  const resourceService = container.resolve(ResourceService)
+
   const { accountId } = await requireSessionWithRedirect(path)
   const [schema, resources] = await Promise.all([
-    readSchema({ accountId, resourceType }),
-    readResources({ accountId, type: resourceType }),
+    schemaService.readSchema(accountId, resourceType),
+    resourceService.readResources({ accountId, type: resourceType }),
   ])
 
   return (

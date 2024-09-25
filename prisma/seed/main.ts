@@ -2,15 +2,21 @@ import { z } from 'zod'
 import { config as loadDotenv } from 'dotenv'
 import { expand as expandDotenv } from 'dotenv-expand'
 import { ResourceType } from '@prisma/client'
+import { container } from 'tsyringe'
 import { systemAccountId } from '@/lib/const'
-import prisma from '@/services/prisma'
-import { applyTemplate } from '@/domain/schema/template'
-import { createResource } from '@/domain/resource'
+import { TemplateService } from '@/domain/schema/template'
 import { fields } from '@/domain/schema/template/system-fields'
-import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
+import { PrismaService } from '@/integrations/PrismaService'
+import { SchemaService } from '@/domain/schema'
+import { ResourceService } from '@/domain/resource'
 
 expandDotenv(loadDotenv())
+
+const prisma = container.resolve(PrismaService)
+const schemaService = container.resolve(SchemaService)
+const resourceService = container.resolve(ResourceService)
+const templateService = container.resolve(TemplateService)
 
 const config = z
   .object({
@@ -24,7 +30,7 @@ const config = z
 const testId = '00000000-0000-0000-0000-000000000001'
 
 async function main() {
-  const systemAccount = await prisma().account.create({
+  const systemAccount = await prisma.account.create({
     data: {
       id: systemAccountId,
       key: 'system',
@@ -32,7 +38,7 @@ async function main() {
     },
   })
 
-  const systemUser = await prisma().user.create({
+  const systemUser = await prisma.user.create({
     data: {
       id: systemAccount.id,
       accountId: systemAccount.id,
@@ -44,7 +50,7 @@ async function main() {
 
   const [devAlias, devDomain] = config.DEV_EMAIL.split('@')
 
-  const customerAccount = await prisma().account.create({
+  const customerAccount = await prisma.account.create({
     data: {
       id: testId,
       key: 'test',
@@ -52,7 +58,7 @@ async function main() {
     },
   })
 
-  await prisma().user.create({
+  await prisma.user.create({
     data: {
       accountId: customerAccount.id,
       email: `${devAlias}+${customerAccount.key}@${devDomain}`,
@@ -61,9 +67,9 @@ async function main() {
     },
   })
 
-  await applyTemplate(customerAccount.id)
+  await templateService.applyTemplate(customerAccount.id)
 
-  const unitOfMeasureOption = await prisma().option.create({
+  const unitOfMeasureOption = await prisma.option.create({
     data: {
       order: 0,
       name: 'My UNIT',
@@ -78,12 +84,12 @@ async function main() {
     },
   })
 
-  const vendorSchema = await readSchema({
-    accountId: customerAccount.id,
-    resourceType: ResourceType.Vendor,
-  })
+  const vendorSchema = await schemaService.readSchema(
+    customerAccount.id,
+    ResourceType.Vendor,
+  )
 
-  const vendor = await createResource({
+  const vendor = await resourceService.createResource({
     accountId: customerAccount.id,
     type: ResourceType.Vendor,
     fields: [
@@ -94,36 +100,36 @@ async function main() {
     ],
   })
 
-  const orderSchema = await readSchema({
-    accountId: customerAccount.id,
-    resourceType: ResourceType.Order,
-  })
+  const purchaseSchema = await schemaService.readSchema(
+    customerAccount.id,
+    ResourceType.Purchase,
+  )
 
-  const order = await createResource({
+  const purchase = await resourceService.createResource({
     accountId: customerAccount.id,
-    type: ResourceType.Order,
+    type: ResourceType.Purchase,
     fields: [
       {
-        fieldId: selectSchemaFieldUnsafe(orderSchema, fields.assignee).id,
+        fieldId: selectSchemaFieldUnsafe(purchaseSchema, fields.assignee).id,
         value: { userId: systemUser.id },
       },
       {
-        fieldId: selectSchemaFieldUnsafe(orderSchema, fields.poNumber).id,
+        fieldId: selectSchemaFieldUnsafe(purchaseSchema, fields.poNumber).id,
         value: { string: '42' },
       },
       {
-        fieldId: selectSchemaFieldUnsafe(orderSchema, fields.vendor).id,
+        fieldId: selectSchemaFieldUnsafe(purchaseSchema, fields.vendor).id,
         value: { resourceId: vendor.id },
       },
     ],
   })
 
-  const itemSchema = await readSchema({
-    accountId: customerAccount.id,
-    resourceType: ResourceType.Item,
-  })
+  const itemSchema = await schemaService.readSchema(
+    customerAccount.id,
+    ResourceType.Item,
+  )
 
-  const item1 = await createResource({
+  const item1 = await resourceService.createResource({
     accountId: customerAccount.id,
     type: ResourceType.Item,
     fields: [
@@ -143,18 +149,18 @@ async function main() {
     ],
   })
 
-  const lineSchema = await readSchema({
-    accountId: customerAccount.id,
-    resourceType: ResourceType.Line,
-  })
+  const lineSchema = await schemaService.readSchema(
+    customerAccount.id,
+    ResourceType.Line,
+  )
 
-  await createResource({
+  await resourceService.createResource({
     accountId: customerAccount.id,
     type: ResourceType.Line,
     fields: [
       {
-        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.order).id,
-        value: { resourceId: order.id },
+        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase).id,
+        value: { resourceId: purchase.id },
       },
       {
         fieldId: selectSchemaFieldUnsafe(lineSchema, fields.item).id,
@@ -163,7 +169,7 @@ async function main() {
     ],
   })
 
-  const item2 = await createResource({
+  const item2 = await resourceService.createResource({
     accountId: customerAccount.id,
     type: ResourceType.Item,
     fields: [
@@ -183,13 +189,13 @@ async function main() {
     ],
   })
 
-  await createResource({
+  await resourceService.createResource({
     accountId: customerAccount.id,
     type: ResourceType.Line,
     fields: [
       {
-        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.order).id,
-        value: { resourceId: order.id },
+        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase).id,
+        value: { resourceId: purchase.id },
       },
       {
         fieldId: selectSchemaFieldUnsafe(lineSchema, fields.item).id,

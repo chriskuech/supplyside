@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
-import { renderPo } from '@/domain/order/renderPo'
-import prisma from '@/services/prisma'
+import { ResourceService } from '@/domain/resource'
+import { PoRenderingService } from '@/domain/purchase/PoRenderingService'
+
+export const dynamic = 'force-dynamic'
 
 /**
  * /api/preview-po?resourceId=<resourceId>
  */
 export async function GET(req: NextRequest): Promise<NextResponse> {
+  const resourceService = container.resolve(ResourceService)
+  const poRenderingService = container.resolve(PoRenderingService)
+
   const query = new URL(req.url).searchParams
-
-  const session = await readSession()
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const { accountId } = session
-
   const resourceId = query.get('resourceId')
+
+  const { accountId } = await readSession()
+
   if (!resourceId) {
     return NextResponse.json(
       { error: '`resourceId` is required' },
@@ -24,11 +25,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const resource = await prisma().resource.findUnique({
-    where: {
-      id: resourceId,
-    },
-  })
+  const resource = await resourceService.read(accountId, 'Purchase', resourceId)
+
   if (!resource) {
     return NextResponse.json({ error: 'Resource not found' }, { status: 404 })
   } else if (resource.accountId !== accountId) {
@@ -38,7 +36,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const buffer = await renderPo({
+  const buffer = await poRenderingService.renderPo({
     resourceId,
     accountId,
     isPreview: true,

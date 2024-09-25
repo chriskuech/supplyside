@@ -1,51 +1,53 @@
 'use server'
 
-import { Prisma } from '@prisma/client'
-import { isEmpty } from 'remeda'
+import { isTruthy } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import prisma from '@/services/prisma'
-import { createBlob } from '@/domain/blobs'
+import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
+import BlobService from '@/domain/blob'
+import { AccountService } from '@/domain/account'
 
-type ClientErrors = Record<string, string[]>
+const schema = z.object({
+  name: z.string().min(1).optional(),
+  key: z.string().min(1).toLowerCase().optional(),
+  address: z.string().optional(),
+  file: z
+    .instanceof(File)
+    .transform((file) => (file.size > 0 ? file : undefined)),
+})
+
+export type Dto = z.infer<typeof schema>
+
+export type Errors = z.typeToFlattenedError<Dto>['fieldErrors']
 
 export const handleSaveSettings = async (
   formData: FormData,
-): Promise<ClientErrors | undefined> => {
+): Promise<Errors | undefined> => {
+  const accountService = container.resolve(AccountService)
+  const blobService = container.resolve(BlobService)
+
   const { accountId } = await readSession()
 
-  const result = z
-    .object({
-      name: z.string().min(1).optional(),
-      key: z.string().min(1).toLowerCase().optional(),
-      address: z.string().optional(),
-    })
-    .safeParse({
-      name: formData.get('name') ?? undefined,
-      key: formData.get('key') ?? undefined,
-      address: formData.get('address') ?? undefined,
-    })
+  const result = schema.safeParse(Object.fromEntries(formData.entries()))
 
   if (!result.success) {
     return result.error.flatten().fieldErrors
   }
 
-  const data: Prisma.AccountUpdateInput = result.data
+  const { name, key, address, file } = result.data
 
-  const file = formData.get('file')
-  if (file && typeof file !== 'string' && file.size > 0) {
-    const { id: logoBlobId } = await createBlob({ accountId, file })
+  const logoBlobId = file
+    ? await blobService.createBlob({ accountId, file }).then(({ id }) => id)
+    : undefined
 
-    data['LogoBlob'] = { connect: { id: logoBlobId } }
+  const data = { name, key, address, logoBlobId }
+
+  if (!Object.values(data).some(isTruthy)) {
+    return
   }
 
-  if (!isEmpty(data)) {
-    await prisma().account.update({
-      where: { id: accountId },
-      data,
-    })
+  await accountService.update(accountId, data)
 
-    revalidatePath('')
-  }
+  revalidatePath('')
 }

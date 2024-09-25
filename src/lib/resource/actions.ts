@@ -1,15 +1,12 @@
 'use server'
 
 import { fail } from 'assert'
-import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { ResourceType } from '@prisma/client'
+import { container } from 'tsyringe'
 import { withSession } from '../session/actions'
-import * as domain from '@/domain/resource'
-import * as schemaDomain from '@/domain/schema'
 import { Resource } from '@/domain/resource/entity'
-import prisma from '@/services/prisma'
 import { ValueResource } from '@/domain/resource/entity'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
 import {
@@ -17,17 +14,26 @@ import {
   selectSchemaFieldUnsafe,
 } from '@/domain/schema/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
+import { DuplicateResourceError } from '@/domain/resource/errors'
+import { SchemaService } from '@/domain/schema'
+import {
+  CreateResourceParams,
+  DeleteResourceParams,
+  ReadResourcesParams,
+  ResourceService,
+  UpdateResourceFieldParams,
+  UpdateResourceParams,
+} from '@/domain/resource'
 
 export const createResource = async (
-  params: Pick<domain.CreateResourceParams, 'type' | 'fields'>,
+  params: Pick<CreateResourceParams, 'type' | 'fields'>,
 ): Promise<Resource> =>
   await withSession(async ({ accountId, userId }) => {
-    const schema = await schemaDomain.readSchema({
-      accountId,
-      resourceType: params.type,
-    })
+    const schema = await container
+      .resolve(SchemaService)
+      .readSchema(accountId, params.type)
 
-    if (params.type === 'Order') {
+    if (params.type === 'Purchase') {
       params.fields = [
         ...(params.fields ?? []),
         {
@@ -39,7 +45,9 @@ export const createResource = async (
 
     revalidatePath('')
 
-    return domain.createResource({ ...params, accountId })
+    return container
+      .resolve(ResourceService)
+      .createResource({ ...params, accountId })
   })
 
 type ReadResourceParams = {
@@ -53,36 +61,44 @@ export const readResource = async (
 ): Promise<Resource> =>
   await withSession(
     async ({ accountId }) =>
-      await domain.readResource({ ...params, accountId }),
+      await container
+        .resolve(ResourceService)
+        .readResource({ ...params, accountId }),
   )
 
 export const readResources = async (
-  params: Omit<domain.ReadResourcesParams, 'accountId'>,
+  params: Omit<ReadResourcesParams, 'accountId'>,
 ): Promise<Resource[]> =>
   await withSession(
     async ({ accountId }) =>
-      await domain.readResources({ ...params, accountId }),
+      await container
+        .resolve(ResourceService)
+        .readResources({ ...params, accountId }),
   )
 
 export const updateResource = async (
-  params: Omit<domain.UpdateResourceParams, 'accountId'>,
+  params: Omit<UpdateResourceParams, 'accountId'>,
 ): Promise<Resource> =>
   await withSession(async ({ accountId }) => {
     revalidatePath('')
 
-    return domain.updateResource({ ...params, accountId })
+    return container
+      .resolve(ResourceService)
+      .updateResource({ ...params, accountId })
   })
 
 export const deleteResource = async ({
   resourceType,
   ...params
-}: Omit<domain.DeleteResourceParams, 'accountId'> & {
+}: Omit<DeleteResourceParams, 'accountId'> & {
   resourceType?: ResourceType
 }): Promise<void> =>
   await withSession(async ({ accountId }) => {
     revalidatePath('')
 
-    await domain.deleteResource({ ...params, accountId })
+    await container
+      .resolve(ResourceService)
+      .deleteResource({ ...params, accountId })
 
     if (!resourceType) return
 
@@ -92,64 +108,36 @@ export const deleteResource = async ({
 export type FindResourcesParams = {
   resourceType: ResourceType
   input: string
+  exact?: boolean
 }
 
 export const findResources = async ({
   resourceType,
   input,
+  exact,
 }: FindResourcesParams): Promise<ValueResource[]> =>
-  await withSession(async ({ accountId }) => {
-    const results = await prisma().$queryRaw`
-    WITH "View" AS (
-      SELECT
-        "Resource".*,
-        "Value"."string" AS "name"
-      FROM "Resource"
-      LEFT JOIN "ResourceField" ON "Resource".id = "ResourceField"."resourceId"
-      LEFT JOIN "Field" ON "ResourceField"."fieldId" = "Field".id
-      LEFT JOIN "Value" ON "ResourceField"."valueId" = "Value".id
-      WHERE "Resource"."type" = ${resourceType}::"ResourceType"
-        AND "Resource"."accountId" = ${accountId}::"uuid"
-        AND "Field"."templateId" IN (${fields.name.templateId}::uuid, ${fields.poNumber.templateId}::uuid)
-        AND "Value"."string" <> ''
-        AND "Value"."string" IS NOT NULL
-    )
-    SELECT "id", "type", "key", "name"
-    FROM "View"
-    WHERE "name" ILIKE '%' || ${input} || '%' OR "name" % ${input} -- % operator uses pg_trgm for similarity matching
-    ORDER BY similarity("name", ${input}) DESC
-    LIMIT 15
-  `
-
-    return z
-      .object({
-        id: z.string(),
-        type: z.nativeEnum(ResourceType),
-        name: z.string(),
-        key: z.number(),
-      })
-      .array()
-      .parse(results)
-  })
+  await withSession(({ accountId }) =>
+    container
+      .resolve(ResourceService)
+      .findResources({ accountId, input, resourceType, exact }),
+  )
 
 export const transitionStatus = async (
   resourceId: string,
   fieldTemplate: FieldTemplate,
   statusTemplate: OptionTemplate,
 ) => {
+  const schemaService = container.resolve(SchemaService)
+
   const { accountId, type: resourceType } = await readResource({
     id: resourceId,
   })
 
-  const schema = await schemaDomain.readSchema({
-    accountId,
-    resourceType,
-    isSystem: true,
-  })
+  const schema = await schemaService.readSchema(accountId, resourceType, true)
   const field =
     selectSchemaField(schema, fieldTemplate) ?? fail('Field not found')
 
-  await domain.updateResourceField({
+  await container.resolve(ResourceService).updateResourceField({
     accountId,
     resourceId,
     fieldId: field.id,
@@ -164,12 +152,23 @@ export const transitionStatus = async (
 }
 
 export const updateResourceField = async (
-  params: Omit<domain.UpdateResourceFieldParams, 'accountId'>,
-) =>
+  params: Omit<UpdateResourceFieldParams, 'accountId'>,
+): Promise<Resource | { error: string }> =>
   await withSession(async ({ accountId }) => {
-    const resource = await domain.updateResourceField({ ...params, accountId })
+    const resource = await container
+      .resolve(ResourceService)
+      .updateResourceField({
+        ...params,
+        accountId,
+      })
 
     revalidatePath('')
 
     return resource
+  }).catch((error) => {
+    if (error instanceof DuplicateResourceError) {
+      return { error: error.message }
+    }
+
+    throw error
   })

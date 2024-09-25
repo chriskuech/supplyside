@@ -5,6 +5,7 @@ import {
   Autocomplete,
   Checkbox,
   InputAdornment,
+  Stack,
   TextField,
 } from '@mui/material'
 import { match } from 'ts-pattern'
@@ -20,6 +21,7 @@ import {
   useState,
 } from 'react'
 import { debounce } from 'remeda'
+import AddressField from './AddressField'
 import ContactField from './ContactField'
 import FileField from './FileField'
 import UserField from './UserField'
@@ -38,6 +40,7 @@ export type Props = {
   onChange: (value: Value) => void
   inline?: boolean
   withoutDebounce?: boolean
+  disabled?: boolean
 }
 
 function Field(
@@ -49,6 +52,7 @@ function Field(
     onChange: incomingOnChange,
     inline,
     withoutDebounce,
+    disabled,
   }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
@@ -86,8 +90,17 @@ function Field(
   dayjs.extend(utc)
 
   return match(field.type)
+    .with('Address', () => (
+      <AddressField
+        disabled={disabled}
+        address={value?.address ?? null}
+        onChange={(address) => handleChange({ ...emptyValue, address })}
+        inline={inline}
+      />
+    ))
     .with('Checkbox', () => (
       <Checkbox
+        disabled={disabled}
         inputRef={ref}
         id={inputId}
         checked={value?.boolean ?? false}
@@ -98,6 +111,7 @@ function Field(
     ))
     .with('Contact', () => (
       <ContactField
+        disabled={disabled}
         contact={value?.contact ?? null}
         onChange={(contact) => handleChange({ ...emptyValue, contact })}
         inline={inline}
@@ -105,6 +119,7 @@ function Field(
     ))
     .with('Date', () => (
       <DatePicker
+        disabled={disabled}
         inputRef={ref}
         sx={{ width: '100%' }}
         slotProps={{
@@ -121,6 +136,7 @@ function Field(
     ))
     .with('File', () => (
       <FileField
+        isReadOnly={disabled}
         resourceId={resourceId}
         fieldId={field.id}
         file={value?.file ?? null}
@@ -129,12 +145,14 @@ function Field(
     ))
     .with('Files', () => (
       <FilesField
+        isReadOnly={disabled}
         files={value?.files ?? []}
         onChange={(files) => handleChange({ ...emptyValue, files })}
       />
     ))
     .with('Money', () => (
       <TextField
+        disabled={disabled}
         inputRef={ref}
         id={inputId}
         fullWidth
@@ -150,6 +168,7 @@ function Field(
     ))
     .with('MultiSelect', () => (
       <Autocomplete
+        disabled={disabled}
         id={inputId}
         multiple
         fullWidth
@@ -172,6 +191,7 @@ function Field(
     ))
     .with('Number', () => (
       <TextField
+        disabled={disabled}
         inputRef={ref}
         id={inputId}
         type="number"
@@ -190,6 +210,7 @@ function Field(
     ))
     .with('Select', () => (
       <Autocomplete<Option>
+        disabled={disabled}
         options={field.options}
         id={inputId}
         fullWidth
@@ -198,11 +219,16 @@ function Field(
         onChange={(e, option) => {
           handleChange({ ...emptyValue, option })
         }}
-        renderInput={(params) => <TextField inputRef={ref} {...params} />}
+        renderInput={(params) => (
+          <Stack direction="row" alignItems="center">
+            <TextField inputRef={ref} {...params} />
+          </Stack>
+        )}
       />
     ))
     .with('Text', () => (
       <TextField
+        disabled={disabled}
         inputRef={ref}
         id={inputId}
         fullWidth
@@ -214,6 +240,7 @@ function Field(
     ))
     .with('Textarea', () => (
       <TextField
+        disabled={disabled}
         inputRef={ref}
         id={inputId}
         multiline
@@ -227,6 +254,7 @@ function Field(
     ))
     .with('User', () => (
       <UserField
+        isReadOnly={disabled}
         ref={ref}
         inputId={inputId}
         user={value?.user ?? null}
@@ -235,9 +263,12 @@ function Field(
     ))
     .with('Resource', () => (
       <ResourceField
+        isReadOnly={disabled}
         ref={ref}
         onChange={(resource) => handleChange({ ...emptyValue, resource })}
-        resourceType={field.resourceType ?? fail()}
+        resourceType={
+          field.resourceType ?? fail('Resource type not found on Field')
+        }
         resource={value?.resource ?? null}
       />
     ))

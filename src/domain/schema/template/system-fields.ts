@@ -28,7 +28,7 @@ export const billStatusOptions = {
   },
 }
 
-export const orderStatusOptions = {
+export const purchaseStatusOptions = {
   draft: {
     templateId: '84c65f46-b8dd-43bf-9bbe-537b816fdeb5',
     name: 'Draft',
@@ -41,9 +41,9 @@ export const orderStatusOptions = {
     templateId: '9946f309-a3e4-4fdf-991a-cc9d3df80ec0',
     name: 'Approved',
   },
-  ordered: {
+  purchased: {
     templateId: '37551c24-8610-4952-abcb-a9e54c086272',
-    name: 'Ordered',
+    name: 'Purchased',
   },
   received: {
     templateId: 'f3f9b5a6-6b0e-4d4d-8d4e-2f7f3b1b7a3a',
@@ -152,6 +152,19 @@ const _fields = {
     type: 'Select',
     description: 'Type of currency for the transaction',
   },
+  customer: {
+    templateId: '0e3369ca-99b1-4cb7-9a18-a2b10d70fed3',
+    name: 'Customer',
+    type: 'Resource',
+    resourceType: 'Customer',
+    description: 'Primary customer for the transaction',
+  },
+  customerDescription: {
+    templateId: '79a53e8a-5b96-4759-8b81-5cdeda01ed34',
+    name: 'Customer Description',
+    type: 'Textarea',
+    description: 'Brief, identifiable description of the customer',
+  },
   document: {
     templateId: 'cb4a0c88-df20-485d-9881-e2c3b1b2b180',
     name: 'Document',
@@ -228,38 +241,38 @@ const _fields = {
     type: 'Text',
     description: 'Unique identifier for a Purchase Order',
   },
-  order: {
+  purchase: {
     templateId: '2f1954ab-e156-4d23-a3da-45e8168fcfdd',
-    name: 'Order',
+    name: 'Purchase',
     type: 'Resource',
-    resourceType: 'Order',
+    resourceType: 'Purchase',
     description: 'Contains all info related to a specific order',
   },
-  orderAttachments: {
+  purchaseAttachments: {
     templateId: '3a0f3e04-b4ac-4266-9d4e-bac5091d0922',
-    name: 'Order Attachments',
+    name: 'Purchase Attachments',
     type: 'Files',
   },
-  orderDescription: {
+  purchaseDescription: {
     templateId: 'f7b4e0f7-e1e7-4e1e-abad-4e0f7e1e7e5d',
-    name: 'Order Description',
+    name: 'Purchase Description',
     type: 'Textarea',
     description: 'Brief, identifiable internal order description',
   },
-  orderNotes: {
+  purchaseNotes: {
     templateId: '3749e137-c1d8-474a-9539-ba9b82cd6e94',
-    name: 'Order Notes',
+    name: 'Purchase Notes',
     type: 'Textarea',
-    description: 'Order notes included in the purchase order header',
+    description: 'Purchase notes included in the purchase order header',
   },
-  orderStatus: {
+  purchaseStatus: {
     templateId: 'd51e1004-c999-4ac1-8692-ff3d966c5dc3',
-    name: 'Order Status',
+    name: 'Purchase Status',
     type: 'Select',
     description: 'Lifecycle states of an order',
-    options: Object.values(orderStatusOptions),
+    options: Object.values(purchaseStatusOptions),
     defaultValue: {
-      optionTemplateId: orderStatusOptions.draft.templateId,
+      optionTemplateId: purchaseStatusOptions.draft.templateId,
     },
   },
   paymentDueDate: {
@@ -291,8 +304,19 @@ const _fields = {
   primaryAddress: {
     templateId: '58e1e7ae-2dab-44e2-b741-e47eddd7a626',
     name: 'Primary Address',
-    type: 'Textarea',
+    type: 'Address',
     description: "The vendor's primary physical address",
+  },
+  primaryContact: {
+    templateId: 'b36205ce-50b8-45cf-beb2-c2ad927aeb34',
+    name: 'Primary Contact',
+    type: 'Contact',
+    description: 'Primary contact for orders',
+  },
+  punchoutSessionUrl: {
+    templateId: '51955a67-a243-4544-992a-3d15720e4a2d',
+    name: 'Punchout Session URL',
+    type: 'Text',
   },
   quantity: {
     templateId: '8c04f743-23a3-417f-8fd9-98cd5ffa4a67',
@@ -325,7 +349,7 @@ const _fields = {
   shippingAddress: {
     templateId: '848fe67b-ee4f-4c68-bdaa-3089622337f6',
     name: 'Shipping Address',
-    type: 'Textarea',
+    type: 'Address',
     description: 'Indicates the ship-to address on the order',
   },
   shippingMethod: {
@@ -412,7 +436,7 @@ export const findTemplateField = (templateId: string | null | undefined) =>
 // Ensure that the templateIds are unique
 deepStrictEqual(
   pipe(
-    [fields, billStatusOptions, orderStatusOptions],
+    [fields, billStatusOptions, purchaseStatusOptions],
     flatMap((e) => Object.values(e)),
     map((e) => e.templateId),
     groupBy((e) => e),

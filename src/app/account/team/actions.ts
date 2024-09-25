@@ -1,38 +1,26 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { inviteUser, readUser } from '@/domain/iam/user'
-import { User } from '@/domain/iam/user/entity'
+import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
-import prisma from '@/services/prisma'
+import { UpdateUserInput, UserService } from '@/domain/user'
 
-export const readSelf = async () => {
-  const { userId } = await readSession()
-
-  return await readUser({ userId })
-}
-
-type UpdateUserParams = { id: string } & Partial<User>
-
-export const updateUser = async ({ id, ...params }: UpdateUserParams) => {
+export const updateUser = async (userId: string, data: UpdateUserInput) => {
   const { accountId } = await readSession()
 
-  return await prisma().user.update({
-    where: { accountId, id },
-    data: params,
-  })
+  await container.resolve(UserService).update(accountId, userId, data)
 }
 
 export const inviteUserToAccount = async (email: string) => {
   const { accountId } = await readSession()
 
-  await inviteUser({ accountId, email })
+  await container.resolve(UserService).invite(accountId, { email })
 }
 
 export const deleteUser = async (userId: string) => {
   const { accountId } = await readSession()
 
-  await prisma().user.delete({ where: { accountId, id: userId } })
+  await container.resolve(UserService).delete(accountId, userId)
 
   revalidatePath('')
 }

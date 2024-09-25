@@ -2,10 +2,11 @@
 
 import assert from 'assert'
 import { revalidatePath } from 'next/cache'
-import * as account from '@/domain/iam/account'
-import { applyTemplate } from '@/domain/schema/template'
+import { container } from 'tsyringe'
 import { systemAccountId } from '@/lib/const'
 import { readSession, impersonate } from '@/lib/session/actions'
+import { AccountService } from '@/domain/account'
+import { TemplateService } from '@/domain/schema/template'
 
 const authz = async () => {
   const s = await readSession()
@@ -17,19 +18,25 @@ const authz = async () => {
 }
 
 export const refreshAccount = async (accountId: string) => {
+  const templateService = container.resolve(TemplateService)
+
   await authz()
-  await applyTemplate(accountId)
+  await templateService.applyTemplate(accountId)
 }
 
 export const createAccount = async () => {
+  const accountService = container.resolve(AccountService)
+
   await authz()
-  await account.createAccount()
+  await accountService.create()
   revalidatePath('')
 }
 
 export const deleteAccount = async (accountId: string) => {
+  const accountService = container.resolve(AccountService)
+
   await authz()
-  await account.deleteAccount(accountId)
+  await accountService.delete(accountId)
   revalidatePath('')
 }
 

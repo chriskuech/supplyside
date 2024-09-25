@@ -56,8 +56,8 @@ function ResourceField(
           fieldId: selectSchemaFieldUnsafe(
             schema ?? fail('Schema not found'),
             match(resourceType)
-              .with(P.union('Vendor', 'Item'), () => fields.name)
-              .with(P.union('Bill', 'Order', 'Line'), () => fields.poNumber)
+              .with(P.union('Customer', 'Item', 'Vendor'), () => fields.name)
+              .with(P.union('Bill', 'Line', 'Purchase'), () => fields.poNumber)
               .exhaustive(),
           ).id,
           value: { string: nameOrNumber },
@@ -186,13 +186,15 @@ const BaseEditableResourceField = (
         ...(inputValue ? [{ inputValue, name: `Add "${inputValue}"` }] : []),
       ]}
       getOptionLabel={(option) => option.name}
-      onChange={(event, newValue) =>
+      onChange={(event, newValue) => {
+        //Preventing propagation to avoid stopping the grid edit mode on enter key press
+        event.stopPropagation()
         match(newValue)
           .with({ id: P.string }, onUpdate)
           .with({ inputValue: P.string }, (o) => onCreate(o.inputValue))
           .with(null, () => {})
           .exhaustive()
-      }
+      }}
       onInputChange={(event, newInputValue) => setInput(newInputValue)}
       renderInput={(params) => (
         <Box display="flex" justifyContent="center" alignContent="center">

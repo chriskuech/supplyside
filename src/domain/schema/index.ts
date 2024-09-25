@@ -1,46 +1,108 @@
-import { ResourceType } from '@prisma/client'
+import { Prisma, ResourceType } from '@prisma/client'
+import { singleton } from 'tsyringe'
+import { difference } from 'remeda'
 import { Schema } from './entity'
 import { mapFieldModelToEntity } from './mappers'
 import { schemaIncludes } from './model'
-import prisma from '@/services/prisma'
+import { PrismaService } from '@/integrations/PrismaService'
 
-export type ReadSchemaParams = {
-  accountId: string
-  resourceType: ResourceType
-  isSystem?: boolean
-}
+@singleton()
+export class SchemaService {
+  constructor(private readonly prisma: PrismaService) {}
 
-export const readSchema = async ({
-  accountId,
-  resourceType,
-  isSystem,
-}: ReadSchemaParams): Promise<Schema> => {
-  const schemas = await prisma().schema.findMany({
-    where: {
-      accountId,
+  async readSchema(
+    accountId: string,
+    resourceType: ResourceType,
+    isSystem?: boolean,
+  ): Promise<Schema> {
+    const schemas = await this.prisma.schema.findMany({
+      where: {
+        accountId,
+        resourceType,
+        isSystem,
+      },
+      include: schemaIncludes,
+      orderBy: {
+        isSystem: 'desc',
+      },
+    })
+
+    return {
       resourceType,
-      isSystem,
-    },
-    include: schemaIncludes,
-    orderBy: {
-      isSystem: 'desc',
-    },
-  })
+      sections: schemas
+        .flatMap((s) => s.Section)
+        .map((s) => ({
+          id: s.id,
+          name: s.name,
+          fields: s.SectionField.map((sf) => sf.Field).map(
+            mapFieldModelToEntity,
+          ),
+        })),
+      allFields: [
+        ...schemas.flatMap((s) => s.SchemaField),
+        ...schemas.flatMap((s) => s.Section).flatMap((s) => s.SectionField),
+      ]
+        .map((sf) => sf.Field)
+        .map(mapFieldModelToEntity),
+    }
+  }
 
-  return {
-    resourceType,
-    sections: schemas
-      .flatMap((s) => s.Section)
-      .map((s) => ({
-        id: s.id,
-        name: s.name,
-        fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity),
-      })),
-    allFields: [
-      ...schemas.flatMap((s) => s.SchemaField),
-      ...schemas.flatMap((s) => s.Section).flatMap((s) => s.SectionField),
-    ]
-      .map((sf) => sf.Field)
-      .map(mapFieldModelToEntity),
+  async readSchemas(accountId: string) {
+    const existingSchemas = await this.prisma.schema.findMany({
+      where: { accountId, isSystem: false },
+      select: {
+        resourceType: true,
+      },
+    })
+
+    const missingResourceTypes = difference(
+      Object.values(ResourceType),
+      existingSchemas.map((schema) => schema.resourceType),
+    )
+
+    missingResourceTypes.length &&
+      (await this.prisma.schema.createMany({
+        data: missingResourceTypes.map<Prisma.SchemaCreateManyInput>(
+          (resourceType) => ({
+            accountId,
+            resourceType,
+            isSystem: false,
+          }),
+        ),
+      }))
+
+    return await this.prisma.schema.findMany({
+      where: { accountId, isSystem: false },
+      select: {
+        id: true,
+        resourceType: true,
+        Section: {
+          select: {
+            id: true,
+            name: true,
+            SectionField: {
+              select: {
+                Field: {
+                  select: {
+                    id: true,
+                    name: true,
+                    templateId: true,
+                  },
+                },
+              },
+              orderBy: {
+                order: 'asc',
+              },
+            },
+          },
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+      orderBy: {
+        resourceType: 'asc',
+      },
+    })
   }
 }

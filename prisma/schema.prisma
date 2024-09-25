@@ -22,15 +22,18 @@ model Session {
 }
 
 model Account {
-  id                    String    @id @default(uuid()) @db.Uuid
-  key                   String    @unique
-  name                  String    @unique
-  address               String    @default("")
-  logoBlobId            String?   @unique @db.Uuid
-  quickBooksConnectedAt DateTime?
-  quickBooksToken       Json?
-  plaidConnectedAt      DateTime?
-  plaidToken            String?
+  id                      String    @id @default(uuid()) @db.Uuid
+  key                     String    @unique
+  name                    String    @unique
+  address                 String    @default("")
+  logoBlobId              String?   @unique @db.Uuid
+  quickBooksConnectedAt   DateTime?
+  quickBooksToken         Json?
+  plaidConnectedAt        DateTime?
+  plaidToken              String?
+  mcMasterCarrUsername    String?
+  mcMasterCarrPassword    String?
+  mcMasterCarrConnectedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -84,18 +87,20 @@ model User {
 }
 
 enum ResourceType {
-  Line
-  Item
-  Order
   Bill
+  Customer
+  Item
+  Line
+  Purchase
   Vendor
 }
 
 model Resource {
-  id        String       @id @default(uuid()) @db.Uuid
-  accountId String       @db.Uuid
-  type      ResourceType
-  key       Int          @db.Integer
+  id         String       @id @default(uuid()) @db.Uuid
+  accountId  String       @db.Uuid
+  type       ResourceType
+  key        Int          @db.Integer
+  templateId String?      @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -106,6 +111,7 @@ model Resource {
   Cost          Cost[]
 
   @@unique([accountId, type, key])
+  @@unique([accountId, templateId])
 }
 
 model ResourceField {
@@ -124,6 +130,7 @@ model ResourceField {
 }
 
 enum FieldType {
+  Address
   Checkbox
   Contact
   Date
@@ -194,6 +201,20 @@ model File {
   ValueFile ValueFile[]
 }
 
+model Address {
+  id            String  @id @default(uuid()) @db.Uuid
+  streetAddress String?
+  city          String?
+  state         String?
+  zip           String?
+  country       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Value Value[]
+}
+
 model Contact {
   id    String  @id @default(uuid()) @db.Uuid
   name  String?
@@ -209,6 +230,7 @@ model Contact {
 
 model Value {
   id         String    @id @default(uuid()) @db.Uuid
+  addressId  String?   @db.Uuid
   boolean    Boolean?
   contactId  String?   @db.Uuid
   date       DateTime? @db.Date
@@ -222,6 +244,7 @@ model Value {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  Address            Address?        @relation(fields: [addressId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   Contact            Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   File               File?           @relation(fields: [fileId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   Files              ValueFile[]

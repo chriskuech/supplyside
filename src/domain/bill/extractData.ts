@@ -3,19 +3,15 @@ import { assert } from 'console'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 import { validate as isUuid } from 'uuid'
-import {
-  ResourceFieldInput,
-  readResource,
-  readResources,
-  updateResource,
-} from '../resource'
+import { container } from 'tsyringe'
+import { ResourceFieldInput, ResourceService } from '../resource/service'
 import { selectResourceFieldValue } from '../resource/extensions'
 import { fields } from '../schema/template/system-fields'
 import { selectSchemaFieldUnsafe } from '../schema/extensions'
-import { readSchema } from '../schema'
-import { mapFileToCompletionParts } from './mapFileToCompletionParts'
-import { mapVendorsToVendorList } from './mapVendorsToVendorList'
-import openai from '@/services/openai'
+import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
+import { SchemaService } from '../schema'
+import OpenAiService from '@/integrations/openai/openai'
+import { CompletionPartsService } from '@/integrations/openai/mapFileToCompletionParts'
 
 const prompt = `
 You are a context extraction tool within a "Procure-to-Pay" B2B SaaS application.
@@ -35,7 +31,7 @@ const ExtractedBillDataSchema = z.object({
     .string()
     .nullish()
     .describe(
-      'The Purchase Order Number. This is a unique identifier for the Order associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.',
+      'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.',
     ),
   vendorId: z
     .string()
@@ -46,17 +42,19 @@ const ExtractedBillDataSchema = z.object({
 })
 
 export const extractContent = async (accountId: string, resourceId: string) => {
+  const openai = container.resolve(OpenAiService)
+  const schemaService = container.resolve(SchemaService)
+  const completionPartsService = container.resolve(CompletionPartsService)
+  const resourceService = container.resolve(ResourceService)
+
   const [billSchema, billResource, vendors] = await Promise.all([
-    readSchema({
-      accountId,
-      resourceType: 'Bill',
-    }),
-    readResource({
+    schemaService.readSchema(accountId, 'Bill'),
+    resourceService.readResource({
       id: resourceId,
       accountId,
       type: 'Bill',
     }),
-    readResources({
+    resourceService.readResources({
       accountId,
       type: 'Vendor',
     }),
@@ -71,12 +69,14 @@ export const extractContent = async (accountId: string, resourceId: string) => {
   if (!billFiles.length) return
 
   const completionParts = (
-    await Promise.all(billFiles.map(mapFileToCompletionParts))
+    await Promise.all(
+      billFiles.map(completionPartsService.mapFileToCompletionParts),
+    )
   ).flat()
 
   if (!completionParts.length) return
 
-  const completion = await openai().beta.chat.completions.parse({
+  const completion = await openai.beta.chat.completions.parse({
     model: 'gpt-4o-2024-08-06',
     messages: [
       {
@@ -109,11 +109,11 @@ export const extractContent = async (accountId: string, resourceId: string) => {
     .int()
     .positive()
     .safeParse(poNumber)?.data
-  const [order, ...orders] =
+  const [pruchase, ...purchases] =
     poNumberAsNumber && vendorId
-      ? await readResources({
+      ? await resourceService.readResources({
           accountId,
-          type: 'Order',
+          type: 'Purchase',
           where: {
             and: [
               {
@@ -129,8 +129,8 @@ export const extractContent = async (accountId: string, resourceId: string) => {
       : []
 
   assert(
-    !orders.length,
-    `Found ${orders.length + 1} orders with PO Number ${poNumber}`,
+    !purchases.length,
+    `Found ${purchases.length + 1} Purchases with PO Number ${poNumber}`,
   )
 
   const updatedFields: ResourceFieldInput[] = [
@@ -142,11 +142,11 @@ export const extractContent = async (accountId: string, resourceId: string) => {
           },
         ]
       : []),
-    ...(order
+    ...(pruchase
       ? [
           {
-            fieldId: selectSchemaFieldUnsafe(billSchema, fields.order).id,
-            value: { resourceId: order.id },
+            fieldId: selectSchemaFieldUnsafe(billSchema, fields.purchase).id,
+            value: { resourceId: pruchase.id },
           },
         ]
       : []),
@@ -162,5 +162,9 @@ export const extractContent = async (accountId: string, resourceId: string) => {
 
   if (!updatedFields.length) return
 
-  await updateResource({ resourceId, accountId, fields: updatedFields })
+  await resourceService.updateResource({
+    resourceId,
+    accountId,
+    fields: updatedFields,
+  })
 }

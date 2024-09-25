@@ -3,7 +3,7 @@ import { FieldType, Prisma } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { isArray, isNullish, pick } from 'remeda'
 import { fields } from '../schema/template/system-fields'
-import { mapFile } from '../files/mapValueFile'
+import { mapFile } from '../file/mapValueFile'
 import { Schema, SchemaField } from '../schema/entity'
 import { mapUserModelToEntity } from '../user/mappers'
 import { Resource, Value, ValueResource } from './entity'
@@ -14,6 +14,7 @@ import { ValueInput } from './patch'
 export const mapResourceModelToEntity = (model: ResourceModel): Resource => ({
   id: model.id,
   accountId: model.accountId,
+  templateId: model.templateId,
   key: model.key,
   type: model.type,
   fields: model.ResourceField.map((rf) => ({
@@ -30,6 +31,7 @@ export const mapResourceToValueResource = (
 ): ValueResource => ({
   id: resource.id,
   type: resource.type,
+  templateId: resource.templateId,
   key: resource.key,
   name:
     selectResourceFieldValue(resource, fields.name)?.string ??
@@ -42,6 +44,17 @@ export const mapValueToValueInput = (
   value: Value,
 ): ValueInput =>
   match<FieldType, ValueInput>(fieldType)
+    .with('Address', () => ({
+      address: value.address
+        ? pick(value.address, [
+            'streetAddress',
+            'city',
+            'state',
+            'zip',
+            'country',
+          ])
+        : null,
+    }))
     .with('Checkbox', () => ({ boolean: value.boolean }))
     .with('Date', () => ({ date: value.date }))
     .with('File', () => ({ fileId: value.file?.id ?? null }))
@@ -60,6 +73,7 @@ export const mapValueToValueInput = (
     .exhaustive()
 
 export const mapValueModelToEntity = (model: ValueModel): Value => ({
+  address: model.Address,
   boolean: model.boolean,
   contact: model.Contact,
   date: model.date,
@@ -78,6 +92,7 @@ export const mapValueResourceModelToEntity = (
   resource: ValueResourceModel,
 ): ValueResource => ({
   id: resource.id,
+  templateId: resource.templateId,
   type: resource.type,
   key: resource.key,
   name:
@@ -95,6 +110,7 @@ export const isMissingRequiredFields = (schema: Schema, resource: Resource) =>
     if (!field.isRequired) return false
 
     const valueColumnName = match<FieldType, keyof Value>(field.type)
+      .with('Address', () => 'address')
       .with('Checkbox', () => 'boolean')
       .with('Date', () => 'date')
       .with('File', () => 'file')
@@ -119,6 +135,18 @@ export const mapValueInputToPrismaValueUpdate = (
   value: ValueInput,
 ): Prisma.ValueUpdateWithoutResourceFieldValueInput =>
   match<ValueInput, Prisma.ValueUpdateWithoutResourceFieldValueInput>(value)
+    .with({ address: P.not(undefined) }, ({ address }) =>
+      address && Object.values(address).some(Boolean)
+        ? {
+            Address: {
+              upsert: {
+                create: address,
+                update: address,
+              },
+            },
+          }
+        : { Address: { delete: true, disconnect: true } },
+    )
     .with({ boolean: P.not(undefined) }, ({ boolean }) => ({ boolean }))
     .with({ contact: P.not(undefined) }, ({ contact }) =>
       contact
@@ -182,6 +210,10 @@ export const mapValueInputToPrismaValueCreate = (
   { defaultToToday, defaultValue }: SchemaField,
 ): Prisma.ValueCreateWithoutResourceFieldValueInput =>
   match<ValueInput, Prisma.ValueCreateWithoutResourceFieldValueInput>(value)
+    .with({ address: P.not(undefined) }, ({ address: value }) => {
+      const address = value ?? defaultValue?.address ?? null
+      return address ? { Address: { create: address } } : {}
+    })
     .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
       boolean: value ?? defaultValue?.boolean ?? null,
     }))
@@ -246,15 +278,32 @@ export const mapValueInputToPrismaValueCreate = (
     })
     .exhaustive()
 
-export const mapValueInputToPrismaValueWhere = (value: ValueInput) =>
-  match<ValueInput>(value)
+export const mapValueInputToPrismaValueWhere = (
+  value: ValueInput,
+): Prisma.ValueWhereInput =>
+  match<ValueInput, Prisma.ValueWhereInput>(value)
+    .with({ address: P.not(undefined) }, ({ address: value }) => ({
+      Address: {
+        streetAddress: value?.streetAddress?.trim() || null,
+        city: value?.city?.trim() || null,
+        state: value?.state?.trim() || null,
+        zip: value?.zip?.trim() || null,
+        country: value?.country?.trim() || null,
+      },
+    }))
     .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
       boolean: value,
     }))
     .with({ contact: P.not(undefined) }, ({ contact: value }) => ({
       Contact: {
-        name: value?.name ?? null,
-        title: value?.title ?? null,
+        name: {
+          equals: value?.name ?? null,
+          mode: 'insensitive',
+        },
+        title: {
+          equals: value?.title ?? null,
+          mode: 'insensitive',
+        },
         email: value?.email ?? null,
         phone: value?.phone ?? null,
       },
@@ -269,7 +318,10 @@ export const mapValueInputToPrismaValueWhere = (value: ValueInput) =>
       optionId: value,
     }))
     .with({ string: P.not(undefined) }, ({ string: value }) => ({
-      string: value,
+      string: {
+        equals: value,
+        mode: 'insensitive',
+      },
     }))
     .with({ userId: P.not(undefined) }, ({ userId: value }) => ({
       userId: value,

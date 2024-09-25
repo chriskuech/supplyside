@@ -1,17 +1,16 @@
 import { Container, Stack, Typography } from '@mui/material'
+import { container } from 'tsyringe'
 import AccountsTable from './AccountsTable'
 import CreateAccountButton from './CreateAccountButton'
-import prisma from '@/services/prisma'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
+import { AccountService } from '@/domain/account'
 
 export default async function AdminPage() {
+  const accountService = container.resolve(AccountService)
+
   const [{ user }, accounts] = await Promise.all([
     requireSessionWithRedirect('/accounts'),
-    prisma().account.findMany({
-      orderBy: {
-        name: 'asc',
-      },
-    }),
+    accountService.list(),
   ])
 
   if (!user.isGlobalAdmin) return

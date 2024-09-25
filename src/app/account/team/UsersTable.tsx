@@ -7,7 +7,7 @@ import { Clear } from '@mui/icons-material'
 import { filter, fromEntries, keys, map, pipe } from 'remeda'
 import { deleteUser, updateUser } from './actions'
 import { systemAccountId } from '@/lib/const'
-import { User } from '@/domain/iam/user/entity'
+import { User } from '@/domain/user/entity'
 import { useConfirmation } from '@/lib/confirmation'
 
 /**
@@ -109,9 +109,12 @@ const UsersTable: FC<Props> = ({ currentUser, users }) => {
       processRowUpdate={async (newRow, oldRow) => {
         const patch = diff(oldRow, newRow)
 
-        await updateUser({
-          id: newRow.id,
-          ...patch,
+        await updateUser(newRow.id, {
+          email: patch.email ?? undefined,
+          firstName: patch.firstName ?? undefined,
+          lastName: patch.lastName ?? undefined,
+          isApprover: patch.isApprover,
+          isAdmin: patch.isAdmin,
         })
 
         return newRow

@@ -1,6 +1,7 @@
 import { fail } from 'assert'
 import { P, match } from 'ts-pattern'
 import { Schema } from './entity'
+import { OptionTemplate } from './template/types'
 
 export type FieldRef =
   | { fieldId: string }
@@ -25,3 +26,22 @@ export const selectSchemaFieldUnsafe = (schema: Schema, fieldRef: FieldRef) =>
   fail(
     `Field not found in schema. \nResource Type: ${schema.resourceType}\nField Ref: ${JSON.stringify(fieldRef)}`,
   )
+
+export const selectSchemaFieldOptionUnsafe = (
+  schema: Schema,
+  fieldRef: FieldRef,
+  optionRef: OptionTemplate,
+) => {
+  const field = selectSchemaFieldUnsafe(schema, fieldRef)
+
+  const matchedOption = field.options.find(
+    (option) => option.templateId === optionRef.templateId,
+  )
+
+  if (!matchedOption)
+    fail(
+      `Option not found in schema field. \nResource Type: ${schema.resourceType}\nField Ref: ${JSON.stringify(fieldRef)}\nOption Ref: ${JSON.stringify(optionRef)}`,
+    )
+
+  return matchedOption
+}

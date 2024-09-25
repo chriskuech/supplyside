@@ -1,8 +1,16 @@
 'use client'
-import { Avatar, Box, Button, Stack, TextField } from '@mui/material'
+import {
+  Avatar,
+  Box,
+  Button,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
-import { handleSaveSettings } from './actions'
-import { Account } from '@/domain/iam/account/entity'
+import { useState } from 'react'
+import { Errors, handleSaveSettings } from './actions'
+import { Account } from '@/domain/account/entity'
 import { useImagePreview } from '@/lib/hooks/useImagePreview'
 
 type Props = {
@@ -12,9 +20,10 @@ type Props = {
 
 export default function Form({ account, billsEmailDomain }: Props) {
   const { image, handleImageChange } = useImagePreview()
+  const [errors, setErrors] = useState<Errors>()
 
   return (
-    <form action={handleSaveSettings}>
+    <form action={(formData) => handleSaveSettings(formData).then(setErrors)}>
       <Stack spacing={4} direction="column" alignItems="center">
         <Stack spacing={2} alignItems="center">
           <Avatar
@@ -22,6 +31,9 @@ export default function Form({ account, billsEmailDomain }: Props) {
             alt="Logo"
             sx={{ width: 300, height: 300 }}
           />
+          <Typography color="error" textAlign="center">
+            {errors?.file?.join(', ')}
+          </Typography>
           <Box>
             <Button component="label" startIcon={<CloudUpload />}>
               Upload Logo
@@ -44,6 +56,8 @@ export default function Form({ account, billsEmailDomain }: Props) {
           margin="normal"
           name="name"
           defaultValue={account?.name}
+          error={!!errors?.name}
+          helperText={errors?.name}
         />
 
         <TextField
@@ -53,13 +67,17 @@ export default function Form({ account, billsEmailDomain }: Props) {
           margin="normal"
           name="key"
           defaultValue={account?.key}
+          error={!!errors?.key}
           helperText={
             <>
               Your Bills Inbox address is currently{' '}
               <strong>
                 {account?.key ?? <em>(Company ID)</em>}@{billsEmailDomain}
               </strong>
-              .
+              .{' '}
+              <Typography color="error" textAlign="center">
+                {errors?.key?.join(', ')}
+              </Typography>
             </>
           }
         />
@@ -74,6 +92,8 @@ export default function Form({ account, billsEmailDomain }: Props) {
           margin="normal"
           name="address"
           defaultValue={account?.address}
+          error={!!errors?.address}
+          helperText={errors?.address}
         />
 
         <Box>

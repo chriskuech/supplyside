@@ -2,7 +2,7 @@
 
 import { RedirectType, redirect } from 'next/navigation'
 import { createSession } from '@/lib/session/actions'
-import { SessionCreationError } from '@/domain/iam/session/errors'
+import { SessionCreationError } from '@/domain/session/errors'
 
 type LoginParams = {
   email: string

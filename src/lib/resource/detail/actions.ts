@@ -2,13 +2,13 @@
 
 import { ResourceType } from '@prisma/client'
 import { notFound, redirect } from 'next/navigation'
+import { container } from 'tsyringe'
 import { requireSessionWithRedirect, withSession } from '@/lib/session/actions'
-import { readResource } from '@/domain/resource'
-import { readSchema } from '@/domain/schema'
-import { Session } from '@/domain/iam/session/entity'
+import { Session } from '@/domain/session/entity'
 import { Resource } from '@/domain/resource/entity'
 import { Schema } from '@/domain/schema/entity'
-import { cloneResource as domainCloneResource } from '@/domain/resource/clone'
+import { SchemaService } from '@/domain/schema'
+import { ResourceService } from '@/domain/resource'
 
 type DetailPageModel = {
   session: Session
@@ -22,6 +22,8 @@ export const readDetailPageModel = async (
   rawKey: unknown,
   path: string,
 ): Promise<DetailPageModel> => {
+  const schemaService = container.resolve(SchemaService)
+
   const key = Number(rawKey)
 
   if (isNaN(key)) notFound()
@@ -29,19 +31,16 @@ export const readDetailPageModel = async (
   const session = await requireSessionWithRedirect(path)
 
   const [resource, schema, lineSchema] = await Promise.all([
-    readResource({
-      accountId: session.accountId,
-      type: resourceType,
-      key,
-    }).catch(() => null),
-    readSchema({
-      accountId: session.accountId,
-      resourceType,
-    }),
-    readSchema({
-      accountId: session.accountId,
-      resourceType: 'Line',
-    }),
+    container
+      .resolve(ResourceService)
+      .readResource({
+        accountId: session.accountId,
+        type: resourceType,
+        key,
+      })
+      .catch(() => null),
+    schemaService.readSchema(session.accountId, resourceType),
+    schemaService.readSchema(session.accountId, 'Line'),
   ])
 
   if (!resource) notFound()
@@ -51,7 +50,9 @@ export const readDetailPageModel = async (
 
 export const cloneResource = async (resourceId: string) =>
   await withSession(async ({ accountId }) => {
-    const resource = await domainCloneResource(accountId, resourceId)
+    const resource = await container
+      .resolve(ResourceService)
+      .cloneResource(accountId, resourceId)
 
     redirect(`/${resource.type.toLowerCase()}s/${resource.key}?cloned`)
   })

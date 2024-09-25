@@ -5,7 +5,7 @@ export const schemas: SchemaTemplate[] = [
   {
     resourceType: 'Bill',
     fields: [
-      fields.order,
+      fields.purchase,
       fields.billStatus,
       fields.itemizedCosts,
       fields.subtotalCost,
@@ -24,7 +24,7 @@ export const schemas: SchemaTemplate[] = [
           fields.invoiceNumber,
           fields.invoiceDate,
           fields.poNumber,
-          fields.orderDescription,
+          fields.purchaseDescription,
         ],
       },
       {
@@ -39,6 +39,27 @@ export const schemas: SchemaTemplate[] = [
           fields.paymentMethod,
           fields.currency,
         ],
+      },
+    ],
+  },
+  {
+    resourceType: 'Customer',
+    sections: [
+      {
+        name: 'Summary',
+        fields: [
+          fields.name,
+          fields.customerDescription,
+          fields.primaryAddress,
+        ],
+      },
+      {
+        name: 'Contacts',
+        fields: [fields.primaryContact],
+      },
+      {
+        name: 'Payment Info',
+        fields: [fields.paymentTerms, fields.paymentMethod],
       },
     ],
   },
@@ -60,14 +81,14 @@ export const schemas: SchemaTemplate[] = [
       fields.unitCost,
       fields.totalCost,
       fields.needDate,
-      fields.order,
+      fields.purchase,
       fields.bill,
     ],
   },
   {
-    resourceType: 'Order',
+    resourceType: 'Purchase',
     fields: [
-      fields.orderStatus,
+      fields.purchaseStatus,
       fields.poNumber,
       fields.assignee,
       fields.document,
@@ -75,17 +96,18 @@ export const schemas: SchemaTemplate[] = [
       fields.subtotalCost,
       fields.itemizedCosts,
       fields.trackingNumber,
-      fields.orderAttachments,
+      fields.purchaseAttachments,
+      fields.punchoutSessionUrl,
     ],
     sections: [
       {
-        name: 'Order Info',
+        name: 'Purchase Info',
         fields: [
           fields.vendor,
           fields.poRecipient,
-          fields.orderDescription,
+          fields.purchaseDescription,
           fields.issuedDate,
-          fields.orderNotes,
+          fields.purchaseNotes,
         ],
       },
       {

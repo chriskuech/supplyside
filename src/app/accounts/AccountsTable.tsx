@@ -3,10 +3,10 @@
 import { Clear, Sync } from '@mui/icons-material'
 import { IconButton } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
-import { Account } from '@prisma/client'
 import { closeSnackbar, enqueueSnackbar } from 'notistack'
 import { deleteAccount, impersonateAccount, refreshAccount } from './actions'
 import { systemAccountId } from '@/lib/const'
+import { Account } from '@/domain/account/entity'
 
 type Props = {
   accounts: Account[]
