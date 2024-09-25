@@ -1,90 +1,87 @@
 import { CountryCode, Products } from 'plaid'
 import { redirect } from 'next/navigation'
-import { container } from 'tsyringe'
+import { container, singleton } from 'tsyringe'
 import { PrismaService } from '../PrismaService'
 import { plaidClient } from './util'
 import ConfigService from '@/integrations/ConfigService'
 
-export const createLinkToken = async (accountId: string) => {
-  const { config } = container.resolve(ConfigService)
+@singleton()
+export class PlaidService {
+  constructor(private readonly prisma: PrismaService) {}
 
-  const request = {
-    user: {
-      client_user_id: accountId,
-    },
-    client_name: 'Supply Side',
-    products: [Products.Auth],
-    language: 'en',
-    redirect_uri: `${config.BASE_URL}/account/integrations`,
-    country_codes: [CountryCode.Us],
+  async createConnection(accountId: string, publicToken: string) {
+    const exchangeResponse = await plaidClient().itemPublicTokenExchange({
+      public_token: publicToken,
+    })
+
+    await this.prisma.account.update({
+      where: { id: accountId },
+      data: {
+        plaidConnectedAt: new Date(),
+        plaidToken: exchangeResponse.data.access_token,
+      },
+    })
   }
 
-  const linkTokenResponse = await plaidClient().linkTokenCreate(request)
-  return linkTokenResponse.data
-}
+  async getPlaidToken(accountId: string): Promise<string | null> {
+    const prisma = container.resolve(PrismaService)
 
-export async function createConnection(accountId: string, publicToken: string) {
-  const prisma = container.resolve(PrismaService)
+    const account = await prisma.account.findUniqueOrThrow({
+      where: { id: accountId },
+    })
 
-  const exchangeResponse = await plaidClient().itemPublicTokenExchange({
-    public_token: publicToken,
-  })
+    if (!account.plaidConnectedAt || !account.plaidToken) {
+      return null
+    }
 
-  await prisma.account.update({
-    where: { id: accountId },
-    data: {
-      plaidConnectedAt: new Date(),
-      plaidToken: exchangeResponse.data.access_token,
-    },
-  })
-}
-
-export async function deletePlaidToken(accountId: string) {
-  const prisma = container.resolve(PrismaService)
-
-  await prisma.account.update({
-    where: { id: accountId },
-    data: {
-      plaidConnectedAt: null,
-      plaidToken: null,
-    },
-  })
-}
-
-export const getPlaidToken = async (
-  accountId: string,
-): Promise<string | null> => {
-  const prisma = container.resolve(PrismaService)
-
-  const account = await prisma.account.findUniqueOrThrow({
-    where: { id: accountId },
-  })
-
-  if (!account.plaidConnectedAt || !account.plaidToken) {
-    return null
+    return account.plaidToken
   }
 
-  return account.plaidToken
-}
-
-// TODO: this references `next` which is not available in the domain layer
-export const requireTokenWithRedirect = async (
-  accountId: string,
-): Promise<string> => {
-  const token = await getPlaidToken(accountId)
-
-  if (!token) {
-    redirect('account/integrations')
+  async deletePlaidToken(accountId: string) {
+    await this.prisma.account.update({
+      where: { id: accountId },
+      data: {
+        plaidConnectedAt: null,
+        plaidToken: null,
+      },
+    })
   }
 
-  return token
-}
+  // TODO: this references `next` which is not available in the domain layer
+  async requireTokenWithRedirect(accountId: string): Promise<string> {
+    const token = await this.getPlaidToken(accountId)
 
-export const getPlaidAccounts = async (accountId: string) => {
-  const token = await requireTokenWithRedirect(accountId)
+    if (!token) {
+      redirect('account/integrations')
+    }
 
-  const accountsResponse = await plaidClient().accountsGet({
-    access_token: token,
-  })
-  return accountsResponse.data.accounts
+    return token
+  }
+
+  async createLinkToken(accountId: string) {
+    const { config } = container.resolve(ConfigService)
+
+    const request = {
+      user: {
+        client_user_id: accountId,
+      },
+      client_name: 'Supply Side',
+      products: [Products.Auth],
+      language: 'en',
+      redirect_uri: `${config.BASE_URL}/account/integrations`,
+      country_codes: [CountryCode.Us],
+    }
+
+    const linkTokenResponse = await plaidClient().linkTokenCreate(request)
+    return linkTokenResponse.data
+  }
+
+  async getPlaidAccounts(accountId: string) {
+    const token = await this.requireTokenWithRedirect(accountId)
+
+    const accountsResponse = await plaidClient().accountsGet({
+      access_token: token,
+    })
+    return accountsResponse.data.accounts
+  }
 }

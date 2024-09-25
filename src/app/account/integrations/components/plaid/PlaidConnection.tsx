@@ -1,15 +1,18 @@
 import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
+import { container } from 'tsyringe'
 import PlaidDisconnectLink from './PlaidDisconnectLink'
 import { Session } from '@/domain/session/entity'
-import { getPlaidAccounts } from '@/integrations/plaid'
+import { PlaidService } from '@/integrations/plaid'
 
 type Props = {
   session: Session
 }
 
 export default async function PlaidConnection({ session }: Props) {
-  const accounts = await getPlaidAccounts(session.accountId)
+  const plaidService = container.resolve(PlaidService)
+
+  const accounts = await plaidService.getPlaidAccounts(session.accountId)
 
   return (
     <Stack gap={2}>
