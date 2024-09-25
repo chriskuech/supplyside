@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
-import { ResourceService } from '@/domain/resource/service'
+import { ResourceService } from '@/domain/resource'
 import { PoRenderingService } from '@/domain/purchase/PoRenderingService'
 
 /**

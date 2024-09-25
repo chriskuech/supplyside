@@ -4,12 +4,7 @@ import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 import { validate as isUuid } from 'uuid'
 import { container } from 'tsyringe'
-import {
-  ResourceFieldInput,
-  readResource,
-  readResources,
-  updateResource,
-} from '../resource'
+import { ResourceFieldInput, ResourceService } from '../resource/service'
 import { selectResourceFieldValue } from '../resource/extensions'
 import { fields } from '../schema/template/system-fields'
 import { selectSchemaFieldUnsafe } from '../schema/extensions'
@@ -50,15 +45,16 @@ export const extractContent = async (accountId: string, resourceId: string) => {
   const openai = container.resolve(OpenAiService)
   const schemaService = container.resolve(SchemaService)
   const completionPartsService = container.resolve(CompletionPartsService)
+  const resourceService = container.resolve(ResourceService)
 
   const [billSchema, billResource, vendors] = await Promise.all([
     schemaService.readSchema(accountId, 'Bill'),
-    readResource({
+    resourceService.readResource({
       id: resourceId,
       accountId,
       type: 'Bill',
     }),
-    readResources({
+    resourceService.readResources({
       accountId,
       type: 'Vendor',
     }),
@@ -115,7 +111,7 @@ export const extractContent = async (accountId: string, resourceId: string) => {
     .safeParse(poNumber)?.data
   const [pruchase, ...purchases] =
     poNumberAsNumber && vendorId
-      ? await readResources({
+      ? await resourceService.readResources({
           accountId,
           type: 'Purchase',
           where: {
@@ -166,5 +162,9 @@ export const extractContent = async (accountId: string, resourceId: string) => {
 
   if (!updatedFields.length) return
 
-  await updateResource({ resourceId, accountId, fields: updatedFields })
+  await resourceService.updateResource({
+    resourceId,
+    accountId,
+    fields: updatedFields,
+  })
 }

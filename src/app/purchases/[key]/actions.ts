@@ -7,7 +7,7 @@ import {
 } from '@/domain/schema/template/system-fields'
 import { transitionStatus } from '@/lib/resource/actions'
 import { readSession } from '@/lib/session/actions'
-import { ResourceService } from '@/domain/resource/service'
+import { ResourceService } from '@/domain/resource'
 import { PoService } from '@/domain/purchase/PoService'
 
 export const createPo = async (resourceId: string) => {

@@ -16,14 +16,6 @@ import {
 import { McMasterInvalidCredentials } from './errors'
 import { resources } from '@/domain/schema/template/system-resources'
 import {
-  updateTemplateId,
-  createResource,
-  findByTemplateId,
-  updateResource,
-  findResources,
-  updateResourceField,
-} from '@/domain/resource'
-import {
   selectSchemaFieldOptionUnsafe,
   selectSchemaFieldUnsafe,
 } from '@/domain/schema/extensions'
@@ -32,6 +24,7 @@ import {
   unitOfMeasureOptions,
 } from '@/domain/schema/template/system-fields'
 import { SchemaService } from '@/domain/schema'
+import { ResourceService } from '@/domain/resource'
 
 @singleton()
 export class McMasterService {
@@ -39,6 +32,7 @@ export class McMasterService {
     private readonly prisma: PrismaService,
     private readonly schemaService: SchemaService,
     private readonly configService: ConfigService,
+    private readonly resourceService: ResourceService,
   ) {}
 
   async createConnection(
@@ -56,7 +50,7 @@ export class McMasterService {
       throw new McMasterInvalidCredentials('Invalid credentials')
     }
 
-    const [mcMasterCarrVendor] = await findResources({
+    const [mcMasterCarrVendor] = await this.resourceService.findResources({
       accountId,
       resourceType: 'Vendor',
       input: 'McMaster-Carr',
@@ -70,7 +64,7 @@ export class McMasterService {
     const mcMasterCarrSystemResource = resources().mcMasterCarrVendor
 
     if (!mcMasterCarrVendor) {
-      await createResource({
+      await this.resourceService.createResource({
         accountId,
         type: 'Vendor',
         templateId: mcMasterCarrSystemResource.templateId,
@@ -80,7 +74,7 @@ export class McMasterService {
         })),
       })
     } else {
-      await updateResource({
+      await this.resourceService.updateResource({
         accountId,
         resourceId: mcMasterCarrVendor.id,
         fields: mcMasterCarrSystemResource.fields.map((f) => ({
@@ -90,7 +84,7 @@ export class McMasterService {
       })
 
       if (!mcMasterCarrVendor.templateId) {
-        await updateTemplateId({
+        await this.resourceService.updateTemplateId({
           accountId,
           resourceId: mcMasterCarrVendor.id,
           templateId: mcMasterCarrSystemResource.templateId,
@@ -109,13 +103,13 @@ export class McMasterService {
   }
 
   async disconnect(accountId: string) {
-    const mcMasterCarrVendor = await findByTemplateId({
+    const mcMasterCarrVendor = await this.resourceService.findByTemplateId({
       accountId,
       templateId: resources().mcMasterCarrVendor.templateId,
     })
 
     if (mcMasterCarrVendor) {
-      await updateTemplateId({
+      await this.resourceService.updateTemplateId({
         accountId,
         resourceId: mcMasterCarrVendor.id,
         templateId: null,
@@ -136,7 +130,7 @@ export class McMasterService {
     accountId: string,
     resourceId: string,
   ): Promise<string> {
-    const { posrUrl } = await this.getMcMasterCarrConfigUnsafe()
+    const { posrUrl } = this.getMcMasterCarrConfigUnsafe()
     const { mcMasterCarrPassword, mcMasterCarrUsername } =
       await this.getCredentials(accountId)
     const body = await this.createPunchOutServiceRequestBody(
@@ -166,7 +160,7 @@ export class McMasterService {
       purchaseSchema,
       fields.punchoutSessionUrl,
     ).id
-    await updateResourceField({
+    await this.resourceService.updateResourceField({
       accountId,
       resourceId,
       fieldId,
@@ -299,7 +293,7 @@ export class McMasterService {
       purchaseSchema,
       fields.issuedDate,
     ).id
-    await updateResourceField({
+    await this.resourceService.updateResourceField({
       accountId,
       resourceId: orderId,
       fieldId: issuedDateFieldId,
@@ -312,7 +306,7 @@ export class McMasterService {
       const { description, quantity, unitOfMeasure, unitPrice } = item
 
       // TODO: Should we match by id?
-      const [matchedItem] = await findResources({
+      const [matchedItem] = await this.resourceService.findResources({
         accountId,
         resourceType: 'Item',
         input: description,
@@ -337,7 +331,7 @@ export class McMasterService {
           unitOfMeasure,
         ).id
 
-        const newResource = await createResource({
+        const newResource = await this.resourceService.createResource({
           accountId,
           type: 'Item',
           fields: [
@@ -375,7 +369,7 @@ export class McMasterService {
         unitOfMeasure,
       ).id
 
-      const createdLine = await createResource({
+      const createdLine = await this.resourceService.createResource({
         accountId,
         type: 'Line',
         fields: [
@@ -396,7 +390,7 @@ export class McMasterService {
 
       // Updating the resource to trigger calculations
       //TODO: update createResource to trigger calculations
-      updateResource({
+      this.resourceService.updateResource({
         accountId,
         resourceId: createdLine.id,
         fields: [

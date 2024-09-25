@@ -2,7 +2,6 @@ import assert from 'assert'
 import { NextRequest, NextResponse } from 'next/server'
 import { Message } from 'postmark'
 import { container } from 'tsyringe'
-import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { Resource } from '@/domain/resource/entity'
@@ -10,6 +9,7 @@ import SmtpService from '@/integrations/SmtpService'
 import { FileService } from '@/domain/file'
 import { AccountService } from '@/domain/account'
 import { SchemaService } from '@/domain/schema'
+import { ResourceService } from '@/domain/resource'
 
 type FileParam = {
   content: string
@@ -25,6 +25,7 @@ type Params = {
 
 const createBill = async (params: Params): Promise<Resource> => {
   const fileService = container.resolve(FileService)
+  const resourceService = container.resolve(ResourceService)
   const schemaService = container.resolve(SchemaService)
 
   const billSchema = await schemaService.readSchema(params.accountId, 'Bill')
@@ -46,7 +47,7 @@ const createBill = async (params: Params): Promise<Resource> => {
 
   console.log('Creating Bill', fileIds)
 
-  const bill = await createResource({
+  const bill = await resourceService.createResource({
     accountId: params.accountId,
     type: 'Bill',
     fields: [

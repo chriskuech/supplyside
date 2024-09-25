@@ -4,16 +4,18 @@ import { container } from 'tsyringe'
 import ConfigService from '@/integrations/ConfigService'
 import { McMasterService } from '@/integrations/mcMasterCarr'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const { config } = container.resolve(ConfigService)
   const mcMasterCarrService = container.resolve(McMasterService)
 
   const cxmlUrlEncoded = await request.text()
-  const cxmlUrlDecoded = decodeURIComponent(cxmlUrlEncoded)
-  const cxml = cxmlUrlDecoded
+  const cxml = decodeURIComponent(cxmlUrlEncoded)
     .replace('cxml-urlencoded=', '')
     .replaceAll('+', ' ')
   const cxmlString = await parseStringPromise(cxml)
+
   await mcMasterCarrService.processPoom(cxmlString)
 
   return new NextResponse(
@@ -24,7 +26,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           <script>
             window.onload = function() {
               // Check if the current frame is not the topmost frame
-              if (window !== window.top) { 
+              if (window !== window.top) {
                 // Change location of the parent frame
                 window.top.location.href = "${config.BASE_URL}/purchases";
               }

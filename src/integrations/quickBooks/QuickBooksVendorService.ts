@@ -13,13 +13,6 @@ import { MAX_ENTITIES_PER_PAGE } from './constants'
 import { QuickBooksClientService } from './QuickBooksClientService'
 import { mapValue } from './mapValue'
 import {
-  createResource,
-  findResources,
-  readResources,
-  updateResource,
-  updateResourceField,
-} from '@/domain/resource'
-import {
   selectSchemaField,
   selectSchemaFieldUnsafe,
 } from '@/domain/schema/extensions'
@@ -27,12 +20,14 @@ import { fields } from '@/domain/schema/template/system-fields'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { SchemaService } from '@/domain/schema'
+import { ResourceService } from '@/domain/resource'
 
 @singleton()
 export class QuickBooksVendorService {
   constructor(
     private readonly schemaService: SchemaService,
     private readonly quickBooksClientService: QuickBooksClientService,
+    private readonly resourceService: ResourceService,
   ) {}
 
   async readVendor(client: OAuthClient, vendorId: string): Promise<Vendor> {
@@ -78,7 +73,7 @@ export class QuickBooksVendorService {
     )
 
     const [currentVendors, vendorSchema] = await Promise.all([
-      readResources({ accountId, type: 'Vendor' }),
+      this.resourceService.readResources({ accountId, type: 'Vendor' }),
       this.schemaService.readSchema(accountId, 'Vendor'),
     ])
 
@@ -116,7 +111,7 @@ export class QuickBooksVendorService {
 
         if (vendorName === quickBooksVendor.DisplayName) return
 
-        return updateResourceField({
+        return this.resourceService.updateResourceField({
           accountId,
           resourceId: vendor.id,
           fieldId: vendorNameField.id,
@@ -127,7 +122,7 @@ export class QuickBooksVendorService {
 
     // `Resource.key` is (currently) created transactionally and thus not parallelizable
     for (const quickBooksVendorToAdd of quickBooksVendorsToAdd) {
-      const [vendor] = await findResources({
+      const [vendor] = await this.resourceService.findResources({
         accountId,
         resourceType: 'Vendor',
         input: quickBooksVendorToAdd.DisplayName,
@@ -135,7 +130,7 @@ export class QuickBooksVendorService {
       })
 
       if (vendor) {
-        await updateResource({
+        await this.resourceService.updateResource({
           accountId,
           resourceId: vendor.id,
           fields: [
@@ -150,7 +145,7 @@ export class QuickBooksVendorService {
           ],
         })
       } else {
-        await createResource({
+        await this.resourceService.createResource({
           accountId,
           type: 'Vendor',
           fields: [
@@ -199,7 +194,7 @@ export class QuickBooksVendorService {
 
     assert(quickBooksVendorIdField, 'quickBooksVendorId field not found')
 
-    await updateResourceField({
+    await this.resourceService.updateResourceField({
       accountId,
       resourceId: vendor.id,
       fieldId: quickBooksVendorIdField,

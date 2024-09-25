@@ -1,7 +1,6 @@
 'use server'
 
 import { container } from 'tsyringe'
-import { readResource } from '@/domain/resource'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { ValueResource } from '@/domain/resource/entity'
@@ -10,6 +9,7 @@ import { withSession } from '@/lib/session/actions'
 import { User } from '@/domain/user/entity'
 import { UserService } from '@/domain/user'
 import { FileService } from '@/domain/file'
+import { ResourceService } from '@/domain/resource'
 
 type ResourceFieldActionParams = {
   resourceId: string
@@ -55,10 +55,13 @@ export const readResourceFieldFileAction = ({
   resourceId,
 }: ResourceFieldActionParams): Promise<File | undefined> =>
   withSession(({ accountId }) =>
-    readResource({ accountId, id: resourceId }).then(
-      (resource) =>
-        selectResourceFieldValue(resource, { fieldId })?.file ?? undefined,
-    ),
+    container
+      .resolve(ResourceService)
+      .readResource({ accountId, id: resourceId })
+      .then(
+        (resource) =>
+          selectResourceFieldValue(resource, { fieldId })?.file ?? undefined,
+      ),
   )
 
 export const readResourceFieldFilesAction = ({
@@ -66,10 +69,13 @@ export const readResourceFieldFilesAction = ({
   resourceId,
 }: ResourceFieldActionParams): Promise<File[] | undefined> =>
   withSession(({ accountId }) =>
-    readResource({ accountId, id: resourceId }).then(
-      (resource) =>
-        selectResourceFieldValue(resource, { fieldId })?.files ?? [],
-    ),
+    container
+      .resolve(ResourceService)
+      .readResource({ accountId, id: resourceId })
+      .then(
+        (resource) =>
+          selectResourceFieldValue(resource, { fieldId })?.files ?? [],
+      ),
   )
 
 export const readResourceFieldResourceAction = ({
@@ -77,10 +83,14 @@ export const readResourceFieldResourceAction = ({
   resourceId,
 }: ResourceFieldActionParams): Promise<ValueResource | undefined> =>
   withSession(({ accountId }) =>
-    readResource({ accountId, id: resourceId }).then(
-      (resource) =>
-        selectResourceFieldValue(resource, { fieldId })?.resource ?? undefined,
-    ),
+    container
+      .resolve(ResourceService)
+      .readResource({ accountId, id: resourceId })
+      .then(
+        (resource) =>
+          selectResourceFieldValue(resource, { fieldId })?.resource ??
+          undefined,
+      ),
   )
 
 export const readResourceAction = ({
@@ -88,7 +98,11 @@ export const readResourceAction = ({
 }: {
   resourceId: string
 }): Promise<Resource> =>
-  withSession(({ accountId }) => readResource({ accountId, id: resourceId }))
+  withSession(({ accountId }) =>
+    container
+      .resolve(ResourceService)
+      .readResource({ accountId, id: resourceId }),
+  )
 
 export const readUsersAction = (): Promise<User[]> =>
   withSession(({ accountId }) => container.resolve(UserService).list(accountId))

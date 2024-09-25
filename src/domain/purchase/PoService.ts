@@ -1,11 +1,11 @@
 import { singleton } from 'tsyringe'
 import BlobService from '../blob'
-import { updateResourceField, readResource } from '../resource'
 import { selectResourceFieldValue } from '../resource/extensions'
 import { SchemaService } from '../schema'
 import { selectSchemaFieldUnsafe } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { AccountService } from '../account'
+import { ResourceService } from '../resource/service'
 import { PoRenderingService } from './PoRenderingService'
 import { PrismaService } from '@/integrations/PrismaService'
 import ConfigService from '@/integrations/ConfigService'
@@ -19,6 +19,7 @@ export class PoService {
     private readonly configService: ConfigService,
     private readonly poRenderingService: PoRenderingService,
     private readonly prisma: PrismaService,
+    private readonly resourceService: ResourceService,
     private readonly schemaService: SchemaService,
     private readonly smtpService: SmtpService,
   ) {}
@@ -32,7 +33,7 @@ export class PoService {
       fields.issuedDate,
     ).id
 
-    await updateResourceField({
+    await this.resourceService.updateResourceField({
       accountId,
       resourceId,
       fieldId: issuedDateFieldId,
@@ -50,7 +51,7 @@ export class PoService {
         buffer,
         type: 'application/pdf',
       }),
-      readResource({ accountId, id: resourceId }),
+      this.resourceService.readResource({ accountId, id: resourceId }),
     ])
 
     const vendorName = selectResourceFieldValue(resource, fields.vendor)
@@ -69,7 +70,7 @@ export class PoService {
       },
     })
 
-    await updateResourceField({
+    await this.resourceService.updateResourceField({
       accountId,
       resourceId,
       fieldId: documentFieldId,
@@ -79,7 +80,7 @@ export class PoService {
 
   async sendPo(accountId: string, resourceId: string) {
     const [order, account] = await Promise.all([
-      readResource({
+      this.resourceService.readResource({
         type: 'Purchase',
         id: resourceId,
         accountId,

@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 import { container } from 'tsyringe'
 import CreateResourceButton from './CreateResourceButton'
 import { ResourceTable } from './table'
-import { readResources } from '@/domain/resource'
+import { ResourceService } from '@/domain/resource'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 import { SchemaService } from '@/domain/schema'
 
@@ -22,11 +22,12 @@ export default async function ListPage({
   callToActions = [],
 }: Props) {
   const schemaService = container.resolve(SchemaService)
+  const resourceService = container.resolve(ResourceService)
 
   const { accountId } = await requireSessionWithRedirect(path)
   const [schema, resources] = await Promise.all([
     schemaService.readSchema(accountId, resourceType),
-    readResources({ accountId, type: resourceType }),
+    resourceService.readResources({ accountId, type: resourceType }),
   ])
 
   return (

@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation'
 import { ResourceType } from '@prisma/client'
 import { container } from 'tsyringe'
 import { withSession } from '../session/actions'
-import * as domain from '@/domain/resource'
 import { Resource } from '@/domain/resource/entity'
 import { ValueResource } from '@/domain/resource/entity'
 import { FieldTemplate, OptionTemplate } from '@/domain/schema/template/types'
@@ -17,9 +16,17 @@ import {
 import { fields } from '@/domain/schema/template/system-fields'
 import { DuplicateResourceError } from '@/domain/resource/errors'
 import { SchemaService } from '@/domain/schema'
+import {
+  CreateResourceParams,
+  DeleteResourceParams,
+  ReadResourcesParams,
+  ResourceService,
+  UpdateResourceFieldParams,
+  UpdateResourceParams,
+} from '@/domain/resource'
 
 export const createResource = async (
-  params: Pick<domain.CreateResourceParams, 'type' | 'fields'>,
+  params: Pick<CreateResourceParams, 'type' | 'fields'>,
 ): Promise<Resource> =>
   await withSession(async ({ accountId, userId }) => {
     const schema = await container
@@ -38,7 +45,9 @@ export const createResource = async (
 
     revalidatePath('')
 
-    return domain.createResource({ ...params, accountId })
+    return container
+      .resolve(ResourceService)
+      .createResource({ ...params, accountId })
   })
 
 type ReadResourceParams = {
@@ -52,36 +61,44 @@ export const readResource = async (
 ): Promise<Resource> =>
   await withSession(
     async ({ accountId }) =>
-      await domain.readResource({ ...params, accountId }),
+      await container
+        .resolve(ResourceService)
+        .readResource({ ...params, accountId }),
   )
 
 export const readResources = async (
-  params: Omit<domain.ReadResourcesParams, 'accountId'>,
+  params: Omit<ReadResourcesParams, 'accountId'>,
 ): Promise<Resource[]> =>
   await withSession(
     async ({ accountId }) =>
-      await domain.readResources({ ...params, accountId }),
+      await container
+        .resolve(ResourceService)
+        .readResources({ ...params, accountId }),
   )
 
 export const updateResource = async (
-  params: Omit<domain.UpdateResourceParams, 'accountId'>,
+  params: Omit<UpdateResourceParams, 'accountId'>,
 ): Promise<Resource> =>
   await withSession(async ({ accountId }) => {
     revalidatePath('')
 
-    return domain.updateResource({ ...params, accountId })
+    return container
+      .resolve(ResourceService)
+      .updateResource({ ...params, accountId })
   })
 
 export const deleteResource = async ({
   resourceType,
   ...params
-}: Omit<domain.DeleteResourceParams, 'accountId'> & {
+}: Omit<DeleteResourceParams, 'accountId'> & {
   resourceType?: ResourceType
 }): Promise<void> =>
   await withSession(async ({ accountId }) => {
     revalidatePath('')
 
-    await domain.deleteResource({ ...params, accountId })
+    await container
+      .resolve(ResourceService)
+      .deleteResource({ ...params, accountId })
 
     if (!resourceType) return
 
@@ -100,7 +117,9 @@ export const findResources = async ({
   exact,
 }: FindResourcesParams): Promise<ValueResource[]> =>
   await withSession(({ accountId }) =>
-    domain.findResources({ accountId, input, resourceType, exact }),
+    container
+      .resolve(ResourceService)
+      .findResources({ accountId, input, resourceType, exact }),
   )
 
 export const transitionStatus = async (
@@ -118,7 +137,7 @@ export const transitionStatus = async (
   const field =
     selectSchemaField(schema, fieldTemplate) ?? fail('Field not found')
 
-  await domain.updateResourceField({
+  await container.resolve(ResourceService).updateResourceField({
     accountId,
     resourceId,
     fieldId: field.id,
@@ -133,13 +152,15 @@ export const transitionStatus = async (
 }
 
 export const updateResourceField = async (
-  params: Omit<domain.UpdateResourceFieldParams, 'accountId'>,
+  params: Omit<UpdateResourceFieldParams, 'accountId'>,
 ): Promise<Resource | { error: string }> =>
   await withSession(async ({ accountId }) => {
-    const resource = await domain.updateResourceField({
-      ...params,
-      accountId,
-    })
+    const resource = await container
+      .resolve(ResourceService)
+      .updateResourceField({
+        ...params,
+        accountId,
+      })
 
     revalidatePath('')
 

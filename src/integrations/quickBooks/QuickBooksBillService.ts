@@ -9,12 +9,12 @@ import { mapValue } from './mapValue'
 import { QuickBooksVendorService } from './QuickBooksVendorService'
 import { QuickBooksExpectedError } from './errors'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
-import { readResource, updateResourceField } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectSchemaField } from '@/domain/schema/extensions'
 import { SchemaService } from '@/domain/schema'
 import { Resource } from '@/domain/resource/entity'
 import ConfigService from '@/integrations/ConfigService'
+import { ResourceService } from '@/domain/resource'
 
 const fieldsMap = [
   {
@@ -42,6 +42,7 @@ export class QuickBooksBillService {
     private readonly schemaService: SchemaService,
     private readonly quickBooksVendorService: QuickBooksVendorService,
     private readonly configService: ConfigService,
+    private readonly resourceService: ResourceService,
   ) {}
 
   async readBill(client: OAuthClient, id: string): Promise<Bill> {
@@ -90,7 +91,7 @@ export class QuickBooksBillService {
 
     assert(quickBooksBillIdField, 'quickBooksBillId field not found')
 
-    await updateResourceField({
+    await this.resourceService.updateResourceField({
       accountId,
       resourceId: bill.id,
       fieldId: quickBooksBillIdField,
@@ -174,7 +175,11 @@ export class QuickBooksBillService {
     accountId: string,
     resourceId: string,
   ): Promise<void> {
-    const bill = await readResource({ accountId, type: 'Bill', id: resourceId })
+    const bill = await this.resourceService.readResource({
+      accountId,
+      type: 'Bill',
+      id: resourceId,
+    })
 
     const quickBooksAccountName = selectResourceFieldValue(
       bill,
@@ -203,7 +208,10 @@ export class QuickBooksBillService {
 
     const vendorId = selectResourceFieldValue(bill, fields.vendor)?.resource?.id
     assert(vendorId, 'Vendor not set')
-    const vendorResource = await readResource({ accountId, id: vendorId })
+    const vendorResource = await this.resourceService.readResource({
+      accountId,
+      id: vendorId,
+    })
 
     const quickBooksVendor =
       await this.quickBooksVendorService.upsertVendorOnQuickBooks(

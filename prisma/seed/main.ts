@@ -5,16 +5,17 @@ import { ResourceType } from '@prisma/client'
 import { container } from 'tsyringe'
 import { systemAccountId } from '@/lib/const'
 import { TemplateService } from '@/domain/schema/template'
-import { createResource } from '@/domain/resource'
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { PrismaService } from '@/integrations/PrismaService'
 import { SchemaService } from '@/domain/schema'
+import { ResourceService } from '@/domain/resource'
 
 expandDotenv(loadDotenv())
 
 const prisma = container.resolve(PrismaService)
 const schemaService = container.resolve(SchemaService)
+const resourceService = container.resolve(ResourceService)
 const templateService = container.resolve(TemplateService)
 
 const config = z
@@ -88,7 +89,7 @@ async function main() {
     ResourceType.Vendor,
   )
 
-  const vendor = await createResource({
+  const vendor = await resourceService.createResource({
     accountId: customerAccount.id,
     type: ResourceType.Vendor,
     fields: [
@@ -104,7 +105,7 @@ async function main() {
     ResourceType.Purchase,
   )
 
-  const purchase = await createResource({
+  const purchase = await resourceService.createResource({
     accountId: customerAccount.id,
     type: ResourceType.Purchase,
     fields: [
@@ -128,7 +129,7 @@ async function main() {
     ResourceType.Item,
   )
 
-  const item1 = await createResource({
+  const item1 = await resourceService.createResource({
     accountId: customerAccount.id,
     type: ResourceType.Item,
     fields: [
@@ -153,7 +154,7 @@ async function main() {
     ResourceType.Line,
   )
 
-  await createResource({
+  await resourceService.createResource({
     accountId: customerAccount.id,
     type: ResourceType.Line,
     fields: [
@@ -168,7 +169,7 @@ async function main() {
     ],
   })
 
-  const item2 = await createResource({
+  const item2 = await resourceService.createResource({
     accountId: customerAccount.id,
     type: ResourceType.Item,
     fields: [
@@ -188,7 +189,7 @@ async function main() {
     ],
   })
 
-  await createResource({
+  await resourceService.createResource({
     accountId: customerAccount.id,
     type: ResourceType.Line,
     fields: [

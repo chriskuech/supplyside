@@ -5,7 +5,7 @@ import ItemizedCostLines from '../costs/ItemizedCostLines'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { Resource } from '@/domain/resource/entity'
 import { Where } from '@/domain/resource/json-logic/types'
-import { ResourceFieldInput, readResources } from '@/domain/resource'
+import { ResourceFieldInput, ResourceService } from '@/domain/resource'
 import { Schema } from '@/domain/schema/entity'
 import { fields } from '@/domain/schema/template/system-fields'
 import { SchemaService } from '@/domain/schema'
@@ -26,7 +26,7 @@ export default async function LinesAndCosts({
   const schemaService = container.resolve(SchemaService)
 
   const [lines, lineSchema] = await Promise.all([
-    readResources({
+    container.resolve(ResourceService).readResources({
       accountId: resource.accountId,
       type: 'Line',
       where: lineQuery,
