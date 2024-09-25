@@ -1,26 +1,38 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import * as domain from '@/domain/resource/costs'
+import { container } from 'tsyringe'
 import { withSession } from '@/lib/session/actions'
+import { CostService } from '@/domain/resource/costs'
 
-export const createCost = (
-  params: Omit<domain.CreateCostParams, 'accountId'>,
-) =>
+export const createCost = (resourceId: string) =>
   withSession(({ accountId }) =>
-    domain.createCost({ ...params, accountId }).then(() => revalidatePath('')),
+    container
+      .resolve(CostService)
+      .create(accountId, resourceId)
+      .then(() => revalidatePath('')),
   )
 
 export const updateCost = (
-  params: Omit<domain.UpdateCostParams, 'accountId'>,
+  resourceId: string,
+  costId: string,
+  data: {
+    name?: string
+    isPercentage?: boolean
+    value?: number
+  },
 ) =>
   withSession(({ accountId }) =>
-    domain.updateCost({ ...params, accountId }).then(() => revalidatePath('')),
+    container
+      .resolve(CostService)
+      .update(accountId, resourceId, costId, data)
+      .then(() => revalidatePath('')),
   )
 
-export const deleteCost = (
-  params: Omit<domain.DeleteCostParams, 'accountId'>,
-) =>
+export const deleteCost = (resourceId: string, costId: string) =>
   withSession(({ accountId }) =>
-    domain.deleteCost({ ...params, accountId }).then(() => revalidatePath('')),
+    container
+      .resolve(CostService)
+      .delete(accountId, resourceId, costId)
+      .then(() => revalidatePath('')),
   )

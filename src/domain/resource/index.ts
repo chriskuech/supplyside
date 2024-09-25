@@ -6,7 +6,6 @@ import { selectSchemaField } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { SchemaField } from '../schema/entity'
 import { SchemaService } from '../schema'
-import { recalculateSubtotalCost } from './costs'
 import { selectResourceFieldValue } from './extensions'
 import {
   mapValueInputToPrismaValueCreate,
@@ -22,6 +21,7 @@ import { mapResourceModelToEntity } from './mappers'
 import { resourceInclude } from './model'
 import { handleResourceCreate, handleResourceUpdate } from './effects'
 import { DuplicateResourceError } from './errors'
+import { CostService } from './costs'
 import { PrismaService } from '@/integrations/PrismaService'
 
 export type ResourceFieldInput = {
@@ -265,6 +265,7 @@ export const deleteResource = async ({
   id,
 }: DeleteResourceParams): Promise<void> => {
   const prisma = container.resolve(PrismaService)
+  const costService = container.resolve(CostService)
 
   const model = await prisma.resource.delete({
     where: { id, accountId },
@@ -276,12 +277,16 @@ export const deleteResource = async ({
     const purchaseId = selectResourceFieldValue(entity, fields.purchase)
       ?.resource?.id
     if (purchaseId) {
-      await recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
+      await costService.recalculateSubtotalCost(
+        accountId,
+        'Purchase',
+        purchaseId,
+      )
     }
 
     const billId = selectResourceFieldValue(entity, fields.bill)?.resource?.id
     if (billId) {
-      await recalculateSubtotalCost(accountId, 'Bill', billId)
+      await costService.recalculateSubtotalCost(accountId, 'Bill', billId)
     }
   }
 }

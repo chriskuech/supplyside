@@ -6,9 +6,9 @@ import { fields } from '../schema/template/system-fields'
 import { extractContent } from '../bill/extractData'
 import { SchemaService } from '../schema'
 import { selectResourceFieldValue } from './extensions'
-import { recalculateItemizedCosts, recalculateSubtotalCost } from './costs'
 import { Resource, Value, ValueResource } from './entity'
 import { linkResource } from './link'
+import { CostService } from './costs'
 import { readResource, updateResourceField } from '.'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
@@ -59,6 +59,7 @@ export const handleResourceUpdate = async ({
   updatedFields,
 }: HandleResourceUpdateParams) => {
   const schemaService = container.resolve(SchemaService)
+  const costService = container.resolve(CostService)
 
   // When a Resource Field is updated,
   // Then copy the linked Resource's Fields
@@ -124,12 +125,16 @@ export const handleResourceUpdate = async ({
     const purchaseId = selectResourceFieldValue(resource, fields.purchase)
       ?.resource?.id
     if (purchaseId) {
-      await recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
+      await costService.recalculateSubtotalCost(
+        accountId,
+        'Purchase',
+        purchaseId,
+      )
     }
 
     const billId = selectResourceFieldValue(resource, fields.bill)?.resource?.id
     if (billId) {
-      await recalculateSubtotalCost(accountId, 'Bill', billId)
+      await costService.recalculateSubtotalCost(accountId, 'Bill', billId)
     }
   }
 
@@ -141,7 +146,7 @@ export const handleResourceUpdate = async ({
       (rf) => rf.field.templateId === fields.subtotalCost.templateId,
     )
   ) {
-    await recalculateItemizedCosts(accountId, resource.id)
+    await costService.recalculateItemizedCosts(accountId, resource.id)
   }
 
   // When the {Bill|Purchase}."Itemized Costs" or {Bill|Purchase}."Subtotal Cost" field is updated,
@@ -183,7 +188,7 @@ export const handleResourceUpdate = async ({
       (rf) => rf.field.templateId === fields.purchase.templateId,
     )
   ) {
-    await recalculateSubtotalCost(accountId, 'Bill', resource.id)
+    await costService.recalculateSubtotalCost(accountId, 'Bill', resource.id)
 
     resource = await readResource({ accountId, id: resource.id })
   }

@@ -1,12 +1,12 @@
 import assert from 'assert'
 import { faker } from '@faker-js/faker'
+import { container } from 'tsyringe'
 import { baseUrl, query, requireTokenWithRedirect } from '..'
 import { accountQuerySchema, readAccountSchema } from '../schemas'
 import { Account } from '../types'
 import { quickBooksClient } from '../util'
-import { readFields, updateField } from '@/domain/schema/fields'
 import { fields } from '@/domain/schema/template/system-fields'
-import { OptionPatch } from '@/domain/schema/fields'
+import { OptionPatch, SchemaFieldService } from '@/domain/schema/fields'
 
 const PAYABLE_ACCOUNTS_TYPE = 'Accounts Payable'
 
@@ -28,6 +28,8 @@ export const readAccount = async (
 export const upsertAccountsFromQuickBooks = async (
   accountId: string,
 ): Promise<void> => {
+  const schemaFieldService = container.resolve(SchemaFieldService)
+
   const allQuickBooksAccounts = await query(
     accountId,
     { entity: 'Account' },
@@ -39,7 +41,7 @@ export const upsertAccountsFromQuickBooks = async (
     allQuickBooksAccounts.QueryResponse.Account?.filter(
       (a) => a.AccountType !== PAYABLE_ACCOUNTS_TYPE,
     )
-  const accountFields = await readFields(accountId)
+  const accountFields = await schemaFieldService.readFields(accountId)
   const quickBooksAccountField = accountFields.find(
     (field) => field.templateId === fields.quickBooksAccount.templateId,
   )
@@ -62,7 +64,7 @@ export const upsertAccountsFromQuickBooks = async (
     name: accountName,
   }))
 
-  await updateField(accountId, {
+  await schemaFieldService.updateField(accountId, {
     description: quickBooksAccountField.description,
     id: quickBooksAccountField.id,
     name: quickBooksAccountField.name,

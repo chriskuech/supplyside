@@ -80,11 +80,7 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                   <TextField
                     defaultValue={row.name}
                     onChange={(e) =>
-                      updateCost({
-                        resourceId: resource.id,
-                        costId: row.id,
-                        data: { name: e.target.value },
-                      })
+                      updateCost(resource.id, row.id, { name: e.target.value })
                     }
                     placeholder="Description"
                     size="small"
@@ -96,10 +92,8 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                     sx={{ width: '100%', textAlign: 'left' }}
                     defaultValue={row.isPercentage ? '%' : '$'}
                     onChange={(e) =>
-                      updateCost({
-                        resourceId: resource.id,
-                        costId: row.id,
-                        data: { isPercentage: e.target.value === '%' },
+                      updateCost(resource.id, row.id, {
+                        isPercentage: e.target.value === '%',
                       })
                     }
                     size="small"
@@ -113,12 +107,8 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                   <TextField
                     defaultValue={row.value}
                     onChange={(e) =>
-                      updateCost({
-                        resourceId: resource.id,
-                        costId: row.id,
-                        data: {
-                          value: Number(e.target.value),
-                        },
+                      updateCost(resource.id, row.id, {
+                        value: Number(e.target.value),
                       })
                     }
                     type="number"
@@ -143,12 +133,7 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                   <Box width={40}>
                     {!isReadOnly && (
                       <IconButton
-                        onClick={() =>
-                          deleteCost({
-                            resourceId: resource.id,
-                            costId: row.id,
-                          })
-                        }
+                        onClick={() => deleteCost(resource.id, row.id)}
                       >
                         <Clear />
                       </IconButton>
@@ -187,10 +172,7 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
 
       {!isReadOnly && (
         <Stack direction="row" justifyContent="end">
-          <Button
-            onClick={() => createCost({ resourceId: resource.id })}
-            startIcon={<Add />}
-          >
+          <Button onClick={() => createCost(resource.id)} startIcon={<Add />}>
             Itemized Cost
           </Button>
         </Stack>
