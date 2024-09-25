@@ -54,15 +54,7 @@ export class PoRenderingService {
         buffer: Buffer.from(html),
       })
 
-      //     --footer-left 'Order ${viewModel.number} | ${viewModel.issuedDate}'
-      // --footer-right 'Page [page] of [topage]'
-
-      const command = `
-    weasyprint
-      '${htmlDataUrl}'
-      '${path}/out.pdf'
-  `
-      await exec(command.replaceAll(/\s+/g, ' '))
+      await exec(`weasyprint '${htmlDataUrl}' '${path}/out.pdf'`)
 
       return await readFile(`${path}/out.pdf`)
     })
