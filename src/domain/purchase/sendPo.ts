@@ -55,8 +55,8 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
   await smtpService.sendEmailWithTemplate({
     From: 'SupplySide <bot@supplyside.io>',
     To: `${poRecipient.name} <${poRecipient.email}>`,
-    Cc: `${assignee?.name} <${assignee?.email}>`,
-    ReplyTo: `${assignee?.name} <${assignee?.email}>`,
+    Cc: `${assignee?.fullName} <${assignee?.email}>`,
+    ReplyTo: `${assignee?.fullName} <${assignee?.email}>`,
     TemplateAlias: 'new-po',
     TemplateModel: {
       // layout
@@ -67,7 +67,7 @@ export const sendPo = async ({ accountId, resourceId }: SendPoParams) => {
 
       // template
       supplier_user_name: poRecipient.name ?? '(No Name)',
-      buyer_user_name: assignee?.name ?? '(Unassigned)',
+      buyer_user_name: assignee?.fullName ?? '(Unassigned)',
       supplier_company_name: vendor?.name ?? '(No Vendor)',
       order_number: number ?? '(No Number)',
       date: date?.toLocaleDateString() ?? '(No Date)',

@@ -10,8 +10,8 @@ import {
   createSession as domainCreateSession,
   readAndExtendSession as domainReadAndExtendSession,
   impersonate as domainImpersonate,
-} from '@/domain/iam/session'
-import { Session } from '@/domain/iam/session/entity'
+} from '@/domain/session'
+import { Session } from '@/domain/session/entity'
 import ConfigService from '@/integrations/ConfigService'
 
 const sessionIdCookieName = 'sessionId'

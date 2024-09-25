@@ -12,7 +12,37 @@ export class FileService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async create(
+  async createFromBuffer(
+    accountId: string,
+    {
+      name,
+      buffer,
+      contentType,
+    }: {
+      name: string
+      buffer: Uint8Array
+      contentType: string
+    },
+  ) {
+    const { id: blobId } = await this.blobService.createBlob({
+      accountId,
+      buffer,
+      type: contentType,
+    })
+
+    const fileEntity = await this.prisma.file.create({
+      data: {
+        accountId,
+        blobId,
+        name,
+      },
+      include: fileInclude,
+    })
+
+    return mapFile(fileEntity)
+  }
+
+  async createFromFile(
     accountId: string,
     {
       name,

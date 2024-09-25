@@ -3,7 +3,7 @@ import { container } from 'tsyringe'
 import AccountsTable from './AccountsTable'
 import CreateAccountButton from './CreateAccountButton'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
-import { AccountService } from '@/domain/iam/account'
+import { AccountService } from '@/domain/account'
 
 export default async function AdminPage() {
   const accountService = container.resolve(AccountService)

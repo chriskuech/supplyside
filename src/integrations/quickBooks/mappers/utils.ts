@@ -24,7 +24,7 @@ export const mapValue = (resource: Resource, field: FieldTemplate) => {
     )
     .with(P.union('Text', 'Textarea'), () => fieldValue?.string)
     .with('Select', () => fieldValue?.option?.name)
-    .with('User', () => fieldValue?.user?.name)
+    .with('User', () => fieldValue?.user?.fullName)
     .with('Resource', () => fieldValue?.resource?.name)
     .with(P.union('Files', 'File'), () => undefined)
     .exhaustive()

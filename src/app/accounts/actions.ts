@@ -6,7 +6,7 @@ import { container } from 'tsyringe'
 import { applyTemplate } from '@/domain/schema/template'
 import { systemAccountId } from '@/lib/const'
 import { readSession, impersonate } from '@/lib/session/actions'
-import { AccountService } from '@/domain/iam/account'
+import { AccountService } from '@/domain/account'
 
 const authz = async () => {
   const s = await readSession()

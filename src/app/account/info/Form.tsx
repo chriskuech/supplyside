@@ -2,7 +2,7 @@
 import { Avatar, Box, Button, Stack, TextField } from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
 import { handleSaveSettings } from './actions'
-import { Account } from '@/domain/iam/account/entity'
+import { Account } from '@/domain/account/entity'
 import { useImagePreview } from '@/lib/hooks/useImagePreview'
 
 type Props = {

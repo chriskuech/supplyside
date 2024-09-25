@@ -1,6 +1,6 @@
 import { Stack, Typography } from '@mui/material'
 import McMasterCarrDisconnectLink from './McMasterCarrDisconnectLink'
-import { Session } from '@/domain/iam/session/entity'
+import { Session } from '@/domain/session/entity'
 
 type Props = {
   session: Session

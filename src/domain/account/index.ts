@@ -5,6 +5,7 @@ import { mapAccountModelToEntity } from './mappers'
 import { accountInclude } from './model'
 import { applyTemplate } from '@/domain/schema/template'
 import { PrismaService } from '@/integrations/PrismaService'
+import { systemAccountId } from '@/lib/const'
 
 @singleton()
 export class AccountService {
@@ -34,8 +35,26 @@ export class AccountService {
     return mapAccountModelToEntity(model)
   }
 
+  async readByKey(key: string): Promise<Account> {
+    const model = await this.prisma.account.findUniqueOrThrow({
+      where: {
+        key,
+      },
+      include: accountInclude,
+    })
+
+    return mapAccountModelToEntity(model)
+  }
+
   async list(): Promise<Account[]> {
     const models = await this.prisma.account.findMany({
+      where: {
+        id: {
+          not: {
+            equals: systemAccountId,
+          },
+        },
+      },
       orderBy: {
         name: 'asc',
       },

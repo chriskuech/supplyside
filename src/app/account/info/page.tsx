@@ -3,7 +3,7 @@ import { container } from 'tsyringe'
 import Form from './Form'
 import { readSession } from '@/lib/session/actions'
 import ConfigService from '@/integrations/ConfigService'
-import { AccountService } from '@/domain/iam/account'
+import { AccountService } from '@/domain/account'
 
 export default async function InfoPage() {
   const accountService = container.resolve(AccountService)

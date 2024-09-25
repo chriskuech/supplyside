@@ -1,10 +1,16 @@
-import { getDownloadPath } from '../blob/util'
-import { User } from './entity'
+import { isTruthy } from 'remeda'
 import { UserModel } from './model'
+import { User } from './entity'
+import { getDownloadPath } from '@/domain/blob/util'
+import { systemAccountId } from '@/lib/const'
 
 export const mapUserModelToEntity = (model: UserModel): User => ({
   id: model.id,
-  name: [model.firstName, model.lastName].join(' '),
+  accountId: model.accountId,
+  firstName: model.firstName,
+  lastName: model.lastName,
+  fullName:
+    [model.firstName, model.lastName].filter(isTruthy).join(' ') || null,
   email: model.email,
   profilePicPath:
     model.ImageBlob &&
@@ -13,4 +19,8 @@ export const mapUserModelToEntity = (model: UserModel): User => ({
       mimeType: model.ImageBlob.mimeType,
       fileName: 'profile-pic',
     }),
+  tsAndCsSignedAt: model.tsAndCsSignedAt,
+  isAdmin: model.isAdmin,
+  isApprover: model.isApprover,
+  isGlobalAdmin: model.accountId === systemAccountId,
 })

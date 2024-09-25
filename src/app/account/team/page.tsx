@@ -1,16 +1,18 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
+import { container } from 'tsyringe'
 import UsersTable from './UsersTable'
 import InviteUserControl from './InviteUserControl'
-import { readSelf } from './actions'
 import { readSession } from '@/lib/session/actions'
-import { readUsers } from '@/domain/iam/user'
+import { UserService } from '@/domain/user'
 
 export default async function Team() {
-  const { accountId } = await readSession()
+  const userService = container.resolve(UserService)
+
+  const { accountId, userId } = await readSession()
 
   const [users, self] = await Promise.all([
-    readUsers({ accountId }),
-    readSelf(),
+    userService.list(accountId),
+    userService.read(accountId, userId),
   ])
 
   return (

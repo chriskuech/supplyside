@@ -22,7 +22,7 @@ import {
 } from '@mui/icons-material'
 import { useState } from 'react'
 import { useThemePreference } from '../DynamicThemeProvider'
-import { User } from '@/domain/iam/user/entity'
+import { User } from '@/domain/user/entity'
 
 type Props = {
   self: User

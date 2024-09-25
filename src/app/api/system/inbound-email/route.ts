@@ -7,9 +7,9 @@ import { fields } from '@/domain/schema/template/system-fields'
 import { readSchema } from '@/domain/schema'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { Resource } from '@/domain/resource/entity'
-import BlobService from '@/domain/blob'
 import SmtpService from '@/integrations/SmtpService'
-import { PrismaService } from '@/integrations/PrismaService'
+import { FileService } from '@/domain/file'
+import { AccountService } from '@/domain/account'
 
 type FileParam = {
   content: string
@@ -24,8 +24,7 @@ type Params = {
 }
 
 const createBill = async (params: Params): Promise<Resource> => {
-  const blobService = container.resolve(BlobService)
-  const prisma = container.resolve(PrismaService)
+  const fileService = container.resolve(FileService)
 
   const billSchema = await readSchema({
     accountId: params.accountId,
@@ -34,19 +33,14 @@ const createBill = async (params: Params): Promise<Resource> => {
 
   const fileIds = await Promise.all(
     params.files.map(async (file) => {
-      const { id: blobId } = await blobService.createBlob({
-        accountId: params.accountId,
-        buffer: Buffer.from(file.content, file.encoding),
-        type: file.contentType,
-      })
-
-      const { id: fileId } = await prisma.file.create({
-        data: {
-          accountId: params.accountId,
+      const { id: fileId } = await fileService.createFromBuffer(
+        params.accountId,
+        {
           name: file.fileName,
-          blobId,
+          buffer: Buffer.from(file.content, file.encoding),
+          contentType: file.contentType,
         },
-      })
+      )
 
       return fileId
     }),
@@ -69,7 +63,7 @@ const createBill = async (params: Params): Promise<Resource> => {
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  const prisma = container.resolve(PrismaService)
+  const accountService = container.resolve(AccountService)
   const smtpService = container.resolve(SmtpService)
 
   const body: Message = await req.json()
@@ -79,9 +73,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   assert(accountKey, 'Account key not found in To: ' + body.To)
 
-  const account = await prisma.account.findUnique({
-    where: { key: accountKey },
-  })
+  const account = await accountService.readByKey(accountKey)
 
   if (!account) {
     await smtpService.sendEmail({

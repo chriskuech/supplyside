@@ -6,7 +6,7 @@ import { DataGrid } from '@mui/x-data-grid'
 import { closeSnackbar, enqueueSnackbar } from 'notistack'
 import { deleteAccount, impersonateAccount, refreshAccount } from './actions'
 import { systemAccountId } from '@/lib/const'
-import { Account } from '@/domain/iam/account/entity'
+import { Account } from '@/domain/account/entity'
 
 type Props = {
   accounts: Account[]

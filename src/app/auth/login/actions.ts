@@ -1,14 +1,14 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import * as domain from '@/domain/iam/user'
-import { IamUserNotFoundError } from '@/domain/iam/user/errors'
+import { IamUserNotFoundError } from '@/domain/user/errors'
+import { StartEmailVerificationInput } from '@/domain/user'
 
 export const startEmailVerification = async (
-  params: domain.StartEmailVerificationParams,
+  params: StartEmailVerificationInput,
 ): Promise<undefined | { error: string }> => {
   try {
-    await domain.startEmailVerification(params)
+    await startEmailVerification(params)
 
     redirect(
       `/auth/verify-login?email=${encodeURIComponent(params.email)}` +

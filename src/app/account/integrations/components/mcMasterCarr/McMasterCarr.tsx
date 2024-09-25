@@ -1,8 +1,8 @@
 import { Alert } from '@mui/material'
 import McMasterCarrConnection from './McMasterCarrConnection'
 import McMasterConnect from './McMasterCarrConnect'
-import { Session } from '@/domain/iam/session/entity'
 import { getMcMasterCarrConfig } from '@/integrations/mcMasterCarr/utils'
+import { Session } from '@/domain/session/entity'
 
 type Props = {
   session: Session

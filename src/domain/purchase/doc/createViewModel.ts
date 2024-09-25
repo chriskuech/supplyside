@@ -186,7 +186,7 @@ const renderFieldValue = (resourceField: ResourceField | undefined) =>
     .with('Text', () => resourceField?.value?.string || null)
     .with('Textarea', () => resourceField?.value?.string || null)
     .with('Select', () => resourceField?.value?.option?.name ?? null)
-    .with('User', () => resourceField?.value?.user?.name ?? null)
+    .with('User', () => resourceField?.value?.user?.fullName ?? null)
     .with('Resource', () => null)
     .with(P.nullish, () => null)
     .exhaustive()

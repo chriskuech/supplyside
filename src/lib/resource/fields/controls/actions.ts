@@ -24,7 +24,7 @@ export const uploadFile = async (formData: FormData) =>
 
     if (!file || typeof file === 'string' || file.size === 0) return
 
-    return await fileService.create(accountId, {
+    return await fileService.createFromFile(accountId, {
       name: file.name,
       file,
     })
@@ -42,7 +42,7 @@ export const uploadFiles = async (formData: FormData) =>
       files
         .filter((file): file is JsFile => typeof file !== 'string')
         .map((file) =>
-          fileService.create(accountId, {
+          fileService.createFromFile(accountId, {
             name: file.name,
             file,
           }),
