@@ -4,6 +4,7 @@ import puppeteer from 'puppeteer'
 /* @ts-expect-error */
 import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.browser.production'
 import { cache } from 'react'
+import { singleton } from 'tsyringe'
 import PoDocument from './doc/PoDocument'
 import { createViewModel } from './doc/createViewModel'
 import PoDocumentFooter from '@/domain/purchase/doc/PoDocumentFooter'
@@ -22,40 +23,39 @@ type RenderPoParams = {
   isPreview?: boolean
 }
 
-export const renderPo = async ({
-  accountId,
-  resourceId,
-  isPreview,
-}: RenderPoParams) => {
-  const [model, page] = await Promise.all([
-    createViewModel(accountId, resourceId),
-    browser().then((browser) => browser.newPage()),
-  ])
+@singleton()
+export class PoRenderingService {
+  async renderPo({ accountId, resourceId, isPreview }: RenderPoParams) {
+    const [model, page] = await Promise.all([
+      createViewModel(accountId, resourceId),
+      browser().then((browser) => browser.newPage()),
+    ])
 
-  try {
-    await page.setContent(
-      htmlDocument(ReactDom.renderToString(PoDocument(model)), isPreview),
-      { timeout: 300 },
-    )
+    try {
+      await page.setContent(
+        htmlDocument(ReactDom.renderToString(PoDocument(model)), isPreview),
+        { timeout: 300 },
+      )
 
-    const buffer = await page.pdf({
-      format: 'letter',
-      headerTemplate: '<div></div>',
-      footerTemplate: ReactDom.renderToString(PoDocumentFooter(model)),
-      displayHeaderFooter: true,
-      margin: {
-        top: '35px',
-        bottom: '35px',
-        left: '15px',
-        right: '15px',
-      },
-      printBackground: true,
-      timeout: 5_000,
-    })
+      const buffer = await page.pdf({
+        format: 'letter',
+        headerTemplate: '<div></div>',
+        footerTemplate: ReactDom.renderToString(PoDocumentFooter(model)),
+        displayHeaderFooter: true,
+        margin: {
+          top: '35px',
+          bottom: '35px',
+          left: '15px',
+          right: '15px',
+        },
+        printBackground: true,
+        timeout: 5_000,
+      })
 
-    return buffer
-  } finally {
-    page.close()
+      return buffer
+    } finally {
+      page.close()
+    }
   }
 }
 

@@ -5,22 +5,21 @@ import {
   fields,
   purchaseStatusOptions,
 } from '@/domain/schema/template/system-fields'
-import { sendPo as domainSendPo } from '@/domain/purchase/sendPo'
-import { createPo as domainCreatePo } from '@/domain/purchase/createPo'
 import { transitionStatus } from '@/lib/resource/actions'
 import { readSession } from '@/lib/session/actions'
 import { ResourceService } from '@/domain/resource/service'
+import { PoService } from '@/domain/purchase/PoService'
 
 export const createPo = async (resourceId: string) => {
   const { accountId } = await readSession()
 
-  return domainCreatePo({ accountId, resourceId })
+  return await container.resolve(PoService).createPo(accountId, resourceId)
 }
 
 export const sendPo = async (resourceId: string) => {
   const { accountId } = await readSession()
 
-  await domainSendPo({ accountId, resourceId })
+  await container.resolve(PoService).sendPo(accountId, resourceId)
   await transitionStatus(
     resourceId,
     fields.purchaseStatus,

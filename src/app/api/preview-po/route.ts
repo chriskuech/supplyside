@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
-import { renderPo } from '@/domain/purchase/renderPo'
 import { ResourceService } from '@/domain/resource/service'
+import { PoRenderingService } from '@/domain/purchase/PoRenderingService'
 
 /**
  * /api/preview-po?resourceId=<resourceId>
  */
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const resourceService = container.resolve(ResourceService)
+  const poRenderingService = container.resolve(PoRenderingService)
 
   const query = new URL(req.url).searchParams
   const resourceId = query.get('resourceId')
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const buffer = await renderPo({
+  const buffer = await poRenderingService.renderPo({
     resourceId,
     accountId,
     isPreview: true,
