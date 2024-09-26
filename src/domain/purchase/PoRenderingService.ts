@@ -1,17 +1,16 @@
-import puppeteer from 'puppeteer'
+import puppeteer, { Browser } from 'puppeteer'
 // https://github.com/vercel/next.js/issues/43810
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 /* @ts-expect-error */
 import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.browser.production'
-import { cache } from 'react'
-import { singleton } from 'tsyringe'
 import { isTruthy } from 'remeda'
 import { P, match } from 'ts-pattern'
 import { FieldType } from '@prisma/client'
-import BlobService from '../blob'
-import { ResourceService } from '../resource/service'
+import { injectable } from 'inversify'
+import { BlobService } from '../blob/BlobService'
+import { ResourceService } from '../resource/ResourceService'
 import { AccountService } from '../account'
-import { SchemaService } from '../schema'
+import { SchemaService } from '../schema/SchemaService'
 import {
   FieldRef,
   selectResourceField,
@@ -24,13 +23,20 @@ import { LineViewModel, PurchaseViewModel } from './doc/ViewModel'
 import PoDocumentFooter from '@/domain/purchase/doc/PoDocumentFooter'
 import { formatInlineAddress } from '@/lib/resource/fields/views/AddressCard'
 
-const browser = cache(async () => {
-  const browser = await puppeteer.launch({
-    args: ['--no-sandbox'],
-  })
+export const browser = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const g = global as any
 
-  return browser
-})
+  if (!g.browser) {
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox'],
+    })
+
+    g.browser = browser
+  }
+
+  return g.browser as Browser
+}
 
 type RenderPoParams = {
   accountId: string
@@ -38,7 +44,7 @@ type RenderPoParams = {
   isPreview?: boolean
 }
 
-@singleton()
+@injectable()
 export class PoRenderingService {
   constructor(
     private readonly blobService: BlobService,

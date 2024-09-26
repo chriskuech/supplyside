@@ -1,22 +1,17 @@
-import { z } from 'zod'
 import { config as loadDotenv } from 'dotenv'
 import { expand as expandDotenv } from 'dotenv-expand'
+import { z } from 'zod'
 import { ResourceType } from '@prisma/client'
-import { container } from 'tsyringe'
 import { systemAccountId } from '@/lib/const'
-import { TemplateService } from '@/domain/schema/template'
+import { TemplateService } from '@/domain/schema/template/TemplateService'
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import { PrismaService } from '@/integrations/PrismaService'
-import { SchemaService } from '@/domain/schema'
-import { ResourceService } from '@/domain/resource'
+import { SchemaService } from '@/domain/schema/SchemaService'
+import { ResourceService } from '@/domain/resource/ResourceService'
+import { container } from '@/lib/di'
 
 expandDotenv(loadDotenv())
-
-const prisma = container.resolve(PrismaService)
-const schemaService = container.resolve(SchemaService)
-const resourceService = container.resolve(ResourceService)
-const templateService = container.resolve(TemplateService)
 
 const config = z
   .object({
@@ -30,6 +25,11 @@ const config = z
 const testId = '00000000-0000-0000-0000-000000000001'
 
 async function main() {
+  const prisma = container().resolve(PrismaService)
+  const schemaService = container().resolve(SchemaService)
+  const resourceService = container().resolve(ResourceService)
+  const templateService = container().resolve(TemplateService)
+
   const systemAccount = await prisma.account.create({
     data: {
       id: systemAccountId,

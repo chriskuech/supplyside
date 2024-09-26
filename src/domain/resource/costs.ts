@@ -1,8 +1,8 @@
-import { singleton } from 'tsyringe'
-import { ResourceService } from './service'
+import { injectable } from 'inversify'
+import { ResourceService } from './ResourceService'
 import { PrismaService } from '@/integrations/PrismaService'
 
-@singleton()
+@injectable()
 export class CostService {
   constructor(
     private readonly prisma: PrismaService,

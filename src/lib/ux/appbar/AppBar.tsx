@@ -4,7 +4,6 @@ import MAppBar from '@mui/material/AppBar'
 import Container from '@mui/material/Container'
 import Toolbar from '@mui/material/Toolbar'
 import Link from 'next/link'
-import { container } from 'tsyringe'
 import { UserMenu } from './UserMenu'
 import { AccountMenu } from './AccountMenu'
 import { NavMenu } from './NavMenu'
@@ -14,13 +13,14 @@ import { systemAccountId } from '@/lib/const'
 import { readSession } from '@/lib/session/actions'
 import { SessionError } from '@/lib/session/types'
 import { AccountService } from '@/domain/account'
+import { container } from '@/lib/di'
 
 export default async function AppBar() {
   const session = await readSession().catch((e) =>
     e instanceof SessionError ? null : fail(e),
   )
 
-  const accountService = container.resolve(AccountService)
+  const accountService = container().resolve(AccountService)
 
   const accounts = await accountService.list()
 

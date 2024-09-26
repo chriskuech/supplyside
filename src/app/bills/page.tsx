@@ -1,12 +1,12 @@
-import { container } from 'tsyringe'
 import BillsInboxControl from './BillsInboxControl'
 import ConfigService from '@/integrations/ConfigService'
+import { container } from '@/lib/di'
 import ListPage from '@/lib/resource/ListPage'
 import { requireSessionWithRedirect } from '@/lib/session/actions'
 
 export default async function Bills() {
   const { account } = await requireSessionWithRedirect('/bills')
-  const { config } = container.resolve(ConfigService)
+  const { config } = container().resolve(ConfigService)
 
   return (
     <ListPage

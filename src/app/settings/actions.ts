@@ -1,12 +1,11 @@
 'use server'
-
 import { isTruthy } from 'remeda'
 import { revalidatePath } from 'next/cache'
-import { container } from 'tsyringe'
 import { z } from 'zod'
 import { readSession } from '@/lib/session/actions'
-import BlobService from '@/domain/blob'
+import { BlobService } from '@/domain/blob/BlobService'
 import { UserService } from '@/domain/user'
+import { container } from '@/lib/di'
 
 const schema = z.object({
   firstName: z.string().min(1).optional(),
@@ -24,8 +23,8 @@ export type Errors = z.typeToFlattenedError<Dto>['fieldErrors']
 export const handleSaveSettings = async (
   formData: FormData,
 ): Promise<Errors | undefined> => {
-  const blobService = container.resolve(BlobService)
-  const userService = container.resolve(UserService)
+  const blobService = container().resolve(BlobService)
+  const userService = container().resolve(UserService)
 
   const {
     // use the non-impersonated accountId and userId

@@ -1,9 +1,8 @@
 'use server'
-
-import { container } from 'tsyringe'
 import { ResourceType } from '@prisma/client'
 import { withSession } from '../session/actions'
-import { SchemaService } from '@/domain/schema'
+import { container } from '../di'
+import { SchemaService } from '@/domain/schema/SchemaService'
 
 export const readSchema = async (
   resourceType: ResourceType,
@@ -11,7 +10,7 @@ export const readSchema = async (
 ) =>
   await withSession(
     async ({ accountId }) =>
-      await container
+      await container()
         .resolve(SchemaService)
         .readSchema(accountId, resourceType, isSystem),
   )

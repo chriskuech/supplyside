@@ -1,11 +1,11 @@
-import { singleton } from 'tsyringe'
-import BlobService from '../blob'
+import { injectable } from 'inversify'
+import { BlobService } from '../blob/BlobService'
 import { mapFile } from './mapValueFile'
 import { fileInclude } from './model'
 import { File as FileEntity } from './types'
 import { PrismaService } from '@/integrations/PrismaService'
 
-@singleton()
+@injectable()
 export class FileService {
   constructor(
     private readonly blobService: BlobService,

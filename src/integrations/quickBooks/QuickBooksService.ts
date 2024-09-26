@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { singleton } from 'tsyringe'
+import { injectable } from 'inversify'
 import { QuickBooksTokenService } from './QuickBooksTokenService'
 import { QuickBooksConfigService } from './QuickBooksConfigService'
 import { QuickBooksClientService } from './QuickBooksClientService'
@@ -9,7 +9,7 @@ import { QuickBooksAccountService } from './QuickBooksAccountService'
 import { QuickBooksVendorService } from './QuickBooksVendorService'
 import { QuickBooksBillService } from './QuickBooksBillService'
 
-@singleton()
+@injectable()
 export class QuickBooksService {
   constructor(
     private readonly quickBooksTokenService: QuickBooksTokenService,

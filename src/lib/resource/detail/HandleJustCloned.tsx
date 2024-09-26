@@ -1,5 +1,4 @@
 'use client'
-
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSnackbar } from 'notistack'
 import { useEffect } from 'react'

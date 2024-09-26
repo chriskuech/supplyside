@@ -1,14 +1,14 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
-import { container } from 'tsyringe'
 import UsersTable from './UsersTable'
 import InviteUserControl from './InviteUserControl'
 import { readSession } from '@/lib/session/actions'
 import { UserService } from '@/domain/user'
+import { container } from '@/lib/di'
 
 export const dynamic = 'force-dynamic'
 
 export default async function Team() {
-  const userService = container.resolve(UserService)
+  const userService = container().resolve(UserService)
 
   const { accountId, userId } = await readSession()
 

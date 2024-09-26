@@ -1,10 +1,10 @@
 import OAuthClient from 'intuit-oauth'
-import { singleton } from 'tsyringe'
+import { injectable } from 'inversify'
 import { companyInfoSchema } from './schemas'
 import { CompanyInfo } from './types'
 import { QuickBooksClientService } from './QuickBooksClientService'
 
-@singleton()
+@injectable()
 export class QuickBooksCompanyInfoService {
   constructor(
     private readonly quickBooksClientService: QuickBooksClientService,

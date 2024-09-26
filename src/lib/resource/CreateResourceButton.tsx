@@ -1,10 +1,9 @@
 'use client'
-
 import { Add } from '@mui/icons-material'
 import { Button, ButtonProps } from '@mui/material'
 import { ResourceType } from '@prisma/client'
 import { createResource } from './actions'
-import { ResourceFieldInput } from '@/domain/resource'
+import { ResourceFieldInput } from '@/domain/resource/ResourceService'
 
 type Props = {
   type: ResourceType

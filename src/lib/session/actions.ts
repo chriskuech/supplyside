@@ -1,9 +1,8 @@
 'use server'
-
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { validate as isUuid } from 'uuid'
-import { container } from 'tsyringe'
+import { container } from '../di'
 import { InvalidSessionError, MissingSessionError } from './types'
 import { Session } from '@/domain/session/entity'
 import ConfigService from '@/integrations/ConfigService'
@@ -20,8 +19,8 @@ export const withSession = async <T>(
 }
 
 export const createSession = async (email: string, tat: string) => {
-  const { config } = container.resolve(ConfigService)
-  const sessionService = container.resolve(SessionService)
+  const { config } = container().resolve(ConfigService)
+  const sessionService = container().resolve(SessionService)
 
   const session = await sessionService.createSession(email, tat)
 
@@ -35,7 +34,7 @@ export const createSession = async (email: string, tat: string) => {
 }
 
 export const readSession = async () => {
-  const sessionService = container.resolve(SessionService)
+  const sessionService = container().resolve(SessionService)
 
   const sessionId = cookies().get(sessionIdCookieName)?.value
 
@@ -74,7 +73,7 @@ export const requireSessionWithRedirect = async (returnTo: string) => {
 }
 
 export const clearSession = async () => {
-  const sessionService = container.resolve(SessionService)
+  const sessionService = container().resolve(SessionService)
 
   const sessionId = cookies().get(sessionIdCookieName)?.value
 
@@ -88,7 +87,7 @@ export const clearSession = async () => {
 }
 
 export const impersonate = async (accountId: string) => {
-  const sessionService = container.resolve(SessionService)
+  const sessionService = container().resolve(SessionService)
 
   const session = await readSession()
 

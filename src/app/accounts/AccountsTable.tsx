@@ -1,5 +1,4 @@
 'use client'
-
 import { Clear, Sync } from '@mui/icons-material'
 import { IconButton } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'

@@ -1,5 +1,4 @@
 'use client'
-
 import { fail } from 'assert'
 import { GlobalStyles, ThemeProvider, useMediaQuery } from '@mui/material'
 import {

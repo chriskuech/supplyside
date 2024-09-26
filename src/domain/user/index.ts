@@ -1,5 +1,5 @@
-import { singleton } from 'tsyringe'
 import { v4 as uuid } from 'uuid'
+import { injectable } from 'inversify'
 import { User } from './entity'
 import { mapUserModelToEntity } from './mappers'
 import { userInclude } from './model'
@@ -32,7 +32,7 @@ export type StartEmailVerificationInput = {
   returnTo?: string
 }
 
-@singleton()
+@injectable()
 export class UserService {
   constructor(
     private readonly smtpService: SmtpService,

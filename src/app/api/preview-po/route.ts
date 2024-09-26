@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
-import { ResourceService } from '@/domain/resource'
+import { ResourceService } from '@/domain/resource/ResourceService'
 import { PoRenderingService } from '@/domain/purchase/PoRenderingService'
+import { container } from '@/lib/di'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,8 +10,8 @@ export const dynamic = 'force-dynamic'
  * /api/preview-po?resourceId=<resourceId>
  */
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const resourceService = container.resolve(ResourceService)
-  const poRenderingService = container.resolve(PoRenderingService)
+  const resourceService = container().resolve(ResourceService)
+  const poRenderingService = container().resolve(PoRenderingService)
 
   const query = new URL(req.url).searchParams
   const resourceId = query.get('resourceId')

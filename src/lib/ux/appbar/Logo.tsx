@@ -1,5 +1,4 @@
 'use client'
-
 import { useTheme } from '@mui/material'
 import { ImageProps } from 'next/image'
 import { match } from 'ts-pattern'

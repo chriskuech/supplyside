@@ -1,7 +1,7 @@
 import assert from 'assert'
 import { faker } from '@faker-js/faker'
-import { singleton } from 'tsyringe'
 import OAuthClient from 'intuit-oauth'
+import { injectable } from 'inversify'
 import { accountQuerySchema, readAccountSchema } from './schemas'
 import { Account } from './types'
 import { QuickBooksClientService } from './QuickBooksClientService'
@@ -13,7 +13,7 @@ import {
 
 const PAYABLE_ACCOUNTS_TYPE = 'Accounts Payable'
 
-@singleton()
+@injectable()
 export class QuickBooksAccountService {
   constructor(
     private readonly quickBooksClientService: QuickBooksClientService,

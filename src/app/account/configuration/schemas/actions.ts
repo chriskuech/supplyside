@@ -1,11 +1,10 @@
 'use server'
-
 import { ResourceType } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
-import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
 import { SchemaSectionService } from '@/domain/schema/SchemaSectionService'
-import { SchemaService } from '@/domain/schema'
+import { SchemaService } from '@/domain/schema/SchemaService'
+import { container } from '@/lib/di'
 
 export type Field = {
   id: string
@@ -28,7 +27,7 @@ export type Schema = {
 export const readSchemas = async (): Promise<Schema[]> => {
   const { accountId } = await readSession()
 
-  return await container.resolve(SchemaService).readSchemas(accountId)
+  return await container().resolve(SchemaService).readSchemas(accountId)
 }
 
 export const updateSchema = async (dto: {
@@ -37,7 +36,7 @@ export const updateSchema = async (dto: {
 }) => {
   const { accountId } = await readSession()
 
-  await container
+  await container()
     .resolve(SchemaSectionService)
     .updateSchema(accountId, dto.schemaId, dto.sectionIds)
 
@@ -50,7 +49,7 @@ export const createSection = async (dto: {
 }) => {
   // TODO: this is missing accountId
 
-  await container.resolve(SchemaSectionService).createSection(dto)
+  await container().resolve(SchemaSectionService).createSection(dto)
 
   revalidatePath('')
 }
@@ -62,7 +61,7 @@ export const updateSection = async (dto: {
 }) => {
   const { accountId } = await readSession()
 
-  await container
+  await container()
     .resolve(SchemaSectionService)
     .updateSection({ accountId, ...dto })
 
@@ -72,7 +71,7 @@ export const updateSection = async (dto: {
 export const deleteSection = async (sectionId: string) => {
   const { accountId } = await readSession()
 
-  await container
+  await container()
     .resolve(SchemaSectionService)
     .deleteSection(accountId, sectionId)
 

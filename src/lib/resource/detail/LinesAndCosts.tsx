@@ -1,14 +1,17 @@
 import { Stack, Typography, Box } from '@mui/material'
-import { container } from 'tsyringe'
 import { ResourceTable } from '../table'
 import ItemizedCostLines from '../costs/ItemizedCostLines'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { Resource } from '@/domain/resource/entity'
 import { Where } from '@/domain/resource/json-logic/types'
-import { ResourceFieldInput, ResourceService } from '@/domain/resource'
+import {
+  ResourceFieldInput,
+  ResourceService,
+} from '@/domain/resource/ResourceService'
 import { Schema } from '@/domain/schema/entity'
 import { fields } from '@/domain/schema/template/system-fields'
-import { SchemaService } from '@/domain/schema'
+import { SchemaService } from '@/domain/schema/SchemaService'
+import { container } from '@/lib/di'
 
 type Props = {
   resource: Resource
@@ -23,10 +26,10 @@ export default async function LinesAndCosts({
   newLineInitialData,
   isReadOnly,
 }: Props) {
-  const schemaService = container.resolve(SchemaService)
+  const schemaService = container().resolve(SchemaService)
 
   const [lines, lineSchema] = await Promise.all([
-    container.resolve(ResourceService).readResources({
+    container().resolve(ResourceService).readResources({
       accountId: resource.accountId,
       type: 'Line',
       where: lineQuery,

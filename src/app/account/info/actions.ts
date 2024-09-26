@@ -1,12 +1,11 @@
 'use server'
-
 import { isTruthy } from 'remeda'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
-import BlobService from '@/domain/blob'
+import { BlobService } from '@/domain/blob/BlobService'
 import { AccountService } from '@/domain/account'
+import { container } from '@/lib/di'
 
 const schema = z.object({
   name: z.string().min(1).optional(),
@@ -24,8 +23,8 @@ export type Errors = z.typeToFlattenedError<Dto>['fieldErrors']
 export const handleSaveSettings = async (
   formData: FormData,
 ): Promise<Errors | undefined> => {
-  const accountService = container.resolve(AccountService)
-  const blobService = container.resolve(BlobService)
+  const accountService = container().resolve(AccountService)
+  const blobService = container().resolve(BlobService)
 
   const { accountId } = await readSession()
 

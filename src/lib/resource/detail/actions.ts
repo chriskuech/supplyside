@@ -1,14 +1,13 @@
 'use server'
-
 import { ResourceType } from '@prisma/client'
 import { notFound, redirect } from 'next/navigation'
-import { container } from 'tsyringe'
 import { requireSessionWithRedirect, withSession } from '@/lib/session/actions'
 import { Session } from '@/domain/session/entity'
 import { Resource } from '@/domain/resource/entity'
 import { Schema } from '@/domain/schema/entity'
-import { SchemaService } from '@/domain/schema'
-import { ResourceService } from '@/domain/resource'
+import { SchemaService } from '@/domain/schema/SchemaService'
+import { ResourceService } from '@/domain/resource/ResourceService'
+import { container } from '@/lib/di'
 
 type DetailPageModel = {
   session: Session
@@ -22,7 +21,7 @@ export const readDetailPageModel = async (
   rawKey: unknown,
   path: string,
 ): Promise<DetailPageModel> => {
-  const schemaService = container.resolve(SchemaService)
+  const schemaService = container().resolve(SchemaService)
 
   const key = Number(rawKey)
 
@@ -31,7 +30,7 @@ export const readDetailPageModel = async (
   const session = await requireSessionWithRedirect(path)
 
   const [resource, schema, lineSchema] = await Promise.all([
-    container
+    container()
       .resolve(ResourceService)
       .readResource({
         accountId: session.accountId,
@@ -50,7 +49,7 @@ export const readDetailPageModel = async (
 
 export const cloneResource = async (resourceId: string) =>
   await withSession(async ({ accountId }) => {
-    const resource = await container
+    const resource = await container()
       .resolve(ResourceService)
       .cloneResource(accountId, resourceId)
 

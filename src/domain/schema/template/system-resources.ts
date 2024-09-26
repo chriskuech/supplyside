@@ -1,9 +1,9 @@
 import { deepStrictEqual } from 'assert'
 import { entries, filter, flatMap, groupBy, map, mapValues, pipe } from 'remeda'
-import { container } from 'tsyringe'
 import { ResourceTemplate } from './types'
 import { fields } from './system-fields'
 import ConfigService from '@/integrations/ConfigService'
+import { container } from '@/lib/di'
 
 const _resources = (
   environment: 'development' | 'integration' | 'production',
@@ -33,7 +33,7 @@ const _resources = (
   }) as const satisfies Record<string, ResourceTemplate>
 
 export const resources = () => {
-  const { config } = container.resolve(ConfigService)
+  const { config } = container().resolve(ConfigService)
   const data = _resources(config.NODE_ENV)
 
   // Ensure that the templateIds are unique

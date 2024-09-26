@@ -1,5 +1,4 @@
 'use client'
-
 import { Clear } from '@mui/icons-material'
 import { Card, CardContent, IconButton, Stack } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'

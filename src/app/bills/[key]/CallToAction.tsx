@@ -1,5 +1,4 @@
 'use client'
-
 import { ArrowRight } from '@mui/icons-material'
 import { Button, CircularProgress, Tooltip, Typography } from '@mui/material'
 import { approveBill as approveBillAction } from './actions'

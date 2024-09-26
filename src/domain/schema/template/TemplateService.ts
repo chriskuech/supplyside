@@ -1,12 +1,12 @@
 import { fail } from 'assert'
-import { singleton } from 'tsyringe'
+import { inject, injectable } from 'inversify'
 import { schemas } from './system-schemas'
 import { fields } from './system-fields'
 import { PrismaService } from '@/integrations/PrismaService'
 
-@singleton()
+@injectable()
 export class TemplateService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async applyTemplate(accountId: string) {
     await this.applyFields(accountId)

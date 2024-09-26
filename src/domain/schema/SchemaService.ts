@@ -1,14 +1,14 @@
 import { Prisma, ResourceType } from '@prisma/client'
-import { singleton } from 'tsyringe'
 import { difference } from 'remeda'
+import { inject, injectable } from 'inversify'
 import { Schema } from './entity'
 import { mapFieldModelToEntity } from './mappers'
 import { schemaIncludes } from './model'
 import { PrismaService } from '@/integrations/PrismaService'
 
-@singleton()
+@injectable()
 export class SchemaService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async readSchema(
     accountId: string,

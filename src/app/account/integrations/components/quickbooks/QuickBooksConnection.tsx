@@ -1,17 +1,17 @@
 import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
-import { container } from 'tsyringe'
 import QuickBooksSyncButton from './QuickBooksSyncButton'
 import QuickBooksDisconnectLink from './QuickBooksDisconnectLink'
 import { Session } from '@/domain/session/entity'
-import { QuickBooksService } from '@/integrations/quickBooks'
+import { QuickBooksService } from '@/integrations/quickBooks/QuickBooksService'
+import { container } from '@/lib/di'
 
 type Props = {
   session: Session
 }
 
 export default async function QuickBooksConnection({ session }: Props) {
-  const quickBooksService = container.resolve(QuickBooksService)
+  const quickBooksService = container().resolve(QuickBooksService)
 
   const quickBooksCompanyInfo = await quickBooksService.getCompanyInfo(
     session.accountId,

@@ -1,5 +1,4 @@
 'use client'
-
 import { CircularProgress } from '@mui/material'
 import { FC, useEffect } from 'react'
 

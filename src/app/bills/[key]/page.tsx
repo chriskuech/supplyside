@@ -2,7 +2,6 @@ import { fail } from 'assert'
 import { Box, Container, Stack } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
-import { container } from 'tsyringe'
 import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
 import PurchaseLink from './tools/PurchaseLink'
@@ -19,14 +18,15 @@ import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectSchemaField } from '@/domain/schema/extensions'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
-import { QuickBooksService } from '@/integrations/quickBooks'
+import { QuickBooksService } from '@/integrations/quickBooks/QuickBooksService'
+import { container } from '@/lib/di'
 
 export default async function BillsDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
-  const quickBooksService = container.resolve(QuickBooksService)
+  const quickBooksService = container().resolve(QuickBooksService)
 
   const { session, resource, schema, lineSchema } = await readDetailPageModel(
     'Bill',

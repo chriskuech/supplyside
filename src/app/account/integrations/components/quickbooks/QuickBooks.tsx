@@ -1,16 +1,16 @@
 import { Alert } from '@mui/material'
-import { container } from 'tsyringe'
 import QuickBooksConnectButton from './QuickBooksConnectButton'
 import QuickBooksConnection from './QuickBooksConnection'
 import { Session } from '@/domain/session/entity'
-import { QuickBooksService } from '@/integrations/quickBooks'
+import { QuickBooksService } from '@/integrations/quickBooks/QuickBooksService'
+import { container } from '@/lib/di'
 
 type Props = {
   session: Session
 }
 
 export default async function Quickbooks({ session }: Props) {
-  const quickBooksService = container.resolve(QuickBooksService)
+  const quickBooksService = container().resolve(QuickBooksService)
 
   if (!quickBooksService.isEnabled) {
     return (

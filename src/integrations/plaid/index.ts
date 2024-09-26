@@ -1,11 +1,11 @@
 import { CountryCode, Products } from 'plaid'
 import { redirect } from 'next/navigation'
-import { singleton } from 'tsyringe'
+import { injectable } from 'inversify'
 import { PrismaService } from '../PrismaService'
 import ConfigService from '../ConfigService'
 import { PlaidConfigService } from './util'
 
-@singleton()
+@injectable()
 export class PlaidService {
   constructor(
     private readonly prisma: PrismaService,

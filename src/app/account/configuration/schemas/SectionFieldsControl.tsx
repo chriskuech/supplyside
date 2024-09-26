@@ -1,5 +1,4 @@
 'use client'
-
 import Autocomplete, {
   AutocompleteRenderInputParams,
 } from '@mui/material/Autocomplete'

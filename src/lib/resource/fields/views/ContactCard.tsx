@@ -1,5 +1,4 @@
 'use client'
-
 import { Badge, Person, Email, Phone, Visibility } from '@mui/icons-material'
 import {
   Card,

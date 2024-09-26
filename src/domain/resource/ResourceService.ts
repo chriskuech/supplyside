@@ -1,9 +1,9 @@
 import { fail } from 'assert'
 import { Prisma, ResourceType } from '@prisma/client'
 import { z } from 'zod'
-import { singleton } from 'tsyringe'
 import { isNullish, map, pipe, sum } from 'remeda'
 import { match } from 'ts-pattern'
+import { inject, injectable } from 'inversify'
 import {
   selectSchemaField,
   selectSchemaFieldUnsafe,
@@ -15,7 +15,7 @@ import {
   purchaseStatusOptions,
 } from '../schema/template/system-fields'
 import { Schema, SchemaField } from '../schema/entity'
-import { SchemaService } from '../schema'
+import { SchemaService } from '../schema/SchemaService'
 import { extractContent } from '../bill/extractData'
 import { FieldTemplate } from '../schema/template/types'
 import { FieldRef, selectResourceFieldValue } from './extensions'
@@ -137,11 +137,11 @@ type ResourceCopyParams = {
   toResourceId: string
 }
 
-@singleton()
+@injectable()
 export class ResourceService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly schemaService: SchemaService,
+    @inject(PrismaService) private readonly prisma: PrismaService,
+    @inject(SchemaService) private readonly schemaService: SchemaService,
   ) {}
 
   async read(accountId: string, resourceType: ResourceType, id: string) {

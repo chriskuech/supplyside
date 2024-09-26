@@ -1,7 +1,7 @@
-import { singleton } from 'tsyringe'
+import { injectable } from 'inversify'
 import { PrismaService } from '@/integrations/PrismaService'
 
-@singleton()
+@injectable()
 export class SchemaSectionService {
   constructor(private readonly prisma: PrismaService) {}
 

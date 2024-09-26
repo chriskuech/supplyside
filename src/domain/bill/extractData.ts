@@ -3,15 +3,18 @@ import { assert } from 'console'
 import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 import { validate as isUuid } from 'uuid'
-import { container } from 'tsyringe'
-import { ResourceFieldInput, ResourceService } from '../resource/service'
+import {
+  ResourceFieldInput,
+  ResourceService,
+} from '../resource/ResourceService'
 import { selectResourceFieldValue } from '../resource/extensions'
 import { fields } from '../schema/template/system-fields'
 import { selectSchemaFieldUnsafe } from '../schema/extensions'
 import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
-import { SchemaService } from '../schema'
-import OpenAiService from '@/integrations/openai/openai'
+import { SchemaService } from '../schema/SchemaService'
+import { OpenAiService } from '@/integrations/openai/OpenAiService'
 import { CompletionPartsService } from '@/integrations/openai/mapFileToCompletionParts'
+import { container } from '@/lib/di'
 
 const prompt = `
 You are a context extraction tool within a "Procure-to-Pay" B2B SaaS application.
@@ -42,10 +45,10 @@ const ExtractedBillDataSchema = z.object({
 })
 
 export const extractContent = async (accountId: string, resourceId: string) => {
-  const openai = container.resolve(OpenAiService)
-  const schemaService = container.resolve(SchemaService)
-  const completionPartsService = container.resolve(CompletionPartsService)
-  const resourceService = container.resolve(ResourceService)
+  const openai = container().resolve(OpenAiService)
+  const schemaService = container().resolve(SchemaService)
+  const completionPartsService = container().resolve(CompletionPartsService)
+  const resourceService = container().resolve(ResourceService)
 
   const [billSchema, billResource, vendors] = await Promise.all([
     schemaService.readSchema(accountId, 'Bill'),

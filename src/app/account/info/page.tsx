@@ -1,15 +1,15 @@
 import { Box, Stack, Typography } from '@mui/material'
-import { container } from 'tsyringe'
 import Form from './Form'
 import { readSession } from '@/lib/session/actions'
 import ConfigService from '@/integrations/ConfigService'
 import { AccountService } from '@/domain/account'
+import { container } from '@/lib/di'
 
 export const dynamic = 'force-dynamic'
 
 export default async function InfoPage() {
-  const accountService = container.resolve(AccountService)
-  const { config } = container.resolve(ConfigService)
+  const accountService = container().resolve(AccountService)
+  const { config } = container().resolve(ConfigService)
 
   const { accountId } = await readSession()
   const account = await accountService.read(accountId)

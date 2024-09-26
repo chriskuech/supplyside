@@ -1,25 +1,24 @@
 'use server'
-
-import { container } from 'tsyringe'
 import {
   fields,
   purchaseStatusOptions,
 } from '@/domain/schema/template/system-fields'
 import { transitionStatus } from '@/lib/resource/actions'
 import { readSession } from '@/lib/session/actions'
-import { ResourceService } from '@/domain/resource'
+import { ResourceService } from '@/domain/resource/ResourceService'
 import { PoService } from '@/domain/purchase/PoService'
+import { container } from '@/lib/di'
 
 export const createPo = async (resourceId: string) => {
   const { accountId } = await readSession()
 
-  return await container.resolve(PoService).createPo(accountId, resourceId)
+  return await container().resolve(PoService).createPo(accountId, resourceId)
 }
 
 export const sendPo = async (resourceId: string) => {
   const { accountId } = await readSession()
 
-  await container.resolve(PoService).sendPo(accountId, resourceId)
+  await container().resolve(PoService).sendPo(accountId, resourceId)
   await transitionStatus(
     resourceId,
     fields.purchaseStatus,
@@ -30,7 +29,7 @@ export const sendPo = async (resourceId: string) => {
 export const findPurchaseBills = async (resourceId: string) => {
   const { accountId } = await readSession()
 
-  return await container
+  return await container()
     .resolve(ResourceService)
     .findBacklinks(accountId, 'Purchase', resourceId)
 }
