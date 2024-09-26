@@ -1,5 +1,6 @@
 import assert from 'assert'
 import { injectable } from 'inversify'
+import { PrismaService } from '../PrismaService'
 import { QuickBooksTokenService } from './QuickBooksTokenService'
 import { QuickBooksConfigService } from './QuickBooksConfigService'
 import { QuickBooksClientService } from './QuickBooksClientService'
@@ -8,10 +9,14 @@ import { QuickBooksCompanyInfoService } from './QuickBooksCompanyInfoService'
 import { QuickBooksAccountService } from './QuickBooksAccountService'
 import { QuickBooksVendorService } from './QuickBooksVendorService'
 import { QuickBooksBillService } from './QuickBooksBillService'
+import { isRequestError } from './utils'
+import { AccountService } from '@/domain/account'
 
 @injectable()
 export class QuickBooksService {
   constructor(
+    private readonly prisma: PrismaService,
+    private readonly accountService: AccountService,
     private readonly quickBooksTokenService: QuickBooksTokenService,
     private readonly quickBooksConfigService: QuickBooksConfigService,
     private readonly quickBooksClientService: QuickBooksClientService,
@@ -40,11 +45,13 @@ export class QuickBooksService {
 
     await this.quickBooksTokenService.deleteToken(accountId)
 
-    // There is a bug with the client, the revoke function succesfully executes but throws a TypeError on the response
     try {
       await client.revoke(token)
     } catch (e) {
+      // There is a bug with the client, the revoke function succesfully executes but throws a TypeError on the response
       if (e instanceof TypeError) return
+      // If there is a 400 error the token has already been revoked on quickBooks side
+      if (isRequestError(e) && e.response.status === 400) return
       throw e
     }
   }
@@ -100,5 +107,21 @@ export class QuickBooksService {
     const client = this.quickBooksClientService.getClient(token)
 
     return this.quickBooksBillService.syncBill(client, accountId, resourceId)
+  }
+
+  async findAccountByRealmId(realmId: string) {
+    const account = await this.prisma.account.findFirst({
+      where: { quickBooksToken: { path: ['realmId'], equals: realmId } },
+    })
+    if (!account) return null
+
+    return this.accountService.read(account.id)
+  }
+
+  async getAccountRealmId(accountId: string): Promise<string> {
+    const token = await this.quickBooksTokenService.getToken(accountId)
+    assert(token, 'No token found')
+
+    return token?.realmId ?? null
   }
 }
