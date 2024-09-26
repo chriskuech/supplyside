@@ -1,4 +1,5 @@
 'use server'
+
 import { redirect } from 'next/navigation'
 import { IamUserNotFoundError } from '@/domain/user/errors'
 import { StartEmailVerificationInput, UserService } from '@/domain/user'
