@@ -109,13 +109,13 @@ export class QuickBooksService {
     return this.quickBooksBillService.syncBill(client, accountId, resourceId)
   }
 
-  async findAccountByRealmId(realmId: string) {
+  async findAccountIdByRealmId(realmId: string) {
     const account = await this.prisma.account.findFirst({
       where: { quickBooksToken: { path: ['realmId'], equals: realmId } },
     })
     if (!account) return null
 
-    return this.accountService.read(account.id)
+    return account.id
   }
 
   async getAccountRealmId(accountId: string): Promise<string> {

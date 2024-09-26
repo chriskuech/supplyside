@@ -17,11 +17,11 @@ export async function GET({ url }: NextRequest): Promise<NextResponse> {
 
   assert(realmId, 'realmId not found')
 
-  const account = await quickBooksService.findAccountByRealmId(realmId)
+  const accountId = await quickBooksService.findAccountIdByRealmId(realmId)
 
-  if (!account) return redirectPage
+  if (!accountId) return redirectPage
 
-  await quickBooksService.disconnect(account.id)
+  await quickBooksService.disconnect(accountId)
 
   return redirectPage
 }
