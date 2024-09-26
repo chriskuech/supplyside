@@ -34,11 +34,24 @@ export class QuickBooksService {
   }
 
   async disconnect(accountId: string) {
+    const token = await this.quickBooksTokenService.getToken(accountId)
+    assert(token, 'No token found')
+    const client = this.quickBooksClientService.getClient(token)
+
     await this.quickBooksTokenService.deleteToken(accountId)
+
+    // There is a bug with the client, the revoke function succesfully executes but throws a TypeError on the response
+    try {
+      await client.revoke(token)
+    } catch (e) {
+      if (e instanceof TypeError) return
+      throw e
+    }
   }
 
   async isConnected(accountId: string): Promise<boolean> {
-    return this.quickBooksTokenService.getToken(accountId) !== null
+    const token = await this.quickBooksTokenService.getToken(accountId)
+    return !!token
   }
 
   async pullData(accountId: string): Promise<void> {
