@@ -1070,4 +1070,31 @@ export class ResourceService {
       })),
     })
   }
+
+  async findResourceByUniqueValue(
+    accountId: string,
+    resourceType: ResourceType,
+    fieldTemplate: FieldTemplate,
+    valueInput: ValueInput,
+  ) {
+    const resourceSchema = await this.schemaService.readSchema(
+      accountId,
+      resourceType,
+    )
+    const fieldId = selectSchemaFieldUnsafe(resourceSchema, fieldTemplate).id
+
+    const value = mapValueInputToPrismaValueWhere(valueInput)
+
+    const resourceField = await this.prisma.resourceField.findFirst({
+      where: {
+        fieldId,
+        Value: value,
+        Resource: { accountId },
+      },
+    })
+
+    if (!resourceField) return null
+
+    return this.readResource({ accountId, id: resourceField.resourceId })
+  }
 }

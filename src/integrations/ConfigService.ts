@@ -13,6 +13,7 @@ const schema = z
     QUICKBOOKS_CLIENT_SECRET: z.string().min(1).optional(),
     QUICKBOOKS_CSRF_SECRET: z.string().min(1).optional(),
     QUICKBOOKS_ENVIRONMENT: z.enum(['sandbox', 'production']).optional(),
+    QUICKBOOKS_WEBHOOK_VERIFIER_TOKEN: z.string().optional(),
 
     PLAID_ENV: z.enum(['sandbox', 'development', 'production']).optional(),
     PLAID_CLIENT_ID: z.string().min(1).optional(),

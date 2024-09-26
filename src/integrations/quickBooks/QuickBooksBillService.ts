@@ -1,6 +1,7 @@
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { injectable } from 'inversify'
+import { PrismaService } from '../PrismaService'
 import { accountQuerySchema, readBillSchema } from './schemas'
 import { Bill } from './types'
 import { QuickBooksClientService } from './QuickBooksClientService'
@@ -38,6 +39,7 @@ const fieldsMap = [
 @injectable()
 export class QuickBooksBillService {
   constructor(
+    private readonly prismaService: PrismaService,
     private readonly quickBooksClientService: QuickBooksClientService,
     private readonly schemaService: SchemaService,
     private readonly quickBooksVendorService: QuickBooksVendorService,
