@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
-import { singleton } from 'tsyringe'
-import { TemplateService } from '../schema/template'
+import { injectable } from 'inversify'
+import { TemplateService } from '../schema/template/TemplateService'
 import { Account } from './entity'
 import { mapAccountModelToEntity } from './mappers'
 import { accountInclude } from './model'
@@ -14,7 +14,7 @@ export type UpdateAccountInput = {
   logoBlobId?: string
 }
 
-@singleton()
+@injectable()
 export class AccountService {
   constructor(
     private readonly prisma: PrismaService,

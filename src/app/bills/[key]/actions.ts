@@ -1,6 +1,4 @@
 'use server'
-
-import { container } from 'tsyringe'
 import { QuickBooksExpectedError } from '@/integrations/quickBooks/errors'
 import {
   billStatusOptions,
@@ -8,10 +6,11 @@ import {
 } from '@/domain/schema/template/system-fields'
 import { transitionStatus } from '@/lib/resource/actions'
 import { readSession } from '@/lib/session/actions'
-import { QuickBooksService } from '@/integrations/quickBooks'
+import { QuickBooksService } from '@/integrations/quickBooks/QuickBooksService'
+import { container } from '@/lib/di'
 
 export const approveBill = async (billResourceId: string) => {
-  const quickBooksService = container.resolve(QuickBooksService)
+  const quickBooksService = container().resolve(QuickBooksService)
 
   //TODO: make actions middleware to avoid repeting same logic on all actions
   try {

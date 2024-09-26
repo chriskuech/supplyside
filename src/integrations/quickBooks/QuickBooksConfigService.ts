@@ -1,8 +1,8 @@
 import { fail } from 'assert'
-import { singleton } from 'tsyringe'
+import { injectable } from 'inversify'
 import ConfigService from '../ConfigService'
 
-@singleton()
+@injectable()
 export class QuickBooksConfigService {
   constructor(private readonly configService: ConfigService) {}
 

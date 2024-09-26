@@ -1,7 +1,7 @@
 import assert from 'assert'
 import { difference, range } from 'remeda'
-import { singleton } from 'tsyringe'
 import OAuthClient from 'intuit-oauth'
+import { injectable } from 'inversify'
 import {
   countQuerySchema,
   readVendorSchema,
@@ -19,10 +19,10 @@ import {
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
-import { SchemaService } from '@/domain/schema'
-import { ResourceService } from '@/domain/resource'
+import { SchemaService } from '@/domain/schema/SchemaService'
+import { ResourceService } from '@/domain/resource/ResourceService'
 
-@singleton()
+@injectable()
 export class QuickBooksVendorService {
   constructor(
     private readonly schemaService: SchemaService,

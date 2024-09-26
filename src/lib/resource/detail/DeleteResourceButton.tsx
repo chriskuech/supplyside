@@ -1,5 +1,4 @@
 'use client'
-
 import { Delete } from '@mui/icons-material'
 import { IconButton, Tooltip } from '@mui/material'
 import { ResourceType } from '@prisma/client'

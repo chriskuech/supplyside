@@ -1,9 +1,9 @@
 import { fail } from 'assert'
 import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid'
-import { singleton } from 'tsyringe'
+import { injectable } from 'inversify'
 import ConfigService from '../ConfigService'
 
-@singleton()
+@injectable()
 export class PlaidConfigService {
   constructor(private readonly configService: ConfigService) {}
 

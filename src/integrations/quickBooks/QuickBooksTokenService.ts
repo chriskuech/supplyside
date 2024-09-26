@@ -1,14 +1,14 @@
-import { singleton } from 'tsyringe'
 import { Token } from 'intuit-oauth'
 import { Prisma } from '@prisma/client'
 import Csrf from 'csrf'
 import { z } from 'zod'
+import { injectable } from 'inversify'
 import { PrismaService } from '../PrismaService'
 import { QuickBooksToken, quickbooksTokenSchema } from './schemas'
 import { QuickBooksClientService } from './QuickBooksClientService'
 import { QuickBooksConfigService } from './QuickBooksConfigService'
 
-@singleton()
+@injectable()
 export class QuickBooksTokenService {
   constructor(
     private readonly prisma: PrismaService,

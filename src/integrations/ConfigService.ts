@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { match } from 'ts-pattern'
-import { singleton } from 'tsyringe'
+import { injectable } from 'inversify'
 
 const schema = z
   .object({
@@ -36,7 +36,7 @@ const schema = z
 
 export type Config = z.infer<typeof schema>
 
-@singleton()
+@injectable()
 export default class ConfigService {
   readonly config: Config = schema.parse(process.env)
 }

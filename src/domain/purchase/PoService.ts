@@ -1,17 +1,17 @@
-import { singleton } from 'tsyringe'
-import BlobService from '../blob'
+import { injectable } from 'inversify'
+import { BlobService } from '../blob/BlobService'
 import { selectResourceFieldValue } from '../resource/extensions'
-import { SchemaService } from '../schema'
+import { SchemaService } from '../schema/SchemaService'
 import { selectSchemaFieldUnsafe } from '../schema/extensions'
 import { fields } from '../schema/template/system-fields'
 import { AccountService } from '../account'
-import { ResourceService } from '../resource/service'
+import { ResourceService } from '../resource/ResourceService'
 import { PoRenderingService } from './PoRenderingService'
 import { PrismaService } from '@/integrations/PrismaService'
 import ConfigService from '@/integrations/ConfigService'
 import SmtpService from '@/integrations/SmtpService'
 
-@singleton()
+@injectable()
 export class PoService {
   constructor(
     private readonly accountService: AccountService,

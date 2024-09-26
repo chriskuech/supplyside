@@ -1,5 +1,4 @@
 'use server'
-
 import { RedirectType, redirect } from 'next/navigation'
 import { createSession } from '@/lib/session/actions'
 import { SessionCreationError } from '@/domain/session/errors'

@@ -1,5 +1,4 @@
 'use client'
-
 import { Button, Card, CardContent, Modal, Typography } from '@mui/material'
 import { ReactNode } from 'react'
 import { Add } from '@mui/icons-material'

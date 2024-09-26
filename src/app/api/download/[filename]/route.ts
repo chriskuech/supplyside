@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
-import BlobService from '@/domain/blob'
+import { BlobService } from '@/domain/blob/BlobService'
+import { container } from '@/lib/di'
 
 /**
  * /api/download/[filename]?blobId=<blobId>[&no-impersonation][&preview]
@@ -10,7 +10,7 @@ export async function GET(
   req: NextRequest,
   { params: { filename } }: { params: { filename: string } },
 ): Promise<NextResponse> {
-  const blobService = container.resolve(BlobService)
+  const blobService = container().resolve(BlobService)
 
   const query = new URL(req.url).searchParams
 

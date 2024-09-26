@@ -1,5 +1,4 @@
 'use client'
-
 import { Avatar, Button, Stack, TextField, Typography } from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
 import { useState } from 'react'

@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable jsx-a11y/alt-text */
-
 import { ReactNode } from 'react'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
 import { PurchaseViewModel } from './ViewModel'

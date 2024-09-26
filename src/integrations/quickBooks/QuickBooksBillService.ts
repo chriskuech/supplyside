@@ -1,6 +1,6 @@
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
-import { singleton } from 'tsyringe'
+import { injectable } from 'inversify'
 import { accountQuerySchema, readBillSchema } from './schemas'
 import { Bill } from './types'
 import { QuickBooksClientService } from './QuickBooksClientService'
@@ -11,10 +11,10 @@ import { QuickBooksExpectedError } from './errors'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectSchemaField } from '@/domain/schema/extensions'
-import { SchemaService } from '@/domain/schema'
+import { SchemaService } from '@/domain/schema/SchemaService'
 import { Resource } from '@/domain/resource/entity'
 import ConfigService from '@/integrations/ConfigService'
-import { ResourceService } from '@/domain/resource'
+import { ResourceService } from '@/domain/resource/ResourceService'
 
 const fieldsMap = [
   {
@@ -35,7 +35,7 @@ const fieldsMap = [
   },
 ]
 
-@singleton()
+@injectable()
 export class QuickBooksBillService {
   constructor(
     private readonly quickBooksClientService: QuickBooksClientService,

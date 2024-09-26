@@ -1,5 +1,4 @@
 'use client'
-
 import { Send } from '@mui/icons-material'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
 import { FC, useState } from 'react'

@@ -1,5 +1,4 @@
 'use client'
-
 import { Forward } from '@mui/icons-material'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
 import { FC, useCallback, useState } from 'react'

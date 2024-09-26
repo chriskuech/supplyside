@@ -1,5 +1,4 @@
 'use client'
-
 import { Close, Download, UploadFile, Visibility } from '@mui/icons-material'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useRef } from 'react'

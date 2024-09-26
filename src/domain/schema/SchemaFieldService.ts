@@ -1,6 +1,6 @@
 import { P, match } from 'ts-pattern'
 import { FieldType, Prisma, ResourceType } from '@prisma/client'
-import { singleton } from 'tsyringe'
+import { injectable } from 'inversify'
 import { SchemaField } from './entity'
 import { mapFieldModelToEntity } from './mappers'
 import { ValueInput } from '@/domain/resource/patch'
@@ -33,7 +33,7 @@ export type OptionPatch = {
   | { op: 'remove'; optionId: string }
 )
 
-@singleton()
+@injectable()
 export class SchemaFieldService {
   constructor(private readonly prisma: PrismaService) {}
 

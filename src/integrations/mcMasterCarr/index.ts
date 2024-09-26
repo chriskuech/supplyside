@@ -1,11 +1,11 @@
 import { readFileSync } from 'fs'
 import path from 'path'
 import { fail } from 'assert'
-import { singleton } from 'tsyringe'
 import { redirect } from 'next/navigation'
 import handlebars from 'handlebars'
 import { parseStringPromise } from 'xml2js'
 import { match } from 'ts-pattern'
+import { injectable } from 'inversify'
 import { PrismaService } from '../PrismaService'
 import ConfigService from '../ConfigService'
 import {
@@ -23,10 +23,10 @@ import {
   fields,
   unitOfMeasureOptions,
 } from '@/domain/schema/template/system-fields'
-import { SchemaService } from '@/domain/schema'
-import { ResourceService } from '@/domain/resource'
+import { SchemaService } from '@/domain/schema/SchemaService'
+import { ResourceService } from '@/domain/resource/ResourceService'
 
-@singleton()
+@injectable()
 export class McMasterService {
   constructor(
     private readonly prisma: PrismaService,

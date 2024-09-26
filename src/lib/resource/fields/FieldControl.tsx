@@ -1,5 +1,4 @@
 'use client'
-
 import { useCallback } from 'react'
 import { updateResourceField } from '../actions'
 import Field, { Props as FieldProps } from './controls/Field'

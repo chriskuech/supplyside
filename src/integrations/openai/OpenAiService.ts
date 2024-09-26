@@ -1,8 +1,8 @@
+import { injectable } from 'inversify'
 import { OpenAI } from 'openai'
-import { singleton } from 'tsyringe'
 
-@singleton()
-export default class OpenAiService extends OpenAI {
+@injectable()
+export class OpenAiService extends OpenAI {
   constructor() {
     super({
       // These are required to use our specific model

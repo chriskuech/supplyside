@@ -4,14 +4,14 @@ import { readFile } from 'fs/promises'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 /* @ts-expect-error */
 import ReactDom from 'next/dist/compiled/react-dom/cjs/react-dom-server-legacy.browser.production'
-import { singleton } from 'tsyringe'
 import { isTruthy } from 'remeda'
 import { P, match } from 'ts-pattern'
 import { FieldType } from '@prisma/client'
-import BlobService from '../blob'
-import { ResourceService } from '../resource/service'
+import { injectable } from 'inversify'
+import { BlobService } from '../blob/BlobService'
+import { ResourceService } from '../resource/ResourceService'
 import { AccountService } from '../account'
-import { SchemaService } from '../schema'
+import { SchemaService } from '../schema/SchemaService'
 import {
   FieldRef,
   selectResourceField,
@@ -31,7 +31,7 @@ type RenderPoParams = {
   isPreview?: boolean
 }
 
-@singleton()
+@injectable()
 export class PoRenderingService {
   constructor(
     private readonly blobService: BlobService,

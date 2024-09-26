@@ -1,17 +1,17 @@
-import { container } from 'tsyringe'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
-import { QuickBooksService } from '@/integrations/quickBooks'
+import { QuickBooksService } from '@/integrations/quickBooks/QuickBooksService'
+import { container } from '@/lib/di'
 
 export default async function VendorDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
-  const quickBooksService = container.resolve(QuickBooksService)
+  const quickBooksService = container().resolve(QuickBooksService)
 
   const { resource, schema, lineSchema } = await readDetailPageModel(
     'Vendor',

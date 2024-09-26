@@ -1,5 +1,4 @@
 'use client'
-
 import { syncDataFromQuickBooks } from '../../actions'
 import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
 import LoadingButton from '@/lib/ux/LoadingButton'

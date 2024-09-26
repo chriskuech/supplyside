@@ -2,7 +2,6 @@ import { fail } from 'assert'
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
-import { container } from 'tsyringe'
 import PurchaseStatusTracker from './PurchaseStatusTracker'
 import ApproveButton from './cta/ApproveButton'
 import SkipButton from './cta/SkipButton'
@@ -30,7 +29,8 @@ import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import { resources } from '@/domain/schema/template/system-resources'
 import { McMasterService } from '@/integrations/mcMasterCarr'
-import { ResourceService } from '@/domain/resource'
+import { ResourceService } from '@/domain/resource/ResourceService'
+import { container } from '@/lib/di'
 
 export default async function PurchaseDetail({
   params: { key },
@@ -44,8 +44,8 @@ export default async function PurchaseDetail({
     lineSchema,
   } = await readDetailPageModel('Purchase', key, `/purchases/${key}`)
 
-  const mcMasterCarrService = container.resolve(McMasterService)
-  const resourceService = container.resolve(ResourceService)
+  const mcMasterCarrService = container().resolve(McMasterService)
+  const resourceService = container().resolve(ResourceService)
 
   const vendorTemplateId = selectResourceFieldValue(resource, fields.vendor)
     ?.resource?.templateId

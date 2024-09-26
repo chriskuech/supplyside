@@ -8,14 +8,14 @@ import {
   ChatCompletionContentPartText,
 } from 'openai/resources/index.mjs'
 import { P, match } from 'ts-pattern'
-import { singleton } from 'tsyringe'
+import { injectable } from 'inversify'
 import ConfigService from '../ConfigService'
 import { File } from '@/domain/file/types'
-import BlobService from '@/domain/blob'
+import { BlobService } from '@/domain/blob/BlobService'
 
 const exec = promisify(execCallback)
 
-@singleton()
+@injectable()
 export class CompletionPartsService {
   constructor(
     private readonly blobService: BlobService,

@@ -1,5 +1,4 @@
 'use client'
-
 import { FC } from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { IconButton } from '@mui/material'

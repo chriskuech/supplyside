@@ -1,14 +1,14 @@
 import { randomUUID } from 'crypto'
-import { singleton } from 'tsyringe'
 import { BlobServiceClient } from '@azure/storage-blob'
+import { injectable } from 'inversify'
 import { Blob, BlobWithData } from './entity'
 import ConfigService from '@/integrations/ConfigService'
 import { PrismaService } from '@/integrations/PrismaService'
 
 const containerName = 'app-data'
 
-@singleton()
-export default class BlobService {
+@injectable()
+export class BlobService {
   private readonly client: BlobServiceClient
 
   constructor(

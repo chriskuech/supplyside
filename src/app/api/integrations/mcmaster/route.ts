@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { parseStringPromise } from 'xml2js'
-import { container } from 'tsyringe'
 import ConfigService from '@/integrations/ConfigService'
 import { McMasterService } from '@/integrations/mcMasterCarr'
+import { container } from '@/lib/di'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const { config } = container.resolve(ConfigService)
-  const mcMasterCarrService = container.resolve(McMasterService)
+  const { config } = container().resolve(ConfigService)
+  const mcMasterCarrService = container().resolve(McMasterService)
 
   const cxmlUrlEncoded = await request.text()
   const cxml = decodeURIComponent(cxmlUrlEncoded)

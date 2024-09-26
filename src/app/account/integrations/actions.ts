@@ -1,17 +1,16 @@
 'use server'
-
 import { revalidatePath } from 'next/cache'
-import { container } from 'tsyringe'
 import { readSession } from '@/lib/session/actions'
 import { McMasterInvalidCredentials } from '@/integrations/mcMasterCarr/errors'
 import { PlaidService } from '@/integrations/plaid'
 import { McMasterService } from '@/integrations/mcMasterCarr'
-import { QuickBooksService } from '@/integrations/quickBooks'
+import { QuickBooksService } from '@/integrations/quickBooks/QuickBooksService'
+import { container } from '@/lib/di'
 
 export const syncDataFromQuickBooks = async () => {
   const { accountId } = await readSession()
 
-  await container.resolve(QuickBooksService).pullData(accountId)
+  await container().resolve(QuickBooksService).pullData(accountId)
 
   revalidatePath('')
 }
@@ -19,13 +18,15 @@ export const syncDataFromQuickBooks = async () => {
 export const createPlaidLinkToken = async () => {
   const { accountId } = await readSession()
 
-  return await container.resolve(PlaidService).createLinkToken(accountId)
+  return await container().resolve(PlaidService).createLinkToken(accountId)
 }
 
 export const createPlaidConnection = async (publicToken: string) => {
   const { accountId } = await readSession()
 
-  await container.resolve(PlaidService).createConnection(accountId, publicToken)
+  await container()
+    .resolve(PlaidService)
+    .createConnection(accountId, publicToken)
 
   revalidatePath('')
 }
@@ -33,7 +34,7 @@ export const createPlaidConnection = async (publicToken: string) => {
 export const disconnectPlaid = async () => {
   const { accountId } = await readSession()
 
-  await container.resolve(PlaidService).deletePlaidToken(accountId)
+  await container().resolve(PlaidService).deletePlaidToken(accountId)
 
   revalidatePath('')
 }
@@ -42,7 +43,7 @@ export const createMcMasterCarrConnection = async (
   username: string,
   password: string,
 ) => {
-  const mcMasterService = container.resolve(McMasterService)
+  const mcMasterService = container().resolve(McMasterService)
 
   const session = await readSession()
 
@@ -64,7 +65,7 @@ export const createMcMasterCarrConnection = async (
 }
 
 export const disconnectMcMasterCarr = async () => {
-  const mcMasterService = container.resolve(McMasterService)
+  const mcMasterService = container().resolve(McMasterService)
 
   const { accountId } = await readSession()
 

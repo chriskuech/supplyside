@@ -1,5 +1,4 @@
 'use client'
-
 import { Chip, Typography } from '@mui/material'
 import { Link as LinkIcon } from '@mui/icons-material'
 import Link from 'next/link'

@@ -1,5 +1,4 @@
 'use client'
-
 import { Visibility } from '@mui/icons-material'
 import { Tooltip, IconButton } from '@mui/material'
 import { File } from '@/domain/file/types'

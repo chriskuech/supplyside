@@ -1,5 +1,4 @@
 'use client'
-
 import { Link } from '@mui/material'
 import { disconnectPlaid } from '../../actions'
 import { useConfirmation } from '@/lib/confirmation'
