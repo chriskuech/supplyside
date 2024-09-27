@@ -19,7 +19,11 @@ import {
 import { fields } from '../schema/template/system-fields'
 import { Resource, ResourceField } from '../resource/entity'
 import PoDocument from './doc/PoDocument'
-import { LineViewModel, PurchaseViewModel } from './doc/ViewModel'
+import {
+  AddressViewModel,
+  LineViewModel,
+  PurchaseViewModel,
+} from './doc/ViewModel'
 import PoDocumentFooter from '@/domain/purchase/doc/PoDocumentFooter'
 import { formatInlineAddress } from '@/lib/resource/fields/views/AddressCard'
 
@@ -183,7 +187,7 @@ export class PoRenderingService {
       total: renderTemplateField(order, fields.totalCost),
       vendorName: renderTemplateField(vendor, fields.name),
       taxable: renderTemplateField(order, fields.taxable),
-      shippingAddress: renderTemplateField(order, fields.shippingAddress),
+      shippingAddress: renderAddressViewModel(order, fields.shippingAddress),
       costs: order.costs.map((cost) => ({
         key: cost.name,
         value: (cost.isPercentage
@@ -204,7 +208,10 @@ export class PoRenderingService {
       ),
       shippingNotes: renderTemplateField(order, fields.shippingNotes),
       poRecipientName: renderTemplateField(order, fields.poRecipient),
-      vendorPrimaryAddress: renderTemplateField(vendor, fields.primaryAddress),
+      vendorPrimaryAddress: renderAddressViewModel(
+        vendor,
+        fields.primaryAddress,
+      ),
     }
   }
 }
@@ -287,3 +294,28 @@ const renderFieldValue = (resourceField: ResourceField | undefined) =>
     .with('Resource', () => null)
     .with(P.nullish, () => null)
     .exhaustive()
+
+const renderAddressViewModel = (
+  resource: Resource | undefined,
+  field: FieldRef,
+): AddressViewModel => {
+  if (!resource)
+    return {
+      line1: null,
+      line2: null,
+      line3: null,
+    }
+
+  const addressValue = selectResourceFieldValue(resource, field)?.address
+  const line2Values = [
+    addressValue?.city,
+    addressValue?.state,
+    addressValue?.zip,
+  ].filter(Boolean)
+
+  return {
+    line1: addressValue?.streetAddress ?? null,
+    line2: line2Values.length ? line2Values.join(' ') : null,
+    line3: addressValue?.country ?? null,
+  }
+}
