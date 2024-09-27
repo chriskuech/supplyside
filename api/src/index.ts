@@ -7,9 +7,13 @@ import { readFile } from "fs/promises";
 const app = fastify();
 
 app.get("/health", async (req, res) => {
-  const meta = await readFile("./build.json", "utf-8");
+  try {
+    const meta = await readFile(`${__dirname}/build.json`, "utf-8");
 
-  res.send(meta);
+    res.send(meta);
+  } catch {
+    res.status(500).send("Failed to read build.json");
+  }
 });
 
 app.listen({ port: config.PORT });
