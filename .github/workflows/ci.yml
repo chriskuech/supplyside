@@ -129,11 +129,12 @@ jobs:
           username: supplyside-github-actions
           password: ${{ secrets.ACR_TOKEN }}
 
-      - name: Push the Docker image to Docker Hub
+      - name: Push the Docker images to Docker Hub
         shell: pwsh
         run: |
           $sha = "${{ github.sha }}"
           "api", "app" | ForEach-Object {
+            Write-Host "`nPushing $_`:$sha"
             docker pull supplyside.azurecr.io/$_`:$sha
             docker tag supplyside.azurecr.io/$_`:$sha supplyside.azurecr.io/$_`:integration
             docker push supplyside.azurecr.io/$_`:integration
