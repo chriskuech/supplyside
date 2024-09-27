@@ -23,7 +23,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@api/trpc": ["../api/src/trpc/router"]
     }
   },
   "include": [
