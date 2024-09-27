@@ -20,7 +20,10 @@ import { fields } from '@/domain/schema/template/system-fields'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { Resource } from '@/domain/resource/entity'
 import { SchemaService } from '@/domain/schema/SchemaService'
-import { ResourceService } from '@/domain/resource/ResourceService'
+import {
+  ResourceFieldInput,
+  ResourceService,
+} from '@/domain/resource/ResourceService'
 
 @injectable()
 export class QuickBooksVendorService {
@@ -72,16 +75,10 @@ export class QuickBooksVendorService {
       (vendorResponse) => vendorResponse.QueryResponse.Vendor ?? [],
     )
 
-    const [currentVendors, vendorSchema] = await Promise.all([
-      this.resourceService.readResources({ accountId, type: 'Vendor' }),
-      this.schemaService.readSchema(accountId, 'Vendor'),
-    ])
-
-    const vendorNameField = selectSchemaFieldUnsafe(vendorSchema, fields.name)
-    const quickBooksVendorIdField = selectSchemaFieldUnsafe(
-      vendorSchema,
-      fields.quickBooksVendorId,
-    )
+    const currentVendors = await this.resourceService.readResources({
+      accountId,
+      type: 'Vendor',
+    })
 
     const quickBooksVendorsToAdd = quickBooksVendors.filter(
       (quickBooksVendor) =>
@@ -107,15 +104,13 @@ export class QuickBooksVendorService {
 
         if (!vendor) return
 
-        const vendorName = selectResourceFieldValue(vendor, fields.name)?.string
-
-        if (vendorName === quickBooksVendor.DisplayName) return
-
-        return this.resourceService.updateResourceField({
+        return this.resourceService.updateResource({
           accountId,
           resourceId: vendor.id,
-          fieldId: vendorNameField.id,
-          value: { string: quickBooksVendor.DisplayName },
+          fields: await this.mapQuickBooksVendorToResourceFields(
+            accountId,
+            quickBooksVendor,
+          ),
         })
       }),
     )
@@ -133,31 +128,19 @@ export class QuickBooksVendorService {
         await this.resourceService.updateResource({
           accountId,
           resourceId: vendor.id,
-          fields: [
-            {
-              fieldId: quickBooksVendorIdField.id,
-              value: { string: quickBooksVendorToAdd.Id },
-            },
-            {
-              fieldId: vendorNameField.id,
-              value: { string: quickBooksVendorToAdd.DisplayName },
-            },
-          ],
+          fields: await this.mapQuickBooksVendorToResourceFields(
+            accountId,
+            quickBooksVendorToAdd,
+          ),
         })
       } else {
         await this.resourceService.createResource({
           accountId,
           type: 'Vendor',
-          fields: [
-            {
-              fieldId: vendorNameField.id,
-              value: { string: quickBooksVendorToAdd.DisplayName },
-            },
-            {
-              fieldId: quickBooksVendorIdField.id,
-              value: { string: quickBooksVendorToAdd.Id },
-            },
-          ],
+          fields: await this.mapQuickBooksVendorToResourceFields(
+            accountId,
+            quickBooksVendorToAdd,
+          ),
         })
       }
     }
@@ -264,9 +247,62 @@ export class QuickBooksVendorService {
   }
 
   private static mapVendor(vendorResource: Resource) {
+    const addressValue = selectResourceFieldValue(
+      vendorResource,
+      fields.primaryAddress,
+    )
     return {
       Id: mapValue(vendorResource, fields.quickBooksVendorId),
       DisplayName: mapValue(vendorResource, fields.name),
+      BillAddr: {
+        City: addressValue?.address?.city,
+        Country: addressValue?.address?.country,
+        CountrySubDivisionCode: addressValue?.address?.state,
+        Line1: addressValue?.address?.streetAddress,
+        PostalCode: addressValue?.address?.zip,
+      },
     }
+  }
+
+  private async mapQuickBooksVendorToResourceFields(
+    accountId: string,
+    quickBooksVendor: Vendor['Vendor'],
+  ): Promise<ResourceFieldInput[]> {
+    const vendorSchema = await this.schemaService.readSchema(
+      accountId,
+      'Vendor',
+    )
+    const vendorNameField = selectSchemaFieldUnsafe(vendorSchema, fields.name)
+    const quickBooksVendorIdField = selectSchemaFieldUnsafe(
+      vendorSchema,
+      fields.quickBooksVendorId,
+    )
+    const primaryAddressField = selectSchemaFieldUnsafe(
+      vendorSchema,
+      fields.primaryAddress,
+    )
+
+    return [
+      {
+        fieldId: vendorNameField.id,
+        value: { string: quickBooksVendor.DisplayName },
+      },
+      {
+        fieldId: quickBooksVendorIdField.id,
+        value: { string: quickBooksVendor.Id },
+      },
+      {
+        fieldId: primaryAddressField.id,
+        value: {
+          address: {
+            city: quickBooksVendor.BillAddr?.City ?? null,
+            country: quickBooksVendor.BillAddr?.Country ?? null,
+            state: quickBooksVendor.BillAddr?.CountrySubDivisionCode ?? null,
+            streetAddress: quickBooksVendor.BillAddr?.Line1 ?? null,
+            zip: quickBooksVendor.BillAddr?.PostalCode ?? null,
+          },
+        },
+      },
+    ]
   }
 }
