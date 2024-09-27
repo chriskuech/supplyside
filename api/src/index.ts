@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import fastify from "fastify";
 import { config } from "config";
-import { on } from "process";
+import process from "process";
 import { readFile } from "fs/promises";
 
 const app = fastify();
@@ -26,7 +26,7 @@ setInterval(() => {
   }, 1000);
 }, 30 * 1000);
 
-on("exit", () => {
+process.on("exit", () => {
   console.log("Exiting...");
   app.close();
 });
