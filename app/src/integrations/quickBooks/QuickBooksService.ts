@@ -85,7 +85,7 @@ export class QuickBooksService {
 
     const client = this.quickBooksClientService.getClient(token)
 
-    return this.quickBooksCompanyInfoService.getCompanyInfo(client)
+    return this.quickBooksCompanyInfoService.getCompanyInfo(accountId, client)
   }
 
   getBillUrl(quickBooksBillId: string) {
@@ -135,6 +135,7 @@ export class QuickBooksService {
     const client = this.quickBooksClientService.getClient(token)
 
     return this.quickBooksBillPaymentService.readBillPayment(
+      accountId,
       client,
       billPaymentId,
     )
@@ -146,6 +147,6 @@ export class QuickBooksService {
 
     const client = this.quickBooksClientService.getClient(token)
 
-    return this.quickBooksBillService.readBill(client, billId)
+    return this.quickBooksBillService.readBill(accountId, client, billId)
   }
 }

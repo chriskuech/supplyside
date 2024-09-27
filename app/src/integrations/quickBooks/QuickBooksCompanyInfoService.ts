@@ -2,21 +2,20 @@ import OAuthClient from 'intuit-oauth'
 import { injectable } from 'inversify'
 import { companyInfoSchema } from './schemas'
 import { CompanyInfo } from './types'
-import { QuickBooksClientService } from './QuickBooksClientService'
+import { QuickBooksApiService } from './QuickBooksApiService'
 
 @injectable()
 export class QuickBooksCompanyInfoService {
-  constructor(
-    private readonly quickBooksClientService: QuickBooksClientService,
-  ) {}
+  constructor(private readonly quickBooksApiService: QuickBooksApiService) {}
 
-  async getCompanyInfo(client: OAuthClient): Promise<CompanyInfo> {
-    const baseUrl = this.quickBooksClientService.getBaseUrl(
-      client.token.realmId,
-    )
+  async getCompanyInfo(
+    accountId: string,
+    client: OAuthClient,
+  ): Promise<CompanyInfo> {
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
-    return client
-      .makeApiCall({
+    return this.quickBooksApiService
+      .makeApiCall(accountId, client, {
         url: `${baseUrl}/companyinfo/${client.token.realmId}`,
         method: 'GET',
       })

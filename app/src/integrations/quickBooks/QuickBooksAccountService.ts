@@ -4,7 +4,7 @@ import OAuthClient from 'intuit-oauth'
 import { injectable } from 'inversify'
 import { accountQuerySchema, readAccountSchema } from './schemas'
 import { Account } from './types'
-import { QuickBooksClientService } from './QuickBooksClientService'
+import { QuickBooksApiService } from './QuickBooksApiService'
 import { fields } from '@/domain/schema/template/system-fields'
 import {
   OptionPatch,
@@ -16,17 +16,19 @@ const PAYABLE_ACCOUNTS_TYPE = 'Accounts Payable'
 @injectable()
 export class QuickBooksAccountService {
   constructor(
-    private readonly quickBooksClientService: QuickBooksClientService,
+    private readonly quickBooksApiService: QuickBooksApiService,
     private readonly schemaFieldService: SchemaFieldService,
   ) {}
 
-  async readAccount(client: OAuthClient, id: string): Promise<Account> {
-    const baseUrl = this.quickBooksClientService.getBaseUrl(
-      client.token.realmId,
-    )
+  async readAccount(
+    accountId: string,
+    client: OAuthClient,
+    id: string,
+  ): Promise<Account> {
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
-    return client
-      .makeApiCall({
+    return this.quickBooksApiService
+      .makeApiCall(accountId, client, {
         url: `${baseUrl}/account/${id}`,
         method: 'GET',
       })
@@ -37,7 +39,8 @@ export class QuickBooksAccountService {
     client: OAuthClient,
     accountId: string,
   ): Promise<void> {
-    const allQuickBooksAccounts = await this.quickBooksClientService.query(
+    const allQuickBooksAccounts = await this.quickBooksApiService.query(
+      accountId,
       client,
       { entity: 'Account' },
       accountQuerySchema,

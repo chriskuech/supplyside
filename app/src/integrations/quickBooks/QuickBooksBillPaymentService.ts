@@ -1,22 +1,22 @@
 import { injectable } from 'inversify'
 import OAuthClient from 'intuit-oauth'
-import { QuickBooksClientService } from './QuickBooksClientService'
 import { BillPayment } from './types'
 import { readBillPaymentSchema } from './schemas'
+import { QuickBooksApiService } from './QuickBooksApiService'
 
 @injectable()
 export class QuickBooksBillPaymentService {
-  constructor(
-    private readonly quickBooksClientService: QuickBooksClientService,
-  ) {}
+  constructor(private readonly quickBooksApiService: QuickBooksApiService) {}
 
-  async readBillPayment(client: OAuthClient, id: string): Promise<BillPayment> {
-    const baseUrl = this.quickBooksClientService.getBaseUrl(
-      client.token.realmId,
-    )
+  async readBillPayment(
+    accountId: string,
+    client: OAuthClient,
+    id: string,
+  ): Promise<BillPayment> {
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
-    return client
-      .makeApiCall({
+    return this.quickBooksApiService
+      .makeApiCall(accountId, client, {
         url: `${baseUrl}/billpayment/${id}`,
         method: 'GET',
       })

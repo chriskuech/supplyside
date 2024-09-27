@@ -10,8 +10,8 @@ import {
 import { Vendor } from './types'
 import { handleNotFoundError } from './errors'
 import { MAX_ENTITIES_PER_PAGE } from './constants'
-import { QuickBooksClientService } from './QuickBooksClientService'
 import { mapValue } from './mapValue'
+import { QuickBooksApiService } from './QuickBooksApiService'
 import {
   selectSchemaField,
   selectSchemaFieldUnsafe,
@@ -26,14 +26,18 @@ import { ResourceService } from '@/domain/resource/ResourceService'
 export class QuickBooksVendorService {
   constructor(
     private readonly schemaService: SchemaService,
-    private readonly quickBooksClientService: QuickBooksClientService,
     private readonly resourceService: ResourceService,
+    private readonly quickBooksApiService: QuickBooksApiService,
   ) {}
 
-  async readVendor(client: OAuthClient, vendorId: string): Promise<Vendor> {
-    return client
-      .makeApiCall({
-        url: `${this.quickBooksClientService.getBaseUrl(client.token.realmId)}/vendor/${vendorId}`,
+  async readVendor(
+    accountId: string,
+    client: OAuthClient,
+    vendorId: string,
+  ): Promise<Vendor> {
+    return this.quickBooksApiService
+      .makeApiCall(accountId, client, {
+        url: `${this.quickBooksApiService.getBaseUrl(client.token.realmId)}/vendor/${vendorId}`,
         method: 'GET',
       })
       .then((data) => readVendorSchema.parse(data.json))
@@ -43,7 +47,8 @@ export class QuickBooksVendorService {
     client: OAuthClient,
     accountId: string,
   ): Promise<void> {
-    const quickBooksVendorsCount = await this.quickBooksClientService.query(
+    const quickBooksVendorsCount = await this.quickBooksApiService.query(
+      accountId,
       client,
       { entity: 'Vendor', getCount: true },
       countQuerySchema,
@@ -56,7 +61,8 @@ export class QuickBooksVendorService {
 
     const vendorResponses = await Promise.all(
       range(0, numberOfRequests).map((i) =>
-        this.quickBooksClientService.query(
+        this.quickBooksApiService.query(
+          accountId,
           client,
           {
             entity: 'Vendor',
@@ -168,12 +174,10 @@ export class QuickBooksVendorService {
     accountId: string,
     vendor: Resource,
   ): Promise<Vendor> => {
-    const baseUrl = this.quickBooksClientService.getBaseUrl(
-      client.token.realmId,
-    )
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
-    const quickBooksVendor = await client
-      .makeApiCall({
+    const quickBooksVendor = await this.quickBooksApiService
+      .makeApiCall(accountId, client, {
         url: `${baseUrl}/vendor`,
         method: 'POST',
         headers: {
@@ -205,12 +209,11 @@ export class QuickBooksVendorService {
   }
 
   async updateVendorOnQuickBooks(
+    accountId: string,
     client: OAuthClient,
     vendor: Resource,
   ): Promise<Vendor> {
-    const baseUrl = this.quickBooksClientService.getBaseUrl(
-      client.token.realmId,
-    )
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
     const quickBooksVendorId = selectResourceFieldValue(
       vendor,
@@ -220,6 +223,7 @@ export class QuickBooksVendorService {
     assert(quickBooksVendorId, 'Vendor has no quickBooksVendorId')
 
     const quickBooksVendor = await this.readVendor(
+      accountId,
       client,
       quickBooksVendorId,
     ).catch((e) =>
@@ -234,8 +238,8 @@ export class QuickBooksVendorService {
       ...QuickBooksVendorService.mapVendor(vendor),
     }
 
-    return client
-      .makeApiCall({
+    return this.quickBooksApiService
+      .makeApiCall(accountId, client, {
         url: `${baseUrl}/vendor`,
         method: 'POST',
         headers: {
@@ -257,7 +261,7 @@ export class QuickBooksVendorService {
     )?.string
 
     if (quickBooksVendorId) {
-      return this.updateVendorOnQuickBooks(client, vendor)
+      return this.updateVendorOnQuickBooks(accountId, client, vendor)
     } else {
       return this.createVendorOnQuickBooks(client, accountId, vendor)
     }

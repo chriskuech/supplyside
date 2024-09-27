@@ -1,10 +1,8 @@
 import OAuthClient, { Token } from 'intuit-oauth'
 import Csrf from 'csrf'
 import QuickbooksOauthClient from 'intuit-oauth'
-import { z } from 'zod'
 import { injectable } from 'inversify'
 import { QuickBooksConfigService } from './QuickBooksConfigService'
-import { QueryOptions } from './types'
 
 @injectable()
 export class QuickBooksClientService {
@@ -32,26 +30,5 @@ export class QuickBooksClientService {
     })
 
     return authUri
-  }
-
-  async query<T>(
-    client: OAuthClient,
-    { entity, getCount, maxResults, startPosition, where }: QueryOptions,
-    schema: z.ZodType<T>,
-  ): Promise<T> {
-    const mappedWhere = where && encodeURIComponent(where)
-
-    return client
-      .makeApiCall({
-        url: `${this.getBaseUrl(client.token.realmId)}/query?query=select ${getCount ? 'count(*)' : '*'} from ${entity} ${where ? `where ${mappedWhere}` : ''} ${startPosition ? `STARTPOSITION ${startPosition}` : ''} ${maxResults ? `MAXRESULTS ${maxResults}` : ''}`,
-        method: 'GET',
-      })
-      .then((data) => schema.parse(data.json))
-  }
-
-  getBaseUrl(realmId: string) {
-    const { apiBaseUrl } = this.quickBooksConfigService.configUnsafe
-
-    return `${apiBaseUrl}/v3/company/${realmId}`
   }
 }
