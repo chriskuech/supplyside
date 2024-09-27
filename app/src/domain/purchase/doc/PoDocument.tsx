@@ -1,9 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable jsx-a11y/alt-text */
 import { ReactNode } from 'react'
-import { isTruthy } from 'remeda'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
 import { PurchaseViewModel } from './ViewModel'
+import PoDocumentFooter from './PoDocumentFooter'
+
+const tdStyle = {
+  border: 0,
+  textAlign: 'right',
+  width: '100px',
+  verticalAlign: 'top',
+} as const
 
 export default function PoDocument({
   lines,
@@ -30,7 +37,7 @@ export default function PoDocument({
   vendorPrimaryAddress,
 }: PurchaseViewModel): ReactNode {
   return (
-    <div>
+    <>
       <PoDocumentStyles />
       <div style={{ ...styles.HeaderCssClass, padding: '0px 20px' }}>
         <div style={{ flex: '1' }}>
@@ -66,138 +73,139 @@ export default function PoDocument({
         <div style={{ whiteSpace: 'pre' }}>{accountAddress}</div>
       </div>
       <div style={{ padding: '20px' }}>
-        <div style={styles.HeaderCssClass}>
-          <div style={{ flex: '1', ...styles.MarginBottomForTable }}>
-            <table
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 250px',
+            gap: '20px',
+            marginBottom: '20px',
+          }}
+        >
+          <div
+            style={{
+              border: '1px solid',
+            }}
+          >
+            <div
               style={{
-                border: '1px solid',
-                minHeight: '100px',
+                fontWeight: 'bold',
+                ...styles.BgColorHeader,
+                padding: '4px 8px',
+                borderBottom: '1px solid',
               }}
             >
-              <thead>
-                <tr style={styles.BgColorHeader}>
-                  <th>Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td
-                    rowSpan={3}
-                    style={{
-                      verticalAlign: 'top',
-                      whiteSpace: 'pre-wrap',
-                      ...styles.TopMarginClass,
-                    }}
-                  >
-                    {notes}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+              Notes
+            </div>
+            <div
+              style={{
+                whiteSpace: 'pre-wrap',
+                padding: '4px 8px',
+              }}
+            >
+              {notes}
+            </div>
           </div>
           <div
             style={{
-              minWidth: '260px',
-              marginLeft: '20px',
-              ...styles.MarginBottomForTable,
+              border: '1px solid',
             }}
           >
-            <table
+            <div
               style={{
-                border: '1px solid',
-                minHeight: '100px',
+                fontWeight: 'bold',
+                ...styles.BgColorHeader,
+                padding: '4px 8px',
+                borderBottom: '1px solid',
               }}
             >
-              <thead>
-                <tr style={styles.BgColorHeader}>
-                  <th colSpan={3}>Payment Terms</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td
-                    style={{
-                      border: 0,
-                      padding: '3px 8px 2px',
-                      fontWeight: '600',
-                    }}
-                  >
-                    Currency
-                  </td>
-                  <td style={styles.PaymentPadding}>{currency}</td>
-                </tr>
-                <tr>
-                  <td
-                    style={{ border: 0, padding: '2px 8px', fontWeight: '600' }}
-                  >
-                    Payment Terms
-                  </td>
-                  <td style={styles.PaymentPadding}>{paymentTerms}</td>
-                </tr>
-                <tr>
-                  <td
-                    style={{ border: 0, padding: '2px 8px', fontWeight: '600' }}
-                  >
-                    Taxable
-                  </td>
-                  <td style={styles.PaymentPadding}>{taxable}</td>
-                </tr>
-              </tbody>
-            </table>
+              Payment Terms
+            </div>
+            <div
+              style={{
+                padding: '4px 8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ fontWeight: 'bold' }}>Currency</div>
+              <div>{currency}</div>
+            </div>
+            <div
+              style={{
+                padding: '4px 8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ fontWeight: 'bold' }}>Payment Terms</div>
+              <div>{paymentTerms}</div>
+            </div>
+            <div
+              style={{
+                padding: '4px 8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ fontWeight: 'bold' }}>Taxable</div>
+              <div>{taxable}</div>
+            </div>
           </div>
         </div>
-        <div style={styles.HeaderCssClass}>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '250px 1fr',
+          }}
+        >
           <div
             style={{
-              minWidth: '250px',
-              ...styles.MarginBottomForTable,
+              border: '1px solid',
+              marginBottom: '20px',
+              display: 'grid',
+              gridTemplateRows: 'auto 1fr',
             }}
           >
-            <table
+            <div
               style={{
-                border: '1px solid',
-                minHeight: '170px',
+                fontWeight: '600',
+                ...styles.BgColorHeader,
+                padding: '4px 8px',
+                borderBottom: '1px solid',
               }}
             >
-              <thead>
-                <tr style={styles.BgColorHeader}>
-                  <th style={{ fontWeight: '600' }}>Vendor</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td
-                    style={{
-                      ...styles.Border0Padding,
-                      ...styles.TopMarginClass,
-                      verticalAlign: 'top',
-                      fontWeight: 'bold',
-                      paddingBottom: '0px',
-                    }}
-                  >
-                    {vendorName}
-                    <span
-                      style={{
-                        whiteSpace: 'pre-wrap',
-                        padding: '0px',
-                        display: 'block',
-                        fontWeight: 'normal',
-                      }}
-                    >
-                      {vendorPrimaryAddress}
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td rowSpan={5} style={styles.Border0Padding}>
-                    <u style={{ display: 'block', margin: '5px 0px' }}>
-                      <b>c/o:</b>
-                    </u>
-                    {poRecipientName}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+              Vendor
+            </div>
+            <div
+              style={{
+                padding: '4px 8px',
+                fontWeight: 'bold',
+              }}
+            >
+              {vendorName}
+              <span
+                style={{
+                  display: 'block',
+                  whiteSpace: 'pre-wrap',
+                  fontWeight: 'normal',
+                }}
+              >
+                {vendorPrimaryAddress}
+              </span>
+            </div>
+            <div style={{ padding: '4px 8px' }}>
+              <u
+                style={{
+                  display: 'block',
+                  margin: '5px 0px',
+                  fontWeight: 'bold',
+                }}
+              >
+                <b>c/o:</b>
+              </u>
+              {poRecipientName}
+            </div>
           </div>
           <div
             style={{
@@ -322,114 +330,101 @@ export default function PoDocument({
               </tr>
             </thead>
             <tbody>
-              {lines.map((line, index) => {
-                const lineAdditionalFieldsRows = line.additionalFields
-                  .map(({ key, value }, index) => (
-                    <tr key={index}>
-                      <td
-                        style={{
-                          border: 0,
-                          padding: '5px 8px',
-                          fontWeight: 600,
-                          width: '50%',
-                          verticalAlign: 'top',
-                        }}
-                      >
-                        {key}
-                      </td>
-                      <td
-                        style={{
-                          border: 0,
-                          padding: '5px 8px',
-                          textAlign: 'left',
-                          verticalAlign: 'top',
-                        }}
-                      >
-                        {value}
-                      </td>
-                    </tr>
-                  ))
-                  .filter(isTruthy)
-
-                const tdStyle = {
-                  border: 0,
-                  textAlign: 'right',
-                  width: '100px',
-                  verticalAlign: 'top',
-                } as const
-
-                return (
-                  <>
-                    <tr
+              {lines.map((line, index) => (
+                <>
+                  <tr
+                    style={{
+                      pageBreakInside: 'avoid',
+                      borderTop: '1px solid black',
+                    }}
+                  >
+                    <td
+                      rowSpan={2}
                       style={{
-                        pageBreakInside: 'avoid',
-                        borderTop: '1px solid black',
+                        borderRight: 0,
+                        fontWeight: 'bold',
+                        verticalAlign: 'top',
                       }}
                     >
-                      <td
-                        rowSpan={2}
+                      {index + 1}
+                    </td>
+                    <td
+                      rowSpan={2}
+                      style={{
+                        borderRight: 0,
+                        verticalAlign: 'top',
+                        borderLeft: 0,
+                        minWidth: '275px',
+                      }}
+                    >
+                      <div style={{ fontWeight: 'bold' }}>{line.itemName}</div>
+                      <div
                         style={{
-                          borderRight: 0,
-                          fontWeight: 'bold',
-                          verticalAlign: 'top',
+                          fontWeight: 'normal',
+                          color: '#575656',
+                          marginTop: '13px',
+                          whiteSpace: 'pre-wrap',
                         }}
                       >
-                        {index + 1}
-                      </td>
-                      <td
-                        rowSpan={2}
-                        style={{
-                          borderRight: 0,
-                          verticalAlign: 'top',
-                          borderLeft: 0,
-                          minWidth: '275px',
-                        }}
-                      >
-                        <div style={{ fontWeight: 'bold' }}>
-                          {line.itemName}
-                        </div>
-                        <div
+                        {line.itemDescription}
+                      </div>
+                    </td>
+                    <td style={tdStyle}>{line.unitOfMeasure}</td>
+                    <td style={tdStyle}>{line.quantity}</td>
+                    <td style={tdStyle}>{line.unitCost}</td>
+                    <td style={tdStyle}>{line.totalCost}</td>
+                  </tr>
+                  <tr>
+                    <td
+                      colSpan={4}
+                      style={{
+                        padding: 0,
+                        verticalAlign: 'top',
+                        border: 0,
+                      }}
+                    >
+                      {!!line.additionalFields.length && (
+                        <table
+                          id="line-additional-fields"
                           style={{
-                            fontWeight: 'normal',
-                            color: '#575656',
-                            marginTop: '13px',
-                            whiteSpace: 'pre-wrap',
+                            border: 'solid black',
+                            borderWidth: '1px 0px 0px 1px',
+                            margin: 0,
                           }}
                         >
-                          {line.itemDescription}
-                        </div>
-                      </td>
-                      <td style={tdStyle}>{line.unitOfMeasure}</td>
-                      <td style={tdStyle}>{line.quantity}</td>
-                      <td style={tdStyle}>{line.unitCost}</td>
-                      <td style={tdStyle}>{line.totalCost}</td>
-                    </tr>
-                    <tr>
-                      <td
-                        colSpan={4}
-                        style={{
-                          padding: 0,
-                          verticalAlign: 'top',
-                          border: 0,
-                        }}
-                      >
-                        {!!lineAdditionalFieldsRows.length && (
-                          <table
-                            id="line-additional-fields"
-                            style={{
-                              border: 'solid black',
-                              borderWidth: '1px 0px 0px 1px',
-                              margin: 0,
-                            }}
-                          >
-                            {lineAdditionalFieldsRows}
-                          </table>
-                        )}
-                      </td>
-                    </tr>
-                  </>
-                )
-              })}
+                          {line.additionalFields.map(
+                            ({ key, value }, index) => (
+                              <tr key={index}>
+                                <td
+                                  style={{
+                                    border: 0,
+                                    padding: '5px 8px',
+                                    fontWeight: 600,
+                                    width: '50%',
+                                    verticalAlign: 'top',
+                                  }}
+                                >
+                                  {key}
+                                </td>
+                                <td
+                                  style={{
+                                    border: 0,
+                                    padding: '5px 8px',
+                                    textAlign: 'left',
+                                    verticalAlign: 'top',
+                                  }}
+                                >
+                                  {value}
+                                </td>
+                              </tr>
+                            ),
+                          )}
+                        </table>
+                      )}
+                    </td>
+                  </tr>
+                </>
+              ))}
             </tbody>
           </table>
           {/* -- BEGIN: Lines -- */}
@@ -554,6 +549,7 @@ export default function PoDocument({
         </table>
         {/* -- END Ts & Cs -- */}
       </div>
-    </div>
+      <PoDocumentFooter number={number} issuedDate={issuedDate} />
+    </>
   )
 }
