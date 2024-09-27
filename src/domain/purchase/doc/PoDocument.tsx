@@ -3,6 +3,7 @@
 import { ReactNode } from 'react'
 import { PoDocumentStyles, styles } from './PoDocumentStyles'
 import { PurchaseViewModel } from './ViewModel'
+import PoDocumentFooter from './PoDocumentFooter'
 
 const tdStyle = {
   border: 0,
@@ -36,8 +37,8 @@ export default function PoDocument({
   vendorPrimaryAddress,
 }: PurchaseViewModel): ReactNode {
   return (
-    <div>
-      <PoDocumentStyles number={number} issuedDate={issuedDate} />
+    <>
+      <PoDocumentStyles />
       <div style={{ ...styles.HeaderCssClass, padding: '0px 20px' }}>
         <div style={{ flex: '1' }}>
           {logoBlobDataUrl && (
@@ -75,15 +76,13 @@ export default function PoDocument({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 260px',
+            gridTemplateColumns: '1fr 250px',
             gap: '20px',
             marginBottom: '20px',
           }}
         >
           <div
             style={{
-              display: 'flex',
-              flexDirection: 'column',
               border: '1px solid',
             }}
           >
@@ -108,8 +107,6 @@ export default function PoDocument({
           </div>
           <div
             style={{
-              display: 'flex',
-              flexDirection: 'column',
               border: '1px solid',
             }}
           >
@@ -123,69 +120,92 @@ export default function PoDocument({
             >
               Payment Terms
             </div>
-            <div style={{ padding: '4px 8px', fontWeight: 'bold' }}>
-              Currency {currency}
+            <div
+              style={{
+                padding: '4px 8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ fontWeight: 'bold' }}>Currency</div>
+              <div>{currency}</div>
             </div>
-            <div style={{ padding: '4px 8px', fontWeight: 'bold' }}>
-              Payment Terms {paymentTerms}
+            <div
+              style={{
+                padding: '4px 8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ fontWeight: 'bold' }}>Payment Terms</div>
+              <div>{paymentTerms}</div>
             </div>
-            <div style={{ padding: '4px 8px', fontWeight: 'bold' }}>
-              Taxable {taxable}
+            <div
+              style={{
+                padding: '4px 8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ fontWeight: 'bold' }}>Taxable</div>
+              <div>{taxable}</div>
             </div>
           </div>
         </div>
-        <div style={styles.HeaderCssClass}>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '250px 1fr',
+          }}
+        >
           <div
             style={{
-              minWidth: '250px',
-              ...styles.MarginBottomForTable,
+              border: '1px solid',
+              marginBottom: '20px',
+              display: 'grid',
+              gridTemplateRows: 'auto 1fr',
             }}
           >
-            <table
+            <div
               style={{
-                border: '1px solid',
-                minHeight: '170px',
+                fontWeight: '600',
+                ...styles.BgColorHeader,
+                padding: '4px 8px',
+                borderBottom: '1px solid',
               }}
             >
-              <thead>
-                <tr style={styles.BgColorHeader}>
-                  <th style={{ fontWeight: '600' }}>Vendor</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td
-                    style={{
-                      ...styles.Border0Padding,
-                      ...styles.TopMarginClass,
-                      verticalAlign: 'top',
-                      fontWeight: 'bold',
-                      paddingBottom: '0px',
-                    }}
-                  >
-                    {vendorName}
-                    <span
-                      style={{
-                        whiteSpace: 'pre-wrap',
-                        padding: '0px',
-                        display: 'block',
-                        fontWeight: 'normal',
-                      }}
-                    >
-                      {vendorPrimaryAddress}
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td rowSpan={5} style={styles.Border0Padding}>
-                    <u style={{ display: 'block', margin: '5px 0px' }}>
-                      <b>c/o:</b>
-                    </u>
-                    {poRecipientName}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+              Vendor
+            </div>
+            <div
+              style={{
+                padding: '4px 8px',
+                fontWeight: 'bold',
+              }}
+            >
+              {vendorName}
+              <span
+                style={{
+                  display: 'block',
+                  whiteSpace: 'pre-wrap',
+                  fontWeight: 'normal',
+                }}
+              >
+                {vendorPrimaryAddress}
+              </span>
+            </div>
+            <div style={{ padding: '4px 8px' }}>
+              <u
+                style={{
+                  display: 'block',
+                  margin: '5px 0px',
+                  fontWeight: 'bold',
+                }}
+              >
+                <b>c/o:</b>
+              </u>
+              {poRecipientName}
+            </div>
           </div>
           <div
             style={{
@@ -529,6 +549,7 @@ export default function PoDocument({
         </table>
         {/* -- END Ts & Cs -- */}
       </div>
-    </div>
+      <PoDocumentFooter number={number} issuedDate={issuedDate} />
+    </>
   )
 }

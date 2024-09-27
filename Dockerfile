@@ -20,13 +20,13 @@ RUN npm run build
 # Release
 #
 
-FROM debian AS runner
+FROM alpine AS runner
 WORKDIR /app
 
-RUN apt update && apt install --yes nodejs poppler-utils weasyprint
+RUN apk add --no-cache nodejs poppler-utils weasyprint ttf-dejavu
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup -S -g 1001 nodejs && adduser -S -u 1001 -G nodejs nextjs
+
 
 RUN mkdir .next
 RUN chown nextjs:nodejs .next

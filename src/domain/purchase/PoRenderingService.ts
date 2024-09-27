@@ -190,10 +190,15 @@ const htmlDocument = (content: string, isPreview?: boolean) => `
       <meta charset="UTF-8">
       <title>Purchase Order</title>
       <style>
+        .page-counter::after {
+          content: "Page " counter(page) " of " counter(pages);
+        }
+
         @page {
           size: Letter;
           margin: 15px;
         }
+
         body {
           ${isPreview ? `background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(watermark)}');` : ''}
           margin: 0;
