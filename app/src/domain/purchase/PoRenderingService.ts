@@ -205,6 +205,7 @@ const htmlDocument = (content: string, isPreview?: boolean) => `
           padding: 0;
           height: 100%;
           font-family: Arial, sans-serif;
+          font-size: 12px;
         }
       </style>
     </head>
