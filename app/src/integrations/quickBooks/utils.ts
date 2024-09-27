@@ -6,4 +6,4 @@ export type RequestError = {
   }
 }
 
-export const isRequestError = isMatching({ response: {status: P.number } })
+export const isRequestError = isMatching({ response: { status: P.number } })
