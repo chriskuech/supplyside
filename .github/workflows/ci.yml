@@ -38,7 +38,7 @@ jobs:
       - name: Create build.json
         shell: pwsh
         run: |
-          $path = 'src/app/api/system/health/build.json'
+          $path = './build.json'
           @{
             commit    = $env:SHA
             version   = $env:PR_NUMBER
@@ -51,12 +51,27 @@ jobs:
           SHA: ${{ github.sha }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
 
-      - name: Build and push container image to registry
+      - name: Copy build.json to app
+        run: cp ./build.json app/src/app/api/system/health/build.json
+
+      - name: Copy build.json to api
+        run: cp ./build.json api/src/build.json
+
+      - name: Build and push app container image to registry
         uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
         with:
           push: true
           tags: supplyside.azurecr.io/app:${{ github.sha }}
-          context: .
+          context: app
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push api container image to registry
+        uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
+        with:
+          push: true
+          tags: supplyside.azurecr.io/api:${{ github.sha }}
+          context: api
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -72,7 +87,8 @@ jobs:
       url: https://app-int.supplyside.io
 
     env:
-      BASE_URL: https://app-int.supplyside.io
+      APP_BASE_URL: https://app-int.supplyside.io
+      API_BASE_URL: https://api-int.supplyside.io
 
     steps:
       - uses: actions/checkout@v4
@@ -104,6 +120,7 @@ jobs:
           npx prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.DB_SERVER_URL }}/integration
+        working-directory: app
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -112,11 +129,16 @@ jobs:
           username: supplyside-github-actions
           password: ${{ secrets.ACR_TOKEN }}
 
-      - name: Push the Docker image to Docker Hub
+      - name: Push the Docker images to Docker Hub
+        shell: pwsh
         run: |
-          docker pull supplyside.azurecr.io/app:${{ github.sha }}
-          docker tag supplyside.azurecr.io/app:${{ github.sha }} supplyside.azurecr.io/app:integration
-          docker push supplyside.azurecr.io/app:integration
+          $sha = "${{ github.sha }}"
+          "api", "app" | ForEach-Object {
+            Write-Host "`nPushing $_`:$sha"
+            docker pull supplyside.azurecr.io/$_`:$sha
+            docker tag supplyside.azurecr.io/$_`:$sha supplyside.azurecr.io/$_`:integration
+            docker push supplyside.azurecr.io/$_`:integration
+          }
 
       - name: Wait for healthcheck
         shell: pwsh
@@ -126,13 +148,32 @@ jobs:
 
           $timeout = (Get-Date).AddMinutes($timeoutInMinutes)
 
+          function Get-Health([string] $url) {
+            $res = Invoke-RestMethod -Uri $url -Method Get -ErrorAction SilentlyContinue
+            return $res -and $res.build.commit -eq $env:SHA
+          }
+
+          $appIsHealthy = $false
+          $apiIsHealthy = $false
+
           do {
             Start-Sleep -Seconds $waitInSeconds
             Write-Host "~" -NoNewline
 
-            $res = Invoke-RestMethod -Uri $env:BASE_URL/api/system/health -Method Get -ErrorAction SilentlyContinue
+            $newAppIsHealthy = Get-Health $env:APP_BASE_URL/api/system/health
+            $newApiIsHealthy = Get-Health $env:API_BASE_URL/health
 
-            if ($res -and $res.build.commit -eq $env:SHA) {
+            if ($appIsHealthy -ne $newAppIsHealthy) {
+              Write-Host "App health change: $appIsHealthy => $newAppIsHealthy"
+              $appIsHealthy = $newAppIsHealthy
+            }
+
+            if ($apiIsHealthy -ne $newApiIsHealthy) {
+              Write-Host "API health change: $apiIsHealthy => $newApiIsHealthy"
+              $apiIsHealthy = $newApiIsHealthy
+            }
+
+            if ($appIsHealthy -and $apiIsHealthy) {
               Write-Host "\nDeployment successful"
               exit 0
             }
@@ -145,4 +186,4 @@ jobs:
           SHA: ${{ github.sha }}
 
       - name: Apply configuration
-        run: curl -X POST $BASE_URL/api/system/post-deployment
+        run: curl -X POST $APP_BASE_URL/api/system/post-deployment
