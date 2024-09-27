@@ -65,10 +65,6 @@ const HeaderCssClass: CSSProperties = {
   alignItems: 'start',
 }
 
-const TopMarginClass: CSSProperties = {
-  padding: '5px 8px',
-}
-
 const MarginBottomForTable: CSSProperties = {
   marginBottom: '20px',
 }
@@ -76,7 +72,6 @@ const MarginBottomForTable: CSSProperties = {
 export const styles = {
   RemovePaddingAndBorder,
   MarginBottomForTable,
-  TopMarginClass,
   Border0Padding,
   BgColorHeader,
   PaymentPadding,
