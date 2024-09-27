@@ -4,6 +4,7 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
+  FormLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -131,9 +132,9 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
 
       {!findTemplateField(field.templateId)?.defaultValue && (
         <FormControl fullWidth>
-          <InputLabel htmlFor="default-field-defaultValue-control">
+          <FormLabel htmlFor="default-field-defaultValue-control">
             Default Value
-          </InputLabel>
+          </FormLabel>
           <DefaultValueControl
             field={field}
             defaultValue={defaultValue}

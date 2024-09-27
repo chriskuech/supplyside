@@ -191,7 +191,11 @@ export default function PoDocument({
                   fontWeight: 'normal',
                 }}
               >
-                {vendorPrimaryAddress}
+                {vendorPrimaryAddress.line1}
+                <br />
+                {vendorPrimaryAddress.line2}
+                <br />
+                {vendorPrimaryAddress.line3}
               </span>
             </div>
             <div style={{ padding: '4px 8px' }}>
@@ -235,7 +239,11 @@ export default function PoDocument({
                       whiteSpace: 'pre-wrap',
                     }}
                   >
-                    {shippingAddress}
+                    {shippingAddress.line1}
+                    <br />
+                    {shippingAddress.line2}
+                    <br />
+                    {shippingAddress.line3}
                   </td>
                   <td style={{ padding: '3px 0px', verticalAlign: 'top' }}>
                     <table style={{ border: '0', margin: 0 }}>

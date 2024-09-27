@@ -11,7 +11,7 @@ export type PurchaseViewModel = {
   total: string | null
   taxable: string | null
   costs: KeyValueModel[]
-  shippingAddress: string | null
+  shippingAddress: AddressViewModel
   shippingMethod: string | null
   incoterms: string | null
   shippingAccountNumber: string | null
@@ -20,7 +20,7 @@ export type PurchaseViewModel = {
   issuedDate: string | null
   logoBlobDataUrl: string | null
   poRecipientName: string | null
-  vendorPrimaryAddress: string | null
+  vendorPrimaryAddress: AddressViewModel
 }
 
 export type KeyValueModel = {
@@ -36,4 +36,10 @@ export type LineViewModel = {
   unitCost: string | null
   totalCost: string | null
   additionalFields: KeyValueModel[]
+}
+
+export type AddressViewModel = {
+  line1: string | null
+  line2: string | null
+  line3: string | null
 }
