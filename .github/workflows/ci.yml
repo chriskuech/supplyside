@@ -134,9 +134,9 @@ jobs:
         run: |
           $sha = "${{ github.sha }}"
           "api", "app" | ForEach-Object {
-            docker pull supplyside.azurecr.io/$_:$sha
-            docker tag supplyside.azurecr.io/$_:$sha supplyside.azurecr.io/$_:integration
-            docker push supplyside.azurecr.io/$_:integration
+            docker pull supplyside.azurecr.io/$_`:$sha
+            docker tag supplyside.azurecr.io/$_`:$sha supplyside.azurecr.io/$_`:integration
+            docker push supplyside.azurecr.io/$_`:integration
           }
 
       - name: Wait for healthcheck
