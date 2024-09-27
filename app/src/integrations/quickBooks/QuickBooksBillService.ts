@@ -1,14 +1,13 @@
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { injectable } from 'inversify'
-import { PrismaService } from '../PrismaService'
 import { accountQuerySchema, readBillSchema } from './schemas'
 import { Bill } from './types'
-import { QuickBooksClientService } from './QuickBooksClientService'
 import { ACCOUNT_BASED_EXPENSE } from './constants'
 import { mapValue } from './mapValue'
 import { QuickBooksVendorService } from './QuickBooksVendorService'
 import { QuickBooksExpectedError } from './errors'
+import { QuickBooksApiService } from './QuickBooksApiService'
 import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { fields } from '@/domain/schema/template/system-fields'
 import { selectSchemaField } from '@/domain/schema/extensions'
@@ -39,21 +38,22 @@ const fieldsMap = [
 @injectable()
 export class QuickBooksBillService {
   constructor(
-    private readonly prismaService: PrismaService,
-    private readonly quickBooksClientService: QuickBooksClientService,
+    private readonly quickBooksApiService: QuickBooksApiService,
     private readonly schemaService: SchemaService,
     private readonly quickBooksVendorService: QuickBooksVendorService,
     private readonly configService: ConfigService,
     private readonly resourceService: ResourceService,
   ) {}
 
-  async readBill(client: OAuthClient, id: string): Promise<Bill> {
-    const baseUrl = this.quickBooksClientService.getBaseUrl(
-      client.token.realmId,
-    )
+  async readBill(
+    accountId: string,
+    client: OAuthClient,
+    id: string,
+  ): Promise<Bill> {
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
-    return await client
-      .makeApiCall({
+    return await this.quickBooksApiService
+      .makeApiCall(accountId, client, {
         url: `${baseUrl}/bill/${id}`,
         method: 'GET',
       })
@@ -67,14 +67,12 @@ export class QuickBooksBillService {
     quickBooksAccountId: string,
     quickBooksVendorId: string,
   ): Promise<Bill> {
-    const baseUrl = this.quickBooksClientService.getBaseUrl(
-      client.token.realmId,
-    )
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
     const body = this.mapBill(bill, quickBooksAccountId, quickBooksVendorId)
 
-    const quickBooksBill = await client
-      .makeApiCall({
+    const quickBooksBill = await this.quickBooksApiService
+      .makeApiCall(accountId, client, {
         url: `${baseUrl}/bill`,
         method: 'POST',
         headers: {
@@ -104,14 +102,13 @@ export class QuickBooksBillService {
   }
 
   async updateBillOnQuickBooks(
+    accountId: string,
     client: OAuthClient,
     bill: Resource,
     quickBooksAccountId: string,
     quickBooksVendorId: string,
   ): Promise<Bill> {
-    const baseUrl = this.quickBooksClientService.getBaseUrl(
-      client.token.realmId,
-    )
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
     const quickBooksBillId = selectResourceFieldValue(
       bill,
@@ -121,7 +118,11 @@ export class QuickBooksBillService {
     assert(quickBooksBillId, 'Bill has no quickBooksBillId')
 
     //TODO: bill can be deleted on QB, do we recreate it?
-    const quickBooksBill = await this.readBill(client, quickBooksBillId)
+    const quickBooksBill = await this.readBill(
+      accountId,
+      client,
+      quickBooksBillId,
+    )
 
     const billBody = this.mapBill(bill, quickBooksAccountId, quickBooksVendorId)
 
@@ -130,8 +131,8 @@ export class QuickBooksBillService {
       ...billBody,
     }
 
-    return client
-      .makeApiCall({
+    return this.quickBooksApiService
+      .makeApiCall(accountId, client, {
         url: `${baseUrl}/bill`,
         method: 'POST',
         headers: {
@@ -156,6 +157,7 @@ export class QuickBooksBillService {
 
     if (quickBooksBillId) {
       return this.updateBillOnQuickBooks(
+        accountId,
         client,
         bill,
         quickBooksAccountId,
@@ -189,7 +191,8 @@ export class QuickBooksBillService {
     )?.option?.name
     assert(quickBooksAccountName, 'Account not set')
 
-    const quickBooksAccountQuery = await this.quickBooksClientService.query(
+    const quickBooksAccountQuery = await this.quickBooksApiService.query(
+      accountId,
       client,
       {
         entity: 'Account',
