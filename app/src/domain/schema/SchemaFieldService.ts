@@ -93,22 +93,39 @@ export class SchemaFieldService {
             update: match<ValueInput, Prisma.ValueUpdateInput>(dto.defaultValue)
               .with({ address: P.not(undefined) }, ({ address }) => ({
                 Address: {
-                  update: {
-                    streetAddress: address?.streetAddress?.trim() || null,
-                    city: address?.city?.trim() || null,
-                    state: address?.state?.trim() || null,
-                    zip: address?.zip?.trim() || null,
-                    country: address?.country?.trim() || null,
+                  upsert: {
+                    create: {
+                      streetAddress: address?.streetAddress?.trim() || null,
+                      city: address?.city?.trim() || null,
+                      state: address?.state?.trim() || null,
+                      zip: address?.zip?.trim() || null,
+                      country: address?.country?.trim() || null,
+                    },
+                    update: {
+                      streetAddress: address?.streetAddress?.trim() || null,
+                      city: address?.city?.trim() || null,
+                      state: address?.state?.trim() || null,
+                      zip: address?.zip?.trim() || null,
+                      country: address?.country?.trim() || null,
+                    },
                   },
                 },
               }))
               .with({ contact: P.not(undefined) }, ({ contact }) => ({
                 Contact: {
-                  update: {
-                    name: contact?.name ?? null,
-                    email: contact?.email ?? null,
-                    phone: contact?.phone ?? null,
-                    title: contact?.title ?? null,
+                  upsert: {
+                    create: {
+                      name: contact?.name ?? null,
+                      email: contact?.email ?? null,
+                      phone: contact?.phone ?? null,
+                      title: contact?.title ?? null,
+                    },
+                    update: {
+                      name: contact?.name ?? null,
+                      email: contact?.email ?? null,
+                      phone: contact?.phone ?? null,
+                      title: contact?.title ?? null,
+                    },
                   },
                 },
               }))

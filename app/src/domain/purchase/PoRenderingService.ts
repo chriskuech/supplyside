@@ -1,4 +1,5 @@
-import puppeteer, { Browser } from 'puppeteer'
+import { readFile } from 'fs/promises'
+
 // https://github.com/vercel/next.js/issues/43810
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 /* @ts-expect-error */
@@ -18,25 +19,15 @@ import {
 } from '../resource/extensions'
 import { fields } from '../schema/template/system-fields'
 import { Resource, ResourceField } from '../resource/entity'
+import { exec, withTempDir } from '../os'
+import { createDataUrl } from '../blob/util'
 import PoDocument from './doc/PoDocument'
-import { LineViewModel, PurchaseViewModel } from './doc/ViewModel'
-import PoDocumentFooter from '@/domain/purchase/doc/PoDocumentFooter'
+import {
+  AddressViewModel,
+  LineViewModel,
+  PurchaseViewModel,
+} from './doc/ViewModel'
 import { formatInlineAddress } from '@/lib/resource/fields/views/AddressCard'
-
-export const browser = async () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const g = global as any
-
-  if (!g.browser) {
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox'],
-    })
-
-    g.browser = browser
-  }
-
-  return g.browser as Browser
-}
 
 type RenderPoParams = {
   accountId: string
@@ -54,36 +45,23 @@ export class PoRenderingService {
   ) {}
 
   async renderPo({ accountId, resourceId, isPreview }: RenderPoParams) {
-    const [model, page] = await Promise.all([
-      this.createViewModel(accountId, resourceId),
-      browser().then((browser) => browser.newPage()),
-    ])
+    return await withTempDir(async (path) => {
+      const viewModel = await this.createViewModel(accountId, resourceId)
 
-    try {
-      await page.setContent(
-        htmlDocument(ReactDom.renderToString(PoDocument(model)), isPreview),
-        { timeout: 300 },
+      const html = htmlDocument(
+        ReactDom.renderToString(PoDocument(viewModel)),
+        isPreview,
       )
 
-      const buffer = await page.pdf({
-        format: 'letter',
-        headerTemplate: '<div></div>',
-        footerTemplate: ReactDom.renderToString(PoDocumentFooter(model)),
-        displayHeaderFooter: true,
-        margin: {
-          top: '35px',
-          bottom: '35px',
-          left: '15px',
-          right: '15px',
-        },
-        printBackground: true,
-        timeout: 5_000,
+      const htmlDataUrl = createDataUrl({
+        mimeType: 'text/html',
+        buffer: Buffer.from(html),
       })
 
-      return buffer
-    } finally {
-      page.close()
-    }
+      await exec(`weasyprint '${htmlDataUrl}' '${path}/out.pdf'`)
+
+      return await readFile(`${path}/out.pdf`)
+    })
   }
 
   async createViewModel(
@@ -183,7 +161,7 @@ export class PoRenderingService {
       total: renderTemplateField(order, fields.totalCost),
       vendorName: renderTemplateField(vendor, fields.name),
       taxable: renderTemplateField(order, fields.taxable),
-      shippingAddress: renderTemplateField(order, fields.shippingAddress),
+      shippingAddress: renderAddressViewModel(order, fields.shippingAddress),
       costs: order.costs.map((cost) => ({
         key: cost.name,
         value: (cost.isPercentage
@@ -204,7 +182,10 @@ export class PoRenderingService {
       ),
       shippingNotes: renderTemplateField(order, fields.shippingNotes),
       poRecipientName: renderTemplateField(order, fields.poRecipient),
-      vendorPrimaryAddress: renderTemplateField(vendor, fields.primaryAddress),
+      vendorPrimaryAddress: renderAddressViewModel(
+        vendor,
+        fields.primaryAddress,
+      ),
     }
   }
 }
@@ -216,11 +197,22 @@ const htmlDocument = (content: string, isPreview?: boolean) => `
       <meta charset="UTF-8">
       <title>Purchase Order</title>
       <style>
+        .page-counter::after {
+          content: "Page " counter(page) " of " counter(pages);
+        }
+
+        @page {
+          size: Letter;
+          margin: 15px;
+        }
+
         body {
           ${isPreview ? `background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(watermark)}');` : ''}
-          font-family: Arial, sans-serif;
           margin: 0;
           padding: 0;
+          height: 100%;
+          font-family: Arial, sans-serif;
+          font-size: 12px;
         }
       </style>
     </head>
@@ -287,3 +279,28 @@ const renderFieldValue = (resourceField: ResourceField | undefined) =>
     .with('Resource', () => null)
     .with(P.nullish, () => null)
     .exhaustive()
+
+const renderAddressViewModel = (
+  resource: Resource | undefined,
+  field: FieldRef,
+): AddressViewModel => {
+  if (!resource)
+    return {
+      line1: null,
+      line2: null,
+      line3: null,
+    }
+
+  const addressValue = selectResourceFieldValue(resource, field)?.address
+  const line2Values = [
+    addressValue?.city,
+    addressValue?.state,
+    addressValue?.zip,
+  ].filter(Boolean)
+
+  return {
+    line1: addressValue?.streetAddress ?? null,
+    line2: line2Values.length ? line2Values.join(' ') : null,
+    line3: addressValue?.country ?? null,
+  }
+}

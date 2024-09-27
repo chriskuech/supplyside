@@ -4,19 +4,18 @@ import { PrismaService } from '../PrismaService'
 import { QuickBooksTokenService } from './QuickBooksTokenService'
 import { QuickBooksConfigService } from './QuickBooksConfigService'
 import { QuickBooksClientService } from './QuickBooksClientService'
-import { CompanyInfo } from './types'
+import { Bill, BillPayment, CompanyInfo } from './types'
 import { QuickBooksCompanyInfoService } from './QuickBooksCompanyInfoService'
 import { QuickBooksAccountService } from './QuickBooksAccountService'
 import { QuickBooksVendorService } from './QuickBooksVendorService'
 import { QuickBooksBillService } from './QuickBooksBillService'
+import { QuickBooksBillPaymentService } from './QuickBooksBillPaymentService'
 import { isRequestError } from './utils'
-import { AccountService } from '@/domain/account'
 
 @injectable()
 export class QuickBooksService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly accountService: AccountService,
     private readonly quickBooksTokenService: QuickBooksTokenService,
     private readonly quickBooksConfigService: QuickBooksConfigService,
     private readonly quickBooksClientService: QuickBooksClientService,
@@ -24,6 +23,7 @@ export class QuickBooksService {
     private readonly quickBooksAccountService: QuickBooksAccountService,
     private readonly quickBooksBillService: QuickBooksBillService,
     private readonly quickBooksVendorService: QuickBooksVendorService,
+    private readonly quickBooksBillPaymentService: QuickBooksBillPaymentService,
   ) {}
 
   get isEnabled() {
@@ -123,5 +123,29 @@ export class QuickBooksService {
     assert(token, 'No token found')
 
     return token?.realmId ?? null
+  }
+
+  async getBillPayment(
+    accountId: string,
+    billPaymentId: string,
+  ): Promise<BillPayment> {
+    const token = await this.quickBooksTokenService.getToken(accountId)
+    assert(token, 'No token found')
+
+    const client = this.quickBooksClientService.getClient(token)
+
+    return this.quickBooksBillPaymentService.readBillPayment(
+      client,
+      billPaymentId,
+    )
+  }
+
+  async getBill(accountId: string, billId: string): Promise<Bill> {
+    const token = await this.quickBooksTokenService.getToken(accountId)
+    assert(token, 'No token found')
+
+    const client = this.quickBooksClientService.getClient(token)
+
+    return this.quickBooksBillService.readBill(client, billId)
   }
 }

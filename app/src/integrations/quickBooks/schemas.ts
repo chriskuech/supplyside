@@ -167,6 +167,37 @@ export const vendorQuerySchema = z.object({
   }),
 })
 
+export const billPaymentSchema = z.object({
+  VendorRef: refSchema,
+  PayType: z.string(),
+  CreditCardPayment: z
+    .object({
+      CCAccountRef: refSchema.optional(),
+    })
+    .optional(),
+  TotalAmt: z.number(),
+  domain: z.string(),
+  sparse: z.boolean(),
+  Id: z.string(),
+  SyncToken: z.string(),
+  MetaData: metadataSchema,
+  DocNumber: z.string().optional(),
+  TxnDate: z.string().optional(),
+  CurrencyRef: refSchema.optional(),
+  PrivateNote: z.string().optional(),
+  Line: z.array(
+    z.object({
+      Amount: z.number(),
+      LinkedTxn: z.array(
+        z.object({
+          TxnId: z.string(),
+          TxnType: z.string(),
+        }),
+      ),
+    }),
+  ),
+})
+
 export const readAccountSchema = z.object({
   Account: accountSchema,
 })
@@ -177,4 +208,8 @@ export const readVendorSchema = z.object({
 
 export const readBillSchema = z.object({
   Bill: billSchema,
+})
+
+export const readBillPaymentSchema = z.object({
+  BillPayment: billPaymentSchema,
 })

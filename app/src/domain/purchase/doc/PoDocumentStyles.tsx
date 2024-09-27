@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { CSSProperties } from 'react'
 
-export const PoDocumentStyles: React.FC = () => (
+export const PoDocumentStyles: FC = () => (
   <style>
     {`
       table {
+        height: 100%;
         width: 100%;
         border-collapse: collapse;
         margin-bottom: 0px;
@@ -64,10 +65,6 @@ const HeaderCssClass: CSSProperties = {
   alignItems: 'start',
 }
 
-const TopMarginClass: CSSProperties = {
-  padding: '5px 8px',
-}
-
 const MarginBottomForTable: CSSProperties = {
   marginBottom: '20px',
 }
@@ -75,7 +72,6 @@ const MarginBottomForTable: CSSProperties = {
 export const styles = {
   RemovePaddingAndBorder,
   MarginBottomForTable,
-  TopMarginClass,
   Border0Padding,
   BgColorHeader,
   PaymentPadding,

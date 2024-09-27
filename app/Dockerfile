@@ -1,9 +1,8 @@
-
 ##
 # Build
 #
 
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -24,21 +23,10 @@ RUN npm run build
 FROM alpine AS runner
 WORKDIR /app
 
-RUN apk add --no-cache \
-  ca-certificates \
-  chromium \
-  freetype \
-  harfbuzz \
-  nodejs \
-  nss \
-  poppler-utils \
-  ttf-freefont
+RUN apk add --no-cache nodejs poppler-utils weasyprint ttf-dejavu
 
-# Tell Puppeteer to skip installing Chrome. We'll be using the installed package.
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+RUN addgroup -S -g 1001 nodejs && adduser -S -u 1001 -G nodejs nextjs
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
 
 RUN mkdir .next
 RUN chown nextjs:nodejs .next

@@ -1,30 +1,34 @@
 import { ReactNode } from 'react'
-import { PurchaseViewModel } from './ViewModel'
+
+interface PoDocumentFooterProps {
+  number: string | null
+  issuedDate: string | null
+}
 
 export default function PoDocumentFooter({
   number,
   issuedDate,
-}: PurchaseViewModel): ReactNode {
+}: PoDocumentFooterProps): ReactNode {
   return (
     <div
       style={{
-        fontSize: '16px',
         fontFamily: 'Arial, sans-serif',
-        padding: '0 30px',
-        width: '100%',
         display: 'flex',
-        alignItems: 'center',
+        justifyContent: 'space-between',
+        margin: '0px 20px',
+        position: 'fixed',
+        bottom: '0',
+        left: '0',
+        right: '0',
       }}
     >
-      <div style={{ flexGrow: 1 }}>
+      <div style={{}}>
         <span>Purchase #{number}</span>
         <span style={{ margin: '0px 5px' }}>|</span>
         <span>{issuedDate ?? 'N/A'}</span>
       </div>
 
-      <div>
-        Page <span className="pageNumber" /> of <span className="totalPages" />
-      </div>
+      <div className="page-counter" />
     </div>
   )
 }
