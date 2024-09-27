@@ -7,6 +7,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { SchemaField } from '@/domain/schema/entity'
 import { Value } from '@/domain/resource/entity'
 import { emptyValue } from '@/domain/resource/entity'
+import AddressField from '@/lib/resource/fields/controls/AddressField'
+import ContactField from '@/lib/resource/fields/controls/ContactField'
 
 type Props = {
   field: SchemaField
@@ -76,6 +78,20 @@ export default function DefaultValueControl({
           onChange({ ...emptyValue, number: parseInt(e.target.value) })
         }
         type="number"
+      />
+    ))
+    .with('Address', () => (
+      <AddressField
+        address={defaultValue?.address}
+        onChange={(value) => onChange({ ...emptyValue, address: value })}
+        disabled={isDisabled}
+      />
+    ))
+    .with('Contact', () => (
+      <ContactField
+        contact={defaultValue?.contact}
+        onChange={(value) => onChange({ ...emptyValue, contact: value })}
+        disabled={isDisabled}
       />
     ))
     .with('Date', () => (

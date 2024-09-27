@@ -6,7 +6,7 @@ import { fields } from '../schema/template/system-fields'
 import { mapFile } from '../file/mapValueFile'
 import { Schema, SchemaField } from '../schema/entity'
 import { mapUserModelToEntity } from '../user/mappers'
-import { Resource, Value, ValueResource } from './entity'
+import { Address, Contact, Resource, Value, ValueResource } from './entity'
 import { ResourceModel, ValueModel, ValueResourceModel } from './model'
 import { selectResourceFieldValue } from './extensions'
 import { ValueInput } from './patch'
@@ -211,14 +211,33 @@ export const mapValueInputToPrismaValueCreate = (
 ): Prisma.ValueCreateWithoutResourceFieldValueInput =>
   match<ValueInput, Prisma.ValueCreateWithoutResourceFieldValueInput>(value)
     .with({ address: P.not(undefined) }, ({ address: value }) => {
-      const address = value ?? defaultValue?.address ?? null
+      const defaultAddress = defaultValue?.address
+      const defaultAdressValue: Address | null = defaultAddress
+        ? {
+            city: defaultAddress.city,
+            country: defaultAddress.country,
+            state: defaultAddress.state,
+            streetAddress: defaultAddress.streetAddress,
+            zip: defaultAddress.zip,
+          }
+        : null
+      const address = value ?? defaultAdressValue
       return address ? { Address: { create: address } } : {}
     })
     .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
       boolean: value ?? defaultValue?.boolean ?? null,
     }))
     .with({ contact: P.not(undefined) }, ({ contact: value }) => {
-      const contact = value ?? defaultValue?.contact ?? null
+      const defaultContact = defaultValue?.contact
+      const defaultContactValue: Contact | null = defaultContact
+        ? {
+            email: defaultContact.email,
+            name: defaultContact.name,
+            phone: defaultContact.phone,
+            title: defaultContact.title,
+          }
+        : null
+      const contact = value ?? defaultContactValue
       return contact ? { Contact: { create: contact } } : {}
     })
     .with({ date: P.not(undefined) }, ({ date: value }) => ({
