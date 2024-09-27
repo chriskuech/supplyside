@@ -22,15 +22,7 @@ app
   .setNotFoundHandler((request, reply) => {
     reply.code(404).send("Not Found");
   })
-  .listen({ port: config.PORT });
-
-setInterval(() => {
-  console.log("Hello World!");
-
-  setTimeout(() => {
-    console.error(new Error("This is an error"));
-  }, 1000);
-}, 30 * 1000);
+  .listen({ port: config.PORT, host: '0.0.0.0' });
 
 process.on("exit", () => {
   console.log("Exiting...");
