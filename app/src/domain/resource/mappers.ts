@@ -136,7 +136,7 @@ export const mapValueInputToPrismaValueUpdate = (
 ): Prisma.ValueUpdateWithoutResourceFieldValueInput =>
   match<ValueInput, Prisma.ValueUpdateWithoutResourceFieldValueInput>(value)
     .with({ address: P.not(undefined) }, ({ address }) =>
-      address && Object.values(address).some(Boolean)
+      address
         ? {
             Address: {
               upsert: {
