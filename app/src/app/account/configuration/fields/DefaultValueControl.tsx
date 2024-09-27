@@ -83,14 +83,14 @@ export default function DefaultValueControl({
     .with('Address', () => (
       <AddressField
         address={defaultValue?.address}
-        onChange={(value) => onChange({ ...emptyValue, address: value })}
+        onChange={(address) => onChange({ ...emptyValue, address })}
         disabled={isDisabled}
       />
     ))
     .with('Contact', () => (
       <ContactField
         contact={defaultValue?.contact}
-        onChange={(value) => onChange({ ...emptyValue, contact: value })}
+        onChange={(contact) => onChange({ ...emptyValue, contact })}
         disabled={isDisabled}
       />
     ))
