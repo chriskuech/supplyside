@@ -1,4 +1,6 @@
 import { Stack, Typography } from '@mui/material'
+import { Link } from '@mui/material'
+import NextLink from 'next/link'
 
 export default function QuickBooksDisconnectedPage() {
   return (
@@ -11,7 +13,11 @@ export default function QuickBooksDisconnectedPage() {
         QuickBooks:
       </Typography>
       <Typography variant="body1">
-        1. Login to SupplySide and click on the building icon in the nav bar
+        1.{' '}
+        <Link component={NextLink} href="/auth/login">
+          Login
+        </Link>{' '}
+        to SupplySide and click on the building icon in the nav bar
       </Typography>
       <Typography variant="body1">
         2. Click on the &apos;Integrations&apos; tab

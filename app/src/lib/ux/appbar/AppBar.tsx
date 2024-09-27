@@ -113,13 +113,6 @@ export default async function AppBar() {
               </Stack>
             </>
           )}
-          {!session && (
-            <Box ml="auto">
-              <Button href="/auth/login" component={Link} variant="outlined">
-                Log in
-              </Button>
-            </Box>
-          )}
         </Toolbar>
       </Container>
     </MAppBar>
