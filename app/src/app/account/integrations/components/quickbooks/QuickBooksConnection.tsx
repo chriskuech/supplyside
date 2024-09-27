@@ -12,6 +12,7 @@ type Props = {
 
 export default async function QuickBooksConnection({ session }: Props) {
   const quickBooksService = container().resolve(QuickBooksService)
+  const realmId = await quickBooksService.getAccountRealmId(session.accountId)
 
   const quickBooksCompanyInfo = await quickBooksService.getCompanyInfo(
     session.accountId,
@@ -33,7 +34,7 @@ export default async function QuickBooksConnection({ session }: Props) {
         <strong>
           {session.account.quickBooksConnectedAt?.toLocaleDateString()}
         </strong>
-        . <QuickBooksDisconnectLink />
+        . <QuickBooksDisconnectLink realmId={realmId} />
       </Typography>
       <QuickBooksSyncButton />
     </Stack>

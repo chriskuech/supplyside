@@ -2,7 +2,11 @@
 import { Link } from '@mui/material'
 import { useConfirmation } from '@/lib/confirmation'
 
-export default function QuickBooksDisconnectLink() {
+type Props = {
+  realmId: string
+}
+
+export default function QuickBooksDisconnectLink({ realmId }: Props) {
   const confirm = useConfirmation()
 
   return (
@@ -17,7 +21,7 @@ export default function QuickBooksDisconnectLink() {
 
         if (!isConfirmed) return
 
-        window.location.href = '/api/integrations/quickbooks/logout'
+        window.location.href = `/api/integrations/quickbooks/logout?realmId=${realmId}`
       }}
     >
       Disconnect

@@ -10,10 +10,12 @@ import { QuickBooksAccountService } from './QuickBooksAccountService'
 import { QuickBooksVendorService } from './QuickBooksVendorService'
 import { QuickBooksBillService } from './QuickBooksBillService'
 import { QuickBooksBillPaymentService } from './QuickBooksBillPaymentService'
+import { isRequestError } from './utils'
 
 @injectable()
 export class QuickBooksService {
   constructor(
+    private readonly prisma: PrismaService,
     private readonly quickBooksTokenService: QuickBooksTokenService,
     private readonly quickBooksConfigService: QuickBooksConfigService,
     private readonly quickBooksClientService: QuickBooksClientService,
@@ -22,7 +24,6 @@ export class QuickBooksService {
     private readonly quickBooksBillService: QuickBooksBillService,
     private readonly quickBooksVendorService: QuickBooksVendorService,
     private readonly quickBooksBillPaymentService: QuickBooksBillPaymentService,
-    private readonly prisma: PrismaService,
   ) {}
 
   get isEnabled() {
@@ -44,11 +45,13 @@ export class QuickBooksService {
 
     await this.quickBooksTokenService.deleteToken(accountId)
 
-    // There is a bug with the client, the revoke function succesfully executes but throws a TypeError on the response
     try {
       await client.revoke(token)
     } catch (e) {
+      // There is a bug with the client, the revoke function succesfully executes but throws a TypeError on the response
       if (e instanceof TypeError) return
+      // If there is a 400 error the token has already been revoked on quickBooks side
+      if (isRequestError(e) && e.response.status === 400) return
       throw e
     }
   }
@@ -113,6 +116,13 @@ export class QuickBooksService {
     if (!account) return null
 
     return account.id
+  }
+
+  async getAccountRealmId(accountId: string): Promise<string> {
+    const token = await this.quickBooksTokenService.getToken(accountId)
+    assert(token, 'No token found')
+
+    return token?.realmId ?? null
   }
 
   async getBillPayment(

@@ -28,17 +28,16 @@ export default async function AppBar() {
     <MAppBar>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
+          <Stack
+            justifyContent="center"
+            height="100%"
+            component={Link}
+            href="/"
+          >
+            <Logo />
+          </Stack>
           {session && (
             <>
-              <Stack
-                justifyContent="center"
-                height="100%"
-                component={Link}
-                href="/"
-              >
-                <Logo />
-              </Stack>
-
               <Stack
                 flexGrow={1}
                 direction="row"
