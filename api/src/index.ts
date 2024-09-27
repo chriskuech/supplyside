@@ -7,7 +7,7 @@ import { readFile } from "fs/promises";
 const app = fastify();
 
 app
-  .get("/", (request, reply) => reply.redirect("/health"))
+  .get("/", (request, reply) => reply.status(200).send("OK"))
   .get("/health", async (request, reply) => {
     try {
       const meta = await readFile(`${__dirname}/build.json`, "utf-8");
