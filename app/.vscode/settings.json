@@ -1,6 +1,5 @@
 {
-  "editor.tabSize": 2,
-  "editor.formatOnSave": true,
+  // TODO: A lot of these were added to mitigate a VS Code bug. We should migrate known good settings to the workspace.
   "[typescriptreact][typescript][javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false,

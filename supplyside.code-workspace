@@ -8,9 +8,21 @@
     },
     {
       "path": "app"
-    },
-    {
-      "path": "worker"
     }
-  ]
+  ],
+  "settings": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true
+  },
+  "extensions": {
+    "recommendations": [
+      "prisma.prisma",
+      "ms-azuretools.vscode-docker",
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "ruschaaf.extended-embedded-languages",
+      "yoavbls.pretty-ts-errors",
+      "linear.linear-open-issue"
+    ]
+  }
 }
