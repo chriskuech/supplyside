@@ -108,7 +108,7 @@ export class QuickBooksVendorService {
               ?.string === quickBooksVendor.Id,
         )
 
-        if (!vendor) return
+        if (!vendor || !!vendor.templateId) return
 
         return this.resourceService.updateResource({
           accountId,
@@ -129,6 +129,8 @@ export class QuickBooksVendorService {
         input: quickBooksVendorToAdd.DisplayName,
         exact: true,
       })
+
+      if (!!vendor.templateId) return
 
       if (vendor) {
         await this.resourceService.updateResource({
