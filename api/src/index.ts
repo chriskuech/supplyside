@@ -6,17 +6,20 @@ import { readFile } from "fs/promises";
 
 const app = fastify();
 
-app.get("/health", async (req, res) => {
-  try {
-    const meta = await readFile(`${__dirname}/build.json`, "utf-8");
+app
+  .get("/health", async (req, res) => {
+    try {
+      const meta = await readFile(`${__dirname}/build.json`, "utf-8");
 
-    res.send(meta);
-  } catch {
-    res.status(500).send("Failed to read build.json");
-  }
-});
-
-app.listen({ port: config.PORT });
+      res.send(meta);
+    } catch {
+      res.status(500).send("Failed to read build.json");
+    }
+  })
+  .setNotFoundHandler((request, reply) => {
+    reply.code(404).send("Not Found");
+  })
+  .listen({ port: config.PORT });
 
 setInterval(() => {
   console.log("Hello World!");
