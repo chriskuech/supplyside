@@ -7,17 +7,17 @@ import { readFile } from "fs/promises";
 const app = fastify();
 
 app
-  .get("/", (req, res) => res.redirect("/health"))
-  .get("/health", async (req, res) => {
+  .get("/", (request, reply) => reply.redirect("/health"))
+  .get("/health", async (request, reply) => {
     try {
       const meta = await readFile(`${__dirname}/build.json`, "utf-8");
 
-      res.send(meta);
+      reply.send(meta);
     } catch {
-      res.status(500).send("Failed to read build.json");
+      reply.status(500).send("Failed to read build.json");
     }
   })
-  .setNotFoundHandler((req, reply) => reply.code(404).send("Not Found"))
+  .setNotFoundHandler((request, reply) => reply.code(404).send("Not Found"))
   .listen({ port: config.PORT, host: "0.0.0.0" });
 
 process.on("exit", () => {
