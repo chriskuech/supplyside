@@ -122,22 +122,23 @@ jobs:
           DATABASE_URL: ${{ secrets.DB_SERVER_URL }}/integration
         working-directory: app
 
-      - name: Login to Docker Hub
+      - name: Login to Docker
         uses: docker/login-action@v3
         with:
           registry: supplyside.azurecr.io
           username: supplyside-github-actions
           password: ${{ secrets.ACR_TOKEN }}
 
-      - name: Push the Docker images to Docker Hub
+      - name: Push the Docker images
         shell: pwsh
         run: |
           $sha = "${{ github.sha }}"
           "api", "app" | ForEach-Object {
-            Write-Host "`nPushing $_`:$sha"
+            Write-Host "Pushing $_`:$sha"
             docker pull supplyside.azurecr.io/$_`:$sha
             docker tag supplyside.azurecr.io/$_`:$sha supplyside.azurecr.io/$_`:integration
             docker push supplyside.azurecr.io/$_`:integration
+            Write-Host ""
           }
 
       - name: Wait for healthcheck
