@@ -73,7 +73,7 @@ export const extractContent = async (accountId: string, resourceId: string) => {
 
   const completionParts = (
     await Promise.all(
-      billFiles.map(completionPartsService.mapFileToCompletionParts),
+      billFiles.map((f) => completionPartsService.mapFileToCompletionParts(f)),
     )
   ).flat()
 
