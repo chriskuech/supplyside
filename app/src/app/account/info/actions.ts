@@ -2,7 +2,7 @@
 
 import { isTruthy } from 'remeda'
 import { z } from 'zod'
-import { readSession, requireSession } from '@/session'
+import { requireSession } from '@/session'
 import { createBlob } from '@/client/blob'
 import { updateAccount } from '@/client/account'
 

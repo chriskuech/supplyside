@@ -1,3 +1,4 @@
+import 'server-only'
 import { SchemaField } from '@supplyside/model'
 import { paths } from '@supplyside/api'
 import { client } from '.'

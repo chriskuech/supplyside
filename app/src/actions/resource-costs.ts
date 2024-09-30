@@ -1,3 +1,5 @@
+'use server'
+
 import * as client from '@/client/resource-costs'
 import { withAccountId } from '@/authz'
 

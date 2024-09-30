@@ -1,3 +1,4 @@
+import 'server-only'
 import { client } from '.'
 
 export const readPlaid = async (accountId: string) => {

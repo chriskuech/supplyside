@@ -1,3 +1,4 @@
+import 'server-only'
 import { readUser } from './client/user'
 import { requireSession } from './session'
 

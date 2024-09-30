@@ -1,3 +1,4 @@
+import 'server-only'
 import { client } from '.'
 
 export const readConnection = async (accountId: string) => {

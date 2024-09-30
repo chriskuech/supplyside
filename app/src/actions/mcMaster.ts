@@ -1,3 +1,5 @@
+'use server'
+
 import { withAccountId } from '@/authz'
 import * as client from '@/client/mcmaster'
 

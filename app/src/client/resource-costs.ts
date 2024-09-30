@@ -1,3 +1,4 @@
+import 'server-only'
 import { Cost } from '@supplyside/model'
 import { omit } from 'remeda'
 import { client } from '.'

@@ -1,3 +1,5 @@
+'use server'
+
 import * as client from '@/client/fields'
 import { withAccountId } from '@/authz'
 

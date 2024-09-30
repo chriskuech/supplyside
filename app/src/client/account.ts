@@ -1,3 +1,4 @@
+import 'server-only'
 import { components } from '@supplyside/api'
 import { client } from '.'
 
