@@ -10,7 +10,7 @@ import { ResourceService } from '@supplyside/api/domain/resource/ResourceService
 import { container } from '@supplyside/api/di'
 import { TemplateService } from '@supplyside/api/domain/schema/TemplateService'
 import { fields } from '@supplyside/model'
-import { systemAccountId } from '../const'
+import { systemAccountId } from '@supplyside/api/const'
 
 expandDotenv(loadDotenv())
 
