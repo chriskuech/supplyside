@@ -51,7 +51,7 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'GET',
-      url: '/{userId}/',
+      url: '/:userId/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -74,7 +74,7 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'PATCH',
-      url: '/{userId}/',
+      url: '/:userId/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -92,7 +92,7 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'DELETE',
-      url: '/{userId}/',
+      url: '/:userId/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),

@@ -3,7 +3,7 @@ import { ReactNode } from 'react'
 import { ResourceType } from '@supplyside/model'
 import CreateResourceButton from './CreateResourceButton'
 import { ResourceTable } from './table'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
 import { readSchema } from '@/client/schema'
 import { readResources } from '@/client/resource'
 
@@ -19,7 +19,7 @@ export default async function ListPage({
   resourceType,
   callToActions = [],
 }: Props) {
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
   const [schema, resources] = await Promise.all([
     readSchema(accountId, resourceType),
     readResources(accountId, resourceType),

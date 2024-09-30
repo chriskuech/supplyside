@@ -1,3 +1,5 @@
+'use client'
+
 import { Add } from '@mui/icons-material'
 import { Button, ButtonProps } from '@mui/material'
 import { ResourceType, ValueInput } from '@supplyside/model'

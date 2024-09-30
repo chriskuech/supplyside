@@ -3,7 +3,7 @@
 import { fail } from 'assert'
 import { Resource, ResourceType, Schema, User } from '@supplyside/model'
 import { notFound, redirect } from 'next/navigation'
-import { Session, readSession } from '@/session'
+import { Session, requireSession } from '@/session'
 import {
   readResource,
   cloneResource as clientCloneResource,
@@ -30,7 +30,8 @@ export const readDetailPageModel = async (
 
   if (isNaN(key)) notFound()
 
-  const session = await readSession()
+  const session = await requireSession()
+
   const resourceId = await resolveKey(session.accountId, resourceType, key)
     .then((r) => r?.id)
     .catch(() => null)
@@ -49,7 +50,7 @@ export const readDetailPageModel = async (
 }
 
 export const cloneResource = async (resourceId: string) => {
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
   const resource = await clientCloneResource(accountId, resourceId)
 
   if (!resource) return

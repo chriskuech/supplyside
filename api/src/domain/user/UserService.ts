@@ -14,7 +14,7 @@ export const UpdateUserSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
   imageBlobId: z.string().uuid().optional(),
-  tsAndCsSignedAt: z.date().optional(),
+  tsAndCsSignedAt: z.string().datetime().optional(),
   isAdmin: z.boolean().optional(),
   isApprover: z.boolean().optional(),
 })
@@ -72,6 +72,13 @@ export class UserService {
   async update(accountId: string, userId: string, data: UpdateUserInput) {
     await this.prisma.user.update({
       where: { accountId, id: userId },
+      data,
+    })
+  }
+
+  async updateSelf(userId: string, data: UpdateUserInput) {
+    await this.prisma.user.update({
+      where: { id: userId },
       data,
     })
   }

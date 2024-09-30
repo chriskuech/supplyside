@@ -10,6 +10,7 @@ export const createSession = async (email: string, tat: string) => {
       email,
       tat,
     },
+    next: { tags: ['Session'] },
   })
 
   return session
@@ -22,6 +23,7 @@ export const extendSession = async (sessionId: string) => {
         sessionId,
       },
     },
+    next: { tags: ['Session'] },
   })
 
   return data
@@ -34,6 +36,7 @@ export const readSession = async (
     params: {
       path: { sessionId },
     },
+    next: { tags: ['Session'] },
   })
 
   return session
@@ -44,6 +47,7 @@ export const clearSession = async (sessionId: string) => {
     params: {
       path: { sessionId },
     },
+    next: { tags: ['Session'] },
   })
 
   return session
@@ -58,6 +62,7 @@ export const impersonate = async (
       path: { sessionId },
     },
     body: { accountId },
+    next: { tags: ['Session'] },
   })
 }
 

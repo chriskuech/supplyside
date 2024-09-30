@@ -17,6 +17,7 @@ export const createResource = async (
         path: { accountId },
       },
       body: { resourceType, fields },
+      next: { tags: ['Resources'] },
     },
   )
 
@@ -38,6 +39,7 @@ export const resolveKey = async (
           resourceKey,
         },
       },
+      next: { tags: ['Resources'] },
     },
   )
 
@@ -51,6 +53,7 @@ export const readResource = async (accountId: string, resourceId: string) => {
       params: {
         path: { accountId, resourceId },
       },
+      next: { tags: ['Resources'] },
     },
   )
 
@@ -72,6 +75,7 @@ export const readResources = async (
           where,
         },
       },
+      next: { tags: ['Resources'] },
     },
   )
 
@@ -90,6 +94,7 @@ export const updateResource = async (
         path: { accountId, resourceId },
       },
       body: fields,
+      next: { tags: ['Resources'] },
     },
   )
 
@@ -101,6 +106,7 @@ export const deleteResource = async (accountId: string, resourceId: string) => {
     params: {
       path: { accountId, resourceId },
     },
+    next: { tags: ['Resources'] },
   })
 }
 
@@ -111,6 +117,7 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
       params: {
         path: { accountId, resourceId },
       },
+      next: { tags: ['Resources'] },
     },
   )
 
@@ -133,6 +140,7 @@ export const findResourcesByNameOrPoNumber = async (
           exact,
         },
       },
+      next: { tags: ['Resources'] },
     },
   )
 
@@ -154,6 +162,7 @@ export const findBacklinks = async (
           resourceId,
         },
       },
+      next: { tags: ['Resources'] },
     },
   )
 

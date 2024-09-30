@@ -6,9 +6,31 @@ export const readSelf = async (userId: string) => {
     params: {
       path: { userId },
     },
+    next: { tags: ['User'] },
   })
 
   return user
+}
+
+export const updateSelf = async (
+  userId: string,
+  data: {
+    email?: string
+    firstName?: string
+    lastName?: string
+    imageBlobId?: string
+    tsAndCsSignedAt?: string
+    isAdmin?: boolean
+    isApprover?: boolean
+  },
+) => {
+  await client.PATCH('/api/self/{userId}/', {
+    params: {
+      path: { userId },
+    },
+    body: data,
+    next: { tags: ['User'] },
+  })
 }
 
 export const readUser = async (accountId: string, userId: string) => {
@@ -18,6 +40,7 @@ export const readUser = async (accountId: string, userId: string) => {
       params: {
         path: { accountId, userId },
       },
+      next: { tags: ['User'] },
     },
   )
 
@@ -29,6 +52,7 @@ export const readUsers = async (accountId: string) => {
     params: {
       path: { accountId },
     },
+    next: { tags: ['User'] },
   })
 
   return users
@@ -43,6 +67,7 @@ export const inviteUser = async (
       path: { accountId },
     },
     body: data,
+    next: { tags: ['User'] },
   })
 }
 
@@ -72,6 +97,7 @@ export const updateUser = async (
       isAdmin: data.isAdmin,
       isApprover: data.isApprover,
     },
+    next: { tags: ['User'] },
   })
 }
 
@@ -80,5 +106,6 @@ export const deleteUser = async (accountId: string, userId: string) => {
     params: {
       path: { accountId, userId },
     },
+    next: { tags: ['User'] },
   })
 }

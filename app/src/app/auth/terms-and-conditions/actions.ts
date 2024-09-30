@@ -1,13 +1,13 @@
 'use server'
 
 import { RedirectType, redirect } from 'next/navigation'
-import { updateUser } from '@/client/user'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
+import { updateSelf } from '@/client/user'
 
 export const acceptTermsAndConditions = async () => {
-  const { accountId, userId } = await readSession()
+  const { userId } = await requireSession()
 
-  await updateUser(accountId, userId, {
+  await updateSelf(userId, {
     tsAndCsSignedAt: new Date().toISOString(),
   })
 

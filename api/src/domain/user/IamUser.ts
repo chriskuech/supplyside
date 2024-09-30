@@ -8,7 +8,7 @@ export const IamUserSchema = z.object({
   fullName: z.string().nullable(),
   email: z.string(),
   profilePicPath: z.string().nullable(),
-  tsAndCsSignedAt: z.date().nullable(),
+  tsAndCsSignedAt: z.string().datetime().nullable(),
   isApprover: z.boolean(),
   isAdmin: z.boolean(),
   isGlobalAdmin: z.boolean(),

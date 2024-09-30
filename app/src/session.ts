@@ -38,6 +38,16 @@ export const readSession = async () => {
   return session
 }
 
+export const requireSession = async () => {
+  const session = await readSession()
+
+  if (!session) {
+    throw new Error('Session not found')
+  }
+
+  return session
+}
+
 export const clearSession = async () => {
   const sessionId = cookies().get(sessionIdCookieName)?.value
 
