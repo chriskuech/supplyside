@@ -14,7 +14,7 @@ import { systemAccountId } from '../const'
 
 expandDotenv(loadDotenv())
 
-const devConfig = z
+const config = z
   .object({
     DEV_EMAIL: z.string().email(),
     DEV_FIRST_NAME: z.string().min(1),
@@ -43,19 +43,19 @@ async function main() {
     data: {
       id: systemAccount.id,
       accountId: systemAccount.id,
-      email: devConfig.DEV_EMAIL,
-      firstName: devConfig.DEV_FIRST_NAME,
-      lastName: devConfig.DEV_LAST_NAME,
+      email: config.DEV_EMAIL,
+      firstName: config.DEV_FIRST_NAME,
+      lastName: config.DEV_LAST_NAME,
     },
   })
 
-  const [devAlias, devDomain] = devConfig.DEV_EMAIL.split('@')
+  const [devAlias, devDomain] = config.DEV_EMAIL.split('@')
 
   const customerAccount = await prisma.account.create({
     data: {
       id: testId,
       key: 'test',
-      name: `${devConfig.DEV_FIRST_NAME}'s Test Company`,
+      name: `${config.DEV_FIRST_NAME}'s Test Company`,
     },
   })
 
@@ -63,8 +63,8 @@ async function main() {
     data: {
       accountId: customerAccount.id,
       email: `${devAlias}+${customerAccount.key}@${devDomain}`,
-      firstName: devConfig.DEV_FIRST_NAME,
-      lastName: devConfig.DEV_LAST_NAME,
+      firstName: config.DEV_FIRST_NAME,
+      lastName: config.DEV_LAST_NAME,
     },
   })
 
