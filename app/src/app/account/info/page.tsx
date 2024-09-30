@@ -1,11 +1,11 @@
 import { Alert, Box, Stack, Typography } from '@mui/material'
 import Form from './Form'
-import { readSession } from '@/session'
 import { config } from '@/config'
 import { readAccount } from '@/client/account'
+import { requireSession } from '@/session'
 
 export default async function InfoPage() {
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
   const account = await readAccount(accountId)
 
   if (!account) return <Alert severity="error">Failed to load</Alert>

@@ -3,11 +3,11 @@ import SchemasControl from './schemas/SchemasControl'
 import AddFieldButton from './fields/AddFieldButton'
 import FieldsTable from './fields/FieldsTable'
 import { readFields } from '@/client/fields'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
 import { readCustomSchemas } from '@/client/schema'
 
 export default async function Configuration() {
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
   const [fields, schemas] = await Promise.all([
     readFields(accountId),
     readCustomSchemas(accountId),

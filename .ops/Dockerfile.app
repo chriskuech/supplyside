@@ -2,15 +2,16 @@
 # Build
 #
 
-FROM node:20 AS builder
-WORKDIR /app
+FROM node:20-alpine AS builder
 
-COPY package.json package-lock.json* ./
-RUN npm ci
 
-COPY . .
+COPY ./app/package.json ./app/package-lock.json* ./app/
+RUN cd ./app && npm ci
 
-RUN npm run build
+COPY ./app ./app
+COPY ./model ./model
+
+RUN cd ./app && npm run build
 
 ##
 # Release

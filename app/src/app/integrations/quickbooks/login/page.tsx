@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation'
 import { connect } from '@/client/quickBooks'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
 import { config } from '@/config'
 
 export default async function QuickbooksLogin() {
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
 
   await connect(accountId, '/integrations/quickbooks/login')
 

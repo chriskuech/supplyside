@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
 import { readResource } from '@/client/resource'
 import { renderPo } from '@/actions/purchase'
 
@@ -10,7 +10,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const query = new URL(req.url).searchParams
   const resourceId = query.get('resourceId')
 
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
 
   if (!resourceId) {
     return NextResponse.json(

@@ -1,11 +1,11 @@
 import { Alert, Box, Link, Stack, Typography } from '@mui/material'
 import Form from './Form'
 import { privacyPolicyUrl, termsOfServiceUrl } from '@/lib/const'
-import { readSession } from '@/session'
 import { readSelf } from '@/client/user'
+import { requireSession } from '@/session'
 
 export default async function SettingsPage() {
-  const { userId } = await readSession()
+  const { userId } = await requireSession()
   const user = await readSelf(userId)
 
   if (!user) return <Alert severity="error">Failed to load</Alert>

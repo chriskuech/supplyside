@@ -2,10 +2,10 @@ import { Alert, Box, Container, Stack, Typography } from '@mui/material'
 import UsersTable from './UsersTable'
 import InviteUserControl from './InviteUserControl'
 import { readSelf, readUsers } from '@/client/user'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
 
 export default async function Team() {
-  const { accountId, userId } = await readSession()
+  const { accountId, userId } = await requireSession()
   const users = await readUsers(accountId)
   const user = await readSelf(userId)
 

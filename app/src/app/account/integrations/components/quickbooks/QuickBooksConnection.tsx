@@ -3,11 +3,11 @@ import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import QuickBooksSyncButton from './QuickBooksSyncButton'
 import QuickBooksDisconnectLink from './QuickBooksDisconnectLink'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
 import { read } from '@/client/quickBooks'
 
 export default async function QuickBooksConnection() {
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
   const config = (await read(accountId)) ?? fail('QuickBooks not connected')
 
   const connectedAt = config.connection

@@ -2,11 +2,11 @@ import { Alert, Stack, Typography } from '@mui/material'
 import QuickBooks from './components/quickbooks/QuickBooks'
 import Plaid from './components/plaid/Plaid'
 import McMasterCarr from './components/mcMasterCarr/McMasterCarr'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
 import { readSelf } from '@/client/user'
 
 export default async function IntegrationsPage() {
-  const { userId } = await readSession()
+  const { userId } = await requireSession()
   const user = await readSelf(userId)
 
   return (

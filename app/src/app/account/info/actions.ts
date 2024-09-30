@@ -2,7 +2,7 @@
 
 import { isTruthy } from 'remeda'
 import { z } from 'zod'
-import { readSession } from '@/session'
+import { readSession, requireSession } from '@/session'
 import { createBlob } from '@/client/blob'
 import { updateAccount } from '@/client/account'
 
@@ -22,7 +22,7 @@ export type Errors = z.typeToFlattenedError<Dto>['fieldErrors']
 export const handleSaveSettings = async (
   formData: FormData,
 ): Promise<Errors | undefined> => {
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
 
   const result = schema.safeParse(Object.fromEntries(formData.entries()))
 

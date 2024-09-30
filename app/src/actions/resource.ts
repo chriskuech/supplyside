@@ -7,7 +7,7 @@ import {
   ValueInput,
   selectSchemaField,
 } from '@supplyside/model'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
 import { withAccountId } from '@/authz'
 import * as client from '@/client/resource'
 import { readSchema } from '@/client/schema'
@@ -32,7 +32,7 @@ export const transitionStatus = async (
   fieldTemplate: FieldTemplate,
   statusTemplate: OptionTemplate,
 ) => {
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
 
   const { type } =
     (await client.readResource(accountId, resourceId)) ??

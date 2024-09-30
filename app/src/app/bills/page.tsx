@@ -3,10 +3,10 @@ import BillsInboxControl from './BillsInboxControl'
 import { readAccount } from '@/client/account'
 import { config } from '@/config'
 import ListPage from '@/lib/resource/ListPage'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
 
 export default async function Bills() {
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
   const account = await readAccount(accountId)
 
   if (!account) return <Alert severity="error">Failed to load</Alert>

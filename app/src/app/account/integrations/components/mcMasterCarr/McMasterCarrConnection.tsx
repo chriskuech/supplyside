@@ -1,10 +1,10 @@
 import { Stack, Typography } from '@mui/material'
 import McMasterCarrDisconnectLink from './McMasterCarrDisconnectLink'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
 import { readConnection } from '@/client/mcmaster'
 
 export default async function McMasterCarrConnection() {
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
   const connection = await readConnection(accountId)
 
   const connectedAt = connection && new Date(connection.connectedAt)

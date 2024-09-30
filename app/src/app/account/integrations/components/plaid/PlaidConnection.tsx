@@ -1,11 +1,11 @@
 import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import PlaidDisconnectLink from './PlaidDisconnectLink'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
 import { readPlaid } from '@/client/plaid'
 
 export default async function PlaidConnection() {
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
   const connection = await readPlaid(accountId)
 
   const connectedAt = connection?.connectedAt

@@ -1,10 +1,10 @@
 import { Alert } from '@mui/material'
 import PlaidConnectButton from './PlaidConnectButton'
-import { readSession } from '@/session'
+import { requireSession } from '@/session'
 import { createPlaidLinkToken } from '@/client/plaid'
 
 export default async function PlaidConnect() {
-  const { accountId } = await readSession()
+  const { accountId } = await requireSession()
   const plaidLinkToken = await createPlaidLinkToken(accountId)
 
   if (!plaidLinkToken)
