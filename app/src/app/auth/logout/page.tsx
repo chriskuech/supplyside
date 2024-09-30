@@ -3,7 +3,7 @@ import { LogoutForm } from './LogoutForm'
 import { clearSession } from '@/session'
 
 export default async function Logout() {
-  function handleLogout() {
+  async function handleLogout() {
     'use server'
 
     clearSession()
