@@ -1,18 +1,18 @@
-import "reflect-metadata";
-import { config as loadDotenv } from "dotenv";
-import { expand as expandDotenv } from "dotenv-expand";
-import { z } from "zod";
-import { ResourceType } from "@prisma/client";
-import { selectSchemaFieldUnsafe } from "@supplyside/model";
-import { PrismaService } from "@supplyside/api/integrations/PrismaService";
-import { SchemaService } from "@supplyside/api/domain/schema/SchemaService";
-import { ResourceService } from "@supplyside/api/domain/resource/ResourceService";
-import { container } from "@supplyside/api/di";
-import { TemplateService } from "@supplyside/api/domain/schema/TemplateService";
-import { fields } from "@supplyside/model";
-import { systemAccountId } from "../const";
+import 'reflect-metadata'
+import { config as loadDotenv } from 'dotenv'
+import { expand as expandDotenv } from 'dotenv-expand'
+import { z } from 'zod'
+import { ResourceType } from '@prisma/client'
+import { selectSchemaFieldUnsafe } from '@supplyside/model'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
+import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
+import { container } from '@supplyside/api/di'
+import { TemplateService } from '@supplyside/api/domain/schema/TemplateService'
+import { fields } from '@supplyside/model'
+import { systemAccountId } from '../const'
 
-expandDotenv(loadDotenv());
+expandDotenv(loadDotenv())
 
 const devConfig = z
   .object({
@@ -21,23 +21,23 @@ const devConfig = z
     DEV_LAST_NAME: z.string().min(1),
     DEV_PASSWORD: z.string().min(1),
   })
-  .parse(process.env);
+  .parse(process.env)
 
-const testId = "00000000-0000-0000-0000-000000000001";
+const testId = '00000000-0000-0000-0000-000000000001'
 
 async function main() {
-  const prisma = container.resolve(PrismaService);
-  const schemaService = container.resolve(SchemaService);
-  const resourceService = container.resolve(ResourceService);
-  const templateService = container.resolve(TemplateService);
+  const prisma = container.resolve(PrismaService)
+  const schemaService = container.resolve(SchemaService)
+  const resourceService = container.resolve(ResourceService)
+  const templateService = container.resolve(TemplateService)
 
   const systemAccount = await prisma.account.create({
     data: {
       id: systemAccountId,
-      key: "system",
-      name: "SYSTEM",
+      key: 'system',
+      name: 'SYSTEM',
     },
-  });
+  })
 
   const systemUser = await prisma.user.create({
     data: {
@@ -47,17 +47,17 @@ async function main() {
       firstName: devConfig.DEV_FIRST_NAME,
       lastName: devConfig.DEV_LAST_NAME,
     },
-  });
+  })
 
-  const [devAlias, devDomain] = devConfig.DEV_EMAIL.split("@");
+  const [devAlias, devDomain] = devConfig.DEV_EMAIL.split('@')
 
   const customerAccount = await prisma.account.create({
     data: {
       id: testId,
-      key: "test",
+      key: 'test',
       name: `${devConfig.DEV_FIRST_NAME}'s Test Company`,
     },
-  });
+  })
 
   await prisma.user.create({
     data: {
@@ -66,14 +66,14 @@ async function main() {
       firstName: devConfig.DEV_FIRST_NAME,
       lastName: devConfig.DEV_LAST_NAME,
     },
-  });
+  })
 
-  await templateService.applyTemplate(customerAccount.id);
+  await templateService.applyTemplate(customerAccount.id)
 
   const unitOfMeasureOption = await prisma.option.create({
     data: {
       order: 0,
-      name: "My UNIT",
+      name: 'My UNIT',
       Field: {
         connect: {
           accountId_templateId: {
@@ -83,12 +83,12 @@ async function main() {
         },
       },
     },
-  });
+  })
 
   const vendorSchema = await schemaService.readSchema(
     customerAccount.id,
     ResourceType.Vendor
-  );
+  )
 
   const vendor = await resourceService.createResource({
     accountId: customerAccount.id,
@@ -96,15 +96,15 @@ async function main() {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(vendorSchema, fields.name).fieldId,
-        valueInput: { string: "ACME Supplies" },
+        valueInput: { string: 'ACME Supplies' },
       },
     ],
-  });
+  })
 
   const purchaseSchema = await schemaService.readSchema(
     customerAccount.id,
     ResourceType.Purchase
-  );
+  )
 
   const purchase = await resourceService.createResource({
     accountId: customerAccount.id,
@@ -118,19 +118,19 @@ async function main() {
       {
         fieldId: selectSchemaFieldUnsafe(purchaseSchema, fields.poNumber)
           .fieldId,
-        valueInput: { string: "42" },
+        valueInput: { string: '42' },
       },
       {
         fieldId: selectSchemaFieldUnsafe(purchaseSchema, fields.vendor).fieldId,
         valueInput: { resourceId: vendor.id },
       },
     ],
-  });
+  })
 
   const itemSchema = await schemaService.readSchema(
     customerAccount.id,
     ResourceType.Item
-  );
+  )
 
   const item1 = await resourceService.createResource({
     accountId: customerAccount.id,
@@ -138,12 +138,12 @@ async function main() {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(itemSchema, fields.name)?.fieldId,
-        valueInput: { string: "Item Name 1" },
+        valueInput: { string: 'Item Name 1' },
       },
       {
         fieldId: selectSchemaFieldUnsafe(itemSchema, fields.itemDescription)
           ?.fieldId,
-        valueInput: { string: "Item Desc 1" },
+        valueInput: { string: 'Item Desc 1' },
       },
       {
         fieldId: selectSchemaFieldUnsafe(itemSchema, fields.unitOfMeasure)
@@ -151,12 +151,12 @@ async function main() {
         valueInput: { optionId: unitOfMeasureOption.id },
       },
     ],
-  });
+  })
 
   const lineSchema = await schemaService.readSchema(
     customerAccount.id,
     ResourceType.Line
-  );
+  )
 
   await resourceService.createResource({
     accountId: customerAccount.id,
@@ -171,7 +171,7 @@ async function main() {
         valueInput: { resourceId: item1.id },
       },
     ],
-  });
+  })
 
   const item2 = await resourceService.createResource({
     accountId: customerAccount.id,
@@ -179,12 +179,12 @@ async function main() {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(itemSchema, fields.name)?.fieldId,
-        valueInput: { string: "Item Name 2" },
+        valueInput: { string: 'Item Name 2' },
       },
       {
         fieldId: selectSchemaFieldUnsafe(itemSchema, fields.itemDescription)
           ?.fieldId,
-        valueInput: { string: "Item Desc 2" },
+        valueInput: { string: 'Item Desc 2' },
       },
       {
         fieldId: selectSchemaFieldUnsafe(itemSchema, fields.unitOfMeasure)
@@ -192,7 +192,7 @@ async function main() {
         valueInput: { optionId: unitOfMeasureOption.id },
       },
     ],
-  });
+  })
 
   await resourceService.createResource({
     accountId: customerAccount.id,
@@ -207,7 +207,7 @@ async function main() {
         valueInput: { resourceId: item2.id },
       },
     ],
-  });
+  })
 }
 
-main();
+main()
