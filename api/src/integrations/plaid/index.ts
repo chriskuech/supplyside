@@ -1,9 +1,9 @@
-import { CountryCode, Products } from "plaid";
-import { injectable } from "inversify";
-import { PrismaService } from "../PrismaService";
-import { PlaidConfigService } from "./util";
-import { fail } from "assert";
-import { ConfigService } from "@supplyside/api/ConfigService";
+import { CountryCode, Products } from 'plaid'
+import { injectable } from 'inversify'
+import { PrismaService } from '../PrismaService'
+import { PlaidConfigService } from './util'
+import { fail } from 'assert'
+import { ConfigService } from '@supplyside/api/ConfigService'
 
 @injectable()
 export class PlaidService {
@@ -18,7 +18,7 @@ export class PlaidService {
       .plaidClient()
       .itemPublicTokenExchange({
         public_token: publicToken,
-      });
+      })
 
     await this.prisma.account.update({
       where: { id: accountId },
@@ -26,19 +26,19 @@ export class PlaidService {
         plaidConnectedAt: new Date(),
         plaidToken: exchangeResponse.data.access_token,
       },
-    });
+    })
   }
 
   async getPlaidToken(accountId: string): Promise<string | null> {
     const account = await this.prisma.account.findUniqueOrThrow({
       where: { id: accountId },
-    });
+    })
 
     if (!account.plaidConnectedAt || !account.plaidToken) {
-      return null;
+      return null
     }
 
-    return account.plaidToken;
+    return account.plaidToken
   }
 
   async deletePlaidToken(accountId: string) {
@@ -48,7 +48,7 @@ export class PlaidService {
         plaidConnectedAt: null,
         plaidToken: null,
       },
-    });
+    })
   }
 
   async createLinkToken(accountId: string) {
@@ -56,29 +56,29 @@ export class PlaidService {
       user: {
         client_user_id: accountId,
       },
-      client_name: "Supply Side",
+      client_name: 'Supply Side',
       products: [Products.Auth],
-      language: "en",
+      language: 'en',
       redirect_uri: `${this.configService.config.BASE_URL}/account/integrations`,
       country_codes: [CountryCode.Us],
-    };
+    }
 
     const linkTokenResponse = await this.plaidConfigService
       .plaidClient()
-      .linkTokenCreate(request);
-    return linkTokenResponse.data;
+      .linkTokenCreate(request)
+    return linkTokenResponse.data
   }
 
   async getPlaidAccounts(accountId: string) {
     const token =
-      (await this.getPlaidToken(accountId)) ?? fail("Token not found");
+      (await this.getPlaidToken(accountId)) ?? fail('Token not found')
 
     const accountsResponse = await this.plaidConfigService
       .plaidClient()
       .accountsGet({
         access_token: token,
-      });
+      })
 
-    return accountsResponse.data.accounts;
+    return accountsResponse.data.accounts
   }
 }

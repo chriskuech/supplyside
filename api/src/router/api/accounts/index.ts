@@ -1,59 +1,59 @@
-import { FastifyInstance } from "fastify";
-import { ZodTypeProvider } from "fastify-type-provider-zod";
-import { mountSchemas } from "./schemas";
-import { container } from "@supplyside/api/di";
-import { z } from "zod";
-import { AccountSchema } from "@supplyside/api/domain/account/entity";
-import { mountUsers } from "./users";
-import { mountIntegrations } from "./integrations";
-import { mountResources } from "./resources";
-import { mountBlobs } from "./blobs";
-import { TemplateService } from "@supplyside/api/domain/schema/TemplateService";
-import { mountFields } from "./fields";
-import { AccountService } from "@supplyside/api/domain/account/AccountService";
+import { FastifyInstance } from 'fastify'
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { mountSchemas } from './schemas'
+import { container } from '@supplyside/api/di'
+import { z } from 'zod'
+import { AccountSchema } from '@supplyside/api/domain/account/entity'
+import { mountUsers } from './users'
+import { mountIntegrations } from './integrations'
+import { mountResources } from './resources'
+import { mountBlobs } from './blobs'
+import { TemplateService } from '@supplyside/api/domain/schema/TemplateService'
+import { mountFields } from './fields'
+import { AccountService } from '@supplyside/api/domain/account/AccountService'
 
 export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
   app
     .withTypeProvider<ZodTypeProvider>()
-    .register(mountBlobs, { prefix: "/:accountId/blobs" })
-    .register(mountFields, { prefix: "/:accountId/fields" })
-    .register(mountIntegrations, { prefix: "/:accountId/integrations" })
-    .register(mountResources, { prefix: "/:accountId/resources" })
-    .register(mountSchemas, { prefix: "/:accountId/schemas" })
-    .register(mountUsers, { prefix: "/:accountId/users" })
+    .register(mountBlobs, { prefix: '/:accountId/blobs' })
+    .register(mountFields, { prefix: '/:accountId/fields' })
+    .register(mountIntegrations, { prefix: '/:accountId/integrations' })
+    .register(mountResources, { prefix: '/:accountId/resources' })
+    .register(mountSchemas, { prefix: '/:accountId/schemas' })
+    .register(mountUsers, { prefix: '/:accountId/users' })
     .route({
-      url: "/",
-      method: "GET",
+      url: '/',
+      method: 'GET',
       schema: {
         response: {
           200: z.array(AccountSchema),
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(AccountService);
+        const service = container.resolve(AccountService)
 
-        const accounts = await service.list();
+        const accounts = await service.list()
 
-        res.send(accounts);
+        res.send(accounts)
       },
     })
     .route({
-      url: "/",
-      method: "POST",
+      url: '/',
+      method: 'POST',
       schema: {
         response: { 200: AccountSchema },
       },
       handler: async (req, res) => {
-        const service = container.resolve(AccountService);
+        const service = container.resolve(AccountService)
 
-        await service.create();
+        await service.create()
 
-        res.send();
+        res.send()
       },
     })
     .route({
-      url: "/:accountId/",
-      method: "GET",
+      url: '/:accountId/',
+      method: 'GET',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -63,16 +63,16 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(AccountService);
+        const service = container.resolve(AccountService)
 
-        const account = await service.read(req.params.accountId);
+        const account = await service.read(req.params.accountId)
 
-        res.send(account);
+        res.send(account)
       },
     })
     .route({
-      method: "PATCH",
-      url: "/:accountId/",
+      method: 'PATCH',
+      url: '/:accountId/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -87,42 +87,42 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
           .partial(),
       },
       handler: async (req, res) => {
-        const service = container.resolve(AccountService);
+        const service = container.resolve(AccountService)
 
-        await service.update(req.params.accountId, req.body);
+        await service.update(req.params.accountId, req.body)
 
-        res.send();
+        res.send()
       },
     })
     .route({
-      url: "/:accountId/",
-      method: "DELETE",
+      url: '/:accountId/',
+      method: 'DELETE',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(AccountService);
+        const service = container.resolve(AccountService)
 
-        await service.delete(req.params.accountId);
+        await service.delete(req.params.accountId)
 
-        res.send();
+        res.send()
       },
     })
     .route({
-      method: "POST",
-      url: "/:accountId/apply-template/",
+      method: 'POST',
+      url: '/:accountId/apply-template/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(TemplateService);
+        const service = container.resolve(TemplateService)
 
-        await service.applyTemplate(req.params.accountId);
+        await service.applyTemplate(req.params.accountId)
 
-        res.send();
+        res.send()
       },
-    });
+    })

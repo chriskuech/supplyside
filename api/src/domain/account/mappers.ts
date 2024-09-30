@@ -1,6 +1,6 @@
-import { AccountModel } from "./model";
-import { Account } from "./entity";
-import { getDownloadPath } from "@supplyside/api/domain/blob/util";
+import { AccountModel } from './model'
+import { Account } from './entity'
+import { getDownloadPath } from '@supplyside/api/domain/blob/util'
 
 export const mapAccountModelToEntity = (model: AccountModel): Account => ({
   id: model.id,
@@ -12,7 +12,7 @@ export const mapAccountModelToEntity = (model: AccountModel): Account => ({
     getDownloadPath({
       blobId: model.LogoBlob.id,
       mimeType: model.LogoBlob.mimeType,
-      fileName: "logo",
+      fileName: 'logo',
     }),
   logoBlobId: model.LogoBlob?.id ?? null,
-});
+})

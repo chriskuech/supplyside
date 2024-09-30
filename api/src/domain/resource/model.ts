@@ -11,9 +11,9 @@ import {
   ResourceField,
   Prisma,
   Cost,
-} from "@prisma/client";
-import { userInclude } from "../user/model";
-import { FileModel } from "@supplyside/api/domain/file/model";
+} from '@prisma/client'
+import { userInclude } from '../user/model'
+import { FileModel } from '@supplyside/api/domain/file/model'
 
 export type ResourceModel = Resource & {
   Cost: Cost[];
@@ -85,11 +85,11 @@ export const valueInclude = {
       },
     },
   },
-} satisfies Prisma.ValueInclude;
+} satisfies Prisma.ValueInclude
 
 export const resourceInclude = {
   Cost: {
-    orderBy: { createdAt: "asc" },
+    orderBy: { createdAt: 'asc' },
   },
   ResourceField: {
     include: {
@@ -99,4 +99,4 @@ export const resourceInclude = {
       },
     },
   },
-} satisfies Prisma.ResourceInclude;
+} satisfies Prisma.ResourceInclude

@@ -1,10 +1,10 @@
-import { Prisma, ResourceType as ResourceTypeModel } from "@prisma/client";
-import { difference } from "remeda";
-import { inject, injectable } from "inversify";
-import { mapFieldModelToEntity } from "./mappers";
-import { fieldIncludes, schemaIncludes } from "./model";
-import { PrismaService } from "@supplyside/api/integrations/PrismaService";
-import { type ResourceType, Schema } from "@supplyside/model";
+import { Prisma, ResourceType as ResourceTypeModel } from '@prisma/client'
+import { difference } from 'remeda'
+import { inject, injectable } from 'inversify'
+import { mapFieldModelToEntity } from './mappers'
+import { fieldIncludes, schemaIncludes } from './model'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { type ResourceType, Schema } from '@supplyside/model'
 
 @injectable()
 export class SchemaService {
@@ -23,9 +23,9 @@ export class SchemaService {
       },
       include: schemaIncludes,
       orderBy: {
-        isSystem: "desc",
+        isSystem: 'desc',
       },
-    });
+    })
 
     return {
       resourceType,
@@ -44,7 +44,7 @@ export class SchemaService {
       ]
         .map((sf) => sf.Field)
         .map(mapFieldModelToEntity),
-    };
+    }
   }
 
   async readCustomSchemas(accountId: string): Promise<Schema[]> {
@@ -53,12 +53,12 @@ export class SchemaService {
       select: {
         resourceType: true,
       },
-    });
+    })
 
     const missingResourceTypes = difference(
       Object.values(ResourceTypeModel),
       existingSchemas.map((schema) => schema.resourceType)
-    );
+    )
 
     if (missingResourceTypes.length) {
       await this.prisma.schema.createMany({
@@ -69,7 +69,7 @@ export class SchemaService {
             isSystem: false,
           })
         ),
-      });
+      })
     }
 
     const schemas = await this.prisma.schema.findMany({
@@ -88,19 +88,19 @@ export class SchemaService {
                 },
               },
               orderBy: {
-                order: "asc",
+                order: 'asc',
               },
             },
           },
           orderBy: {
-            order: "asc",
+            order: 'asc',
           },
         },
       },
       orderBy: {
-        resourceType: "asc",
+        resourceType: 'asc',
       },
-    });
+    })
 
     return schemas.map((s) => ({
       resourceType: s.resourceType,
@@ -111,6 +111,6 @@ export class SchemaService {
         fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity),
       })),
       allFields: [],
-    }));
+    }))
   }
 }

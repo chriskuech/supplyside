@@ -1,10 +1,10 @@
-import { P, match } from "ts-pattern";
-import { FieldType, Prisma, ResourceType } from "@prisma/client";
-import { injectable } from "inversify";
-import { mapFieldModelToEntity } from "./mappers";
-import { valueInclude } from "@supplyside/api/domain/resource/model";
-import { PrismaService } from "@supplyside/api/integrations/PrismaService";
-import { SchemaField, ValueInput } from "@supplyside/model";
+import { P, match } from 'ts-pattern'
+import { FieldType, Prisma, ResourceType } from '@prisma/client'
+import { injectable } from 'inversify'
+import { mapFieldModelToEntity } from './mappers'
+import { valueInclude } from '@supplyside/api/domain/resource/model'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { SchemaField, ValueInput } from '@supplyside/model'
 
 export type CreateFieldParams = {
   name: string;
@@ -27,9 +27,9 @@ export type OptionPatch = {
   id: string; // patch ID -- must be `id` to work with mui
   name: string;
 } & (
-  | { op: "add" }
-  | { op: "update"; optionId: string }
-  | { op: "remove"; optionId: string }
+  | { op: 'add' }
+  | { op: 'update'; optionId: string }
+  | { op: 'remove'; optionId: string }
 );
 
 @injectable()
@@ -52,7 +52,7 @@ export class SchemaFieldService {
         type: params.type,
         resourceType: params.resourceType,
       },
-    });
+    })
   }
 
   async readFields(accountId: string): Promise<SchemaField[]> {
@@ -61,7 +61,7 @@ export class SchemaFieldService {
         accountId,
       },
       orderBy: {
-        name: "asc",
+        name: 'asc',
       },
       include: {
         DefaultValue: {
@@ -69,13 +69,13 @@ export class SchemaFieldService {
         },
         Option: {
           orderBy: {
-            order: "asc",
+            order: 'asc',
           },
         },
       },
-    });
+    })
 
-    return fields.map(mapFieldModelToEntity);
+    return fields.map(mapFieldModelToEntity)
   }
 
   async updateField(accountId: string, dto: UpdateFieldDto) {
@@ -196,7 +196,7 @@ export class SchemaFieldService {
       }),
       ...dto.options.map((o, i) =>
         match(o)
-          .with({ op: "add" }, (o) =>
+          .with({ op: 'add' }, (o) =>
             this.prisma.option.create({
               data: {
                 Field: {
@@ -210,7 +210,7 @@ export class SchemaFieldService {
               },
             })
           )
-          .with({ op: "update" }, (o) =>
+          .with({ op: 'update' }, (o) =>
             this.prisma.option.update({
               where: {
                 id: o.optionId,
@@ -225,7 +225,7 @@ export class SchemaFieldService {
               },
             })
           )
-          .with({ op: "remove" }, (o) =>
+          .with({ op: 'remove' }, (o) =>
             this.prisma.option.delete({
               where: {
                 id: o.optionId,
@@ -238,7 +238,7 @@ export class SchemaFieldService {
           )
           .exhaustive()
       ),
-    ]);
+    ])
   }
 
   async deleteField(accountId: string, fieldId: string) {
@@ -247,8 +247,8 @@ export class SchemaFieldService {
         accountId: accountId,
         id: fieldId,
       },
-    });
+    })
   }
 }
 
-const sanitizeColumnName = (name: string) => name.replace('"', "");
+const sanitizeColumnName = (name: string) => name.replace('"', '')

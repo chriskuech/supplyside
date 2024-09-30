@@ -1,7 +1,7 @@
-import { fail } from "assert";
-import { Configuration, PlaidApi, PlaidEnvironments } from "plaid";
-import { injectable } from "inversify";
-import { ConfigService } from "@supplyside/api/ConfigService";
+import { fail } from 'assert'
+import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid'
+import { injectable } from 'inversify'
+import { ConfigService } from '@supplyside/api/ConfigService'
 
 @injectable()
 export class PlaidConfigService {
@@ -12,33 +12,33 @@ export class PlaidConfigService {
       PLAID_ENV: environment,
       PLAID_CLIENT_ID: clientId,
       PLAID_SECRET: clientSecret,
-    } = this.configService.config;
+    } = this.configService.config
 
     if (!clientId || !clientSecret || !environment) {
-      return null;
+      return null
     }
 
-    return { clientId, clientSecret, environment };
+    return { clientId, clientSecret, environment }
   }
 
   getPlaidConfigUnsafe() {
-    return this.getPlaidConfig() ?? fail("Plaid not configured");
+    return this.getPlaidConfig() ?? fail('Plaid not configured')
   }
 
   plaidClient() {
-    const config = this.getPlaidConfigUnsafe();
+    const config = this.getPlaidConfigUnsafe()
 
     return new PlaidApi(
       new Configuration({
         basePath: PlaidEnvironments[config.environment],
         baseOptions: {
           headers: {
-            "PLAID-CLIENT-ID": config.clientId,
-            "PLAID-SECRET": config.clientSecret,
-            "Plaid-Version": "2020-09-14",
+            'PLAID-CLIENT-ID': config.clientId,
+            'PLAID-SECRET': config.clientSecret,
+            'Plaid-Version': '2020-09-14',
           },
         },
       })
-    );
+    )
   }
 }

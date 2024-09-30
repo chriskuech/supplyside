@@ -1,15 +1,15 @@
-import { fail } from "assert";
-import { inject, injectable } from "inversify";
-import { fields, schemas } from "@supplyside/model";
-import { PrismaService } from "@supplyside/api/integrations/PrismaService";
+import { fail } from 'assert'
+import { inject, injectable } from 'inversify'
+import { fields, schemas } from '@supplyside/model'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 
 @injectable()
 export class TemplateService {
   constructor(@inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async applyTemplate(accountId: string) {
-    await this.applyFields(accountId);
-    await this.applySchemas(accountId);
+    await this.applyFields(accountId)
+    await this.applySchemas(accountId)
   }
 
   private async applyFields(accountId: string) {
@@ -27,7 +27,7 @@ export class TemplateService {
           },
         ],
       },
-    });
+    })
 
     for (const {
       templateId,
@@ -72,7 +72,7 @@ export class TemplateService {
           resourceType,
           defaultToToday,
         },
-      });
+      })
 
       const upsertingOptions = options?.map(
         ({ templateId, ...option }, order) =>
@@ -94,7 +94,7 @@ export class TemplateService {
               name: option.name,
             },
           })
-      );
+      )
 
       const cleaningOptions =
         options &&
@@ -108,14 +108,14 @@ export class TemplateService {
               },
             },
           },
-        });
+        })
 
-      await Promise.all([cleaningOptions, ...(upsertingOptions ?? [])]);
+      await Promise.all([cleaningOptions, ...(upsertingOptions ?? [])])
 
       if (defaultValue?.optionTemplateId) {
         const templateId =
           options?.find((o) => o.templateId === defaultValue?.optionTemplateId)
-            ?.templateId ?? fail("Option not found");
+            ?.templateId ?? fail('Option not found')
 
         await this.prisma.field.update({
           where: { id: fieldId },
@@ -145,7 +145,7 @@ export class TemplateService {
               },
             },
           },
-        });
+        })
       }
     }
   }
@@ -156,7 +156,7 @@ export class TemplateService {
         accountId,
         isSystem: true,
       },
-    });
+    })
 
     await Promise.all(
       schemas.map(async ({ resourceType, fields, sections }) => {
@@ -198,8 +198,8 @@ export class TemplateService {
               })),
             },
           },
-        });
+        })
       })
-    );
+    )
   }
 }

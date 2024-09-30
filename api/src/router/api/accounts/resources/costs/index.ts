@@ -1,15 +1,15 @@
-import { container } from "@supplyside/api/di";
-import { CostService } from "@supplyside/api/domain/resource/costs";
-import { FastifyInstance } from "fastify";
-import { ZodTypeProvider } from "fastify-type-provider-zod";
-import { z } from "zod";
+import { container } from '@supplyside/api/di'
+import { CostService } from '@supplyside/api/domain/resource/costs'
+import { FastifyInstance } from 'fastify'
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
 export const mountCosts = async <App extends FastifyInstance>(app: App) =>
   app
     .withTypeProvider<ZodTypeProvider>()
     .route({
-      method: "POST",
-      url: "/",
+      method: 'POST',
+      url: '/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -17,16 +17,16 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(CostService);
+        const service = container.resolve(CostService)
 
-        await service.create(req.params.accountId, req.params.resourceId);
+        await service.create(req.params.accountId, req.params.resourceId)
 
-        res.send();
+        res.send()
       },
     })
     .route({
-      method: "PATCH",
-      url: "/:costId/",
+      method: 'PATCH',
+      url: '/:costId/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -42,21 +42,21 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
           .partial(),
       },
       handler: async (req, res) => {
-        const service = container.resolve(CostService);
+        const service = container.resolve(CostService)
 
         await service.update(
           req.params.accountId,
           req.params.resourceId,
           req.params.costId,
           req.body
-        );
+        )
 
-        res.send();
+        res.send()
       },
     })
     .route({
-      method: "DELETE",
-      url: "/:costId/",
+      method: 'DELETE',
+      url: '/:costId/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -65,14 +65,14 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(CostService);
+        const service = container.resolve(CostService)
 
         await service.delete(
           req.params.accountId,
           req.params.resourceId,
           req.params.costId
-        );
+        )
 
-        res.send();
+        res.send()
       },
-    });
+    })

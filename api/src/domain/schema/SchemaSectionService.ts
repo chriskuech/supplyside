@@ -1,6 +1,6 @@
-import { injectable } from "inversify";
-import { PrismaService } from "@supplyside/api/integrations/PrismaService";
-import { ResourceType } from "@supplyside/model";
+import { injectable } from 'inversify'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { ResourceType } from '@supplyside/model'
 
 @injectable()
 export class SchemaSectionService {
@@ -13,7 +13,7 @@ export class SchemaSectionService {
         name: dto.name,
         order: 0,
       },
-    });
+    })
   }
 
   async updateCustomSchema(
@@ -41,7 +41,7 @@ export class SchemaSectionService {
           })),
         },
       },
-    });
+    })
   }
 
   async updateSection(dto: {
@@ -87,7 +87,7 @@ export class SchemaSectionService {
           },
         },
       }),
-    ]);
+    ])
   }
 
   async deleteSection(accountId: string, sectionId: string) {
@@ -98,6 +98,6 @@ export class SchemaSectionService {
           accountId,
         },
       },
-    });
+    })
   }
 }

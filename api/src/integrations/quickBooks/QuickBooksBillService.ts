@@ -1,38 +1,38 @@
-import assert from "assert";
-import OAuthClient from "intuit-oauth";
-import { injectable } from "inversify";
-import { accountQuerySchema, readBillSchema } from "./schemas";
-import { Bill } from "./types";
-import { ACCOUNT_BASED_EXPENSE } from "./constants";
-import { mapValue } from "./mapValue";
-import { QuickBooksVendorService } from "./QuickBooksVendorService";
-import { QuickBooksExpectedError } from "./errors";
-import { QuickBooksApiService } from "./QuickBooksApiService";
-import { selectResourceFieldValue } from "@supplyside/model";
-import { Resource, fields } from "@supplyside/model";
-import { selectSchemaField } from "@supplyside/model";
-import { SchemaService } from "@supplyside/api/domain/schema/SchemaService";
-import { ResourceService } from "@supplyside/api/domain/resource/ResourceService";
-import { ConfigService } from "@supplyside/api/ConfigService";
+import assert from 'assert'
+import OAuthClient from 'intuit-oauth'
+import { injectable } from 'inversify'
+import { accountQuerySchema, readBillSchema } from './schemas'
+import { Bill } from './types'
+import { ACCOUNT_BASED_EXPENSE } from './constants'
+import { mapValue } from './mapValue'
+import { QuickBooksVendorService } from './QuickBooksVendorService'
+import { QuickBooksExpectedError } from './errors'
+import { QuickBooksApiService } from './QuickBooksApiService'
+import { selectResourceFieldValue } from '@supplyside/model'
+import { Resource, fields } from '@supplyside/model'
+import { selectSchemaField } from '@supplyside/model'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
+import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
+import { ConfigService } from '@supplyside/api/ConfigService'
 
 const fieldsMap = [
   {
     field: fields.quickBooksBillId,
-    key: "Id",
+    key: 'Id',
   },
   {
     field: fields.invoiceDate,
-    key: "TxnDate",
+    key: 'TxnDate',
   },
   {
     field: fields.paymentDueDate,
-    key: "DueDate",
+    key: 'DueDate',
   },
   {
     field: fields.invoiceNumber,
-    key: "DocNumber",
+    key: 'DocNumber',
   },
-];
+]
 
 @injectable()
 export class QuickBooksBillService {
@@ -49,14 +49,14 @@ export class QuickBooksBillService {
     client: OAuthClient,
     id: string
   ): Promise<Bill> {
-    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId);
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
     return await this.quickBooksApiService
       .makeApiCall(accountId, client, {
         url: `${baseUrl}/bill/${id}`,
-        method: "GET",
+        method: 'GET',
       })
-      .then((data) => readBillSchema.parse(data.json));
+      .then((data) => readBillSchema.parse(data.json))
   }
 
   async createBillOnQuickBooks(
@@ -66,38 +66,38 @@ export class QuickBooksBillService {
     quickBooksAccountId: string,
     quickBooksVendorId: string
   ): Promise<Bill> {
-    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId);
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
-    const body = this.mapBill(bill, quickBooksAccountId, quickBooksVendorId);
+    const body = this.mapBill(bill, quickBooksAccountId, quickBooksVendorId)
 
     const quickBooksBill = await this.quickBooksApiService
       .makeApiCall(accountId, client, {
         url: `${baseUrl}/bill`,
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
       })
-      .then((data) => readBillSchema.parse(data.json));
+      .then((data) => readBillSchema.parse(data.json))
 
-    const vendorSchema = await this.schemaService.readSchema(accountId, "Bill");
+    const vendorSchema = await this.schemaService.readSchema(accountId, 'Bill')
 
     const quickBooksBillIdField = selectSchemaField(
       vendorSchema,
       fields.quickBooksBillId
-    )?.fieldId;
+    )?.fieldId
 
-    assert(quickBooksBillIdField, "quickBooksBillId field not found");
+    assert(quickBooksBillIdField, 'quickBooksBillId field not found')
 
     await this.resourceService.updateResourceField({
       accountId,
       resourceId: bill.id,
       fieldId: quickBooksBillIdField,
       valueInput: { string: quickBooksBill.Bill.Id },
-    });
+    })
 
-    return quickBooksBill;
+    return quickBooksBill
   }
 
   async updateBillOnQuickBooks(
@@ -107,43 +107,43 @@ export class QuickBooksBillService {
     quickBooksAccountId: string,
     quickBooksVendorId: string
   ): Promise<Bill> {
-    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId);
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
     const quickBooksBillId = selectResourceFieldValue(
       bill,
       fields.quickBooksBillId
-    )?.string;
+    )?.string
 
-    assert(quickBooksBillId, "Bill has no quickBooksBillId");
+    assert(quickBooksBillId, 'Bill has no quickBooksBillId')
 
     //TODO: bill can be deleted on QB, do we recreate it?
     const quickBooksBill = await this.readBill(
       accountId,
       client,
       quickBooksBillId
-    );
+    )
 
     const billBody = this.mapBill(
       bill,
       quickBooksAccountId,
       quickBooksVendorId
-    );
+    )
 
     const body = {
       ...quickBooksBill.Bill,
       ...billBody,
-    };
+    }
 
     return this.quickBooksApiService
       .makeApiCall(accountId, client, {
         url: `${baseUrl}/bill`,
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
       })
-      .then((data) => readBillSchema.parse(data.json));
+      .then((data) => readBillSchema.parse(data.json))
   }
 
   async upsertBillOnQuickBooks(
@@ -156,7 +156,7 @@ export class QuickBooksBillService {
     const quickBooksBillId = selectResourceFieldValue(
       bill,
       fields.quickBooksBillId
-    )?.string;
+    )?.string
 
     if (quickBooksBillId) {
       return this.updateBillOnQuickBooks(
@@ -165,7 +165,7 @@ export class QuickBooksBillService {
         bill,
         quickBooksAccountId,
         quickBooksVendorId
-      );
+      )
     } else {
       return this.createBillOnQuickBooks(
         client,
@@ -173,7 +173,7 @@ export class QuickBooksBillService {
         bill,
         quickBooksAccountId,
         quickBooksVendorId
-      );
+      )
     }
   }
 
@@ -184,51 +184,51 @@ export class QuickBooksBillService {
   ): Promise<void> {
     const bill = await this.resourceService.readResource({
       accountId,
-      type: "Bill",
+      type: 'Bill',
       id: resourceId,
-    });
+    })
 
     const quickBooksAccountName = selectResourceFieldValue(
       bill,
       fields.quickBooksAccount
-    )?.option?.name;
-    assert(quickBooksAccountName, "Account not set");
+    )?.option?.name
+    assert(quickBooksAccountName, 'Account not set')
 
     const quickBooksAccountQuery = await this.quickBooksApiService.query(
       accountId,
       client,
       {
-        entity: "Account",
+        entity: 'Account',
         where: `FullyQualifiedName = '${quickBooksAccountName}'`,
       },
       accountQuerySchema
-    );
+    )
 
     assert(
       quickBooksAccountQuery.QueryResponse.Account,
       new QuickBooksExpectedError(
-        "Accounting category does not exist or is not active in QuickBooks"
+        'Accounting category does not exist or is not active in QuickBooks'
       )
-    );
+    )
 
     const quickBooksAccountId =
-      quickBooksAccountQuery.QueryResponse.Account[0].Id;
+      quickBooksAccountQuery.QueryResponse.Account[0].Id
 
     const vendorId = selectResourceFieldValue(bill, fields.vendor)?.resource
-      ?.id;
-    assert(vendorId, "Vendor not set");
+      ?.id
+    assert(vendorId, 'Vendor not set')
     const vendorResource = await this.resourceService.readResource({
       accountId,
       id: vendorId,
-    });
+    })
 
     const quickBooksVendor =
       await this.quickBooksVendorService.upsertVendorOnQuickBooks(
         client,
         accountId,
         vendorResource
-      );
-    const quickBooksVendorId = quickBooksVendor.Vendor.Id;
+      )
+    const quickBooksVendorId = quickBooksVendor.Vendor.Id
 
     await this.upsertBillOnQuickBooks(
       client,
@@ -236,7 +236,7 @@ export class QuickBooksBillService {
       bill,
       quickBooksAccountId,
       quickBooksVendorId
-    );
+    )
   }
 
   mapBill(
@@ -250,7 +250,7 @@ export class QuickBooksBillService {
         [fieldMap.key]: mapValue(billResource, fieldMap.field),
       }),
       {}
-    );
+    )
 
     return {
       ...quickBooksBill,
@@ -270,6 +270,6 @@ export class QuickBooksBillService {
           },
         },
       ],
-    };
+    }
   }
 }

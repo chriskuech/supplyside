@@ -1,11 +1,11 @@
-import { faker } from "@faker-js/faker";
-import { inject, injectable } from "inversify";
-import { TemplateService } from "../schema/TemplateService";
-import { Account } from "./entity";
-import { mapAccountModelToEntity } from "./mappers";
-import { accountInclude } from "./model";
-import { PrismaService } from "@supplyside/api/integrations/PrismaService";
-import { systemAccountId } from "@supplyside/api/const";
+import { faker } from '@faker-js/faker'
+import { inject, injectable } from 'inversify'
+import { TemplateService } from '../schema/TemplateService'
+import { Account } from './entity'
+import { mapAccountModelToEntity } from './mappers'
+import { accountInclude } from './model'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { systemAccountId } from '@supplyside/api/const'
 
 @injectable()
 export class AccountService {
@@ -17,16 +17,16 @@ export class AccountService {
   ) {}
 
   async create(): Promise<void> {
-    const temporaryKey = faker.string.alpha({ casing: "lower", length: 5 });
+    const temporaryKey = faker.string.alpha({ casing: 'lower', length: 5 })
 
     const { id: accountId } = await this.prisma.account.create({
       data: {
         key: temporaryKey,
-        name: "New Account - " + temporaryKey,
+        name: 'New Account - ' + temporaryKey,
       },
-    });
+    })
 
-    await this.templateService.applyTemplate(accountId);
+    await this.templateService.applyTemplate(accountId)
   }
 
   async read(accountId: string): Promise<Account> {
@@ -35,9 +35,9 @@ export class AccountService {
         id: accountId,
       },
       include: accountInclude,
-    });
+    })
 
-    return mapAccountModelToEntity(model);
+    return mapAccountModelToEntity(model)
   }
 
   async readByKey(key: string): Promise<Account> {
@@ -46,9 +46,9 @@ export class AccountService {
         key,
       },
       include: accountInclude,
-    });
+    })
 
-    return mapAccountModelToEntity(model);
+    return mapAccountModelToEntity(model)
   }
 
   async list(): Promise<Account[]> {
@@ -61,12 +61,12 @@ export class AccountService {
         },
       },
       orderBy: {
-        name: "asc",
+        name: 'asc',
       },
       include: accountInclude,
-    });
+    })
 
-    return models.map(mapAccountModelToEntity);
+    return models.map(mapAccountModelToEntity)
   }
 
   async update(
@@ -81,7 +81,7 @@ export class AccountService {
     await this.prisma.account.update({
       where: { id: accountId },
       data,
-    });
+    })
   }
 
   async delete(accountId: string): Promise<void> {
@@ -89,6 +89,6 @@ export class AccountService {
       where: {
         id: accountId,
       },
-    });
+    })
   }
 }

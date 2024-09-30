@@ -1,14 +1,14 @@
-import { PrismaService } from "@supplyside/api/integrations/PrismaService";
-import { injectable } from "inversify";
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { injectable } from 'inversify'
 import {
   FieldType,
   ResourceType,
   SchemaField,
   ValueInput,
-} from "@supplyside/model";
-import { mapFieldModelToEntity } from "../schema/mappers";
-import { fieldIncludes } from "../schema/model";
-import { OptionPatch } from "../schema/SchemaFieldService";
+} from '@supplyside/model'
+import { mapFieldModelToEntity } from '../schema/mappers'
+import { fieldIncludes } from '../schema/model'
+import { OptionPatch } from '../schema/SchemaFieldService'
 
 @injectable()
 export class FieldService {
@@ -20,12 +20,12 @@ export class FieldService {
         accountId,
       },
       orderBy: {
-        name: "asc",
+        name: 'asc',
       },
       include: fieldIncludes,
-    });
+    })
 
-    return fields.map(mapFieldModelToEntity);
+    return fields.map(mapFieldModelToEntity)
   }
 
   async createField(
@@ -49,7 +49,7 @@ export class FieldService {
           create: {},
         },
       },
-    });
+    })
   }
 
   async updateField(
@@ -75,7 +75,7 @@ export class FieldService {
           update: dto.defaultValue,
         },
       },
-    });
+    })
   }
 
   async deleteField(accountId: string, fieldId: string) {
@@ -84,6 +84,6 @@ export class FieldService {
         id: fieldId,
         accountId,
       },
-    });
+    })
   }
 }

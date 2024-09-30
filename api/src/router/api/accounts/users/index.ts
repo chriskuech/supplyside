@@ -1,19 +1,19 @@
-import { container } from "@supplyside/api/di";
+import { container } from '@supplyside/api/di'
 import {
   UpdateUserSchema,
   UserService,
-} from "@supplyside/api/domain/user/UserService";
-import { UserSchema } from "@supplyside/model";
-import { FastifyInstance } from "fastify";
-import { ZodTypeProvider } from "fastify-type-provider-zod";
-import { z } from "zod";
+} from '@supplyside/api/domain/user/UserService'
+import { UserSchema } from '@supplyside/model'
+import { FastifyInstance } from 'fastify'
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
 export const mountUsers = async <App extends FastifyInstance>(app: App) =>
   app
     .withTypeProvider<ZodTypeProvider>()
     .route({
-      method: "GET",
-      url: "/",
+      method: 'GET',
+      url: '/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -23,16 +23,16 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(UserService);
+        const service = container.resolve(UserService)
 
-        const users = await service.list(req.params.accountId);
+        const users = await service.list(req.params.accountId)
 
-        res.send(users);
+        res.send(users)
       },
     })
     .route({
-      method: "POST",
-      url: "/",
+      method: 'POST',
+      url: '/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -42,16 +42,16 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(UserService);
+        const service = container.resolve(UserService)
 
-        await service.invite(req.params.accountId, req.body);
+        await service.invite(req.params.accountId, req.body)
 
-        res.send();
+        res.send()
       },
     })
     .route({
-      method: "GET",
-      url: "/{userId}/",
+      method: 'GET',
+      url: '/{userId}/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -62,19 +62,19 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(UserService);
+        const service = container.resolve(UserService)
 
         const user = await service.read(
           req.params.accountId,
           req.params.userId
-        );
+        )
 
-        res.send(user);
+        res.send(user)
       },
     })
     .route({
-      method: "PATCH",
-      url: "/{userId}/",
+      method: 'PATCH',
+      url: '/{userId}/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -83,16 +83,16 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
         body: UpdateUserSchema,
       },
       handler: async (req, res) => {
-        const service = container.resolve(UserService);
+        const service = container.resolve(UserService)
 
-        await service.update(req.params.accountId, req.params.userId, req.body);
+        await service.update(req.params.accountId, req.params.userId, req.body)
 
-        res.send();
+        res.send()
       },
     })
     .route({
-      method: "DELETE",
-      url: "/{userId}/",
+      method: 'DELETE',
+      url: '/{userId}/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -100,10 +100,10 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(UserService);
+        const service = container.resolve(UserService)
 
-        await service.delete(req.params.accountId, req.params.userId);
+        await service.delete(req.params.accountId, req.params.userId)
 
-        res.send();
+        res.send()
       },
-    });
+    })

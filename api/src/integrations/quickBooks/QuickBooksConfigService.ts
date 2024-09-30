@@ -1,6 +1,6 @@
-import { ConfigService } from "@supplyside/api/ConfigService";
-import { fail } from "assert";
-import { injectable } from "inversify";
+import { ConfigService } from '@supplyside/api/ConfigService'
+import { fail } from 'assert'
+import { injectable } from 'inversify'
 
 @injectable()
 export class QuickBooksConfigService {
@@ -13,10 +13,10 @@ export class QuickBooksConfigService {
       QUICKBOOKS_CSRF_SECRET: csrfSecret,
       QUICKBOOKS_ENVIRONMENT: environment,
       BASE_URL,
-    } = this.configService.config;
+    } = this.configService.config
 
     if (!clientId || !clientSecret || !csrfSecret || !environment) {
-      return null;
+      return null
     }
 
     return {
@@ -24,19 +24,19 @@ export class QuickBooksConfigService {
       clientSecret,
       csrfSecret,
       environment,
-      redirectUri: BASE_URL + "/api/integrations/quickbooks/login",
+      redirectUri: BASE_URL + '/api/integrations/quickbooks/login',
       apiBaseUrl: {
-        sandbox: "https://sandbox-quickbooks.api.intuit.com",
-        production: "https://quickbooks.api.intuit.com",
+        sandbox: 'https://sandbox-quickbooks.api.intuit.com',
+        production: 'https://quickbooks.api.intuit.com',
       }[environment],
       appBaseUrl: {
-        sandbox: "https://sandbox.qbo.intuit.com",
-        production: "https://qbo.intuit.com",
+        sandbox: 'https://sandbox.qbo.intuit.com',
+        production: 'https://qbo.intuit.com',
       }[environment],
-    };
+    }
   }
 
   get configUnsafe() {
-    return this.config ?? fail("QuickBooks not configured");
+    return this.config ?? fail('QuickBooks not configured')
   }
 }

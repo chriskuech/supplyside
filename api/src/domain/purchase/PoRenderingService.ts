@@ -1,12 +1,12 @@
-import { readFile } from "fs/promises";
-import { isTruthy } from "remeda";
-import { P, match } from "ts-pattern";
-import { FieldType } from "@prisma/client";
-import { injectable } from "inversify";
-import { BlobService } from "../blob/BlobService";
-import { ResourceService } from "../resource/ResourceService";
-import { AccountService } from "../account/AccountService";
-import { SchemaService } from "../schema/SchemaService";
+import { readFile } from 'fs/promises'
+import { isTruthy } from 'remeda'
+import { P, match } from 'ts-pattern'
+import { FieldType } from '@prisma/client'
+import { injectable } from 'inversify'
+import { BlobService } from '../blob/BlobService'
+import { ResourceService } from '../resource/ResourceService'
+import { AccountService } from '../account/AccountService'
+import { SchemaService } from '../schema/SchemaService'
 import {
   FieldReference,
   Resource,
@@ -15,16 +15,16 @@ import {
   formatInlineAddress,
   selectResourceField,
   selectResourceFieldValue,
-} from "@supplyside/model";
-import { createDataUrl } from "../blob/util";
-import PoDocument from "./doc/PoDocument";
+} from '@supplyside/model'
+import { createDataUrl } from '../blob/util'
+import PoDocument from './doc/PoDocument'
 import {
   AddressViewModel,
   LineViewModel,
   PurchaseViewModel,
-} from "./doc/ViewModel";
-import { renderToStaticMarkup } from "react-dom/server";
-import { OsService } from "@supplyside/api/os";
+} from './doc/ViewModel'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { OsService } from '@supplyside/api/os'
 
 type RenderPoParams = {
   accountId: string;
@@ -44,24 +44,24 @@ export class PoRenderingService {
 
   async renderPo({ accountId, resourceId, isPreview }: RenderPoParams) {
     return await this.osService.withTempDir(async (path) => {
-      const viewModel = await this.createViewModel(accountId, resourceId);
+      const viewModel = await this.createViewModel(accountId, resourceId)
 
       const html = htmlDocument(
         renderToStaticMarkup(PoDocument(viewModel)),
         isPreview
-      );
+      )
 
       const htmlDataUrl = createDataUrl({
-        mimeType: "text/html",
+        mimeType: 'text/html',
         buffer: Buffer.from(html),
-      });
+      })
 
       await this.osService.exec(
         `weasyprint '${htmlDataUrl}' '${path}/out.pdf'`
-      );
+      )
 
-      return await readFile(`${path}/out.pdf`);
-    });
+      return await readFile(`${path}/out.pdf`)
+    })
   }
 
   async createViewModel(
@@ -72,36 +72,36 @@ export class PoRenderingService {
       this.resourceService.readResource({
         accountId,
         id: purchaseId,
-        type: "Purchase",
+        type: 'Purchase',
       }),
       this.resourceService.readResources({
         accountId,
-        type: "Line",
+        type: 'Line',
         where: {
-          "==": [{ var: "Purchase" }, purchaseId],
+          '==': [{ var: 'Purchase' }, purchaseId],
         },
       }),
-      this.schemaService.readSchema(accountId, "Line"),
+      this.schemaService.readSchema(accountId, 'Line'),
       this.accountService.read(accountId),
-    ]);
+    ])
 
     const vendorId = selectResourceFieldValue(order, fields.vendor)?.resource
-      ?.id;
+      ?.id
 
     const vendor = vendorId
       ? await this.resourceService.readResource({
           accountId: account.id,
           id: vendorId,
-          type: "Vendor",
+          type: 'Vendor',
         })
-      : undefined;
+      : undefined
 
     const blob = account.logoBlobId
       ? await this.blobService.readBlob({
           accountId: account.id,
           blobId: account.logoBlobId,
         })
-      : undefined;
+      : undefined
 
     const lineAdditionalFields = lineSchema.fields.filter(
       (field) =>
@@ -111,24 +111,24 @@ export class PoRenderingService {
           fields.unitCost.templateId,
           fields.quantity.templateId,
         ].includes(field.templateId as string)
-    );
+    )
 
     return {
       logoBlobDataUrl: account?.logoBlobId
-        ? `data:${blob?.mimeType};base64,${blob?.buffer.toString("base64")}`
+        ? `data:${blob?.mimeType};base64,${blob?.buffer.toString('base64')}`
         : null,
       lines: await Promise.all(
         lines.map(async (line) => {
           const itemId = selectResourceFieldValue(line, fields.item)?.resource
-            ?.id;
+            ?.id
 
           const item = itemId
             ? await this.resourceService.readResource({
                 accountId: account.id,
                 id: itemId,
-                type: "Item",
+                type: 'Item',
               })
-            : undefined;
+            : undefined
 
           return {
             itemName: renderTemplateField(item, fields.name),
@@ -141,12 +141,12 @@ export class PoRenderingService {
               .map(({ name, fieldId }) => {
                 const value = renderFieldValue(
                   selectResourceField(line, { fieldId })
-                );
+                )
 
-                return value && { key: name, value };
+                return value && { key: name, value }
               })
               .filter(isTruthy),
-          } satisfies LineViewModel;
+          } satisfies LineViewModel
         })
       ),
       notes: renderTemplateField(order, fields.purchaseNotes),
@@ -169,9 +169,9 @@ export class PoRenderingService {
               0) *
             (cost.value / 100)
           : cost.value
-        ).toLocaleString("en-US", {
-          style: "currency",
-          currency: "USD",
+        ).toLocaleString('en-US', {
+          style: 'currency',
+          currency: 'USD',
         }),
       })),
       incoterms: renderTemplateField(order, fields.incoterms),
@@ -186,7 +186,7 @@ export class PoRenderingService {
         vendor,
         fields.primaryAddress
       ),
-    };
+    }
   }
 }
 
@@ -212,7 +212,7 @@ const htmlDocument = (content: string, isPreview?: boolean) => `
               ? `background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(
                   watermark
                 )}');`
-              : ""
+              : ''
           }
           margin: 0;
           padding: 0;
@@ -226,64 +226,64 @@ const htmlDocument = (content: string, isPreview?: boolean) => `
       ${content}
     </body>
   </html>
-`;
+`
 
 const watermark = `
   <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="none"/>
     <text x="100" y="100" font-family="sans-serif" font-size="40" fill="rgba(0,0,0,0.2)" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(-27 100 100)">PREVIEW</text>
   </svg>
-`;
+`
 
 const renderTemplateField = (
   resource: Resource | undefined,
   fieldRef: FieldReference
-) => renderFieldValue(resource && selectResourceField(resource, fieldRef));
+) => renderFieldValue(resource && selectResourceField(resource, fieldRef))
 
 const renderFieldValue = (resourceField: ResourceField | undefined) =>
   match<FieldType | undefined, string | null>(resourceField?.fieldType)
-    .with("Address", () =>
+    .with('Address', () =>
       resourceField?.value?.address
         ? formatInlineAddress(resourceField.value.address)
         : null
     )
-    .with("Checkbox", () =>
+    .with('Checkbox', () =>
       match(resourceField?.value.boolean)
-        .with(true, () => "Yes")
-        .with(false, () => "No")
+        .with(true, () => 'Yes')
+        .with(false, () => 'No')
         .with(P.nullish, () => null)
         .exhaustive()
     )
-    .with("Contact", () => resourceField?.value?.contact?.name || null)
-    .with("Date", () =>
+    .with('Contact', () => resourceField?.value?.contact?.name || null)
+    .with('Date', () =>
       resourceField?.value?.date
         ? new Date(resourceField.value.date).toLocaleDateString()
         : null
     )
-    .with("File", () => (resourceField?.value?.file ? "File Attached" : null))
-    .with("Files", () =>
-      resourceField?.value?.files?.length ? "Files Attached" : null
+    .with('File', () => (resourceField?.value?.file ? 'File Attached' : null))
+    .with('Files', () =>
+      resourceField?.value?.files?.length ? 'Files Attached' : null
     )
     .with(
-      "Money",
+      'Money',
       () =>
-        resourceField?.value?.number?.toLocaleString("en-US", {
-          style: "currency",
-          currency: "USD",
+        resourceField?.value?.number?.toLocaleString('en-US', {
+          style: 'currency',
+          currency: 'USD',
         }) ?? null
     )
-    .with("Number", () => resourceField?.value?.number?.toString() ?? null)
+    .with('Number', () => resourceField?.value?.number?.toString() ?? null)
     .with(
-      "MultiSelect",
-      () => resourceField?.value?.options?.map((o) => o.name).join(", ") ?? null
+      'MultiSelect',
+      () => resourceField?.value?.options?.map((o) => o.name).join(', ') ?? null
     )
-    .with("Text", () => resourceField?.value?.string || null)
-    .with("Textarea", () => resourceField?.value?.string || null)
-    .with("Select", () => resourceField?.value?.option?.name ?? null)
-    .with("User", () => resourceField?.value?.user?.fullName ?? null)
-    .with("Resource", () => null)
+    .with('Text', () => resourceField?.value?.string || null)
+    .with('Textarea', () => resourceField?.value?.string || null)
+    .with('Select', () => resourceField?.value?.option?.name ?? null)
+    .with('User', () => resourceField?.value?.user?.fullName ?? null)
+    .with('Resource', () => null)
     .with(P.nullish, () => null)
-    .exhaustive();
+    .exhaustive()
 
 const renderAddressViewModel = (
   resource: Resource | undefined,
@@ -294,18 +294,18 @@ const renderAddressViewModel = (
       line1: null,
       line2: null,
       line3: null,
-    };
+    }
 
-  const addressValue = selectResourceFieldValue(resource, field)?.address;
+  const addressValue = selectResourceFieldValue(resource, field)?.address
   const line2Values = [
     addressValue?.city,
     addressValue?.state,
     addressValue?.zip,
-  ].filter(Boolean);
+  ].filter(Boolean)
 
   return {
     line1: addressValue?.streetAddress ?? null,
-    line2: line2Values.length ? line2Values.join(" ") : null,
+    line2: line2Values.length ? line2Values.join(' ') : null,
     line3: addressValue?.country ?? null,
-  };
-};
+  }
+}

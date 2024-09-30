@@ -1,6 +1,6 @@
-import { getDownloadPath } from "../blob/util";
-import { File } from "@supplyside/api/domain/file/types";
-import { FileModel } from "@supplyside/api/domain/file/model";
+import { getDownloadPath } from '../blob/util'
+import { File } from '@supplyside/api/domain/file/types'
+import { FileModel } from '@supplyside/api/domain/file/model'
 
 export const mapFile = (file: FileModel): File => ({
   id: file.id,
@@ -20,4 +20,4 @@ export const mapFile = (file: FileModel): File => ({
     fileName: file.name,
     isPreview: true,
   }),
-});
+})

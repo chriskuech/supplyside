@@ -1,7 +1,7 @@
-import { Container } from "inversify";
+import { Container } from 'inversify'
 
 export const container = new Container({
   autoBindInjectable: true,
-  defaultScope: "Singleton",
+  defaultScope: 'Singleton',
   skipBaseClassChecks: true,
-});
+})

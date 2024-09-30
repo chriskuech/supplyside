@@ -4,7 +4,7 @@ import { JsonLogicValue } from './types'
 
 export const sanitizeValue = (value: JsonLogicValue) =>
   match(value)
-    .with(P.string, (s) => `'${s.replace(/'/g, "''")}'`)
+    .with(P.string, (s) => `'${s.replace(/'/g, '\'\'')}'`)
     .with(P.union(P.boolean, P.number, null), (n) => String(n))
     .exhaustive()
 

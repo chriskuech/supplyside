@@ -1,9 +1,9 @@
-import { fail } from "assert";
-import { Prisma } from "@prisma/client";
-import { z } from "zod";
-import { isNullish, map, pipe, sum } from "remeda";
-import { match } from "ts-pattern";
-import { inject, injectable } from "inversify";
+import { fail } from 'assert'
+import { Prisma } from '@prisma/client'
+import { z } from 'zod'
+import { isNullish, map, pipe, sum } from 'remeda'
+import { match } from 'ts-pattern'
+import { inject, injectable } from 'inversify'
 import {
   FieldReference,
   FieldTemplate,
@@ -23,20 +23,20 @@ import {
   ValueInput,
   ResourceTypeSchema,
   ValueResource,
-} from "@supplyside/model";
-import { SchemaService } from "../schema/SchemaService";
+} from '@supplyside/model'
+import { SchemaService } from '../schema/SchemaService'
 import {
   mapValueInputToPrismaValueCreate,
   mapValueInputToPrismaValueUpdate,
   mapValueInputToPrismaValueWhere,
   mapValueToValueInput,
-} from "./mappers";
-import { createSql } from "./json-logic/compile";
-import { OrderBy, JsonLogic } from "./json-logic/types";
-import { mapResourceModelToEntity } from "./mappers";
-import { resourceInclude } from "./model";
-import { DuplicateResourceError } from "./errors";
-import { PrismaService } from "@supplyside/api/integrations/PrismaService";
+} from './mappers'
+import { createSql } from './json-logic/compile'
+import { OrderBy, JsonLogic } from './json-logic/types'
+import { mapResourceModelToEntity } from './mappers'
+import { resourceInclude } from './model'
+import { DuplicateResourceError } from './errors'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 
 export type ReadResourceParams = {
   accountId: string;
@@ -105,7 +105,7 @@ type HandleResourceUpdateParams = {
   updatedFields: FieldUpdate[];
 };
 
-const millisecondsPerDay = 24 * 60 * 60 * 1000;
+const millisecondsPerDay = 24 * 60 * 60 * 1000
 
 type HandleResourceCreateParams = {
   accountId: string;
@@ -149,9 +149,9 @@ export class ResourceService {
         type: resourceType,
       },
       include: resourceInclude,
-    });
+    })
 
-    return mapResourceModelToEntity(model);
+    return mapResourceModelToEntity(model)
   }
 
   async findBacklinks(
@@ -176,9 +176,9 @@ export class ResourceService {
         },
       },
       include: resourceInclude,
-    });
+    })
 
-    return models.map(mapResourceModelToEntity);
+    return models.map(mapResourceModelToEntity)
   }
 
   async createResource({
@@ -187,14 +187,14 @@ export class ResourceService {
     templateId,
     fields: resourceFields,
   }: CreateResourceParams): Promise<Resource> {
-    const schema = await this.schemaService.readSchema(accountId, type);
+    const schema = await this.schemaService.readSchema(accountId, type)
 
     const {
       _max: { key },
     } = await this.prisma.resource.aggregate({
       where: { accountId, type },
       _max: { key: true },
-    });
+    })
 
     const resource = await this.prisma.resource.create({
       data: {
@@ -204,7 +204,7 @@ export class ResourceService {
         key: (key ?? 0) + 1,
         Cost: {
           create: {
-            name: "Taxes",
+            name: 'Taxes',
             isPercentage: true,
             value: 0,
           },
@@ -213,7 +213,7 @@ export class ResourceService {
           create: schema.fields.map((schemaField) => {
             const resourceField = resourceFields?.find(
               (rf) => rf.fieldId === schemaField.fieldId
-            );
+            )
 
             return {
               Field: {
@@ -228,20 +228,20 @@ export class ResourceService {
                   schemaField
                 ),
               },
-            };
+            }
           }),
         },
       },
       include: resourceInclude,
-    });
+    })
 
     await this.handleResourceCreate({
       accountId,
       schema,
       resource: mapResourceModelToEntity(resource),
-    });
+    })
 
-    return await this.readResource({ accountId, id: resource.id });
+    return await this.readResource({ accountId, id: resource.id })
   }
 
   async readResource({
@@ -263,9 +263,9 @@ export class ResourceService {
             : undefined,
       },
       include: resourceInclude,
-    });
+    })
 
-    return mapResourceModelToEntity(model);
+    return mapResourceModelToEntity(model)
   }
 
   async readResources({
@@ -274,10 +274,10 @@ export class ResourceService {
     where,
     orderBy,
   }: ReadResourcesParams): Promise<Resource[]> {
-    const schema = await this.schemaService.readSchema(accountId, type);
-    const sql = createSql({ accountId, schema, where, orderBy });
+    const schema = await this.schemaService.readSchema(accountId, type)
+    const sql = createSql({ accountId, schema, where, orderBy })
 
-    const results: { _id: string }[] = await this.prisma.$queryRawUnsafe(sql);
+    const results: { _id: string }[] = await this.prisma.$queryRawUnsafe(sql)
 
     const models = await this.prisma.resource.findMany({
       where: {
@@ -288,10 +288,10 @@ export class ResourceService {
         },
       },
       include: resourceInclude,
-      orderBy: [{ key: "desc" }],
-    });
+      orderBy: [{ key: 'desc' }],
+    })
 
-    return models.map(mapResourceModelToEntity);
+    return models.map(mapResourceModelToEntity)
   }
 
   async updateResource({
@@ -299,24 +299,24 @@ export class ResourceService {
     resourceId,
     fields,
   }: UpdateResourceParams) {
-    const resource = await this.readResource({ accountId, id: resourceId });
+    const resource = await this.readResource({ accountId, id: resourceId })
     const schema = await this.schemaService.readSchema(
       accountId,
       resource.type
-    );
+    )
 
     await Promise.all(
       fields.map(async ({ fieldId, valueInput }) => {
         const sf =
           schema.fields.find((f) => f.fieldId === fieldId) ??
-          fail("Field not found in schema");
+          fail('Field not found in schema')
 
         const rf = resource.fields.find(
           (resourceField) => resourceField.fieldId === fieldId
-        );
+        )
 
         if (resource.templateId && rf?.templateId) {
-          throw new Error("Can't update a system value on a system resource");
+          throw new Error('Can\'t update a system value on a system resource')
         }
 
         await this.checkForDuplicateResource(
@@ -325,7 +325,7 @@ export class ResourceService {
           resource,
           valueInput,
           resourceId
-        );
+        )
 
         await this.prisma.resourceField.upsert({
           where: {
@@ -353,44 +353,44 @@ export class ResourceService {
               },
             },
           },
-        });
+        })
       })
-    );
+    )
 
-    const entity = await this.readResource({ accountId, id: resourceId });
+    const entity = await this.readResource({ accountId, id: resourceId })
 
     await this.handleResourceUpdate({
       accountId,
       schema,
       resource: entity,
       updatedFields: fields.map((field) => ({
-        field: selectSchemaField(schema, field) ?? fail("Field not found"),
+        field: selectSchemaField(schema, field) ?? fail('Field not found'),
         valueInput:
-          selectResourceFieldValue(entity, field) ?? fail("Value not found"),
+          selectResourceFieldValue(entity, field) ?? fail('Value not found'),
       })),
-    });
+    })
 
-    return await this.readResource({ accountId, id: resourceId });
+    return await this.readResource({ accountId, id: resourceId })
   }
 
   async deleteResource({ accountId, id }: DeleteResourceParams): Promise<void> {
     const model = await this.prisma.resource.delete({
       where: { id, accountId },
       include: resourceInclude,
-    });
+    })
 
-    const entity = mapResourceModelToEntity(model);
-    if (entity.type === "Line") {
+    const entity = mapResourceModelToEntity(model)
+    if (entity.type === 'Line') {
       const purchaseId = selectResourceFieldValue(entity, fields.purchase)
-        ?.resource?.id;
+        ?.resource?.id
       if (purchaseId) {
-        await this.recalculateSubtotalCost(accountId, "Purchase", purchaseId);
+        await this.recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
       }
 
       const billId = selectResourceFieldValue(entity, fields.bill)?.resource
-        ?.id;
+        ?.id
       if (billId) {
-        await this.recalculateSubtotalCost(accountId, "Bill", billId);
+        await this.recalculateSubtotalCost(accountId, 'Bill', billId)
       }
     }
   }
@@ -410,7 +410,7 @@ export class ResourceService {
       accountId,
       resourceId,
       fields: [{ fieldId, valueInput }],
-    });
+    })
   }
 
   async updateTemplateId({
@@ -421,17 +421,17 @@ export class ResourceService {
     await this.prisma.resource.update({
       where: { id: resourceId, accountId },
       data: { templateId },
-    });
+    })
   }
 
   async findByTemplateId({ accountId, templateId }: FindByTemplateIdParams) {
     const resource = await this.prisma.resource.findFirst({
       where: { accountId, templateId },
       include: resourceInclude,
-    });
-    if (!resource) return null;
+    })
+    if (!resource) return null
 
-    return mapResourceModelToEntity(resource);
+    return mapResourceModelToEntity(resource)
   }
 
   async checkForDuplicateResource(
@@ -458,12 +458,12 @@ export class ResourceService {
             id: resourceId,
           },
         },
-      });
+      })
 
       if (resourceExists) {
         throw new DuplicateResourceError(
-          Object.values(valueInput)[0]?.toString() ?? ""
-        );
+          Object.values(valueInput)[0]?.toString() ?? ''
+        )
       }
     }
   }
@@ -500,7 +500,7 @@ export class ResourceService {
     }
     ORDER BY similarity("name", ${input}) DESC
     LIMIT 15
-  `;
+  `
 
     return z
       .object({
@@ -511,21 +511,21 @@ export class ResourceService {
         templateId: z.string().nullable(),
       })
       .array()
-      .parse(results);
+      .parse(results)
   }
 
   async recalculateItemizedCosts(accountId: string, resourceId: string) {
     const resource = await this.readResource({
       accountId,
       id: resourceId,
-    });
+    })
     const schema = await this.schemaService.readSchema(
       accountId,
       resource.type
-    );
+    )
 
     const subtotal =
-      selectResourceFieldValue(resource, fields.subtotalCost)?.number ?? 0;
+      selectResourceFieldValue(resource, fields.subtotalCost)?.number ?? 0
 
     await this.updateResourceField({
       accountId,
@@ -540,7 +540,7 @@ export class ResourceService {
           sum()
         ),
       },
-    });
+    })
   }
 
   async recalculateSubtotalCost(
@@ -552,15 +552,15 @@ export class ResourceService {
       accountId,
       resourceType,
       true
-    );
+    )
 
     const lines = await this.readResources({
       accountId,
-      type: "Line",
+      type: 'Line',
       where: {
-        "==": [{ var: resourceType }, resourceId],
+        '==': [{ var: resourceType }, resourceId],
       },
-    });
+    })
 
     const subTotal = pipe(
       lines,
@@ -568,7 +568,7 @@ export class ResourceService {
         (line) => selectResourceFieldValue(line, fields.totalCost)?.number ?? 0
       ),
       sum()
-    );
+    )
 
     await this.updateResourceField({
       accountId,
@@ -577,7 +577,7 @@ export class ResourceService {
       valueInput: {
         number: Number(subTotal), // TODO: this is ignoring that subTotal is bigint
       },
-    });
+    })
   }
 
   async handleResourceCreate({
@@ -585,13 +585,13 @@ export class ResourceService {
     schema,
     resource,
   }: HandleResourceCreateParams) {
-    if (resource.type === "Purchase") {
+    if (resource.type === 'Purchase') {
       await this.updateResourceField({
         accountId,
         resourceId: resource.id,
         fieldId: selectSchemaFieldUnsafe(schema, fields.poNumber).fieldId,
         valueInput: { string: resource.key.toString() },
-      });
+      })
     }
 
     // // When the "Bill Files" field is updated,
@@ -614,7 +614,7 @@ export class ResourceService {
         uf: FieldUpdate
       ): uf is FieldUpdate & { valueInput: { resource: ValueResource } } =>
         !!uf.field.resourceType && !!uf.valueInput.resource
-    );
+    )
     if (updatedFieldsWithResourceType.length) {
       await Promise.all(
         updatedFieldsWithResourceType.map(
@@ -624,31 +624,31 @@ export class ResourceService {
               fromResourceId: valueInput.resource.id,
               toResourceId: resource.id,
               backLinkFieldRef: { fieldId },
-            });
+            })
           }
         )
-      );
+      )
     }
 
     // When the Line."Unit Cost" or Line."Quantity" or a new item is selected field is updated,
     // Then update Line."Total Cost"
     if (
-      resource.type === "Line" &&
+      resource.type === 'Line' &&
       updatedFields.some(
         (rf) =>
           rf.field.templateId === fields.unitCost.templateId ||
           rf.field.templateId === fields.quantity.templateId ||
-          rf.valueInput.resource?.type === "Item"
+          rf.valueInput.resource?.type === 'Item'
       )
     ) {
       const totalCostFieldId = selectSchemaFieldUnsafe(
         schema,
         fields.totalCost
-      ).fieldId;
+      ).fieldId
       const unitCost =
-        selectResourceFieldValue(resource, fields.unitCost)?.number ?? 0;
+        selectResourceFieldValue(resource, fields.unitCost)?.number ?? 0
       const quantity =
-        selectResourceFieldValue(resource, fields.quantity)?.number ?? 0;
+        selectResourceFieldValue(resource, fields.quantity)?.number ?? 0
 
       await this.updateResourceField({
         accountId,
@@ -657,45 +657,45 @@ export class ResourceService {
         valueInput: {
           number: unitCost * quantity,
         },
-      });
+      })
     }
 
     // When the Line."Total Cost" field is updated,
     // Then update the {Bill|Purchase}."Subtotal Cost" field
     if (
-      resource.type === "Line" &&
+      resource.type === 'Line' &&
       updatedFields.some(
         (rf) => rf.field.templateId === fields.totalCost.templateId
       )
     ) {
       const purchaseId = selectResourceFieldValue(resource, fields.purchase)
-        ?.resource?.id;
+        ?.resource?.id
       if (purchaseId) {
-        await this.recalculateSubtotalCost(accountId, "Purchase", purchaseId);
+        await this.recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
       }
 
       const billId = selectResourceFieldValue(resource, fields.bill)?.resource
-        ?.id;
+        ?.id
       if (billId) {
-        await this.recalculateSubtotalCost(accountId, "Bill", billId);
+        await this.recalculateSubtotalCost(accountId, 'Bill', billId)
       }
     }
 
     // When the {Bill|Purchase}."Subtotal Cost" field is updated,
     // Then recalculate the {Bill|Purchase}."Itemized Costs" field
     if (
-      ["Bill", "Purchase"].includes(resource.type) &&
+      ['Bill', 'Purchase'].includes(resource.type) &&
       updatedFields.some(
         (rf) => rf.field.templateId === fields.subtotalCost.templateId
       )
     ) {
-      await this.recalculateItemizedCosts(accountId, resource.id);
+      await this.recalculateItemizedCosts(accountId, resource.id)
     }
 
     // When the {Bill|Purchase}."Itemized Costs" or {Bill|Purchase}."Subtotal Cost" field is updated,
     // Then update {Bill|Purchase}."Total Cost"
     if (
-      ["Bill", "Purchase"].includes(resource.type) &&
+      ['Bill', 'Purchase'].includes(resource.type) &&
       updatedFields.some(
         (rf) =>
           rf.field.templateId === fields.subtotalCost.templateId ||
@@ -706,12 +706,12 @@ export class ResourceService {
         accountId,
         resource.type,
         true
-      );
+      )
 
       const itemizedCosts =
-        selectResourceFieldValue(resource, fields.itemizedCosts)?.number ?? 0;
+        selectResourceFieldValue(resource, fields.itemizedCosts)?.number ?? 0
       const subtotalCost =
-        selectResourceFieldValue(resource, fields.subtotalCost)?.number ?? 0;
+        selectResourceFieldValue(resource, fields.subtotalCost)?.number ?? 0
 
       await this.updateResourceField({
         accountId,
@@ -720,27 +720,27 @@ export class ResourceService {
         valueInput: {
           number: itemizedCosts + subtotalCost,
         },
-      });
+      })
     }
 
     // When the Purchase field of a Bill resource has been updated (an Purchase has been linked to a Bill)
     // Then recalculate the Bill."Subtotal Cost"
     if (
-      resource.type === "Bill" &&
+      resource.type === 'Bill' &&
       updatedFields.some(
         (rf) => rf.field.templateId === fields.purchase.templateId
       )
     ) {
-      await this.recalculateSubtotalCost(accountId, "Bill", resource.id);
+      await this.recalculateSubtotalCost(accountId, 'Bill', resource.id)
 
-      resource = await this.readResource({ accountId, id: resource.id });
+      resource = await this.readResource({ accountId, id: resource.id })
     }
 
     // When the Bill.“Invoice Date” field or Bill.“Payment Terms” field changes,
     // Given the “Invoice Date” field and “Payment Terms” fields are not null,
     // Then set “Payment Due Date” = “Invoice Date” + “Payment Terms”
     if (
-      resource.type === "Bill" &&
+      resource.type === 'Bill' &&
       updatedFields.some(
         (rf) =>
           rf.field.templateId === fields.invoiceDate.templateId ||
@@ -750,11 +750,11 @@ export class ResourceService {
       const invoiceDate = selectResourceFieldValue(
         resource,
         fields.invoiceDate
-      )?.date;
+      )?.date
       const paymentTerms = selectResourceFieldValue(
         resource,
         fields.paymentTerms
-      )?.number;
+      )?.number
 
       if (!isNullish(invoiceDate) && !isNullish(paymentTerms)) {
         await this.updateResourceField({
@@ -768,7 +768,7 @@ export class ResourceService {
                 paymentTerms * millisecondsPerDay
             ).toISOString(),
           },
-        });
+        })
       }
     }
 
@@ -798,27 +798,27 @@ export class ResourceService {
         accountId,
         id: toResourceId,
       }),
-    ]);
+    ])
 
     await this.copyFields({
       accountId,
       fromResourceId,
       toResourceId,
-    });
+    })
 
-    if (fromResource.type === "Purchase" && toResource.type === "Bill") {
+    if (fromResource.type === 'Purchase' && toResource.type === 'Bill') {
       await this.cloneCosts({
         accountId,
         fromResourceId,
         toResourceId,
-      });
+      })
       await this.linkLines({
         accountId,
         fromResourceId,
         toResourceId,
         fromResourceField: fields.purchase,
         toResourceField: fields.bill,
-      });
+      })
     }
   }
 
@@ -829,15 +829,15 @@ export class ResourceService {
     fromResourceField,
     toResourceField,
   }: LinkLinesParams) {
-    const lineSchema = await this.schemaService.readSchema(accountId, "Line");
+    const lineSchema = await this.schemaService.readSchema(accountId, 'Line')
 
     const lines = await this.readResources({
       accountId,
-      type: "Line",
+      type: 'Line',
       where: {
-        "==": [{ var: fromResourceField.name }, fromResourceId],
+        '==': [{ var: fromResourceField.name }, fromResourceId],
       },
-    });
+    })
 
     await Promise.all(
       lines.map((line) =>
@@ -848,28 +848,28 @@ export class ResourceService {
           valueInput: { resourceId: toResourceId },
         })
       )
-    );
+    )
   }
 
   async cloneResource(accountId: string, resourceId: string) {
     const source = await this.readResource({
       accountId,
       id: resourceId,
-    });
+    })
 
     const destination = await match(source.type)
-      .with("Bill", async () => {
-        const schema = await this.schemaService.readSchema(accountId, "Bill");
+      .with('Bill', async () => {
+        const schema = await this.schemaService.readSchema(accountId, 'Bill')
 
         const billStatusField = selectSchemaFieldUnsafe(
           schema,
           fields.billStatus
-        );
+        )
 
         const draftStatusOption =
           billStatusField.options.find(
             (o) => o.templateId === billStatusOptions.draft.templateId
-          ) ?? fail("Draft status not found");
+          ) ?? fail('Draft status not found')
 
         const destination = await this.createResource({
           accountId,
@@ -886,7 +886,7 @@ export class ResourceService {
               valueInput: { optionId: draftStatusOption?.id ?? null },
             },
           ],
-        });
+        })
 
         await Promise.all([
           this.cloneLines({
@@ -900,25 +900,25 @@ export class ResourceService {
             fromResourceId: source.id,
             toResourceId: destination.id,
           }),
-        ]);
+        ])
 
-        return destination;
+        return destination
       })
-      .with("Purchase", async () => {
+      .with('Purchase', async () => {
         const schema = await this.schemaService.readSchema(
           accountId,
-          "Purchase"
-        );
+          'Purchase'
+        )
 
         const orderStatusField = selectSchemaFieldUnsafe(
           schema,
           fields.purchaseStatus
-        );
+        )
 
         const draftStatusOption =
           orderStatusField.options.find(
             (o) => o.templateId === purchaseStatusOptions.draft.templateId
-          ) ?? fail("Draft status not found");
+          ) ?? fail('Draft status not found')
 
         const destination = await this.createResource({
           accountId,
@@ -935,7 +935,7 @@ export class ResourceService {
               valueInput: { optionId: draftStatusOption?.id ?? null },
             },
           ],
-        });
+        })
 
         await Promise.all([
           this.cloneLines({
@@ -949,9 +949,9 @@ export class ResourceService {
             fromResourceId: source.id,
             toResourceId: destination.id,
           }),
-        ]);
+        ])
 
-        return destination;
+        return destination
       })
       .otherwise(
         async () =>
@@ -963,9 +963,9 @@ export class ResourceService {
               valueInput: mapValueToValueInput(fieldType, value),
             })),
           })
-      );
+      )
 
-    return destination;
+    return destination
   }
 
   async cloneCosts({
@@ -976,13 +976,13 @@ export class ResourceService {
     const fromCosts = await this.prisma.cost.findMany({
       where: { resourceId: fromResourceId, Resource: { accountId } },
       orderBy: {
-        createdAt: "asc",
+        createdAt: 'asc',
       },
-    });
+    })
 
     await this.prisma.cost.deleteMany({
       where: { resourceId: toResourceId, Resource: { accountId } },
-    });
+    })
 
     await this.prisma.cost.createMany({
       data: fromCosts.map(({ name, isPercentage, value }) => ({
@@ -991,7 +991,7 @@ export class ResourceService {
         isPercentage,
         value,
       })),
-    });
+    })
   }
 
   async cloneLines({
@@ -1000,23 +1000,23 @@ export class ResourceService {
     toResourceId,
     backLinkFieldRef,
   }: ResourceCopyParams & { backLinkFieldRef: FieldReference }) {
-    const lineSchema = await this.schemaService.readSchema(accountId, "Line");
+    const lineSchema = await this.schemaService.readSchema(accountId, 'Line')
 
-    const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef);
+    const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
 
     const lines = await this.readResources({
       accountId,
-      type: "Line",
+      type: 'Line',
       where: {
-        "==": [{ var: backLinkField.name }, fromResourceId],
+        '==': [{ var: backLinkField.name }, fromResourceId],
       },
-    });
+    })
 
     // `createResource` is not (currently) parallelizable
     for (const line of lines) {
       await this.createResource({
         accountId,
-        type: "Line",
+        type: 'Line',
         fields: [
           ...line.fields
             .filter(({ fieldId }) => fieldId !== backLinkField.fieldId)
@@ -1029,7 +1029,7 @@ export class ResourceService {
             valueInput: { resourceId: toResourceId },
           },
         ],
-      });
+      })
     }
   }
 
@@ -1047,12 +1047,12 @@ export class ResourceService {
         accountId,
         id: toResourceId,
       }),
-    ]);
+    ])
 
     const [fromSchema, toSchema] = await Promise.all([
       this.schemaService.readSchema(accountId, fromResource.type),
       this.schemaService.readSchema(accountId, toResource.type),
-    ]);
+    ])
 
     const fieldsToUpdate = fromResource.fields
       .map((rf) => ({
@@ -1061,7 +1061,7 @@ export class ResourceService {
         tf: findTemplateField(rf.templateId),
       }))
       .filter(({ sf }) => selectSchemaField(toSchema, sf))
-      .filter(({ tf }) => !tf?.isDerived);
+      .filter(({ tf }) => !tf?.isDerived)
 
     const resource = await this.updateResource({
       accountId,
@@ -1070,7 +1070,7 @@ export class ResourceService {
         fieldId: sf.fieldId,
         valueInput: mapValueToValueInput(sf.type, rf.value),
       })),
-    });
+    })
 
     await this.handleResourceUpdate({
       accountId,
@@ -1080,7 +1080,7 @@ export class ResourceService {
         field: sf,
         valueInput: rf.value,
       })),
-    });
+    })
   }
 
   async findResourceByUniqueValue(
@@ -1092,13 +1092,13 @@ export class ResourceService {
     const resourceSchema = await this.schemaService.readSchema(
       accountId,
       resourceType
-    );
+    )
     const fieldId = selectSchemaFieldUnsafe(
       resourceSchema,
       fieldTemplate
-    ).fieldId;
+    ).fieldId
 
-    const value = mapValueInputToPrismaValueWhere(valueInput);
+    const value = mapValueInputToPrismaValueWhere(valueInput)
 
     const resourceField = await this.prisma.resourceField.findFirst({
       where: {
@@ -1106,10 +1106,10 @@ export class ResourceService {
         Value: value,
         Resource: { accountId },
       },
-    });
+    })
 
-    if (!resourceField) return null;
+    if (!resourceField) return null
 
-    return this.readResource({ accountId, id: resourceField.resourceId });
+    return this.readResource({ accountId, id: resourceField.resourceId })
   }
 }

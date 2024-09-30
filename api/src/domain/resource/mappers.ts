@@ -1,7 +1,7 @@
-import { fail } from "assert";
-import { FieldType, Prisma } from "@prisma/client";
-import { P, match } from "ts-pattern";
-import { pick } from "remeda";
+import { fail } from 'assert'
+import { FieldType, Prisma } from '@prisma/client'
+import { P, match } from 'ts-pattern'
+import { pick } from 'remeda'
 import {
   Address,
   Contact,
@@ -12,10 +12,10 @@ import {
   ValueResource,
   fields,
   selectResourceFieldValue,
-} from "@supplyside/model";
-import { mapFile } from "../file/mapValueFile";
-import { mapUserModelToEntity } from "../user/mappers";
-import { ResourceModel, ValueModel, ValueResourceModel } from "./model";
+} from '@supplyside/model'
+import { mapFile } from '../file/mapValueFile'
+import { mapUserModelToEntity } from '../user/mappers'
+import { ResourceModel, ValueModel, ValueResourceModel } from './model'
 
 export const mapResourceModelToEntity = (model: ResourceModel): Resource => ({
   id: model.id,
@@ -31,7 +31,7 @@ export const mapResourceModelToEntity = (model: ResourceModel): Resource => ({
     value: mapValueModelToEntity(rf.Value),
   })),
   costs: model.Cost,
-});
+})
 
 export const mapResourceToValueResource = (
   resource: Resource
@@ -43,41 +43,41 @@ export const mapResourceToValueResource = (
   name:
     selectResourceFieldValue(resource, fields.name)?.string ??
     selectResourceFieldValue(resource, fields.poNumber)?.string ??
-    fail("Resource type does not have a name or number field"),
-});
+    fail('Resource type does not have a name or number field'),
+})
 
 export const mapValueToValueInput = (
   fieldType: FieldType,
   value: Value
 ): ValueInput =>
   match<FieldType, ValueInput>(fieldType)
-    .with("Address", () => ({
+    .with('Address', () => ({
       address: value.address
         ? pick(value.address, [
-            "streetAddress",
-            "city",
-            "state",
-            "zip",
-            "country",
+            'streetAddress',
+            'city',
+            'state',
+            'zip',
+            'country',
           ])
         : null,
     }))
-    .with("Checkbox", () => ({ boolean: value.boolean }))
-    .with("Date", () => ({ date: value.date ?? null }))
-    .with("File", () => ({ fileId: value.file?.id ?? null }))
-    .with(P.union("Money", "Number"), () => ({ number: value.number }))
-    .with("User", () => ({ userId: value.user?.id ?? null }))
-    .with("Select", () => ({ optionId: value.option?.id ?? null }))
-    .with(P.union("Textarea", "Text"), () => ({ string: value.string }))
-    .with("Resource", () => ({ resourceId: value.resource?.id ?? null }))
-    .with("Contact", () => ({
+    .with('Checkbox', () => ({ boolean: value.boolean }))
+    .with('Date', () => ({ date: value.date ?? null }))
+    .with('File', () => ({ fileId: value.file?.id ?? null }))
+    .with(P.union('Money', 'Number'), () => ({ number: value.number }))
+    .with('User', () => ({ userId: value.user?.id ?? null }))
+    .with('Select', () => ({ optionId: value.option?.id ?? null }))
+    .with(P.union('Textarea', 'Text'), () => ({ string: value.string }))
+    .with('Resource', () => ({ resourceId: value.resource?.id ?? null }))
+    .with('Contact', () => ({
       contact: value.contact
-        ? pick(value.contact, ["name", "title", "email", "phone"])
+        ? pick(value.contact, ['name', 'title', 'email', 'phone'])
         : null,
     }))
-    .with("Files", () => ({ fileIds: value.files?.map((f) => f.id) }))
-    .with("MultiSelect", () => ({ optionIds: value.options?.map((o) => o.id) }))
-    .exhaustive();
+    .with('Files', () => ({ fileIds: value.files?.map((f) => f.id) }))
+    .with('MultiSelect', () => ({ optionIds: value.options?.map((o) => o.id) }))
+    .exhaustive()
 
 export const mapValueModelToEntity = (model: ValueModel): Value => ({
   updatedAt: model.updatedAt.toISOString(),
@@ -93,7 +93,7 @@ export const mapValueModelToEntity = (model: ValueModel): Value => ({
   resource: model.Resource && mapValueResourceModelToEntity(model.Resource),
   file: model.File ? mapFile(model.File) : null,
   files: model.Files.map(({ File: file }) => mapFile(file)),
-});
+})
 
 export const mapValueResourceModelToEntity = (
   resource: ValueResourceModel
@@ -109,8 +109,8 @@ export const mapValueResourceModelToEntity = (
         (
           [fields.name.templateId, fields.poNumber.templateId] as string[]
         ).includes(rf.Field.templateId)
-    )?.Value.string ?? "",
-});
+    )?.Value.string ?? '',
+})
 
 export const mapValueInputToPrismaValueUpdate = (
   value: ValueInput
@@ -184,7 +184,7 @@ export const mapValueInputToPrismaValueUpdate = (
         deleteMany: { optionId: { notIn: optionIds } },
       },
     }))
-    .exhaustive();
+    .exhaustive()
 
 export const mapValueInputToPrismaValueCreate = (
   value: ValueInput,
@@ -192,7 +192,7 @@ export const mapValueInputToPrismaValueCreate = (
 ): Prisma.ValueCreateWithoutResourceFieldValueInput =>
   match<ValueInput, Prisma.ValueCreateWithoutResourceFieldValueInput>(value)
     .with({ address: P.not(undefined) }, ({ address: value }) => {
-      const defaultAddress = defaultValue?.address;
+      const defaultAddress = defaultValue?.address
       const defaultAdressValue: Address | null = defaultAddress
         ? {
             city: defaultAddress.city,
@@ -201,15 +201,15 @@ export const mapValueInputToPrismaValueCreate = (
             streetAddress: defaultAddress.streetAddress,
             zip: defaultAddress.zip,
           }
-        : null;
-      const address = value ?? defaultAdressValue;
-      return address ? { Address: { create: address } } : {};
+        : null
+      const address = value ?? defaultAdressValue
+      return address ? { Address: { create: address } } : {}
     })
     .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
       boolean: value ?? defaultValue?.boolean ?? null,
     }))
     .with({ contact: P.not(undefined) }, ({ contact: value }) => {
-      const defaultContact = defaultValue?.contact;
+      const defaultContact = defaultValue?.contact
       const defaultContactValue: Contact | null = defaultContact
         ? {
             email: defaultContact.email,
@@ -217,9 +217,9 @@ export const mapValueInputToPrismaValueCreate = (
             phone: defaultContact.phone,
             title: defaultContact.title,
           }
-        : null;
-      const contact = value ?? defaultContactValue;
-      return contact ? { Contact: { create: contact } } : {};
+        : null
+      const contact = value ?? defaultContactValue
+      return contact ? { Contact: { create: contact } } : {}
     })
     .with({ date: P.not(undefined) }, ({ date: value }) => ({
       date:
@@ -232,51 +232,51 @@ export const mapValueInputToPrismaValueCreate = (
       number: value ?? defaultValue?.number ?? null,
     }))
     .with({ optionId: P.not(undefined) }, ({ optionId: value }) => {
-      const optionId = value ?? defaultValue?.option?.id ?? null;
-      return optionId ? { Option: { connect: { id: optionId } } } : {};
+      const optionId = value ?? defaultValue?.option?.id ?? null
+      return optionId ? { Option: { connect: { id: optionId } } } : {}
     })
     .with({ string: P.not(undefined) }, ({ string: value }) => ({
       string: value ?? defaultValue?.string ?? null,
     }))
     .with({ userId: P.not(undefined) }, ({ userId: value }) => {
-      const userId = value ?? defaultValue?.user?.id ?? null;
-      return userId ? { User: { connect: { id: userId } } } : {};
+      const userId = value ?? defaultValue?.user?.id ?? null
+      return userId ? { User: { connect: { id: userId } } } : {}
     })
     .with({ fileId: P.not(undefined) }, ({ fileId: value }) => {
-      const fileId = value ?? defaultValue?.file?.id ?? null;
-      return fileId ? { File: { connect: { id: fileId } } } : {};
+      const fileId = value ?? defaultValue?.file?.id ?? null
+      return fileId ? { File: { connect: { id: fileId } } } : {}
     })
     .with({ resourceId: P.not(undefined) }, ({ resourceId: value }) => {
-      const resourceId = value ?? defaultValue?.resource?.id ?? null;
-      return resourceId ? { Resource: { connect: { id: resourceId } } } : {};
+      const resourceId = value ?? defaultValue?.resource?.id ?? null
+      return resourceId ? { Resource: { connect: { id: resourceId } } } : {}
     })
     .with({ fileIds: P.not(undefined) }, ({ fileIds: value }) => {
       const fileIds = value.length
         ? value
         : defaultValue?.files?.length
         ? defaultValue.files.map((f) => f.id)
-        : [];
+        : []
       return {
         Files: {
           create: fileIds.map((fileId) => ({
             File: { connect: { id: fileId } },
           })),
         },
-      };
+      }
     })
     .with({ optionIds: P.not(undefined) }, ({ optionIds: value }) => {
       const optionIds = value.length
         ? value
         : defaultValue?.options.length
         ? defaultValue.options.map((o) => o.id)
-        : [];
+        : []
       return {
         ValueOption: {
           create: optionIds.map((id) => ({ Option: { connect: { id } } })),
         },
-      };
+      }
     })
-    .exhaustive();
+    .exhaustive()
 
 export const mapValueInputToPrismaValueWhere = (
   value: ValueInput
@@ -298,11 +298,11 @@ export const mapValueInputToPrismaValueWhere = (
       Contact: {
         name: {
           equals: value?.name ?? null,
-          mode: "insensitive",
+          mode: 'insensitive',
         },
         title: {
           equals: value?.title ?? null,
-          mode: "insensitive",
+          mode: 'insensitive',
         },
         email: value?.email ?? null,
         phone: value?.phone ?? null,
@@ -320,7 +320,7 @@ export const mapValueInputToPrismaValueWhere = (
     .with({ string: P.not(undefined) }, ({ string: value }) => ({
       string: {
         equals: value,
-        mode: "insensitive",
+        mode: 'insensitive',
       },
     }))
     .with({ userId: P.not(undefined) }, ({ userId: value }) => ({
@@ -338,4 +338,4 @@ export const mapValueInputToPrismaValueWhere = (
     .with({ optionIds: P.not(undefined) }, ({ optionIds: value }) => ({
       optionId: { in: value },
     }))
-    .exhaustive();
+    .exhaustive()

@@ -1,11 +1,11 @@
-import { Resource, fields, selectResourceFieldValue } from "@supplyside/model";
+import { Resource, fields, selectResourceFieldValue } from '@supplyside/model'
 
 export const mapVendorsToVendorList = (vendors: Resource[]) =>
-  "Vendor List\n\n" +
+  'Vendor List\n\n' +
   [
     {
-      id: "ID",
-      name: "Name",
+      id: 'ID',
+      name: 'Name',
     },
     ...vendors.map((vendor) => ({
       id: vendor.id,
@@ -14,4 +14,4 @@ export const mapVendorsToVendorList = (vendors: Resource[]) =>
   ]
     .filter(({ name }) => !!name)
     .map(({ id, name }) => `${id}\t${name}`)
-    .join("\n");
+    .join('\n')

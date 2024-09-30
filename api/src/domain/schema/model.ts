@@ -1,5 +1,5 @@
-import { Field, Option, Prisma } from "@prisma/client";
-import { ValueModel, valueInclude } from "../resource/model";
+import { Field, Option, Prisma } from '@prisma/client'
+import { ValueModel, valueInclude } from '../resource/model'
 
 export const fieldIncludes = {
   DefaultValue: {
@@ -7,10 +7,10 @@ export const fieldIncludes = {
   },
   Option: {
     orderBy: {
-      order: "asc",
+      order: 'asc',
     },
   },
-} satisfies Prisma.FieldInclude;
+} satisfies Prisma.FieldInclude
 
 export type FieldModel = Field & {
   Option: Option[];
@@ -25,7 +25,7 @@ export const schemaIncludes = {
       },
     },
     orderBy: {
-      order: "asc",
+      order: 'asc',
     },
   },
   Section: {
@@ -37,12 +37,12 @@ export const schemaIncludes = {
           },
         },
         orderBy: {
-          order: "asc",
+          order: 'asc',
         },
       },
     },
     orderBy: {
-      order: "asc",
+      order: 'asc',
     },
   },
-} satisfies Prisma.SchemaInclude;
+} satisfies Prisma.SchemaInclude

@@ -1,16 +1,16 @@
-import { container } from "@supplyside/api/di";
-import { SessionService } from "@supplyside/api/domain/session/SessionService";
-import { SessionSchema } from "@supplyside/api/domain/session/entity";
-import { FastifyInstance } from "fastify";
-import { ZodTypeProvider } from "fastify-type-provider-zod";
-import { z } from "zod";
+import { container } from '@supplyside/api/di'
+import { SessionService } from '@supplyside/api/domain/session/SessionService'
+import { SessionSchema } from '@supplyside/api/domain/session/entity'
+import { FastifyInstance } from 'fastify'
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
 export const mountSessions = async <App extends FastifyInstance>(app: App) =>
   app
     .withTypeProvider<ZodTypeProvider>()
     .route({
-      method: "POST",
-      url: "/",
+      method: 'POST',
+      url: '/',
       schema: {
         body: z.object({
           email: z.string().email(),
@@ -21,16 +21,16 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(SessionService);
+        const service = container.resolve(SessionService)
 
-        const session = await service.create(req.body.email, req.body.tat);
+        const session = await service.create(req.body.email, req.body.tat)
 
-        res.send(session);
+        res.send(session)
       },
     })
     .route({
-      method: "POST",
-      url: "/:sessionId/extend",
+      method: 'POST',
+      url: '/:sessionId/extend',
       schema: {
         params: z.object({
           sessionId: z.string().uuid(),
@@ -40,21 +40,21 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(SessionService);
+        const service = container.resolve(SessionService)
 
-        const session = await service.extend(req.params.sessionId);
+        const session = await service.extend(req.params.sessionId)
 
         if (!session) {
-          res.status(404);
-          return;
+          res.status(404)
+          return
         }
 
-        res.send(session);
+        res.send(session)
       },
     })
     .route({
-      method: "POST",
-      url: "/:sessionId/impersonate",
+      method: 'POST',
+      url: '/:sessionId/impersonate',
       schema: {
         params: z.object({
           sessionId: z.string().uuid(),
@@ -67,16 +67,16 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(SessionService);
+        const service = container.resolve(SessionService)
 
-        await service.impersonate(req.params.sessionId, req.body.accountId);
+        await service.impersonate(req.params.sessionId, req.body.accountId)
 
-        res.send();
+        res.send()
       },
     })
     .route({
-      method: "GET",
-      url: "/:sessionId",
+      method: 'GET',
+      url: '/:sessionId',
       schema: {
         params: z.object({
           sessionId: z.string().uuid(),
@@ -86,21 +86,21 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(SessionService);
+        const service = container.resolve(SessionService)
 
-        const session = await service.read(req.params.sessionId);
+        const session = await service.read(req.params.sessionId)
 
         if (!session) {
-          res.status(404);
-          return;
+          res.status(404)
+          return
         }
 
-        res.send(session);
+        res.send(session)
       },
     })
     .route({
-      method: "DELETE",
-      url: "/",
+      method: 'DELETE',
+      url: '/',
       schema: {
         params: z.object({
           sessionId: z.string(),
@@ -110,16 +110,16 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(SessionService);
+        const service = container.resolve(SessionService)
 
-        await service.clear(req.params.sessionId);
+        await service.clear(req.params.sessionId)
 
-        res.send();
+        res.send()
       },
     })
     .route({
-      method: "POST",
-      url: "/request-token",
+      method: 'POST',
+      url: '/request-token',
       schema: {
         body: z.object({
           email: z.string().email(),
@@ -127,10 +127,10 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(SessionService);
+        const service = container.resolve(SessionService)
 
-        await service.startEmailVerification(req.body);
+        await service.startEmailVerification(req.body)
 
-        res.send();
+        res.send()
       },
-    });
+    })

@@ -1,15 +1,15 @@
-import { container } from "@supplyside/api/di";
-import { PlaidService } from "@supplyside/api/integrations/plaid";
-import { FastifyInstance } from "fastify";
-import { ZodTypeProvider } from "fastify-type-provider-zod";
-import { z } from "zod";
+import { container } from '@supplyside/api/di'
+import { PlaidService } from '@supplyside/api/integrations/plaid'
+import { FastifyInstance } from 'fastify'
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
 export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
   app
     .withTypeProvider<ZodTypeProvider>()
     .route({
-      method: "GET",
-      url: "/",
+      method: 'GET',
+      url: '/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -27,31 +27,31 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(PlaidService);
+        const service = container.resolve(PlaidService)
 
-        const accounts = await service.getPlaidAccounts(req.params.accountId);
+        const accounts = await service.getPlaidAccounts(req.params.accountId)
 
         res.send({
           accounts: accounts.map((a) => ({ id: a.account_id, name: a.name })),
           connectedAt: new Date().toISOString(),
-        });
+        })
       },
     })
     .route({
-      method: "PUT",
-      url: "/integrations/plaid/",
+      method: 'PUT',
+      url: '/integrations/plaid/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
         }),
       },
       handler: async (req, res) => {
-        res.send();
+        res.send()
       },
     })
     .route({
-      method: "POST",
-      url: "/link-token/",
+      method: 'POST',
+      url: '/link-token/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -61,12 +61,12 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(PlaidService);
+        const service = container.resolve(PlaidService)
 
         const { link_token } = await service.createLinkToken(
           req.params.accountId
-        );
+        )
 
-        res.send(link_token);
+        res.send(link_token)
       },
-    });
+    })

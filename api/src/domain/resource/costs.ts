@@ -1,6 +1,6 @@
-import { injectable } from "inversify";
-import { ResourceService } from "./ResourceService";
-import { PrismaService } from "@supplyside/api/integrations/PrismaService";
+import { injectable } from 'inversify'
+import { ResourceService } from './ResourceService'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 
 @injectable()
 export class CostService {
@@ -19,7 +19,7 @@ export class CostService {
           },
         },
       },
-    });
+    })
   }
 
   async update(
@@ -48,9 +48,9 @@ export class CostService {
       include: {
         Resource: true,
       },
-    });
+    })
 
-    await this.resourceService.recalculateItemizedCosts(accountId, resourceId);
+    await this.resourceService.recalculateItemizedCosts(accountId, resourceId)
   }
 
   async delete(accountId: string, resourceId: string, costId: string) {
@@ -62,8 +62,8 @@ export class CostService {
           accountId,
         },
       },
-    });
+    })
 
-    await this.resourceService.recalculateItemizedCosts(accountId, resourceId);
+    await this.resourceService.recalculateItemizedCosts(accountId, resourceId)
   }
 }

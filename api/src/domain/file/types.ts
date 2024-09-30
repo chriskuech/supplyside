@@ -1,4 +1,4 @@
-import { ZodType, z } from "zod";
+import { ZodType, z } from 'zod'
 
 export type File = {
   id: string;
@@ -20,4 +20,4 @@ export const FileSchema: ZodType<File> = z.object({
   contentType: z.string(),
   downloadPath: z.string(),
   previewPath: z.string(),
-});
+})

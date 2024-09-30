@@ -1,12 +1,12 @@
-import { FieldType, Value } from "@prisma/client";
-import { P, match } from "ts-pattern";
-import { OrderBy, JsonLogic } from "./types";
-import { mapUuidToBase64, sanitizeValue } from "./sanitize";
+import { FieldType, Value } from '@prisma/client'
+import { P, match } from 'ts-pattern'
+import { OrderBy, JsonLogic } from './types'
+import { mapUuidToBase64, sanitizeValue } from './sanitize'
 import {
   Schema,
   SchemaField,
   selectSchemaFieldUnsafe,
-} from "@supplyside/model";
+} from '@supplyside/model'
 
 export type MapToSqlParams = {
   accountId: string;
@@ -31,41 +31,41 @@ export const createSql = ({
                 f.fieldId
               )}"`
           ),
-        ].join(", ")}
+        ].join(', ')}
       FROM "Resource"
       WHERE "Resource"."accountId" = '${accountId}'
         AND "type" = '${schema.resourceType}'
     )
     SELECT "_id"
     FROM "View"
-    ${where ? `WHERE ${createWhere(where, schema)}` : ""}
-    ${orderBy ? `ORDER BY ${createOrderBy(orderBy)}` : ""}
-  `;
+    ${where ? `WHERE ${createWhere(where, schema)}` : ''}
+    ${orderBy ? `ORDER BY ${createOrderBy(orderBy)}` : ''}
+  `
 
 const createWhere = (where: JsonLogic, schema: Schema): string =>
   match(where)
     .with({ and: P.any }, ({ and: clauses }) =>
-      clauses.map((c) => `(${createWhere(c, schema)})`).join(" AND ")
+      clauses.map((c) => `(${createWhere(c, schema)})`).join(' AND ')
     )
     .with(
-      { "==": P.any },
-      ({ "==": [{ var: var_ }, val] }) =>
+      { '==': P.any },
+      ({ '==': [{ var: var_ }, val] }) =>
         `${resolveFieldNameToColumn(schema, var_)} = ${sanitizeValue(val)}`
     )
     .with(
-      { "!=": P.any },
-      ({ "!=": [{ var: var_ }, val] }) =>
+      { '!=': P.any },
+      ({ '!=': [{ var: var_ }, val] }) =>
         `${resolveFieldNameToColumn(schema, var_)} <> ${sanitizeValue(val)}`
     )
-    .exhaustive();
+    .exhaustive()
 
 const createOrderBy = (orderBy: OrderBy[]) =>
-  orderBy.map((o) => `${sanitizeValue(o.var)} ${o.dir}`).join(", ");
+  orderBy.map((o) => `${sanitizeValue(o.var)} ${o.dir}`).join(', ')
 
 const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
   match(type)
     .with(
-      "Address",
+      'Address',
       () => /*sql*/ `
         SELECT json_build_object(
           'streetAddress', "Address"."streetAddress",
@@ -82,7 +82,7 @@ const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
       `
     )
     .with(
-      "Contact",
+      'Contact',
       () => /*sql*/ `
         SELECT "Contact"."name"
         FROM "ResourceField"
@@ -93,7 +93,7 @@ const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
       `
     )
     .with(
-      "Files",
+      'Files',
       () => /*sql*/ `
         SELECT array_agg("ValueFile"."fileId")
         FROM "ResourceField"
@@ -103,7 +103,7 @@ const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
       `
     )
     .with(
-      "MultiSelect",
+      'MultiSelect',
       () => /*sql*/ `
         SELECT array_agg("ValueOption"."optionId")
         FROM "ResourceField"
@@ -122,27 +122,27 @@ const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
           AND "ResourceField"."fieldId" = '${fieldId}'
       `
     )
-    .exhaustive();
+    .exhaustive()
 
 type PrimitiveFieldType = Exclude<
   FieldType,
-  "Address" | "Contact" | "Files" | "MultiSelect"
+  'Address' | 'Contact' | 'Files' | 'MultiSelect'
 >;
 
 const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
   match<PrimitiveFieldType, keyof Value>(t)
-    .with("Checkbox", () => "boolean")
-    .with("Date", () => "date")
-    .with("File", () => "fileId")
-    .with(P.union("Money", "Number"), () => "number")
-    .with("User", () => "userId")
-    .with("Select", () => "optionId")
-    .with(P.union("Textarea", "Text"), () => "string")
-    .with("Resource", () => "resourceId")
-    .exhaustive();
+    .with('Checkbox', () => 'boolean')
+    .with('Date', () => 'date')
+    .with('File', () => 'fileId')
+    .with(P.union('Money', 'Number'), () => 'number')
+    .with('User', () => 'userId')
+    .with('Select', () => 'optionId')
+    .with(P.union('Textarea', 'Text'), () => 'string')
+    .with('Resource', () => 'resourceId')
+    .exhaustive()
 
 const resolveFieldNameToColumn = (schema: Schema, fieldName: string) => {
-  const { fieldId } = selectSchemaFieldUnsafe(schema, { name: fieldName });
+  const { fieldId } = selectSchemaFieldUnsafe(schema, { name: fieldName })
 
-  return `"${mapUuidToBase64(fieldId)}"`;
-};
+  return `"${mapUuidToBase64(fieldId)}"`
+}

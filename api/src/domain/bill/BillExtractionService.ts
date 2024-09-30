@@ -1,22 +1,22 @@
-import { fail } from "assert";
-import { assert } from "console";
-import { zodResponseFormat } from "openai/helpers/zod";
-import { z } from "zod";
-import { validate as isUuid } from "uuid";
+import { fail } from 'assert'
+import { assert } from 'console'
+import { zodResponseFormat } from 'openai/helpers/zod'
+import { z } from 'zod'
+import { validate as isUuid } from 'uuid'
 import {
   ResourceFieldInput,
   ResourceService,
-} from "../resource/ResourceService";
-import { mapVendorsToVendorList } from "../../integrations/openai/mapVendorsToVendorList";
-import { SchemaService } from "../schema/SchemaService";
-import { CompletionPartsService } from "@supplyside/api/integrations/openai/mapFileToCompletionParts";
-import { OpenAiService } from "@supplyside/api/integrations/openai/OpenAiService";
+} from '../resource/ResourceService'
+import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
+import { SchemaService } from '../schema/SchemaService'
+import { CompletionPartsService } from '@supplyside/api/integrations/openai/mapFileToCompletionParts'
+import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
 import {
   fields,
   selectResourceFieldValue,
   selectSchemaFieldUnsafe,
-} from "@supplyside/model";
-import { inject, injectable } from "inversify";
+} from '@supplyside/model'
+import { inject, injectable } from 'inversify'
 
 const prompt = `
 You are a context extraction tool within a "Procure-to-Pay" B2B SaaS application.
@@ -29,14 +29,14 @@ You will be provided with the following context:
 - The content of the uploaded documents associated with the Bill.
 
 You MUST only return high-confidence data. If the data is uncertain or ambiguous, do not include it in the output.
-`;
+`
 
 const ExtractedBillDataSchema = z.object({
   poNumber: z
     .string()
     .nullish()
     .describe(
-      "The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing."
+      'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.'
     ),
   vendorId: z
     .string()
@@ -44,7 +44,7 @@ const ExtractedBillDataSchema = z.object({
     .describe(
       'The Vendor ID. The Vendor ID is a UUIDv4 for identifying the Vendor. The Bill will contain the Vendor Name, not the Vendor ID. The Vendor ID must be looked up in the provided "Vendor List" TSV file by identifying the Vendor Name in the file (accounting for minor spelling/punctuation differences) and returning the associated Vendor ID for that Vendor Name. If no Vendor ID can be determined with high confidence, this field should be null/missing.'
     ),
-});
+})
 
 @injectable()
 export class BillExtractionService {
@@ -59,25 +59,25 @@ export class BillExtractionService {
 
   async extractContent(accountId: string, resourceId: string) {
     const [billSchema, billResource, vendors] = await Promise.all([
-      this.schemaService.readSchema(accountId, "Bill"),
+      this.schemaService.readSchema(accountId, 'Bill'),
       this.resourceService.readResource({
         id: resourceId,
         accountId,
-        type: "Bill",
+        type: 'Bill',
       }),
       this.resourceService.readResources({
         accountId,
-        type: "Vendor",
+        type: 'Vendor',
       }),
-    ]);
+    ])
 
-    const vendorList = mapVendorsToVendorList(vendors);
+    const vendorList = mapVendorsToVendorList(vendors)
 
     const billFiles =
       selectResourceFieldValue(billResource, fields.billFiles)?.files ??
-      fail("Files not found");
+      fail('Files not found')
 
-    if (!billFiles.length) return;
+    if (!billFiles.length) return
 
     const completionParts = (
       await Promise.all(
@@ -85,22 +85,22 @@ export class BillExtractionService {
           this.completionPartsService.mapFileToCompletionParts(f)
         )
       )
-    ).flat();
+    ).flat()
 
-    if (!completionParts.length) return;
+    if (!completionParts.length) return
 
     const completion = await this.openai.beta.chat.completions.parse({
-      model: "gpt-4o-2024-08-06",
+      model: 'gpt-4o-2024-08-06',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: prompt,
         },
         {
-          role: "user",
+          role: 'user',
           content: [
             {
-              type: "text",
+              type: 'text',
               text: vendorList,
             },
             ...completionParts,
@@ -109,44 +109,44 @@ export class BillExtractionService {
       ],
       response_format: zodResponseFormat(
         ExtractedBillDataSchema,
-        "extractedBillData"
+        'extractedBillData'
       ),
-    });
+    })
 
-    const data = completion.choices[0]?.message.parsed;
+    const data = completion.choices[0]?.message.parsed
 
-    const poNumber = data?.poNumber;
-    const vendorId = data?.vendorId;
+    const poNumber = data?.poNumber
+    const vendorId = data?.vendorId
     const poNumberAsNumber = z.coerce
       .number()
       .int()
       .positive()
-      .safeParse(poNumber)?.data;
+      .safeParse(poNumber)?.data
     const [pruchase, ...purchases] =
       poNumberAsNumber && vendorId
         ? await this.resourceService.readResources({
             accountId,
-            type: "Purchase",
+            type: 'Purchase',
             where: {
               and: [
                 {
-                  "==": [
+                  '==': [
                     {
                       var: fields.poNumber.name,
                     },
                     poNumberAsNumber.toString(),
                   ],
                 },
-                { "==": [{ var: fields.vendor.name }, vendorId] },
+                { '==': [{ var: fields.vendor.name }, vendorId] },
               ],
             },
           })
-        : [];
+        : []
 
     assert(
       !purchases.length,
       `Found ${purchases.length + 1} Purchases with PO Number ${poNumber}`
-    );
+    )
 
     const updatedFields: ResourceFieldInput[] = [
       ...(poNumber
@@ -176,14 +176,14 @@ export class BillExtractionService {
             },
           ]
         : []),
-    ];
+    ]
 
-    if (!updatedFields.length) return;
+    if (!updatedFields.length) return
 
     await this.resourceService.updateResource({
       resourceId,
       accountId,
       fields: updatedFields,
-    });
+    })
   }
 }

@@ -1,13 +1,13 @@
-import { inject, injectable } from "inversify";
-import { mapUserModelToEntity } from "./mappers";
-import { userInclude } from "./model";
-import { PrismaService } from "@supplyside/api/integrations/PrismaService";
-import SmtpService from "@supplyside/api/integrations/SmtpService";
-import { z } from "zod";
-import { ConfigService } from "@supplyside/api/ConfigService";
-import { User } from "@supplyside/model";
+import { inject, injectable } from 'inversify'
+import { mapUserModelToEntity } from './mappers'
+import { userInclude } from './model'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import SmtpService from '@supplyside/api/integrations/SmtpService'
+import { z } from 'zod'
+import { ConfigService } from '@supplyside/api/ConfigService'
+import { User } from '@supplyside/model'
 
-const loginPath = "/auth/login";
+const loginPath = '/auth/login'
 
 export const UpdateUserSchema = z.object({
   email: z.string().email().optional(),
@@ -17,7 +17,7 @@ export const UpdateUserSchema = z.object({
   tsAndCsSignedAt: z.date().optional(),
   isAdmin: z.boolean().optional(),
   isApprover: z.boolean().optional(),
-});
+})
 
 export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
 
@@ -43,9 +43,9 @@ export class UserService {
         id: userId,
       },
       include: userInclude,
-    });
+    })
 
-    return mapUserModelToEntity(model);
+    return mapUserModelToEntity(model)
   }
 
   async read(accountId: string, userId: string): Promise<User> {
@@ -55,25 +55,25 @@ export class UserService {
         accountId,
       },
       include: userInclude,
-    });
+    })
 
-    return mapUserModelToEntity(model);
+    return mapUserModelToEntity(model)
   }
 
   async list(accountId: string): Promise<User[]> {
     const users = await this.prisma.user.findMany({
       where: { accountId },
       include: userInclude,
-    });
+    })
 
-    return users.map(mapUserModelToEntity);
+    return users.map(mapUserModelToEntity)
   }
 
   async update(accountId: string, userId: string, data: UpdateUserInput) {
     await this.prisma.user.update({
       where: { accountId, id: userId },
       data,
-    });
+    })
   }
 
   async delete(accountId: string, userId: string) {
@@ -82,7 +82,7 @@ export class UserService {
         accountId,
         id: userId,
       },
-    });
+    })
   }
 
   async invite(accountId: string, { email, isAdmin }: InviteUserInput) {
@@ -92,18 +92,18 @@ export class UserService {
         accountId,
         isAdmin,
       },
-    });
+    })
 
     await this.smtpService.sendEmailWithTemplate({
-      From: "SupplySide <bot@supplyside.io>",
+      From: 'SupplySide <bot@supplyside.io>',
       To: email,
-      TemplateAlias: "user-invitation",
+      TemplateAlias: 'user-invitation',
       TemplateModel: {
         invite_email: email,
         action_url: `${this.configService.config.BASE_URL}${loginPath}`,
         product_url: this.configService.config.BASE_URL,
       },
-      MessageStream: "outbound",
-    });
+      MessageStream: 'outbound',
+    })
   }
 }

@@ -1,22 +1,22 @@
-import { container } from "@supplyside/api/di";
-import { SchemaSectionService } from "@supplyside/api/domain/schema/SchemaSectionService";
-import { SchemaService } from "@supplyside/api/domain/schema/SchemaService";
+import { container } from '@supplyside/api/di'
+import { SchemaSectionService } from '@supplyside/api/domain/schema/SchemaSectionService'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
   ResourceTypeSchema,
   Schema,
   SchemaSchema,
   SectionSchema,
-} from "@supplyside/model";
-import { FastifyInstance } from "fastify";
-import { ZodTypeProvider } from "fastify-type-provider-zod";
-import { z } from "zod";
+} from '@supplyside/model'
+import { FastifyInstance } from 'fastify'
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
 export const mountSchemas = <App extends FastifyInstance>(app: App) =>
   app
     .withTypeProvider<ZodTypeProvider>()
     .route({
-      method: "GET",
-      url: "/:resourceType/merged/",
+      method: 'GET',
+      url: '/:resourceType/merged/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -27,19 +27,19 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(SchemaService);
+        const service = container.resolve(SchemaService)
 
         const schema: Schema = await service.readSchema(
           req.params.accountId,
           req.params.resourceType
-        );
+        )
 
-        res.send(schema);
+        res.send(schema)
       },
     })
     .route({
-      method: "GET",
-      url: "/custom/",
+      method: 'GET',
+      url: '/custom/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -49,16 +49,16 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(SchemaService);
+        const service = container.resolve(SchemaService)
 
-        const schemas = await service.readCustomSchemas(req.params.accountId);
+        const schemas = await service.readCustomSchemas(req.params.accountId)
 
-        res.send(schemas);
+        res.send(schemas)
       },
     })
     .route({
-      method: "GET",
-      url: "/:resourceType/custom/",
+      method: 'GET',
+      url: '/:resourceType/custom/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -69,20 +69,20 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(SchemaService);
+        const service = container.resolve(SchemaService)
 
         const schema: Schema = await service.readSchema(
           req.params.accountId,
           req.params.resourceType,
           false
-        );
+        )
 
-        res.send(schema);
+        res.send(schema)
       },
     })
     .route({
-      method: "PATCH",
-      url: "/:resourceType/custom/",
+      method: 'PATCH',
+      url: '/:resourceType/custom/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -91,20 +91,20 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         body: z.array(z.string().uuid()),
       },
       handler: async (req, res) => {
-        const service = container.resolve(SchemaSectionService);
+        const service = container.resolve(SchemaSectionService)
 
         await service.updateCustomSchema(
           req.params.accountId,
           req.params.resourceType,
           req.body
-        );
+        )
 
-        res.send();
+        res.send()
       },
     })
     .route({
-      method: "POST",
-      url: "/:resourceType/custom/sections/",
+      method: 'POST',
+      url: '/:resourceType/custom/sections/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -118,20 +118,20 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(SchemaService);
+        const service = container.resolve(SchemaService)
 
         const schema = await service.readSchema(
           req.params.accountId,
           req.params.resourceType,
           false
-        );
+        )
 
-        res.send(schema.sections);
+        res.send(schema.sections)
       },
     })
     .route({
-      method: "PATCH",
-      url: "/:resourceType/custom/sections/:sectionId/",
+      method: 'PATCH',
+      url: '/:resourceType/custom/sections/:sectionId/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -144,21 +144,21 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(SchemaSectionService);
+        const service = container.resolve(SchemaSectionService)
 
         await service.updateSection({
           accountId: req.params.accountId,
           sectionId: req.params.sectionId,
           name: req.body.name,
           fieldIds: req.body.fieldIds,
-        });
+        })
 
-        res.send();
+        res.send()
       },
     })
     .route({
-      method: "DELETE",
-      url: "/:resourceType/custom/sections/:sectionId/",
+      method: 'DELETE',
+      url: '/:resourceType/custom/sections/:sectionId/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -167,10 +167,10 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(SchemaSectionService);
+        const service = container.resolve(SchemaSectionService)
 
-        await service.deleteSection(req.params.accountId, req.params.sectionId);
+        await service.deleteSection(req.params.accountId, req.params.sectionId)
 
-        res.send();
+        res.send()
       },
-    });
+    })

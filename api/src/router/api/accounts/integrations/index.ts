@@ -1,8 +1,8 @@
-import { ZodTypeProvider } from "fastify-type-provider-zod";
-import { mountQuickBooks } from "./quickBooks";
-import { FastifyInstance } from "fastify";
-import { mountPlaid } from "./plaid";
-import { mountMcMasterCarr } from "./mcmaster";
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { mountQuickBooks } from './quickBooks'
+import { FastifyInstance } from 'fastify'
+import { mountPlaid } from './plaid'
+import { mountMcMasterCarr } from './mcmaster'
 
 export const mountIntegrations = async <App extends FastifyInstance>(
   app: App
@@ -10,11 +10,11 @@ export const mountIntegrations = async <App extends FastifyInstance>(
   app
     .withTypeProvider<ZodTypeProvider>()
     .register(mountMcMasterCarr, {
-      prefix: "/mcmaster",
+      prefix: '/mcmaster',
     })
     .register(mountPlaid, {
-      prefix: "/plaid",
+      prefix: '/plaid',
     })
     .register(mountQuickBooks, {
-      prefix: "/quickbooks",
-    });
+      prefix: '/quickbooks',
+    })

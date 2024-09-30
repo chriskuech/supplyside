@@ -1,15 +1,15 @@
-import { randomUUID } from "crypto";
-import { BlobServiceClient } from "@azure/storage-blob";
-import { injectable } from "inversify";
-import { Blob, BlobWithData } from "./entity";
-import { PrismaService } from "@supplyside/api/integrations/PrismaService";
-import { ConfigService } from "@supplyside/api/ConfigService";
+import { randomUUID } from 'crypto'
+import { BlobServiceClient } from '@azure/storage-blob'
+import { injectable } from 'inversify'
+import { Blob, BlobWithData } from './entity'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { ConfigService } from '@supplyside/api/ConfigService'
 
-const containerName = "app-data";
+const containerName = 'app-data'
 
 @injectable()
 export class BlobService {
-  private readonly client: BlobServiceClient;
+  private readonly client: BlobServiceClient
 
   constructor(
     private readonly prisma: PrismaService,
@@ -17,7 +17,7 @@ export class BlobService {
   ) {
     this.client = BlobServiceClient.fromConnectionString(
       config.AZURE_STORAGE_CONNECTION_STRING
-    );
+    )
   }
 
   async createBlob({
@@ -35,18 +35,18 @@ export class BlobService {
         type: string;
       }
   )): Promise<Blob> {
-    const blobName = randomUUID();
+    const blobName = randomUUID()
 
-    const containerClient = this.client.getContainerClient(containerName);
+    const containerClient = this.client.getContainerClient(containerName)
 
-    await containerClient.createIfNotExists();
+    await containerClient.createIfNotExists()
 
-    const buffer = rest.buffer ?? (await rest.file.arrayBuffer());
-    const type = rest.type ?? rest.file.type;
+    const buffer = rest.buffer ?? (await rest.file.arrayBuffer())
+    const type = rest.type ?? rest.file.type
 
     await containerClient
       .getBlockBlobClient(blobName)
-      .uploadData(buffer, { blobHTTPHeaders: { blobContentType: type } });
+      .uploadData(buffer, { blobHTTPHeaders: { blobContentType: type } })
 
     const blob = await this.prisma.blob.create({
       data: {
@@ -54,9 +54,9 @@ export class BlobService {
         mimeType: type.toLowerCase(),
         name: blobName,
       },
-    });
+    })
 
-    return blob;
+    return blob
   }
 
   async readBlob({
@@ -68,18 +68,18 @@ export class BlobService {
   }): Promise<BlobWithData | undefined> {
     const blob = await this.prisma.blob.findUnique({
       where: { accountId, id: blobId },
-    });
+    })
 
     if (!blob) {
-      throw new Error("Blob not found");
+      throw new Error('Blob not found')
     }
 
     const buffer = await this.client
       .getContainerClient(containerName)
       .getBlockBlobClient(blob.name)
-      .downloadToBuffer();
+      .downloadToBuffer()
 
-    return { ...blob, buffer };
+    return { ...blob, buffer }
   }
 
   async deleteBlob({
@@ -91,17 +91,17 @@ export class BlobService {
   }): Promise<void> {
     const blob = await this.prisma.blob.findUnique({
       where: { accountId, id: blobId },
-    });
+    })
 
     if (!blob) {
-      throw new Error("Blob not found");
+      throw new Error('Blob not found')
     }
 
     await this.client
       .getContainerClient(containerName)
       .getBlockBlobClient(blob.name)
-      .deleteIfExists();
+      .deleteIfExists()
 
-    await this.prisma.blob.delete({ where: { accountId, id: blobId } });
+    await this.prisma.blob.delete({ where: { accountId, id: blobId } })
   }
 }

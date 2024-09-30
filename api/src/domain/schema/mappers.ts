@@ -1,6 +1,6 @@
-import { SchemaField, Section } from "@supplyside/model";
-import { mapValueModelToEntity } from "../resource/mappers";
-import { FieldModel } from "./model";
+import { SchemaField } from '@supplyside/model'
+import { mapValueModelToEntity } from '../resource/mappers'
+import { FieldModel } from './model'
 
 export const mapFieldModelToEntity = (model: FieldModel): SchemaField => ({
   fieldId: model.id,
@@ -17,4 +17,4 @@ export const mapFieldModelToEntity = (model: FieldModel): SchemaField => ({
   defaultValue: model.DefaultValue && mapValueModelToEntity(model.DefaultValue),
   defaultToToday: model.defaultToToday,
   isRequired: model.isRequired,
-});
+})

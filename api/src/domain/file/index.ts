@@ -1,9 +1,9 @@
-import { injectable } from "inversify";
-import { BlobService } from "../blob/BlobService";
-import { mapFile } from "./mapValueFile";
-import { fileInclude } from "./model";
-import { File as FileEntity } from "./types";
-import { PrismaService } from "@supplyside/api/integrations/PrismaService";
+import { injectable } from 'inversify'
+import { BlobService } from '../blob/BlobService'
+import { mapFile } from './mapValueFile'
+import { fileInclude } from './model'
+import { File as FileEntity } from './types'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 
 @injectable()
 export class FileService {
@@ -28,7 +28,7 @@ export class FileService {
       accountId,
       buffer,
       type: contentType,
-    });
+    })
 
     const fileEntity = await this.prisma.file.create({
       data: {
@@ -37,9 +37,9 @@ export class FileService {
         name,
       },
       include: fileInclude,
-    });
+    })
 
-    return mapFile(fileEntity);
+    return mapFile(fileEntity)
   }
 
   async createFromFile(
@@ -55,7 +55,7 @@ export class FileService {
     const { id: blobId } = await this.blobService.createBlob({
       accountId,
       file,
-    });
+    })
 
     const fileEntity = await this.prisma.file.create({
       data: {
@@ -64,8 +64,8 @@ export class FileService {
         name,
       },
       include: fileInclude,
-    });
+    })
 
-    return mapFile(fileEntity);
+    return mapFile(fileEntity)
   }
 }

@@ -1,14 +1,14 @@
-import { ReactNode } from "react";
-import { PoDocumentStyles, styles } from "./PoDocumentStyles";
-import { PurchaseViewModel } from "./ViewModel";
-import PoDocumentFooter from "./PoDocumentFooter";
+import { ReactNode } from 'react'
+import { PoDocumentStyles, styles } from './PoDocumentStyles'
+import { PurchaseViewModel } from './ViewModel'
+import PoDocumentFooter from './PoDocumentFooter'
 
 const tdStyle = {
   border: 0,
-  textAlign: "right",
-  width: "100px",
-  verticalAlign: "top",
-} as const;
+  textAlign: 'right',
+  width: '100px',
+  verticalAlign: 'top',
+} as const
 
 export default function PoDocument({
   lines,
@@ -37,67 +37,67 @@ export default function PoDocument({
   return (
     <>
       <PoDocumentStyles />
-      <div style={{ ...styles.HeaderCssClass, padding: "0px 20px" }}>
-        <div style={{ flex: "1" }}>
+      <div style={{ ...styles.HeaderCssClass, padding: '0px 20px' }}>
+        <div style={{ flex: '1' }}>
           {logoBlobDataUrl && (
             <img
               src={logoBlobDataUrl}
               alt="Logo"
-              style={{ maxHeight: "100px", maxWidth: "100px" }}
+              style={{ maxHeight: '100px', maxWidth: '100px' }}
             />
           )}
         </div>
         <div
           style={{
-            textAlign: "right",
+            textAlign: 'right',
           }}
         >
           <h1
             style={{
-              margin: "0",
-              fontWeight: "600",
-              lineHeight: "30px",
-              marginBottom: "5px",
+              margin: '0',
+              fontWeight: '600',
+              lineHeight: '30px',
+              marginBottom: '5px',
             }}
           >
             PURCHASE ORDER
           </h1>
-          Purchase #{number} <span style={{ margin: "0px 5px" }}>|</span>{" "}
-          {issuedDate ?? "N/A"}
+          Purchase #{number} <span style={{ margin: '0px 5px' }}>|</span>{' '}
+          {issuedDate ?? 'N/A'}
         </div>
       </div>
-      <div style={{ padding: "0px 20px" }}>
+      <div style={{ padding: '0px 20px' }}>
         <div style={{ fontWeight: 600 }}>{accountName}</div>
-        <div style={{ whiteSpace: "pre" }}>{accountAddress}</div>
+        <div style={{ whiteSpace: 'pre' }}>{accountAddress}</div>
       </div>
-      <div style={{ padding: "20px" }}>
+      <div style={{ padding: '20px' }}>
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 250px",
-            gap: "20px",
-            marginBottom: "20px",
+            display: 'grid',
+            gridTemplateColumns: '1fr 250px',
+            gap: '20px',
+            marginBottom: '20px',
           }}
         >
           <div
             style={{
-              border: "1px solid",
+              border: '1px solid',
             }}
           >
             <div
               style={{
-                fontWeight: "bold",
+                fontWeight: 'bold',
                 ...styles.BgColorHeader,
-                padding: "4px 8px",
-                borderBottom: "1px solid",
+                padding: '4px 8px',
+                borderBottom: '1px solid',
               }}
             >
               Notes
             </div>
             <div
               style={{
-                whiteSpace: "pre-wrap",
-                padding: "4px 8px",
+                whiteSpace: 'pre-wrap',
+                padding: '4px 8px',
               }}
             >
               {notes}
@@ -105,47 +105,47 @@ export default function PoDocument({
           </div>
           <div
             style={{
-              border: "1px solid",
+              border: '1px solid',
             }}
           >
             <div
               style={{
-                fontWeight: "bold",
+                fontWeight: 'bold',
                 ...styles.BgColorHeader,
-                padding: "4px 8px",
-                borderBottom: "1px solid",
+                padding: '4px 8px',
+                borderBottom: '1px solid',
               }}
             >
               Payment Terms
             </div>
             <div
               style={{
-                padding: "4px 8px",
-                display: "flex",
-                justifyContent: "space-between",
+                padding: '4px 8px',
+                display: 'flex',
+                justifyContent: 'space-between',
               }}
             >
-              <div style={{ fontWeight: "bold" }}>Currency</div>
+              <div style={{ fontWeight: 'bold' }}>Currency</div>
               <div>{currency}</div>
             </div>
             <div
               style={{
-                padding: "4px 8px",
-                display: "flex",
-                justifyContent: "space-between",
+                padding: '4px 8px',
+                display: 'flex',
+                justifyContent: 'space-between',
               }}
             >
-              <div style={{ fontWeight: "bold" }}>Payment Terms</div>
+              <div style={{ fontWeight: 'bold' }}>Payment Terms</div>
               <div>{paymentTerms}</div>
             </div>
             <div
               style={{
-                padding: "4px 8px",
-                display: "flex",
-                justifyContent: "space-between",
+                padding: '4px 8px',
+                display: 'flex',
+                justifyContent: 'space-between',
               }}
             >
-              <div style={{ fontWeight: "bold" }}>Taxable</div>
+              <div style={{ fontWeight: 'bold' }}>Taxable</div>
               <div>{taxable}</div>
             </div>
           </div>
@@ -153,40 +153,40 @@ export default function PoDocument({
 
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "250px 1fr",
+            display: 'grid',
+            gridTemplateColumns: '250px 1fr',
           }}
         >
           <div
             style={{
-              border: "1px solid",
-              marginBottom: "20px",
-              display: "grid",
-              gridTemplateRows: "auto 1fr",
+              border: '1px solid',
+              marginBottom: '20px',
+              display: 'grid',
+              gridTemplateRows: 'auto 1fr',
             }}
           >
             <div
               style={{
-                fontWeight: "600",
+                fontWeight: '600',
                 ...styles.BgColorHeader,
-                padding: "4px 8px",
-                borderBottom: "1px solid",
+                padding: '4px 8px',
+                borderBottom: '1px solid',
               }}
             >
               Vendor
             </div>
             <div
               style={{
-                padding: "4px 8px",
-                fontWeight: "bold",
+                padding: '4px 8px',
+                fontWeight: 'bold',
               }}
             >
               {vendorName}
               <span
                 style={{
-                  display: "block",
-                  whiteSpace: "pre-wrap",
-                  fontWeight: "normal",
+                  display: 'block',
+                  whiteSpace: 'pre-wrap',
+                  fontWeight: 'normal',
                 }}
               >
                 {vendorPrimaryAddress.line1}
@@ -196,12 +196,12 @@ export default function PoDocument({
                 {vendorPrimaryAddress.line3}
               </span>
             </div>
-            <div style={{ padding: "4px 8px" }}>
+            <div style={{ padding: '4px 8px' }}>
               <u
                 style={{
-                  display: "block",
-                  margin: "5px 0px",
-                  fontWeight: "bold",
+                  display: 'block',
+                  margin: '5px 0px',
+                  fontWeight: 'bold',
                 }}
               >
                 <b>c/o:</b>
@@ -211,15 +211,15 @@ export default function PoDocument({
           </div>
           <div
             style={{
-              flex: "1",
-              marginLeft: "20px",
+              flex: '1',
+              marginLeft: '20px',
               ...styles.MarginBottomForTable,
             }}
           >
             <table
               style={{
-                border: "1px solid",
-                minHeight: "170px",
+                border: '1px solid',
+                minHeight: '170px',
               }}
             >
               <thead>
@@ -231,10 +231,10 @@ export default function PoDocument({
                 <tr>
                   <td
                     style={{
-                      width: "200px",
-                      verticalAlign: "top",
-                      padding: "5px 8px",
-                      whiteSpace: "pre-wrap",
+                      width: '200px',
+                      verticalAlign: 'top',
+                      padding: '5px 8px',
+                      whiteSpace: 'pre-wrap',
                     }}
                   >
                     {shippingAddress.line1}
@@ -243,15 +243,15 @@ export default function PoDocument({
                     <br />
                     {shippingAddress.line3}
                   </td>
-                  <td style={{ padding: "3px 0px", verticalAlign: "top" }}>
-                    <table style={{ border: "0", margin: 0 }}>
+                  <td style={{ padding: '3px 0px', verticalAlign: 'top' }}>
+                    <table style={{ border: '0', margin: 0 }}>
                       <tbody>
                         <tr>
                           <td style={styles.ShippingCss}>Method</td>
                           <td
                             style={{
                               ...styles.PaymentPadding,
-                              verticalAlign: "top",
+                              verticalAlign: 'top',
                             }}
                           >
                             {shippingMethod}
@@ -262,7 +262,7 @@ export default function PoDocument({
                           <td
                             style={{
                               ...styles.PaymentPadding,
-                              verticalAlign: "top",
+                              verticalAlign: 'top',
                             }}
                           >
                             {shippingAccountNumber}
@@ -273,7 +273,7 @@ export default function PoDocument({
                           <td
                             style={{
                               ...styles.PaymentPadding,
-                              verticalAlign: "top",
+                              verticalAlign: 'top',
                             }}
                           >
                             {incoterms}
@@ -286,14 +286,14 @@ export default function PoDocument({
                 <tr>
                   <td
                     colSpan={2}
-                    style={{ padding: 0, border: "0", verticalAlign: "top" }}
+                    style={{ padding: 0, border: '0', verticalAlign: 'top' }}
                   >
                     <p
                       style={{
                         margin: 0,
-                        padding: "5px 8px",
+                        padding: '5px 8px',
                         fontWeight: 600,
-                        textDecoration: "underline",
+                        textDecoration: 'underline',
                       }}
                     >
                       Shipping Notes
@@ -301,8 +301,8 @@ export default function PoDocument({
                     <p
                       style={{
                         margin: 0,
-                        padding: "0px 8px 5px",
-                        whiteSpace: "pre-wrap",
+                        padding: '0px 8px 5px',
+                        whiteSpace: 'pre-wrap',
                       }}
                     >
                       {shippingNotes}
@@ -319,8 +319,8 @@ export default function PoDocument({
           {/* -- BEGIN: Lines -- */}
           <table
             style={{
-              border: "1px solid black",
-              borderCollapse: "collapse",
+              border: '1px solid black',
+              borderCollapse: 'collapse',
             }}
           >
             <thead>
@@ -330,7 +330,7 @@ export default function PoDocument({
                 <th style={styles.RemovePaddingAndBorder}>Unit</th>
                 <th style={styles.UnitPriceCSS}>Qty</th>
                 <th style={styles.UnitPriceCSS}>Unit Price</th>
-                <th style={{ borderLeft: 0, textAlign: "right" }}>
+                <th style={{ borderLeft: 0, textAlign: 'right' }}>
                   Total Price
                 </th>
               </tr>
@@ -340,16 +340,16 @@ export default function PoDocument({
                 <>
                   <tr
                     style={{
-                      pageBreakInside: "avoid",
-                      borderTop: "1px solid black",
+                      pageBreakInside: 'avoid',
+                      borderTop: '1px solid black',
                     }}
                   >
                     <td
                       rowSpan={2}
                       style={{
                         borderRight: 0,
-                        fontWeight: "bold",
-                        verticalAlign: "top",
+                        fontWeight: 'bold',
+                        verticalAlign: 'top',
                       }}
                     >
                       {index + 1}
@@ -358,18 +358,18 @@ export default function PoDocument({
                       rowSpan={2}
                       style={{
                         borderRight: 0,
-                        verticalAlign: "top",
+                        verticalAlign: 'top',
                         borderLeft: 0,
-                        minWidth: "275px",
+                        minWidth: '275px',
                       }}
                     >
-                      <div style={{ fontWeight: "bold" }}>{line.itemName}</div>
+                      <div style={{ fontWeight: 'bold' }}>{line.itemName}</div>
                       <div
                         style={{
-                          fontWeight: "normal",
-                          color: "#575656",
-                          marginTop: "13px",
-                          whiteSpace: "pre-wrap",
+                          fontWeight: 'normal',
+                          color: '#575656',
+                          marginTop: '13px',
+                          whiteSpace: 'pre-wrap',
                         }}
                       >
                         {line.itemDescription}
@@ -385,7 +385,7 @@ export default function PoDocument({
                       colSpan={4}
                       style={{
                         padding: 0,
-                        verticalAlign: "top",
+                        verticalAlign: 'top',
                         border: 0,
                       }}
                     >
@@ -393,8 +393,8 @@ export default function PoDocument({
                         <table
                           id="line-additional-fields"
                           style={{
-                            border: "solid black",
-                            borderWidth: "1px 0px 0px 1px",
+                            border: 'solid black',
+                            borderWidth: '1px 0px 0px 1px',
                             margin: 0,
                           }}
                         >
@@ -404,10 +404,10 @@ export default function PoDocument({
                                 <td
                                   style={{
                                     border: 0,
-                                    padding: "5px 8px",
+                                    padding: '5px 8px',
                                     fontWeight: 600,
-                                    width: "50%",
-                                    verticalAlign: "top",
+                                    width: '50%',
+                                    verticalAlign: 'top',
                                   }}
                                 >
                                   {key}
@@ -415,9 +415,9 @@ export default function PoDocument({
                                 <td
                                   style={{
                                     border: 0,
-                                    padding: "5px 8px",
-                                    textAlign: "left",
-                                    verticalAlign: "top",
+                                    padding: '5px 8px',
+                                    textAlign: 'left',
+                                    verticalAlign: 'top',
                                   }}
                                 >
                                   {value}
@@ -438,25 +438,25 @@ export default function PoDocument({
           {/* -- BEGIN: Costs -- */}
           <div
             id="cost-aggregation-table"
-            style={{ display: "flex", justifyContent: "end" }}
+            style={{ display: 'flex', justifyContent: 'end' }}
           >
             <div style={{ flexGrow: 1 }} />
             <div>
               <table
                 style={{
-                  border: "1px solid black",
+                  border: '1px solid black',
                   borderTop: 0,
                   margin: 0,
-                  breakInside: "avoid",
+                  breakInside: 'avoid',
                 }}
               >
-                <tr style={{ backgroundColor: "#CCCCCC", fontWeight: "bold" }}>
+                <tr style={{ backgroundColor: '#CCCCCC', fontWeight: 'bold' }}>
                   <td
                     style={{
-                      width: "150px",
+                      width: '150px',
                       borderTop: 0,
                       borderBottom: 0,
-                      padding: "5px 8px",
+                      padding: '5px 8px',
                     }}
                   >
                     SUBTOTAL
@@ -465,9 +465,9 @@ export default function PoDocument({
                     style={{
                       borderTop: 0,
                       borderBottom: 0,
-                      padding: "5px 8px",
-                      width: "100px",
-                      textAlign: "right",
+                      padding: '5px 8px',
+                      width: '100px',
+                      textAlign: 'right',
                     }}
                   >
                     {subtotal}
@@ -479,7 +479,7 @@ export default function PoDocument({
                       style={{
                         borderTop: 0,
                         borderBottom: 0,
-                        padding: "5px 8px",
+                        padding: '5px 8px',
                       }}
                     >
                       {key}
@@ -488,32 +488,32 @@ export default function PoDocument({
                       style={{
                         borderTop: 0,
                         borderBottom: 0,
-                        padding: "5px 8px",
-                        textAlign: "right",
+                        padding: '5px 8px',
+                        textAlign: 'right',
                       }}
                     >
                       {value}
                     </td>
                   </tr>
                 ))}
-                <tr style={{ backgroundColor: "#C7E1F2" }}>
+                <tr style={{ backgroundColor: '#C7E1F2' }}>
                   <td
                     style={{
-                      fontWeight: "bold",
+                      fontWeight: 'bold',
                       border: 0,
-                      borderLeft: "1px solid black",
-                      padding: "5px 8px",
+                      borderLeft: '1px solid black',
+                      padding: '5px 8px',
                     }}
                   >
                     TOTAL
                   </td>
                   <td
                     style={{
-                      fontWeight: "bold",
+                      fontWeight: 'bold',
                       border: 0,
-                      borderLeft: "1px solid black",
-                      padding: "5px 8px",
-                      textAlign: "right",
+                      borderLeft: '1px solid black',
+                      padding: '5px 8px',
+                      textAlign: 'right',
                     }}
                   >
                     {total}
@@ -529,9 +529,9 @@ export default function PoDocument({
         {/* -- BEGIN: Ts & Cs -- */}
         <table
           style={{
-            pageBreakInside: "avoid",
+            pageBreakInside: 'avoid',
             ...styles.MarginBottomForTable,
-            minHeight: "170px",
+            minHeight: '170px',
           }}
         >
           <thead>
@@ -543,9 +543,9 @@ export default function PoDocument({
             <tr>
               <td
                 style={{
-                  verticalAlign: "top",
-                  textAlign: "justify",
-                  whiteSpace: "pre-wrap",
+                  verticalAlign: 'top',
+                  textAlign: 'justify',
+                  whiteSpace: 'pre-wrap',
                 }}
               >
                 {termsAndConditions}
@@ -557,5 +557,5 @@ export default function PoDocument({
       </div>
       <PoDocumentFooter number={number} issuedDate={issuedDate} />
     </>
-  );
+  )
 }
