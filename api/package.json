@@ -5,7 +5,7 @@
   "scripts": {
     "check": "tsc --noEmit",
     "dev": "concurrently \"npm:dev:*\"",
-    "dev:start": "tsx --env-file=.env --watch src/index.ts",
+    "dev:start": "tsx --watch --env-file=.env src/index.ts",
     "dev:check": "tsc --watch --noEmit",
     "gen": "npm run start -- --gen",
     "lint": "eslint src",
