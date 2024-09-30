@@ -1,26 +1,30 @@
 import "reflect-metadata";
-import fastify from "fastify";
-import { config } from "config";
 import process from "process";
-import { readFile } from "fs/promises";
+import { createServer as createRouter } from "@supplyside/api/router";
+import { writeFileSync } from "fs";
+import openapiTS, { astToString } from "openapi-typescript";
+import { container } from "./di";
+import { ConfigService } from "./ConfigService";
 
-const app = fastify();
+(async () => {
+  const { config } = container.resolve(ConfigService);
 
-app
-  .get("/", (request, reply) => reply.status(200).send("OK"))
-  .get("/health", async (request, reply) => {
-    try {
-      const meta = await readFile(`${__dirname}/build.json`, "utf-8");
+  const app = createRouter(config.NODE_ENV);
 
-      reply.send(meta);
-    } catch {
-      reply.status(500).send("Failed to read build.json");
-    }
-  })
-  .setNotFoundHandler((request, reply) => reply.code(404).send("Not Found"))
-  .listen({ port: config.PORT, host: "0.0.0.0" });
+  process.on("exit", () => app.close());
 
-process.on("exit", () => {
-  console.log("Exiting...");
-  app.close();
-});
+  await app.ready();
+
+  if (config.CI || config.NODE_ENV === "development") {
+    const json = JSON.stringify(app.swagger());
+    const ast = await openapiTS(json);
+    const ts = astToString(ast);
+    writeFileSync("./client.ts", ts);
+  }
+
+  if (process.argv.includes("--gen")) {
+    process.exit(0);
+  }
+
+  app.listen({ port: config.PORT, host: "0.0.0.0" });
+})();

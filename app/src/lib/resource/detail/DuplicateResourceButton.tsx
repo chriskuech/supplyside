@@ -1,7 +1,7 @@
 'use client'
 import { FileCopy } from '@mui/icons-material'
 import { IconButton, Tooltip } from '@mui/material'
-import { ResourceType } from '@prisma/client'
+import { ResourceType } from '@supplyside/model'
 import { cloneResource } from './actions'
 
 type Props = {

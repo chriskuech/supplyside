@@ -1,11 +1,12 @@
 'use client'
+
 import { GridRenderEditCellParams, useGridApiContext } from '@mui/x-data-grid'
 import { Box } from '@mui/material'
 import { useLayoutEffect, useRef } from 'react'
+import { SchemaField } from '@supplyside/model'
+import { selectResourceFieldValue } from '@supplyside/model'
 import Field from '../fields/controls/Field'
 import { Cell, Display, Row } from './types'
-import { SchemaField as SchemaField } from '@/domain/schema/entity'
-import { selectResourceFieldValue } from '@/domain/resource/extensions'
 
 type Props = {
   cellParams: GridRenderEditCellParams<Row, Cell, Display>
@@ -29,7 +30,7 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
         withoutDebounce
         ref={inputRef}
         field={field}
-        inputId={cellParams.row.id + field.id}
+        inputId={cellParams.row.id + field.fieldId}
         onChange={(value) =>
           apiRef.current.setEditCellValue({
             id: cellParams.id,
@@ -39,7 +40,7 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
           })
         }
         resourceId={cellParams.row.id}
-        value={selectResourceFieldValue(cellParams.row, { fieldId: field.id })}
+        value={selectResourceFieldValue(cellParams.row, field)}
         inline
       />
     </Box>

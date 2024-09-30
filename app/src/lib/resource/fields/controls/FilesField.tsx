@@ -9,8 +9,8 @@ import {
   Typography,
 } from '@mui/material'
 import { useRef } from 'react'
-import { uploadFiles } from './actions'
-import { File } from '@/domain/file/types'
+import { File } from '@supplyside/model'
+// import { uploadFiles } from '@/actions/files'
 
 type Props = {
   files: File[]
@@ -75,7 +75,7 @@ export default function FilesField({ files, isReadOnly, onChange }: Props) {
               formData.append('files', file)
             }
 
-            uploadFiles(formData).then((files) => files && onChange?.(files))
+            // uploadFiles(formData).then((files) => files && onChange?.(files))
           }}
           multiple
         />

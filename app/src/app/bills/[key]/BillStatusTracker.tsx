@@ -1,11 +1,11 @@
 import { match } from 'ts-pattern'
-import StatusTrackerView from '@/lib/ux/StatusTrackerView'
-import { selectResourceFieldValue } from '@/domain/resource/extensions'
-import { Resource } from '@/domain/resource/entity'
 import {
+  Resource,
   billStatusOptions,
   fields,
-} from '@/domain/schema/template/system-fields'
+  selectResourceFieldValue,
+} from '@supplyside/model'
+import StatusTrackerView from '@/lib/ux/StatusTrackerView'
 
 const happyPath: string[] = [
   billStatusOptions.draft.name,

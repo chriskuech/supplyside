@@ -1,12 +1,11 @@
 'use client'
-import { syncDataFromQuickBooks } from '../../actions'
-import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
+
+import { pullData } from '@/actions/quickBooks'
+import { useAsyncCallback } from '@/hooks/useAsyncCallback'
 import LoadingButton from '@/lib/ux/LoadingButton'
 
 export default function QuickBooksSyncButton() {
-  const [{ isLoading }, syncData] = useAsyncCallback(() =>
-    syncDataFromQuickBooks(),
-  )
+  const [{ isLoading }, syncData] = useAsyncCallback(() => pullData())
 
   return (
     <LoadingButton variant="outlined" onClick={syncData} isLoading={isLoading}>

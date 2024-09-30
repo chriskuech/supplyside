@@ -1,10 +1,14 @@
+import { fail } from 'assert'
 import { enqueueSnackbar } from 'notistack'
 import { isDeepEqual } from 'remeda'
-import { updateResource } from '../actions'
+import { mapValueToValueInput } from '@supplyside/model'
 import { Row } from './types'
-import { mapValueToValueInput } from '@/domain/resource/mappers'
+import { updateResource } from '@/actions/resource'
 
-export const handleProcessRowUpdate = async (newRow: Row, oldRow: Row) => {
+export const handleProcessRowUpdate = async (
+  newRow: Row,
+  oldRow: Row,
+): Promise<Row> => {
   const updatedFields = newRow.fields.filter((newField) => {
     const newValue = newField.value
     const oldValue = oldRow.fields.find(
@@ -13,18 +17,21 @@ export const handleProcessRowUpdate = async (newRow: Row, oldRow: Row) => {
 
     return !isDeepEqual(oldValue, newValue)
   })
+
   if (!updatedFields.length) {
     return newRow
   }
 
   try {
-    const resource = await updateResource({
-      resourceId: newRow.id,
-      fields: updatedFields.map(({ fieldId, fieldType, value }) => ({
+    const resource = await updateResource(
+      newRow.id,
+      updatedFields.map(({ fieldId, fieldType, value }) => ({
         fieldId,
-        value: mapValueToValueInput(fieldType, value),
+        valueInput: mapValueToValueInput(fieldType, value),
       })),
-    })
+    )
+
+    if (!resource) fail('Failed to update resource')
 
     return { ...resource, index: newRow.index }
   } catch {

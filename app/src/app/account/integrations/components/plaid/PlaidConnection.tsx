@@ -1,35 +1,30 @@
 import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import PlaidDisconnectLink from './PlaidDisconnectLink'
-import { Session } from '@/domain/session/entity'
-import { PlaidService } from '@/integrations/plaid'
-import { container } from '@/lib/di'
+import { readSession } from '@/session'
+import { readPlaid } from '@/client/plaid'
 
-type Props = {
-  session: Session
-}
+export default async function PlaidConnection() {
+  const { accountId } = await readSession()
+  const connection = await readPlaid(accountId)
 
-export default async function PlaidConnection({ session }: Props) {
-  const plaidService = container().resolve(PlaidService)
-
-  const accounts = await plaidService.getPlaidAccounts(session.accountId)
+  const connectedAt = connection?.connectedAt
+    ? new Date(connection.connectedAt)
+    : null
 
   return (
     <Stack gap={2}>
       <Stack>
         <Typography fontWeight="bold">Connected accounts</Typography>
-        {accounts?.map((account) => (
-          <Stack key={account.account_id} direction="row" alignItems="center">
-            <Typography>{account.name}</Typography>
+        {connection?.accounts.map(({ id, name }) => (
+          <Stack key={id} direction="row" alignItems="center">
+            <Typography>{name}</Typography>
             <CheckIcon color="success" />
           </Stack>
         ))}
       </Stack>
       <Typography variant="caption">
-        Connected at:{' '}
-        <strong>
-          {session.account.plaidConnectedAt?.toLocaleDateString()}
-        </strong>
+        Connected at: <strong>{connectedAt?.toLocaleDateString()}</strong>
         . <PlaidDisconnectLink />
       </Typography>
     </Stack>

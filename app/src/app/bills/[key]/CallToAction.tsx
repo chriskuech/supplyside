@@ -1,20 +1,21 @@
 'use client'
+
 import { ArrowRight } from '@mui/icons-material'
 import { Button, CircularProgress, Tooltip, Typography } from '@mui/material'
-import { approveBill as approveBillAction } from './actions'
-import MatchControl from './cta/MatchControl'
-import { selectResourceFieldValue } from '@/domain/resource/extensions'
-import { Resource } from '@/domain/resource/entity'
 import {
+  Resource,
+  Schema,
+  User,
   billStatusOptions,
   fields,
-} from '@/domain/schema/template/system-fields'
-import { transitionStatus } from '@/lib/resource/actions'
-import { Schema } from '@/domain/schema/entity'
-import { User } from '@/domain/user/entity'
-import { isMissingRequiredFields } from '@/domain/resource/mappers'
+  isMissingRequiredFields,
+  selectResourceFieldValue,
+} from '@supplyside/model'
+import { approveBill as approveBillAction } from './actions'
+import MatchControl from './cta/MatchControl'
 import LoadingButton from '@/lib/ux/LoadingButton'
-import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
+import { useAsyncCallback } from '@/hooks/useAsyncCallback'
+import { transitionStatus } from '@/actions/resource'
 
 type Props = {
   self: User

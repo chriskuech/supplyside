@@ -1,12 +1,15 @@
+import { Alert } from '@mui/material'
 import BillsInboxControl from './BillsInboxControl'
-import ConfigService from '@/integrations/ConfigService'
-import { container } from '@/lib/di'
+import { readAccount } from '@/client/account'
+import { config } from '@/config'
 import ListPage from '@/lib/resource/ListPage'
-import { requireSessionWithRedirect } from '@/lib/session/actions'
+import { readSession } from '@/session'
 
 export default async function Bills() {
-  const { account } = await requireSessionWithRedirect('/bills')
-  const { config } = container().resolve(ConfigService)
+  const { accountId } = await readSession()
+  const account = await readAccount(accountId)
+
+  if (!account) return <Alert severity="error">Failed to load</Alert>
 
   return (
     <ListPage
@@ -15,7 +18,7 @@ export default async function Bills() {
       callToActions={[
         <BillsInboxControl
           key={BillsInboxControl.name}
-          address={`${account.key}@${config.BILLS_EMAIL_DOMAIN}`}
+          address={`${account.key}@${config().BILLS_EMAIL_DOMAIN}`}
         />,
       ]}
       path="/bills"

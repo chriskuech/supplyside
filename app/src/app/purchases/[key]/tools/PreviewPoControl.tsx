@@ -1,7 +1,7 @@
 'use client'
 import { Visibility } from '@mui/icons-material'
 import { Tooltip, IconButton } from '@mui/material'
-import { File } from '@/domain/file/types'
+import { File } from '@supplyside/model'
 
 type Props = {
   file: File

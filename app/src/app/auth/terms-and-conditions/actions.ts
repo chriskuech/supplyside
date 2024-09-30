@@ -1,15 +1,14 @@
 'use server'
+
 import { RedirectType, redirect } from 'next/navigation'
-import { readSession } from '@/lib/session/actions'
-import { UserService } from '@/domain/user'
-import { container } from '@/lib/di'
+import { updateUser } from '@/client/user'
+import { readSession } from '@/session'
 
 export const acceptTermsAndConditions = async () => {
   const { accountId, userId } = await readSession()
-  const userService = container().resolve(UserService)
 
-  await userService.update(accountId, userId, {
-    tsAndCsSignedAt: new Date(),
+  await updateUser(accountId, userId, {
+    tsAndCsSignedAt: new Date().toISOString(),
   })
 
   redirect('/', RedirectType.replace)

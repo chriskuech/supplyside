@@ -4,9 +4,7 @@ import { match } from 'ts-pattern'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { SchemaField } from '@/domain/schema/entity'
-import { Value } from '@/domain/resource/entity'
-import { emptyValue } from '@/domain/resource/entity'
+import { SchemaField, Value, emptyValue } from '@supplyside/model'
 import AddressField from '@/lib/resource/fields/controls/AddressField'
 import ContactField from '@/lib/resource/fields/controls/ContactField'
 
@@ -103,10 +101,10 @@ export default function DefaultValueControl({
             onClear: () => onChange({ ...emptyValue, date: null }),
           },
         }}
-        value={defaultValue?.date && dayjs.utc(defaultValue.date)}
+        value={defaultValue?.date ? dayjs.utc(defaultValue.date) : null}
         disabled={isDisabled}
         onChange={(value) =>
-          onChange({ ...emptyValue, date: value?.toDate() ?? null })
+          onChange({ ...emptyValue, date: value?.toISOString() ?? null })
         }
       />
     ))

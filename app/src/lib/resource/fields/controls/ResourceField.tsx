@@ -14,21 +14,21 @@ import {
 import { Clear, Link as LinkIcon, ViewSidebar } from '@mui/icons-material'
 import { ForwardedRef, forwardRef, useEffect, useMemo, useState } from 'react'
 import { debounce } from 'remeda'
-import { ResourceType } from '@prisma/client'
 import NextLink from 'next/link'
 import { P, match } from 'ts-pattern'
 import {
-  createResource,
-  findResources as findResourcesRaw,
-} from '../../actions'
+  ResourceType,
+  ValueResource,
+  fields,
+  mapResourceToValueResource,
+  selectSchemaFieldUnsafe,
+} from '@supplyside/model'
 import ResourceForm from '../../ResourceForm'
 import useResource from '../../useResource'
-import { ValueResource } from '@/domain/resource/entity'
-import { useDisclosure } from '@/lib/hooks/useDisclosure'
-import { mapResourceToValueResource } from '@/domain/resource/mappers'
-import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
-import { fields } from '@/domain/schema/template/system-fields'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import useSchema from '@/lib/schema/useSchema'
+import { createResource } from '@/actions/resource'
+import { findResourcesByNameOrPoNumber } from '@/actions/resource'
 
 type Props = {
   resource: ValueResource | null
@@ -48,21 +48,19 @@ function ResourceField(
   const schema = useSchema(resourceType)
 
   const handleCreate = (nameOrNumber: string) =>
-    createResource({
-      type: resourceType,
-      fields: [
-        {
-          fieldId: selectSchemaFieldUnsafe(
-            schema ?? fail('Schema not found'),
-            match(resourceType)
-              .with(P.union('Customer', 'Item', 'Vendor'), () => fields.name)
-              .with(P.union('Bill', 'Line', 'Purchase'), () => fields.poNumber)
-              .exhaustive(),
-          ).id,
-          value: { string: nameOrNumber },
-        },
-      ],
-    }).then((resource) => {
+    createResource(resourceType, [
+      {
+        fieldId: selectSchemaFieldUnsafe(
+          schema ?? fail('Schema not found'),
+          match(resourceType)
+            .with(P.union('Customer', 'Item', 'Vendor'), () => fields.name)
+            .with(P.union('Bill', 'Line', 'Purchase'), () => fields.poNumber)
+            .exhaustive(),
+        ).fieldId,
+        valueInput: { string: nameOrNumber },
+      },
+    ]).then((resource) => {
+      if (!resource) return
       onChange(mapResourceToValueResource(resource))
       open()
     })
@@ -162,7 +160,7 @@ const BaseEditableResourceField = (
 
   const findResources = useMemo(
     () =>
-      debounce(findResourcesRaw, {
+      debounce(findResourcesByNameOrPoNumber, {
         waitMs: 500,
         timing: 'both',
       }).call,
@@ -170,7 +168,9 @@ const BaseEditableResourceField = (
   )
 
   useEffect(() => {
-    findResources({ resourceType, input }).then(setOptions)
+    findResources(resourceType, { input }).then((options) =>
+      setOptions(options ?? []),
+    )
   }, [findResources, input, resourceType])
 
   return (

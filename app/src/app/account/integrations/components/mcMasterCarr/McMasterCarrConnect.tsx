@@ -1,15 +1,15 @@
 'use client'
 import { Stack, TextField } from '@mui/material'
 import { useState } from 'react'
-import { createMcMasterCarrConnection } from '../../actions'
 import LoadingButton from '@/lib/ux/LoadingButton'
-import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
+import { useAsyncCallback } from '@/hooks/useAsyncCallback'
+import { connect } from '@/actions/mcMaster'
 
 export default function MacMasterConnect() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [{ isLoading }, createConnection] = useAsyncCallback(() =>
-    createMcMasterCarrConnection(username, password),
+    connect(username, password),
   )
 
   return (

@@ -1,11 +1,10 @@
 'use server'
+
 import { isTruthy } from 'remeda'
-import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { readSession } from '@/lib/session/actions'
-import { BlobService } from '@/domain/blob/BlobService'
-import { UserService } from '@/domain/user'
-import { container } from '@/lib/di'
+import { createBlob } from '@/client/blob'
+import { updateUser } from '@/client/user'
+import { readSession } from '@/session'
 
 const schema = z.object({
   firstName: z.string().min(1).optional(),
@@ -23,13 +22,7 @@ export type Errors = z.typeToFlattenedError<Dto>['fieldErrors']
 export const handleSaveSettings = async (
   formData: FormData,
 ): Promise<Errors | undefined> => {
-  const blobService = container().resolve(BlobService)
-  const userService = container().resolve(UserService)
-
-  const {
-    // use the non-impersonated accountId and userId
-    user: { accountId, id: userId },
-  } = await readSession()
+  const { accountId, userId } = await readSession()
 
   const result = schema.safeParse(Object.fromEntries(formData.entries()))
 
@@ -40,7 +33,7 @@ export const handleSaveSettings = async (
   const { firstName, lastName, file } = result.data
 
   const imageBlobId = file
-    ? await blobService.createBlob({ accountId, file }).then(({ id }) => id)
+    ? await createBlob({ accountId, file }).then(({ id }) => id)
     : undefined
 
   const data = { firstName, lastName, imageBlobId }
@@ -49,7 +42,5 @@ export const handleSaveSettings = async (
     return
   }
 
-  await userService.update(accountId, userId, data)
-
-  revalidatePath('')
+  await updateUser(accountId, userId, data)
 }

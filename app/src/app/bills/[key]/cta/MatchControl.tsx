@@ -1,4 +1,5 @@
 'use client'
+
 import {
   Box,
   Button,
@@ -11,18 +12,20 @@ import {
 } from '@mui/material'
 import { AddLink, Link } from '@mui/icons-material'
 import { isTruthy } from 'remeda'
-import { useDisclosure } from '@/lib/hooks/useDisclosure'
-import { selectResourceFieldValue } from '@/domain/resource/extensions'
+import {
+  Resource,
+  Schema,
+  fields,
+  selectResourceFieldValue,
+  selectSchemaFieldUnsafe,
+} from '@supplyside/model'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import { ResourceTable } from '@/lib/resource/table'
-import { Schema } from '@/domain/schema/entity'
-import { fields } from '@/domain/schema/template/system-fields'
-import { Resource } from '@/domain/resource/entity'
-import { updateResourceField } from '@/lib/resource/actions'
 import { useResources } from '@/lib/resource/useResources'
-import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
 import useSchema from '@/lib/schema/useSchema'
 import { useConfirmation } from '@/lib/confirmation'
-import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
+import { useAsyncCallback } from '@/hooks/useAsyncCallback'
+import { updateResourceField } from '@/actions/resource'
 
 type Props = {
   schema: Schema
@@ -33,10 +36,9 @@ export default function MatchControl({ schema, resource }: Props) {
   const { open, isOpen, close } = useDisclosure()
   const [{ isLoading }, callback] = useAsyncCallback(
     async (resourceId: string) =>
-      updateResourceField({
-        resourceId: resource.id,
-        fieldId: selectSchemaFieldUnsafe(schema, fields.purchase).id,
-        value: { resourceId },
+      updateResourceField(resource.id, {
+        fieldId: selectSchemaFieldUnsafe(schema, fields.purchase).fieldId,
+        valueInput: { resourceId },
       }).then(() => close()),
   )
   const confirm = useConfirmation()
@@ -68,10 +70,10 @@ export default function MatchControl({ schema, resource }: Props) {
 
                 if (!isConfirmed) return
 
-                await updateResourceField({
-                  resourceId: resource.id,
-                  fieldId: selectSchemaFieldUnsafe(schema, fields.purchase).id,
-                  value: { resourceId: null },
+                await updateResourceField(resource.id, {
+                  fieldId: selectSchemaFieldUnsafe(schema, fields.purchase)
+                    .fieldId,
+                  valueInput: { resourceId: null },
                 })
               }
             : open

@@ -1,0 +1,12 @@
+{
+  "name": "@supplyside/model",
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "remeda": "^2.14.0",
+    "ts-pattern": "^5.4.0",
+    "zod": "^3.23.8"
+  }
+}

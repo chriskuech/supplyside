@@ -20,8 +20,8 @@ import {
   Settings,
 } from '@mui/icons-material'
 import { useState } from 'react'
+import { User } from '@supplyside/model'
 import { useThemePreference } from '../DynamicThemeProvider'
-import { User } from '@/domain/user/entity'
 
 type Props = {
   self: User

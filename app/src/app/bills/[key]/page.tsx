@@ -2,36 +2,32 @@ import { fail } from 'assert'
 import { Box, Container, Stack } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
+import {
+  billStatusOptions,
+  fields,
+  selectResourceFieldValue,
+  selectSchemaField,
+} from '@supplyside/model'
 import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
 import PurchaseLink from './tools/PurchaseLink'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
-import {
-  billStatusOptions,
-  fields,
-} from '@/domain/schema/template/system-fields'
-import { selectResourceFieldValue } from '@/domain/resource/extensions'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
-import { selectSchemaField } from '@/domain/schema/extensions'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
-import { QuickBooksService } from '@/integrations/quickBooks/QuickBooksService'
-import { container } from '@/lib/di'
+import { getBillUrl } from '@/quickBooks'
 
 export default async function BillsDetail({
   params: { key },
 }: {
   params: { key: string }
 }) {
-  const quickBooksService = container().resolve(QuickBooksService)
-
-  const { session, resource, schema, lineSchema } = await readDetailPageModel(
+  const { resource, schema, lineSchema, user } = await readDetailPageModel(
     'Bill',
     key,
-    `/bills/${key}`,
   )
 
   const status =
@@ -60,7 +56,7 @@ export default async function BillsDetail({
   )?.string
 
   const quickBooksAppUrl = quickBooksBillId
-    ? quickBooksService.getBillUrl(quickBooksBillId)
+    ? getBillUrl(quickBooksBillId)
     : undefined
 
   return (
@@ -141,7 +137,7 @@ export default async function BillsDetail({
                       ?.option?.id
                   }
                   schema={schema}
-                  self={session.user}
+                  self={user}
                   resource={resource}
                 />
               </Stack>

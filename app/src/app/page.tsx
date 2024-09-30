@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
-import { requireSessionWithRedirect } from '@/lib/session/actions'
 import { systemAccountId } from '@/lib/const'
+import { readSession } from '@/session'
 
 export default async function Home() {
-  const { accountId } = await requireSessionWithRedirect('/')
+  const { accountId } = await readSession()
 
   redirect(accountId === systemAccountId ? '/accounts' : '/purchases')
 }

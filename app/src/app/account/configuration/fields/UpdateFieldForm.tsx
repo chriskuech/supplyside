@@ -12,20 +12,33 @@ import {
   TextField,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
-import { FieldType } from '@prisma/client'
 import { isTruthy } from 'remeda'
+import {
+  SchemaField,
+  Value,
+  emptyValue,
+  fieldTypes,
+  findTemplateField,
+  mapValueToValueInput,
+} from '@supplyside/model'
 import OptionsControl from './OptionsControl'
 import ResourceTypeSelect from './ResourceTypeSelect'
 import DefaultValueControl from './DefaultValueControl'
-import { OptionPatch, UpdateFieldDto } from '@/domain/schema/SchemaFieldService'
-import { findTemplateField } from '@/domain/schema/template/system-fields'
-import { Value, emptyValue } from '@/domain/resource/entity'
-import { SchemaField } from '@/domain/schema/entity'
-import { mapValueToValueInput } from '@/domain/resource/mappers'
+import { UpdateFieldData } from '@/client/fields'
+
+// TODO: consolidate
+export type OptionPatch = {
+  id: string // patch ID -- must be `id` to work with mui
+  name: string
+} & (
+  | { op: 'add' }
+  | { op: 'update'; optionId: string }
+  | { op: 'remove'; optionId: string }
+)
 
 type Props = {
   field: SchemaField
-  onSubmit: (dto: UpdateFieldDto) => void
+  onSubmit: (dto: UpdateFieldData) => void
   onCancel: () => void
 }
 
@@ -83,7 +96,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
             value={field.type}
             disabled
           >
-            {Object.values(FieldType).map((ft) => (
+            {fieldTypes.map((ft) => (
               <MenuItem value={ft} key={ft}>
                 {ft}
               </MenuItem>
@@ -144,7 +157,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         </FormControl>
       )}
 
-      {field.type === FieldType.Date && (
+      {field.type === 'Date' && (
         <FormControl fullWidth>
           <FormControlLabel
             label="Default to Today"
@@ -180,7 +193,8 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
           disabled={!isValid}
           onClick={() =>
             onSubmit({
-              id: field.id,
+              resourceType: field.resourceType,
+              // id: field.fieldId,
               name,
               description: description?.trim() || null,
               options,

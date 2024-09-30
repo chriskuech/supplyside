@@ -1,22 +1,15 @@
-import { Stack, Typography, Box } from '@mui/material'
+import { Stack, Typography, Box, Alert } from '@mui/material'
+import { Resource, Schema, ValueInput, fields } from '@supplyside/model'
 import { ResourceTable } from '../table'
 import ItemizedCostLines from '../costs/ItemizedCostLines'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
-import { Resource } from '@/domain/resource/entity'
-import { Where } from '@/domain/resource/json-logic/types'
-import {
-  ResourceFieldInput,
-  ResourceService,
-} from '@/domain/resource/ResourceService'
-import { Schema } from '@/domain/schema/entity'
-import { fields } from '@/domain/schema/template/system-fields'
-import { SchemaService } from '@/domain/schema/SchemaService'
-import { container } from '@/lib/di'
+import { JsonLogic, readResources } from '@/client/resource'
+import { readSchema } from '@/client/schema'
 
 type Props = {
   resource: Resource
-  lineQuery: Where
-  newLineInitialData: ResourceFieldInput[]
+  lineQuery: JsonLogic
+  newLineInitialData: { fieldId: string; valueInput: ValueInput }[]
   isReadOnly?: boolean
 }
 
@@ -26,20 +19,19 @@ export default async function LinesAndCosts({
   newLineInitialData,
   isReadOnly,
 }: Props) {
-  const schemaService = container().resolve(SchemaService)
-
   const [lines, lineSchema] = await Promise.all([
-    container().resolve(ResourceService).readResources({
-      accountId: resource.accountId,
-      type: 'Line',
+    readResources(resource.accountId, 'Line', {
       where: lineQuery,
     }),
-    schemaService.readSchema(resource.accountId, 'Line'),
+    readSchema(resource.accountId, 'Line'),
   ])
+
+  if (!lines || !lineSchema)
+    return <Alert severity="error">Failed to load</Alert>
 
   const strippedSchema: Schema = {
     ...lineSchema,
-    allFields: lineSchema.allFields.filter(
+    fields: lineSchema.fields.filter(
       ({ templateId }) =>
         !templateId ||
         ![fields.purchase.templateId, fields.bill.templateId].includes(
@@ -55,13 +47,16 @@ export default async function LinesAndCosts({
           Lines
         </Typography>
         {!isReadOnly && (
-          <CreateResourceButton type="Line" fields={newLineInitialData} />
+          <CreateResourceButton
+            resourceType="Line"
+            fields={newLineInitialData}
+          />
         )}
       </Stack>
       <Stack>
         <ResourceTable
           schema={strippedSchema}
-          resources={lines}
+          resources={lines ?? []}
           isEditable={!isReadOnly}
           sx={{
             borderBottomRightRadius: 0,

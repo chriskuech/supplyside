@@ -1,9 +1,10 @@
 'use client'
+
 import { Autocomplete, TextField } from '@mui/material'
 import { ForwardedRef, forwardRef, useEffect, useState } from 'react'
 import { enqueueSnackbar } from 'notistack'
-import { readUsersAction } from './actions'
-import { User } from '@/domain/user/entity'
+import { User } from '@supplyside/model'
+import { readUsers } from '@/actions/user'
 
 type Props = {
   inputId: string
@@ -19,8 +20,8 @@ function UserField(
   const [users, setUsers] = useState<User[]>([])
 
   useEffect(() => {
-    readUsersAction()
-      .then(setUsers)
+    readUsers()
+      .then((users) => setUsers(users ?? []))
       .catch(() =>
         enqueueSnackbar('Failed to load users', { variant: 'error' }),
       )

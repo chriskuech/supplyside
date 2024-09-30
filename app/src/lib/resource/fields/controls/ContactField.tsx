@@ -12,9 +12,9 @@ import {
   Typography,
 } from '@mui/material'
 import { FC, useEffect, useState } from 'react'
+import { Contact } from '@supplyside/model'
 import ContactCard from '../views/ContactCard'
-import { useDisclosure } from '@/lib/hooks/useDisclosure'
-import { Contact } from '@/domain/resource/entity'
+import { useDisclosure } from '@/hooks/useDisclosure'
 
 export type ContactFieldProps = {
   contact: Contact | null

@@ -1,33 +1,20 @@
 'use server'
-import { QuickBooksExpectedError } from '@/integrations/quickBooks/errors'
-import {
-  billStatusOptions,
-  fields,
-} from '@/domain/schema/template/system-fields'
-import { transitionStatus } from '@/lib/resource/actions'
-import { readSession } from '@/lib/session/actions'
-import { QuickBooksService } from '@/integrations/quickBooks/QuickBooksService'
-import { container } from '@/lib/di'
+
+import { billStatusOptions, fields } from '@supplyside/model'
+import { pushBill } from '@/client/quickBooks'
+import { readSession } from '@/session'
+import { transitionStatus } from '@/actions/resource'
 
 export const approveBill = async (billResourceId: string) => {
-  const quickBooksService = container().resolve(QuickBooksService)
+  const { accountId } = await readSession()
 
-  //TODO: make actions middleware to avoid repeting same logic on all actions
-  try {
-    const { accountId } = await readSession()
+  const result = await pushBill(accountId, billResourceId)
 
-    await quickBooksService.pushBill(accountId, billResourceId)
+  if (!result) return
 
-    await transitionStatus(
-      billResourceId,
-      fields.billStatus,
-      billStatusOptions.approved,
-    )
-  } catch (e) {
-    if (e instanceof QuickBooksExpectedError) {
-      return { error: true, message: e.message }
-    }
-
-    throw e
-  }
+  await transitionStatus(
+    billResourceId,
+    fields.billStatus,
+    billStatusOptions.approved,
+  )
 }

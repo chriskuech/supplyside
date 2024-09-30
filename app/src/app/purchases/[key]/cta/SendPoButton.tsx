@@ -1,10 +1,10 @@
 'use client'
 import { Send } from '@mui/icons-material'
 import React from 'react'
-import { sendPo as sendPoAction } from '../actions'
 import LoadingButton from '@/lib/ux/LoadingButton'
-import { useAsyncCallback } from '@/lib/hooks/useAsyncCallback'
+import { useAsyncCallback } from '@/hooks/useAsyncCallback'
 import { useConfirmation } from '@/lib/confirmation'
+import { sendPo as sendPoAction } from '@/actions/purchase'
 
 type Props = {
   resourceId: string

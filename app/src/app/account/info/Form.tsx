@@ -1,4 +1,5 @@
 'use client'
+
 import {
   Avatar,
   Box,
@@ -10,8 +11,8 @@ import {
 import { CloudUpload } from '@mui/icons-material'
 import { useState } from 'react'
 import { Errors, handleSaveSettings } from './actions'
-import { Account } from '@/domain/account/entity'
-import { useImagePreview } from '@/lib/hooks/useImagePreview'
+import { useImagePreview } from '@/hooks/useImagePreview'
+import { Account } from '@/client/account'
 
 type Props = {
   account: Account

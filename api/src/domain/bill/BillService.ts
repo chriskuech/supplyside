@@ -1,0 +1,117 @@
+import { inject, injectable } from "inversify";
+import { container } from "@supplyside/api/di";
+import { FileService } from "@supplyside/api/domain/file";
+import { ResourceService } from "@supplyside/api/domain/resource/ResourceService";
+import { SchemaService } from "@supplyside/api/domain/schema/SchemaService";
+import SmtpService from "@supplyside/api/integrations/SmtpService";
+import { Resource, fields, selectSchemaFieldUnsafe } from "@supplyside/model";
+import assert from "assert";
+import { Message } from "postmark";
+import { AccountService } from "../account/AccountService";
+
+type FileParam = {
+  content: string;
+  encoding: BufferEncoding;
+  contentType: string;
+  fileName: string;
+};
+
+type Params = {
+  accountId: string;
+  files: FileParam[];
+};
+
+const createBill = async (params: Params): Promise<Resource> => {
+  const fileService = container.resolve(FileService);
+  const resourceService = container.resolve(ResourceService);
+  const schemaService = container.resolve(SchemaService);
+
+  const billSchema = await schemaService.readSchema(params.accountId, "Bill");
+
+  const fileIds = await Promise.all(
+    params.files.map(async (file) => {
+      const { id: fileId } = await fileService.createFromBuffer(
+        params.accountId,
+        {
+          name: file.fileName,
+          buffer: Buffer.from(file.content, file.encoding),
+          contentType: file.contentType,
+        }
+      );
+
+      return fileId;
+    })
+  );
+
+  console.log("Creating Bill", fileIds);
+
+  const bill = await resourceService.createResource({
+    accountId: params.accountId,
+    type: "Bill",
+    fields: [
+      {
+        fieldId: selectSchemaFieldUnsafe(billSchema, fields.billFiles).fieldId,
+        valueInput: { fileIds },
+      },
+    ],
+  });
+
+  return bill;
+};
+
+@injectable()
+export class BillService {
+  constructor(
+    @inject(AccountService) private readonly accountService: AccountService,
+    @inject(SmtpService) private readonly smtpService: SmtpService
+  ) {}
+
+  async handleMessage(message: Message): Promise<void> {
+    // for some reason this is (sometimes?) wrapped in quotes
+    const accountKey = message.To?.split("@").shift()?.replace(/^"/, "");
+
+    assert(accountKey, "Account key not found in To: " + message.To);
+
+    const account = await this.accountService.readByKey(accountKey);
+
+    if (!account) {
+      await this.smtpService.sendEmail({
+        From: "SupplySide <bot@supplyside.io>",
+        To: message.From,
+        Subject: "We couldn't process your email",
+        Attachments: message.Attachments,
+        TextBody: `The account with key ${accountKey} does not exist.`,
+      });
+    }
+
+    const attachments: FileParam[] | undefined = message.Attachments?.map(
+      (attachment) => ({
+        content: attachment.Content,
+        encoding: "base64",
+        contentType: attachment.ContentType,
+        fileName: attachment.Name,
+      })
+    );
+
+    const email: FileParam | null = message.HtmlBody
+      ? {
+          content: message.HtmlBody,
+          encoding: "utf-8",
+          contentType: "text/html",
+          fileName: "email.html",
+        }
+      : message.TextBody
+      ? {
+          content: message.TextBody,
+          encoding: "utf-8",
+          contentType: "text/plain",
+          fileName: "email.txt",
+        }
+      : null;
+
+    await createBill({
+      accountId: account.id,
+      files: [...(email ? [email] : []), ...(attachments ?? [])],
+    });
+  }
+}

@@ -1,10 +1,14 @@
-import { Box, Link, Stack, Typography } from '@mui/material'
+import { Alert, Box, Link, Stack, Typography } from '@mui/material'
 import Form from './Form'
 import { privacyPolicyUrl, termsOfServiceUrl } from '@/lib/const'
-import { requireSessionWithRedirect } from '@/lib/session/actions'
+import { readSession } from '@/session'
+import { readSelf } from '@/client/user'
 
 export default async function SettingsPage() {
-  const { user } = await requireSessionWithRedirect('/settings')
+  const { userId } = await readSession()
+  const user = await readSelf(userId)
+
+  if (!user) return <Alert severity="error">Failed to load</Alert>
 
   return (
     <Stack

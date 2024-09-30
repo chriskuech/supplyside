@@ -2,35 +2,32 @@ import { fail } from 'assert'
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
+import {
+  fields,
+  isMissingRequiredFields,
+  purchaseStatusOptions,
+  resources,
+  selectResourceFieldValue,
+  selectSchemaField,
+} from '@supplyside/model'
 import PurchaseStatusTracker from './PurchaseStatusTracker'
 import ApproveButton from './cta/ApproveButton'
 import SkipButton from './cta/SkipButton'
 import StatusTransitionButton from './cta/StatusTransitionButton'
 import SendPoButton from './cta/SendPoButton'
-import { findPurchaseBills } from './actions'
 import TrackingControl from './tools/TrackingControl'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
 import BillLink from './tools/BillLink'
 import PreviewPoControl from './tools/PreviewPoControl'
 import DownloadPoControl from './tools/DownloadPoControl'
-import {
-  fields,
-  purchaseStatusOptions,
-} from '@/domain/schema/template/system-fields'
-import { selectResourceFieldValue } from '@/domain/resource/extensions'
-import { emptyValue } from '@/domain/resource/entity'
 import PreviewDraftPoButton from '@/app/purchases/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
-import { isMissingRequiredFields } from '@/domain/resource/mappers'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
-import { selectSchemaField } from '@/domain/schema/extensions'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
-import { resources } from '@/domain/schema/template/system-resources'
-import { McMasterService } from '@/integrations/mcMasterCarr'
-import { ResourceService } from '@/domain/resource/ResourceService'
-import { container } from '@/lib/di'
+import { createPunchOutServiceRequest } from '@/client/mcmaster'
+import { findBacklinks, readResources } from '@/client/resource'
 
 export default async function PurchaseDetail({
   params: { key },
@@ -38,40 +35,28 @@ export default async function PurchaseDetail({
   params: { key: string }
 }) {
   const {
-    session: { user, accountId },
+    session: { accountId },
     resource,
     schema,
     lineSchema,
-  } = await readDetailPageModel('Purchase', key, `/purchases/${key}`)
-
-  const mcMasterCarrService = container().resolve(McMasterService)
-  const resourceService = container().resolve(ResourceService)
+    user,
+  } = await readDetailPageModel('Purchase', key)
 
   const vendorTemplateId = selectResourceFieldValue(resource, fields.vendor)
     ?.resource?.templateId
   const isVendorMcMasterCarr =
     vendorTemplateId === resources().mcMasterCarrVendor.templateId
-  const purchaseLines = await resourceService.readResources({
-    accountId: resource.accountId,
-    type: 'Line',
+  const purchaseLines = await readResources(resource.accountId, 'Line', {
     where: {
       '==': [{ var: fields.purchase.name }, resource.id],
     },
   })
-  const purchaseHasLines = purchaseLines.length > 0
+  const purchaseHasLines = !!purchaseLines?.length
   if (isVendorMcMasterCarr && !purchaseHasLines) {
-    let punchoutSessionUrl = selectResourceFieldValue(
-      resource,
-      fields.punchoutSessionUrl,
-    )?.string
-
-    if (!punchoutSessionUrl) {
-      punchoutSessionUrl =
-        await mcMasterCarrService.createPunchOutServiceRequest(
-          accountId,
-          resource.id,
-        )
-    }
+    const punchoutSessionUrl =
+      selectResourceFieldValue(resource, fields.punchoutSessionUrl)?.string ??
+      (await createPunchOutServiceRequest(accountId, resource.id))?.url ??
+      fail('Failed to create punchout session')
 
     return (
       <iframe
@@ -87,7 +72,7 @@ export default async function PurchaseDetail({
     )
   }
 
-  const orderBills = (await findPurchaseBills(resource.id)) ?? []
+  const orderBills = (await findBacklinks(accountId, 'Bill', resource.id)) ?? []
 
   const status =
     selectResourceFieldValue(resource, fields.purchaseStatus)?.option ??
@@ -124,10 +109,7 @@ export default async function PurchaseDetail({
             selectSchemaField(schema, fields.trackingNumber) ??
             fail('Field not found')
           }
-          value={
-            selectResourceFieldValue(resource, fields.trackingNumber) ??
-            emptyValue
-          }
+          value={selectResourceFieldValue(resource, fields.trackingNumber)}
         />,
         ...(poFile ? [<PreviewPoControl key={poFile.id} file={poFile} />] : []),
         ...(poFile
@@ -151,9 +133,7 @@ export default async function PurchaseDetail({
             selectSchemaField(schema, fields.assignee) ??
             fail('Field not found')
           }
-          value={
-            selectResourceFieldValue(resource, fields.assignee) ?? emptyValue
-          }
+          value={selectResourceFieldValue(resource, fields.assignee)}
         />,
         ...(!isDraft
           ? [<EditControl key={EditControl.name} resourceId={resource.id} />]

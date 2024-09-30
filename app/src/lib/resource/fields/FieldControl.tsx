@@ -1,9 +1,8 @@
 'use client'
 import { useCallback } from 'react'
-import { updateResourceField } from '../actions'
+import { Value, mapValueToValueInput } from '@supplyside/model'
 import Field, { Props as FieldProps } from './controls/Field'
-import { mapValueToValueInput } from '@/domain/resource/mappers'
-import { Value } from '@/domain/resource/entity'
+import { updateResourceField } from '@/actions/resource'
 
 export default function FieldControl({
   resourceId,
@@ -12,12 +11,11 @@ export default function FieldControl({
 }: Omit<FieldProps, 'onChange'>) {
   const handleChange = useCallback(
     (value: Value) =>
-      updateResourceField({
-        resourceId,
-        fieldId: field.id,
-        value: mapValueToValueInput(field.type, value),
+      updateResourceField(resourceId, {
+        fieldId: field.fieldId,
+        valueInput: mapValueToValueInput(field.type, value),
       }),
-    [field.id, field.type, resourceId],
+    [field.fieldId, field.type, resourceId],
   )
 
   return (

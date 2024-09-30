@@ -1,40 +1,31 @@
+import { fail } from 'assert'
 import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import QuickBooksSyncButton from './QuickBooksSyncButton'
 import QuickBooksDisconnectLink from './QuickBooksDisconnectLink'
-import { Session } from '@/domain/session/entity'
-import { QuickBooksService } from '@/integrations/quickBooks/QuickBooksService'
-import { container } from '@/lib/di'
+import { readSession } from '@/session'
+import { read } from '@/client/quickBooks'
 
-type Props = {
-  session: Session
-}
+export default async function QuickBooksConnection() {
+  const { accountId } = await readSession()
+  const config = (await read(accountId)) ?? fail('QuickBooks not connected')
 
-export default async function QuickBooksConnection({ session }: Props) {
-  const quickBooksService = container().resolve(QuickBooksService)
-  const realmId = await quickBooksService.getAccountRealmId(session.accountId)
-
-  const quickBooksCompanyInfo = await quickBooksService.getCompanyInfo(
-    session.accountId,
-  )
+  const connectedAt = config.connection
+    ? new Date(config.connection.connectedAt)
+    : null
 
   return (
     <Stack gap={2}>
       <Stack>
         <Typography fontWeight="bold">Connected company</Typography>
         <Stack direction="row" alignItems="center">
-          <Typography>
-            {quickBooksCompanyInfo.CompanyInfo.CompanyName}
-          </Typography>
+          <Typography>{config.connection.companyName}</Typography>
           <CheckIcon color="success" />
         </Stack>
       </Stack>
       <Typography variant="caption">
-        Connected at:{' '}
-        <strong>
-          {session.account.quickBooksConnectedAt?.toLocaleDateString()}
-        </strong>
-        . <QuickBooksDisconnectLink realmId={realmId} />
+        Connected at: <strong>{connectedAt?.toLocaleDateString()}</strong>
+        . <QuickBooksDisconnectLink realmId={config.connection.realmId} />
       </Typography>
       <QuickBooksSyncButton />
     </Stack>

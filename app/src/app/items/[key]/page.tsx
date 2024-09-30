@@ -1,5 +1,4 @@
-import { selectResourceFieldValue } from '@/domain/resource/extensions'
-import { fields } from '@/domain/schema/template/system-fields'
+import { fields, selectResourceFieldValue } from '@supplyside/model'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 
@@ -11,7 +10,6 @@ export default async function ItemsDetail({
   const { resource, schema, lineSchema } = await readDetailPageModel(
     'Item',
     key,
-    `/items/${key}`,
   )
 
   return (

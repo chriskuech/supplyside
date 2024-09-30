@@ -1,5 +1,5 @@
 import { Avatar, Stack, Typography } from '@mui/material'
-import { User } from '@/domain/user/entity'
+import { User } from '@supplyside/model'
 
 type Props = {
   user: User | null

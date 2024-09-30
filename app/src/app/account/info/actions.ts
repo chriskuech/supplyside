@@ -1,11 +1,10 @@
 'use server'
+
 import { isTruthy } from 'remeda'
-import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-import { readSession } from '@/lib/session/actions'
-import { BlobService } from '@/domain/blob/BlobService'
-import { AccountService } from '@/domain/account'
-import { container } from '@/lib/di'
+import { readSession } from '@/session'
+import { createBlob } from '@/client/blob'
+import { updateAccount } from '@/client/account'
 
 const schema = z.object({
   name: z.string().min(1).optional(),
@@ -23,9 +22,6 @@ export type Errors = z.typeToFlattenedError<Dto>['fieldErrors']
 export const handleSaveSettings = async (
   formData: FormData,
 ): Promise<Errors | undefined> => {
-  const accountService = container().resolve(AccountService)
-  const blobService = container().resolve(BlobService)
-
   const { accountId } = await readSession()
 
   const result = schema.safeParse(Object.fromEntries(formData.entries()))
@@ -37,7 +33,7 @@ export const handleSaveSettings = async (
   const { name, key, address, file } = result.data
 
   const logoBlobId = file
-    ? await blobService.createBlob({ accountId, file }).then(({ id }) => id)
+    ? await createBlob({ accountId, file }).then(({ id }) => id)
     : undefined
 
   const data = { name, key, address, logoBlobId }
@@ -46,7 +42,5 @@ export const handleSaveSettings = async (
     return
   }
 
-  await accountService.update(accountId, data)
-
-  revalidatePath('')
+  await updateAccount(accountId, data)
 }

@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readSession } from '@/lib/session/actions'
-import { ResourceService } from '@/domain/resource/ResourceService'
-import { PoRenderingService } from '@/domain/purchase/PoRenderingService'
-import { container } from '@/lib/di'
-
-export const dynamic = 'force-dynamic'
+import { readSession } from '@/session'
+import { readResource } from '@/client/resource'
+import { renderPo } from '@/actions/purchase'
 
 /**
  * /api/preview-po?resourceId=<resourceId>
  */
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const resourceService = container().resolve(ResourceService)
-  const poRenderingService = container().resolve(PoRenderingService)
-
   const query = new URL(req.url).searchParams
   const resourceId = query.get('resourceId')
 
@@ -25,7 +19,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const resource = await resourceService.read(accountId, 'Purchase', resourceId)
+  const resource = await readResource(accountId, resourceId)
 
   if (!resource) {
     return NextResponse.json({ error: 'Resource not found' }, { status: 404 })
@@ -36,7 +30,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     )
   }
 
-  const buffer = await poRenderingService.renderPo({
+  const buffer = await renderPo({
     resourceId,
     accountId,
     isPreview: true,

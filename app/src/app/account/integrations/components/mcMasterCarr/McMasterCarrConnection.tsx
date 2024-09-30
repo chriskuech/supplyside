@@ -1,19 +1,18 @@
 import { Stack, Typography } from '@mui/material'
 import McMasterCarrDisconnectLink from './McMasterCarrDisconnectLink'
-import { Session } from '@/domain/session/entity'
+import { readSession } from '@/session'
+import { readConnection } from '@/client/mcmaster'
 
-type Props = {
-  session: Session
-}
+export default async function McMasterCarrConnection() {
+  const { accountId } = await readSession()
+  const connection = await readConnection(accountId)
 
-export default async function McMasterCarrConnection({ session }: Props) {
+  const connectedAt = connection && new Date(connection.connectedAt)
+
   return (
     <Stack gap={2}>
       <Typography variant="caption">
-        Connected at:{' '}
-        <strong>
-          {session.account.mcMasterCarrConnectedAt?.toLocaleDateString()}
-        </strong>
+        Connected at: <strong>{connectedAt?.toLocaleDateString()}</strong>
         . <McMasterCarrDisconnectLink />
       </Typography>
     </Stack>

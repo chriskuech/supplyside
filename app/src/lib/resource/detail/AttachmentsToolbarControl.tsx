@@ -11,10 +11,8 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material'
-import { ResourceType } from '@prisma/client'
-import { Value } from '@/domain/resource/entity'
-import { SchemaField } from '@/domain/schema/entity'
-import { useDisclosure } from '@/lib/hooks/useDisclosure'
+import { ResourceType, SchemaField, Value } from '@supplyside/model'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 
 type AttachmentsToolbarControlProps = {
@@ -52,7 +50,7 @@ export default function AttachmentsToolbarControl({
             Add, view, or remove attachments for this {resourceType}.
           </DialogContentText>
           <FieldControl
-            inputId={`rf-${field.id}`}
+            inputId={`rf-${field.fieldId}`}
             resourceId={resourceId}
             field={field}
             value={value}

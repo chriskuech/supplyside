@@ -20,16 +20,19 @@ import {
   useState,
 } from 'react'
 import { debounce } from 'remeda'
+import {
+  SchemaField,
+  Value,
+  emptyValue,
+  findTemplateField,
+} from '@supplyside/model'
+import { Option } from '@supplyside/model'
 import AddressField from './AddressField'
 import ContactField from './ContactField'
 import FileField from './FileField'
 import UserField from './UserField'
 import ResourceField from './ResourceField'
 import FilesField from './FilesField'
-import { Option, SchemaField } from '@/domain/schema/entity'
-import { Value } from '@/domain/resource/entity'
-import { findTemplateField } from '@/domain/schema/template/system-fields'
-import { emptyValue } from '@/domain/resource/entity'
 
 export type Props = {
   inputId: string
@@ -64,7 +67,7 @@ function Field(
 
   const handleChange = useCallback(
     (value: Value) => {
-      const newValue = { ...value, updatedAt: new Date() }
+      const newValue = { ...value, updatedAt: new Date().toISOString() }
       setValue(newValue)
       if (withoutDebounce) {
         incomingOnChange(newValue)
@@ -127,9 +130,9 @@ function Field(
             onClear: () => handleChange({ ...emptyValue, date: null }),
           },
         }}
-        value={value?.date && dayjs.utc(value.date)}
+        value={value?.date ? dayjs.utc(value.date) : null}
         onChange={(value) =>
-          handleChange({ ...emptyValue, date: value?.toDate() ?? null })
+          handleChange({ ...emptyValue, date: value?.toISOString() ?? null })
         }
       />
     ))
@@ -137,7 +140,7 @@ function Field(
       <FileField
         isReadOnly={disabled}
         resourceId={resourceId}
-        fieldId={field.id}
+        fieldId={field.fieldId}
         file={value?.file ?? null}
         onChange={(file) => handleChange({ ...emptyValue, file })}
       />

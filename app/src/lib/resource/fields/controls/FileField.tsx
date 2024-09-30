@@ -2,8 +2,8 @@
 import { Close, Download, UploadFile, Visibility } from '@mui/icons-material'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useRef } from 'react'
-import { uploadFile } from './actions'
-import { File } from '@/domain/file/types'
+import { File } from '@supplyside/model'
+import { uploadFile } from '@/actions/files'
 
 type Props = {
   resourceId: string

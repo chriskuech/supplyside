@@ -1,21 +1,15 @@
-import { Box, Container, Stack, Typography } from '@mui/material'
+import { Alert, Box, Container, Stack, Typography } from '@mui/material'
 import UsersTable from './UsersTable'
 import InviteUserControl from './InviteUserControl'
-import { readSession } from '@/lib/session/actions'
-import { UserService } from '@/domain/user'
-import { container } from '@/lib/di'
-
-export const dynamic = 'force-dynamic'
+import { readSelf, readUsers } from '@/client/user'
+import { readSession } from '@/session'
 
 export default async function Team() {
-  const userService = container().resolve(UserService)
-
   const { accountId, userId } = await readSession()
+  const users = await readUsers(accountId)
+  const user = await readSelf(userId)
 
-  const [users, self] = await Promise.all([
-    userService.list(accountId),
-    userService.read(accountId, userId),
-  ])
+  if (!user) return <Alert severity="error">Failed to load</Alert>
 
   return (
     <Container maxWidth="md" sx={{ marginTop: 5 }}>
@@ -32,7 +26,7 @@ export default async function Team() {
             <InviteUserControl />
           </Box>
         </Stack>
-        <UsersTable currentUser={self} users={users} />
+        <UsersTable currentUser={user} users={users} />
       </Stack>
     </Container>
   )

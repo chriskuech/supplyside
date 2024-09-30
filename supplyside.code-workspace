@@ -4,10 +4,16 @@
       "path": ".github"
     },
     {
+      "path": ".ops"
+    },
+    {
       "path": "api"
     },
     {
       "path": "app"
+    },
+    {
+      "path": "model"
     }
   ],
   "settings": {
