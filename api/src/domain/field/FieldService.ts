@@ -1,5 +1,5 @@
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import {
   FieldType,
   ResourceType,
@@ -12,7 +12,9 @@ import { OptionPatch } from '../schema/SchemaFieldService'
 
 @injectable()
 export class FieldService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @inject(PrismaService)
+    private readonly prisma: PrismaService) {}
 
   async readFields(accountId: string): Promise<SchemaField[]> {
     const fields = await this.prisma.field.findMany({

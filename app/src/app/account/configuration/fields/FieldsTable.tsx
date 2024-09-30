@@ -103,6 +103,7 @@ export default function FieldsTable({ fields }: Props) {
         rows={fields}
         rowSelection={false}
         onRowClick={({ row }) => setField(row)}
+        getRowId={(field) => field.fieldId}
       />
       <FieldModal
         field={field}

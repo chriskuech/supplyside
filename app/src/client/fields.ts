@@ -1,6 +1,7 @@
 import 'server-only'
 import { SchemaField } from '@supplyside/model'
 import { paths } from '@supplyside/api'
+import { revalidateTag } from 'next/cache'
 import { client } from '.'
 
 export type CreateFieldData =
@@ -10,6 +11,8 @@ export const createField = async (
   accountId: string,
   params: CreateFieldData,
 ) => {
+  revalidateTag('Fields')
+
   const { data } = await client.POST('/api/accounts/{accountId}/fields/', {
     params: {
       path: { accountId },
@@ -28,6 +31,7 @@ export const updateField = async (
   fieldId: string,
   dto: UpdateFieldData,
 ) => {
+  revalidateTag('Fields')
   await client.PATCH('/api/accounts/{accountId}/fields/{fieldId}/', {
     params: {
       path: { accountId, fieldId },
@@ -43,12 +47,17 @@ export const readFields = async (
     params: {
       path: { accountId },
     },
+    next: {
+      tags: ['Fields'],
+    },
   })
 
   return data
 }
 
 export const deleteField = async (accountId: string, fieldId: string) => {
+  revalidateTag('Fields')
+
   await client.DELETE('/api/accounts/{accountId}/fields/{fieldId}/', {
     params: {
       path: { accountId, fieldId },
