@@ -2,7 +2,7 @@ import 'server-only'
 import { client } from '.'
 
 export const readConnection = async (accountId: string) => {
-  const { data } = await client.GET(
+  const { data } = await client().GET(
     '/api/accounts/{accountId}/integrations/mcmaster/',
     {
       params: {
@@ -19,7 +19,7 @@ export const connect = async (
   username: string,
   password: string,
 ) => {
-  await client.POST(
+  await client().POST(
     '/api/accounts/{accountId}/integrations/mcmaster/connect/',
     {
       params: {
@@ -31,7 +31,7 @@ export const connect = async (
 }
 
 export const disconnect = async (accountId: string) => {
-  await client.POST(
+  await client().POST(
     '/api/accounts/{accountId}/integrations/mcmaster/disconnect/',
     {
       params: {
@@ -45,7 +45,7 @@ export const createPunchOutServiceRequest = async (
   accountId: string,
   resourceId: string,
 ) => {
-  const { data } = await client.POST(
+  const { data } = await client().POST(
     '/api/accounts/{accountId}/integrations/mcmaster/create-punchout-session/',
     {
       params: {
@@ -58,7 +58,7 @@ export const createPunchOutServiceRequest = async (
 }
 
 export const processPoom = async (cxmlString: string) => {
-  const { data } = await client.POST(
+  const { data } = await client().POST(
     '/api/integrations/mcmaster/process-poom/',
     {
       body: cxmlString,

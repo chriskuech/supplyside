@@ -4,6 +4,8 @@ import { z } from 'zod'
 
 export const ConfigSchema = z
   .object({
+    API_KEY: z.string().min(1),
+    API_BASE_URL: z.string().url(),
     BASE_URL: z.string().url(),
     NODE_ENV: z.enum(['development', 'integration', 'production']),
     PORT: z.coerce.number(),

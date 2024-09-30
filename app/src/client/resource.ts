@@ -10,7 +10,7 @@ export const createResource = async (
   resourceType: ResourceType,
   fields: { fieldId: string; valueInput: ValueInput }[],
 ) => {
-  const { data: resource } = await client.POST(
+  const { data: resource } = await client().POST(
     '/api/accounts/{accountId}/resources/',
     {
       params: {
@@ -29,7 +29,7 @@ export const resolveKey = async (
   resourceType: ResourceType,
   resourceKey: number,
 ) => {
-  const { data: resource } = await client.GET(
+  const { data: resource } = await client().GET(
     '/api/accounts/{accountId}/resources/head/',
     {
       params: {
@@ -47,7 +47,7 @@ export const resolveKey = async (
 }
 
 export const readResource = async (accountId: string, resourceId: string) => {
-  const { data: resource } = await client.GET(
+  const { data: resource } = await client().GET(
     '/api/accounts/{accountId}/resources/{resourceId}/',
     {
       params: {
@@ -65,7 +65,7 @@ export const readResources = async (
   resourceType: ResourceType,
   { where }: { where?: JsonLogic } = {},
 ): Promise<Resource[] | undefined> => {
-  const { data: resources } = await client.GET(
+  const { data: resources } = await client().GET(
     '/api/accounts/{accountId}/resources/',
     {
       params: {
@@ -87,7 +87,7 @@ export const updateResource = async (
   resourceId: string,
   fields: { fieldId: string; valueInput: ValueInput }[],
 ) => {
-  const { data: resource } = await client.PATCH(
+  const { data: resource } = await client().PATCH(
     '/api/accounts/{accountId}/resources/{resourceId}/',
     {
       params: {
@@ -102,7 +102,7 @@ export const updateResource = async (
 }
 
 export const deleteResource = async (accountId: string, resourceId: string) => {
-  await client.DELETE('/api/accounts/{accountId}/resources/{resourceId}/', {
+  await client().DELETE('/api/accounts/{accountId}/resources/{resourceId}/', {
     params: {
       path: { accountId, resourceId },
     },
@@ -111,7 +111,7 @@ export const deleteResource = async (accountId: string, resourceId: string) => {
 }
 
 export const cloneResource = async (accountId: string, resourceId: string) => {
-  const { data: resource } = await client.POST(
+  const { data: resource } = await client().POST(
     '/api/accounts/{accountId}/resources/{resourceId}/clone/',
     {
       params: {
@@ -129,7 +129,7 @@ export const findResourcesByNameOrPoNumber = async (
   resourceType: ResourceType,
   { input, exact }: { input: string; exact?: boolean },
 ) => {
-  const { data: resources } = await client.GET(
+  const { data: resources } = await client().GET(
     '/api/accounts/{accountId}/resources/find-by-name-or-po-number/',
     {
       params: {
@@ -152,7 +152,7 @@ export const findBacklinks = async (
   resourceType: ResourceType,
   resourceId: string,
 ) => {
-  const { data: resources } = await client.GET(
+  const { data: resources } = await client().GET(
     '/api/accounts/{accountId}/resources/find-backlinks/',
     {
       params: {

@@ -6,7 +6,7 @@ export const readSchema = async (
   accountId: string,
   resourceType: ResourceType,
 ): Promise<Schema | undefined> => {
-  const { data: schema } = await client.GET(
+  const { data: schema } = await client().GET(
     '/api/accounts/{accountId}/schemas/{resourceType}/merged/',
     {
       params: {
@@ -19,7 +19,7 @@ export const readSchema = async (
 }
 
 export const readCustomSchemas = async (accountId: string) => {
-  const { data } = await client.GET(
+  const { data } = await client().GET(
     '/api/accounts/{accountId}/schemas/custom/',
     {
       params: {
@@ -36,7 +36,7 @@ export const updateSchema = async (
   resourceType: ResourceType,
   sectionIds: string[],
 ) => {
-  await client.PATCH(
+  await client().PATCH(
     '/api/accounts/{accountId}/schemas/{resourceType}/custom/',
     {
       params: {
@@ -52,7 +52,7 @@ export const addSection = async (
   resourceType: ResourceType,
   data: { name: string },
 ) => {
-  await client.POST(
+  await client().POST(
     '/api/accounts/{accountId}/schemas/{resourceType}/custom/sections/',
     {
       params: {
@@ -72,7 +72,7 @@ export const updateSection = async (
     fieldIds: string[]
   },
 ) => {
-  await client.PATCH(
+  await client().PATCH(
     '/api/accounts/{accountId}/schemas/{resourceType}/custom/sections/{sectionId}/',
     {
       params: {
@@ -88,7 +88,7 @@ export const removeSection = async (
   resourceType: ResourceType,
   sectionId: string,
 ) => {
-  await client.DELETE(
+  await client().DELETE(
     '/api/accounts/{accountId}/schemas/{resourceType}/custom/sections/{sectionId}/',
     {
       params: {

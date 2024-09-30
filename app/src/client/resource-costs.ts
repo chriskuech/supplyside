@@ -4,7 +4,7 @@ import { omit } from 'remeda'
 import { client } from '.'
 
 export const createCost = async (accountId: string, resourceId: string) => {
-  const { data } = await client.POST(
+  const { data } = await client().POST(
     '/api/accounts/{accountId}/resources/{resourceId}/costs/',
     {
       params: {
@@ -22,7 +22,7 @@ export const updateCost = async (
   costId: string,
   data: Partial<Cost>,
 ) => {
-  await client.PATCH(
+  await client().PATCH(
     '/api/accounts/{accountId}/resources/{resourceId}/costs/{costId}/',
     {
       params: {
@@ -38,7 +38,7 @@ export const deleteCost = async (
   resourceId: string,
   costId: string,
 ) => {
-  await client.DELETE(
+  await client().DELETE(
     '/api/accounts/{accountId}/resources/{resourceId}/costs/{costId}/',
     {
       params: {

@@ -2,7 +2,7 @@ import 'server-only'
 import { client } from '.'
 
 export const readPlaid = async (accountId: string) => {
-  const { data } = await client.GET(
+  const { data } = await client().GET(
     '/api/accounts/{accountId}/integrations/plaid/',
     {
       params: {
@@ -15,7 +15,7 @@ export const readPlaid = async (accountId: string) => {
 }
 
 export const getPlaidAccounts = async (accountId: string) => {
-  const { data } = await client.GET(
+  const { data } = await client().GET(
     '/api/accounts/{accountId}/integrations/plaid/',
     {
       params: {
@@ -28,7 +28,7 @@ export const getPlaidAccounts = async (accountId: string) => {
 }
 
 export const createPlaidLinkToken = async (accountId: string) => {
-  const { data } = await client.POST(
+  const { data } = await client().POST(
     '/api/accounts/{accountId}/integrations/plaid/link-token/',
     {
       params: {

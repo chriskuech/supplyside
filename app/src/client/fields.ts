@@ -13,7 +13,7 @@ export const createField = async (
 ) => {
   revalidateTag('Fields')
 
-  const { data } = await client.POST('/api/accounts/{accountId}/fields/', {
+  const { data } = await client().POST('/api/accounts/{accountId}/fields/', {
     params: {
       path: { accountId },
     },
@@ -32,7 +32,7 @@ export const updateField = async (
   dto: UpdateFieldData,
 ) => {
   revalidateTag('Fields')
-  await client.PATCH('/api/accounts/{accountId}/fields/{fieldId}/', {
+  await client().PATCH('/api/accounts/{accountId}/fields/{fieldId}/', {
     params: {
       path: { accountId, fieldId },
     },
@@ -43,7 +43,7 @@ export const updateField = async (
 export const readFields = async (
   accountId: string,
 ): Promise<SchemaField[] | undefined> => {
-  const { data } = await client.GET('/api/accounts/{accountId}/fields/', {
+  const { data } = await client().GET('/api/accounts/{accountId}/fields/', {
     params: {
       path: { accountId },
     },
@@ -58,7 +58,7 @@ export const readFields = async (
 export const deleteField = async (accountId: string, fieldId: string) => {
   revalidateTag('Fields')
 
-  await client.DELETE('/api/accounts/{accountId}/fields/{fieldId}/', {
+  await client().DELETE('/api/accounts/{accountId}/fields/{fieldId}/', {
     params: {
       path: { accountId, fieldId },
     },

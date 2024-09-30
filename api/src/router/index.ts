@@ -13,25 +13,18 @@ import { mountWebhooks } from './webhooks'
 import { mountHealth } from './health'
 import { JsonLogicSchema } from '../domain/resource/json-logic/types'
 import { mountSelf } from './api/self'
-import { Config } from '../ConfigService'
 
-const envToLogger = {
-  development: {
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        translateTime: 'HH:MM:ss Z',
-        ignore: 'pid,hostname',
-      },
-    },
-  },
-  integration: false,
-  production: true,
-}
-
-export const createServer = (environment: Config['NODE_ENV']) =>
+export const createServer = (isDev?: boolean) => 
   fastify({
-    logger: envToLogger[environment] ?? true,
+    logger: isDev ? {
+      transport: {
+        target: 'pino-pretty',
+        options: {
+          translateTime: 'HH:MM:ss Z',
+          ignore: 'pid,hostname',
+        },
+      },
+    } : true,
   }) // TODO: reenable logging
     .setValidatorCompiler(validatorCompiler)
     .setSerializerCompiler(serializerCompiler)

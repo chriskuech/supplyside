@@ -59,7 +59,7 @@ export class PlaidService {
       client_name: 'Supply Side',
       products: [Products.Auth],
       language: 'en',
-      redirect_uri: `${this.configService.config.BASE_URL}/account/integrations`,
+      redirect_uri: `${this.configService.config.APP_BASE_URL}/account/integrations`,
       country_codes: [CountryCode.Us],
     }
 

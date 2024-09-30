@@ -154,10 +154,10 @@ export class SessionService {
         verify_token: tat,
         action_url:
           `${
-            this.configService.config.BASE_URL
+            this.configService.config.APP_BASE_URL
           }${verifyLoginPath}?email=${encodeURIComponent(email)}&token=${tat}` +
           (returnTo ? `&returnTo=${returnTo}` : ''),
-        product_url: this.configService.config.BASE_URL,
+        product_url: this.configService.config.APP_BASE_URL,
       },
       MessageStream: 'outbound',
     })

@@ -107,8 +107,8 @@ export class UserService {
       TemplateAlias: 'user-invitation',
       TemplateModel: {
         invite_email: email,
-        action_url: `${this.configService.config.BASE_URL}${loginPath}`,
-        product_url: this.configService.config.BASE_URL,
+        action_url: `${this.configService.config.APP_BASE_URL}${loginPath}`,
+        product_url: this.configService.config.APP_BASE_URL,
       },
       MessageStream: 'outbound',
     })

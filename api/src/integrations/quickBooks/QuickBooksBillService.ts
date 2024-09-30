@@ -254,7 +254,7 @@ export class QuickBooksBillService {
 
     return {
       ...quickBooksBill,
-      PrivateNote: `${this.configService.config.BASE_URL}/bills/${billResource.key}`,
+      PrivateNote: `${this.configService.config.APP_BASE_URL}/bills/${billResource.key}`,
       VendorRef: {
         value: quickBooksVendorId,
       },

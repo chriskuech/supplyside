@@ -1,11 +1,14 @@
+
 import { injectable } from 'inversify'
 import z from 'zod'
 
 const ConfigSchema = z.object({
+  API_KEY: z.string().min(1),
+  APP_BASE_URL: z.string().url(),
+  
   POSTMARK_API_KEY: z.string().min(1),
   AZURE_STORAGE_CONNECTION_STRING: z.string().min(1),
   NODE_ENV: z.enum(['development', 'integration', 'production']),
-  BASE_URL: z.string().url(),
   CI: z.coerce.boolean().optional(),
   GEN: z.coerce.boolean().optional(),
   PORT: z.coerce.number(),
@@ -36,7 +39,6 @@ export class ConfigService {
 
   get config(): Config {
     this._config ??= ConfigSchema.parse(process.env)
-
     return this._config
   }
 }

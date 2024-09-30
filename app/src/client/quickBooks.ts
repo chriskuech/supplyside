@@ -5,7 +5,7 @@ export const getVendorUrl = (vendorId: string) =>
   `/api/integrations/quickbooks/vendor/${vendorId}`
 
 export const read = async (accountId: string) => {
-  const { data } = await client.GET(
+  const { data } = await client().GET(
     '/api/accounts/{accountId}/integrations/quickbooks/',
     {
       params: {
@@ -18,7 +18,7 @@ export const read = async (accountId: string) => {
 }
 
 export const connect = async (accountId: string, url: string) => {
-  const { data } = await client.POST(
+  const { data } = await client().POST(
     '/api/accounts/{accountId}/integrations/quickbooks/connect/',
     {
       params: {
@@ -32,7 +32,7 @@ export const connect = async (accountId: string, url: string) => {
 }
 
 export const disconnect = async (accountId: string) => {
-  const { data } = await client.POST(
+  const { data } = await client().POST(
     '/api/accounts/{accountId}/integrations/quickbooks/disconnect/',
     {
       params: {
@@ -45,7 +45,7 @@ export const disconnect = async (accountId: string) => {
 }
 
 // export const pullBills = async (accountId: string) => {
-//   const { data } = await client.POST(
+//   const { data } = await client().POST(
 //     '/api/accounts/{accountId}/integrations/quickbooks/pull-bills/',
 //     {
 //       params: {
@@ -59,7 +59,7 @@ export const disconnect = async (accountId: string) => {
 // }
 
 export const pushBill = async (accountId: string, billResourceId: string) => {
-  const { data } = await client.PUT(
+  const { data } = await client().PUT(
     '/api/accounts/{accountId}/integrations/quickbooks/bills/{billResourceId}/',
     {
       params: {
@@ -72,7 +72,7 @@ export const pushBill = async (accountId: string, billResourceId: string) => {
 }
 
 export const pullData = async (accountId: string) =>
-  await client.POST(
+  await client().POST(
     '/api/accounts/{accountId}/integrations/quickbooks/pull-data/',
     {
       params: {

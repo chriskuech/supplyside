@@ -127,7 +127,7 @@ export class PoService {
         buyer_logo_base64: logoBlob?.buffer.toString('base64'),
         buyer_logo_contenttype: logoBlob?.mimeType,
         buyer_company_name: account.name,
-        product_url: this.configService.config.BASE_URL,
+        product_url: this.configService.config.APP_BASE_URL,
 
         // template
         supplier_user_name: poRecipient.name ?? '(No Name)',

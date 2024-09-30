@@ -262,7 +262,7 @@ export class McMasterService {
       clientName: supplierIdentity,
       punchOutSharedSecret: secret,
       buyerCookie: `${resourceId}|${accountId}`,
-      poomReturnEndpoint: `${this.configService.config.BASE_URL}/api/integrations/mcmaster`,
+      poomReturnEndpoint: `${this.configService.config.APP_BASE_URL}/api/integrations/mcmaster`,
     })
 
     return renderedPunchoutSetupRequest

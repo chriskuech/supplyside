@@ -12,7 +12,7 @@ export class QuickBooksConfigService {
       QUICKBOOKS_CLIENT_SECRET: clientSecret,
       QUICKBOOKS_CSRF_SECRET: csrfSecret,
       QUICKBOOKS_ENVIRONMENT: environment,
-      BASE_URL,
+      APP_BASE_URL,
     } = this.configService.config
 
     if (!clientId || !clientSecret || !csrfSecret || !environment) {
@@ -24,7 +24,7 @@ export class QuickBooksConfigService {
       clientSecret,
       csrfSecret,
       environment,
-      redirectUri: BASE_URL + '/api/integrations/quickbooks/login',
+      redirectUri: APP_BASE_URL + '/api/integrations/quickbooks/login',
       apiBaseUrl: {
         sandbox: 'https://sandbox-quickbooks.api.intuit.com',
         production: 'https://quickbooks.api.intuit.com',
