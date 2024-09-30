@@ -8,5 +8,13 @@
     "remeda": "^2.14.0",
     "ts-pattern": "^5.4.0",
     "zod": "^3.23.8"
-  }
+  },
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

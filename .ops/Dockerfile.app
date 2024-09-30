@@ -4,12 +4,14 @@
 
 FROM node:20-alpine AS builder
 
+COPY ./model/package.json ./model/package-lock.json* ./model/
+RUN cd ./model && npm ci
 
 COPY ./app/package.json ./app/package-lock.json* ./app/
 RUN cd ./app && npm ci
 
-COPY ./app ./app
 COPY ./model ./model
+COPY ./app ./app
 
 RUN cd ./app && npm run build
 
