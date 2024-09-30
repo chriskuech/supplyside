@@ -6,7 +6,6 @@
     "dev": "next dev",
     "check": "tsc --noEmit --project .",
     "check:watch": "tsc --noEmit --watch --project .",
-    "prebuild": "prisma generate --no-hints",
     "build": "next build",
     "lint": "next lint"
   },
