@@ -6,10 +6,8 @@ import { accountQuerySchema, readAccountSchema } from './schemas'
 import { Account } from './types'
 import { QuickBooksApiService } from './QuickBooksApiService'
 import { fields } from '@supplyside/model'
-import {
-  OptionPatch,
-  SchemaFieldService,
-} from '@supplyside/api/domain/schema/SchemaFieldService'
+import { SchemaFieldService } from '@supplyside/api/domain/schema/SchemaFieldService'
+import { OptionPatch } from '@supplyside/api/router/api/accounts/fields'
 
 const PAYABLE_ACCOUNTS_TYPE = 'Accounts Payable'
 
@@ -53,7 +51,7 @@ export class QuickBooksAccountService {
       allQuickBooksAccounts.QueryResponse.Account?.filter(
         (a) => a.AccountType !== PAYABLE_ACCOUNTS_TYPE
       )
-    const accountFields = await this.schemaFieldService.readFields(accountId)
+    const accountFields = await this.schemaFieldService.list(accountId)
     const quickBooksAccountField = accountFields.find(
       (field) => field.templateId === fields.quickBooksAccount.templateId
     )
@@ -76,16 +74,19 @@ export class QuickBooksAccountService {
       name: accountName,
     }))
 
-    await this.schemaFieldService.updateField(accountId, {
-      description: quickBooksAccountField.description,
-      id: quickBooksAccountField.fieldId,
-      name: quickBooksAccountField.name,
-      defaultValue: {
-        optionId: quickBooksAccountField.defaultValue?.option?.id ?? null,
-      },
-      defaultToToday: quickBooksAccountField.defaultToToday,
-      isRequired: quickBooksAccountField.isRequired,
-      options,
-    })
+    await this.schemaFieldService.update(
+      accountId,
+      quickBooksAccountField.fieldId,
+      {
+        description: quickBooksAccountField.description,
+        name: quickBooksAccountField.name,
+        defaultValue: {
+          optionId: quickBooksAccountField.defaultValue?.option?.id ?? null,
+        },
+        defaultToToday: quickBooksAccountField.defaultToToday,
+        isRequired: quickBooksAccountField.isRequired,
+        options,
+      }
+    )
   }
 }

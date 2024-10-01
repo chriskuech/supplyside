@@ -8,7 +8,7 @@ import {
 } from '@supplyside/model'
 import { ZodType, z } from 'zod'
 import { container } from '@supplyside/api/di'
-import { FieldService } from '@supplyside/api/domain/field/FieldService'
+import { SchemaFieldService } from '@supplyside/api/domain/schema/SchemaFieldService'
 
 // TODO: consolidate
 export type OptionPatch = {
@@ -52,7 +52,7 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
         },
       },
       handler: async (req, res) => {
-        const service = container.resolve(FieldService)
+        const service = container.resolve(SchemaFieldService)
         const fields = await service.list(req.params.accountId)
 
         res.send(fields)
@@ -73,7 +73,7 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(FieldService)
+        const service = container.resolve(SchemaFieldService)
         await service.create(req.params.accountId, req.body)
 
         res.send()
@@ -98,7 +98,7 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(FieldService)
+        const service = container.resolve(SchemaFieldService)
         await service.update(
           req.params.accountId,
           req.params.fieldId,
@@ -118,7 +118,7 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(FieldService)
+        const service = container.resolve(SchemaFieldService)
         await service.delete(req.params.accountId, req.params.fieldId)
 
         res.send()

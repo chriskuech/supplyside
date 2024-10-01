@@ -1,44 +1,48 @@
-import { P, match } from 'ts-pattern'
-import { FieldType, Prisma, ResourceType } from '@prisma/client'
-import { inject, injectable } from 'inversify'
-import { mapFieldModelToEntity } from './mappers'
-import { valueInclude } from '@supplyside/api/domain/resource/model'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import { SchemaField, ValueInput } from '@supplyside/model'
-
-export type CreateFieldParams = {
-  name: string;
-  type: FieldType;
-  resourceType?: ResourceType;
-  isRequired?: boolean;
-};
-
-export type UpdateFieldDto = {
-  id: string;
-  name: string;
-  description: string | null;
-  options: OptionPatch[];
-  defaultValue: ValueInput;
-  defaultToToday: boolean;
-  isRequired?: boolean;
-};
-
-export type OptionPatch = {
-  id: string; // patch ID -- must be `id` to work with mui
-  name: string;
-} & (
-  | { op: 'add' }
-  | { op: 'update'; optionId: string }
-  | { op: 'remove'; optionId: string }
-);
+import { inject, injectable } from 'inversify'
+import {
+  FieldType,
+  ResourceType,
+  SchemaField,
+  ValueInput,
+} from '@supplyside/model'
+import { mapFieldModelToEntity } from './mappers'
+import { fieldIncludes } from './model'
+import { mapValueInputToPrismaValueUpdate } from '../resource/mappers'
+import { OptionPatch } from '@supplyside/api/router/api/accounts/fields'
 
 @injectable()
 export class SchemaFieldService {
-  constructor(@inject(PrismaService) private readonly prisma: PrismaService) {}
+  constructor(
+    @inject(PrismaService)
+    private readonly prisma: PrismaService) {}
 
-  async createField(accountId: string, params: CreateFieldParams) {
+  async list(accountId: string): Promise<SchemaField[]> {
+    const fields = await this.prisma.field.findMany({
+      where: {
+        accountId,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+      include: fieldIncludes,
+    })
+
+    return fields.map(mapFieldModelToEntity)
+  }
+
+  async create(
+    accountId: string,
+    data: {
+      name: string;
+      type: FieldType;
+      resourceType?: ResourceType;
+      isRequired: boolean;
+    }
+  ) {
     await this.prisma.field.create({
       data: {
+        ...data,
         Account: {
           connect: {
             id: accountId,
@@ -47,208 +51,44 @@ export class SchemaFieldService {
         DefaultValue: {
           create: {},
         },
-        isRequired: params.isRequired,
-        name: sanitizeColumnName(params.name),
-        type: params.type,
-        resourceType: params.resourceType,
       },
     })
   }
 
-  async readFields(accountId: string): Promise<SchemaField[]> {
-    const fields = await this.prisma.field.findMany({
-      where: {
-        accountId,
-      },
-      orderBy: {
-        name: 'asc',
-      },
-      include: {
-        DefaultValue: {
-          include: valueInclude,
-        },
-        Option: {
-          orderBy: {
-            order: 'asc',
-          },
+  async update(
+    accountId: string,
+    fieldId: string,
+    dto: {
+      name?: string;
+      description?: string | null;
+      resourceType?: ResourceType | null;
+      isRequired?: boolean;
+      options?: OptionPatch[];
+      defaultToToday?: boolean;
+      defaultValue?: ValueInput;
+    }
+  ) {
+    await this.prisma.field.update({
+      where: { id: fieldId, accountId },
+      data: {
+        name: dto.name,
+        description: dto.description,
+        resourceType: dto.resourceType,
+        isRequired: dto.isRequired,
+        defaultToToday: dto.defaultToToday,
+        DefaultValue: dto.defaultValue && {
+          update: mapValueInputToPrismaValueUpdate(dto.defaultValue),
         },
       },
     })
-
-    return fields.map(mapFieldModelToEntity)
   }
 
-  async updateField(accountId: string, dto: UpdateFieldDto) {
-    await Promise.all([
-      this.prisma.field.update({
-        where: {
-          id: dto.id,
-          accountId,
-        },
-        data: {
-          name: sanitizeColumnName(dto.name),
-          description: dto.description,
-          DefaultValue: {
-            update: match<ValueInput, Prisma.ValueUpdateInput>(dto.defaultValue)
-              .with({ address: P.not(undefined) }, ({ address }) => ({
-                Address: {
-                  upsert: {
-                    create: {
-                      streetAddress: address?.streetAddress?.trim() || null,
-                      city: address?.city?.trim() || null,
-                      state: address?.state?.trim() || null,
-                      zip: address?.zip?.trim() || null,
-                      country: address?.country?.trim() || null,
-                    },
-                    update: {
-                      streetAddress: address?.streetAddress?.trim() || null,
-                      city: address?.city?.trim() || null,
-                      state: address?.state?.trim() || null,
-                      zip: address?.zip?.trim() || null,
-                      country: address?.country?.trim() || null,
-                    },
-                  },
-                },
-              }))
-              .with({ contact: P.not(undefined) }, ({ contact }) => ({
-                Contact: {
-                  upsert: {
-                    create: {
-                      name: contact?.name ?? null,
-                      email: contact?.email ?? null,
-                      phone: contact?.phone ?? null,
-                      title: contact?.title ?? null,
-                    },
-                    update: {
-                      name: contact?.name ?? null,
-                      email: contact?.email ?? null,
-                      phone: contact?.phone ?? null,
-                      title: contact?.title ?? null,
-                    },
-                  },
-                },
-              }))
-              .with({ optionIds: P.not(undefined) }, (v) => ({
-                ValueOption: {
-                  create: v.optionIds.map((id) => ({
-                    Option: {
-                      connect: {
-                        id,
-                      },
-                    },
-                  })),
-                },
-              }))
-              .with({ fileIds: P.not(undefined) }, (v) => ({
-                Files: {
-                  create: v.fileIds.map((id) => ({
-                    File: {
-                      connect: {
-                        id,
-                      },
-                    },
-                  })),
-                },
-              }))
-              .with({ optionId: P.not(undefined) }, ({ optionId }) => ({
-                Option: optionId
-                  ? {
-                      connect: {
-                        id: optionId,
-                      },
-                    }
-                  : {
-                      disconnect: true,
-                    },
-              }))
-              .with({ fileId: P.not(undefined) }, ({ fileId }) => ({
-                File: fileId
-                  ? {
-                      connect: {
-                        id: fileId,
-                      },
-                    }
-                  : {
-                      disconnect: true,
-                    },
-              }))
-              .with({ resourceId: P.not(undefined) }, ({ resourceId }) => ({
-                Resource: resourceId
-                  ? {
-                      connect: {
-                        id: resourceId,
-                      },
-                    }
-                  : {
-                      disconnect: true,
-                    },
-              }))
-              .with({ userId: P.not(undefined) }, ({ userId }) => ({
-                User: userId
-                  ? { connect: { id: userId } }
-                  : { disconnect: true },
-              }))
-              .otherwise((v) => v),
-          },
-          isRequired: dto.isRequired,
-          defaultToToday: dto.defaultToToday,
-        },
-      }),
-      ...dto.options.map((o, i) =>
-        match(o)
-          .with({ op: 'add' }, (o) =>
-            this.prisma.option.create({
-              data: {
-                Field: {
-                  connect: {
-                    id: dto.id,
-                    accountId,
-                  },
-                },
-                name: o.name,
-                order: i,
-              },
-            })
-          )
-          .with({ op: 'update' }, (o) =>
-            this.prisma.option.update({
-              where: {
-                id: o.optionId,
-                Field: {
-                  id: dto.id,
-                  accountId,
-                },
-              },
-              data: {
-                name: o.name,
-                order: i,
-              },
-            })
-          )
-          .with({ op: 'remove' }, (o) =>
-            this.prisma.option.delete({
-              where: {
-                id: o.optionId,
-                Field: {
-                  id: dto.id,
-                  accountId,
-                },
-              },
-            })
-          )
-          .exhaustive()
-      ),
-    ])
-  }
-
-  async deleteField(accountId: string, fieldId: string) {
+  async delete(accountId: string, fieldId: string) {
     await this.prisma.field.delete({
       where: {
-        accountId: accountId,
         id: fieldId,
+        accountId,
       },
     })
   }
 }
-
-const sanitizeColumnName = (name: string) => name.replace('"', '')

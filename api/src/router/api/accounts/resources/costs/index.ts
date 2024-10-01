@@ -1,5 +1,5 @@
 import { container } from '@supplyside/api/di'
-import { CostService } from '@supplyside/api/domain/resource/costs'
+import { CostService } from '@supplyside/api/domain/resource/CostService'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
