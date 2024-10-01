@@ -54,8 +54,7 @@ export default function AccountsTable({ accounts }: Props) {
                             variant: 'success',
                           })
                         })
-                        .catch((error) => {
-                          console.error(error)
+                        .catch(() => {
                           closeSnackbar(key)
                           enqueueSnackbar(
                             'There was an error applying the template',

@@ -12,7 +12,7 @@ import { z } from 'zod'
 import { mountCosts } from './costs'
 import { JsonLogicSchema } from '@supplyside/api/domain/resource/json-logic/types'
 import { pick } from 'remeda'
-import {parse} from 'qs'
+import { parse } from 'qs'
 
 export const mountResources = async <App extends FastifyInstance>(app: App) =>
   app
@@ -26,10 +26,13 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           accountId: z.string().uuid(),
         }),
         // TODO: there must be a cleaner way to parse deep objects
-        querystring: z.preprocess(a => parse(a as string), z.object({
+        querystring: z.preprocess(
+          (a) => parse(a as string),
+          z.object({
             resourceType: ResourceTypeSchema,
             where: JsonLogicSchema.optional(),
-          }) ),
+          })
+        ),
         response: {
           200: z.array(ResourceSchema),
         },

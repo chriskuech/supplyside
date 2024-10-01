@@ -21,7 +21,6 @@ export async function GET(
   const { accountId, blobId } = await match(query)
     .with({ type: 'profile-pic' }, async ({ userId }) => {
       const user = await readSelf(userId)
-      if (!user) console.error('user not found', userId)
       return { accountId: user?.accountId, blobId: user?.profilePicBlobId }
     })
     .with({ type: 'logo' }, async ({ accountId }) => {
@@ -36,11 +35,9 @@ export async function GET(
     .exhaustive()
   if (!accountId || !blobId) return notFound()
 
-  console.log([accountId, blobId])
   const blob = await readBlob(accountId, blobId)
   if (!blob) return notFound()
 
-  console.error(2)
   const data = await readBlobData(accountId, blobId)
   if (!data) return notFound()
 
