@@ -114,8 +114,12 @@ export default function ResourceTable({
       slots={{
         toolbar: () => (
           <GridToolbarContainer>
-            <GridToolbarColumnsButton />
-            <GridToolbarFilterButton />
+            <GridToolbarColumnsButton
+              slotProps={{ button: { variant: 'text' } }}
+            />
+            <GridToolbarFilterButton
+              slotProps={{ button: { variant: 'text' } }}
+            />
             <GridToolbarQuickFilter
               quickFilterParser={parseFilter}
               quickFilterFormatter={(quickFilterValues) =>
