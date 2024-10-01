@@ -46,10 +46,10 @@ export class PoService {
       valueInput: { date: new Date().toISOString() },
     })
 
-    const buffer = await this.poRenderingService.renderPo({
+    const buffer = await this.poRenderingService.renderPo(
       accountId,
       resourceId,
-    })
+    )
 
     const [blob, resource] = await Promise.all([
       this.blobService.createBlob(accountId, {

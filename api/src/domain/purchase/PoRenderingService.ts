@@ -16,20 +16,12 @@ import {
   selectResourceField,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import PoDocument from './doc/PoDocument'
 import {
   AddressViewModel,
   LineViewModel,
   PurchaseViewModel,
 } from './doc/ViewModel'
-import { renderToStaticMarkup } from 'react-dom/server'
 import { OsService } from '@supplyside/api/os'
-
-type RenderPoParams = {
-  accountId: string;
-  resourceId: string;
-  isPreview?: boolean;
-};
 
 @injectable()
 export class PoRenderingService {
@@ -41,14 +33,20 @@ export class PoRenderingService {
     @inject(OsService) private readonly osService: OsService
   ) {}
 
-  async renderPo({ accountId, resourceId, isPreview }: RenderPoParams) {
+  async renderPo(
+    accountId: string,
+    resourceId: string,
+    { isPreview }: { isPreview?: boolean } = {},
+  ) {
     return await this.osService.withTempDir(async (path) => {
       const viewModel = await this.createViewModel(accountId, resourceId)
 
-      const html = htmlDocument(
-        renderToStaticMarkup(PoDocument(viewModel)),
-        isPreview
-      )
+      // TODO: render to html
+      // const html = htmlDocument(
+      //   renderToStaticMarkup(PoDocument(viewModel)),
+      //   isPreview
+      // )
+      const html = `${viewModel.number}${isPreview}`
 
       await writeFile(`${path}/out.html`, html)
 
@@ -94,7 +92,7 @@ export class PoRenderingService {
 
     const blob = account.logoBlobId
       ? await this.blobService.readBlobWithData(account.id, account.logoBlobId)
-      : undefined 
+      : undefined
 
     const lineAdditionalFields = lineSchema.fields.filter(
       (field) =>
@@ -183,50 +181,50 @@ export class PoRenderingService {
   }
 }
 
-const htmlDocument = (content: string, isPreview?: boolean) => `
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <title>Purchase Order</title>
-      <style>
-        .page-counter::after {
-          content: "Page " counter(page) " of " counter(pages);
-        }
+// const htmlDocument = (content: string, isPreview?: boolean) => `
+//   <!DOCTYPE html>
+//   <html lang="en">
+//     <head>
+//       <meta charset="UTF-8">
+//       <title>Purchase Order</title>
+//       <style>
+//         .page-counter::after {
+//           content: "Page " counter(page) " of " counter(pages);
+//         }
 
-        @page {
-          size: Letter;
-          margin: 15px;
-        }
+//         @page {
+//           size: Letter;
+//           margin: 15px;
+//         }
 
-        body {
-          ${
-            isPreview
-              ? `background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(
-                  watermark
-                )}');`
-              : ''
-          }
-          margin: 0;
-          padding: 0;
-          height: 100%;
-          font-family: Arial, sans-serif;
-          font-size: 12px;
-        }
-      </style>
-    </head>
-    <body>
-      ${content}
-    </body>
-  </html>
-`
+//         body {
+//           ${
+//             isPreview
+//               ? `background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(
+//                   watermark
+//                 )}');`
+//               : ''
+//           }
+//           margin: 0;
+//           padding: 0;
+//           height: 100%;
+//           font-family: Arial, sans-serif;
+//           font-size: 12px;
+//         }
+//       </style>
+//     </head>
+//     <body>
+//       ${content}
+//     </body>
+//   </html>
+// `
 
-const watermark = `
-  <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-    <rect width="100%" height="100%" fill="none"/>
-    <text x="100" y="100" font-family="sans-serif" font-size="40" fill="rgba(0,0,0,0.2)" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(-27 100 100)">PREVIEW</text>
-  </svg>
-`
+// const watermark = `
+//   <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+//     <rect width="100%" height="100%" fill="none"/>
+//     <text x="100" y="100" font-family="sans-serif" font-size="40" fill="rgba(0,0,0,0.2)" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(-27 100 100)">PREVIEW</text>
+//   </svg>
+// `
 
 const renderTemplateField = (
   resource: Resource | undefined,

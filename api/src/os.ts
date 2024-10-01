@@ -3,11 +3,15 @@ import { exec as execCallback } from 'child_process'
 import { mkdir } from 'fs/promises'
 import { v4 as uuid } from 'uuid'
 import { ConfigService } from './ConfigService'
+import { inject, injectable } from 'inversify'
 
 const exec = promisify(execCallback)
 
+@injectable()
 export class OsService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    @inject(ConfigService) private readonly configService: ConfigService
+  ) {}
 
   async exec(command: string) {
     return await exec(command)

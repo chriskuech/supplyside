@@ -1,7 +1,6 @@
-import { ReactNode } from 'react'
-import { PoDocumentStyles, styles } from './PoDocumentStyles'
+import { PoDocumentStyles, styles } from './PoDocumentStyles.tsx-'
 import { PurchaseViewModel } from './ViewModel'
-import PoDocumentFooter from './PoDocumentFooter'
+import PoDocumentFooter from './PoDocumentFooter.tsx-'
 
 const tdStyle = {
   border: 0,
@@ -33,7 +32,7 @@ export default function PoDocument({
   shippingNotes,
   poRecipientName,
   vendorPrimaryAddress,
-}: PurchaseViewModel): ReactNode {
+}: PurchaseViewModel) {
   return (
     <>
       <PoDocumentStyles />
