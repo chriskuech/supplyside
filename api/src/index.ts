@@ -14,7 +14,7 @@ const isDev =  process.env.NODE_ENV === 'development';
 
   await app.ready()
 
-  if (process.env.CI || isDev) {
+  if (isDev || process.argv.includes('--gen')) {
     const json = JSON.stringify(app.swagger())
     const ast = await openapiTS(json)
     const ts = astToString(ast)

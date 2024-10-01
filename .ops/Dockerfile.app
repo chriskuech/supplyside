@@ -18,7 +18,6 @@ COPY ./api ./api
 COPY ./app ./app
 
 RUN cd ./api && npm run gen
-RUN test -f ./api/client.ts
 RUN cd ./app && npm run build
 
 ##
