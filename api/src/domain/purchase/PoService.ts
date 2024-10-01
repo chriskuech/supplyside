@@ -116,13 +116,12 @@ export class PoService {
 
     if (!poBlob) return
 
-    await this.smtpService.sendEmailWithTemplate({
-      From: 'SupplySide <bot@supplyside.io>',
-      To: `${poRecipient.name} <${poRecipient.email}>`,
-      Cc: `${assignee?.fullName} <${assignee?.email}>`,
-      ReplyTo: `${assignee?.fullName} <${assignee?.email}>`,
-      TemplateAlias: 'new-po',
-      TemplateModel: {
+    await this.smtpService.sendEmail({
+      to: [poRecipient],
+      cc: assignee && [assignee],
+      replyTo: assignee && [assignee],
+      templateAlias: 'new-po',
+      templateModel: {
         // layout
         buyer_logo_base64: logoBlob?.buffer.toString('base64'),
         buyer_logo_contenttype: logoBlob?.mimeType,
@@ -131,18 +130,16 @@ export class PoService {
 
         // template
         supplier_user_name: poRecipient.name ?? '(No Name)',
-        buyer_user_name: assignee?.fullName ?? '(Unassigned)',
+        buyer_user_name: assignee?.name ?? '(Unassigned)',
         supplier_company_name: vendor?.name ?? '(No Vendor)',
         order_number: number ?? '(No Number)',
         date: date ? new Date(date).toLocaleDateString() : '(No Date)',
       },
-      MessageStream: 'outbound',
-      Attachments: [
+      attachments: [
         {
-          Name: po.name,
-          ContentID: '', // bad typings
-          Content: poBlob.buffer.toString('base64'),
-          ContentType: po.contentType,
+          name: po.name,
+          contentBase64: poBlob.buffer.toString('base64'),
+          contentType: po.contentType,
         },
       ],
     })

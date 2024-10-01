@@ -5,7 +5,7 @@ export const UserSchema = z.object({
   accountId: z.string(),
   firstName: z.string().nullable(),
   lastName: z.string().nullable(),
-  fullName: z.string().nullable(),
+  name: z.string().nullable(),
   email: z.string(),
   profilePicBlobId: z.string().uuid().nullable(),
   tsAndCsSignedAt: z.string().datetime().nullable(),

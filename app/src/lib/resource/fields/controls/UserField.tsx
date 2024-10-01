@@ -34,7 +34,7 @@ function UserField(
       value={user}
       readOnly={isReadOnly}
       onChange={(e, value) => onChange(value)}
-      getOptionLabel={(u) => u.fullName ?? ''}
+      getOptionLabel={(u) => u.name ?? ''}
       options={users}
       renderInput={(params) => <TextField inputRef={ref} {...params} />}
     />

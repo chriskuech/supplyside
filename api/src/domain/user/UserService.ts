@@ -101,16 +101,14 @@ export class UserService {
       },
     })
 
-    await this.smtpService.sendEmailWithTemplate({
-      From: 'SupplySide <bot@supplyside.io>',
-      To: email,
-      TemplateAlias: 'user-invitation',
-      TemplateModel: {
+    await this.smtpService.sendEmail({
+      to: [{ email }],
+      templateAlias: 'user-invitation',
+      templateModel: {
         invite_email: email,
         action_url: `${this.configService.config.APP_BASE_URL}${loginPath}`,
         product_url: this.configService.config.APP_BASE_URL,
       },
-      MessageStream: 'outbound',
     })
   }
 }

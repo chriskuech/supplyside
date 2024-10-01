@@ -145,11 +145,10 @@ export class SessionService {
       throw error
     }
 
-    await this.smtpService.sendEmailWithTemplate({
-      From: 'SupplySide <bot@supplyside.io>',
-      To: email,
-      TemplateAlias: 'email-verification',
-      TemplateModel: {
+    await this.smtpService.sendEmail({
+      to: [{ email }],
+      templateAlias: 'email-verification',
+      templateModel: {
         verify_email: email,
         verify_token: tat,
         action_url:
@@ -159,7 +158,6 @@ export class SessionService {
           (returnTo ? `&returnTo=${returnTo}` : ''),
         product_url: this.configService.config.APP_BASE_URL,
       },
-      MessageStream: 'outbound',
     })
   }
 }

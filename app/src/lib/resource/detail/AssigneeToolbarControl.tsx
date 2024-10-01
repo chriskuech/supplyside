@@ -39,15 +39,12 @@ export default function AssigneeToolbarControl({
       <Tooltip
         title={
           assignee
-            ? `Assigned to ${assignee?.fullName ?? assignee?.email ?? '(No name)'}`
+            ? `Assigned to ${assignee?.name ?? assignee?.email ?? '(No name)'}`
             : `Assign the ${resourceType} to a user`
         }
       >
         <IconButton onClick={open}>
-          <Avatar
-            alt={assignee?.fullName ?? ''}
-            src={getProfilePicPath(assignee)}
-          >
+          <Avatar alt={assignee?.name ?? ''} src={getProfilePicPath(assignee)}>
             {!assignee && <AssignmentInd />}
           </Avatar>
         </IconButton>

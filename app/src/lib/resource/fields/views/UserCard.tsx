@@ -10,13 +10,10 @@ export default function UserCard({ user }: Props) {
   return (
     <Stack direction="row" spacing={1}>
       {user && (
-        <Avatar
-          src={getProfilePicPath(user)}
-          alt={user.fullName ?? undefined}
-        />
+        <Avatar src={getProfilePicPath(user)} alt={user.name ?? undefined} />
       )}
       <Stack>
-        <Typography>{user?.fullName}</Typography>
+        <Typography>{user?.name}</Typography>
         <Typography variant="caption">{user?.email}</Typography>
       </Stack>
     </Stack>

@@ -149,7 +149,7 @@ export const mapSchemaFieldToGridColDef = (
       .with(
         'User',
         () => (value) =>
-          value?.user?.fullName?.toLowerCase().includes(query.toLowerCase()) ||
+          value?.user?.name?.toLowerCase().includes(query.toLowerCase()) ||
           value?.user?.email.toLowerCase().includes(query.toLowerCase()) ||
           false,
       )

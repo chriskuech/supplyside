@@ -8,7 +8,7 @@ export const mapUserModelToEntity = (model: UserModel): User => ({
   accountId: model.accountId,
   firstName: model.firstName,
   lastName: model.lastName,
-  fullName:
+  name:
     [model.firstName, model.lastName].filter(isTruthy).join(' ') || null,
   email: model.email,
   tsAndCsSignedAt: model.tsAndCsSignedAt?.toISOString() ?? null,

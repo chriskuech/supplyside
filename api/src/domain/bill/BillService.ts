@@ -77,15 +77,7 @@ export class BillService {
 
     const account = await this.accountService.readByKey(accountKey)
 
-    if (!account) {
-      await this.smtpService.sendEmail({
-        From: 'SupplySide <bot@supplyside.io>',
-        To: message.From,
-        Subject: 'We couldn\'t process your email',
-        Attachments: message.Attachments,
-        TextBody: `The account with key ${accountKey} does not exist.`,
-      })
-    }
+    if (!account) return
 
     const attachments: FileParam[] | undefined = message.Attachments?.map(
       (attachment) => ({
