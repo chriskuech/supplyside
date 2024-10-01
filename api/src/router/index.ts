@@ -14,9 +14,9 @@ import { mountHealth } from './health'
 import { JsonLogicSchema } from '../domain/resource/json-logic/types'
 import { mountSelf } from './api/self'
 
-export const createServer = (isDev?: boolean) => 
-  fastify({
-    logger: isDev ? {
+export const createServer = (isDev?: boolean) => fastify({
+  logger: isDev
+    ? {
       transport: {
         target: 'pino-pretty',
         options: {
@@ -24,29 +24,30 @@ export const createServer = (isDev?: boolean) =>
           ignore: 'pid,hostname',
         },
       },
-    } : true,
-  }) // TODO: reenable logging
-    .setValidatorCompiler(validatorCompiler)
-    .setSerializerCompiler(serializerCompiler)
-    .register(fastifySwagger, {
-      openapi: {
-        info: {
-          title: 'SupplySide API',
-          version: '0.0.0',
-        },
+    }
+    : true,
+})
+  .setValidatorCompiler(validatorCompiler)
+  .setSerializerCompiler(serializerCompiler)
+  .register(fastifySwagger, {
+    openapi: {
+      info: {
+        title: 'SupplySide API',
+        version: '0.0.0',
       },
-      transform: jsonSchemaTransform,
-      transformObject: createJsonSchemaTransformObject({
-        schemas: {
-          Account: AccountSchema,
-          Session: SessionSchema,
-          JsonLogic: JsonLogicSchema,
-        },
-      }),
-    })
-    .get('/', (request, reply) => reply.status(200).send('OK')) // required by App Service
-    .register(mountApi, { prefix: '/api' })
-    .register(mountHealth, { prefix: '/health' })
-    .register(mountSelf, { prefix: '/self' })
-    .register(mountWebhooks, { prefix: '/webhooks' })
-    .setNotFoundHandler((request, reply) => reply.code(404).send('Not Found'))
+    },
+    transform: jsonSchemaTransform,
+    transformObject: createJsonSchemaTransformObject({
+      schemas: {
+        Account: AccountSchema,
+        Session: SessionSchema,
+        JsonLogic: JsonLogicSchema,
+      },
+    }),
+  })
+  .get('/', (request, reply) => reply.status(200).send('OK')) // required by App Service
+  .register(mountApi, { prefix: '/api' })
+  .register(mountHealth, { prefix: '/health' })
+  .register(mountSelf, { prefix: '/self' })
+  .register(mountWebhooks, { prefix: '/webhooks' })
+  .setNotFoundHandler((request, reply) => reply.code(404).send('Not Found'))

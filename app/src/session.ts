@@ -36,7 +36,6 @@ export const readSession = async () => {
   const sessionId = cookies().get(sessionIdCookieName)?.value
   if (!sessionId) return
   const session = await client.readSession(sessionId)
-  if (!session) return
   return session
 }
 

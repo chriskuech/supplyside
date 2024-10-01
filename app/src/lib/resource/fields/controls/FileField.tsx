@@ -4,6 +4,7 @@ import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useRef } from 'react'
 import { File } from '@supplyside/model'
 import { uploadFile } from '@/actions/files'
+import { download, preview } from '@/app/api/download/[filename]/util'
 
 type Props = {
   resourceId: string
@@ -36,12 +37,12 @@ export default function FileField({ file, isReadOnly, onChange }: Props) {
       {file && (
         <>
           <Tooltip title="View File">
-            <IconButton onClick={() => window.open(file.previewPath)}>
+            <IconButton onClick={() => preview(file)}>
               <Visibility />
             </IconButton>
           </Tooltip>
           <Tooltip title="Download File">
-            <IconButton onClick={() => file && window.open(file.downloadPath)}>
+            <IconButton onClick={() => download(file)}>
               <Download />
             </IconButton>
           </Tooltip>

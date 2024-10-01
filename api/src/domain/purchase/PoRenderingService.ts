@@ -93,11 +93,8 @@ export class PoRenderingService {
       : undefined
 
     const blob = account.logoBlobId
-      ? await this.blobService.readBlob({
-          accountId: account.id,
-          blobId: account.logoBlobId,
-        })
-      : undefined
+      ? await this.blobService.readBlobWithData(account.id, account.logoBlobId)
+      : undefined 
 
     const lineAdditionalFields = lineSchema.fields.filter(
       (field) =>

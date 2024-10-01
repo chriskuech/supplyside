@@ -1,47 +1,60 @@
-import { fail } from 'assert'
 import { NextRequest, NextResponse } from 'next/server'
+import { match } from 'ts-pattern'
+import { querySchema } from './schema'
+import { readBlob, readBlobData } from '@/client/blob'
+import { requireSession } from '@/session'
+import { readSelf } from '@/client/user'
+import { readAccount } from '@/client/account'
+import { readFile } from '@/client/files'
 
-/**
- * /api/download/[filename]?blobId=<blobId>[&no-impersonation][&preview]
- */
 export async function GET(
   req: NextRequest,
   { params: { filename } }: { params: { filename: string } },
 ): Promise<NextResponse> {
-  fail('NYI')
-  // const query = new URL(req.url).searchParams
+  const notFound = () =>
+    NextResponse.json({ error: 'Blob not found' }, { status: 404 })
 
-  // const blobId = query.get('blobId')
-  // if (!blobId) {
-  //   return NextResponse.json({ error: '`blobId` is required' }, { status: 400 })
-  // }
+  const query = querySchema.parse(
+    Object.fromEntries(new URL(req.url).searchParams.entries()),
+  )
 
-  // const { accountId: impersonatedAccountId, userId } = await readSession()
-  // const user = await readSelf(userId)
+  const { accountId, blobId } = await match(query)
+    .with({ type: 'profile-pic' }, async ({ userId }) => {
+      const user = await readSelf(userId)
+      if (!user) console.error('user not found', userId)
+      return { accountId: user?.accountId, blobId: user?.profilePicBlobId }
+    })
+    .with({ type: 'logo' }, async ({ accountId }) => {
+      const account = await readAccount(accountId)
+      return { accountId, blobId: account?.logoBlobId }
+    })
+    .with({ type: 'file' }, async ({ fileId }) => {
+      const { accountId } = await requireSession()
+      const file = await readFile(accountId, fileId)
+      return { accountId, blobId: file?.blobId }
+    })
+    .exhaustive()
+  if (!accountId || !blobId) return notFound()
 
-  // if (!user)
-  //   return NextResponse.json({ error: 'User not found' }, { status: 404 })
+  console.log([accountId, blobId])
+  const blob = await readBlob(accountId, blobId)
+  if (!blob) return notFound()
 
-  // const accountId =
-  //   query.get('no-impersonation') !== null
-  //     ? user.accountId
-  //     : impersonatedAccountId
+  console.error(2)
+  const data = await readBlobData(accountId, blobId)
+  if (!data) return notFound()
 
-  // const blob = await readBlob(accountId, blobId)
-  // if (!blob) {
-  //   return NextResponse.json({ error: 'File not found' }, { status: 404 })
-  // }
+  const contentType = blob.mimeType
+  const encoding = contentType.startsWith('text/') ? 'utf-8' : undefined
 
-  // const encoding = blob.mimeType.startsWith('text/') ? 'utf-8' : undefined
-
-  // return new NextResponse(blob.buffer, {
-  //   headers: {
-  //     'Content-Type': encoding
-  //       ? `${blob.mimeType}; charset=${encoding}`
-  //       : blob.mimeType,
-  //     ...(query.get('preview') === null
-  //       ? { 'Content-Disposition': `attachment; filename=${filename}` }
-  //       : undefined),
-  //   },
-  // })
+  return new NextResponse(data, {
+    headers: {
+      'Content-Type': encoding
+        ? `${contentType}; charset=${encoding}`
+        : contentType,
+      ...(query.preview
+        ? { 'Content-Disposition': `attachment; filename=${filename}` }
+        : undefined),
+    },
+  })
 }

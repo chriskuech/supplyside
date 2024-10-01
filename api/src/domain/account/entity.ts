@@ -5,7 +5,6 @@ export const AccountSchema = z.object({
   key: z.string(),
   name: z.string(),
   address: z.string(),
-  logoPath: z.string().nullable(),
   logoBlobId: z.string().nullable(),
 })
 

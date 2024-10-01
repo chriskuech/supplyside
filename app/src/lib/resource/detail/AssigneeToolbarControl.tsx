@@ -15,6 +15,7 @@ import {
 import { ResourceType, SchemaField, Value } from '@supplyside/model'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
+import { getProfilePicPath } from '@/app/api/download/[filename]/util'
 
 type AssigneeControlProps = {
   resourceId: string
@@ -45,7 +46,7 @@ export default function AssigneeToolbarControl({
         <IconButton onClick={open}>
           <Avatar
             alt={assignee?.fullName ?? ''}
-            src={assignee?.profilePicPath ?? ''}
+            src={getProfilePicPath(assignee)}
           >
             {!assignee && <AssignmentInd />}
           </Avatar>

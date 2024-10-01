@@ -22,6 +22,7 @@ import {
 import { useState } from 'react'
 import { User } from '@supplyside/model'
 import { useThemePreference } from '../DynamicThemeProvider'
+import { getProfilePicPath } from '@/app/api/download/[filename]/util'
 
 type Props = {
   self: User
@@ -36,7 +37,7 @@ export function UserMenu({ self: user }: Props) {
       <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
         <Avatar
           alt={user.fullName ?? ''}
-          src={user.profilePicPath ?? ''}
+          src={getProfilePicPath(user)}
           sx={{ bgcolor: 'primary.main' }}
         />
       </IconButton>

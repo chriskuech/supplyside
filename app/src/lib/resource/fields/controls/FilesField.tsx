@@ -10,7 +10,8 @@ import {
 } from '@mui/material'
 import { useRef } from 'react'
 import { File } from '@supplyside/model'
-// import { uploadFiles } from '@/actions/files'
+import { uploadFiles } from '@/actions/files'
+import { download, preview } from '@/app/api/download/[filename]/util'
 
 type Props = {
   files: File[]
@@ -28,12 +29,12 @@ export default function FilesField({ files, isReadOnly, onChange }: Props) {
           <Stack key={file.id} direction="row" alignItems="center">
             <Typography flexGrow={1}>{file.name ?? '-'}</Typography>
             <Tooltip title="View File">
-              <IconButton onClick={() => window.open(file.previewPath)}>
+              <IconButton onClick={() => preview(file)}>
                 <Visibility />
               </IconButton>
             </Tooltip>
             <Tooltip title="Download File">
-              <IconButton onClick={() => window.open(file.downloadPath)}>
+              <IconButton onClick={() => download(file)}>
                 <Download />
               </IconButton>
             </Tooltip>
@@ -75,7 +76,7 @@ export default function FilesField({ files, isReadOnly, onChange }: Props) {
               formData.append('files', file)
             }
 
-            // uploadFiles(formData).then((files) => files && onChange?.(files))
+            uploadFiles(formData).then((files) => files && onChange?.(files))
           }}
           multiple
         />

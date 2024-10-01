@@ -13,6 +13,7 @@ import { useState } from 'react'
 import { Errors, handleSaveSettings } from './actions'
 import { useImagePreview } from '@/hooks/useImagePreview'
 import { Account } from '@/client/account'
+import { getLogoPath } from '@/app/api/download/[filename]/util'
 
 type Props = {
   account: Account
@@ -28,7 +29,7 @@ export default function Form({ account, billsEmailDomain }: Props) {
       <Stack spacing={4} direction="column" alignItems="center">
         <Stack spacing={2} alignItems="center">
           <Avatar
-            src={(image || account?.logoPath) ?? undefined}
+            src={image || getLogoPath(account) || undefined}
             alt="Logo"
             sx={{ width: 300, height: 300 }}
           />

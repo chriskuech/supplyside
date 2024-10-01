@@ -3,7 +3,7 @@
 import { isTruthy } from 'remeda'
 import { z } from 'zod'
 import { createBlob } from '@/client/blob'
-import { updateUser } from '@/client/user'
+import { readSelf, updateSelf } from '@/client/user'
 import { requireSession } from '@/session'
 
 const schema = z.object({
@@ -22,7 +22,10 @@ export type Errors = z.typeToFlattenedError<Dto>['fieldErrors']
 export const handleSaveSettings = async (
   formData: FormData,
 ): Promise<Errors | undefined> => {
-  const { accountId, userId } = await requireSession()
+  const { userId } = await requireSession()
+  const user = await readSelf(userId)
+
+  if (!user) return
 
   const result = schema.safeParse(Object.fromEntries(formData.entries()))
 
@@ -32,15 +35,13 @@ export const handleSaveSettings = async (
 
   const { firstName, lastName, file } = result.data
 
-  const imageBlobId = file
-    ? await createBlob({ accountId, file }).then(({ id }) => id)
-    : undefined
+  const imageBlob = file && (await createBlob(user.accountId, file))
 
-  const data = { firstName, lastName, imageBlobId }
+  const data = { firstName, lastName, imageBlobId: imageBlob?.id }
 
   if (!Object.values(data).some(isTruthy)) {
     return
   }
 
-  await updateUser(accountId, userId, data)
+  await updateSelf(userId, data)
 }

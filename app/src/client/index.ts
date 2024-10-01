@@ -3,11 +3,20 @@ import createClient from 'openapi-fetch'
 import type { paths } from '@supplyside/api'
 import { config } from '@/config'
 
-export const client = () => {
+// shim until react cache is released
+const cache = <T>(fn: () => T): (() => T) => {
+  let value: T | undefined = undefined
+  return () => {
+    value ??= fn()
+    return value
+  }
+}
+
+export const client = cache(() => {
   const { API_BASE_URL, API_KEY } = config()
 
   return createClient<paths>({
     baseUrl: API_BASE_URL,
-    headers: new Headers({ Authorization: `Bearer ${API_KEY}` }),
+    headers: { Authorization: `Bearer ${API_KEY}` },
   })
-}
+})

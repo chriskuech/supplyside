@@ -23,7 +23,7 @@ export class BlobService {
   async createBlob(
     accountId: string,
     data: {
-      buffer: Buffer | ArrayBuffer;
+      buffer: Buffer;
       contentType: string;
     }
   ): Promise<Blob> {
@@ -34,11 +34,9 @@ export class BlobService {
 
     await containerClient.createIfNotExists()
 
-    await containerClient
-      .getBlockBlobClient(blobName)
-      .uploadData(data.buffer, {
-        blobHTTPHeaders: { blobContentType: contentType },
-      })
+    await containerClient.getBlockBlobClient(blobName).uploadData(data.buffer, {
+      blobHTTPHeaders: { blobContentType: contentType },
+    })
 
     const blob = await this.prisma.blob.create({
       data: {
@@ -51,20 +49,19 @@ export class BlobService {
     return blob
   }
 
-  async readBlob({
-    accountId,
-    blobId,
-  }: {
-    accountId: string;
-    blobId: string;
-  }): Promise<BlobWithData | undefined> {
-    const blob = await this.prisma.blob.findUnique({
+  async readBlob(accountId: string, blobId: string): Promise<Blob> {
+    return await this.prisma.blob.findUniqueOrThrow({
       where: { accountId, id: blobId },
     })
+  }
 
-    if (!blob) {
-      throw new Error('Blob not found')
-    }
+  async readBlobWithData(
+    accountId: string,
+    blobId: string
+  ): Promise<BlobWithData> {
+    const blob = await this.prisma.blob.findUniqueOrThrow({
+      where: { accountId, id: blobId },
+    })
 
     const buffer = await this.client
       .getContainerClient(containerName)
@@ -81,13 +78,9 @@ export class BlobService {
     accountId: string;
     blobId: string;
   }): Promise<void> {
-    const blob = await this.prisma.blob.findUnique({
+    const blob = await this.prisma.blob.findUniqueOrThrow({
       where: { accountId, id: blobId },
     })
-
-    if (!blob) {
-      throw new Error('Blob not found')
-    }
 
     await this.client
       .getContainerClient(containerName)

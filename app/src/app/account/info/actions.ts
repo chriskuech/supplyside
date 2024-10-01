@@ -32,9 +32,8 @@ export const handleSaveSettings = async (
 
   const { name, key, address, file } = result.data
 
-  const logoBlobId = file
-    ? await createBlob({ accountId, file }).then(({ id }) => id)
-    : undefined
+  const logoBlobId =
+    file && (await createBlob(accountId, file).then((blob) => blob?.id))
 
   const data = { name, key, address, logoBlobId }
 

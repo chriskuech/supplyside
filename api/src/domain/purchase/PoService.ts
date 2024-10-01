@@ -108,9 +108,9 @@ export class PoService {
     if (!po || !poRecipient?.email) return
 
     const [poBlob, logoBlob] = await Promise.all([
-      this.blobService.readBlob({ accountId, blobId: po.blobId }),
+      this.blobService.readBlobWithData(accountId, po.blobId),
       account.logoBlobId
-        ? this.blobService.readBlob({ accountId, blobId: account.logoBlobId })
+        ? this.blobService.readBlobWithData(accountId, account.logoBlobId)
         : undefined,
     ])
 

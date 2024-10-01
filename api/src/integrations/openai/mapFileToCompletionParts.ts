@@ -9,9 +9,9 @@ import {
 } from 'openai/resources/index.mjs'
 import { P, match } from 'ts-pattern'
 import { inject, injectable } from 'inversify'
-import { File } from '@supplyside/api/domain/file/types'
 import { BlobService } from '@supplyside/api/domain/blob/BlobService'
 import { ConfigService } from '@supplyside/api/ConfigService'
+import { File } from '@supplyside/model'
 
 const exec = promisify(execCallback)
 
@@ -37,10 +37,10 @@ export class CompletionPartsService {
   private async readTextFileToString(
     file: File
   ): Promise<ChatCompletionContentPartText> {
-    const blob = await this.blobService.readBlob({
-      accountId: file.accountId,
-      blobId: file.blobId,
-    })
+    const blob = await this.blobService.readBlobWithData(
+      file.accountId,
+      file.blobId
+    )
 
     assert(blob)
 
@@ -53,12 +53,10 @@ export class CompletionPartsService {
   private async readImageFileToBase64(
     file: File
   ): Promise<ChatCompletionContentPartImage> {
-    const blob = await this.blobService.readBlob({
-      accountId: file.accountId,
-      blobId: file.blobId,
-    })
-
-    assert(blob)
+    const blob = await this.blobService.readBlobWithData(
+      file.accountId,
+      file.blobId
+    )
 
     return {
       type: 'image_url',
@@ -74,12 +72,7 @@ export class CompletionPartsService {
   private async readPdfToBase64s(
     file: File
   ): Promise<ChatCompletionContentPartImage[]> {
-    const blob = await this.blobService.readBlob({
-      accountId: file.accountId,
-      blobId: file.blobId,
-    })
-
-    assert(blob)
+    const blob = await this.blobService.readBlobWithData(file.accountId, file.blobId)
 
     const containerPath = `${this.configService.config.TEMP_PATH}/${file.id}`
     await mkdir(containerPath, { recursive: true })

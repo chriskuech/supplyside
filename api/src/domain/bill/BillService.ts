@@ -1,6 +1,5 @@
 import { inject, injectable } from 'inversify'
 import { container } from '@supplyside/api/di'
-import { FileService } from '@supplyside/api/domain/file'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import SmtpService from '@supplyside/api/integrations/SmtpService'
@@ -8,6 +7,8 @@ import { Resource, fields, selectSchemaFieldUnsafe } from '@supplyside/model'
 import assert from 'assert'
 import { Message } from 'postmark'
 import { AccountService } from '../account/AccountService'
+import { FileService } from '../file/FileService'
+import { BlobService } from '../blob/BlobService'
 
 type FileParam = {
   content: string;
@@ -22,6 +23,7 @@ type Params = {
 };
 
 const createBill = async (params: Params): Promise<Resource> => {
+  const blobService = container.resolve(BlobService)
   const fileService = container.resolve(FileService)
   const resourceService = container.resolve(ResourceService)
   const schemaService = container.resolve(SchemaService)
@@ -30,14 +32,15 @@ const createBill = async (params: Params): Promise<Resource> => {
 
   const fileIds = await Promise.all(
     params.files.map(async (file) => {
-      const { id: fileId } = await fileService.createFromBuffer(
-        params.accountId,
-        {
-          name: file.fileName,
-          buffer: Buffer.from(file.content, file.encoding),
-          contentType: file.contentType,
-        }
-      )
+      const { id: blobId } = await blobService.createBlob(params.accountId, {
+        buffer: Buffer.from(file.content, file.encoding),
+        contentType: file.contentType,
+      })
+
+      const { id: fileId } = await fileService.create(params.accountId, {
+        name: file.fileName,
+        blobId,
+      })
 
       return fileId
     })

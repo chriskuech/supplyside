@@ -7,7 +7,7 @@ export const UserSchema = z.object({
   lastName: z.string().nullable(),
   fullName: z.string().nullable(),
   email: z.string(),
-  profilePicPath: z.string().nullable(),
+  profilePicBlobId: z.string().uuid().nullable(),
   tsAndCsSignedAt: z.string().datetime().nullable(),
   isAdmin: z.boolean(),
   isApprover: z.boolean(),
