@@ -1,6 +1,7 @@
 import 'server-only'
 import { Resource, ResourceType, ValueInput } from '@supplyside/model'
 import { components } from '@supplyside/api'
+import { stringify } from 'qs'
 import { client } from '.'
 
 export type JsonLogic = components['schemas']['JsonLogic']
@@ -74,6 +75,9 @@ export const readResources = async (
           resourceType,
           where,
         },
+      },
+      querySerializer(queryParams) {
+        return stringify(queryParams)
       },
       next: { tags: ['Resources'] },
     },

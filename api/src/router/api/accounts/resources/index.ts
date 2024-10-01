@@ -12,6 +12,7 @@ import { z } from 'zod'
 import { mountCosts } from './costs'
 import { JsonLogicSchema } from '@supplyside/api/domain/resource/json-logic/types'
 import { pick } from 'remeda'
+import {parse} from 'qs'
 
 export const mountResources = async <App extends FastifyInstance>(app: App) =>
   app
@@ -24,10 +25,11 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         params: z.object({
           accountId: z.string().uuid(),
         }),
-        querystring: z.object({
-          resourceType: ResourceTypeSchema,
-          where: JsonLogicSchema.optional(),
-        }),
+        // TODO: there must be a cleaner way to parse deep objects
+        querystring: z.preprocess(a => parse(a as string), z.object({
+            resourceType: ResourceTypeSchema,
+            where: JsonLogicSchema.optional(),
+          }) ),
         response: {
           200: z.array(ResourceSchema),
         },
@@ -39,6 +41,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         const resources = await service.readResources({
           accountId: req.params.accountId,
           type: req.query.resourceType,
+          where: req.query.where,
         })
 
         res.status(200).send(resources)
@@ -143,7 +146,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         }),
         querystring: z.object({
           resourceType: ResourceTypeSchema,
-          resourceKey: z.number().int().positive(),
+          resourceKey: z.coerce.number(),
         }),
         response: {
           200: z.object({
