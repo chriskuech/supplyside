@@ -15,7 +15,8 @@ import { isRequestError } from './utils'
 @injectable()
 export class QuickBooksService {
   constructor(
-    @inject(PrismaService) private readonly prisma: PrismaService,
+    @inject(PrismaService)
+    private readonly prisma: PrismaService,
     @inject(QuickBooksTokenService)
     private readonly quickBooksTokenService: QuickBooksTokenService,
     @inject(QuickBooksConfigService)
