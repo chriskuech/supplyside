@@ -162,11 +162,11 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
 
-        const resource = await service.readResource({
-          accountId: req.params.accountId,
-          type: req.query.resourceType,
-          key: req.query.resourceKey,
-        })
+        const resource = await service.readByKey(
+          req.params.accountId,
+          req.query.resourceType,
+          req.query.resourceKey
+        )
 
         res.status(200).send(pick(resource, ['id', 'key', 'type']))
       },
@@ -186,10 +186,10 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
 
-        const resource = await service.readResource({
-          accountId: req.params.accountId,
-          id: req.params.resourceId,
-        })
+        const resource = await service.read(
+          req.params.accountId,
+          req.params.resourceId
+        )
 
         res.send(resource)
       },

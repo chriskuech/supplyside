@@ -141,12 +141,26 @@ export class ResourceService {
     @inject(SchemaService) private readonly schemaService: SchemaService
   ) {}
 
-  async read(accountId: string, resourceType: ResourceType, id: string) {
+  async read(accountId: string, resourceId: string): Promise<Resource> {
     const model = await this.prisma.resource.findUniqueOrThrow({
       where: {
-        id,
+        id: resourceId,
         accountId,
-        type: resourceType,
+      },
+      include: resourceInclude,
+    })
+
+    return mapResourceModelToEntity(model)
+  }
+
+  async readByKey(accountId: string, resourceType: ResourceType, key: number) {
+    const model = await this.prisma.resource.findUniqueOrThrow({
+      where: {
+        accountId_type_key: {
+          accountId,
+          type: resourceType,
+          key,
+        },
       },
       include: resourceInclude,
     })
@@ -241,31 +255,7 @@ export class ResourceService {
       resource: mapResourceModelToEntity(resource),
     })
 
-    return await this.readResource({ accountId, id: resource.id })
-  }
-
-  async readResource({
-    accountId,
-    type,
-    key,
-    id,
-  }: ReadResourceParams): Promise<Resource> {
-    const model = await this.prisma.resource.findUniqueOrThrow({
-      where: {
-        id,
-        accountId_type_key:
-          type && key
-            ? {
-                accountId,
-                type,
-                key,
-              }
-            : undefined,
-      },
-      include: resourceInclude,
-    })
-
-    return mapResourceModelToEntity(model)
+    return await this.read(accountId, resource.id)
   }
 
   async readResources({
@@ -299,7 +289,7 @@ export class ResourceService {
     resourceId,
     fields,
   }: UpdateResourceParams) {
-    const resource = await this.readResource({ accountId, id: resourceId })
+    const resource = await this.read(accountId, resourceId)
     const schema = await this.schemaService.readSchema(
       accountId,
       resource.type
@@ -311,9 +301,7 @@ export class ResourceService {
           schema.fields.find((f) => f.fieldId === fieldId) ??
           fail('Field not found in schema')
 
-        const rf = resource.fields.find(
-          (resourceField) => resourceField.fieldId === fieldId
-        )
+        const rf = resource.fields.find((rf) => rf.fieldId === fieldId)
 
         if (resource.templateId && rf?.templateId) {
           throw new Error('Can\'t update a system value on a system resource')
@@ -357,7 +345,7 @@ export class ResourceService {
       })
     )
 
-    const entity = await this.readResource({ accountId, id: resourceId })
+    const entity = await this.read(accountId, resourceId)
 
     await this.handleResourceUpdate({
       accountId,
@@ -370,7 +358,7 @@ export class ResourceService {
       })),
     })
 
-    return await this.readResource({ accountId, id: resourceId })
+    return await this.read(accountId, resourceId)
   }
 
   async deleteResource({ accountId, id }: DeleteResourceParams): Promise<void> {
@@ -515,10 +503,7 @@ export class ResourceService {
   }
 
   async recalculateItemizedCosts(accountId: string, resourceId: string) {
-    const resource = await this.readResource({
-      accountId,
-      id: resourceId,
-    })
+    const resource = await this.read(accountId, resourceId)
     const schema = await this.schemaService.readSchema(
       accountId,
       resource.type
@@ -733,7 +718,7 @@ export class ResourceService {
     ) {
       await this.recalculateSubtotalCost(accountId, 'Bill', resource.id)
 
-      resource = await this.readResource({ accountId, id: resource.id })
+      resource = await this.read(accountId, resource.id)
     }
 
     // When the Bill.“Invoice Date” field or Bill.“Payment Terms” field changes,
@@ -790,14 +775,8 @@ export class ResourceService {
     toResourceId,
   }: LinkResourceParams & { backLinkFieldRef: FieldReference }) {
     const [fromResource, toResource] = await Promise.all([
-      this.readResource({
-        accountId,
-        id: fromResourceId,
-      }),
-      this.readResource({
-        accountId,
-        id: toResourceId,
-      }),
+      this.read(accountId, fromResourceId),
+      this.read(accountId, toResourceId),
     ])
 
     await this.copyFields({
@@ -852,10 +831,7 @@ export class ResourceService {
   }
 
   async cloneResource(accountId: string, resourceId: string) {
-    const source = await this.readResource({
-      accountId,
-      id: resourceId,
-    })
+    const source = await this.read(accountId, resourceId)
 
     const destination = await match(source.type)
       .with('Bill', async () => {
@@ -1039,14 +1015,8 @@ export class ResourceService {
     toResourceId,
   }: ResourceCopyParams) {
     const [fromResource, toResource] = await Promise.all([
-      this.readResource({
-        accountId,
-        id: fromResourceId,
-      }),
-      this.readResource({
-        accountId,
-        id: toResourceId,
-      }),
+      this.read(accountId, fromResourceId),
+      this.read(accountId, toResourceId),
     ])
 
     const [fromSchema, toSchema] = await Promise.all([
@@ -1110,6 +1080,6 @@ export class ResourceService {
 
     if (!resourceField) return null
 
-    return this.readResource({ accountId, id: resourceField.resourceId })
+    return this.read(accountId, resourceField.resourceId)
   }
 }

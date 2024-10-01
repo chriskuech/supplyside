@@ -48,7 +48,7 @@ export class PoService {
 
     const buffer = await this.poRenderingService.renderPo(
       accountId,
-      resourceId,
+      resourceId
     )
 
     const [blob, resource] = await Promise.all([
@@ -56,7 +56,7 @@ export class PoService {
         buffer,
         contentType: 'application/pdf',
       }),
-      this.resourceService.readResource({ accountId, id: resourceId }),
+      this.resourceService.read(accountId, resourceId),
     ])
 
     const vendorName = selectResourceFieldValue(resource, fields.vendor)
@@ -87,11 +87,7 @@ export class PoService {
 
   async sendPo(accountId: string, resourceId: string) {
     const [order, account] = await Promise.all([
-      this.resourceService.readResource({
-        type: 'Purchase',
-        id: resourceId,
-        accountId,
-      }),
+      this.resourceService.read(accountId, resourceId),
       this.accountService.read(accountId),
     ])
 

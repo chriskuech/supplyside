@@ -60,11 +60,7 @@ export class BillExtractionService {
   async extractContent(accountId: string, resourceId: string) {
     const [billSchema, billResource, vendors] = await Promise.all([
       this.schemaService.readSchema(accountId, 'Bill'),
-      this.resourceService.readResource({
-        id: resourceId,
-        accountId,
-        type: 'Bill',
-      }),
+      this.resourceService.read(accountId, resourceId),
       this.resourceService.readResources({
         accountId,
         type: 'Vendor',

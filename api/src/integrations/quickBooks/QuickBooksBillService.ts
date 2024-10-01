@@ -184,11 +184,7 @@ export class QuickBooksBillService {
     accountId: string,
     resourceId: string
   ): Promise<void> {
-    const bill = await this.resourceService.readResource({
-      accountId,
-      type: 'Bill',
-      id: resourceId,
-    })
+    const bill = await this.resourceService.read(accountId, resourceId)
 
     const quickBooksAccountName = selectResourceFieldValue(
       bill,
@@ -219,10 +215,7 @@ export class QuickBooksBillService {
     const vendorId = selectResourceFieldValue(bill, fields.vendor)?.resource
       ?.id
     assert(vendorId, 'Vendor not set')
-    const vendorResource = await this.resourceService.readResource({
-      accountId,
-      id: vendorId,
-    })
+    const vendorResource = await this.resourceService.read(accountId, vendorId)
 
     const quickBooksVendor =
       await this.quickBooksVendorService.upsertVendorOnQuickBooks(

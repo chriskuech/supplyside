@@ -36,7 +36,7 @@ export class PoRenderingService {
   async renderPo(
     accountId: string,
     resourceId: string,
-    { isPreview }: { isPreview?: boolean } = {},
+    { isPreview }: { isPreview?: boolean } = {}
   ) {
     return await this.osService.withTempDir(async (path) => {
       const viewModel = await this.createViewModel(accountId, resourceId)
@@ -63,11 +63,7 @@ export class PoRenderingService {
     purchaseId: string
   ): Promise<PurchaseViewModel> {
     const [order, lines, lineSchema, account] = await Promise.all([
-      this.resourceService.readResource({
-        accountId,
-        id: purchaseId,
-        type: 'Purchase',
-      }),
+      this.resourceService.read(accountId, purchaseId),
       this.resourceService.readResources({
         accountId,
         type: 'Line',
@@ -83,11 +79,7 @@ export class PoRenderingService {
       ?.id
 
     const vendor = vendorId
-      ? await this.resourceService.readResource({
-          accountId: account.id,
-          id: vendorId,
-          type: 'Vendor',
-        })
+      ? await this.resourceService.read(account.id, vendorId)
       : undefined
 
     const blob = account.logoBlobId
@@ -114,11 +106,7 @@ export class PoRenderingService {
             ?.id
 
           const item = itemId
-            ? await this.resourceService.readResource({
-                accountId: account.id,
-                id: itemId,
-                type: 'Item',
-              })
+            ? await this.resourceService.read(account.id, itemId)
             : undefined
 
           return {
