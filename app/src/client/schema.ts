@@ -1,5 +1,6 @@
 import 'server-only'
 import { ResourceType, Schema } from '@supplyside/model'
+import { revalidateTag } from 'next/cache'
 import { client } from '.'
 
 export const readSchema = async (
@@ -11,6 +12,9 @@ export const readSchema = async (
     {
       params: {
         path: { accountId, resourceType },
+      },
+      next: {
+        tags: ['Schemas'],
       },
     },
   )
@@ -25,6 +29,9 @@ export const readCustomSchemas = async (accountId: string) => {
       params: {
         path: { accountId },
       },
+      next: {
+        tags: ['Schemas'],
+      },
     },
   )
 
@@ -36,6 +43,8 @@ export const updateSchema = async (
   resourceType: ResourceType,
   sectionIds: string[],
 ) => {
+  revalidateTag('Schemas')
+
   await client().PATCH(
     '/api/accounts/{accountId}/schemas/{resourceType}/custom/',
     {
@@ -52,6 +61,8 @@ export const addSection = async (
   resourceType: ResourceType,
   data: { name: string },
 ) => {
+  revalidateTag('Schemas')
+
   await client().POST(
     '/api/accounts/{accountId}/schemas/{resourceType}/custom/sections/',
     {
@@ -72,6 +83,8 @@ export const updateSection = async (
     fieldIds: string[]
   },
 ) => {
+  revalidateTag('Schemas')
+
   await client().PATCH(
     '/api/accounts/{accountId}/schemas/{resourceType}/custom/sections/{sectionId}/',
     {
@@ -88,6 +101,8 @@ export const removeSection = async (
   resourceType: ResourceType,
   sectionId: string,
 ) => {
+  revalidateTag('Schemas')
+
   await client().DELETE(
     '/api/accounts/{accountId}/schemas/{resourceType}/custom/sections/{sectionId}/',
     {

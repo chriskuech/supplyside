@@ -15,7 +15,7 @@ export class SchemaService {
     resourceType: ResourceType,
     isSystem?: boolean
   ): Promise<Schema> {
-    const schemas = await this.prisma.schema.findMany({
+    const schema = await this.prisma.schema.findFirstOrThrow({
       where: {
         accountId,
         resourceType,
@@ -28,19 +28,16 @@ export class SchemaService {
     })
 
     return {
+      id: schema.id,
       resourceType,
-      sections: schemas
-        .flatMap((s) => s.Section)
-        .map((s) => ({
-          id: s.id,
-          name: s.name,
-          fields: s.SectionField.map((sf) => sf.Field).map(
-            mapFieldModelToEntity
-          ),
-        })),
+      sections: schema.Section.map((s) => ({
+        id: s.id,
+        name: s.name,
+        fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity),
+      })),
       fields: [
-        ...schemas.flatMap((s) => s.SchemaField),
-        ...schemas.flatMap((s) => s.Section).flatMap((s) => s.SectionField),
+        ...schema.SchemaField,
+        ...schema.Section.flatMap((s) => s.SectionField),
       ]
         .map((sf) => sf.Field)
         .map(mapFieldModelToEntity),
@@ -103,6 +100,7 @@ export class SchemaService {
     })
 
     return schemas.map((s) => ({
+      id: s.id,
       resourceType: s.resourceType,
       fields: [],
       sections: s.Section.map((s) => ({

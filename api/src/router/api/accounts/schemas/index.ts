@@ -119,6 +119,8 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
       },
       handler: async (req, res) => {
         const service = container.resolve(SchemaService)
+        const schemaSectionService = container.resolve(SchemaSectionService)
+
 
         const schema = await service.readSchema(
           req.params.accountId,
@@ -126,7 +128,12 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
           false
         )
 
-        res.send(schema.sections)
+        schemaSectionService.createSection({
+          schemaId: schema.id, name: req.body.name
+        })
+
+
+        res.send()
       },
     })
     .route({
