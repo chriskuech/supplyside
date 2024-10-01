@@ -1,4 +1,4 @@
-import { fail } from 'assert'
+import assert from 'assert'
 import { Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import QuickBooksSyncButton from './QuickBooksSyncButton'
@@ -8,7 +8,8 @@ import { read } from '@/client/quickBooks'
 
 export default async function QuickBooksConnection() {
   const { accountId } = await requireSession()
-  const config = (await read(accountId)) ?? fail('QuickBooks not connected')
+  const config = await read(accountId)
+  assert(config?.connection, 'QuickBooks not connected')
 
   const connectedAt = config.connection
     ? new Date(config.connection.connectedAt)

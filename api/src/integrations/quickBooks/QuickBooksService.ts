@@ -156,15 +156,7 @@ export class QuickBooksService {
     return this.quickBooksBillService.readBill(accountId, client, billId)
   }
 
-  async getSetupUrl(accountId: string) {
-    const account = await this.prisma.account.findUniqueOrThrow({
-      where: { id: accountId },
-    })
-
-    // TODO
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const token = account?.quickBooksToken as any
-
-    return token?.path[0]
+  async getSetupUrl() {
+    return this.quickBooksClientService.setupUrl
   }
 }
