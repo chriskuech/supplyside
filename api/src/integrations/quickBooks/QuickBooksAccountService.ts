@@ -1,7 +1,7 @@
 import assert from 'assert'
 import { faker } from '@faker-js/faker'
 import OAuthClient from 'intuit-oauth'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { accountQuerySchema, readAccountSchema } from './schemas'
 import { Account } from './types'
 import { QuickBooksApiService } from './QuickBooksApiService'
@@ -16,7 +16,9 @@ const PAYABLE_ACCOUNTS_TYPE = 'Accounts Payable'
 @injectable()
 export class QuickBooksAccountService {
   constructor(
+    @inject(QuickBooksApiService)
     private readonly quickBooksApiService: QuickBooksApiService,
+    @inject(SchemaFieldService)
     private readonly schemaFieldService: SchemaFieldService
   ) {}
 

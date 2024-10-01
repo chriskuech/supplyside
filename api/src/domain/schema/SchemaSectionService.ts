@@ -1,10 +1,10 @@
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { ResourceType } from '@supplyside/model'
 
 @injectable()
 export class SchemaSectionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async createSection(dto: { schemaId: string; name: string }) {
     await this.prisma.section.create({

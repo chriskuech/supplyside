@@ -4,7 +4,7 @@ import assert, { fail } from 'assert'
 import handlebars from 'handlebars'
 import { parseStringPromise } from 'xml2js'
 import { match } from 'ts-pattern'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { PrismaService } from '../PrismaService'
 import {
   cxmlSchema,
@@ -26,10 +26,10 @@ import { accountInclude } from '@supplyside/api/domain/account/model'
 @injectable()
 export class McMasterService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly schemaService: SchemaService,
-    private readonly resourceService: ResourceService,
-    private readonly configService: ConfigService
+    @inject(PrismaService) private readonly prisma: PrismaService,
+    @inject(SchemaService) private readonly schemaService: SchemaService,
+    @inject(ResourceService) private readonly resourceService: ResourceService,
+    @inject(ConfigService) private readonly configService: ConfigService
   ) {}
 
   async getConnectedAt(accountId: string) {

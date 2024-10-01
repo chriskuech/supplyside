@@ -1,6 +1,6 @@
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { accountQuerySchema, readBillSchema } from './schemas'
 import { Bill } from './types'
 import { ACCOUNT_BASED_EXPENSE } from './constants'
@@ -37,11 +37,13 @@ const fieldsMap = [
 @injectable()
 export class QuickBooksBillService {
   constructor(
+    @inject(QuickBooksApiService)
     private readonly quickBooksApiService: QuickBooksApiService,
-    private readonly schemaService: SchemaService,
+    @inject(SchemaService) private readonly schemaService: SchemaService,
+    @inject(QuickBooksVendorService)
     private readonly quickBooksVendorService: QuickBooksVendorService,
-    private readonly resourceService: ResourceService,
-    private readonly configService: ConfigService
+    @inject(ResourceService) private readonly resourceService: ResourceService,
+    @inject(ConfigService) private readonly configService: ConfigService
   ) {}
 
   async readBill(

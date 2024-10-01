@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { PrismaService } from '../PrismaService'
 import { QuickBooksTokenService } from './QuickBooksTokenService'
 import { QuickBooksConfigService } from './QuickBooksConfigService'
@@ -15,14 +15,22 @@ import { isRequestError } from './utils'
 @injectable()
 export class QuickBooksService {
   constructor(
-    private readonly prisma: PrismaService,
+    @inject(PrismaService) private readonly prisma: PrismaService,
+    @inject(QuickBooksTokenService)
     private readonly quickBooksTokenService: QuickBooksTokenService,
+    @inject(QuickBooksConfigService)
     private readonly quickBooksConfigService: QuickBooksConfigService,
+    @inject(QuickBooksClientService)
     private readonly quickBooksClientService: QuickBooksClientService,
+    @inject(QuickBooksCompanyInfoService)
     private readonly quickBooksCompanyInfoService: QuickBooksCompanyInfoService,
+    @inject(QuickBooksAccountService)
     private readonly quickBooksAccountService: QuickBooksAccountService,
+    @inject(QuickBooksBillService)
     private readonly quickBooksBillService: QuickBooksBillService,
+    @inject(QuickBooksVendorService)
     private readonly quickBooksVendorService: QuickBooksVendorService,
+    @inject(QuickBooksBillPaymentService)
     private readonly quickBooksBillPaymentService: QuickBooksBillPaymentService
   ) {}
 

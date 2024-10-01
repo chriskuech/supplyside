@@ -1,11 +1,13 @@
 import { fail } from 'assert'
 import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { ConfigService } from '@supplyside/api/ConfigService'
 
 @injectable()
 export class PlaidConfigService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    @inject(ConfigService) private readonly configService: ConfigService
+  ) {}
 
   getPlaidConfig() {
     const {

@@ -2,7 +2,7 @@ import { Token } from 'intuit-oauth'
 import { Prisma } from '@prisma/client'
 import Csrf from 'csrf'
 import { z } from 'zod'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { PrismaService } from '../PrismaService'
 import { QuickBooksToken, quickbooksTokenSchema } from './schemas'
 import { QuickBooksClientService } from './QuickBooksClientService'
@@ -11,9 +11,11 @@ import { QuickBooksConfigService } from './QuickBooksConfigService'
 @injectable()
 export class QuickBooksTokenService {
   constructor(
-    private readonly prisma: PrismaService,
+    @inject(PrismaService) private readonly prisma: PrismaService,
+    @inject(QuickBooksClientService)
     private readonly quickBooksClientService: QuickBooksClientService,
-    private readonly quickBooksConfigService: QuickBooksConfigService,
+    @inject(QuickBooksConfigService)
+    private readonly quickBooksConfigService: QuickBooksConfigService
   ) {}
 
   async getToken(accountId: string): Promise<QuickBooksToken | undefined> {
@@ -26,7 +28,7 @@ export class QuickBooksTokenService {
     }
 
     const { success, data: token } = quickbooksTokenSchema.safeParse(
-      account.quickBooksToken,
+      account.quickBooksToken
     )
 
     if (!success || !token) {

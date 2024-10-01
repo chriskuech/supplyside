@@ -1,5 +1,5 @@
 import { CountryCode, Products } from 'plaid'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { PrismaService } from '../PrismaService'
 import { PlaidConfigService } from './util'
 import { fail } from 'assert'
@@ -8,9 +8,10 @@ import { ConfigService } from '@supplyside/api/ConfigService'
 @injectable()
 export class PlaidService {
   constructor(
-    private readonly prisma: PrismaService,
+    @inject(PrismaService) private readonly prisma: PrismaService,
+    @inject(PlaidConfigService)
     private readonly plaidConfigService: PlaidConfigService,
-    private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService
   ) {}
 
   async createConnection(accountId: string, publicToken: string) {

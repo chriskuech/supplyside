@@ -1,4 +1,4 @@
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { BlobService } from '../blob/BlobService'
 import { SchemaService } from '../schema/SchemaService'
 import {
@@ -16,14 +16,15 @@ import { ConfigService } from '@supplyside/api/ConfigService'
 @injectable()
 export class PoService {
   constructor(
-    private readonly accountService: AccountService,
-    private readonly blobService: BlobService,
+    @inject(AccountService) private readonly accountService: AccountService,
+    @inject(BlobService) private readonly blobService: BlobService,
+    @inject(PoRenderingService)
     private readonly poRenderingService: PoRenderingService,
-    private readonly prisma: PrismaService,
-    private readonly resourceService: ResourceService,
-    private readonly schemaService: SchemaService,
-    private readonly smtpService: SmtpService,
-    private readonly configService: ConfigService
+    @inject(PrismaService) private readonly prisma: PrismaService,
+    @inject(ResourceService) private readonly resourceService: ResourceService,
+    @inject(SchemaService) private readonly schemaService: SchemaService,
+    @inject(SmtpService) private readonly smtpService: SmtpService,
+    @inject(ConfigService) private readonly configService: ConfigService
   ) {}
 
   async createPo(accountId: string, resourceId: string) {
@@ -51,10 +52,9 @@ export class PoService {
     })
 
     const [blob, resource] = await Promise.all([
-      this.blobService.createBlob({
-        accountId,
+      this.blobService.createBlob(accountId, {
         buffer,
-        type: 'application/pdf',
+        contentType: 'application/pdf',
       }),
       this.resourceService.readResource({ accountId, id: resourceId }),
     ])

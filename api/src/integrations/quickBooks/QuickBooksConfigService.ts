@@ -1,10 +1,12 @@
 import { ConfigService } from '@supplyside/api/ConfigService'
 import { fail } from 'assert'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 
 @injectable()
 export class QuickBooksConfigService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    @inject(ConfigService) private readonly configService: ConfigService
+  ) {}
 
   get config() {
     const {

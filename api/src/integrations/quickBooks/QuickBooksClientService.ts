@@ -1,13 +1,14 @@
 import OAuthClient, { Token } from 'intuit-oauth'
 import Csrf from 'csrf'
 import QuickbooksOauthClient from 'intuit-oauth'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { QuickBooksConfigService } from './QuickBooksConfigService'
 
 @injectable()
 export class QuickBooksClientService {
   constructor(
-    private readonly quickBooksConfigService: QuickBooksConfigService,
+    @inject(QuickBooksConfigService)
+    private readonly quickBooksConfigService: QuickBooksConfigService
   ) {}
 
   getClient(token?: Token) {

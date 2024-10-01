@@ -1,7 +1,7 @@
 import assert from 'assert'
 import { difference, range } from 'remeda'
 import OAuthClient from 'intuit-oauth'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import {
   countQuerySchema,
   readVendorSchema,
@@ -28,8 +28,9 @@ import {
 @injectable()
 export class QuickBooksVendorService {
   constructor(
-    private readonly schemaService: SchemaService,
-    private readonly resourceService: ResourceService,
+    @inject(SchemaService) private readonly schemaService: SchemaService,
+    @inject(ResourceService) private readonly resourceService: ResourceService,
+    @inject(QuickBooksApiService)
     private readonly quickBooksApiService: QuickBooksApiService
   ) {}
 

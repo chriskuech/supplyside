@@ -8,7 +8,7 @@ import {
   ChatCompletionContentPartText,
 } from 'openai/resources/index.mjs'
 import { P, match } from 'ts-pattern'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { File } from '@supplyside/api/domain/file/types'
 import { BlobService } from '@supplyside/api/domain/blob/BlobService'
 import { ConfigService } from '@supplyside/api/ConfigService'
@@ -18,8 +18,8 @@ const exec = promisify(execCallback)
 @injectable()
 export class CompletionPartsService {
   constructor(
-    private readonly blobService: BlobService,
-    private readonly configService: ConfigService
+    @inject(BlobService) private readonly blobService: BlobService,
+    @inject(ConfigService) private readonly configService: ConfigService
   ) {}
 
   mapFileToCompletionParts(file: File): Promise<ChatCompletionContentPart[]> {

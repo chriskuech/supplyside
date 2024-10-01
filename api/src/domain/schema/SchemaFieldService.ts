@@ -1,6 +1,6 @@
 import { P, match } from 'ts-pattern'
 import { FieldType, Prisma, ResourceType } from '@prisma/client'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { mapFieldModelToEntity } from './mappers'
 import { valueInclude } from '@supplyside/api/domain/resource/model'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
@@ -34,7 +34,7 @@ export type OptionPatch = {
 
 @injectable()
 export class SchemaFieldService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async createField(accountId: string, params: CreateFieldParams) {
     await this.prisma.field.create({

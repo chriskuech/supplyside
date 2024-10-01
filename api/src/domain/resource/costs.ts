@@ -1,12 +1,12 @@
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { ResourceService } from './ResourceService'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 
 @injectable()
 export class CostService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly resourceService: ResourceService
+    @inject(PrismaService) private readonly prisma: PrismaService,
+    @inject(ResourceService) private readonly resourceService: ResourceService
   ) {}
 
   async create(accountId: string, resourceId: string) {

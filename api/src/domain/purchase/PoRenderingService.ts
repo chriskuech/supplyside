@@ -1,8 +1,8 @@
-import { readFile } from 'fs/promises'
+import { readFile, writeFile } from 'fs/promises'
 import { isTruthy } from 'remeda'
 import { P, match } from 'ts-pattern'
 import { FieldType } from '@prisma/client'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { BlobService } from '../blob/BlobService'
 import { ResourceService } from '../resource/ResourceService'
 import { AccountService } from '../account/AccountService'
@@ -16,7 +16,6 @@ import {
   selectResourceField,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import { createDataUrl } from '../blob/util'
 import PoDocument from './doc/PoDocument'
 import {
   AddressViewModel,
@@ -35,11 +34,11 @@ type RenderPoParams = {
 @injectable()
 export class PoRenderingService {
   constructor(
-    private readonly blobService: BlobService,
-    private readonly schemaService: SchemaService,
-    private readonly accountService: AccountService,
-    private readonly resourceService: ResourceService,
-    private readonly osService: OsService
+    @inject(BlobService) private readonly blobService: BlobService,
+    @inject(SchemaService) private readonly schemaService: SchemaService,
+    @inject(AccountService) private readonly accountService: AccountService,
+    @inject(ResourceService) private readonly resourceService: ResourceService,
+    @inject(OsService) private readonly osService: OsService
   ) {}
 
   async renderPo({ accountId, resourceId, isPreview }: RenderPoParams) {
@@ -51,13 +50,10 @@ export class PoRenderingService {
         isPreview
       )
 
-      const htmlDataUrl = createDataUrl({
-        mimeType: 'text/html',
-        buffer: Buffer.from(html),
-      })
+      await writeFile(`${path}/out.html`, html)
 
       await this.osService.exec(
-        `weasyprint '${htmlDataUrl}' '${path}/out.pdf'`
+        `weasyprint '${path}/out.html' '${path}/out.pdf'`
       )
 
       return await readFile(`${path}/out.pdf`)
