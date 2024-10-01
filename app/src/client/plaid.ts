@@ -3,7 +3,7 @@ import { client } from '.'
 
 export const readPlaid = async (accountId: string) => {
   const { data } = await client().GET(
-    '/api/accounts/{accountId}/integrations/plaid/token',
+    '/api/accounts/{accountId}/integrations/plaid/token/',
     {
       params: {
         path: { accountId },
@@ -16,7 +16,7 @@ export const readPlaid = async (accountId: string) => {
 
 export const getPlaidAccounts = async (accountId: string) => {
   const { data } = await client().GET(
-    '/api/accounts/{accountId}/integrations/plaid/accounts',
+    '/api/accounts/{accountId}/integrations/plaid/accounts/',
     {
       params: {
         path: { accountId },

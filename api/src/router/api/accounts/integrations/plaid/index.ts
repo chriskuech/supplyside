@@ -9,7 +9,7 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
     .withTypeProvider<ZodTypeProvider>()
     .route({
       method: 'GET',
-      url: '/token',
+      url: '/token/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -32,7 +32,7 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'GET',
-      url: '/accounts',
+      url: '/accounts/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -62,7 +62,7 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'PUT',
-      url: '/integrations/plaid/',
+      url: '/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
