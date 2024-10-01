@@ -3,12 +3,16 @@ import { Add } from '@mui/icons-material'
 import AccountsTable from './AccountsTable'
 import { readAccounts } from '@/client/account'
 import { createAccount } from '@/actions/account'
-import { readSelf } from '@/actions/user'
+import { requireSession } from '@/session'
+import { systemAccountId } from '@/lib/const'
 
 export default async function AdminPage() {
-  const [user, accounts] = await Promise.all([readSelf(), readAccounts()])
+  const { accountId } = await requireSession()
 
-  if (!user?.isGlobalAdmin) return <Alert severity="error">Not an admin</Alert>
+  if (accountId !== systemAccountId)
+    return <Alert severity="error">Not an admin</Alert>
+
+  const accounts = await readAccounts()
 
   return (
     <Container sx={{ my: 5 }}>
