@@ -126,7 +126,7 @@ export const mapValueInputToPrismaValueUpdate = (
               },
             },
           }
-        : { Address: { delete: true, disconnect: true } }
+        : { Address: { disconnect: true } }
     )
     .with({ boolean: P.not(undefined) }, ({ boolean }) => ({ boolean }))
     .with({ contact: P.not(undefined) }, ({ contact }) =>

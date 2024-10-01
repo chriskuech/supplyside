@@ -9,6 +9,7 @@ import {
 import { mapFieldModelToEntity } from '../schema/mappers'
 import { fieldIncludes } from '../schema/model'
 import { OptionPatch } from '../schema/SchemaFieldService'
+import { mapValueInputToPrismaValueUpdate } from '../resource/mappers'
 
 @injectable()
 export class FieldService {
@@ -73,8 +74,8 @@ export class FieldService {
         description: dto.description,
         resourceType: dto.resourceType,
         isRequired: dto.isRequired,
-        DefaultValue: {
-          update: dto.defaultValue,
+        DefaultValue: dto.defaultValue && {
+          update: mapValueInputToPrismaValueUpdate(dto.defaultValue),
         },
       },
     })
