@@ -2,6 +2,7 @@ import 'server-only'
 import { Resource, ResourceType, ValueInput } from '@supplyside/model'
 import { components } from '@supplyside/api'
 import { stringify } from 'qs'
+import { revalidateTag } from 'next/cache'
 import { client } from '.'
 
 export type JsonLogic = components['schemas']['JsonLogic']
@@ -11,6 +12,8 @@ export const createResource = async (
   resourceType: ResourceType,
   fields: { fieldId: string; valueInput: ValueInput }[],
 ) => {
+  revalidateTag('Resources')
+
   const { data: resource } = await client().POST(
     '/api/accounts/{accountId}/resources/',
     {
@@ -18,7 +21,6 @@ export const createResource = async (
         path: { accountId },
       },
       body: { resourceType, fields },
-      next: { tags: ['Resources'] },
     },
   )
 
@@ -91,6 +93,8 @@ export const updateResource = async (
   resourceId: string,
   fields: { fieldId: string; valueInput: ValueInput }[],
 ) => {
+  revalidateTag('Resources')
+
   const { data: resource } = await client().PATCH(
     '/api/accounts/{accountId}/resources/{resourceId}/',
     {
@@ -98,7 +102,6 @@ export const updateResource = async (
         path: { accountId, resourceId },
       },
       body: fields,
-      next: { tags: ['Resources'] },
     },
   )
 
@@ -106,22 +109,24 @@ export const updateResource = async (
 }
 
 export const deleteResource = async (accountId: string, resourceId: string) => {
+  revalidateTag('Resources')
+
   await client().DELETE('/api/accounts/{accountId}/resources/{resourceId}/', {
     params: {
       path: { accountId, resourceId },
     },
-    next: { tags: ['Resources'] },
   })
 }
 
 export const cloneResource = async (accountId: string, resourceId: string) => {
+  revalidateTag('Resources')
+
   const { data: resource } = await client().POST(
     '/api/accounts/{accountId}/resources/{resourceId}/clone/',
     {
       params: {
         path: { accountId, resourceId },
       },
-      next: { tags: ['Resources'] },
     },
   )
 
