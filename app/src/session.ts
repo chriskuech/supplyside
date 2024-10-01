@@ -1,11 +1,9 @@
 'use server'
-
 import { cookies } from 'next/headers'
 import { components } from '@supplyside/api'
 import { validate as isUuid } from 'uuid'
 import { redirect } from 'next/navigation'
 import * as client from './client/session'
-import { withSessionId } from './authz'
 import { config } from '@/config'
 
 export type Session = components['schemas']['Session']
@@ -28,7 +26,11 @@ export const createSession = async (email: string, tat: string) => {
   return session
 }
 
-export const extendSession = withSessionId(client.extendSession)
+// TODO: this is unused
+export const extendSession = async () => {
+  const session = await requireSession()
+  await client.extendSession(session.id)
+}
 
 export const readSession = async () => {
   const sessionId = cookies().get(sessionIdCookieName)?.value

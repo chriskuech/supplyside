@@ -3,6 +3,7 @@ import { readSession } from './session'
 import { readSelf } from './client/user'
 
 export async function middleware(request: NextRequest) {
+  // TODO: extend the session
   const session = await readSession()
 
   if (!session)

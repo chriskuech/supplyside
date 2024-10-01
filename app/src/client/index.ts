@@ -6,11 +6,8 @@ import { config } from '@/config'
 export const client = () => {
   const { API_BASE_URL, API_KEY } = config()
 
-  const headers = new Headers()
-  headers.append('Authorization', `Bearer ${API_KEY}`)
-
   return createClient<paths>({
     baseUrl: API_BASE_URL,
-    headers,
+    headers: new Headers({ Authorization: `Bearer ${API_KEY}` }),
   })
 }

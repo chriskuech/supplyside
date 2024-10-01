@@ -13,4 +13,4 @@ export default [
       semi: ['error', 'never']
     }
   }
-];
+]
