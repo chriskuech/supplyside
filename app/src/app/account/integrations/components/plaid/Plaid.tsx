@@ -8,5 +8,5 @@ export default async function Plaid() {
 
   const plaid = await readPlaid(accountId)
 
-  return plaid ? <PlaidConnection /> : <PlaidConnect />
+  return plaid?.token ? <PlaidConnection /> : <PlaidConnect />
 }

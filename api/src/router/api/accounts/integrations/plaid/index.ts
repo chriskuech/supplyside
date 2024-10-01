@@ -9,7 +9,30 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
     .withTypeProvider<ZodTypeProvider>()
     .route({
       method: 'GET',
-      url: '/',
+      url: '/token',
+      schema: {
+        params: z.object({
+          accountId: z.string().uuid(),
+        }),
+        response: {
+          200: z.object({
+            token: z.string().nullable()
+          }),
+        },
+      },
+      handler: async (req, res) => {
+        const service = container.resolve(PlaidService)
+
+        const token = await service.getPlaidToken(req.params.accountId)
+
+        res.send({
+          token
+        })
+      },
+    })
+    .route({
+      method: 'GET',
+      url: '/accounts',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -57,7 +80,7 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
           accountId: z.string().uuid(),
         }),
         response: {
-          200: z.string(),
+          200: z.object({ token: z.string() }),
         },
       },
       handler: async (req, res) => {
@@ -67,6 +90,6 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
           req.params.accountId
         )
 
-        res.send(link_token)
+        res.send({token: link_token})
       },
     })
