@@ -13,6 +13,7 @@ RUN cd ./app && npm ci
 COPY ./model ./model
 COPY ./app ./app
 
+RUN cd ./api && npm run gen
 RUN cd ./app && npm run build
 
 ##

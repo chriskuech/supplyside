@@ -53,7 +53,7 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
       },
       handler: async (req, res) => {
         const service = container.resolve(FieldService)
-        const fields = await service.readFields(req.params.accountId)
+        const fields = await service.list(req.params.accountId)
 
         res.send(fields)
       },
@@ -74,7 +74,7 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
       },
       handler: async (req, res) => {
         const service = container.resolve(FieldService)
-        await service.createField(req.params.accountId, req.body)
+        await service.create(req.params.accountId, req.body)
 
         res.send()
       },
@@ -99,7 +99,7 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
       },
       handler: async (req, res) => {
         const service = container.resolve(FieldService)
-        await service.updateField(
+        await service.update(
           req.params.accountId,
           req.params.fieldId,
           req.body
@@ -119,7 +119,7 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
       },
       handler: async (req, res) => {
         const service = container.resolve(FieldService)
-        await service.deleteField(req.params.accountId, req.params.fieldId)
+        await service.delete(req.params.accountId, req.params.fieldId)
 
         res.send()
       },

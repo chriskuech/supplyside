@@ -64,7 +64,7 @@ export class PoRenderingService {
   ): Promise<PurchaseViewModel> {
     const [order, lines, lineSchema, account] = await Promise.all([
       this.resourceService.read(accountId, purchaseId),
-      this.resourceService.readResources({
+      this.resourceService.list({
         accountId,
         type: 'Line',
         where: {

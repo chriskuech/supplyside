@@ -168,6 +168,16 @@ export class ResourceService {
     return mapResourceModelToEntity(model)
   }
 
+  async readByTemplateId({ accountId, templateId }: FindByTemplateIdParams) {
+    const resource = await this.prisma.resource.findFirst({
+      where: { accountId, templateId },
+      include: resourceInclude,
+    })
+    if (!resource) return null
+
+    return mapResourceModelToEntity(resource)
+  }
+
   async findBacklinks(
     accountId: string,
     resourceType: ResourceType,
@@ -195,7 +205,7 @@ export class ResourceService {
     return models.map(mapResourceModelToEntity)
   }
 
-  async createResource({
+  async create({
     accountId,
     type,
     templateId,
@@ -258,7 +268,7 @@ export class ResourceService {
     return await this.read(accountId, resource.id)
   }
 
-  async readResources({
+  async list({
     accountId,
     type,
     where,
@@ -284,7 +294,7 @@ export class ResourceService {
     return models.map(mapResourceModelToEntity)
   }
 
-  async updateResource({
+  async update({
     accountId,
     resourceId,
     fields,
@@ -361,7 +371,7 @@ export class ResourceService {
     return await this.read(accountId, resourceId)
   }
 
-  async deleteResource({ accountId, id }: DeleteResourceParams): Promise<void> {
+  async delete({ accountId, id }: DeleteResourceParams): Promise<void> {
     const model = await this.prisma.resource.delete({
       where: { id, accountId },
       include: resourceInclude,
@@ -394,7 +404,7 @@ export class ResourceService {
     fieldId: string;
     valueInput: ValueInput;
   }) {
-    return await this.updateResource({
+    return await this.update({
       accountId,
       resourceId,
       fields: [{ fieldId, valueInput }],
@@ -410,16 +420,6 @@ export class ResourceService {
       where: { id: resourceId, accountId },
       data: { templateId },
     })
-  }
-
-  async findByTemplateId({ accountId, templateId }: FindByTemplateIdParams) {
-    const resource = await this.prisma.resource.findFirst({
-      where: { accountId, templateId },
-      include: resourceInclude,
-    })
-    if (!resource) return null
-
-    return mapResourceModelToEntity(resource)
   }
 
   async checkForDuplicateResource(
@@ -539,7 +539,7 @@ export class ResourceService {
       true
     )
 
-    const lines = await this.readResources({
+    const lines = await this.list({
       accountId,
       type: 'Line',
       where: {
@@ -810,7 +810,7 @@ export class ResourceService {
   }: LinkLinesParams) {
     const lineSchema = await this.schemaService.readSchema(accountId, 'Line')
 
-    const lines = await this.readResources({
+    const lines = await this.list({
       accountId,
       type: 'Line',
       where: {
@@ -847,7 +847,7 @@ export class ResourceService {
             (o) => o.templateId === billStatusOptions.draft.templateId
           ) ?? fail('Draft status not found')
 
-        const destination = await this.createResource({
+        const destination = await this.create({
           accountId,
           type: source.type,
           fields: [
@@ -896,7 +896,7 @@ export class ResourceService {
             (o) => o.templateId === purchaseStatusOptions.draft.templateId
           ) ?? fail('Draft status not found')
 
-        const destination = await this.createResource({
+        const destination = await this.create({
           accountId,
           type: source.type,
           fields: [
@@ -931,7 +931,7 @@ export class ResourceService {
       })
       .otherwise(
         async () =>
-          await this.createResource({
+          await this.create({
             accountId,
             type: source.type,
             fields: source.fields.map(({ fieldId, fieldType, value }) => ({
@@ -980,7 +980,7 @@ export class ResourceService {
 
     const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
 
-    const lines = await this.readResources({
+    const lines = await this.list({
       accountId,
       type: 'Line',
       where: {
@@ -990,7 +990,7 @@ export class ResourceService {
 
     // `createResource` is not (currently) parallelizable
     for (const line of lines) {
-      await this.createResource({
+      await this.create({
         accountId,
         type: 'Line',
         fields: [
@@ -1033,7 +1033,7 @@ export class ResourceService {
       .filter(({ sf }) => selectSchemaField(toSchema, sf))
       .filter(({ tf }) => !tf?.isDerived)
 
-    const resource = await this.updateResource({
+    const resource = await this.update({
       accountId,
       resourceId: toResourceId,
       fields: fieldsToUpdate.map(({ rf, sf }) => ({

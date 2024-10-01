@@ -84,7 +84,7 @@ export class QuickBooksVendorService {
       (vendorResponse) => vendorResponse.QueryResponse.Vendor ?? []
     )
 
-    const currentVendors = await this.resourceService.readResources({
+    const currentVendors = await this.resourceService.list({
       accountId,
       type: 'Vendor',
     })
@@ -113,7 +113,7 @@ export class QuickBooksVendorService {
 
         if (!vendor || !!vendor.templateId) return
 
-        return this.resourceService.updateResource({
+        return this.resourceService.update({
           accountId,
           resourceId: vendor.id,
           fields: await this.mapQuickBooksVendorToResourceFields(
@@ -138,7 +138,7 @@ export class QuickBooksVendorService {
       if (vendor.templateId) return
 
       if (vendor) {
-        await this.resourceService.updateResource({
+        await this.resourceService.update({
           accountId,
           resourceId: vendor.id,
           fields: await this.mapQuickBooksVendorToResourceFields(
@@ -147,7 +147,7 @@ export class QuickBooksVendorService {
           ),
         })
       } else {
-        await this.resourceService.createResource({
+        await this.resourceService.create({
           accountId,
           type: 'Vendor',
           fields: await this.mapQuickBooksVendorToResourceFields(

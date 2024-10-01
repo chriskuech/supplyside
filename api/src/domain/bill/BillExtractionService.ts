@@ -61,7 +61,7 @@ export class BillExtractionService {
     const [billSchema, billResource, vendors] = await Promise.all([
       this.schemaService.readSchema(accountId, 'Bill'),
       this.resourceService.read(accountId, resourceId),
-      this.resourceService.readResources({
+      this.resourceService.list({
         accountId,
         type: 'Vendor',
       }),
@@ -120,7 +120,7 @@ export class BillExtractionService {
       .safeParse(poNumber)?.data
     const [pruchase, ...purchases] =
       poNumberAsNumber && vendorId
-        ? await this.resourceService.readResources({
+        ? await this.resourceService.list({
             accountId,
             type: 'Purchase',
             where: {
@@ -176,7 +176,7 @@ export class BillExtractionService {
 
     if (!updatedFields.length) return
 
-    await this.resourceService.updateResource({
+    await this.resourceService.update({
       resourceId,
       accountId,
       fields: updatedFields,

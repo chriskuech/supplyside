@@ -90,7 +90,7 @@ async function main() {
     ResourceType.Vendor
   )
 
-  const vendor = await resourceService.createResource({
+  const vendor = await resourceService.create({
     accountId: customerAccount.id,
     type: ResourceType.Vendor,
     fields: [
@@ -106,7 +106,7 @@ async function main() {
     ResourceType.Purchase
   )
 
-  const purchase = await resourceService.createResource({
+  const purchase = await resourceService.create({
     accountId: customerAccount.id,
     type: ResourceType.Purchase,
     fields: [
@@ -132,7 +132,7 @@ async function main() {
     ResourceType.Item
   )
 
-  const item1 = await resourceService.createResource({
+  const item1 = await resourceService.create({
     accountId: customerAccount.id,
     type: ResourceType.Item,
     fields: [
@@ -158,7 +158,7 @@ async function main() {
     ResourceType.Line
   )
 
-  await resourceService.createResource({
+  await resourceService.create({
     accountId: customerAccount.id,
     type: ResourceType.Line,
     fields: [
@@ -173,7 +173,7 @@ async function main() {
     ],
   })
 
-  const item2 = await resourceService.createResource({
+  const item2 = await resourceService.create({
     accountId: customerAccount.id,
     type: ResourceType.Item,
     fields: [
@@ -194,7 +194,7 @@ async function main() {
     ],
   })
 
-  await resourceService.createResource({
+  await resourceService.create({
     accountId: customerAccount.id,
     type: ResourceType.Line,
     fields: [

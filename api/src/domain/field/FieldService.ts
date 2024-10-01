@@ -17,7 +17,7 @@ export class FieldService {
     @inject(PrismaService)
     private readonly prisma: PrismaService) {}
 
-  async readFields(accountId: string): Promise<SchemaField[]> {
+  async list(accountId: string): Promise<SchemaField[]> {
     const fields = await this.prisma.field.findMany({
       where: {
         accountId,
@@ -31,7 +31,7 @@ export class FieldService {
     return fields.map(mapFieldModelToEntity)
   }
 
-  async createField(
+  async create(
     accountId: string,
     data: {
       name: string;
@@ -55,7 +55,7 @@ export class FieldService {
     })
   }
 
-  async updateField(
+  async update(
     accountId: string,
     fieldId: string,
     dto: {
@@ -81,7 +81,7 @@ export class FieldService {
     })
   }
 
-  async deleteField(accountId: string, fieldId: string) {
+  async delete(accountId: string, fieldId: string) {
     await this.prisma.field.delete({
       where: {
         id: fieldId,

@@ -41,7 +41,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
 
-        const resources = await service.readResources({
+        const resources = await service.list({
           accountId: req.params.accountId,
           type: req.query.resourceType,
           where: req.query.where,
@@ -131,7 +131,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
 
-        const resource = await service.createResource({
+        const resource = await service.create({
           accountId: req.params.accountId,
           type: req.body.resourceType,
           fields: req.body.fields,
@@ -212,7 +212,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
 
-        const resource = await service.updateResource({
+        const resource = await service.update({
           accountId: req.params.accountId,
           resourceId: req.params.resourceId,
           fields: req.body,
@@ -233,7 +233,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
 
-        await service.deleteResource({
+        await service.delete({
           accountId: req.params.accountId,
           id: req.params.resourceId,
         })

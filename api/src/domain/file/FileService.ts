@@ -26,7 +26,7 @@ export class FileService {
     return mapFile(model)
   }
 
-  async readFile(accountId: string, fileId: string): Promise<File> {
+  async read(accountId: string, fileId: string): Promise<File> {
     const model = await this.prisma.file.findUniqueOrThrow({
       where: { accountId, id: fileId },
       include: fileInclude,

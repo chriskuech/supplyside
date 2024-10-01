@@ -71,7 +71,7 @@ export class McMasterService {
     const mcMasterCarrSystemResource = resources().mcMasterCarrVendor
 
     if (!mcMasterCarrVendor) {
-      await this.resourceService.createResource({
+      await this.resourceService.create({
         accountId,
         type: 'Vendor',
         templateId: mcMasterCarrSystemResource.templateId,
@@ -81,7 +81,7 @@ export class McMasterService {
         })),
       })
     } else {
-      await this.resourceService.updateResource({
+      await this.resourceService.update({
         accountId,
         resourceId: mcMasterCarrVendor.id,
         fields: mcMasterCarrSystemResource.fields.map((f) => ({
@@ -110,7 +110,7 @@ export class McMasterService {
   }
 
   async disconnect(accountId: string) {
-    const mcMasterCarrVendor = await this.resourceService.findByTemplateId({
+    const mcMasterCarrVendor = await this.resourceService.readByTemplateId({
       accountId,
       templateId: resources().mcMasterCarrVendor.templateId,
     })
@@ -341,7 +341,7 @@ export class McMasterService {
           unitOfMeasure
         ).id
 
-        const newResource = await this.resourceService.createResource({
+        const newResource = await this.resourceService.create({
           accountId,
           type: 'Item',
           fields: [
@@ -382,7 +382,7 @@ export class McMasterService {
         unitOfMeasure
       ).id
 
-      const createdLine = await this.resourceService.createResource({
+      const createdLine = await this.resourceService.create({
         accountId,
         type: 'Line',
         fields: [
@@ -403,7 +403,7 @@ export class McMasterService {
 
       // Updating the resource to trigger calculations
       //TODO: update createResource to trigger calculations
-      this.resourceService.updateResource({
+      this.resourceService.update({
         accountId,
         resourceId: createdLine.id,
         fields: [
