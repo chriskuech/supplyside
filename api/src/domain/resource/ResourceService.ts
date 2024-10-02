@@ -107,12 +107,6 @@ type HandleResourceUpdateParams = {
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 
-type HandleResourceCreateParams = {
-  accountId: string;
-  schema: Schema;
-  resource: Resource;
-};
-
 type LinkResourceParams = {
   accountId: string;
   fromResourceId: string;
@@ -209,23 +203,39 @@ export class ResourceService {
     accountId,
     type,
     templateId,
-    fields: resourceFields,
+    fields: inputResourceFields,
   }: CreateResourceParams): Promise<Resource> {
     const schema = await this.schemaService.readMergedSchema(accountId, type)
 
     const {
-      _max: { key },
+      _max: { key: latestKey },
     } = await this.prisma.resource.aggregate({
       where: { accountId, type },
       _max: { key: true },
     })
 
-    const resource = await this.prisma.resource.create({
+    const key = (latestKey ?? 0) + 1
+
+    const poNumberField = selectSchemaField(schema, fields.poNumber)
+
+    const resourceFields: ResourceFieldInput[] = [
+      ...(inputResourceFields ?? []),
+      ...(poNumberField
+        ? [
+            {
+              fieldId: poNumberField.fieldId,
+              valueInput: { string: key.toString() },
+            },
+          ]
+        : []),
+    ]
+
+    const model = await this.prisma.resource.create({
       data: {
         accountId,
         templateId,
         type,
-        key: (key ?? 0) + 1,
+        key,
         Cost: {
           create: {
             name: 'Taxes',
@@ -259,13 +269,7 @@ export class ResourceService {
       include: resourceInclude,
     })
 
-    await this.handleResourceCreate({
-      accountId,
-      schema,
-      resource: mapResourceModelToEntity(resource),
-    })
-
-    return await this.read(accountId, resource.id)
+    return mapResourceModelToEntity(model)
   }
 
   async list({
@@ -294,11 +298,7 @@ export class ResourceService {
     return models.map(mapResourceModelToEntity)
   }
 
-  async update({
-    accountId,
-    resourceId,
-    fields,
-  }: UpdateResourceParams) {
+  async update({ accountId, resourceId, fields }: UpdateResourceParams) {
     const resource = await this.read(accountId, resourceId)
     const schema = await this.schemaService.readMergedSchema(
       accountId,
@@ -565,27 +565,6 @@ export class ResourceService {
     })
   }
 
-  async handleResourceCreate({
-    accountId,
-    schema,
-    resource,
-  }: HandleResourceCreateParams) {
-    if (resource.type === 'Purchase') {
-      await this.updateResourceField({
-        accountId,
-        resourceId: resource.id,
-        fieldId: selectSchemaFieldUnsafe(schema, fields.poNumber).fieldId,
-        valueInput: { string: resource.key.toString() },
-      })
-    }
-
-    // // When the "Bill Files" field is updated,
-    // // Then extract their PO # and Vendor ID
-    // if (resource.type === "Bill") {
-    //   await this.billExtractionService.extractContent(accountId, resource.id);
-    // }
-  }
-
   async handleResourceUpdate({
     accountId,
     schema,
@@ -808,7 +787,10 @@ export class ResourceService {
     fromResourceField,
     toResourceField,
   }: LinkLinesParams) {
-    const lineSchema = await this.schemaService.readMergedSchema(accountId, 'Line')
+    const lineSchema = await this.schemaService.readMergedSchema(
+      accountId,
+      'Line'
+    )
 
     const lines = await this.list({
       accountId,
@@ -835,7 +817,10 @@ export class ResourceService {
 
     const destination = await match(source.type)
       .with('Bill', async () => {
-        const schema = await this.schemaService.readMergedSchema(accountId, 'Bill')
+        const schema = await this.schemaService.readMergedSchema(
+          accountId,
+          'Bill'
+        )
 
         const billStatusField = selectSchemaFieldUnsafe(
           schema,
@@ -976,7 +961,10 @@ export class ResourceService {
     toResourceId,
     backLinkFieldRef,
   }: ResourceCopyParams & { backLinkFieldRef: FieldReference }) {
-    const lineSchema = await this.schemaService.readMergedSchema(accountId, 'Line')
+    const lineSchema = await this.schemaService.readMergedSchema(
+      accountId,
+      'Line'
+    )
 
     const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
 
