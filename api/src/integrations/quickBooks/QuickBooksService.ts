@@ -50,7 +50,10 @@ export class QuickBooksService {
     )
   }
 
-  async disconnect(accountId: string) {
+  async disconnect(realmId: string) {
+    const accountId = await this.findAccountIdByRealmId(realmId)
+
+    if (!accountId) return
     const token = await this.quickBooksTokenService.getToken(accountId)
     assert(token, 'No token found')
     const client = this.quickBooksClientService.getClient(token)

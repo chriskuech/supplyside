@@ -31,12 +31,12 @@ export const connect = async (accountId: string, url: string) => {
   return data
 }
 
-export const disconnect = async (accountId: string) => {
+export const disconnect = async (realmId: string) => {
   const { data } = await client().POST(
-    '/api/accounts/{accountId}/integrations/quickbooks/disconnect/',
+    '/api/integrations/quickbooks/disconnect/',
     {
       params: {
-        path: { accountId },
+        query: { realmId },
       },
     },
   )

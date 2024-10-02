@@ -87,28 +87,12 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(QuickBooksService)
 
-        const bills = await service.connect(
+        await service.connect(
           req.params.accountId,
           req.query.url
         )
 
-        res.send(bills)
-      },
-    })
-    .route({
-      method: 'POST',
-      url: '/disconnect/',
-      schema: {
-        params: z.object({
-          accountId: z.string().uuid(),
-        }),
-      },
-      handler: async (req, res) => {
-        const service = container.resolve(QuickBooksService)
-
-        await service.disconnect(req.params.accountId)
-
-        res.status(200).send({})
+        res.send()
       },
     })
     .route({
