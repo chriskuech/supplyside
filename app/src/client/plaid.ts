@@ -1,4 +1,5 @@
 import 'server-only'
+import { revalidateTag } from 'next/cache'
 import { client } from '.'
 
 export const readPlaid = async (accountId: string) => {
@@ -7,6 +8,9 @@ export const readPlaid = async (accountId: string) => {
     {
       params: {
         path: { accountId },
+      },
+      next: {
+        tags: ['Plaid'],
       },
     },
   )
@@ -21,6 +25,9 @@ export const getPlaidAccounts = async (accountId: string) => {
       params: {
         path: { accountId },
       },
+      next: {
+        tags: ['Plaid'],
+      },
     },
   )
 
@@ -28,6 +35,8 @@ export const getPlaidAccounts = async (accountId: string) => {
 }
 
 export const createPlaidLinkToken = async (accountId: string) => {
+  revalidateTag('Plaid')
+
   const { data } = await client().POST(
     '/api/accounts/{accountId}/integrations/plaid/link-token/',
     {
@@ -38,4 +47,30 @@ export const createPlaidLinkToken = async (accountId: string) => {
   )
 
   return data?.token
+}
+
+export const connect = async (accountId: string, token: string) => {
+  revalidateTag('Plaid')
+
+  await client().POST('/api/accounts/{accountId}/integrations/plaid/connect', {
+    params: {
+      path: { accountId },
+      query: {
+        token,
+      },
+    },
+  })
+}
+
+export const disconnect = async (accountId: string) => {
+  revalidateTag('Plaid')
+
+  await client().POST(
+    '/api/accounts/{accountId}/integrations/plaid/disconnect',
+    {
+      params: {
+        path: { accountId },
+      },
+    },
+  )
 }
