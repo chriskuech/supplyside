@@ -31,8 +31,10 @@ import { findBacklinks, readResources } from '@/client/resource'
 
 export default async function PurchaseDetail({
   params: { key },
+  searchParams,
 }: {
   params: { key: string }
+  searchParams: Record<string, unknown>
 }) {
   const {
     session: { accountId },
@@ -100,6 +102,7 @@ export default async function PurchaseDetail({
       lineSchema={lineSchema}
       schema={schema}
       resource={resource}
+      searchParams={searchParams}
       tools={[
         ...orderBills.map((bill) => <BillLink key={bill.id} bill={bill} />),
         <TrackingControl

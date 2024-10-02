@@ -1,4 +1,5 @@
 'use client'
+
 import {
   DataGridPro,
   DataGridProProps,
@@ -12,6 +13,7 @@ import { Clear } from '@mui/icons-material'
 import { useMemo } from 'react'
 import { z } from 'zod'
 import { Resource, Schema } from '@supplyside/model'
+import { P, match } from 'ts-pattern'
 import { mapSchemaFieldToGridColDef } from './mapSchemaFieldToGridColDef'
 import { Row, Column } from './types'
 import { handleProcessRowUpdate } from './processRowUpdate'
@@ -91,11 +93,19 @@ export default function ResourceTable({
       autoHeight
       density="standard"
       processRowUpdate={handleProcessRowUpdate}
-      onRowClick={({ row: { type, key } }) => {
-        if (type === 'Line') return
-
-        window.location.href = `/${type.toLowerCase()}s/${key}`
-      }}
+      onRowClick={({ row: { type, key, id } }: { row: Row }) =>
+        match(type)
+          .with(
+            P.union('Bill', 'Purchase'),
+            () => (window.location.href = `/${type.toLowerCase()}s/${key}`),
+          )
+          .with(
+            P.union('Customer', 'Item', 'Vendor'),
+            () => (window.location.search = `drawerResourceId=${id}`),
+          )
+          .with('Line', () => null)
+          .exhaustive()
+      }
       apiRef={apiRef}
       initialState={{
         ...initialState,

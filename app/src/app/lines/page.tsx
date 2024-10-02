@@ -1,5 +1,15 @@
 import ListPage from '@/lib/resource/ListPage'
 
-export default async function Lines() {
-  return <ListPage tableKey="linesList" resourceType="Line" path="/lines" />
+export default async function Lines({
+  searchParams,
+}: {
+  searchParams: Record<string, unknown>
+}) {
+  return (
+    <ListPage
+      tableKey="linesList"
+      resourceType="Line"
+      searchParams={searchParams}
+    />
+  )
 }

@@ -4,8 +4,10 @@ import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 
 export default async function ItemsDetail({
   params: { key },
+  searchParams,
 }: {
   params: { key: string }
+  searchParams: Record<string, unknown>
 }) {
   const { resource, schema, lineSchema } = await readDetailPageModel(
     'Item',
@@ -17,6 +19,7 @@ export default async function ItemsDetail({
       lineSchema={lineSchema}
       schema={schema}
       resource={resource}
+      searchParams={searchParams}
       tools={[]}
       name={selectResourceFieldValue(resource, fields.name)?.string}
     />

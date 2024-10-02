@@ -3,13 +3,11 @@ import { fail } from 'assert'
 import {
   Autocomplete,
   Box,
-  Drawer,
   IconButton,
   Link,
   Stack,
   TextField,
   Tooltip,
-  Typography,
 } from '@mui/material'
 import { Clear, Link as LinkIcon, ViewSidebar } from '@mui/icons-material'
 import { ForwardedRef, forwardRef, useEffect, useMemo, useState } from 'react'
@@ -23,9 +21,7 @@ import {
   mapResourceToValueResource,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
-import ResourceForm from '../../ResourceForm'
-import useResource from '../../useResource'
-import { useDisclosure } from '@/hooks/useDisclosure'
+import { useRouter } from 'next/navigation'
 import useSchema from '@/lib/schema/useSchema'
 import { createResource } from '@/actions/resource'
 import { findResourcesByNameOrPoNumber } from '@/actions/resource'
@@ -44,8 +40,11 @@ function ResourceField(
   { resourceType, resource, onChange, isReadOnly }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
-  const { isOpen, open, close } = useDisclosure()
+  const router = useRouter()
   const schema = useSchema(resourceType)
+
+  const open = (resourceId: string) =>
+    router.push(window.location.pathname + `?drawerResourceId=${resourceId}`)
 
   const handleCreate = (nameOrNumber: string) =>
     createResource(resourceType, [
@@ -62,14 +61,18 @@ function ResourceField(
     ]).then((resource) => {
       if (!resource) return
       onChange(mapResourceToValueResource(resource))
-      open()
+      open(resource.id)
     })
 
   if (resource) {
     return (
       <>
         <Stack direction="row" alignItems="center">
-          <Link onClick={open} flexGrow={1} sx={{ cursor: 'pointer' }}>
+          <Link
+            onClick={() => open(resource.id)}
+            flexGrow={1}
+            sx={{ cursor: 'pointer' }}
+          >
             {resource.name}
           </Link>
           <Tooltip title={`Open ${resourceType} page`}>
@@ -82,7 +85,7 @@ function ResourceField(
             </IconButton>
           </Tooltip>
           <Tooltip title={`Open ${resourceType} drawer`}>
-            <IconButton onClick={open} size="small">
+            <IconButton onClick={() => open(resource.id)} size="small">
               <ViewSidebar fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -94,12 +97,6 @@ function ResourceField(
             </Tooltip>
           )}
         </Stack>
-        <Drawer open={isOpen} onClose={close} anchor="right">
-          <ResourceFieldDrawer
-            resourceType={resourceType}
-            valueResource={resource}
-          />
-        </Drawer>
       </>
     )
   }
@@ -115,33 +112,6 @@ function ResourceField(
       onUpdate={onChange}
       ref={ref}
     />
-  )
-}
-
-type ResourceFieldDrawerProps = {
-  valueResource: ValueResource
-  resourceType: ResourceType
-}
-
-const ResourceFieldDrawer = ({
-  valueResource,
-  resourceType,
-}: ResourceFieldDrawerProps) => {
-  const [resource] = useResource(valueResource?.id)
-
-  return (
-    resource && (
-      <Box p={2} minWidth={500}>
-        <Typography variant="h5" sx={{ p: 2 }} gutterBottom>
-          {resourceType} details
-        </Typography>
-        <ResourceForm
-          resource={resource}
-          resourceType={resourceType}
-          singleColumn
-        />
-      </Box>
-    )
   )
 }
 

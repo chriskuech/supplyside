@@ -11,30 +11,28 @@ import {
 } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
 import { useSnackbar } from 'notistack'
-import { Resource, ResourceType, mapValueToValueInput } from '@supplyside/model'
+import { Resource, mapValueToValueInput, Schema } from '@supplyside/model'
 import { selectResourceFieldValue } from '@supplyside/model'
-import useSchema from '../schema/useSchema'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
 import Field from './fields/controls/Field'
 import { updateResourceField } from '@/actions/resource'
 
 type Props = {
+  schema: Schema
   resource: Resource
-  resourceType: ResourceType
   singleColumn?: boolean
 }
 
 export default function ResourceForm({
+  schema,
   resource,
-  resourceType,
   singleColumn,
 }: Props) {
   const { enqueueSnackbar } = useSnackbar()
 
   const columns = singleColumn ? 1 : 3
 
-  const schema = useSchema(resourceType)
   if (!schema || !resource) return <CircularProgress />
 
   return (
