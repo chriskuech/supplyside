@@ -135,9 +135,9 @@ export class QuickBooksVendorService {
         }
       )
 
-      if (vendor.templateId) return
-
       if (vendor) {
+        if (vendor.templateId) return
+
         await this.resourceService.update({
           accountId,
           resourceId: vendor.id,

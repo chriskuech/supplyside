@@ -78,9 +78,8 @@ export class QuickBooksService {
 
   async pullData(accountId: string): Promise<void> {
     const token = await this.quickBooksTokenService.getToken(accountId)
-    const client = this.quickBooksClientService.getClient(token ?? undefined)
-
     assert(token, 'No token found')
+    const client = this.quickBooksClientService.getClient(token)
 
     await Promise.all([
       this.quickBooksAccountService.upsertAccountsFromQuickBooks(

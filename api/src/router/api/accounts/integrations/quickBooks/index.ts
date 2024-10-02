@@ -108,6 +108,6 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
 
         await service.pullData(req.params.accountId)
 
-        res.status(200).send({})
+        res.send()
       },
     })
