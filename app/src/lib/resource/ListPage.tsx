@@ -52,7 +52,6 @@ export default async function ListPage({
               <CreateResourceButton
                 key={CreateResourceButton.name}
                 resourceType={resourceType}
-                shouldRedirect
                 buttonProps={{
                   size: 'large',
                   color: 'secondary',
