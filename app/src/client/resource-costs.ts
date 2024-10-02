@@ -8,7 +8,7 @@ export const createCost = async (accountId: string, resourceId: string) => {
   revalidateTag('Resources')
 
   const { data } = await client().POST(
-    '/api/accounts/{accountId}/resources/{resourceId}/costs/',
+    '/api/accounts/{accountId}/resources/{resourceId}/costs',
     {
       params: {
         path: { accountId, resourceId },
@@ -28,7 +28,7 @@ export const updateCost = async (
   revalidateTag('Resources')
 
   await client().PATCH(
-    '/api/accounts/{accountId}/resources/{resourceId}/costs/{costId}/',
+    '/api/accounts/{accountId}/resources/{resourceId}/costs/{costId}',
     {
       params: {
         path: { accountId, resourceId, costId },
@@ -46,7 +46,7 @@ export const deleteCost = async (
   revalidateTag('Resources')
 
   await client().DELETE(
-    '/api/accounts/{accountId}/resources/{resourceId}/costs/{costId}/',
+    '/api/accounts/{accountId}/resources/{resourceId}/costs/{costId}',
     {
       params: {
         path: { accountId, resourceId, costId },

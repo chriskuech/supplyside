@@ -3,7 +3,7 @@ import { client } from '.'
 
 export const readFile = async (accountId: string, fileId: string) => {
   const { data: file } = await client().GET(
-    '/api/accounts/{accountId}/files/{fileId}/',
+    '/api/accounts/{accountId}/files/{fileId}',
     {
       params: {
         path: { accountId, fileId },
@@ -24,7 +24,7 @@ export const createFile = async (
   revalidateTag('Resource')
 
   const { data: file } = await client().POST(
-    '/api/accounts/{accountId}/files/',
+    '/api/accounts/{accountId}/files',
     {
       params: {
         path: { accountId },

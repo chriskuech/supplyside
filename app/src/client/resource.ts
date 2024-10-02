@@ -15,7 +15,7 @@ export const createResource = async (
   revalidateTag('Resources')
 
   const { data: resource } = await client().POST(
-    '/api/accounts/{accountId}/resources/',
+    '/api/accounts/{accountId}/resources',
     {
       params: {
         path: { accountId },
@@ -33,7 +33,7 @@ export const resolveKey = async (
   resourceKey: number,
 ) => {
   const { data: resource } = await client().GET(
-    '/api/accounts/{accountId}/resources/head/',
+    '/api/accounts/{accountId}/resources/head',
     {
       params: {
         path: { accountId },
@@ -51,7 +51,7 @@ export const resolveKey = async (
 
 export const readResource = async (accountId: string, resourceId: string) => {
   const { data: resource } = await client().GET(
-    '/api/accounts/{accountId}/resources/{resourceId}/',
+    '/api/accounts/{accountId}/resources/{resourceId}',
     {
       params: {
         path: { accountId, resourceId },
@@ -69,7 +69,7 @@ export const readResources = async (
   { where }: { where?: JsonLogic } = {},
 ): Promise<Resource[] | undefined> => {
   const { data: resources } = await client().GET(
-    '/api/accounts/{accountId}/resources/',
+    '/api/accounts/{accountId}/resources',
     {
       params: {
         path: { accountId },
@@ -96,7 +96,7 @@ export const updateResource = async (
   revalidateTag('Resources')
 
   const { data: resource } = await client().PATCH(
-    '/api/accounts/{accountId}/resources/{resourceId}/',
+    '/api/accounts/{accountId}/resources/{resourceId}',
     {
       params: {
         path: { accountId, resourceId },
@@ -111,7 +111,7 @@ export const updateResource = async (
 export const deleteResource = async (accountId: string, resourceId: string) => {
   revalidateTag('Resources')
 
-  await client().DELETE('/api/accounts/{accountId}/resources/{resourceId}/', {
+  await client().DELETE('/api/accounts/{accountId}/resources/{resourceId}', {
     params: {
       path: { accountId, resourceId },
     },
@@ -122,7 +122,7 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
   revalidateTag('Resources')
 
   const { data: resource } = await client().POST(
-    '/api/accounts/{accountId}/resources/{resourceId}/clone/',
+    '/api/accounts/{accountId}/resources/{resourceId}/clone',
     {
       params: {
         path: { accountId, resourceId },
@@ -139,7 +139,7 @@ export const findResourcesByNameOrPoNumber = async (
   { input, exact }: { input: string; exact?: boolean },
 ) => {
   const { data: resources } = await client().GET(
-    '/api/accounts/{accountId}/resources/find-by-name-or-po-number/',
+    '/api/accounts/{accountId}/resources/find-by-name-or-po-number',
     {
       params: {
         path: { accountId },
@@ -162,7 +162,7 @@ export const findBacklinks = async (
   resourceId: string,
 ) => {
   const { data: resources } = await client().GET(
-    '/api/accounts/{accountId}/resources/find-backlinks/',
+    '/api/accounts/{accountId}/resources/find-backlinks',
     {
       params: {
         path: { accountId },

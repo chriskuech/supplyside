@@ -5,7 +5,7 @@ export const createBlob = async (accountId: string, file: File) => {
   const buffer = Buffer.from(await file.arrayBuffer())
 
   const { data: blob } = await client().POST(
-    '/api/accounts/{accountId}/blobs/',
+    '/api/accounts/{accountId}/blobs',
     {
       params: {
         path: { accountId },
@@ -23,7 +23,7 @@ export const createBlob = async (accountId: string, file: File) => {
 
 export const readBlob = async (accountId: string, blobId: string) => {
   const { data: blob } = await client().GET(
-    '/api/accounts/{accountId}/blobs/{blobId}/',
+    '/api/accounts/{accountId}/blobs/{blobId}',
     {
       params: {
         path: { accountId, blobId },
@@ -36,7 +36,7 @@ export const readBlob = async (accountId: string, blobId: string) => {
 
 export const readBlobData = async (accountId: string, blobId: string) => {
   const { data: buffer } = await client().GET(
-    '/api/accounts/{accountId}/blobs/{blobId}/download/',
+    '/api/accounts/{accountId}/blobs/{blobId}/download',
     {
       params: {
         path: { accountId, blobId },

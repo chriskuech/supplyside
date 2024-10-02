@@ -16,7 +16,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
     .withTypeProvider<ZodTypeProvider>()
     .route({
       method: 'POST',
-      url: '/',
+      url: '',
       schema: {
         consumes: ['*'],
         headers: z.object({ 'content-type': z.string() }),
@@ -48,7 +48,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
     })
     .route({
       method: 'GET',
-      url: '/:blobId/',
+      url: '/:blobId',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -70,7 +70,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
     })
     .route({
       method: 'GET',
-      url: '/:blobId/download/',
+      url: '/:blobId/download',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),

@@ -6,7 +6,7 @@ export const getVendorUrl = (vendorId: string) =>
 
 export const read = async (accountId: string) => {
   const { data } = await client().GET(
-    '/api/accounts/{accountId}/integrations/quickbooks/',
+    '/api/accounts/{accountId}/integrations/quickbooks',
     {
       params: {
         path: { accountId },
@@ -19,7 +19,7 @@ export const read = async (accountId: string) => {
 
 export const connect = async (accountId: string, url: string) => {
   const { data } = await client().POST(
-    '/api/accounts/{accountId}/integrations/quickbooks/connect/',
+    '/api/accounts/{accountId}/integrations/quickbooks/connect',
     {
       params: {
         path: { accountId },
@@ -33,7 +33,7 @@ export const connect = async (accountId: string, url: string) => {
 
 export const disconnect = async (accountId: string) => {
   const { data } = await client().POST(
-    '/api/accounts/{accountId}/integrations/quickbooks/disconnect/',
+    '/api/accounts/{accountId}/integrations/quickbooks/disconnect',
     {
       params: {
         path: { accountId },
@@ -46,7 +46,7 @@ export const disconnect = async (accountId: string) => {
 
 // export const pullBills = async (accountId: string) => {
 //   const { data } = await client().POST(
-//     '/api/accounts/{accountId}/integrations/quickbooks/pull-bills/',
+//     '/api/accounts/{accountId}/integrations/quickbooks/pull-bills',
 //     {
 //       params: {
 //         path: { accountId },
@@ -60,7 +60,7 @@ export const disconnect = async (accountId: string) => {
 
 export const pushBill = async (accountId: string, billResourceId: string) => {
   const { data } = await client().PUT(
-    '/api/accounts/{accountId}/integrations/quickbooks/bills/{billResourceId}/',
+    '/api/accounts/{accountId}/integrations/quickbooks/bills/{billResourceId}',
     {
       params: {
         path: { accountId, billResourceId },
@@ -73,7 +73,7 @@ export const pushBill = async (accountId: string, billResourceId: string) => {
 
 export const pullData = async (accountId: string) =>
   await client().POST(
-    '/api/accounts/{accountId}/integrations/quickbooks/pull-data/',
+    '/api/accounts/{accountId}/integrations/quickbooks/pull-data',
     {
       params: {
         path: { accountId },

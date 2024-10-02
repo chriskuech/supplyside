@@ -26,7 +26,7 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
     .register(mountSchemas, { prefix: '/:accountId/schemas' })
     .register(mountUsers, { prefix: '/:accountId/users' })
     .route({
-      url: '/',
+      url: '',
       method: 'GET',
       schema: {
         response: {
@@ -42,7 +42,7 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
       },
     })
     .route({
-      url: '/',
+      url: '',
       method: 'POST',
       schema: {
         response: { 200: AccountSchema },
@@ -56,7 +56,7 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
       },
     })
     .route({
-      url: '/:accountId/',
+      url: '/:accountId',
       method: 'GET',
       schema: {
         params: z.object({
@@ -76,7 +76,7 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'PATCH',
-      url: '/:accountId/',
+      url: '/:accountId',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -99,7 +99,7 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
       },
     })
     .route({
-      url: '/:accountId/',
+      url: '/:accountId',
       method: 'DELETE',
       schema: {
         params: z.object({
@@ -116,7 +116,7 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'POST',
-      url: '/:accountId/apply-template/',
+      url: '/:accountId/apply-template',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),

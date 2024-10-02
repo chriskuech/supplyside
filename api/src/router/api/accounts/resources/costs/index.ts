@@ -9,7 +9,7 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
     .withTypeProvider<ZodTypeProvider>()
     .route({
       method: 'POST',
-      url: '/',
+      url: '',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -26,7 +26,7 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'PATCH',
-      url: '/:costId/',
+      url: '/:costId',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -56,7 +56,7 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'DELETE',
-      url: '/:costId/',
+      url: '/:costId',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),

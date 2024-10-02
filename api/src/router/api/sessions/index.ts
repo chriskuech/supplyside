@@ -10,7 +10,7 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
     .withTypeProvider<ZodTypeProvider>()
     .route({
       method: 'POST',
-      url: '/',
+      url: '',
       schema: {
         body: z.object({
           email: z.string().email(),
@@ -100,7 +100,7 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'DELETE',
-      url: '/',
+      url: '',
       schema: {
         params: z.object({
           sessionId: z.string(),

@@ -5,7 +5,7 @@ import { client } from '.'
 export const createPo = async (accountId: string, resourceId: string) => {
   revalidateTag('Resource')
 
-  await client().PUT('/api/accounts/{accountId}/purchases/{resourceId}/po/', {
+  await client().PUT('/api/accounts/{accountId}/purchases/{resourceId}/po', {
     params: {
       path: { accountId, resourceId },
     },
@@ -16,7 +16,7 @@ export const sendPo = async (accountId: string, resourceId: string) => {
   revalidateTag('Resource')
 
   await client().POST(
-    '/api/accounts/{accountId}/purchases/{resourceId}/po/send/',
+    '/api/accounts/{accountId}/purchases/{resourceId}/po/send',
     {
       params: {
         path: { accountId, resourceId },
@@ -30,7 +30,7 @@ export const previewPo = async (
   resourceId: string,
 ): Promise<Buffer | undefined> => {
   const { data: buffer } = await client().GET(
-    '/api/accounts/{accountId}/purchases/{resourceId}/po/preview/',
+    '/api/accounts/{accountId}/purchases/{resourceId}/po/preview',
     {
       params: {
         path: { accountId, resourceId },

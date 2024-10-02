@@ -9,7 +9,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
 ) =>
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'POST',
-    url: '/process-poom/',
+    url: '/process-poom',
     schema: {
       body: z.string().min(1),
     },

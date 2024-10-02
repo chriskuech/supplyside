@@ -3,7 +3,7 @@ import { client } from '.'
 
 export const readConnection = async (accountId: string) => {
   const { data } = await client().GET(
-    '/api/accounts/{accountId}/integrations/mcmaster/',
+    '/api/accounts/{accountId}/integrations/mcmaster',
     {
       params: {
         path: { accountId },
@@ -20,7 +20,7 @@ export const connect = async (
   password: string,
 ) => {
   await client().POST(
-    '/api/accounts/{accountId}/integrations/mcmaster/connect/',
+    '/api/accounts/{accountId}/integrations/mcmaster/connect',
     {
       params: {
         path: { accountId },
@@ -32,7 +32,7 @@ export const connect = async (
 
 export const disconnect = async (accountId: string) => {
   await client().POST(
-    '/api/accounts/{accountId}/integrations/mcmaster/disconnect/',
+    '/api/accounts/{accountId}/integrations/mcmaster/disconnect',
     {
       params: {
         path: { accountId },
@@ -46,7 +46,7 @@ export const createPunchOutServiceRequest = async (
   resourceId: string,
 ) => {
   const { data } = await client().POST(
-    '/api/accounts/{accountId}/integrations/mcmaster/create-punchout-session/',
+    '/api/accounts/{accountId}/integrations/mcmaster/create-punchout-session',
     {
       params: {
         path: { accountId, resourceId },
@@ -59,7 +59,7 @@ export const createPunchOutServiceRequest = async (
 
 export const processPoom = async (cxmlString: string) => {
   const { data } = await client().POST(
-    '/api/integrations/mcmaster/process-poom/',
+    '/api/integrations/mcmaster/process-poom',
     {
       body: cxmlString,
     },

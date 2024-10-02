@@ -20,7 +20,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
     .register(mountCosts, { prefix: '/:resourceId/costs' })
     .route({
       method: 'GET',
-      url: '/',
+      url: '',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -52,7 +52,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'GET',
-      url: '/find-by-name-or-po-number/',
+      url: '/find-by-name-or-po-number',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -81,7 +81,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'GET',
-      url: '/find-backlinks/',
+      url: '/find-backlinks',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -108,7 +108,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'POST',
-      url: '/',
+      url: '',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -142,7 +142,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'GET',
-      url: '/head/',
+      url: '/head',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -173,7 +173,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'GET',
-      url: '/:resourceId/',
+      url: '/:resourceId',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -196,7 +196,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'PATCH',
-      url: '/:resourceId/',
+      url: '/:resourceId',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -223,7 +223,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'DELETE',
-      url: '/:resourceId/',
+      url: '/:resourceId',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -243,7 +243,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'POST',
-      url: '/:resourceId/clone/',
+      url: '/:resourceId/clone',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),

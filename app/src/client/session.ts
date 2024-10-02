@@ -5,7 +5,7 @@ import { client } from '.'
 export type Session = components['schemas']['Session']
 
 export const createSession = async (email: string, tat: string) => {
-  const { data: session } = await client().POST('/api/sessions/', {
+  const { data: session } = await client().POST('/api/sessions', {
     body: {
       email,
       tat,
@@ -43,7 +43,7 @@ export const readSession = async (
 }
 
 export const clearSession = async (sessionId: string) => {
-  const { data: session } = await client().DELETE('/api/sessions/', {
+  const { data: session } = await client().DELETE('/api/sessions', {
     params: {
       path: { sessionId },
     },

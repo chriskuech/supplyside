@@ -45,7 +45,7 @@ export const createServer = (isDev?: boolean) => fastify({
       },
     }),
   })
-  .get('/', (request, reply) => reply.status(200).send('OK')) // required by App Service
+  .get('', (request, reply) => reply.status(200).send('OK')) // required by App Service
   .register(mountApi, { prefix: '/api' })
   .register(mountHealth, { prefix: '/health' })
   .register(mountSelf, { prefix: '/self' })

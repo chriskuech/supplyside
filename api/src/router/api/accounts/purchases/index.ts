@@ -10,7 +10,7 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
     .withTypeProvider<ZodTypeProvider>()
     .route({
       method: 'PUT',
-      url: '/:resourceId/po/',
+      url: '/:resourceId/po',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -25,7 +25,7 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'POST',
-      url: '/:resourceId/po/send/',
+      url: '/:resourceId/po/send',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -40,7 +40,7 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'GET',
-      url: '/:resourceId/po/preview/',
+      url: '/:resourceId/po/preview',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -63,7 +63,7 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
     })
     // .route({
     //   method: 'GET',
-    //   url: '/:resourceId/po/download/',
+    //   url: '/:resourceId/po/download',
     //   schema: {
     //     params: z.object({
     //       accountId: z.string().uuid(),

@@ -13,7 +13,7 @@ export const mountSelf = async <App extends FastifyInstance>(app: App) =>
     .withTypeProvider<ZodTypeProvider>()
     .route({
       method: 'GET',
-      url: '/:userId/',
+      url: '/:userId',
       schema: {
         params: z.object({
           userId: z.string().uuid(),
@@ -34,7 +34,7 @@ export const mountSelf = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'PATCH',
-      url: '/:userId/',
+      url: '/:userId',
       schema: {
         params: z.object({
           userId: z.string().uuid(),

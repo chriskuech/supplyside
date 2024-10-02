@@ -11,7 +11,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
     .withTypeProvider<ZodTypeProvider>()
     .route({
       method: 'GET',
-      url: '/:resourceType/merged/',
+      url: '/:resourceType/merged',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -34,7 +34,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'GET',
-      url: '/custom/',
+      url: '/custom',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -53,7 +53,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'GET',
-      url: '/:resourceType/custom/',
+      url: '/:resourceType/custom',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -77,7 +77,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'PATCH',
-      url: '/:resourceType/custom/',
+      url: '/:resourceType/custom',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -99,7 +99,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'POST',
-      url: '/:resourceType/custom/sections/',
+      url: '/:resourceType/custom/sections',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -123,7 +123,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'PATCH',
-      url: '/:resourceType/custom/sections/:sectionId/',
+      url: '/:resourceType/custom/sections/:sectionId',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -153,7 +153,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'DELETE',
-      url: '/:resourceType/custom/sections/:sectionId/',
+      url: '/:resourceType/custom/sections/:sectionId',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),

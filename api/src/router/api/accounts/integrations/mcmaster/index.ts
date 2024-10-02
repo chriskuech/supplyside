@@ -11,7 +11,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
     .withTypeProvider<ZodTypeProvider>()
     .route({
       method: 'GET',
-      url: '/',
+      url: '',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -38,7 +38,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
     })
     .route({
       method: 'POST',
-      url: '/create-punchout-session/',
+      url: '/create-punchout-session',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -63,7 +63,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
     })
     .route({
       method: 'POST',
-      url: '/connect/',
+      url: '/connect',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -87,7 +87,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
     })
     .route({
       method: 'POST',
-      url: '/disconnect/',
+      url: '/disconnect',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -103,7 +103,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
     })
     .route({
       method: 'POST',
-      url: '/process-poom/',
+      url: '/process-poom',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),

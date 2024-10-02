@@ -9,7 +9,7 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
     .withTypeProvider<ZodTypeProvider>()
     .route({
       method: 'GET',
-      url: '/',
+      url: '',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -35,7 +35,7 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'POST',
-      url: '/disconnect/',
+      url: '/disconnect',
       schema: {
         querystring: z.object({
           realmId: z.string().min(1),
@@ -51,7 +51,7 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'POST',
-      url: '/connect/',
+      url: '/connect',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
