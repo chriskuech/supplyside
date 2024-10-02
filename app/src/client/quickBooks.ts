@@ -72,7 +72,7 @@ export const pushBill = async (accountId: string, billResourceId: string) => {
   return data
 }
 
-export const pullData = async (accountId: string) =>
+export const pullData = async (accountId: string) => {
   await client().POST(
     '/api/accounts/{accountId}/integrations/quickbooks/pull-data/',
     {
@@ -81,3 +81,4 @@ export const pullData = async (accountId: string) =>
       },
     },
   )
+}
