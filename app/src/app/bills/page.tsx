@@ -5,7 +5,11 @@ import { config } from '@/config'
 import ListPage from '@/lib/resource/ListPage'
 import { requireSession } from '@/session'
 
-export default async function Bills() {
+export default async function Bills({
+  searchParams,
+}: {
+  searchParams: Record<string, unknown>
+}) {
   const { accountId } = await requireSession()
   const account = await readAccount(accountId)
 
@@ -15,13 +19,13 @@ export default async function Bills() {
     <ListPage
       tableKey="billsList"
       resourceType="Bill"
+      searchParams={searchParams}
       callToActions={[
         <BillsInboxControl
           key={BillsInboxControl.name}
           address={`${account.key}@${config().BILLS_EMAIL_DOMAIN}`}
         />,
       ]}
-      path="/bills"
     />
   )
 }

@@ -22,8 +22,10 @@ import { getBillUrl } from '@/quickBooks'
 
 export default async function BillsDetail({
   params: { key },
+  searchParams,
 }: {
   params: { key: string }
+  searchParams: { [key: string]: unknown }
 }) {
   const { resource, schema, lineSchema, user } = await readDetailPageModel(
     'Bill',
@@ -64,6 +66,7 @@ export default async function BillsDetail({
       lineSchema={lineSchema}
       schema={schema}
       resource={resource}
+      searchParams={searchParams}
       tools={[
         ...(quickBooksAppUrl
           ? [
