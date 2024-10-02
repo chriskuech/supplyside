@@ -9,9 +9,9 @@ import {
 } from '@supplyside/model'
 import ResourceForm from '../ResourceForm'
 import { ResourceDrawer } from '../ResourceDrawer'
+import DeleteResourceButton from '../DeleteResourceButton'
 import ReadOnlyFieldsView from './ReadOnlyFieldsView'
 import LinesAndCosts from './LinesAndCosts'
-import DeleteResourceButton from './DeleteResourceButton'
 import DuplicateResourceButton from './DuplicateResourceButton'
 import HandleJustCloned from './HandleJustCloned'
 
@@ -81,6 +81,7 @@ export default function ResourceDetailPage({
                   key={DeleteResourceButton.name}
                   resourceType={resource.type}
                   resourceId={resource.id}
+                  size="large"
                 />
               ),
             ].map((tool, i) => (

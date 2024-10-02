@@ -75,20 +75,23 @@ function ResourceField(
           >
             {resource.name}
           </Link>
-          <Tooltip title={`Open ${resourceType} page`}>
-            <IconButton
-              href={`/${resourceType.toLowerCase()}s/${resource.key}`}
-              LinkComponent={NextLink}
-              size="small"
-            >
-              <LinkIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={`Open ${resourceType} drawer`}>
-            <IconButton onClick={() => open(resource.id)} size="small">
-              <ViewSidebar fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          {['Bill', 'Purchase'].includes(resourceType) ? (
+            <Tooltip title={`Open ${resourceType} page`}>
+              <IconButton
+                href={`/${resourceType.toLowerCase()}s/${resource.key}`}
+                LinkComponent={NextLink}
+                size="small"
+              >
+                <LinkIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <Tooltip title={`Open ${resourceType} drawer`}>
+              <IconButton onClick={() => open(resource.id)} size="small">
+                <ViewSidebar fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
           {!isReadOnly && (
             <Tooltip title={`Clear the selected ${resourceType}`}>
               <IconButton onClick={() => onChange?.(null)} size="small">
