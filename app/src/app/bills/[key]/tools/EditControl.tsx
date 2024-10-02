@@ -1,3 +1,5 @@
+'use client'
+
 import { Edit } from '@mui/icons-material'
 import { Tooltip, IconButton } from '@mui/material'
 import { billStatusOptions, fields } from '@supplyside/model'
