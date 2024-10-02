@@ -11,7 +11,7 @@
     "gen:prisma": "prisma generate --no-hints",
     "gen:client": "npm run start -- --gen",
     "lint": "eslint src",
-    "postinstall": "prisma generate",
+    "postinstall": "npm run gen:prisma",
     "start": "tsx src/index.ts"
   },
   "author": "",
