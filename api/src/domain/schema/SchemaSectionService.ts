@@ -6,10 +6,22 @@ import { ResourceType } from '@supplyside/model'
 export class SchemaSectionService {
   constructor(@inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  async createSection(dto: { schemaId: string; name: string }) {
+  async createCustomSection(
+    accountId: string,
+    resourceType: ResourceType,
+    dto: { name: string }
+  ) {
     await this.prisma.section.create({
       data: {
-        schemaId: dto.schemaId,
+        Schema: {
+          connect: {
+            accountId_resourceType_isSystem: {
+              accountId,
+              resourceType,
+              isSystem: false,
+            },
+          },
+        },
         name: dto.name,
         order: 0,
       },
@@ -19,7 +31,7 @@ export class SchemaSectionService {
   async updateCustomSchema(
     accountId: string,
     resourceType: ResourceType,
-    sectionIds: string[]
+    data: { sectionIds: string[] }
   ) {
     await this.prisma.schema.update({
       where: {
@@ -31,7 +43,7 @@ export class SchemaSectionService {
       },
       data: {
         Section: {
-          update: sectionIds.map((sectionId, i) => ({
+          update: data.sectionIds.map((sectionId, i) => ({
             where: {
               id: sectionId,
             },
@@ -44,37 +56,44 @@ export class SchemaSectionService {
     })
   }
 
-  async updateSection(dto: {
-    accountId: string;
-    sectionId: string;
-    name?: string;
-    fieldIds: string[];
-  }) {
+  async updateCustomSection(
+    accountId: string,
+    resourceType: ResourceType,
+    sectionId: string,
+    data: {
+      name?: string;
+      fieldIds: string[];
+    }
+  ) {
     await Promise.all([
       this.prisma.sectionField.deleteMany({
         where: {
-          sectionId: dto.sectionId,
           fieldId: {
-            notIn: dto.fieldIds,
+            notIn: data.fieldIds,
+          },
+          Section: {
+            id: sectionId,
+            Schema: {
+              resourceType,
+              accountId,
+            },
           },
         },
       }),
       this.prisma.section.update({
         where: {
-          id: dto.sectionId,
+          id: sectionId,
           Schema: {
-            accountId: dto.accountId,
+            resourceType,
+            accountId,
           },
         },
         data: {
-          name: dto.name,
+          name: data.name,
           SectionField: {
-            upsert: dto.fieldIds.map((fieldId, i) => ({
+            upsert: data.fieldIds.map((fieldId, i) => ({
               where: {
-                sectionId_fieldId: {
-                  sectionId: dto.sectionId,
-                  fieldId,
-                },
+                sectionId_fieldId: { sectionId, fieldId },
               },
               create: {
                 fieldId,

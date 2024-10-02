@@ -85,7 +85,7 @@ async function main() {
     },
   })
 
-  const vendorSchema = await schemaService.readSchema(
+  const vendorSchema = await schemaService.readMergedSchema(
     customerAccount.id,
     ResourceType.Vendor
   )
@@ -101,7 +101,7 @@ async function main() {
     ],
   })
 
-  const purchaseSchema = await schemaService.readSchema(
+  const purchaseSchema = await schemaService.readMergedSchema(
     customerAccount.id,
     ResourceType.Purchase
   )
@@ -127,7 +127,7 @@ async function main() {
     ],
   })
 
-  const itemSchema = await schemaService.readSchema(
+  const itemSchema = await schemaService.readMergedSchema(
     customerAccount.id,
     ResourceType.Item
   )
@@ -153,14 +153,14 @@ async function main() {
     ],
   })
 
-  const lineSchema = await schemaService.readSchema(
+  const lineSchema = await schemaService.readMergedSchema(
     customerAccount.id,
-    ResourceType.Line
+    'PurchaseLine'
   )
 
   await resourceService.create({
     accountId: customerAccount.id,
-    type: ResourceType.Line,
+    type: 'PurchaseLine',
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase).fieldId,
@@ -196,7 +196,7 @@ async function main() {
 
   await resourceService.create({
     accountId: customerAccount.id,
-    type: ResourceType.Line,
+    type: 'PurchaseLine',
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase).fieldId,

@@ -1,5 +1,4 @@
 import { P, match } from "ts-pattern";
-import { FieldTemplateReference } from "../templates/types";
 import { Resource, ResourceField } from "../types/resource";
 import { Schema } from "../types/schema";
 import { isArray, isNullish, pick } from "remeda";

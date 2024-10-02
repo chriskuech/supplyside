@@ -1,6 +1,21 @@
-import { SchemaField } from '@supplyside/model'
+import { Schema, SchemaField } from '@supplyside/model'
 import { mapValueModelToEntity } from '../resource/mappers'
-import { FieldModel } from './model'
+import { FieldModel, SchemaModel } from './model'
+
+export const mapSchemaModelToEntity = (model: SchemaModel): Schema => ({
+  resourceType: model.resourceType,
+  sections: model.Section.flatMap((s) => ({
+    id: s.id,
+    name: s.name,
+    fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity),
+  })),
+  fields: [
+    ...model.SchemaField,
+    ...model.Section.flatMap((s) => s.SectionField),
+  ]
+    .map((sf) => sf.Field)
+    .map(mapFieldModelToEntity),
+})
 
 export const mapFieldModelToEntity = (model: FieldModel): SchemaField => ({
   fieldId: model.id,

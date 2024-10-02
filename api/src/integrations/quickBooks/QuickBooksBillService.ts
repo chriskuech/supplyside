@@ -83,7 +83,7 @@ export class QuickBooksBillService {
       })
       .then((data) => readBillSchema.parse(data.json))
 
-    const vendorSchema = await this.schemaService.readSchema(accountId, 'Bill')
+    const vendorSchema = await this.schemaService.readMergedSchema(accountId, 'Bill')
 
     const quickBooksBillIdField = selectSchemaField(
       vendorSchema,

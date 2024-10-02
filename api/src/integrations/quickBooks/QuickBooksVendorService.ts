@@ -177,7 +177,7 @@ export class QuickBooksVendorService {
       })
       .then((data) => readVendorSchema.parse(data.json))
 
-    const vendorSchema = await this.schemaService.readSchema(
+    const vendorSchema = await this.schemaService.readMergedSchema(
       accountId,
       'Vendor'
     )
@@ -279,7 +279,7 @@ export class QuickBooksVendorService {
     accountId: string,
     quickBooksVendor: Vendor['Vendor']
   ): Promise<ResourceFieldInput[]> {
-    const vendorSchema = await this.schemaService.readSchema(
+    const vendorSchema = await this.schemaService.readMergedSchema(
       accountId,
       'Vendor'
     )

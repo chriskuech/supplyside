@@ -3,6 +3,7 @@ import { ReactNode } from 'react'
 import { ResourceType } from '@supplyside/model'
 import CreateResourceButton from './CreateResourceButton'
 import { ResourceTable } from './table'
+import { ResourceDrawer } from './ResourceDrawer'
 import { requireSession } from '@/session'
 import { readSchema } from '@/client/schema'
 import { readResources } from '@/client/resource'
@@ -11,12 +12,13 @@ type Props = {
   tableKey: string
   resourceType: ResourceType
   callToActions?: ReactNode[]
-  path: string
+  searchParams: Record<string, unknown>
 }
 
 export default async function ListPage({
   tableKey,
   resourceType,
+  searchParams,
   callToActions = [],
 }: Props) {
   const { accountId } = await requireSession()
@@ -33,39 +35,41 @@ export default async function ListPage({
     )
 
   return (
-    <Container sx={{ my: 5 }}>
-      <Stack spacing={4}>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Typography
-            variant="h3"
-            flexGrow={1}
-            sx={{ textShadow: '0px 7px 27px rgba(0, 0, 0, 0.3)' }}
-          >
-            {resourceType}s
-          </Typography>
-          {[
-            ...callToActions,
-            <CreateResourceButton
-              key={CreateResourceButton.name}
-              resourceType={resourceType}
-              shouldRedirect
-              buttonProps={{
-                size: 'large',
-                color: 'secondary',
-              }}
-            />,
-          ].map((cta, i) => (
-            <Box key={i} height="min-content">
-              {cta}
-            </Box>
-          ))}
+    <>
+      <Container sx={{ my: 5 }}>
+        <Stack spacing={4}>
+          <Stack direction="row" alignItems="center" gap={1}>
+            <Typography
+              variant="h3"
+              flexGrow={1}
+              sx={{ textShadow: '0px 7px 27px rgba(0, 0, 0, 0.3)' }}
+            >
+              {resourceType}s
+            </Typography>
+            {[
+              ...callToActions,
+              <CreateResourceButton
+                key={CreateResourceButton.name}
+                resourceType={resourceType}
+                buttonProps={{
+                  size: 'large',
+                  color: 'secondary',
+                }}
+              />,
+            ].map((cta, i) => (
+              <Box key={i} height="min-content">
+                {cta}
+              </Box>
+            ))}
+          </Stack>
+          <ResourceTable
+            tableKey={tableKey}
+            schema={schema}
+            resources={resources}
+          />
         </Stack>
-        <ResourceTable
-          tableKey={tableKey}
-          schema={schema}
-          resources={resources}
-        />
-      </Stack>
-    </Container>
+      </Container>
+      <ResourceDrawer searchParams={searchParams} />
+    </>
   )
 }

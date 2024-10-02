@@ -7,8 +7,10 @@ import { getVendorUrl } from '@/client/quickBooks'
 
 export default async function VendorDetail({
   params: { key },
+  searchParams,
 }: {
   params: { key: string }
+  searchParams: Record<string, unknown>
 }) {
   const { resource, schema, lineSchema } = await readDetailPageModel(
     'Vendor',
@@ -41,6 +43,7 @@ export default async function VendorDetail({
             ]
           : []
       }
+      searchParams={searchParams}
     />
   )
 }

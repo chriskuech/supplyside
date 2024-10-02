@@ -3,15 +3,13 @@ import { fail } from 'assert'
 import {
   Autocomplete,
   Box,
-  Drawer,
   IconButton,
   Link,
   Stack,
   TextField,
   Tooltip,
-  Typography,
 } from '@mui/material'
-import { Clear, Link as LinkIcon, ViewSidebar } from '@mui/icons-material'
+import { Clear, Link as LinkIcon, Sync, ViewSidebar } from '@mui/icons-material'
 import { ForwardedRef, forwardRef, useEffect, useMemo, useState } from 'react'
 import { debounce } from 'remeda'
 import NextLink from 'next/link'
@@ -23,16 +21,15 @@ import {
   mapResourceToValueResource,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
-import ResourceForm from '../../ResourceForm'
-import useResource from '../../useResource'
-import { useDisclosure } from '@/hooks/useDisclosure'
+import { useRouter } from 'next/navigation'
 import useSchema from '@/lib/schema/useSchema'
-import { createResource } from '@/actions/resource'
+import { copyFromResource, createResource } from '@/actions/resource'
 import { findResourcesByNameOrPoNumber } from '@/actions/resource'
 
 type Props = {
-  resource: ValueResource | null
-  onChange: (resource: ValueResource | null) => void
+  resourceId: string
+  valueResource: ValueResource | null
+  onChange: (valueResource: ValueResource | null) => void
   resourceType: ResourceType
   isReadOnly?: boolean
 }
@@ -41,11 +38,20 @@ type Props = {
  * A field that allows the user to select a resource of a given type.
  */
 function ResourceField(
-  { resourceType, resource, onChange, isReadOnly }: Props,
+  {
+    resourceId,
+    resourceType,
+    valueResource: resource,
+    onChange,
+    isReadOnly,
+  }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
-  const { isOpen, open, close } = useDisclosure()
+  const router = useRouter()
   const schema = useSchema(resourceType)
+
+  const open = (resourceId: string) =>
+    router.push(window.location.pathname + `?drawerResourceId=${resourceId}`)
 
   const handleCreate = (nameOrNumber: string) =>
     createResource(resourceType, [
@@ -54,7 +60,10 @@ function ResourceField(
           schema ?? fail('Schema not found'),
           match(resourceType)
             .with(P.union('Customer', 'Item', 'Vendor'), () => fields.name)
-            .with(P.union('Bill', 'Line', 'Purchase'), () => fields.poNumber)
+            .with(
+              P.union('Bill', 'PurchaseLine', 'Purchase'),
+              () => fields.poNumber,
+            )
             .exhaustive(),
         ).fieldId,
         valueInput: { string: nameOrNumber },
@@ -62,30 +71,47 @@ function ResourceField(
     ]).then((resource) => {
       if (!resource) return
       onChange(mapResourceToValueResource(resource))
-      open()
+      open(resource.id)
     })
 
   if (resource) {
     return (
       <>
         <Stack direction="row" alignItems="center">
-          <Link onClick={open} flexGrow={1} sx={{ cursor: 'pointer' }}>
+          <Link
+            onClick={() => open(resource.id)}
+            flexGrow={1}
+            sx={{ cursor: 'pointer' }}
+          >
             {resource.name}
           </Link>
-          <Tooltip title={`Open ${resourceType} page`}>
+          <Tooltip title={`Sync data from ${resourceType}`}>
             <IconButton
-              href={`/${resourceType.toLowerCase()}s/${resource.key}`}
-              LinkComponent={NextLink}
+              onClick={() =>
+                copyFromResource(resourceId, { fromResourceId: resource.id })
+              }
               size="small"
             >
-              <LinkIcon fontSize="small" />
+              <Sync fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title={`Open ${resourceType} drawer`}>
-            <IconButton onClick={open} size="small">
-              <ViewSidebar fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          {['Bill', 'Purchase'].includes(resourceType) ? (
+            <Tooltip title={`Open ${resourceType} page`}>
+              <IconButton
+                href={`/${resourceType.toLowerCase()}s/${resource.key}`}
+                LinkComponent={NextLink}
+                size="small"
+              >
+                <LinkIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <Tooltip title={`Open ${resourceType} drawer`}>
+              <IconButton onClick={() => open(resource.id)} size="small">
+                <ViewSidebar fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
           {!isReadOnly && (
             <Tooltip title={`Clear the selected ${resourceType}`}>
               <IconButton onClick={() => onChange?.(null)} size="small">
@@ -94,12 +120,6 @@ function ResourceField(
             </Tooltip>
           )}
         </Stack>
-        <Drawer open={isOpen} onClose={close} anchor="right">
-          <ResourceFieldDrawer
-            resourceType={resourceType}
-            valueResource={resource}
-          />
-        </Drawer>
       </>
     )
   }
@@ -115,33 +135,6 @@ function ResourceField(
       onUpdate={onChange}
       ref={ref}
     />
-  )
-}
-
-type ResourceFieldDrawerProps = {
-  valueResource: ValueResource
-  resourceType: ResourceType
-}
-
-const ResourceFieldDrawer = ({
-  valueResource,
-  resourceType,
-}: ResourceFieldDrawerProps) => {
-  const [resource] = useResource(valueResource?.id)
-
-  return (
-    resource && (
-      <Box p={2} minWidth={500}>
-        <Typography variant="h5" sx={{ p: 2 }} gutterBottom>
-          {resourceType} details
-        </Typography>
-        <ResourceForm
-          resource={resource}
-          resourceType={resourceType}
-          singleColumn
-        />
-      </Box>
-    )
   )
 }
 

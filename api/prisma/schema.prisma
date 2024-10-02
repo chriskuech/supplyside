@@ -90,8 +90,8 @@ enum ResourceType {
   Bill
   Customer
   Item
-  Line
   Purchase
+  PurchaseLine
   Vendor
 }
 

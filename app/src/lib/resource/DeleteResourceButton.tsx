@@ -2,19 +2,23 @@
 import { Delete } from '@mui/icons-material'
 import { IconButton, Tooltip } from '@mui/material'
 import { ResourceType } from '@supplyside/model'
+import { useRouter } from 'next/navigation'
 import { useConfirmation } from '@/lib/confirmation'
 import { deleteResource } from '@/actions/resource'
 
 type Props = {
   resourceType: ResourceType
   resourceId: string
+  size?: 'small' | 'medium' | 'large'
 }
 
 export default function DeleteResourceButton({
   resourceType,
   resourceId,
+  size,
 }: Props) {
   const confirm = useConfirmation()
+  const router = useRouter()
 
   return (
     <Tooltip title={`Permanently delete this ${resourceType}`}>
@@ -29,9 +33,10 @@ export default function DeleteResourceButton({
           if (!isConfirmed) return
 
           await deleteResource(resourceId)
+          router.push(`/${resourceType.toLowerCase()}s`)
         }}
       >
-        <Delete fontSize="large" />
+        <Delete fontSize={size} />
       </IconButton>
     </Tooltip>
   )
