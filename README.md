@@ -29,3 +29,10 @@ See the READMEs in each project for more information.
 4. In `api`, run `npm run gen`.
 5. In `api`, run `docker compose up`.
 6. In `app` and `api`, run `npm run dev`.
+
+
+## Rendering SECURITY.md to PDF
+
+```bash
+npx md-mermaid-to-pdf ./SECURITY.md --pdf-options '{ "format": "Letter", "margin": "1in" }'
+```
