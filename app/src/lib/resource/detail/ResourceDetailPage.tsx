@@ -17,7 +17,7 @@ import HandleJustCloned from './HandleJustCloned'
 
 type Props = {
   schema: Schema
-  lineSchema: Schema
+  lineSchema: Schema | null
   resource: Resource
   name?: string | null
   tools: readonly ReactNode[]
@@ -100,8 +100,9 @@ export default function ResourceDetailPage({
             ) : (
               <ResourceForm schema={schema} resource={resource} />
             )}
-            {backlinkField && (
+            {backlinkField && lineSchema && (
               <LinesAndCosts
+                lineSchema={lineSchema}
                 resource={resource}
                 lineQuery={{
                   '==': [{ var: backlinkField.name }, resource.id],

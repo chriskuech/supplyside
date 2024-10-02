@@ -96,14 +96,14 @@ export default function ResourceTable({
       onRowClick={({ row: { type, key, id } }: { row: Row }) =>
         match(type)
           .with(
-            P.union('Bill', 'Purchase'),
+            P.union('Bill', 'Job', 'Purchase'),
             () => (window.location.href = `/${type.toLowerCase()}s/${key}`),
           )
           .with(
-            P.union('Customer', 'Item', 'Vendor'),
+            P.union('Customer', 'Item', 'Part', 'Vendor'),
             () => (window.location.search = `drawerResourceId=${id}`),
           )
-          .with('PurchaseLine', () => null)
+          .with(P.union('JobLine', 'PurchaseLine'), () => null)
           .exhaustive()
       }
       apiRef={apiRef}

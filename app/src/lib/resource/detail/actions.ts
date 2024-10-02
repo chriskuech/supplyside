@@ -3,6 +3,7 @@
 import { fail } from 'assert'
 import { Resource, ResourceType, Schema, User } from '@supplyside/model'
 import { notFound, redirect } from 'next/navigation'
+import { match } from 'ts-pattern'
 import { Session, requireSession } from '@/session'
 import {
   readResource,
@@ -17,7 +18,7 @@ type DetailPageModel = {
   session: Session
   resource: Resource
   schema: Schema
-  lineSchema: Schema
+  lineSchema: Schema | null
   account: Account
   user: User
 }
@@ -38,10 +39,19 @@ export const readDetailPageModel = async (
 
   if (!resourceId) notFound()
 
+  const lineResourceType = match<ResourceType, ResourceType | null>(
+    resourceType,
+  )
+    .with('Bill', () => 'PurchaseLine')
+    .with('Job', () => 'JobLine')
+    .with('Purchase', () => 'PurchaseLine')
+    .otherwise(() => null)
+
   const [resource, schema, lineSchema, account, user] = await Promise.all([
     readResource(session.accountId, resourceId).then((e) => e ?? fail()),
     readSchema(session.accountId, resourceType).then((e) => e ?? fail()),
-    readSchema(session.accountId, 'PurchaseLine').then((e) => e ?? fail()),
+    lineResourceType &&
+      readSchema(session.accountId, lineResourceType).then((e) => e ?? fail()),
     readAccount(session.accountId).then((e) => e ?? fail()),
     readSelf(session.userId).then((e) => e ?? fail()),
   ])

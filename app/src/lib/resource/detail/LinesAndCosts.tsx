@@ -4,10 +4,10 @@ import { ResourceTable } from '../table'
 import ItemizedCostLines from '../costs/ItemizedCostLines'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { JsonLogic, readResources } from '@/client/resource'
-import { readSchema } from '@/client/schema'
 
 type Props = {
   resource: Resource
+  lineSchema: Schema
   lineQuery: JsonLogic
   newLineInitialData: { fieldId: string; valueInput: ValueInput }[]
   isReadOnly?: boolean
@@ -15,16 +15,18 @@ type Props = {
 
 export default async function LinesAndCosts({
   resource,
+  lineSchema,
   lineQuery,
   newLineInitialData,
   isReadOnly,
 }: Props) {
-  const [lines, lineSchema] = await Promise.all([
-    readResources(resource.accountId, 'PurchaseLine', {
+  const lines = await readResources(
+    resource.accountId,
+    lineSchema.resourceType,
+    {
       where: lineQuery,
-    }),
-    readSchema(resource.accountId, 'PurchaseLine'),
-  ])
+    },
+  )
 
   if (!lines || !lineSchema)
     return <Alert severity="error">Failed to load</Alert>
@@ -48,7 +50,7 @@ export default async function LinesAndCosts({
         </Typography>
         {!isReadOnly && (
           <CreateResourceButton
-            resourceType="PurchaseLine"
+            resourceType={lineSchema.resourceType}
             fields={newLineInitialData}
           />
         )}

@@ -73,17 +73,41 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
-    resourceType: "PurchaseLine",
+    resourceType: "Job",
     fields: [
-      fields.item,
-      fields.unitOfMeasure,
+      fields.jobStatus,
+    ],
+    sections: [
+      {
+        name: "Job Info",
+        fields: [
+          fields.name,
+          fields.jobDescription,
+          fields.needDate,
+          fields.totalCost,
+          fields.customer,
+        ]
+      }
+    ]
+  },
+  {
+    resourceType: "JobLine",
+    fields: [
+      fields.job,
+      fields.part,
       fields.quantity,
       fields.unitCost,
-      fields.totalCost,
-      fields.needDate,
-      fields.purchase,
-      fields.bill,
-    ],
+      fields.totalCost
+    ]
+  },
+  {
+    resourceType: "Part",
+    fields: [
+      fields.name,
+      fields.partNumber,
+      fields.revision,
+      fields.partFiles,
+    ]
   },
   {
     resourceType: "Purchase",
@@ -98,6 +122,7 @@ export const schemas: SchemaTemplate[] = [
       fields.trackingNumber,
       fields.purchaseAttachments,
       fields.punchoutSessionUrl,
+      fields.job,
     ],
     sections: [
       {
@@ -133,6 +158,19 @@ export const schemas: SchemaTemplate[] = [
         name: fields.termsAndConditions.name,
         fields: [fields.termsAndConditions],
       },
+    ],
+  },
+  {
+    resourceType: "PurchaseLine",
+    fields: [
+      fields.item,
+      fields.unitOfMeasure,
+      fields.quantity,
+      fields.unitCost,
+      fields.totalCost,
+      fields.needDate,
+      fields.purchase,
+      fields.bill,
     ],
   },
   {
