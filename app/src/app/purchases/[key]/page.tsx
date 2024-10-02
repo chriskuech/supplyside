@@ -34,7 +34,7 @@ export default async function PurchaseDetail({
   searchParams,
 }: {
   params: { key: string }
-  searchParams: { [key: string]: unknown }
+  searchParams: Record<string, unknown>
 }) {
   const {
     session: { accountId },

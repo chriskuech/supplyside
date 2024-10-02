@@ -7,7 +7,7 @@ export default async function CustomersDetail({
   searchParams,
 }: {
   params: { key: string }
-  searchParams: { [key: string]: unknown }
+  searchParams: Record<string, unknown>
 }) {
   const { resource, schema, lineSchema } = await readDetailPageModel(
     'Customer',

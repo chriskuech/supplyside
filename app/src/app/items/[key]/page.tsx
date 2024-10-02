@@ -7,7 +7,7 @@ export default async function ItemsDetail({
   searchParams,
 }: {
   params: { key: string }
-  searchParams: { [key: string]: unknown }
+  searchParams: Record<string, unknown>
 }) {
   const { resource, schema, lineSchema } = await readDetailPageModel(
     'Item',

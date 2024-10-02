@@ -10,7 +10,7 @@ export default async function VendorDetail({
   searchParams,
 }: {
   params: { key: string }
-  searchParams: { [key: string]: unknown }
+  searchParams: Record<string, unknown>
 }) {
   const { resource, schema, lineSchema } = await readDetailPageModel(
     'Vendor',

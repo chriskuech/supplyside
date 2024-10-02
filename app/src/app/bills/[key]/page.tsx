@@ -25,7 +25,7 @@ export default async function BillsDetail({
   searchParams,
 }: {
   params: { key: string }
-  searchParams: { [key: string]: unknown }
+  searchParams: Record<string, unknown>
 }) {
   const { resource, schema, lineSchema, user } = await readDetailPageModel(
     'Bill',
