@@ -378,7 +378,7 @@ export class ResourceService {
     })
 
     const entity = mapResourceModelToEntity(model)
-    if (entity.type === 'Line') {
+    if (entity.type === 'PurchaseLine') {
       const purchaseId = selectResourceFieldValue(entity, fields.purchase)
         ?.resource?.id
       if (purchaseId) {
@@ -541,7 +541,7 @@ export class ResourceService {
 
     const lines = await this.list({
       accountId,
-      type: 'Line',
+      type: 'PurchaseLine',
       where: {
         '==': [{ var: resourceType }, resourceId],
       },
@@ -574,7 +574,7 @@ export class ResourceService {
     // When the Line."Unit Cost" or Line."Quantity" or a new item is selected field is updated,
     // Then update Line."Total Cost"
     if (
-      resource.type === 'Line' &&
+      resource.type === 'PurchaseLine' &&
       updatedFields.some(
         (rf) =>
           rf.field.templateId === fields.unitCost.templateId ||
@@ -604,7 +604,7 @@ export class ResourceService {
     // When the Line."Total Cost" field is updated,
     // Then update the {Bill|Purchase}."Subtotal Cost" field
     if (
-      resource.type === 'Line' &&
+      resource.type === 'PurchaseLine' &&
       updatedFields.some(
         (rf) => rf.field.templateId === fields.totalCost.templateId
       )
@@ -762,14 +762,11 @@ export class ResourceService {
     fromResourceField,
     toResourceField,
   }: LinkLinesParams) {
-    const lineSchema = await this.schemaService.readMergedSchema(
-      accountId,
-      'Line'
-    )
+    const lineSchema = await this.schemaService.readMergedSchema(accountId, 'PurchaseLine')
 
     const lines = await this.list({
       accountId,
-      type: 'Line',
+      type: 'PurchaseLine',
       where: {
         '==': [{ var: fromResourceField.name }, fromResourceId],
       },
@@ -936,16 +933,13 @@ export class ResourceService {
     toResourceId,
     backLinkFieldRef,
   }: ResourceCopyParams & { backLinkFieldRef: FieldReference }) {
-    const lineSchema = await this.schemaService.readMergedSchema(
-      accountId,
-      'Line'
-    )
+    const lineSchema = await this.schemaService.readMergedSchema(accountId, 'PurchaseLine')
 
     const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
 
     const lines = await this.list({
       accountId,
-      type: 'Line',
+      type: 'PurchaseLine',
       where: {
         '==': [{ var: backLinkField.name }, fromResourceId],
       },
@@ -955,7 +949,7 @@ export class ResourceService {
     for (const line of lines) {
       await this.create({
         accountId,
-        type: 'Line',
+        type: 'PurchaseLine',
         fields: [
           ...line.fields
             .filter(({ fieldId }) => fieldId !== backLinkField.fieldId)

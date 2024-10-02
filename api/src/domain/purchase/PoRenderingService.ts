@@ -66,12 +66,12 @@ export class PoRenderingService {
       this.resourceService.read(accountId, purchaseId),
       this.resourceService.list({
         accountId,
-        type: 'Line',
+        type: 'PurchaseLine',
         where: {
           '==': [{ var: 'Purchase' }, purchaseId],
         },
       }),
-      this.schemaService.readMergedSchema(accountId, 'Line'),
+      this.schemaService.readMergedSchema(accountId, 'PurchaseLine'),
       this.accountService.read(accountId),
     ])
 

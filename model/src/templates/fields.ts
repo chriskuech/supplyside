@@ -221,7 +221,7 @@ const _fields = {
     name: 'Line',
     type: 'Resource',
     description: 'Contains all info related to a specific line item',
-    resourceType: 'Line',
+    resourceType: 'PurchaseLine',
   },
   name: {
     templateId: 'aebb8b9f-d49a-4d5b-b6cf-453bfad847b4',

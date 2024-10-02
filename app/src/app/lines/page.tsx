@@ -8,7 +8,7 @@ export default async function Lines({
   return (
     <ListPage
       tableKey="linesList"
-      resourceType="Line"
+      resourceType="PurchaseLine"
       searchParams={searchParams}
     />
   )

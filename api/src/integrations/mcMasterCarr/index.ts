@@ -355,7 +355,7 @@ export class McMasterService {
         matchedItemId = newResource.id
       }
 
-      const lineSchema = await this.schemaService.readMergedSchema(accountId, 'Line')
+      const lineSchema = await this.schemaService.readMergedSchema(accountId, 'PurchaseLine')
       const itemFieldId = selectSchemaFieldUnsafe(
         lineSchema,
         fields.item
@@ -384,7 +384,7 @@ export class McMasterService {
 
       const createdLine = await this.resourceService.create({
         accountId,
-        type: 'Line',
+        type: 'PurchaseLine',
         fields: [
           {
             fieldId: itemFieldId,

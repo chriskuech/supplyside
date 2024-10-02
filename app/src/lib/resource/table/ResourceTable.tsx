@@ -103,7 +103,7 @@ export default function ResourceTable({
             P.union('Customer', 'Item', 'Vendor'),
             () => (window.location.search = `drawerResourceId=${id}`),
           )
-          .with('Line', () => null)
+          .with('PurchaseLine', () => null)
           .exhaustive()
       }
       apiRef={apiRef}
