@@ -10,7 +10,7 @@ export default async function Quickbooks() {
 
   if (!config) return <Alert severity="error">Failed to load</Alert>
 
-  return config.connection ? (
+  return config.status === 'connected' ? (
     <QuickBooksConnection />
   ) : (
     <QuickBooksConnectButton url={config.setupUrl} />

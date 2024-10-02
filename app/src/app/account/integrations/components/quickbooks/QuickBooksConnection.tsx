@@ -9,24 +9,22 @@ import { read } from '@/client/quickBooks'
 export default async function QuickBooksConnection() {
   const { accountId } = await requireSession()
   const config = await read(accountId)
-  assert(config?.connection, 'QuickBooks not connected')
+  assert(config?.status === 'connected', 'QuickBooks not connected')
 
-  const connectedAt = config.connection
-    ? new Date(config.connection.connectedAt)
-    : null
+  const connectedAt = new Date(config.connectedAt)
 
   return (
     <Stack gap={2}>
       <Stack>
         <Typography fontWeight="bold">Connected company</Typography>
         <Stack direction="row" alignItems="center">
-          <Typography>{config.connection.companyName}</Typography>
+          <Typography>{config.companyName}</Typography>
           <CheckIcon color="success" />
         </Stack>
       </Stack>
       <Typography variant="caption">
-        Connected at: <strong>{connectedAt?.toLocaleDateString()}</strong>
-        . <QuickBooksDisconnectLink realmId={config.connection.realmId} />
+        Connected at: <strong>{connectedAt.toLocaleDateString()}</strong>
+        . <QuickBooksDisconnectLink realmId={config.realmId} />
       </Typography>
       <QuickBooksSyncButton />
     </Stack>

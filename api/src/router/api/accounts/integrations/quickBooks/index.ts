@@ -1,5 +1,6 @@
 import { container } from '@supplyside/api/di'
 import { QuickBooksService } from '@supplyside/api/integrations/quickBooks/QuickBooksService'
+import { fail } from 'assert'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
@@ -15,39 +16,41 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
           accountId: z.string().uuid(),
         }),
         response: {
-          200: z.object({
-            setupUrl: z.string().url(),
-            connection: z.object({
+          200: z.discriminatedUnion('status', [
+            z.object({
+              status: z.literal('disconnected'),
+              setupUrl: z.string().url(),
+            }),
+            z.object({
+              status: z.literal('connected'),
               companyName: z.string().min(1),
               realmId: z.string().min(1),
               connectedAt: z.string().datetime(),
-            }).nullable(),
-          }),
-          404: z.undefined(),
+            }),
+          ]),
         },
       },
       handler: async (req, res) => {
         const service = container.resolve(QuickBooksService)
 
         const isConnected = await service.isConnected(req.params.accountId)
-        const setupUrl = await service.getSetupUrl()
 
         if (isConnected) {
           const companyInfo = await service.getCompanyInfo(
             req.params.accountId
           )
           const realmId = await service.getAccountRealmId(req.params.accountId)
+          const connectedAt = await service.getConnectedAt(req.params.accountId)
 
           res.status(200).send({
-            setupUrl,
-            connection: {
-              companyName: companyInfo.CompanyInfo.CompanyName,
-              realmId,
-              connectedAt: new Date().toISOString(),
-            },
+            status: 'connected',
+            companyName: companyInfo.CompanyInfo.CompanyName,
+            realmId,
+            connectedAt: connectedAt?.toISOString() ?? fail('"quickBooks connected at" not set'),
           })
         } else {
-          res.status(200).send({setupUrl, connection: null})
+          const setupUrl = await service.getSetupUrl()
+          res.status(200).send({ setupUrl, status: 'disconnected' })
         }
       },
     })
@@ -87,28 +90,9 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(QuickBooksService)
 
-        const bills = await service.connect(
-          req.params.accountId,
-          req.query.url
-        )
+        await service.connect(req.params.accountId, req.query.url)
 
-        res.send(bills)
-      },
-    })
-    .route({
-      method: 'POST',
-      url: '/disconnect/',
-      schema: {
-        params: z.object({
-          accountId: z.string().uuid(),
-        }),
-      },
-      handler: async (req, res) => {
-        const service = container.resolve(QuickBooksService)
-
-        await service.disconnect(req.params.accountId)
-
-        res.status(200).send({})
+        res.send()
       },
     })
     .route({
@@ -124,6 +108,6 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
 
         await service.pullData(req.params.accountId)
 
-        res.status(200).send({})
+        res.send()
       },
     })

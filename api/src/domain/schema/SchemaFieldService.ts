@@ -10,12 +10,14 @@ import { mapFieldModelToEntity } from './mappers'
 import { fieldIncludes } from './model'
 import { mapValueInputToPrismaValueUpdate } from '../resource/mappers'
 import { OptionPatch } from '@supplyside/api/router/api/accounts/fields'
+import { match } from 'ts-pattern'
 
 @injectable()
 export class SchemaFieldService {
   constructor(
     @inject(PrismaService)
-    private readonly prisma: PrismaService) {}
+    private readonly prisma: PrismaService
+  ) {}
 
   async list(accountId: string): Promise<SchemaField[]> {
     const fields = await this.prisma.field.findMany({
@@ -68,6 +70,54 @@ export class SchemaFieldService {
       defaultValue?: ValueInput;
     }
   ) {
+    if (dto.options)
+      await Promise.all(
+        dto.options.map((o, i) =>
+          match(o)
+            .with({ op: 'add' }, (o) =>
+              this.prisma.option.create({
+                data: {
+                  Field: {
+                    connect: {
+                      id: fieldId,
+                      accountId,
+                    },
+                  },
+                  name: o.name,
+                  order: i,
+                },
+              })
+            )
+            .with({ op: 'update' }, (o) =>
+              this.prisma.option.update({
+                where: {
+                  id: o.optionId,
+                  Field: {
+                    id: fieldId,
+                    accountId,
+                  },
+                },
+                data: {
+                  name: o.name,
+                  order: i,
+                },
+              })
+            )
+            .with({ op: 'remove' }, (o) =>
+              this.prisma.option.delete({
+                where: {
+                  id: o.optionId,
+                  Field: {
+                    id: fieldId,
+                    accountId,
+                  },
+                },
+              })
+            )
+            .exhaustive()
+        )
+      )
+
     await this.prisma.field.update({
       where: { id: fieldId, accountId },
       data: {
