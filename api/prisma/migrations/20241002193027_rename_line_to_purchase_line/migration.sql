@@ -1,2 +1,2 @@
 
-ALTER TYPE ResourceType RENAME VALUE 'Line' TO 'PurchaseLine'
+ALTER TYPE "ResourceType" RENAME VALUE 'Line' TO 'PurchaseLine'

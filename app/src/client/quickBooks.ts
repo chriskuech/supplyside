@@ -31,32 +31,18 @@ export const connect = async (accountId: string, url: string) => {
   return data
 }
 
-export const disconnect = async (accountId: string) => {
+export const disconnect = async (realmId: string) => {
   const { data } = await client().POST(
-    '/api/accounts/{accountId}/integrations/quickbooks/disconnect/',
+    '/api/integrations/quickbooks/disconnect/',
     {
       params: {
-        path: { accountId },
+        query: { realmId },
       },
     },
   )
 
   return data
 }
-
-// export const pullBills = async (accountId: string) => {
-//   const { data } = await client().POST(
-//     '/api/accounts/{accountId}/integrations/quickbooks/pull-bills/',
-//     {
-//       params: {
-//         path: { accountId },
-//         query: {},
-//       },
-//     },
-//   )
-
-//   return data
-// }
 
 export const pushBill = async (accountId: string, billResourceId: string) => {
   const { data } = await client().PUT(
@@ -71,7 +57,7 @@ export const pushBill = async (accountId: string, billResourceId: string) => {
   return data
 }
 
-export const pullData = async (accountId: string) =>
+export const pullData = async (accountId: string) => {
   await client().POST(
     '/api/accounts/{accountId}/integrations/quickbooks/pull-data/',
     {
@@ -80,3 +66,4 @@ export const pullData = async (accountId: string) =>
       },
     },
   )
+}

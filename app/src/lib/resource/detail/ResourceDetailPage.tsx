@@ -40,7 +40,6 @@ export default function ResourceDetailPage({
 }: Props) {
   return (
     <>
-      <ResourceDrawer searchParams={searchParams} />
       <Stack>
         <HandleJustCloned />
         <Container sx={{ py: 5 }}>
@@ -120,6 +119,7 @@ export default function ResourceDetailPage({
           </Stack>
         </Container>
       </Stack>
+      <ResourceDrawer searchParams={searchParams} />
     </>
   )
 }

@@ -1,14 +1,11 @@
-import { z } from 'zod'
 import { redirect } from 'next/navigation'
+import { NextRequest } from 'next/server'
 import { config } from '@/config'
-import { disconnect } from '@/client/mcmaster'
+import { disconnect } from '@/actions/quickBooks'
 
-export default async function QuickbooksLogout({
-  searchParams,
-}: {
-  searchParams: Record<string, string | unknown>
-}) {
-  const realmId = z.string().safeParse(searchParams['realmId']).data
+export async function GET({ url }: NextRequest) {
+  const mappedUrl = new URL(url)
+  const realmId = mappedUrl.searchParams.get('realmId')
 
   if (!realmId)
     return redirect(`${config().BASE_URL}/integrations/quickbooks/disconnected`)

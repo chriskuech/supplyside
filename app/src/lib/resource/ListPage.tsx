@@ -36,7 +36,6 @@ export default async function ListPage({
 
   return (
     <>
-      <ResourceDrawer searchParams={searchParams} />
       <Container sx={{ my: 5 }}>
         <Stack spacing={4}>
           <Stack direction="row" alignItems="center" gap={1}>
@@ -70,6 +69,7 @@ export default async function ListPage({
           />
         </Stack>
       </Container>
+      <ResourceDrawer searchParams={searchParams} />
     </>
   )
 }
