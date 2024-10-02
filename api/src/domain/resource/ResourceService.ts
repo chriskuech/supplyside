@@ -211,7 +211,7 @@ export class ResourceService {
     templateId,
     fields: resourceFields,
   }: CreateResourceParams): Promise<Resource> {
-    const schema = await this.schemaService.readSchema(accountId, type)
+    const schema = await this.schemaService.readMergedSchema(accountId, type)
 
     const {
       _max: { key },
@@ -274,7 +274,7 @@ export class ResourceService {
     where,
     orderBy,
   }: ReadResourcesParams): Promise<Resource[]> {
-    const schema = await this.schemaService.readSchema(accountId, type)
+    const schema = await this.schemaService.readMergedSchema(accountId, type)
     const sql = createSql({ accountId, schema, where, orderBy })
 
     const results: { _id: string }[] = await this.prisma.$queryRawUnsafe(sql)
@@ -300,7 +300,7 @@ export class ResourceService {
     fields,
   }: UpdateResourceParams) {
     const resource = await this.read(accountId, resourceId)
-    const schema = await this.schemaService.readSchema(
+    const schema = await this.schemaService.readMergedSchema(
       accountId,
       resource.type
     )
@@ -504,7 +504,7 @@ export class ResourceService {
 
   async recalculateItemizedCosts(accountId: string, resourceId: string) {
     const resource = await this.read(accountId, resourceId)
-    const schema = await this.schemaService.readSchema(
+    const schema = await this.schemaService.readMergedSchema(
       accountId,
       resource.type
     )
@@ -533,7 +533,7 @@ export class ResourceService {
     resourceType: ResourceType,
     resourceId: string
   ) {
-    const schema = await this.schemaService.readSchema(
+    const schema = await this.schemaService.readMergedSchema(
       accountId,
       resourceType,
       true
@@ -687,7 +687,7 @@ export class ResourceService {
           rf.field.templateId === fields.itemizedCosts.templateId
       )
     ) {
-      const schema = await this.schemaService.readSchema(
+      const schema = await this.schemaService.readMergedSchema(
         accountId,
         resource.type,
         true
@@ -808,7 +808,7 @@ export class ResourceService {
     fromResourceField,
     toResourceField,
   }: LinkLinesParams) {
-    const lineSchema = await this.schemaService.readSchema(accountId, 'Line')
+    const lineSchema = await this.schemaService.readMergedSchema(accountId, 'Line')
 
     const lines = await this.list({
       accountId,
@@ -835,7 +835,7 @@ export class ResourceService {
 
     const destination = await match(source.type)
       .with('Bill', async () => {
-        const schema = await this.schemaService.readSchema(accountId, 'Bill')
+        const schema = await this.schemaService.readMergedSchema(accountId, 'Bill')
 
         const billStatusField = selectSchemaFieldUnsafe(
           schema,
@@ -881,7 +881,7 @@ export class ResourceService {
         return destination
       })
       .with('Purchase', async () => {
-        const schema = await this.schemaService.readSchema(
+        const schema = await this.schemaService.readMergedSchema(
           accountId,
           'Purchase'
         )
@@ -976,7 +976,7 @@ export class ResourceService {
     toResourceId,
     backLinkFieldRef,
   }: ResourceCopyParams & { backLinkFieldRef: FieldReference }) {
-    const lineSchema = await this.schemaService.readSchema(accountId, 'Line')
+    const lineSchema = await this.schemaService.readMergedSchema(accountId, 'Line')
 
     const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
 
@@ -1020,8 +1020,8 @@ export class ResourceService {
     ])
 
     const [fromSchema, toSchema] = await Promise.all([
-      this.schemaService.readSchema(accountId, fromResource.type),
-      this.schemaService.readSchema(accountId, toResource.type),
+      this.schemaService.readMergedSchema(accountId, fromResource.type),
+      this.schemaService.readMergedSchema(accountId, toResource.type),
     ])
 
     const fieldsToUpdate = fromResource.fields
@@ -1059,7 +1059,7 @@ export class ResourceService {
     fieldTemplate: FieldReference,
     valueInput: ValueInput
   ) {
-    const resourceSchema = await this.schemaService.readSchema(
+    const resourceSchema = await this.schemaService.readMergedSchema(
       accountId,
       resourceType
     )

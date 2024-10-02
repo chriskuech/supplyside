@@ -71,7 +71,7 @@ export class PoRenderingService {
           '==': [{ var: 'Purchase' }, purchaseId],
         },
       }),
-      this.schemaService.readSchema(accountId, 'Line'),
+      this.schemaService.readMergedSchema(accountId, 'Line'),
       this.accountService.read(accountId),
     ])
 
