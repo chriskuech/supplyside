@@ -36,7 +36,7 @@ RUN cd ./model && npm ci --include production
 COPY --from=builder --chown=api:nodejs /api/tsconfig.json /api/package.json /api/package-lock.json* ./api/
 COPY --from=builder --chown=api:nodejs /api/prisma ./api/prisma
 COPY --from=builder --chown=api:nodejs /api/src ./api/src
-RUN cd ./api && npm ci --include production
+RUN cd ./api && npm ci --include production && npm run gen
 
 USER api
 
