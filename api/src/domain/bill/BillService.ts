@@ -48,9 +48,10 @@ const createBill = async (params: Params): Promise<Resource> => {
 
   console.log('Creating Bill', fileIds)
 
-  const bill = await resourceService.create({
-    accountId: params.accountId,
-    type: 'Bill',
+  const bill = await resourceService.create(
+    params.accountId,
+    'Bill',
+    {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(billSchema, fields.billFiles).fieldId,

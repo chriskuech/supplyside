@@ -57,12 +57,14 @@ export class McMasterService {
     }
 
     const [mcMasterCarrVendor] =
-      await this.resourceService.findResourcesByNameOrPoNumber({
+      await this.resourceService.findResourcesByNameOrPoNumber(
         accountId,
-        resourceType: 'Vendor',
-        input: 'McMaster-Carr',
-        exact: true,
-      })
+        'Vendor',
+        {
+          input: 'McMaster-Carr',
+          exact: true,
+        }
+      )
 
     const vendorSchema = await this.schemaService.readMergedSchema(
       accountId,
@@ -71,9 +73,7 @@ export class McMasterService {
     const mcMasterCarrSystemResource = resources().mcMasterCarrVendor
 
     if (!mcMasterCarrVendor) {
-      await this.resourceService.create({
-        accountId,
-        type: 'Vendor',
+      await this.resourceService.create(accountId, 'Vendor', {
         templateId: mcMasterCarrSystemResource.templateId,
         fields: mcMasterCarrSystemResource.fields.map((f) => ({
           fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).fieldId,
@@ -81,9 +81,7 @@ export class McMasterService {
         })),
       })
     } else {
-      await this.resourceService.update({
-        accountId,
-        resourceId: mcMasterCarrVendor.id,
+      await this.resourceService.update(accountId, mcMasterCarrVendor.id, {
         fields: mcMasterCarrSystemResource.fields.map((f) => ({
           fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).fieldId,
           valueInput: f.value,
@@ -110,10 +108,10 @@ export class McMasterService {
   }
 
   async disconnect(accountId: string) {
-    const mcMasterCarrVendor = await this.resourceService.readByTemplateId({
+    const mcMasterCarrVendor = await this.resourceService.readByTemplateId(
       accountId,
-      templateId: resources().mcMasterCarrVendor.templateId,
-    })
+      resources().mcMasterCarrVendor.templateId
+    )
 
     if (mcMasterCarrVendor) {
       await this.resourceService.updateTemplateId({
@@ -167,9 +165,7 @@ export class McMasterService {
       purchaseSchema,
       fields.punchoutSessionUrl
     ).fieldId
-    await this.resourceService.updateResourceField({
-      accountId,
-      resourceId,
+    await this.resourceService.updateResourceField(accountId, resourceId, {
       fieldId,
       valueInput: { string: punchoutSessionUrl },
     })
@@ -299,9 +295,7 @@ export class McMasterService {
       purchaseSchema,
       fields.issuedDate
     ).fieldId
-    await this.resourceService.updateResourceField({
-      accountId,
-      resourceId: orderId,
+    await this.resourceService.updateResourceField(accountId, orderId, {
       fieldId: issuedDateFieldId,
       valueInput: {
         date: orderDate.toISOString(),
@@ -313,12 +307,14 @@ export class McMasterService {
 
       // TODO: Should we match by id?
       const [matchedItem] =
-        await this.resourceService.findResourcesByNameOrPoNumber({
+        await this.resourceService.findResourcesByNameOrPoNumber(
           accountId,
-          resourceType: 'Item',
-          input: description,
-          exact: true,
-        })
+          'Item',
+          {
+            input: description,
+            exact: true,
+          }
+        )
 
       let matchedItemId = matchedItem?.id
 
@@ -341,21 +337,26 @@ export class McMasterService {
           unitOfMeasure
         ).id
 
-        const newResource = await this.resourceService.create({
+        const newResource = await this.resourceService.create(
           accountId,
-          type: 'Item',
-          fields: [
-            { fieldId: nameFieldId, valueInput: { string: description } },
-            {
-              fieldId: itemUnitofMesureFieldId,
-              valueInput: { optionId: itemUnitOfMeasureOptionId },
-            },
-          ],
-        })
+          'Item',
+          {
+            fields: [
+              { fieldId: nameFieldId, valueInput: { string: description } },
+              {
+                fieldId: itemUnitofMesureFieldId,
+                valueInput: { optionId: itemUnitOfMeasureOptionId },
+              },
+            ],
+          }
+        )
         matchedItemId = newResource.id
       }
 
-      const lineSchema = await this.schemaService.readMergedSchema(accountId, 'PurchaseLine')
+      const lineSchema = await this.schemaService.readMergedSchema(
+        accountId,
+        'PurchaseLine'
+      )
       const itemFieldId = selectSchemaFieldUnsafe(
         lineSchema,
         fields.item
@@ -382,30 +383,30 @@ export class McMasterService {
         unitOfMeasure
       ).id
 
-      const createdLine = await this.resourceService.create({
+      const createdLine = await this.resourceService.create(
         accountId,
-        type: 'PurchaseLine',
-        fields: [
-          {
-            fieldId: itemFieldId,
-            valueInput: { resourceId: matchedItemId },
-          },
-          {
-            fieldId: orderFieldId,
-            valueInput: { resourceId: orderId },
-          },
-          {
-            fieldId: lineUnitofMesureFieldId,
-            valueInput: { optionId: lineUnitOfMeasureOptionId },
-          },
-        ],
-      })
+        'PurchaseLine',
+        {
+          fields: [
+            {
+              fieldId: itemFieldId,
+              valueInput: { resourceId: matchedItemId },
+            },
+            {
+              fieldId: orderFieldId,
+              valueInput: { resourceId: orderId },
+            },
+            {
+              fieldId: lineUnitofMesureFieldId,
+              valueInput: { optionId: lineUnitOfMeasureOptionId },
+            },
+          ],
+        }
+      )
 
       // Updating the resource to trigger calculations
       //TODO: update createResource to trigger calculations
-      this.resourceService.update({
-        accountId,
-        resourceId: createdLine.id,
+      this.resourceService.update(accountId, createdLine.id, {
         fields: [
           {
             fieldId: quantityFieldId,

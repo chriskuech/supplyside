@@ -83,7 +83,10 @@ export class QuickBooksBillService {
       })
       .then((data) => readBillSchema.parse(data.json))
 
-    const vendorSchema = await this.schemaService.readMergedSchema(accountId, 'Bill')
+    const vendorSchema = await this.schemaService.readMergedSchema(
+      accountId,
+      'Bill'
+    )
 
     const quickBooksBillIdField = selectSchemaField(
       vendorSchema,
@@ -92,9 +95,7 @@ export class QuickBooksBillService {
 
     assert(quickBooksBillIdField, 'quickBooksBillId field not found')
 
-    await this.resourceService.updateResourceField({
-      accountId,
-      resourceId: bill.id,
+    await this.resourceService.updateResourceField(accountId, bill.id, {
       fieldId: quickBooksBillIdField,
       valueInput: { string: quickBooksBill.Bill.Id },
     })
