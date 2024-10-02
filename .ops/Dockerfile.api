@@ -31,8 +31,8 @@ RUN apk add --no-cache poppler-utils
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 api
 
-COPY --from=builder --chown=api:nodejs /app/tsconfig.json /app/package.json /app/package-lock.json* ./
-COPY --from=builder --chown=api:nodejs /app/src ./src
+COPY --from=builder --chown=api:nodejs /api/tsconfig.json /api/package.json /api/package-lock.json* ./
+COPY --from=builder --chown=api:nodejs /api/src ./src
 RUN npm ci --include production
 
 USER api
