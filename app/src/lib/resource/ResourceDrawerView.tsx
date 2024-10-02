@@ -25,13 +25,11 @@ export const ResourceDrawerView = ({
           <Typography variant="h5" sx={{ p: 2 }} flexGrow={1}>
             {state.schema.resourceType} details
           </Typography>
-          <Stack justifyContent="center">
-            <DeleteResourceButton
-              resourceType={state.schema.resourceType}
-              resourceId={state.resource.id}
-              size="small"
-            />
-          </Stack>
+          <DeleteResourceButton
+            resourceType={state.schema.resourceType}
+            resourceId={state.resource.id}
+            size="small"
+          />
         </Stack>
         <ResourceForm
           resource={state.resource}
