@@ -1,11 +1,9 @@
 import McMasterCarrConnection from './McMasterCarrConnection'
 import McMasterConnect from './McMasterCarrConnect'
-import { readConnection } from '@/client/mcmaster'
-import { requireSession } from '@/session'
+import { readConnection } from '@/actions/mcMaster'
 
 export default async function McMasterCarr() {
-  const { accountId } = await requireSession()
-  const connection = await readConnection(accountId)
+  const connection = await readConnection()
 
   return connection ? <McMasterCarrConnection /> : <McMasterConnect />
 }
