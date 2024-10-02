@@ -4,9 +4,9 @@ import { readFile } from 'fs/promises'
 export const mountHealth = async <App extends FastifyInstance>(app: App) =>
   app.get('/', async (request, reply) => {
     try {
-      const meta = await readFile(`${__dirname}/build.json`, 'utf-8')
+      const build = await readFile(`${__dirname}/build.json`, 'utf-8')
 
-      reply.send(meta)
+      reply.send({ timestamp: new Date().toISOString(), build })
     } catch {
       reply.status(500).send('Failed to read build.json')
     }
