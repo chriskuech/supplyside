@@ -44,21 +44,6 @@ export const disconnect = async (realmId: string) => {
   return data
 }
 
-//TODO: delete?
-// export const pullBills = async (accountId: string) => {
-//   const { data } = await client().POST(
-//     '/api/accounts/{accountId}/integrations/quickbooks/pull-bills/',
-//     {
-//       params: {
-//         path: { accountId },
-//         query: {},
-//       },
-//     },
-//   )
-
-//   return data
-// }
-
 export const pushBill = async (accountId: string, billResourceId: string) => {
   const { data } = await client().PUT(
     '/api/accounts/{accountId}/integrations/quickbooks/bills/{billResourceId}/',

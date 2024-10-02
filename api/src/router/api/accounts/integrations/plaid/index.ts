@@ -62,7 +62,7 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'POST',
-      url: '/connect',
+      url: '/connect/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -80,7 +80,7 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'POST',
-      url: '/disconnect',
+      url: '/disconnect/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
