@@ -1,7 +1,7 @@
 import { Prisma, ResourceType as ResourceTypeModel } from '@prisma/client'
 import { difference } from 'remeda'
 import { inject, injectable } from 'inversify'
-import { mapFieldModelToEntity } from './mappers'
+import { mapFieldModelToEntity , mapSchemaModelToEntity} from './mappers'
 import { fieldIncludes, schemaIncludes } from './model'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { type ResourceType, Schema } from '@supplyside/model'
@@ -10,12 +10,12 @@ import { type ResourceType, Schema } from '@supplyside/model'
 export class SchemaService {
   constructor(@inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  async readSchema(
+  async readMergedSchema(
     accountId: string,
     resourceType: ResourceType,
     isSystem?: boolean
   ): Promise<Schema> {
-    const schema = await this.prisma.schema.findFirstOrThrow({
+    const schemas = await this.prisma.schema.findMany({
       where: {
         accountId,
         resourceType,
@@ -28,22 +28,39 @@ export class SchemaService {
     })
 
     return {
-      id: schema.id,
       resourceType,
-      sections: schema.Section.map((s) => ({
+      sections: schemas.flatMap((s) => s.Section).flatMap((s) => ({
         id: s.id,
         name: s.name,
         fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity),
       })),
       fields: [
-        ...schema.SchemaField,
-        ...schema.Section.flatMap((s) => s.SectionField),
+        ...schemas.flatMap((s) => s.SchemaField),
+        ...schemas.flatMap((s) => s.Section).flatMap((s) => s.SectionField),
       ]
         .map((sf) => sf.Field)
         .map(mapFieldModelToEntity),
     }
   }
 
+  async readCustomSchema(
+    accountId: string,
+    resourceType: ResourceType
+  ): Promise<Schema> {
+    const schema = await this.prisma.schema.findUniqueOrThrow({
+      where: {
+        accountId_resourceType_isSystem: {
+          accountId,
+          resourceType,
+          isSystem: false,
+        }
+      },
+      include: schemaIncludes,
+    })
+
+    return mapSchemaModelToEntity(schema)
+  }
+      
   async readCustomSchemas(accountId: string): Promise<Schema[]> {
     const existingSchemas = await this.prisma.schema.findMany({
       where: { accountId, isSystem: false },

@@ -1,12 +1,7 @@
 import { container } from '@supplyside/api/di'
 import { SchemaSectionService } from '@supplyside/api/domain/schema/SchemaSectionService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import {
-  ResourceTypeSchema,
-  Schema,
-  SchemaSchema,
-  SectionSchema,
-} from '@supplyside/model'
+import { ResourceTypeSchema, Schema, SchemaSchema } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
@@ -29,7 +24,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(SchemaService)
 
-        const schema: Schema = await service.readSchema(
+        const schema: Schema = await service.readMergedSchema(
           req.params.accountId,
           req.params.resourceType
         )
@@ -71,7 +66,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(SchemaService)
 
-        const schema: Schema = await service.readSchema(
+        const schema: Schema = await service.readMergedSchema(
           req.params.accountId,
           req.params.resourceType,
           false
@@ -96,7 +91,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         await service.updateCustomSchema(
           req.params.accountId,
           req.params.resourceType,
-          req.body
+          {sectionIds: req.body}
         )
 
         res.send()
@@ -113,27 +108,17 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         body: z.object({
           name: z.string(),
         }),
-        response: {
-          200: z.array(SectionSchema),
-        },
       },
-      handler: async (req, res) => {
-        const service = container.resolve(SchemaService)
+      handler: async (req) => {
         const schemaSectionService = container.resolve(SchemaSectionService)
 
-
-        const schema = await service.readSchema(
+        await schemaSectionService.createCustomSection(
           req.params.accountId,
           req.params.resourceType,
-          false
+          {
+            name: req.body.name,
+          }
         )
-
-        schemaSectionService.createSection({
-          schemaId: schema.id, name: req.body.name
-        })
-
-
-        res.send()
       },
     })
     .route({
@@ -153,12 +138,15 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(SchemaSectionService)
 
-        await service.updateSection({
-          accountId: req.params.accountId,
-          sectionId: req.params.sectionId,
-          name: req.body.name,
-          fieldIds: req.body.fieldIds,
-        })
+        await service.updateCustomSection(
+          req.params.accountId,
+          req.params.resourceType,
+          req.params.sectionId,
+          {
+            name: req.body.name,
+            fieldIds: req.body.fieldIds,
+          }
+        )
 
         res.send()
       },

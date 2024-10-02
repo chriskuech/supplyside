@@ -28,7 +28,7 @@ const createBill = async (params: Params): Promise<Resource> => {
   const resourceService = container.resolve(ResourceService)
   const schemaService = container.resolve(SchemaService)
 
-  const billSchema = await schemaService.readSchema(params.accountId, 'Bill')
+  const billSchema = await schemaService.readMergedSchema(params.accountId, 'Bill')
 
   const fileIds = await Promise.all(
     params.files.map(async (file) => {

@@ -64,7 +64,7 @@ export class McMasterService {
         exact: true,
       })
 
-    const vendorSchema = await this.schemaService.readSchema(
+    const vendorSchema = await this.schemaService.readMergedSchema(
       accountId,
       'Vendor'
     )
@@ -159,7 +159,7 @@ export class McMasterService {
       throw new Error('punchout session url not found')
     }
 
-    const purchaseSchema = await this.schemaService.readSchema(
+    const purchaseSchema = await this.schemaService.readMergedSchema(
       accountId,
       'Purchase'
     )
@@ -290,7 +290,7 @@ export class McMasterService {
 
     this.authenticatePoom(sender.domain, sender.identity, sender.sharedSecret)
 
-    const purchaseSchema = await this.schemaService.readSchema(
+    const purchaseSchema = await this.schemaService.readMergedSchema(
       accountId,
       'Purchase'
     )
@@ -323,7 +323,7 @@ export class McMasterService {
       let matchedItemId = matchedItem?.id
 
       if (!matchedItemId) {
-        const itemSchema = await this.schemaService.readSchema(
+        const itemSchema = await this.schemaService.readMergedSchema(
           accountId,
           'Item'
         )
@@ -355,7 +355,7 @@ export class McMasterService {
         matchedItemId = newResource.id
       }
 
-      const lineSchema = await this.schemaService.readSchema(accountId, 'Line')
+      const lineSchema = await this.schemaService.readMergedSchema(accountId, 'Line')
       const itemFieldId = selectSchemaFieldUnsafe(
         lineSchema,
         fields.item

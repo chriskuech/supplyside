@@ -28,7 +28,7 @@ export class PoService {
   ) {}
 
   async createPo(accountId: string, resourceId: string) {
-    const schema = await this.schemaService.readSchema(accountId, 'Purchase')
+    const schema = await this.schemaService.readMergedSchema(accountId, 'Purchase')
 
     const documentFieldId = selectSchemaFieldUnsafe(
       schema,

@@ -9,7 +9,6 @@ export const SectionSchema = z.object({
 });
 
 export const SchemaSchema = z.object({
-  id: z.string().uuid(),
   resourceType: ResourceTypeSchema,
   sections: z.array(SectionSchema),
   fields: z.array(SchemaFieldSchema),

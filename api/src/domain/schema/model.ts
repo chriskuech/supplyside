@@ -1,4 +1,4 @@
-import { Field, Option, Prisma } from '@prisma/client'
+import { Field, Option, Prisma, Schema, SchemaField, Section, SectionField } from '@prisma/client'
 import { ValueModel, valueInclude } from '../resource/model'
 
 export const fieldIncludes = {
@@ -16,6 +16,15 @@ export type FieldModel = Field & {
   Option: Option[];
   DefaultValue: ValueModel | null;
 };
+
+export type SectionModel = Section & {
+  SectionField: (SectionField & { Field: FieldModel })[]
+}
+
+export type SchemaModel = Schema & {
+  SchemaField: (SchemaField & { Field: FieldModel })[]
+  Section: SectionModel[]
+}
 
 export const schemaIncludes = {
   SchemaField: {
