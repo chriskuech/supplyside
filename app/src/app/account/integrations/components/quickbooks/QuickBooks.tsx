@@ -1,3 +1,4 @@
+import { fail } from 'assert'
 import { Alert } from '@mui/material'
 import QuickBooksConnectButton from './QuickBooksConnectButton'
 import QuickBooksConnection from './QuickBooksConnection'
@@ -13,6 +14,8 @@ export default async function Quickbooks() {
   return config.connection ? (
     <QuickBooksConnection />
   ) : (
-    <QuickBooksConnectButton url={config.setupUrl} />
+    <QuickBooksConnectButton
+      url={config.setupUrl ?? fail('setup url not provided')}
+    />
   )
 }

@@ -4,6 +4,8 @@ import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
+
+//TODO: Check what can we delete from here
 export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
   app
     .withTypeProvider<ZodTypeProvider>()

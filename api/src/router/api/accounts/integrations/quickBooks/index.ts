@@ -16,7 +16,7 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
         }),
         response: {
           200: z.object({
-            setupUrl: z.string().url(),
+            setupUrl: z.string().url().nullable(),
             connection: z.object({
               companyName: z.string().min(1),
               realmId: z.string().min(1),
@@ -30,16 +30,15 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
         const service = container.resolve(QuickBooksService)
 
         const isConnected = await service.isConnected(req.params.accountId)
-        const setupUrl = await service.getSetupUrl()
-
+        
         if (isConnected) {
           const companyInfo = await service.getCompanyInfo(
             req.params.accountId
           )
           const realmId = await service.getAccountRealmId(req.params.accountId)
-
+          
           res.status(200).send({
-            setupUrl,
+            setupUrl: null,
             connection: {
               companyName: companyInfo.CompanyInfo.CompanyName,
               realmId,
@@ -47,6 +46,7 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
             },
           })
         } else {
+          const setupUrl = await service.getSetupUrl()
           res.status(200).send({setupUrl, connection: null})
         }
       },
