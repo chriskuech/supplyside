@@ -24,16 +24,19 @@ RUN cd ./api && npm run lint && npm run check
 
 FROM node:20-alpine AS runner
 
-WORKDIR /app
-
 RUN apk add --no-cache poppler-utils weasyprint ttf-dejavu
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 api
 
-COPY --from=builder --chown=api:nodejs /api/tsconfig.json /api/package.json /api/package-lock.json* ./
-COPY --from=builder --chown=api:nodejs /api/src ./src
-RUN npm ci --include production
+
+COPY --from=builder --chown=api:nodejs /model/tsconfig.json /model/package.json /model/package-lock.json* ./model/
+COPY --from=builder --chown=api:nodejs /model/src ./model/src
+RUN cd ./model && npm ci --include production
+
+COPY --from=builder --chown=api:nodejs /api/tsconfig.json /api/package.json /api/package-lock.json* ./api/
+COPY --from=builder --chown=api:nodejs /api/src ./api/src
+RUN cd ./api && npm ci --include production
 
 USER api
 
@@ -41,5 +44,7 @@ ENV PORT=8080
 ENV HOSTNAME="0.0.0.0"
 
 EXPOSE ${PORT}
+
+WORKDIR /api
 
 CMD [ "npm", "start" ]
