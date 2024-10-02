@@ -571,29 +571,6 @@ export class ResourceService {
     resource,
     updatedFields,
   }: HandleResourceUpdateParams) {
-    // When a Resource Field is updated,
-    // Then copy the linked Resource's Fields
-    const updatedFieldsWithResourceType = updatedFields.filter(
-      (
-        uf: FieldUpdate
-      ): uf is FieldUpdate & { valueInput: { resource: ValueResource } } =>
-        !!uf.field.resourceType && !!uf.valueInput.resource
-    )
-    if (updatedFieldsWithResourceType.length) {
-      await Promise.all(
-        updatedFieldsWithResourceType.map(
-          async ({ field: { fieldId }, valueInput }) => {
-            await this.linkResource({
-              accountId,
-              fromResourceId: valueInput.resource.id,
-              toResourceId: resource.id,
-              backLinkFieldRef: { fieldId },
-            })
-          }
-        )
-      )
-    }
-
     // When the Line."Unit Cost" or Line."Quantity" or a new item is selected field is updated,
     // Then update Line."Total Cost"
     if (
@@ -758,10 +735,8 @@ export class ResourceService {
       this.read(accountId, toResourceId),
     ])
 
-    await this.copyFields({
-      accountId,
+    await this.copyFields(accountId, toResourceId, {
       fromResourceId,
-      toResourceId,
     })
 
     if (fromResource.type === 'Purchase' && toResource.type === 'Bill') {
@@ -997,14 +972,16 @@ export class ResourceService {
     }
   }
 
-  async copyFields({
-    accountId,
-    fromResourceId,
-    toResourceId,
-  }: ResourceCopyParams) {
+  async copyFields(
+    accountId: string,
+    resourceId: string,
+    data: {
+      fromResourceId: string;
+    }
+  ) {
     const [fromResource, toResource] = await Promise.all([
-      this.read(accountId, fromResourceId),
-      this.read(accountId, toResourceId),
+      this.read(accountId, data.fromResourceId),
+      this.read(accountId, resourceId),
     ])
 
     const [fromSchema, toSchema] = await Promise.all([
@@ -1023,7 +1000,7 @@ export class ResourceService {
 
     const resource = await this.update({
       accountId,
-      resourceId: toResourceId,
+      resourceId,
       fields: fieldsToUpdate.map(({ rf, sf }) => ({
         fieldId: sf.fieldId,
         valueInput: mapValueToValueInput(sf.type, rf.value),

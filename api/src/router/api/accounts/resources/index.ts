@@ -264,3 +264,27 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         res.send(resource)
       },
     })
+    .route({
+      method: 'POST',
+      url: '/:resourceId/copy-from/',
+      schema: {
+        params: z.object({
+          accountId: z.string().uuid(),
+          resourceId: z.string().uuid(),
+        }),
+        body: z.object({
+          fromResourceId: z.string().uuid(),
+        }),
+      },
+      handler: async (req) => {
+        const service = container.resolve(ResourceService)
+
+        const resource = await service.copyFields(
+          req.params.accountId,
+          req.params.resourceId,
+          { fromResourceId: req.body.fromResourceId }
+        )
+
+        return resource
+      },
+    })
