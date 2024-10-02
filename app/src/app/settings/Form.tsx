@@ -1,10 +1,12 @@
 'use client'
+
 import { Avatar, Button, Stack, TextField, Typography } from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
 import { useState } from 'react'
+import { User } from '@supplyside/model'
+import { getProfilePicPath } from '../api/download/[filename]/util'
 import { Errors, handleSaveSettings } from './actions'
-import { User } from '@/domain/user/entity'
-import { useImagePreview } from '@/lib/hooks/useImagePreview'
+import { useImagePreview } from '@/hooks/useImagePreview'
 
 type Props = {
   user: User
@@ -20,7 +22,7 @@ export default function Form({ user }: Props) {
         <Stack direction="row" justifyContent="center">
           <Avatar
             alt="Profile picture"
-            src={(image || user.profilePicPath) ?? undefined}
+            src={image || getProfilePicPath(user) || ''}
             sx={{ width: 300, height: 300 }}
           />
         </Stack>

@@ -3,8 +3,8 @@ import { Button, Card, CardContent, Modal, Typography } from '@mui/material'
 import { ReactNode } from 'react'
 import { Add } from '@mui/icons-material'
 import CreateFieldForm from './CreateFieldForm'
-import { createField } from './actions'
-import { useDisclosure } from '@/lib/hooks/useDisclosure'
+import { useDisclosure } from '@/hooks/useDisclosure'
+import { createField } from '@/actions/fields'
 
 export default function AddFieldButton(): ReactNode {
   const { isOpen, close, open } = useDisclosure()

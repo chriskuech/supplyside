@@ -1,8 +1,14 @@
-import { createPlaidLinkToken } from '../../actions'
+import { Alert } from '@mui/material'
 import PlaidConnectButton from './PlaidConnectButton'
+import { requireSession } from '@/session'
+import { createPlaidLinkToken } from '@/client/plaid'
 
 export default async function PlaidConnect() {
-  const plaidLinkToken = await createPlaidLinkToken()
+  const { accountId } = await requireSession()
+  const plaidLinkToken = await createPlaidLinkToken(accountId)
 
-  return <PlaidConnectButton linkToken={plaidLinkToken.link_token} />
+  if (!plaidLinkToken)
+    return <Alert severity="error">Failed to connect to Plaid</Alert>
+
+  return <PlaidConnectButton linkToken={plaidLinkToken} />
 }

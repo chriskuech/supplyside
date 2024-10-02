@@ -1,27 +1,18 @@
 import { Alert } from '@mui/material'
 import QuickBooksConnectButton from './QuickBooksConnectButton'
 import QuickBooksConnection from './QuickBooksConnection'
-import { Session } from '@/domain/session/entity'
-import { QuickBooksService } from '@/integrations/quickBooks/QuickBooksService'
-import { container } from '@/lib/di'
+import { requireSession } from '@/session'
+import { read } from '@/client/quickBooks'
 
-type Props = {
-  session: Session
-}
+export default async function Quickbooks() {
+  const { accountId } = await requireSession()
+  const config = await read(accountId)
 
-export default async function Quickbooks({ session }: Props) {
-  const quickBooksService = container().resolve(QuickBooksService)
+  if (!config) return <Alert severity="error">Failed to load</Alert>
 
-  if (!quickBooksService.isEnabled) {
-    return (
-      <Alert severity="error">QuickBooks is not enabled on this system</Alert>
-    )
-  }
-
-  const isConnected = await quickBooksService.isConnected(session.accountId)
-  if (!isConnected) {
-    return <QuickBooksConnectButton url={quickBooksService.setupUrl} />
-  }
-
-  return <QuickBooksConnection session={session} />
+  return config.connection ? (
+    <QuickBooksConnection />
+  ) : (
+    <QuickBooksConnectButton url={config.setupUrl} />
+  )
 }

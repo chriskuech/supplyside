@@ -1,12 +1,11 @@
-import { Box, Container, Stack, Typography } from '@mui/material'
-import { ResourceType } from '@prisma/client'
+import { Alert, Box, Container, Stack, Typography } from '@mui/material'
 import { ReactNode } from 'react'
-import { container } from '../di'
+import { ResourceType } from '@supplyside/model'
 import CreateResourceButton from './CreateResourceButton'
 import { ResourceTable } from './table'
-import { ResourceService } from '@/domain/resource/ResourceService'
-import { requireSessionWithRedirect } from '@/lib/session/actions'
-import { SchemaService } from '@/domain/schema/SchemaService'
+import { requireSession } from '@/session'
+import { readSchema } from '@/client/schema'
+import { readResources } from '@/client/resource'
 
 type Props = {
   tableKey: string
@@ -18,17 +17,20 @@ type Props = {
 export default async function ListPage({
   tableKey,
   resourceType,
-  path,
   callToActions = [],
 }: Props) {
-  const schemaService = container().resolve(SchemaService)
-  const resourceService = container().resolve(ResourceService)
-
-  const { accountId } = await requireSessionWithRedirect(path)
+  const { accountId } = await requireSession()
   const [schema, resources] = await Promise.all([
-    schemaService.readSchema(accountId, resourceType),
-    resourceService.readResources({ accountId, type: resourceType }),
+    readSchema(accountId, resourceType),
+    readResources(accountId, resourceType),
   ])
+
+  if (!schema || !resources)
+    return (
+      <Alert severity="error">
+        Failed to load {resourceType}s. Please try again.
+      </Alert>
+    )
 
   return (
     <Container sx={{ my: 5 }}>
@@ -45,7 +47,7 @@ export default async function ListPage({
             ...callToActions,
             <CreateResourceButton
               key={CreateResourceButton.name}
-              type={resourceType}
+              resourceType={resourceType}
               shouldRedirect
               buttonProps={{
                 size: 'large',

@@ -1,9 +1,9 @@
 'use client'
 import { Delete } from '@mui/icons-material'
 import { IconButton, Tooltip } from '@mui/material'
-import { ResourceType } from '@prisma/client'
-import { deleteResource } from '../actions'
+import { ResourceType } from '@supplyside/model'
 import { useConfirmation } from '@/lib/confirmation'
+import { deleteResource } from '@/actions/resource'
 
 type Props = {
   resourceType: ResourceType
@@ -28,7 +28,7 @@ export default function DeleteResourceButton({
 
           if (!isConfirmed) return
 
-          await deleteResource({ id: resourceId, resourceType })
+          await deleteResource(resourceId)
         }}
       >
         <Delete fontSize="large" />

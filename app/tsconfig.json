@@ -23,17 +23,11 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@supplyside/api": ["../api/client.ts"],
+      "@supplyside/model": ["../model/src"]
     }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "./types",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": ["node_modules"],
-  "types": ["intuit-oauth"],
-  "typeRoots": ["./node_modules/@types"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

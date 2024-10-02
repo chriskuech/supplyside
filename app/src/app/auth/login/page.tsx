@@ -2,9 +2,9 @@ import { Box, Card, CardContent, Stack, Typography } from '@mui/material'
 import { redirect, RedirectType } from 'next/navigation'
 import { z } from 'zod'
 import Form from './Form'
-import { readSession } from '@/lib/session/actions'
 import RefreshOnFocus from '@/lib/ux/RefreshOnFocus'
 import Logo from '@/lib/ux/appbar/Logo'
+import { readSession } from '@/session'
 
 export default async function Login({
   searchParams,
@@ -17,7 +17,6 @@ export default async function Login({
     })
     .safeParse(searchParams)
 
-  // TODO: don't catch all--it can be inferred as a static page
   const session = await readSession().catch(() => null)
 
   if (session)

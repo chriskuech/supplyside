@@ -1,4 +1,5 @@
 'use client'
+
 import { LocalShipping, ArrowRight } from '@mui/icons-material'
 import {
   Tooltip,
@@ -10,15 +11,14 @@ import {
   Button,
   DialogActions,
 } from '@mui/material'
-import { Value } from '@/domain/resource/entity'
-import { SchemaField } from '@/domain/schema/entity'
-import { useDisclosure } from '@/lib/hooks/useDisclosure'
+import { SchemaField, Value } from '@supplyside/model'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 
 type TrackingControlProps = {
   resourceId: string
   field: SchemaField
-  value: Value
+  value: Value | undefined
 }
 
 export default function TrackingControl({
@@ -28,7 +28,7 @@ export default function TrackingControl({
 }: TrackingControlProps) {
   const { isOpen, open, close } = useDisclosure()
 
-  const { string: trackingNumber } = value
+  const trackingNumber = value?.string
 
   return (
     <>
@@ -49,7 +49,7 @@ export default function TrackingControl({
             Set the tracking number for this order.
           </DialogContentText>
           <FieldControl
-            inputId={`rf-${field.id}`}
+            inputId={`rf-${field.fieldId}`}
             resourceId={resourceId}
             field={field}
             value={value}

@@ -1,19 +1,18 @@
-import { Container, Stack, Typography } from '@mui/material'
+import { Alert, Button, Container, Stack, Typography } from '@mui/material'
+import { Add } from '@mui/icons-material'
 import AccountsTable from './AccountsTable'
-import CreateAccountButton from './CreateAccountButton'
-import { requireSessionWithRedirect } from '@/lib/session/actions'
-import { AccountService } from '@/domain/account'
-import { container } from '@/lib/di'
+import { readAccounts } from '@/client/account'
+import { createAccount } from '@/actions/account'
+import { requireSession } from '@/session'
+import { systemAccountId } from '@/lib/const'
 
 export default async function AdminPage() {
-  const accountService = container().resolve(AccountService)
+  const { accountId } = await requireSession()
 
-  const [{ user }, accounts] = await Promise.all([
-    requireSessionWithRedirect('/accounts'),
-    accountService.list(),
-  ])
+  if (accountId !== systemAccountId)
+    return <Alert severity="error">Not an admin</Alert>
 
-  if (!user.isGlobalAdmin) return
+  const accounts = await readAccounts()
 
   return (
     <Container sx={{ my: 5 }}>
@@ -24,9 +23,15 @@ export default async function AdminPage() {
           justifyContent="space-between"
         >
           <Typography variant="h4">Accounts</Typography>
-          <CreateAccountButton />
+          <Button startIcon={<Add />} onClick={createAccount}>
+            Account
+          </Button>
         </Stack>
-        <AccountsTable accounts={accounts} />
+        {accounts ? (
+          <AccountsTable accounts={accounts} />
+        ) : (
+          <Alert severity="error">No accounts found</Alert>
+        )}
       </Stack>
     </Container>
   )

@@ -27,15 +27,9 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { z } from 'zod'
-import {
-  Schema,
-  Section,
-  deleteSection,
-  updateSchema,
-  updateSection,
-} from './actions'
+import { ResourceType, Schema, SchemaField, Section } from '@supplyside/model'
 import SectionFieldsControl from './SectionFieldsControl'
-import { SchemaField } from '@/domain/schema/entity'
+import { removeSection, updateSchema, updateSection } from '@/actions/schema'
 
 type Props = {
   fields: SchemaField[]
@@ -62,7 +56,7 @@ export default function SchemaSectionsControl({ fields, schema }: Props) {
     }),
   )
 
-  const sectionIds = schema.Section.map((s) => s.id)
+  const sectionIds = schema.sections.map((s) => s.id)
 
   return (
     <List>
@@ -78,17 +72,23 @@ export default function SchemaSectionsControl({ fields, schema }: Props) {
           )
           const i = sectionIds.findIndex((sectionId) => sectionId === over.id)
 
-          updateSchema({
-            schemaId: schema.id,
-            sectionIds: [...removed.slice(0, i), activeId, ...removed.slice(i)],
-          })
+          updateSchema(schema.resourceType, [
+            ...removed.slice(0, i),
+            activeId,
+            ...removed.slice(i),
+          ])
         }}
       >
-        <SortableContext items={schema.Section} strategy={rectSortingStrategy}>
-          {schema.Section.map((section) => (
+        <SortableContext items={schema.sections} strategy={rectSortingStrategy}>
+          {schema.sections.map((section) => (
             <Fragment key={section.id}>
               <Divider variant="fullWidth" />
-              <SortableRow key={section.id} fields={fields} section={section} />
+              <SortableRow
+                key={section.id}
+                resourceType={schema.resourceType}
+                fields={fields}
+                section={section}
+              />
             </Fragment>
           ))}
         </SortableContext>
@@ -98,9 +98,10 @@ export default function SchemaSectionsControl({ fields, schema }: Props) {
 }
 
 const SortableRow: FC<{
+  resourceType: ResourceType
   fields: SchemaField[]
   section: Section
-}> = ({ fields, section }) => {
+}> = ({ resourceType, fields, section }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: section.id })
 
@@ -119,10 +120,8 @@ const SortableRow: FC<{
       secondaryAction={
         <IconButton
           edge="end"
-          onClick={() => deleteSection(section.id)}
-          disabled={section.SectionField.some(
-            (field) => !!field.Field.templateId,
-          )}
+          onClick={() => removeSection(resourceType, section.id)}
+          disabled={section.fields.some((field) => !!field.templateId)}
         >
           <Clear />
         </IconButton>
@@ -135,11 +134,7 @@ const SortableRow: FC<{
         section={section}
         fields={fields}
         onChange={(fieldIds) => {
-          updateSection({
-            sectionId: section.id,
-            name: section.name,
-            fieldIds,
-          })
+          updateSection(resourceType, section.id, { fieldIds })
         }}
       />
     </ListItem>

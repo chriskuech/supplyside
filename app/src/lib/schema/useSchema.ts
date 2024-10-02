@@ -1,8 +1,7 @@
 import 'client-only'
-import { ResourceType } from '@prisma/client'
 import { useEffect, useState } from 'react'
-import { readSchema } from './actions'
-import { Schema } from '@/domain/schema/entity'
+import { ResourceType, Schema } from '@supplyside/model'
+import { readSchema } from '@/actions/schema'
 
 const useSchema = (resourceType: ResourceType): Schema | null | undefined => {
   const [schema, setSchema] = useState<Schema | null>()
@@ -16,7 +15,7 @@ const useSchema = (resourceType: ResourceType): Schema | null | undefined => {
     ) {
       setIsLoading(true)
       readSchema(resourceType)
-        .then(setSchema)
+        .then((schema) => setSchema(schema ?? null))
         .catch(() => setSchema(null))
         .finally(() => setIsLoading(false))
     }

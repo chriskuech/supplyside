@@ -1,37 +1,38 @@
 'use client'
+
 import { Add } from '@mui/icons-material'
 import { Button, ButtonProps } from '@mui/material'
-import { ResourceType } from '@prisma/client'
-import { createResource } from './actions'
-import { ResourceFieldInput } from '@/domain/resource/ResourceService'
+import { ResourceType, ValueInput } from '@supplyside/model'
+import { createResource } from '@/actions/resource'
 
 type Props = {
-  type: ResourceType
+  resourceType: ResourceType
   shouldRedirect?: boolean
-  fields?: ResourceFieldInput[]
+  fields?: { fieldId: string; valueInput: ValueInput }[]
   buttonProps?: ButtonProps
 }
 
 export default function CreateResourceButton({
-  type,
-  fields,
+  resourceType,
+  fields = [],
   shouldRedirect,
   buttonProps,
 }: Props) {
   return (
     <Button
       onClick={() =>
-        createResource({ type, fields }).then(({ key }) => {
-          if (shouldRedirect) {
-            location.href = `/${type.toLowerCase()}s/${key}`
-          }
+        createResource(resourceType, fields).then((resource) => {
+          if (!resource) return
+          if (!shouldRedirect) return
+
+          location.href = `/${resourceType.toLowerCase()}s/${resource.key}`
         })
       }
       startIcon={!shouldRedirect && <Add />}
       endIcon={shouldRedirect && <Add />}
       {...buttonProps}
     >
-      {type}
+      {resourceType}
     </Button>
   )
 }

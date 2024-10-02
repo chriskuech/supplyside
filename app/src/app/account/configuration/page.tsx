@@ -1,12 +1,19 @@
-import { Box, Container, Stack, Typography } from '@mui/material'
-import { readSchemas } from './schemas/actions'
+import { Alert, Box, Container, Stack, Typography } from '@mui/material'
 import SchemasControl from './schemas/SchemasControl'
 import AddFieldButton from './fields/AddFieldButton'
 import FieldsTable from './fields/FieldsTable'
-import { readFields } from './fields/actions'
+import { readFields } from '@/client/fields'
+import { requireSession } from '@/session'
+import { readCustomSchemas } from '@/client/schema'
 
 export default async function Configuration() {
-  const [fields, schemas] = await Promise.all([readFields(), readSchemas()])
+  const { accountId } = await requireSession()
+  const [fields, schemas] = await Promise.all([
+    readFields(accountId),
+    readCustomSchemas(accountId),
+  ])
+
+  if (!fields || !schemas) return <Alert severity="error">Failed to load</Alert>
 
   return (
     <Container maxWidth="md" sx={{ marginY: 5 }}>

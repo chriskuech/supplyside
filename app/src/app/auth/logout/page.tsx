@@ -1,6 +1,14 @@
+import { RedirectType, redirect } from 'next/navigation'
 import { LogoutForm } from './LogoutForm'
-import { handleLogout } from './actions'
+import { clearSession } from '@/session'
 
 export default async function Logout() {
+  async function handleLogout() {
+    'use server'
+
+    clearSession()
+    redirect('/', RedirectType.replace)
+  }
+
   return <LogoutForm onLogout={handleLogout} />
 }

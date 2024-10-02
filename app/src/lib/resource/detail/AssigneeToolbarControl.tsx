@@ -1,4 +1,5 @@
 'use client'
+
 import { AssignmentInd } from '@mui/icons-material'
 import {
   Avatar,
@@ -11,11 +12,10 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material'
-import { ResourceType } from '@prisma/client'
-import { Value } from '@/domain/resource/entity'
-import { SchemaField } from '@/domain/schema/entity'
-import { useDisclosure } from '@/lib/hooks/useDisclosure'
+import { ResourceType, SchemaField, Value } from '@supplyside/model'
+import { useDisclosure } from '@/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
+import { getProfilePicPath } from '@/app/api/download/[filename]/util'
 
 type AssigneeControlProps = {
   resourceId: string
@@ -39,15 +39,12 @@ export default function AssigneeToolbarControl({
       <Tooltip
         title={
           assignee
-            ? `Assigned to ${assignee?.fullName ?? assignee?.email ?? '(No name)'}`
+            ? `Assigned to ${assignee?.name ?? assignee?.email ?? '(No name)'}`
             : `Assign the ${resourceType} to a user`
         }
       >
         <IconButton onClick={open}>
-          <Avatar
-            alt={assignee?.fullName ?? ''}
-            src={assignee?.profilePicPath ?? ''}
-          >
+          <Avatar alt={assignee?.name ?? ''} src={getProfilePicPath(assignee)}>
             {!assignee && <AssignmentInd />}
           </Avatar>
         </IconButton>
@@ -61,7 +58,7 @@ export default function AssigneeToolbarControl({
             completion.
           </DialogContentText>
           <FieldControl
-            inputId={`rf-${field.id}`}
+            inputId={`rf-${field.fieldId}`}
             resourceId={resourceId}
             field={field}
             value={value}

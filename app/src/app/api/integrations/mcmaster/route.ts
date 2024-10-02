@@ -1,22 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { parseStringPromise } from 'xml2js'
-import ConfigService from '@/integrations/ConfigService'
-import { McMasterService } from '@/integrations/mcMasterCarr'
-import { container } from '@/lib/di'
+import { config } from '@/config'
+import { processPoom } from '@/client/mcmaster'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const { config } = container().resolve(ConfigService)
-  const mcMasterCarrService = container().resolve(McMasterService)
-
   const cxmlUrlEncoded = await request.text()
   const cxml = decodeURIComponent(cxmlUrlEncoded)
     .replace('cxml-urlencoded=', '')
     .replaceAll('+', ' ')
   const cxmlString = await parseStringPromise(cxml)
 
-  await mcMasterCarrService.processPoom(cxmlString)
+  await processPoom(cxmlString)
 
   return new NextResponse(
     `
@@ -28,7 +24,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               // Check if the current frame is not the topmost frame
               if (window !== window.top) {
                 // Change location of the parent frame
-                window.top.location.href = "${config.BASE_URL}/purchases";
+                window.top.location.href = "${config().BASE_URL}/purchases";
               }
             };
           </script>

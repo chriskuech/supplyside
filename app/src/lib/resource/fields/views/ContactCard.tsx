@@ -12,8 +12,8 @@ import {
   Dialog,
   IconButton,
 } from '@mui/material'
-import { useDisclosure } from '@/lib/hooks/useDisclosure'
-import { Contact } from '@/domain/resource/entity'
+import { Contact } from '@supplyside/model'
+import { useDisclosure } from '@/hooks/useDisclosure'
 
 type Props = {
   contact: Contact

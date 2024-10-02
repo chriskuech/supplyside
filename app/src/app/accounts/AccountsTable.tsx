@@ -1,11 +1,13 @@
 'use client'
+
 import { Clear, Sync } from '@mui/icons-material'
 import { IconButton } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import { closeSnackbar, enqueueSnackbar } from 'notistack'
-import { deleteAccount, impersonateAccount, refreshAccount } from './actions'
 import { systemAccountId } from '@/lib/const'
-import { Account } from '@/domain/account/entity'
+import { Account } from '@/client/account'
+import { applyTemplateAsAdmin, deleteAccount } from '@/actions/account'
+import { impersonate } from '@/session'
 
 type Props = {
   accounts: Account[]
@@ -45,15 +47,14 @@ export default function AccountsTable({ accounts }: Props) {
                     key="sync"
                     onClick={() => {
                       const key = enqueueSnackbar('Applying the template...')
-                      refreshAccount(accountId)
+                      applyTemplateAsAdmin(accountId)
                         .then(() => {
                           closeSnackbar(key)
                           enqueueSnackbar('Template successfully applied', {
                             variant: 'success',
                           })
                         })
-                        .catch((error) => {
-                          console.error(error)
+                        .catch(() => {
                           closeSnackbar(key)
                           enqueueSnackbar(
                             'There was an error applying the template',
@@ -76,7 +77,7 @@ export default function AccountsTable({ accounts }: Props) {
       ]}
       rows={accounts}
       rowSelection={false}
-      onRowClick={({ row: { id } }) => impersonateAccount(id)}
+      onRowClick={({ row: { id } }) => impersonate(id)}
     />
   )
 }

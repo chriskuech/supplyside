@@ -62,7 +62,8 @@ jobs:
         with:
           push: true
           tags: supplyside.azurecr.io/app:${{ github.sha }}
-          context: app
+          context: .
+          file: .ops/Dockerfile.app
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -71,7 +72,8 @@ jobs:
         with:
           push: true
           tags: supplyside.azurecr.io/api:${{ github.sha }}
-          context: api
+          context: .
+          file: .ops/Dockerfile.api
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

@@ -1,8 +1,9 @@
 'use client'
 import { Add } from '@mui/icons-material'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
+import { Schema } from '@supplyside/model'
 import { useRef, useState } from 'react'
-import { Schema, createSection } from './actions'
+import { addSection } from '@/actions/schema'
 
 type Props = {
   schema: Schema
@@ -12,10 +13,10 @@ export default function AddSectionControl({ schema }: Props) {
   const [name, setName] = useState('')
   const ref = useRef<HTMLInputElement>()
 
-  const isValid = name && !schema.Section.map((s) => s.name).includes(name)
+  const isValid = name && !schema.sections.map((s) => s.name).includes(name)
 
   const handleSubmit = () => {
-    createSection({ schemaId: schema.id, name })
+    addSection(schema.resourceType, { name })
     setName('')
     ref.current?.focus()
   }

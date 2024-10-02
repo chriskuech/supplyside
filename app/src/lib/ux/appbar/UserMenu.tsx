@@ -20,8 +20,9 @@ import {
   Settings,
 } from '@mui/icons-material'
 import { useState } from 'react'
+import { User } from '@supplyside/model'
 import { useThemePreference } from '../DynamicThemeProvider'
-import { User } from '@/domain/user/entity'
+import { getProfilePicPath } from '@/app/api/download/[filename]/util'
 
 type Props = {
   self: User
@@ -35,8 +36,8 @@ export function UserMenu({ self: user }: Props) {
     <Stack justifyContent="center">
       <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
         <Avatar
-          alt={user.fullName ?? ''}
-          src={user.profilePicPath ?? ''}
+          alt={user.name ?? ''}
+          src={getProfilePicPath(user)}
           sx={{ bgcolor: 'primary.main' }}
         />
       </IconButton>

@@ -24,8 +24,7 @@ import { Box, Stack, TextField } from '@mui/material'
 import { FC } from 'react'
 import { z } from 'zod'
 import { isPlainObject } from 'remeda'
-import { Field, Section } from './actions'
-import { SchemaField } from '@/domain/schema/entity'
+import { SchemaField, Section } from '@supplyside/model'
 
 type Props = {
   fields: SchemaField[]
@@ -38,21 +37,21 @@ export default function SectionFieldsControl({
   fields,
   onChange,
 }: Props) {
-  const fieldIds = new Set(section.SectionField.map((sf) => sf.Field.id))
+  const fieldIds = new Set(section.fields.map((sf) => sf.fieldId))
 
   return (
-    <Autocomplete<Field, true, boolean, true>
+    <Autocomplete<SchemaField, true, boolean, true>
       multiple
       disableClearable={fields
-        .filter((f) => fieldIds.has(f.id))
+        .filter((f) => fieldIds.has(f.fieldId))
         .some((f) => !!f.templateId)}
-      options={fields.filter((f) => !fieldIds.has(f.id))}
-      value={section.SectionField.map((sf) => sf.Field)}
+      options={fields.filter((f) => !fieldIds.has(f.fieldId))}
+      value={section.fields}
       getOptionLabel={(o) => (typeof o === 'string' ? o : o.name)}
       onChange={(e, values, reason) =>
         reason === 'clear'
           ? onChange([])
-          : onChange(values.filter(isPlainObject).map((f) => f.id))
+          : onChange(values.filter(isPlainObject).map((f) => f.fieldId))
       }
       renderTags={(fields) => (
         <SortableChips fields={fields} onChange={onChange} />
@@ -69,11 +68,11 @@ export default function SectionFieldsControl({
 }
 
 const SortableChip: FC<{
-  field: Field
+  field: SchemaField
   onRemove: (fieldId: string) => void
 }> = ({ field, onRemove }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: field.id })
+    useSortable({ id: field.fieldId })
 
   return (
     <Box
@@ -87,16 +86,18 @@ const SortableChip: FC<{
       {...listeners}
     >
       <Chip
-        key={field.id}
+        key={field.fieldId}
         label={field.name}
-        onDelete={!!field.templateId ? undefined : () => onRemove(field.id)}
+        onDelete={
+          !!field.templateId ? undefined : () => onRemove(field.fieldId)
+        }
       />
     </Box>
   )
 }
 
 const SortableChips: FC<{
-  fields: Field[]
+  fields: SchemaField[]
   onChange: (fieldIds: string[]) => void
 }> = ({ fields, onChange }) => {
   const sensors = useSensors(
@@ -118,7 +119,7 @@ const SortableChips: FC<{
     }),
   )
 
-  const fieldIds = fields.map((f) => f.id)
+  const fieldIds = fields.map((f) => f.fieldId)
 
   return (
     <DndContext
@@ -134,11 +135,14 @@ const SortableChips: FC<{
         onChange([...removed.slice(0, i), activeId, ...removed.slice(i)])
       }}
     >
-      <SortableContext items={fields} strategy={rectSortingStrategy}>
+      <SortableContext
+        items={fields.map((f) => ({ ...f, id: f.fieldId }))}
+        strategy={rectSortingStrategy}
+      >
         <Stack direction="row" gap={1} flexWrap="wrap">
           {fields.map((field) => (
             <SortableChip
-              key={field.id}
+              key={field.fieldId}
               field={field}
               onRemove={(fieldId) =>
                 onChange(fieldIds.filter((fid) => fid !== fieldId))

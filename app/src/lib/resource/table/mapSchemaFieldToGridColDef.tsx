@@ -1,21 +1,23 @@
 import assert from 'assert'
 import { P, match } from 'ts-pattern'
-import { FieldType } from '@prisma/client'
 import { Box, Chip, Stack } from '@mui/material'
 import { Check } from '@mui/icons-material'
 import { GridApplyQuickFilter } from '@mui/x-data-grid/models/colDef/gridColDef'
+import {
+  FieldType,
+  SchemaField,
+  Value,
+  emptyValue,
+  findTemplateField,
+  selectResourceFieldValue,
+} from '@supplyside/model'
 import ContactCard from '../fields/views/ContactCard'
 import UserCard from '../fields/views/UserCard'
 import ResourceFieldView from '../fields/views/ResourceFieldView'
 import AddressCard from '../fields/views/AddressCard'
 import FieldGridEditCell from './FieldGridEditCell'
 import { Cell, Column, Display, Row } from './types'
-import { SchemaField } from '@/domain/schema/entity'
-import { findTemplateField } from '@/domain/schema/template/system-fields'
 import { formatDate, formatMoney } from '@/lib/format'
-import { Value } from '@/domain/resource/entity'
-import { selectResourceFieldValue } from '@/domain/resource/extensions'
-import { emptyValue } from '@/domain/resource/entity'
 
 export const mapSchemaFieldToGridColDef = (
   field: SchemaField,
@@ -23,7 +25,7 @@ export const mapSchemaFieldToGridColDef = (
     isEditable: boolean
   },
 ): Column => ({
-  field: field.id,
+  field: field.fieldId,
 
   headerName: field.name,
 
@@ -86,9 +88,11 @@ export const mapSchemaFieldToGridColDef = (
       .with(
         'Date',
         () => (value) =>
-          formatDate(value?.date)
-            ?.toLowerCase()
-            .includes(query.toLowerCase()) ?? false,
+          value?.date
+            ? (formatDate(new Date(value.date))
+                ?.toLowerCase()
+                .includes(query.toLowerCase()) ?? false)
+            : false,
       )
       .with(
         'File',
@@ -145,7 +149,7 @@ export const mapSchemaFieldToGridColDef = (
       .with(
         'User',
         () => (value) =>
-          value?.user?.fullName?.toLowerCase().includes(query.toLowerCase()) ||
+          value?.user?.name?.toLowerCase().includes(query.toLowerCase()) ||
           value?.user?.email.toLowerCase().includes(query.toLowerCase()) ||
           false,
       )
@@ -153,18 +157,19 @@ export const mapSchemaFieldToGridColDef = (
   },
 
   valueGetter: (cell: Display, resource: Row): Value =>
-    selectResourceFieldValue(resource, { fieldId: field.id }) ?? emptyValue,
+    selectResourceFieldValue(resource, field) ?? emptyValue,
 
   // This function is called when a value is written to the row, prior to persisting the resource.
   valueSetter: (value: Value | undefined = emptyValue, row: Row): Row =>
-    !selectResourceFieldValue(row, { fieldId: field.id })
+    !selectResourceFieldValue(row, field)
       ? {
           ...row,
           fields: [
             ...row.fields,
             {
-              fieldId: field.id,
+              fieldId: field.fieldId,
               fieldType: field.type,
+              name: field.name,
               templateId: field.templateId,
               value,
             },
@@ -173,10 +178,11 @@ export const mapSchemaFieldToGridColDef = (
       : {
           ...row,
           fields: [
-            ...row.fields.filter((f) => f.fieldId !== field.id),
+            ...row.fields.filter((f) => f.fieldId !== field.fieldId),
             {
-              fieldId: field.id,
+              fieldId: field.fieldId,
               fieldType: field.type,
+              name: field.name,
               templateId: field.templateId,
               value,
             },
@@ -232,11 +238,13 @@ export const mapSchemaFieldToGridColDef = (
 
   // Only called if `renderCell` returns `undefined`
   valueFormatter: (_, resource) => {
-    const value = selectResourceFieldValue(resource, { fieldId: field.id })
+    const value = selectResourceFieldValue(resource, field)
     const template = findTemplateField(field.templateId)
 
     const formatted = match<FieldType>(field.type)
-      .with('Date', () => formatDate(value?.date) ?? undefined)
+      .with('Date', () =>
+        value?.date ? formatDate(new Date(value.date)) : undefined,
+      )
       .with('Money', () =>
         value?.number?.toLocaleString('en-US', {
           style: 'currency',

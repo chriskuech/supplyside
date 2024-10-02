@@ -1,5 +1,5 @@
 import { Autocomplete, TextField } from '@mui/material'
-import { ResourceType } from '@prisma/client'
+import { ResourceType, resourceTypes } from '@supplyside/model'
 
 type Props = {
   resourceType: ResourceType | undefined
@@ -14,7 +14,7 @@ export default function ResourceTypeSelect({
     <Autocomplete<ResourceType>
       size="small"
       fullWidth
-      options={Object.values(ResourceType)}
+      options={resourceTypes}
       value={resourceType}
       disabled={!setResourceType}
       onChange={(e, value) => setResourceType?.(value ?? undefined)}

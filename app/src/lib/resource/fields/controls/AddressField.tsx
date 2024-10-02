@@ -9,9 +9,9 @@ import {
   TextField,
 } from '@mui/material'
 import { FC, useEffect, useState } from 'react'
+import { Address } from '@supplyside/model'
 import AddressCard from '../views/AddressCard'
-import { useDisclosure } from '@/lib/hooks/useDisclosure'
-import { Address } from '@/domain/resource/entity'
+import { useDisclosure } from '@/hooks/useDisclosure'
 
 export type AddressFieldProps = {
   address: Address | null

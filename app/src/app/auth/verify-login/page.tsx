@@ -12,9 +12,9 @@ import { redirect, RedirectType } from 'next/navigation'
 import { z } from 'zod'
 import NextLink from 'next/link'
 import Form from './Form'
-import { readSession } from '@/lib/session/actions'
 import RefreshOnFocus from '@/lib/ux/RefreshOnFocus'
 import Logo from '@/lib/ux/appbar/Logo'
+import { readSession } from '@/session'
 
 export default async function VerifyLogin({
   searchParams,

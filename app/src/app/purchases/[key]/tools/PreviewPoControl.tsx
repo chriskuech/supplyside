@@ -1,7 +1,8 @@
 'use client'
 import { Visibility } from '@mui/icons-material'
 import { Tooltip, IconButton } from '@mui/material'
-import { File } from '@/domain/file/types'
+import { File } from '@supplyside/model'
+import { preview } from '@/app/api/download/[filename]/util'
 
 type Props = {
   file: File
@@ -10,7 +11,7 @@ type Props = {
 export default function PreviewPoControl({ file }: Props) {
   return (
     <Tooltip title="Preview Purchase Order file">
-      <IconButton onClick={() => window.open(file.previewPath)}>
+      <IconButton onClick={() => preview(file)}>
         <Visibility fontSize="large" />
       </IconButton>
     </Tooltip>

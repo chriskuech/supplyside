@@ -10,6 +10,7 @@ import {
   Chip,
 } from '@mui/material'
 import { match } from 'ts-pattern'
+import { Resource, Schema } from '@supplyside/model'
 import { chunkByN } from '../chunkByN'
 import FileField from '../fields/controls/FileField'
 import FilesField from '../fields/controls/FilesField'
@@ -18,8 +19,6 @@ import ResourceFieldView from '../fields/views/ResourceFieldView'
 import UserCard from '../fields/views/UserCard'
 import ContactCard from '../fields/views/ContactCard'
 import AddressCard from '../fields/views/AddressCard'
-import { Schema } from '@/domain/schema/entity'
-import { Resource } from '@/domain/resource/entity'
 
 type Props = {
   schema: Schema
@@ -40,7 +39,7 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                   </Typography>
                   <Stack spacing={2}>
                     {section.fields.map((field) => (
-                      <Stack key={field.id}>
+                      <Stack key={field.fieldId}>
                         <Tooltip title={field.description}>
                           <Stack
                             direction="row"
@@ -58,7 +57,7 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                         <Box>
                           {match(
                             resource.fields.find(
-                              (rf) => rf.fieldId === field.id,
+                              (rf) => rf.fieldId === field.fieldId,
                             ),
                           )
                             .with({ fieldType: 'Address' }, ({ value }) =>
@@ -85,12 +84,14 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                             .with(
                               { fieldType: 'Date' },
                               ({ value: { date } }) =>
-                                date?.toLocaleDateString() ?? '-',
+                                date
+                                  ? new Date(date).toLocaleDateString()
+                                  : '-',
                             )
                             .with({ fieldType: 'File' }, ({ value }) => (
                               <FileField
                                 resourceId={resource.id}
-                                fieldId={field.id}
+                                fieldId={field.fieldId}
                                 file={value?.file}
                                 isReadOnly
                               />

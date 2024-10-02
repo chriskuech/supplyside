@@ -1,5 +1,6 @@
 import { Avatar, Stack, Typography } from '@mui/material'
-import { User } from '@/domain/user/entity'
+import { User } from '@supplyside/model'
+import { getProfilePicPath } from '@/app/api/download/[filename]/util'
 
 type Props = {
   user: User | null
@@ -8,11 +9,11 @@ type Props = {
 export default function UserCard({ user }: Props) {
   return (
     <Stack direction="row" spacing={1}>
-      {user?.profilePicPath && (
-        <Avatar src={user.profilePicPath} alt={user.fullName ?? undefined} />
+      {user && (
+        <Avatar src={getProfilePicPath(user)} alt={user.name ?? undefined} />
       )}
       <Stack>
-        <Typography>{user?.fullName}</Typography>
+        <Typography>{user?.name}</Typography>
         <Typography variant="caption">{user?.email}</Typography>
       </Stack>
     </Stack>

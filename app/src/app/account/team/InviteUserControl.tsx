@@ -1,10 +1,11 @@
 'use client'
+
 import { Send } from '@mui/icons-material'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
 import { FC, useState } from 'react'
 import { z } from 'zod'
 import { useSnackbar } from 'notistack'
-import { inviteUserToAccount } from './actions'
+import { inviteUser } from '@/actions/user'
 
 const InviteUserControl: FC = () => {
   const { enqueueSnackbar } = useSnackbar()
@@ -13,17 +14,14 @@ const InviteUserControl: FC = () => {
   const isValid = z.string().email().safeParse(email).success
   const showError = !!email && !isValid
 
-  const handleInviteUser = () => {
-    inviteUserToAccount(email)
-      .then(() => setEmail(''))
+  const handleInviteUser = () =>
+    inviteUser({ email })
       .catch(() => {
-        setEmail('')
-
         enqueueSnackbar('Failed to invite user. Please try again.', {
           variant: 'error',
         })
       })
-  }
+      .finally(() => setEmail(''))
 
   return (
     <TextField

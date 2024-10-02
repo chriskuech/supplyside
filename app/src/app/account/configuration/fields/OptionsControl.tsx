@@ -25,7 +25,16 @@ import { Box, Stack, TextField } from '@mui/material'
 import { FC } from 'react'
 import { faker } from '@faker-js/faker'
 import { P, match } from 'ts-pattern'
-import { OptionPatch } from '@/domain/schema/SchemaFieldService'
+
+// TODO: move to model
+export type OptionPatch = {
+  id: string // patch ID -- must be `id` to work with mui
+  name: string
+} & (
+  | { op: 'add' }
+  | { op: 'update'; optionId: string }
+  | { op: 'remove'; optionId: string }
+)
 
 type Props = {
   options: OptionPatch[]

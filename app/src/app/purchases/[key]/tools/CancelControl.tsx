@@ -1,11 +1,9 @@
 'use client'
+
 import { IconButton, Tooltip } from '@mui/material'
 import { CancelOutlined } from '@mui/icons-material'
-import { transitionStatus } from '@/lib/resource/actions'
-import {
-  fields,
-  purchaseStatusOptions,
-} from '@/domain/schema/template/system-fields'
+import { fields, purchaseStatusOptions } from '@supplyside/model'
+import { transitionStatus } from '@/actions/resource'
 
 type Props = {
   resourceId: string

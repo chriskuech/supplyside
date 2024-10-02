@@ -10,16 +10,14 @@ import {
   Typography,
 } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
-import { ResourceType } from '@prisma/client'
 import { useSnackbar } from 'notistack'
+import { Resource, ResourceType, mapValueToValueInput } from '@supplyside/model'
+import { selectResourceFieldValue } from '@supplyside/model'
 import useSchema from '../schema/useSchema'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
 import Field from './fields/controls/Field'
-import { updateResourceField } from './actions'
-import { selectResourceFieldValue } from '@/domain/resource/extensions'
-import { Resource } from '@/domain/resource/entity'
-import { mapValueToValueInput } from '@/domain/resource/mappers'
+import { updateResourceField } from '@/actions/resource'
 
 type Props = {
   resource: Resource
@@ -76,15 +74,13 @@ export default function ResourceForm({
                     {singleField.description}
                   </Typography>
                   <FieldControl
-                    inputId={`rf-${singleField.id}`}
+                    inputId={`rf-${singleField.fieldId}`}
                     resourceId={resource.id}
                     field={
                       singleField ??
                       fail('Assumed a single field was asserted above')
                     }
-                    value={selectResourceFieldValue(resource, {
-                      fieldId: singleField.id,
-                    })}
+                    value={selectResourceFieldValue(resource, singleField)}
                     disabled={!!resource.templateId && !!singleField.templateId}
                   />
                 </Box>
@@ -93,7 +89,7 @@ export default function ResourceForm({
                   {chunkByN(s.fields, columns).map((fs, i) => (
                     <Stack key={i} spacing={3} flex={1}>
                       {fs.map((f) => (
-                        <Stack key={f.id}>
+                        <Stack key={f.fieldId}>
                           <Typography
                             variant="overline"
                             fontSize={14}
@@ -117,21 +113,26 @@ export default function ResourceForm({
                           <Box>
                             <Field
                               disabled={!!resource.templateId && !!f.templateId}
-                              inputId={`rf-${f.id}`}
+                              inputId={`rf-${f.fieldId}`}
                               resourceId={resource.id}
                               field={f}
                               value={selectResourceFieldValue(resource, {
-                                fieldId: f.id,
+                                fieldId: f.fieldId,
                               })}
                               onChange={async (value) => {
-                                const result = await updateResourceField({
-                                  resourceId: resource.id,
-                                  fieldId: f.id,
-                                  value: mapValueToValueInput(f.type, value),
-                                })
+                                const result = await updateResourceField(
+                                  resource.id,
+                                  {
+                                    fieldId: f.fieldId,
+                                    valueInput: mapValueToValueInput(
+                                      f.type,
+                                      value,
+                                    ),
+                                  },
+                                )
 
-                                if ('error' in result) {
-                                  enqueueSnackbar(result.error, {
+                                if (!result) {
+                                  enqueueSnackbar('Failed to update field', {
                                     variant: 'error',
                                   })
                                 }

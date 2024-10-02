@@ -1,7 +1,7 @@
 'use server'
+
 import { RedirectType, redirect } from 'next/navigation'
-import { createSession } from '@/lib/session/actions'
-import { SessionCreationError } from '@/domain/session/errors'
+import { createSession } from '@/session'
 
 type LoginParams = {
   email: string
@@ -10,15 +10,9 @@ type LoginParams = {
 }
 
 export const login = async ({ email, token, returnTo = '/' }: LoginParams) => {
-  try {
-    await createSession(email, token)
+  const session = await createSession(email, token)
 
-    redirect(returnTo, RedirectType.replace)
-  } catch (error) {
-    if (error instanceof SessionCreationError) {
-      return { error: error.message }
-    }
+  if (!session) return { error: 'Invalid token' }
 
-    throw error
-  }
+  redirect(returnTo, RedirectType.replace)
 }

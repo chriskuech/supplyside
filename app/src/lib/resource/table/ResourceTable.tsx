@@ -11,13 +11,12 @@ import { CircularProgress, IconButton } from '@mui/material'
 import { Clear } from '@mui/icons-material'
 import { useMemo } from 'react'
 import { z } from 'zod'
-import { deleteResource } from '../actions'
+import { Resource, Schema } from '@supplyside/model'
 import { mapSchemaFieldToGridColDef } from './mapSchemaFieldToGridColDef'
 import { Row, Column } from './types'
 import { handleProcessRowUpdate } from './processRowUpdate'
 import { usePersistDatagridState } from './usePersistDatagridState'
-import { Resource } from '@/domain/resource/entity'
-import { Schema } from '@/domain/schema/entity'
+import { deleteResource } from '@/actions/resource'
 
 type Props = {
   tableKey?: string
@@ -56,7 +55,7 @@ export default function ResourceTable({
             type: 'number',
             editable: false,
           },
-      ...schema.allFields.map((field) =>
+      ...schema.fields.map((field) =>
         mapSchemaFieldToGridColDef(field, { isEditable }),
       ),
       ...(isEditable
@@ -64,11 +63,11 @@ export default function ResourceTable({
             {
               field: '_delete',
               headerName: 'Delete',
-              renderCell: ({ row: { id } }) => (
+              renderCell: ({ row: { id: resourceId } }) => (
                 <IconButton
                   onClick={(e) => {
                     e.stopPropagation()
-                    deleteResource({ id })
+                    deleteResource(resourceId)
                   }}
                 >
                   <Clear />
@@ -115,8 +114,12 @@ export default function ResourceTable({
       slots={{
         toolbar: () => (
           <GridToolbarContainer>
-            <GridToolbarColumnsButton />
-            <GridToolbarFilterButton />
+            <GridToolbarColumnsButton
+              slotProps={{ button: { variant: 'text' } }}
+            />
+            <GridToolbarFilterButton
+              slotProps={{ button: { variant: 'text' } }}
+            />
             <GridToolbarQuickFilter
               quickFilterParser={parseFilter}
               quickFilterFormatter={(quickFilterValues) =>

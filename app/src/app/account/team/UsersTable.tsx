@@ -1,13 +1,14 @@
 'use client'
+
 import { FC } from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { IconButton } from '@mui/material'
 import { Clear } from '@mui/icons-material'
 import { filter, fromEntries, keys, map, pipe } from 'remeda'
-import { deleteUser, updateUser } from './actions'
+import { User } from '@supplyside/model'
 import { systemAccountId } from '@/lib/const'
-import { User } from '@/domain/user/entity'
 import { useConfirmation } from '@/lib/confirmation'
+import { deleteUser, updateUser } from '@/actions/user'
 
 /**
  * @param oldObj

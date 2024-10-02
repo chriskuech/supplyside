@@ -1,7 +1,7 @@
 'use client'
 import { Link } from '@mui/material'
-import { disconnectPlaid } from '../../actions'
 import { useConfirmation } from '@/lib/confirmation'
+import { disconnect } from '@/actions/plaid'
 
 export default function PlaidDisconnectLink() {
   const confirm = useConfirmation()
@@ -17,7 +17,7 @@ export default function PlaidDisconnectLink() {
         })
 
         if (isConfirmed) {
-          await disconnectPlaid()
+          await disconnect()
         }
       }}
     >

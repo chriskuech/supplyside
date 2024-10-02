@@ -6,11 +6,11 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 import { FC, useState } from 'react'
+import { SchemaField } from '@supplyside/model'
 import UpdateFieldForm from './UpdateFieldForm'
-import { deleteField, updateField } from './actions'
-import { UpdateFieldDto } from '@/domain/schema/SchemaFieldService'
 import { useConfirmation } from '@/lib/confirmation'
-import { SchemaField } from '@/domain/schema/entity'
+import { deleteField, updateField } from '@/actions/fields'
+import { UpdateFieldData } from '@/client/fields'
 
 type Props = {
   fields: SchemaField[]
@@ -86,7 +86,7 @@ export default function FieldsTable({ fields }: Props) {
 
             if (!isConfirmed) return
 
-            await deleteField(row.id)
+            await deleteField(row.fieldId)
           }}
           disabled={!!row.templateId}
         >
@@ -103,6 +103,7 @@ export default function FieldsTable({ fields }: Props) {
         rows={fields}
         rowSelection={false}
         onRowClick={({ row }) => setField(row)}
+        getRowId={(field) => field.fieldId}
       />
       <FieldModal
         field={field}
@@ -115,7 +116,7 @@ export default function FieldsTable({ fields }: Props) {
 
 const FieldModal: FC<{
   field: SchemaField | undefined
-  onUpdate: (dto: UpdateFieldDto) => void
+  onUpdate: (fieldId: string, dto: UpdateFieldData) => void
   onClose: () => void
 }> = ({ field, onUpdate, onClose }) => (
   <Modal open={!!field} onClose={onClose}>
@@ -140,7 +141,7 @@ const FieldModal: FC<{
               key={JSON.stringify(field)}
               field={field}
               onSubmit={(dto) => {
-                onUpdate(dto)
+                onUpdate(field.fieldId, dto)
                 onClose()
               }}
               onCancel={onClose}

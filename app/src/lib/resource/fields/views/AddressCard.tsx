@@ -1,6 +1,6 @@
 import { Home } from '@mui/icons-material'
 import { Card, Box, Typography, Stack } from '@mui/material'
-import { Address } from '@/domain/resource/entity'
+import { Address } from '@supplyside/model'
 
 export const formatInlineAddress = (address: Address): string => {
   const { streetAddress, city, state, zip, country } = address

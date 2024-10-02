@@ -1,4 +1,5 @@
 'use client'
+
 import {
   Box,
   Button,
@@ -16,10 +17,8 @@ import {
 } from '@mui/material'
 import { Add, Clear } from '@mui/icons-material'
 import { match } from 'ts-pattern'
-import { createCost, deleteCost, updateCost } from './actions'
-import { Resource } from '@/domain/resource/entity'
-import { fields } from '@/domain/schema/template/system-fields'
-import { selectResourceFieldValue } from '@/domain/resource/extensions'
+import { Resource, fields, selectResourceFieldValue } from '@supplyside/model'
+import { createCost, deleteCost, updateCost } from '@/actions/resource-costs'
 
 type Props = {
   resource: Resource

@@ -1,8 +1,8 @@
 import 'client-only'
+
 import { useCallback, useEffect, useState } from 'react'
-import { readResource, updateResource } from './actions'
-import { Resource } from '@/domain/resource/entity'
-import { mapValueToValueInput } from '@/domain/resource/mappers'
+import { Resource, mapValueToValueInput } from '@supplyside/model'
+import { readResource, updateResource } from '@/actions/resource'
 
 const useResource = (resourceId?: string) => {
   const [resource, setLocalResource] = useState<Resource | null>()
@@ -13,8 +13,8 @@ const useResource = (resourceId?: string) => {
     if (!resourceId) return
     if (!isLoading && !isError && resourceId !== resource?.id) {
       setIsLoading(true)
-      readResource({ id: resourceId })
-        .then(setLocalResource)
+      readResource(resourceId)
+        .then((resource) => setLocalResource(resource ?? null))
         .catch(() => {
           setIsError(true)
           setLocalResource(null)
@@ -25,14 +25,14 @@ const useResource = (resourceId?: string) => {
 
   const setApiResource = useCallback(
     (resource: Resource) =>
-      updateResource({
-        resourceId: resource.id,
-        fields: resource.fields.map(({ fieldId, fieldType, value }) => ({
+      updateResource(
+        resource.id,
+        resource.fields.map(({ fieldId, fieldType, value }) => ({
           fieldId,
-          value: mapValueToValueInput(fieldType, value),
+          valueInput: mapValueToValueInput(fieldType, value),
         })),
-      })
-        .then(setLocalResource)
+      )
+        .then((resource) => setLocalResource(resource ?? null))
         .catch(() => setIsError(true)),
     [],
   )

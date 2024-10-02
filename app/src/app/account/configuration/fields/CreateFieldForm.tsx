@@ -9,13 +9,13 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
-import { FieldType, ResourceType } from '@prisma/client'
 import { useState } from 'react'
+import { FieldType, ResourceType, fieldTypes } from '@supplyside/model'
 import ResourceTypeSelect from './ResourceTypeSelect'
-import { CreateFieldParams } from '@/domain/schema/SchemaFieldService'
+import { CreateFieldData } from '@/client/fields'
 
 type Props = {
-  onSubmit: (params: CreateFieldParams) => void
+  onSubmit: (params: CreateFieldData) => void
 }
 
 export default function CreateFieldForm({ onSubmit }: Props) {
@@ -46,7 +46,7 @@ export default function CreateFieldForm({ onSubmit }: Props) {
           <Autocomplete<FieldType>
             fullWidth
             value={type}
-            options={Object.values(FieldType)}
+            options={fieldTypes}
             onChange={(e, value) => setType(value ?? undefined)}
             renderInput={(params) => <TextField {...params} label="Type" />}
           />

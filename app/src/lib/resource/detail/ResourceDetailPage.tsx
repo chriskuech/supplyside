@@ -1,16 +1,18 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { ReactNode } from 'react'
 import { match, P } from 'ts-pattern'
+import {
+  FieldTemplate,
+  Resource,
+  Schema,
+  selectSchemaFieldUnsafe,
+} from '@supplyside/model'
 import ResourceForm from '../ResourceForm'
 import ReadOnlyFieldsView from './ReadOnlyFieldsView'
 import LinesAndCosts from './LinesAndCosts'
 import DeleteResourceButton from './DeleteResourceButton'
 import DuplicateResourceButton from './DuplicateResourceButton'
 import HandleJustCloned from './HandleJustCloned'
-import { Schema } from '@/domain/schema/entity'
-import { selectSchemaFieldUnsafe } from '@/domain/schema/extensions'
-import { Resource } from '@/domain/resource/entity'
-import { FieldTemplate } from '@/domain/schema/template/types'
 
 type Props = {
   schema: Schema
@@ -105,8 +107,8 @@ export default function ResourceDetailPage({
               newLineInitialData={[
                 {
                   fieldId: selectSchemaFieldUnsafe(lineSchema, backlinkField)
-                    .id,
-                  value: { resourceId: resource.id },
+                    .fieldId,
+                  valueInput: { resourceId: resource.id },
                 },
               ]}
               isReadOnly={isReadOnly}

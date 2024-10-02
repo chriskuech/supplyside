@@ -1,7 +1,7 @@
 'use client'
 import { Link } from '@mui/material'
-import { disconnectMcMasterCarr } from '../../actions'
 import { useConfirmation } from '@/lib/confirmation'
+import { disconnect } from '@/actions/mcMaster'
 
 export default function McMasterCarrDisconnectLink() {
   const confirm = useConfirmation()
@@ -17,7 +17,7 @@ export default function McMasterCarrDisconnectLink() {
         })
 
         if (isConfirmed) {
-          await disconnectMcMasterCarr()
+          await disconnect()
         }
       }}
     >

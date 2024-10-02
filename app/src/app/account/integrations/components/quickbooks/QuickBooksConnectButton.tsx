@@ -1,7 +1,8 @@
 'use client'
+
 import { Link } from '@mui/material'
 import Image from 'next/image'
-import { useDisclosure } from '@/lib/hooks/useDisclosure'
+import { useDisclosure } from '@/hooks/useDisclosure'
 
 type Props = {
   url: string

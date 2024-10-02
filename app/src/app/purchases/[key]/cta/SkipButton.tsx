@@ -1,11 +1,9 @@
 'use client'
+
 import { Button, Tooltip } from '@mui/material'
 import { ArrowRight } from '@mui/icons-material'
-import {
-  fields,
-  purchaseStatusOptions,
-} from '@/domain/schema/template/system-fields'
-import { transitionStatus } from '@/lib/resource/actions'
+import { fields, purchaseStatusOptions } from '@supplyside/model'
+import { transitionStatus } from '@/actions/resource'
 
 type Props = {
   resourceId: string
