@@ -4,19 +4,27 @@ import { PrismaService } from '../PrismaService'
 import { QuickBooksTokenService } from './QuickBooksTokenService'
 import { QuickBooksConfigService } from './QuickBooksConfigService'
 import { QuickBooksClientService } from './QuickBooksClientService'
-import { Bill, BillPayment, CompanyInfo } from './types'
+import { Bill, BillPayment, CompanyInfo, WebhookBody } from './types'
 import { QuickBooksCompanyInfoService } from './QuickBooksCompanyInfoService'
 import { QuickBooksAccountService } from './QuickBooksAccountService'
 import { QuickBooksVendorService } from './QuickBooksVendorService'
 import { QuickBooksBillService } from './QuickBooksBillService'
 import { QuickBooksBillPaymentService } from './QuickBooksBillPaymentService'
 import { isRequestError } from './utils'
+import { groupBy } from 'remeda'
+import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
+import { billStatusOptions, fields, selectSchemaFieldOptionUnsafe, selectSchemaFieldUnsafe } from '@supplyside/model'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 
 @injectable()
 export class QuickBooksService {
   constructor(
     @inject(PrismaService)
     private readonly prisma: PrismaService,
+    @inject(ResourceService)
+    private readonly resourceService: ResourceService,
+    @inject(SchemaService)
+    private readonly schemaService: SchemaService,
     @inject(QuickBooksTokenService)
     private readonly quickBooksTokenService: QuickBooksTokenService,
     @inject(QuickBooksConfigService)
@@ -160,5 +168,75 @@ export class QuickBooksService {
 
   async getSetupUrl() {
     return this.quickBooksClientService.setupUrl
+  }
+
+  async processWebhook(data: WebhookBody): Promise<void> {
+    await Promise.all(
+      data.eventNotifications.map(async (notification) => {
+        const accountId = await this.findAccountIdByRealmId(
+          notification.realmId
+        )
+        if (!accountId) return
+
+        const entities = groupBy(
+          notification.dataChangeEvent.entities,
+          (entity) => entity.id
+        )
+
+        return Promise.all(
+          Object.keys(entities).map(async (entityId) => {
+            // Right now the only entities supported are bill payments (change webhookBodySchema to accept more entities)
+            const billPayment = await this.getBillPayment(accountId, entityId)
+            const billIds = billPayment.BillPayment.Line.flatMap((line) =>
+              line.LinkedTxn.filter((txn) => txn.TxnType === 'Bill').map(
+                (txn) => txn.TxnId
+              )
+            )
+
+            return Promise.all(
+              billIds.map(async (billId) => {
+                const bill =
+                  await this.resourceService.findResourceByUniqueValue(
+                    accountId,
+                    'Bill',
+                    fields.quickBooksBillId,
+                    { string: billId }
+                  )
+
+                if (!bill) return
+
+                const quickBooksBill = await this.getBill(accountId, billId)
+
+                //TODO: we are missing updating the previously related bills status when a billPayment is deleted or updated
+                if (quickBooksBill.Bill.Balance === 0) {
+                  const billSchema = await this.schemaService.readSchema(
+                    accountId,
+                    'Bill'
+                  )
+
+                  const billStatusFieldId = selectSchemaFieldUnsafe(
+                    billSchema,
+                    fields.billStatus
+                  ).fieldId
+
+                  const paidOptionId = selectSchemaFieldOptionUnsafe(
+                    billSchema,
+                    fields.billStatus,
+                    billStatusOptions.paid
+                  ).id
+
+                  await this.resourceService.updateResourceField({
+                    accountId,
+                    resourceId: bill.id,
+                    fieldId: billStatusFieldId,
+                    valueInput: { optionId: paidOptionId },
+                  })
+                }
+              })
+            )
+          })
+        )
+      })
+    )
   }
 }

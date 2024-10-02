@@ -7,11 +7,11 @@ import { mountIntegrations } from './integrations'
 import { container } from '@supplyside/api/di'
 import { ConfigService } from '@supplyside/api/ConfigService'
 
-export const mountApi = <App extends FastifyInstance>(app: App) =>
+const authApi = <App extends FastifyInstance>(app: App) =>
   app
     .addHook('preHandler', (req, reply, next) => {
       const { config } = container.resolve(ConfigService)
-      
+
       const [scheme, token] = req.headers.authorization?.split(' ') ?? []
 
       if (scheme !== 'Bearer') {
@@ -33,6 +33,10 @@ export const mountApi = <App extends FastifyInstance>(app: App) =>
     })
     .withTypeProvider<ZodTypeProvider>()
     .register(mountAccounts, { prefix: '/accounts' })
-    .register(mountIntegrations, { prefix: '/integrations' })
     .register(mountSelf, { prefix: '/self' })
     .register(mountSessions, { prefix: '/sessions' })
+
+export const mountApi = <App extends FastifyInstance>(app: App) =>
+  app
+    .register(mountIntegrations, { prefix: '/integrations' })
+    .register(authApi)
