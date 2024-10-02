@@ -217,7 +217,7 @@ export class QuickBooksService {
 
                 //TODO: we are missing updating the previously related bills status when a billPayment is deleted or updated
                 if (quickBooksBill.Bill.Balance === 0) {
-                  const billSchema = await this.schemaService.readSchema(
+                  const billSchema = await this.schemaService.readMergedSchema(
                     accountId,
                     'Bill'
                   )
