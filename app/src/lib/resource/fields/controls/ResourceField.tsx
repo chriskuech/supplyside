@@ -9,7 +9,7 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material'
-import { Clear, Link as LinkIcon, ViewSidebar } from '@mui/icons-material'
+import { Clear, Link as LinkIcon, Sync, ViewSidebar } from '@mui/icons-material'
 import { ForwardedRef, forwardRef, useEffect, useMemo, useState } from 'react'
 import { debounce } from 'remeda'
 import NextLink from 'next/link'
@@ -23,12 +23,13 @@ import {
 } from '@supplyside/model'
 import { useRouter } from 'next/navigation'
 import useSchema from '@/lib/schema/useSchema'
-import { createResource } from '@/actions/resource'
+import { copyFromResource, createResource } from '@/actions/resource'
 import { findResourcesByNameOrPoNumber } from '@/actions/resource'
 
 type Props = {
-  resource: ValueResource | null
-  onChange: (resource: ValueResource | null) => void
+  resourceId: string
+  valueResource: ValueResource | null
+  onChange: (valueResource: ValueResource | null) => void
   resourceType: ResourceType
   isReadOnly?: boolean
 }
@@ -37,7 +38,13 @@ type Props = {
  * A field that allows the user to select a resource of a given type.
  */
 function ResourceField(
-  { resourceType, resource, onChange, isReadOnly }: Props,
+  {
+    resourceId,
+    resourceType,
+    valueResource: resource,
+    onChange,
+    isReadOnly,
+  }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
   const router = useRouter()
@@ -78,6 +85,16 @@ function ResourceField(
           >
             {resource.name}
           </Link>
+          <Tooltip title={`Sync data from ${resourceType}`}>
+            <IconButton
+              onClick={() =>
+                copyFromResource(resourceId, { fromResourceId: resource.id })
+              }
+              size="small"
+            >
+              <Sync fontSize="small" />
+            </IconButton>
+          </Tooltip>
           {['Bill', 'Purchase'].includes(resourceType) ? (
             <Tooltip title={`Open ${resourceType} page`}>
               <IconButton

@@ -163,8 +163,10 @@ function Field(
         onChange={(e) =>
           handleChange({ ...emptyValue, number: parseFloat(e.target.value) })
         }
-        InputProps={{
-          startAdornment: <InputAdornment position="start">$</InputAdornment>,
+        slotProps={{
+          input: {
+            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+          },
         }}
       />
     ))
@@ -201,13 +203,27 @@ function Field(
         onChange={(e) =>
           handleChange({ ...emptyValue, number: parseFloat(e.target.value) })
         }
-        InputProps={{
-          startAdornment: findTemplateField(field.templateId)?.prefix && (
-            <InputAdornment position="start">
-              {findTemplateField(field.templateId)?.prefix}
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            startAdornment: findTemplateField(field.templateId)?.prefix && (
+              <InputAdornment position="start">
+                {findTemplateField(field.templateId)?.prefix}
+              </InputAdornment>
+            ),
+          },
         }}
+      />
+    ))
+    .with('Resource', () => (
+      <ResourceField
+        resourceId={resourceId}
+        isReadOnly={disabled}
+        ref={ref}
+        onChange={(resource) => handleChange({ ...emptyValue, resource })}
+        resourceType={
+          field.resourceType ?? fail('Resource type not found on Field')
+        }
+        valueResource={value?.resource ?? null}
       />
     ))
     .with('Select', () => (
@@ -261,17 +277,6 @@ function Field(
         inputId={inputId}
         user={value?.user ?? null}
         onChange={(user) => handleChange({ ...emptyValue, user })}
-      />
-    ))
-    .with('Resource', () => (
-      <ResourceField
-        isReadOnly={disabled}
-        ref={ref}
-        onChange={(resource) => handleChange({ ...emptyValue, resource })}
-        resourceType={
-          field.resourceType ?? fail('Resource type not found on Field')
-        }
-        resource={value?.resource ?? null}
       />
     ))
     .exhaustive()

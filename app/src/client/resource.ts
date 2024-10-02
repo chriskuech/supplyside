@@ -177,3 +177,23 @@ export const findBacklinks = async (
 
   return resources
 }
+
+export const copyFromResource = async (
+  accountId: string,
+  resourceId: string,
+  { fromResourceId }: { fromResourceId: string },
+) => {
+  revalidateTag('Resources')
+
+  const { data: resource } = await client().POST(
+    '/api/accounts/{accountId}/resources/{resourceId}/copy-from/',
+    {
+      params: {
+        path: { accountId, resourceId },
+      },
+      body: { fromResourceId },
+    },
+  )
+
+  return resource
+}
