@@ -1,5 +1,6 @@
 import { container } from '@supplyside/api/di'
 import { QuickBooksService } from '@supplyside/api/integrations/quickBooks/QuickBooksService'
+import { fail } from 'assert'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
@@ -39,12 +40,13 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
             req.params.accountId
           )
           const realmId = await service.getAccountRealmId(req.params.accountId)
+          const connectedAt = await service.getConnectedAt(req.params.accountId)
 
           res.status(200).send({
             status: 'connected',
             companyName: companyInfo.CompanyInfo.CompanyName,
             realmId,
-            connectedAt: new Date().toISOString(),
+            connectedAt: connectedAt?.toISOString() ?? fail('"quickBooks connected at" not set'),
           })
         } else {
           const setupUrl = await service.getSetupUrl()

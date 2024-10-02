@@ -84,6 +84,14 @@ export class QuickBooksService {
     return !!token
   }
 
+  async getConnectedAt(accountId: string) {
+    const account = await this.prisma.account.findFirstOrThrow({
+      where: { id: accountId },
+    })
+
+    return account.quickBooksConnectedAt
+  }
+
   async pullData(accountId: string): Promise<void> {
     const token = await this.quickBooksTokenService.getToken(accountId)
     assert(token, 'No token found')
