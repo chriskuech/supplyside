@@ -163,7 +163,7 @@ jobs:
             Start-Sleep -Seconds $waitInSeconds
             Write-Host "~" -NoNewline
 
-            $newAppIsHealthy = Get-Health $env:APP_BASE_URL/api/system/health
+            $newAppIsHealthy = Get-Health $env:APP_BASE_URL/api/health
             $newApiIsHealthy = Get-Health $env:API_BASE_URL/health
 
             if ($appIsHealthy -ne $newAppIsHealthy) {

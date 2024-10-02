@@ -75,13 +75,32 @@ jobs:
 
           $timeout = (Get-Date).AddMinutes($timeoutInMinutes)
 
+          function Get-Health([string] $url) {
+            $res = Invoke-RestMethod -Uri $url -Method Get -ErrorAction SilentlyContinue
+            return $res -and $res.build.commit -eq $env:SHA
+          }
+
+          $appIsHealthy = $false
+          $apiIsHealthy = $false
+
           do {
             Start-Sleep -Seconds $waitInSeconds
             Write-Host "~" -NoNewline
 
-            $res = Invoke-RestMethod -Uri $env:BASE_URL/api/system/health -Method Get -ErrorAction SilentlyContinue
+            $newAppIsHealthy = Get-Health $env:APP_BASE_URL/api/health
+            $newApiIsHealthy = Get-Health $env:API_BASE_URL/health
 
-            if ($res -and $res.build.commit -eq $env:SHA) {
+            if ($appIsHealthy -ne $newAppIsHealthy) {
+              Write-Host "App health change: $appIsHealthy => $newAppIsHealthy"
+              $appIsHealthy = $newAppIsHealthy
+            }
+
+            if ($apiIsHealthy -ne $newApiIsHealthy) {
+              Write-Host "API health change: $apiIsHealthy => $newApiIsHealthy"
+              $apiIsHealthy = $newApiIsHealthy
+            }
+
+            if ($appIsHealthy -and $apiIsHealthy) {
               Write-Host "\nDeployment successful"
               exit 0
             }
@@ -89,7 +108,7 @@ jobs:
 
           Write-Host "\nDeployment timed out after $timeoutInMinutes minutes"
           exit 1
-
+  
         env:
           SHA: ${{ github.sha }}
 
