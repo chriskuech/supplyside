@@ -4,15 +4,19 @@
 #
 
 FROM node:20-alpine AS builder
-WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN npm ci
+COPY ./model/package.json ./model/package-lock.json* ./model/
+RUN cd ./model && npm ci
 
-COPY . .
+COPY ./api/package.json ./api/package-lock.json* ./api/
+RUN cd ./api && npm ci
 
-RUN npm run lint
-RUN npm run check
+COPY ./model ./model
+COPY ./api ./api
+
+RUN cd ./api && npm run gen
+RUN cd ./api && npm run lint && npm run check
+
 
 ##
 # Release
