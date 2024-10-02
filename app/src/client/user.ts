@@ -91,6 +91,7 @@ export const updateUser = async (
   },
 ) => {
   revalidateTag('User')
+
   await client().PATCH('/api/accounts/{accountId}/users/{userId}/', {
     params: {
       path: { accountId, userId },

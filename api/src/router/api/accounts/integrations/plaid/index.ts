@@ -61,14 +61,35 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
       },
     })
     .route({
-      method: 'PUT',
-      url: '/',
+      method: 'POST',
+      url: '/connect/',
+      schema: {
+        params: z.object({
+          accountId: z.string().uuid(),
+        }),
+        querystring: z.object({
+          token: z.string().min(1)
+        })
+      },
+      handler: async (req, res) => {
+        const service = container.resolve(PlaidService)
+        await service.createConnection(req.params.accountId, req.query.token )
+
+        res.send()
+      },
+    })
+    .route({
+      method: 'POST',
+      url: '/disconnect/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
         }),
       },
       handler: async (req, res) => {
+        const service = container.resolve(PlaidService)
+        await service.deletePlaidToken(req.params.accountId )
+
         res.send()
       },
     })

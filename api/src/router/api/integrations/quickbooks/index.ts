@@ -1,38 +1,16 @@
+import { ConfigService } from '@supplyside/api/ConfigService'
 import { container } from '@supplyside/api/di'
 import { QuickBooksService } from '@supplyside/api/integrations/quickBooks/QuickBooksService'
+import { webhookBodySchema } from '@supplyside/api/integrations/quickBooks/schemas'
+import { createHmac } from 'crypto'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
+
 export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
   app
     .withTypeProvider<ZodTypeProvider>()
-    .route({
-      method: 'GET',
-      url: '/',
-      schema: {
-        params: z.object({
-          accountId: z.string().uuid(),
-        }),
-        response: {
-          200: z.object({}),
-        },
-      },
-      handler: async (req, res) => {
-        const service = container.resolve(QuickBooksService)
-
-        const gettingIsConnected = service.isConnected(req.params.accountId)
-        const gettingCompanyInfo = service.getCompanyInfo(req.params.accountId)
-        const gettingRealmId = service.getAccountRealmId(req.params.accountId)
-
-        res.status(200).send({
-          isConnected: await gettingIsConnected,
-          companyInfo: await gettingCompanyInfo,
-
-          realmId: await gettingRealmId,
-        })
-      },
-    })
     .route({
       method: 'POST',
       url: '/disconnect/',
@@ -42,29 +20,40 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
         }),
       },
       handler: async (req, res) => {
-        const service = container.resolve(QuickBooksService)
+        const quickBooksService = container.resolve(QuickBooksService)
 
-        await service.disconnect(req.query.realmId)
+        await quickBooksService.disconnect(req.query.realmId)
 
         res.status(200).send()
       },
     })
     .route({
       method: 'POST',
-      url: '/connect/',
-      schema: {
-        params: z.object({
-          accountId: z.string().uuid(),
-        }),
-        querystring: z.object({
-          url: z.string(),
-        }),
-      },
+      url: '/webhook/',
       handler: async (req, res) => {
-        const service = container.resolve(QuickBooksService)
+        const quickBooksService = container.resolve(QuickBooksService)
+        const configService = container.resolve(ConfigService)
 
-        await service.connect(req.params.accountId, req.query.url)
+        const body = req.body
+        const signature = req.headers['intuit-signature']
+        const verifierToken =
+          configService.config.QUICKBOOKS_WEBHOOK_VERIFIER_TOKEN
 
-        res.status(200).send()
+        if (!signature || !verifierToken) return res.status(401).send()
+
+        if (!body) return res.status(200).send()
+
+        const hash = createHmac('sha256', verifierToken)
+          .update(JSON.stringify(body))
+          .digest('base64')
+
+        if (hash !== signature) return res.status(401).send
+
+        const data = webhookBodySchema.parse(body)
+
+        //TODO: we should add events to a queue and process asyncronously to avoid timeouts
+        await quickBooksService.processWebhook(data)
+
+        return res.status(200).send()
       },
     })

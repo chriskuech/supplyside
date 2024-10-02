@@ -213,3 +213,22 @@ export const readBillSchema = z.object({
 export const readBillPaymentSchema = z.object({
   BillPayment: billPaymentSchema,
 })
+
+export const webhookBodySchema = z.object({
+  eventNotifications: z.array(
+    z.object({
+      realmId: z.string(),
+      dataChangeEvent: z.object({
+        entities: z.array(
+          z.object({
+            id: z.string(),
+            operation: z.enum(['Create', 'Update', 'Merge', 'Delete', 'Void']),
+            name: z.enum(['BillPayment']),
+            lastUpdated: z.string(),
+          })
+        ),
+      }),
+    })
+  ),
+})
+

@@ -1,4 +1,5 @@
 import 'server-only'
+import { revalidateTag } from 'next/cache'
 import { client } from '.'
 
 export const readConnection = async (accountId: string) => {
@@ -7,6 +8,9 @@ export const readConnection = async (accountId: string) => {
     {
       params: {
         path: { accountId },
+      },
+      next: {
+        tags: ['McMaster'],
       },
     },
   )
@@ -19,6 +23,8 @@ export const connect = async (
   username: string,
   password: string,
 ) => {
+  revalidateTag('McMaster')
+
   await client().POST(
     '/api/accounts/{accountId}/integrations/mcmaster/connect/',
     {
@@ -31,6 +37,8 @@ export const connect = async (
 }
 
 export const disconnect = async (accountId: string) => {
+  revalidateTag('McMaster')
+
   await client().POST(
     '/api/accounts/{accountId}/integrations/mcmaster/disconnect/',
     {
