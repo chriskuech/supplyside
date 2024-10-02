@@ -41,7 +41,7 @@ export const readDetailPageModel = async (
   const [resource, schema, lineSchema, account, user] = await Promise.all([
     readResource(session.accountId, resourceId).then((e) => e ?? fail()),
     readSchema(session.accountId, resourceType).then((e) => e ?? fail()),
-    readSchema(session.accountId, 'Line').then((e) => e ?? fail()),
+    readSchema(session.accountId, 'PurchaseLine').then((e) => e ?? fail()),
     readAccount(session.accountId).then((e) => e ?? fail()),
     readSelf(session.userId).then((e) => e ?? fail()),
   ])

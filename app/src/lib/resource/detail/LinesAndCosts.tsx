@@ -20,10 +20,10 @@ export default async function LinesAndCosts({
   isReadOnly,
 }: Props) {
   const [lines, lineSchema] = await Promise.all([
-    readResources(resource.accountId, 'Line', {
+    readResources(resource.accountId, 'PurchaseLine', {
       where: lineQuery,
     }),
-    readSchema(resource.accountId, 'Line'),
+    readSchema(resource.accountId, 'PurchaseLine'),
   ])
 
   if (!lines || !lineSchema)
@@ -48,7 +48,7 @@ export default async function LinesAndCosts({
         </Typography>
         {!isReadOnly && (
           <CreateResourceButton
-            resourceType="Line"
+            resourceType="PurchaseLine"
             fields={newLineInitialData}
           />
         )}

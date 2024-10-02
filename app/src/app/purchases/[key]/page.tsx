@@ -48,11 +48,15 @@ export default async function PurchaseDetail({
     ?.resource?.templateId
   const isVendorMcMasterCarr =
     vendorTemplateId === resources().mcMasterCarrVendor.templateId
-  const purchaseLines = await readResources(resource.accountId, 'Line', {
-    where: {
-      '==': [{ var: fields.purchase.name }, resource.id],
+  const purchaseLines = await readResources(
+    resource.accountId,
+    'PurchaseLine',
+    {
+      where: {
+        '==': [{ var: fields.purchase.name }, resource.id],
+      },
     },
-  })
+  )
   const purchaseHasLines = !!purchaseLines?.length
   if (isVendorMcMasterCarr && !purchaseHasLines) {
     const punchoutSessionUrl =

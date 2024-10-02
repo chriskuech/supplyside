@@ -73,7 +73,7 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
-    resourceType: "Line",
+    resourceType: "PurchaseLine",
     fields: [
       fields.item,
       fields.unitOfMeasure,

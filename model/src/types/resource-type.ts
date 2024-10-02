@@ -4,8 +4,8 @@ export const resourceTypes = [
   "Bill",
   "Customer",
   "Item",
-  "Line",
   "Purchase",
+  "PurchaseLine",
   "Vendor",
 ] as const;
 

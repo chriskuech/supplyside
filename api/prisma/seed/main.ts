@@ -155,12 +155,12 @@ async function main() {
 
   const lineSchema = await schemaService.readMergedSchema(
     customerAccount.id,
-    ResourceType.Line
+    'PurchaseLine'
   )
 
   await resourceService.create({
     accountId: customerAccount.id,
-    type: ResourceType.Line,
+    type: 'PurchaseLine',
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase).fieldId,
@@ -196,7 +196,7 @@ async function main() {
 
   await resourceService.create({
     accountId: customerAccount.id,
-    type: ResourceType.Line,
+    type: 'PurchaseLine',
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase).fieldId,
