@@ -52,7 +52,7 @@ export const createPlaidLinkToken = async (accountId: string) => {
 export const connect = async (accountId: string, token: string) => {
   revalidateTag('Plaid')
 
-  await client().POST('/api/accounts/{accountId}/integrations/plaid/connect', {
+  await client().POST('/api/accounts/{accountId}/integrations/plaid/connect/', {
     params: {
       path: { accountId },
       query: {
@@ -66,7 +66,7 @@ export const disconnect = async (accountId: string) => {
   revalidateTag('Plaid')
 
   await client().POST(
-    '/api/accounts/{accountId}/integrations/plaid/disconnect',
+    '/api/accounts/{accountId}/integrations/plaid/disconnect/',
     {
       params: {
         path: { accountId },
