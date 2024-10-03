@@ -9,8 +9,14 @@ import {
   Value,
   emptyValue,
   findTemplateField,
+  formatInlineAddress,
   selectResourceFieldValue,
 } from '@supplyside/model'
+import {
+  gridDateComparator,
+  gridNumberComparator,
+  gridStringOrNumberComparator,
+} from '@mui/x-data-grid'
 import ContactCard from '../fields/views/ContactCard'
 import UserCard from '../fields/views/UserCard'
 import ResourceFieldView from '../fields/views/ResourceFieldView'
@@ -55,6 +61,89 @@ export const mapSchemaFieldToGridColDef = (
     options.isEditable && !findTemplateField(field.templateId)?.isDerived,
 
   type: 'custom',
+
+  sortComparator: (v1, v2, param1, param2) =>
+    match(field.type)
+      .with('Number', () =>
+        gridNumberComparator(v1?.number, v2?.number, param1, param2),
+      )
+      .with('Address', () =>
+        gridStringOrNumberComparator(
+          v1?.address && formatInlineAddress(v1.address),
+          v2?.address && formatInlineAddress(v2.address),
+          param1,
+          param2,
+        ),
+      )
+      .with('Checkbox', () =>
+        gridStringOrNumberComparator(v1?.boolean, v2?.boolean, param1, param2),
+      )
+      .with('Contact', () =>
+        gridStringOrNumberComparator(
+          v1?.contact?.name,
+          v2?.contact?.name,
+          param1,
+          param2,
+        ),
+      )
+      .with('Date', () =>
+        gridDateComparator(v1?.date, v2?.date, param1, param2),
+      )
+      .with('File', () =>
+        gridStringOrNumberComparator(
+          v1?.file?.name,
+          v2?.file?.name,
+          param1,
+          param2,
+        ),
+      )
+      .with('Files', () =>
+        gridStringOrNumberComparator(
+          v1?.files.length,
+          v2?.files.length,
+          param1,
+          param2,
+        ),
+      )
+      .with('Money', () =>
+        gridStringOrNumberComparator(v1?.number, v2?.number, param1, param2),
+      )
+      .with('Resource', () =>
+        gridStringOrNumberComparator(
+          v1?.resource?.name,
+          v2?.resource?.name,
+          param1,
+          param2,
+        ),
+      )
+      .with(P.union('Text', 'Textarea'), () =>
+        gridStringOrNumberComparator(v1?.string, v2?.string, param1, param2),
+      )
+      .with(P.union('User'), () =>
+        gridStringOrNumberComparator(
+          v1?.user?.name,
+          v2?.user?.name,
+          param1,
+          param2,
+        ),
+      )
+      .with(P.union('Select'), () =>
+        gridStringOrNumberComparator(
+          v1?.option?.name,
+          v2?.option?.name,
+          param1,
+          param2,
+        ),
+      )
+      .with(P.union('MultiSelect'), () =>
+        gridStringOrNumberComparator(
+          v1?.options.length,
+          v2?.options.length,
+          param1,
+          param2,
+        ),
+      )
+      .otherwise(() => 0),
 
   getApplyQuickFilterFn: (query) => {
     assert(typeof query === 'string', 'Query must be a string')
