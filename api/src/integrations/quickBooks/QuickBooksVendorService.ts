@@ -84,10 +84,7 @@ export class QuickBooksVendorService {
       (vendorResponse) => vendorResponse.QueryResponse.Vendor ?? []
     )
 
-    const currentVendors = await this.resourceService.list({
-      accountId,
-      type: 'Vendor',
-    })
+    const currentVendors = await this.resourceService.list(accountId, 'Vendor')
 
     const quickBooksVendorsToAdd = quickBooksVendors.filter(
       (quickBooksVendor) =>

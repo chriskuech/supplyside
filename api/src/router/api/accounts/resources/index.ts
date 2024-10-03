@@ -42,11 +42,13 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
 
-        const resources = await service.list({
-          accountId: req.params.accountId,
-          type: req.query.resourceType,
-          where: req.query.where,
-        })
+        const resources = await service.list(
+          req.params.accountId,
+          req.query.resourceType,
+          {
+            where: req.query.where,
+          }
+        )
 
         res.status(200).send(resources)
       },

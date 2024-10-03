@@ -43,52 +43,12 @@ export type ResourceFieldInput = {
   valueInput: ValueInput;
 };
 
-export type FindResourcesParams = {
-  input: string;
-  exact?: boolean;
-};
-
-export type UpdateTemplateIdParams = {
-  accountId: string;
-  resourceId: string;
-  templateId: string | null;
-};
-
-export type ReadResourcesParams = {
-  accountId: string;
-  type: ResourceType;
-  where?: JsonLogic;
-  orderBy?: OrderBy[];
-};
-
 type FieldUpdate = {
   field: SchemaField;
   valueInput: Value;
 };
 
-type HandleResourceUpdateParams = {
-  accountId: string;
-  schema: Schema;
-  resource: Resource;
-  updatedFields: FieldUpdate[];
-};
-
 const millisecondsPerDay = 24 * 60 * 60 * 1000
-
-type LinkResourceParams = {
-  accountId: string;
-  fromResourceId: string;
-  toResourceId: string;
-  backLinkFieldRef: FieldReference;
-};
-
-type LinkLinesParams = {
-  accountId: string;
-  fromResourceId: string;
-  toResourceId: string;
-  fromResourceField: FieldTemplate;
-  toResourceField: FieldTemplate;
-};
 
 type ResourceCopyParams = {
   accountId: string;
@@ -218,12 +178,17 @@ export class ResourceService {
     return mapResourceModelToEntity(model)
   }
 
-  async list({
-    accountId,
-    type,
-    where,
-    orderBy,
-  }: ReadResourcesParams): Promise<Resource[]> {
+  async list(
+    accountId: string,
+    type: ResourceType,
+    {
+      where,
+      orderBy,
+    }: {
+      where?: JsonLogic;
+      orderBy?: OrderBy[];
+    } = {}
+  ): Promise<Resource[]> {
     const schema = await this.schemaService.readMergedSchema(accountId, type)
     const sql = createSql({ accountId, schema, where, orderBy })
 
@@ -346,31 +311,28 @@ export class ResourceService {
   async updateResourceField(
     accountId: string,
     resourceId: string,
-    {
-      fieldId,
-      valueInput,
-    }: {
+    data: {
       fieldId: string;
       valueInput: ValueInput;
     }
   ) {
     return await this.update(accountId, resourceId, {
-      fields: [{ fieldId, valueInput }],
+      fields: [data],
     })
   }
 
-  async updateTemplateId({
-    accountId,
-    resourceId,
-    templateId,
-  }: UpdateTemplateIdParams) {
+  async updateTemplateId(
+    accountId: string,
+    resourceId: string,
+    { templateId }: { templateId: string | null }
+  ) {
     await this.prisma.resource.update({
       where: { id: resourceId, accountId },
       data: { templateId },
     })
   }
 
-  async checkForDuplicateResource(
+  private async checkForDuplicateResource(
     sf: SchemaField,
     accountId: string,
     resource: Resource,
@@ -407,7 +369,7 @@ export class ResourceService {
   async findResourcesByNameOrPoNumber(
     accountId: string,
     resourceType: ResourceType,
-    { input, exact }: FindResourcesParams
+    { input, exact }: { input: string; exact?: boolean }
   ): Promise<ValueResource[]> {
     const results = await this.prisma.$queryRaw`
     WITH "View" AS (
@@ -473,7 +435,7 @@ export class ResourceService {
     })
   }
 
-  async recalculateSubtotalCost(
+  private async recalculateSubtotalCost(
     accountId: string,
     resourceType: ResourceType,
     resourceId: string
@@ -484,9 +446,7 @@ export class ResourceService {
       true
     )
 
-    const lines = await this.list({
-      accountId,
-      type: 'PurchaseLine',
+    const lines = await this.list(accountId, 'PurchaseLine', {
       where: {
         '==': [{ var: resourceType }, resourceId],
       },
@@ -508,12 +468,17 @@ export class ResourceService {
     })
   }
 
-  async handleResourceUpdate({
+  private async handleResourceUpdate({
     accountId,
     schema,
     resource,
     updatedFields,
-  }: HandleResourceUpdateParams) {
+  }: {
+    accountId: string;
+    schema: Schema;
+    resource: Resource;
+    updatedFields: FieldUpdate[];
+  }) {
     // When the Line."Unit Cost" or Line."Quantity" or a new item is selected field is updated,
     // Then update Line."Total Cost"
     if (
@@ -666,7 +631,12 @@ export class ResourceService {
     accountId,
     fromResourceId,
     toResourceId,
-  }: LinkResourceParams & { backLinkFieldRef: FieldReference }) {
+  }: {
+    accountId: string;
+    fromResourceId: string;
+    toResourceId: string;
+    backLinkFieldRef: FieldReference;
+  } & { backLinkFieldRef: FieldReference }) {
     const [fromResource, toResource] = await Promise.all([
       this.read(accountId, fromResourceId),
       this.read(accountId, toResourceId),
@@ -698,15 +668,19 @@ export class ResourceService {
     toResourceId,
     fromResourceField,
     toResourceField,
-  }: LinkLinesParams) {
+  }: {
+    accountId: string;
+    fromResourceId: string;
+    toResourceId: string;
+    fromResourceField: FieldTemplate;
+    toResourceField: FieldTemplate;
+  }) {
     const lineSchema = await this.schemaService.readMergedSchema(
       accountId,
       'PurchaseLine'
     )
 
-    const lines = await this.list({
-      accountId,
-      type: 'PurchaseLine',
+    const lines = await this.list(accountId, 'PurchaseLine', {
       where: {
         '==': [{ var: fromResourceField.name }, fromResourceId],
       },
@@ -833,7 +807,7 @@ export class ResourceService {
     return destination
   }
 
-  async cloneCosts({
+  private async cloneCosts({
     accountId,
     fromResourceId,
     toResourceId,
@@ -859,7 +833,7 @@ export class ResourceService {
     })
   }
 
-  async cloneLines({
+  private async cloneLines({
     accountId,
     fromResourceId,
     toResourceId,
@@ -872,9 +846,7 @@ export class ResourceService {
 
     const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
 
-    const lines = await this.list({
-      accountId,
-      type: 'PurchaseLine',
+    const lines = await this.list(accountId, 'PurchaseLine', {
       where: {
         '==': [{ var: backLinkField.name }, fromResourceId],
       },

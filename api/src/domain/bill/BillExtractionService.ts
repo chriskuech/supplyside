@@ -57,10 +57,7 @@ export class BillExtractionService {
     const [billSchema, billResource, vendors] = await Promise.all([
       this.schemaService.readMergedSchema(accountId, 'Bill'),
       this.resourceService.read(accountId, resourceId),
-      this.resourceService.list({
-        accountId,
-        type: 'Vendor',
-      }),
+      this.resourceService.list(accountId, 'Vendor'),
     ])
 
     const billFiles =
@@ -86,9 +83,7 @@ export class BillExtractionService {
       .safeParse(poNumber)?.data
     const [purchase, ...purchases] =
       poNumberAsNumber && vendorId
-        ? await this.resourceService.list({
-            accountId,
-            type: 'Purchase',
+        ? await this.resourceService.list(accountId, 'Purchase', {
             where: {
               and: [
                 {
