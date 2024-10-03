@@ -249,6 +249,12 @@ const _fields = {
     type: "Textarea",
     description: "Brief, identifiable description of the item",
   },
+  itemNumber: {
+    templateId: "9e0115e1-e10c-4e21-a399-47ad9bfc1a6f",
+    name: "Item Number",
+    type: "Text",
+    description: "Unique identifier for a item",
+  },
   itemizedCosts: {
     templateId: "25a46eb4-2eca-40a8-9596-cda2a524facd",
     name: "Itemized Costs",
@@ -298,6 +304,12 @@ const _fields = {
     name: "Need Date",
     type: "Date",
     description: "Represents the latest delivery date",
+  },
+  otherNotes: {
+    templateId: "ca79749f-b8f0-4a76-b4bf-080fae2d229b",
+    name: "Other Notes",
+    type: "Textarea",
+    description: "Other notes included in the purchase order header",
   },
   part: {
     templateId: "fc0189d7-1535-4c3e-8561-d6427be78de8",
