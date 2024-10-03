@@ -143,7 +143,7 @@ export const mapSchemaFieldToGridColDef = (
           param2,
         ),
       )
-      .otherwise(() => 0),
+      .exhaustive(),
 
   getApplyQuickFilterFn: (query) => {
     assert(typeof query === 'string', 'Query must be a string')
