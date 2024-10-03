@@ -49,7 +49,7 @@ export async function GET(
       'Content-Type': encoding
         ? `${contentType}; charset=${encoding}`
         : contentType,
-      ...(query.preview
+      ...(!query.preview
         ? { 'Content-Disposition': `attachment; filename=${filename}` }
         : undefined),
     },

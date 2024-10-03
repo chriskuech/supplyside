@@ -2,19 +2,21 @@ import 'server-only'
 import { client } from '.'
 
 export const createBlob = async (accountId: string, file: File) => {
-  const buffer = Buffer.from(await file.arrayBuffer())
+  const arrayBuffer = await file.arrayBuffer()
 
   const { data: blob } = await client().POST(
     '/api/accounts/{accountId}/blobs/',
     {
+      headers: {
+        'Content-Type': file.type,
+      },
       params: {
         path: { accountId },
-        header: {
-          'content-type': file.type,
-        },
       },
-      // circumvent bug in openapi-fetch
-      body: buffer satisfies Buffer as unknown as undefined,
+
+      // hacks for compatibility with blobs
+      body: arrayBuffer as unknown as undefined,
+      bodySerializer: (e) => e,
     },
   )
 

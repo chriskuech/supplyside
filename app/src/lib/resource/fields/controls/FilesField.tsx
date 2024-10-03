@@ -68,15 +68,18 @@ export default function FilesField({ files, isReadOnly, onChange }: Props) {
           style={{ display: 'none' }}
           type="file"
           ref={fileInputRef}
-          onChange={({ target: { files } }) => {
-            if (!files?.length) return
+          onChange={({ target: { files: inputFiles } }) => {
+            if (!inputFiles?.length) return
 
             const formData = new FormData()
-            for (const file of files) {
+            for (const file of inputFiles) {
               formData.append('files', file)
             }
 
-            uploadFiles(formData).then((files) => files && onChange?.(files))
+            uploadFiles(formData).then(
+              (addedFiles) =>
+                addedFiles && onChange?.([...files, ...addedFiles]),
+            )
           }}
           multiple
         />

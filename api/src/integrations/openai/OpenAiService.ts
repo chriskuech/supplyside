@@ -5,6 +5,7 @@ import { CompletionPartsService } from './CompletionPartsService'
 import { File } from '@supplyside/model'
 import { ZodSchema } from 'zod'
 import { P, match } from 'ts-pattern'
+import { ChatCompletionContentPart } from 'openai/resources/index.mjs'
 
 @injectable()
 export class OpenAiService {
@@ -30,7 +31,7 @@ export class OpenAiService {
       await Promise.all(
         params.files.map((file) =>
           match(file)
-            .with(P.string, (text) => ({ type: 'text', text } as const))
+            .with(P.string, (text) => ({ type: 'text', text } satisfies ChatCompletionContentPart))
             .otherwise((file) =>
               this.completionPartsService.mapFileToCompletionParts(file)
             )

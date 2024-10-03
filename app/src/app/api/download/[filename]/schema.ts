@@ -1,7 +1,9 @@
 import { z } from 'zod'
 
 export const querySchema = z.intersection(
-  z.object({ preview: z.boolean().optional() }),
+  z.object({
+    preview: z.literal('true').optional(),
+  }),
   z.discriminatedUnion('type', [
     z.object({
       type: z.literal('profile-pic'),
