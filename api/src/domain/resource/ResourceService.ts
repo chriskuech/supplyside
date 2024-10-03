@@ -627,42 +627,7 @@ export class ResourceService {
     // }
   }
 
-  async linkResource({
-    accountId,
-    fromResourceId,
-    toResourceId,
-  }: {
-    accountId: string;
-    fromResourceId: string;
-    toResourceId: string;
-    backLinkFieldRef: FieldReference;
-  } & { backLinkFieldRef: FieldReference }) {
-    const [fromResource, toResource] = await Promise.all([
-      this.read(accountId, fromResourceId),
-      this.read(accountId, toResourceId),
-    ])
-
-    await this.copyFields(accountId, toResourceId, {
-      fromResourceId,
-    })
-
-    if (fromResource.type === 'Purchase' && toResource.type === 'Bill') {
-      await this.cloneCosts({
-        accountId,
-        fromResourceId,
-        toResourceId,
-      })
-      await this.linkLines({
-        accountId,
-        fromResourceId,
-        toResourceId,
-        fromResourceField: fields.purchase,
-        toResourceField: fields.bill,
-      })
-    }
-  }
-
-  private async linkLines({
+  async linkLines({
     accountId,
     fromResourceId,
     toResourceId,
@@ -807,7 +772,8 @@ export class ResourceService {
     return destination
   }
 
-  private async cloneCosts({
+  async cloneCosts(
+    {
     accountId,
     fromResourceId,
     toResourceId,

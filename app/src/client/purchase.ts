@@ -3,7 +3,7 @@ import { revalidateTag } from 'next/cache'
 import { client } from '.'
 
 export const createPo = async (accountId: string, resourceId: string) => {
-  revalidateTag('Resource')
+  revalidateTag('Resources')
 
   await client().PUT('/api/accounts/{accountId}/purchases/{resourceId}/po/', {
     params: {
@@ -13,7 +13,7 @@ export const createPo = async (accountId: string, resourceId: string) => {
 }
 
 export const sendPo = async (accountId: string, resourceId: string) => {
-  revalidateTag('Resource')
+  revalidateTag('Resources')
 
   await client().POST(
     '/api/accounts/{accountId}/purchases/{resourceId}/po/send/',

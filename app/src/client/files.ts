@@ -21,7 +21,7 @@ export const createFile = async (
     blobId: string
   },
 ) => {
-  revalidateTag('Resource')
+  revalidateTag('Resources')
 
   const { data: file } = await client().POST(
     '/api/accounts/{accountId}/files/',
