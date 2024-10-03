@@ -1,9 +1,11 @@
 import { Alert, Box, Container, Stack, Typography } from '@mui/material'
 import { ReactNode } from 'react'
 import { ResourceType } from '@supplyside/model'
+import { z } from 'zod'
+import { GridFilterModel } from '@mui/x-data-grid'
 import CreateResourceButton from './CreateResourceButton'
-import { ResourceTable } from './table'
 import { ResourceDrawer } from './ResourceDrawer'
+import { ListPageResourceTable } from './ListPageResourceTable'
 import { requireSession } from '@/session'
 import { readSchema } from '@/client/schema'
 import { readResources } from '@/client/resource'
@@ -26,6 +28,14 @@ export default async function ListPage({
     readSchema(accountId, resourceType),
     readResources(accountId, resourceType),
   ])
+
+  const initialGridFilterModel = z
+    .string()
+    .transform(
+      (data) => JSON.parse(decodeURIComponent(data)) as GridFilterModel,
+    )
+    .optional()
+    .safeParse(searchParams.filter).data
 
   if (!schema || !resources)
     return (
@@ -62,10 +72,11 @@ export default async function ListPage({
               </Box>
             ))}
           </Stack>
-          <ResourceTable
+          <ListPageResourceTable
             tableKey={tableKey}
             schema={schema}
             resources={resources}
+            initialGridFilterModel={initialGridFilterModel}
           />
         </Stack>
       </Container>
