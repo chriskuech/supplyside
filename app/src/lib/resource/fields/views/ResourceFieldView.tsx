@@ -7,10 +7,18 @@ type Props = {
 }
 
 export default function ResourceFieldView({ resource }: Props) {
+  const shouldRedirectToDetailPage = ['Bill', 'Job', 'Purchase'].includes(
+    resource.type,
+  )
+
   return (
     <Link
       component={NextLink}
-      href={`/${resource.type.toLowerCase()}s/${resource.key}`}
+      href={
+        shouldRedirectToDetailPage
+          ? `/${resource.type.toLowerCase()}s/${resource.key}`
+          : `${window.location.pathname}?drawerResourceId=${resource.id}`
+      }
     >
       {resource.name ?? '-'}
     </Link>
