@@ -3,6 +3,7 @@
 import {
   DataGridPro,
   DataGridProProps,
+  GridFilterModel,
   GridToolbarColumnsButton,
   GridToolbarContainer,
   GridToolbarFilterButton,
@@ -27,6 +28,8 @@ type Props = {
   isEditable?: boolean
   indexed?: boolean
   initialQuery?: string
+  initialGridFilterModel?: GridFilterModel
+  saveGridFilterModel?: (model: GridFilterModel) => void
 } & Partial<DataGridProProps<Row>>
 
 export default function ResourceTable({
@@ -36,6 +39,8 @@ export default function ResourceTable({
   isEditable = false,
   indexed,
   initialQuery,
+  initialGridFilterModel,
+  saveGridFilterModel,
   ...props
 }: Props) {
   const { apiRef, initialState, saveStateToLocalstorage } =
@@ -112,7 +117,8 @@ export default function ResourceTable({
         filter: {
           filterModel: {
             items: [],
-            quickFilterValues: parseFilter(initialQuery ?? ''),
+            ...initialGridFilterModel,
+            quickFilterValues: parseQuickFilter(initialQuery ?? ''),
           },
         },
         preferencePanel: { open: false },
@@ -120,6 +126,7 @@ export default function ResourceTable({
       onColumnVisibilityModelChange={saveStateToLocalstorage}
       onColumnWidthChange={saveStateToLocalstorage}
       onColumnOrderChange={saveStateToLocalstorage}
+      onFilterModelChange={saveGridFilterModel}
       onSortModelChange={saveStateToLocalstorage}
       slots={{
         toolbar: () => (
@@ -131,7 +138,7 @@ export default function ResourceTable({
               slotProps={{ button: { variant: 'text' } }}
             />
             <GridToolbarQuickFilter
-              quickFilterParser={parseFilter}
+              quickFilterParser={parseQuickFilter}
               quickFilterFormatter={(quickFilterValues) =>
                 z
                   .array(z.string().nullable().optional())
@@ -150,7 +157,7 @@ export default function ResourceTable({
   )
 }
 
-const parseFilter = (searchInput: string) =>
+const parseQuickFilter = (searchInput: string) =>
   searchInput
     .split(' ')
     .map((value) => value.trim())
