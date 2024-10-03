@@ -1,3 +1,5 @@
+'use client'
+
 import { Link } from '@mui/material'
 import { ValueResource } from '@supplyside/model'
 import NextLink from 'next/link'
