@@ -21,6 +21,7 @@ export default function ResourceFieldView({ resource }: Props) {
           ? `/${resource.type.toLowerCase()}s/${resource.key}`
           : `${window.location.pathname}?drawerResourceId=${resource.id}`
       }
+      scroll={false}
     >
       {resource.name ?? '-'}
     </Link>
