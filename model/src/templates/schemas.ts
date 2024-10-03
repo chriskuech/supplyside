@@ -135,8 +135,9 @@ export const schemas: SchemaTemplate[] = [
         ],
       },
       {
-        name: "Payment Info",
+        name: "Billing Info",
         fields: [
+          fields.billingAddress,
           fields.currency,
           fields.paymentTerms,
           fields.paymentMethod,
@@ -150,7 +151,6 @@ export const schemas: SchemaTemplate[] = [
           fields.shippingMethod,
           fields.shippingAccountNumber,
           fields.incoterms,
-          fields.shippingNotes,
         ],
       },
       {
@@ -180,7 +180,12 @@ export const schemas: SchemaTemplate[] = [
     sections: [
       {
         name: "Summary",
-        fields: [fields.name, fields.vendorDescription, fields.primaryAddress],
+        fields: [
+          fields.name,
+          fields.vendorDescription,
+          fields.primaryAddress,
+          fields.customerReferenceNumber,
+        ],
       },
       {
         name: "Contacts",
