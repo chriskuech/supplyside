@@ -13,10 +13,12 @@ import { mountFields } from './fields'
 import { AccountService } from '@supplyside/api/domain/account/AccountService'
 import { mountFiles } from './files'
 import { mountPurchases } from './purchases'
+import { mountBills } from './bills'
 
 export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
   app
     .withTypeProvider<ZodTypeProvider>()
+    .register(mountBills, { prefix: '/:accountId/bills' })
     .register(mountBlobs, { prefix: '/:accountId/blobs' })
     .register(mountFields, { prefix: '/:accountId/fields' })
     .register(mountFiles, { prefix: '/:accountId/files' })

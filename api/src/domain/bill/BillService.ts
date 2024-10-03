@@ -2,7 +2,6 @@ import { inject, injectable } from 'inversify'
 import { container } from '@supplyside/api/di'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import SmtpService from '@supplyside/api/integrations/SmtpService'
 import { Resource, fields, selectSchemaFieldUnsafe } from '@supplyside/model'
 import assert from 'assert'
 import { Message } from 'postmark'
@@ -28,7 +27,10 @@ const createBill = async (params: Params): Promise<Resource> => {
   const resourceService = container.resolve(ResourceService)
   const schemaService = container.resolve(SchemaService)
 
-  const billSchema = await schemaService.readMergedSchema(params.accountId, 'Bill')
+  const billSchema = await schemaService.readMergedSchema(
+    params.accountId,
+    'Bill'
+  )
 
   const fileIds = await Promise.all(
     params.files.map(async (file) => {
@@ -48,10 +50,7 @@ const createBill = async (params: Params): Promise<Resource> => {
 
   console.log('Creating Bill', fileIds)
 
-  const bill = await resourceService.create(
-    params.accountId,
-    'Bill',
-    {
+  const bill = await resourceService.create(params.accountId, 'Bill', {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(billSchema, fields.billFiles).fieldId,
@@ -67,8 +66,32 @@ const createBill = async (params: Params): Promise<Resource> => {
 export class BillService {
   constructor(
     @inject(AccountService) private readonly accountService: AccountService,
-    @inject(SmtpService) private readonly smtpService: SmtpService
+    @inject(ResourceService) private readonly resourceService: ResourceService
   ) {}
+
+  async linkPurchase(
+    accountId: string,
+    resourceId: string,
+    { purchaseId }: { purchaseId: string }
+  ) {
+    await this.resourceService.copyFields(accountId, resourceId, {
+      fromResourceId: purchaseId,
+    })
+
+    await this.resourceService.cloneCosts({
+      accountId,
+      fromResourceId: purchaseId,
+      toResourceId: resourceId,
+    })
+
+    await this.resourceService.linkLines({
+      accountId,
+      fromResourceId: purchaseId,
+      toResourceId: resourceId,
+      fromResourceField: fields.purchase,
+      toResourceField: fields.bill,
+    })
+  }
 
   async handleMessage(message: Message): Promise<void> {
     // for some reason this is (sometimes?) wrapped in quotes

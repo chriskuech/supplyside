@@ -26,6 +26,7 @@ import useSchema from '@/lib/schema/useSchema'
 import { useConfirmation } from '@/lib/confirmation'
 import { useAsyncCallback } from '@/hooks/useAsyncCallback'
 import { updateResourceField } from '@/actions/resource'
+import { linkPurchase } from '@/actions/bills'
 
 type Props = {
   schema: Schema
@@ -34,24 +35,18 @@ type Props = {
 
 export default function MatchControl({ schema, resource }: Props) {
   const { open, isOpen, close } = useDisclosure()
-  const [{ isLoading }, callback] = useAsyncCallback(
-    async (resourceId: string) =>
-      updateResourceField(resource.id, {
-        fieldId: selectSchemaFieldUnsafe(schema, fields.purchase).fieldId,
-        valueInput: { resourceId },
-      }).then(() => close()),
+  const [{ isLoading }, callback] = useAsyncCallback((purchaseId: string) =>
+    linkPurchase(resource.id, { purchaseId }).then(close),
   )
   const confirm = useConfirmation()
+  const purchaseSchema = useSchema('Purchase')
+  const unlinkedPurchases = useResources('Purchase', undefined)
 
   const purchase = selectResourceFieldValue(resource, fields.purchase)?.resource
 
   const poNumber = selectResourceFieldValue(resource, fields.poNumber)?.string
   const vendorName = selectResourceFieldValue(resource, fields.vendor)?.resource
     ?.name
-
-  const purchaseSchema = useSchema('Purchase')
-
-  const unlinkedPurchases = useResources('Purchase', undefined)
 
   return (
     <>
