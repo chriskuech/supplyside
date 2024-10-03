@@ -6,11 +6,9 @@ import { z } from 'zod'
 import { BlobSchema } from '@supplyside/api/domain/blob/entity'
 
 export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
-  app.addContentTypeParser('*', { parseAs: 'buffer' }, (req, body, done) => {
-    return Buffer.isBuffer(body)
-      ? done(null, body)
-      : done(new Error('Invalid body'))
-  })
+  app.addContentTypeParser('*', { parseAs: 'buffer' }, (req, body, done) =>
+    Buffer.isBuffer(body) ? done(null, body) : done(new Error('Invalid body'))
+  )
 
   return app
     .withTypeProvider<ZodTypeProvider>()
@@ -19,31 +17,31 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
       url: '/',
       schema: {
         consumes: ['*'],
-        headers: z.object({ 'content-type': z.string() }),
         params: z.object({ accountId: z.string().uuid() }),
         body: z.any(),
-        response: { 200: BlobSchema, 400: z.string() },
+        response: { 200: BlobSchema, 400: z.any() },
       },
       handler: async (req, res) => {
         const service = container.resolve(BlobService)
 
         const contentType = req.headers['content-type']
         if (!contentType || !/^\w+\/\w+$/.test(contentType)) {
-          res.status(400).send(`Missing content-type header "${contentType}"`)
+          res.status(400).send(`Missing Content-Type header "${contentType}"`)
           return
         }
 
-        if (!Buffer.isBuffer(req.body)) {
+        const buffer = req.body
+        if (!Buffer.isBuffer(buffer)) {
           res.status(400).send('Invalid body')
           return
         }
 
         const blob = await service.createBlob(req.params.accountId, {
-          buffer: req.body,
+          buffer: buffer,
           contentType,
         })
 
-        res.send(blob)
+        return blob
       },
     })
     .route({

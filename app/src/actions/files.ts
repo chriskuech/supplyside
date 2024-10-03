@@ -1,27 +1,21 @@
 'use server'
 
 import { isTruthy } from 'remeda'
+import { z } from 'zod'
+import { File as FileModel } from '@supplyside/model'
 import { withAccountId } from '@/authz'
 import { createBlob } from '@/client/blob'
 import { createFile } from '@/client/files'
 
 export const uploadFile = withAccountId(
-  async (accountId, formData: FormData) => {
-    const fileFormData = formData.get('file')
+  async (accountId, formData: FormData): Promise<FileModel | undefined> => {
+    const jsFile = z.instanceof(File).parse(formData.get('file'))
 
-    if (
-      !fileFormData ||
-      typeof fileFormData === 'string' ||
-      fileFormData.size === 0
-    )
-      return
-
-    const blob = await createBlob(accountId, fileFormData)
-
+    const blob = await createBlob(accountId, jsFile)
     if (!blob) return
 
     const file = await createFile(accountId, {
-      name: fileFormData.name,
+      name: jsFile.name,
       blobId: blob.id,
     })
 
@@ -30,32 +24,22 @@ export const uploadFile = withAccountId(
 )
 
 export const uploadFiles = withAccountId(
-  async (accountId, formData: FormData) => {
-    const formDataFiles = formData.getAll('files')
-
-    if (formDataFiles.length === 0) return
-
-    const results = await Promise.all(
-      formDataFiles
-        .filter((file): file is File => typeof file !== 'string')
-        .map(async (file) => {
-          const blob = await createBlob(accountId, file)
-
-          if (!blob) return
-
-          return { name: file.name, blobId: blob.id }
-        }),
-    )
-
-    // TODO: handle error
-    if (results.some((results) => !results)) return
-
-    const fileParams = results.filter(isTruthy)
-
-    if (!fileParams.length) return
+  async (accountId, formData: FormData): Promise<FileModel[] | undefined> => {
+    const jsFiles = z.array(z.instanceof(File)).parse(formData.getAll('files'))
 
     const files = await Promise.all(
-      fileParams.map((file) => createFile(accountId, file)),
+      jsFiles.map(async (jsFile) => {
+        const blob = await createBlob(accountId, jsFile)
+        if (!blob) return
+
+        const file = await createFile(accountId, {
+          name: jsFile.name,
+          blobId: blob.id,
+        })
+        if (!file) return
+
+        return file
+      }),
     )
 
     return files.filter(isTruthy)

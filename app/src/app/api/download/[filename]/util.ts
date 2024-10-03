@@ -4,8 +4,8 @@ import { File } from '@supplyside/model'
 import { Query } from './schema'
 import { Account } from '@/client/account'
 
-const getDownloadPath = (fileName: string, query: Query) =>
-  `/api/download/${fileName}?${new URLSearchParams(mapValues(query, encodeURIComponent)).toString()}`
+const getDownloadPath = (fileName: string, { preview, ...query }: Query) =>
+  `/api/download/${fileName}?${preview ? 'preview=true&' : ''}${new URLSearchParams(mapValues(query, encodeURIComponent)).toString()}`
 
 export const download = (file: File | undefined) =>
   window.open(getFilePath(file))
@@ -19,7 +19,7 @@ const getFilePath = (
 ): string | undefined =>
   file &&
   getDownloadPath(file.name, {
-    preview,
+    preview: preview ? 'true' : undefined,
     type: 'file',
     fileId: file.id,
   })
