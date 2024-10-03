@@ -68,7 +68,13 @@ export const schemas: SchemaTemplate[] = [
     sections: [
       {
         name: "Summary",
-        fields: [fields.name, fields.itemDescription, fields.unitOfMeasure],
+        fields: [
+          fields.name,
+          fields.itemDescription,
+          fields.unitOfMeasure,
+          fields.itemNumber,
+          fields.otherNotes,
+        ],
       },
     ],
   },
@@ -162,6 +168,8 @@ export const schemas: SchemaTemplate[] = [
       fields.unitCost,
       fields.totalCost,
       fields.needDate,
+      fields.itemNumber,
+      fields.otherNotes,
       fields.purchase,
       fields.bill,
     ],
