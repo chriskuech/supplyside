@@ -159,7 +159,6 @@ export class PoRenderingService {
         order,
         fields.shippingAccountNumber
       ),
-      shippingNotes: renderTemplateField(order, fields.shippingNotes),
       poRecipientName: renderTemplateField(order, fields.poRecipient),
       vendorPrimaryAddress: renderAddressViewModel(
         vendor,

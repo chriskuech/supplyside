@@ -15,7 +15,6 @@ export type PurchaseViewModel = {
   shippingMethod: string | null
   incoterms: string | null
   shippingAccountNumber: string | null
-  shippingNotes: string | null
   lines: LineViewModel[]
   issuedDate: string | null
   logoBlobDataUrl: string | null
