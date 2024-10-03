@@ -176,9 +176,10 @@ export class BillExtractionService {
 
     if (!updatedFields.length) return
 
-    await this.resourceService.update({
-      resourceId,
+    await this.resourceService.update(
       accountId,
+      resourceId,
+      {
       fields: updatedFields,
     })
   }

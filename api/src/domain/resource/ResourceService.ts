@@ -38,35 +38,14 @@ import { resourceInclude } from './model'
 import { DuplicateResourceError } from './errors'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 
-export type ReadResourceParams = {
-  accountId: string;
-  type?: ResourceType;
-  key?: number;
-  id?: string;
-} & ({ type: ResourceType; key: number } | { id: string });
-
 export type ResourceFieldInput = {
   fieldId: string;
   valueInput: ValueInput;
 };
 
-export type CreateResourceParams = {
-  accountId: string;
-  type: ResourceType;
-  templateId?: string;
-  fields?: ResourceFieldInput[];
-};
-
 export type FindResourcesParams = {
-  accountId: string;
-  resourceType: ResourceType;
   input: string;
   exact?: boolean;
-};
-
-export type FindByTemplateIdParams = {
-  accountId: string;
-  templateId: string;
 };
 
 export type UpdateTemplateIdParams = {
@@ -80,17 +59,6 @@ export type ReadResourcesParams = {
   type: ResourceType;
   where?: JsonLogic;
   orderBy?: OrderBy[];
-};
-
-export type UpdateResourceParams = {
-  accountId: string;
-  resourceId: string;
-  fields: ResourceFieldInput[];
-};
-
-export type DeleteResourceParams = {
-  accountId: string;
-  id: string;
 };
 
 type FieldUpdate = {
@@ -162,7 +130,7 @@ export class ResourceService {
     return mapResourceModelToEntity(model)
   }
 
-  async readByTemplateId({ accountId, templateId }: FindByTemplateIdParams) {
+  async readByTemplateId(accountId: string, templateId: string) {
     const resource = await this.prisma.resource.findFirst({
       where: { accountId, templateId },
       include: resourceInclude,
@@ -199,12 +167,17 @@ export class ResourceService {
     return models.map(mapResourceModelToEntity)
   }
 
-  async create({
-    accountId,
-    type,
-    templateId,
-    fields: inputResourceFields,
-  }: CreateResourceParams): Promise<Resource> {
+  async create(
+    accountId: string,
+    type: ResourceType,
+    {
+      templateId,
+      fields: inputResourceFields,
+    }: {
+      templateId?: string;
+      fields?: ResourceFieldInput[];
+    }
+  ): Promise<Resource> {
     const schema = await this.schemaService.readMergedSchema(accountId, type)
 
     const {
@@ -298,7 +271,11 @@ export class ResourceService {
     return models.map(mapResourceModelToEntity)
   }
 
-  async update({ accountId, resourceId, fields }: UpdateResourceParams) {
+  async update(
+    accountId: string,
+    resourceId: string,
+    { fields }: { fields: ResourceFieldInput[] }
+  ) {
     const resource = await this.read(accountId, resourceId)
     const schema = await this.schemaService.readMergedSchema(
       accountId,
@@ -371,9 +348,9 @@ export class ResourceService {
     return await this.read(accountId, resourceId)
   }
 
-  async delete({ accountId, id }: DeleteResourceParams): Promise<void> {
+  async delete(accountId: string, resourceId: string): Promise<void> {
     const model = await this.prisma.resource.delete({
-      where: { id, accountId },
+      where: { id: resourceId, accountId },
       include: resourceInclude,
     })
 
@@ -393,20 +370,18 @@ export class ResourceService {
     }
   }
 
-  async updateResourceField({
-    accountId,
-    resourceId,
-    fieldId,
-    valueInput,
-  }: {
-    accountId: string;
-    resourceId: string;
-    fieldId: string;
-    valueInput: ValueInput;
-  }) {
-    return await this.update({
-      accountId,
-      resourceId,
+  async updateResourceField(
+    accountId: string,
+    resourceId: string,
+    {
+      fieldId,
+      valueInput,
+    }: {
+      fieldId: string;
+      valueInput: ValueInput;
+    }
+  ) {
+    return await this.update(accountId, resourceId, {
       fields: [{ fieldId, valueInput }],
     })
   }
@@ -456,12 +431,11 @@ export class ResourceService {
     }
   }
 
-  async findResourcesByNameOrPoNumber({
-    accountId,
-    resourceType,
-    input,
-    exact,
-  }: FindResourcesParams): Promise<ValueResource[]> {
+  async findResourcesByNameOrPoNumber(
+    accountId: string,
+    resourceType: ResourceType,
+    { input, exact }: FindResourcesParams
+  ): Promise<ValueResource[]> {
     const results = await this.prisma.$queryRaw`
     WITH "View" AS (
       SELECT
@@ -512,9 +486,7 @@ export class ResourceService {
     const subtotal =
       selectResourceFieldValue(resource, fields.subtotalCost)?.number ?? 0
 
-    await this.updateResourceField({
-      accountId,
-      resourceId,
+    await this.updateResourceField(accountId, resourceId, {
       fieldId: selectSchemaFieldUnsafe(schema, fields.itemizedCosts).fieldId,
       valueInput: {
         number: pipe(
@@ -555,10 +527,8 @@ export class ResourceService {
       sum()
     )
 
-    await this.updateResourceField({
-      accountId,
+    await this.updateResourceField(accountId, resourceId, {
       fieldId: selectSchemaFieldUnsafe(schema, fields.subtotalCost)?.fieldId,
-      resourceId,
       valueInput: {
         number: Number(subTotal), // TODO: this is ignoring that subTotal is bigint
       },
@@ -591,10 +561,8 @@ export class ResourceService {
       const quantity =
         selectResourceFieldValue(resource, fields.quantity)?.number ?? 0
 
-      await this.updateResourceField({
-        accountId,
+      await this.updateResourceField(accountId, resource.id, {
         fieldId: totalCostFieldId,
-        resourceId: resource.id,
         valueInput: {
           number: unitCost * quantity,
         },
@@ -654,10 +622,8 @@ export class ResourceService {
       const subtotalCost =
         selectResourceFieldValue(resource, fields.subtotalCost)?.number ?? 0
 
-      await this.updateResourceField({
-        accountId,
+      await this.updateResourceField(accountId, resource.id, {
         fieldId: selectSchemaFieldUnsafe(schema, fields.totalCost).fieldId,
-        resourceId: resource.id,
         valueInput: {
           number: itemizedCosts + subtotalCost,
         },
@@ -698,11 +664,9 @@ export class ResourceService {
       )?.number
 
       if (!isNullish(invoiceDate) && !isNullish(paymentTerms)) {
-        await this.updateResourceField({
-          accountId,
+        await this.updateResourceField(accountId, resource.id, {
           fieldId: selectSchemaFieldUnsafe(schema, fields.paymentDueDate)
             .fieldId,
-          resourceId: resource.id,
           valueInput: {
             date: new Date(
               new Date(invoiceDate).getTime() +
@@ -762,7 +726,10 @@ export class ResourceService {
     fromResourceField,
     toResourceField,
   }: LinkLinesParams) {
-    const lineSchema = await this.schemaService.readMergedSchema(accountId, 'PurchaseLine')
+    const lineSchema = await this.schemaService.readMergedSchema(
+      accountId,
+      'PurchaseLine'
+    )
 
     const lines = await this.list({
       accountId,
@@ -774,9 +741,7 @@ export class ResourceService {
 
     await Promise.all(
       lines.map((line) =>
-        this.updateResourceField({
-          accountId,
-          resourceId: line.id,
+        this.updateResourceField(accountId, line.id, {
           fieldId: selectSchemaFieldUnsafe(lineSchema, toResourceField).fieldId,
           valueInput: { resourceId: toResourceId },
         })
@@ -804,9 +769,7 @@ export class ResourceService {
             (o) => o.templateId === billStatusOptions.draft.templateId
           ) ?? fail('Draft status not found')
 
-        const destination = await this.create({
-          accountId,
-          type: source.type,
+        const destination = await this.create(accountId, source.type, {
           fields: [
             ...source.fields
               .filter((rf) => rf.fieldId !== billStatusField.fieldId)
@@ -853,9 +816,7 @@ export class ResourceService {
             (o) => o.templateId === purchaseStatusOptions.draft.templateId
           ) ?? fail('Draft status not found')
 
-        const destination = await this.create({
-          accountId,
-          type: source.type,
+        const destination = await this.create(accountId, source.type, {
           fields: [
             ...source.fields
               .filter((rf) => rf.fieldId !== orderStatusField.fieldId)
@@ -888,9 +849,7 @@ export class ResourceService {
       })
       .otherwise(
         async () =>
-          await this.create({
-            accountId,
-            type: source.type,
+          await this.create(accountId, source.type, {
             fields: source.fields.map(({ fieldId, fieldType, value }) => ({
               fieldId,
               valueInput: mapValueToValueInput(fieldType, value),
@@ -933,7 +892,10 @@ export class ResourceService {
     toResourceId,
     backLinkFieldRef,
   }: ResourceCopyParams & { backLinkFieldRef: FieldReference }) {
-    const lineSchema = await this.schemaService.readMergedSchema(accountId, 'PurchaseLine')
+    const lineSchema = await this.schemaService.readMergedSchema(
+      accountId,
+      'PurchaseLine'
+    )
 
     const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
 
@@ -947,9 +909,7 @@ export class ResourceService {
 
     // `createResource` is not (currently) parallelizable
     for (const line of lines) {
-      await this.create({
-        accountId,
-        type: 'PurchaseLine',
+      await this.create(accountId, 'PurchaseLine', {
         fields: [
           ...line.fields
             .filter(({ fieldId }) => fieldId !== backLinkField.fieldId)
@@ -992,9 +952,7 @@ export class ResourceService {
       .filter(({ sf }) => selectSchemaField(toSchema, sf))
       .filter(({ tf }) => !tf?.isDerived)
 
-    const resource = await this.update({
-      accountId,
-      resourceId,
+    const resource = await this.update(accountId, resourceId, {
       fields: fieldsToUpdate.map(({ rf, sf }) => ({
         fieldId: sf.fieldId,
         valueInput: mapValueToValueInput(sf.type, rf.value),

@@ -69,12 +69,14 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
 
-        const resources = await service.findResourcesByNameOrPoNumber({
-          accountId: req.params.accountId,
-          resourceType: req.query.resourceType,
-          input: req.query.input,
-          exact: req.query.exact,
-        })
+        const resources = await service.findResourcesByNameOrPoNumber(
+          req.params.accountId,
+          req.query.resourceType,
+          {
+            input: req.query.input,
+            exact: req.query.exact,
+          }
+        )
 
         res.status(200).send(resources)
       },
@@ -131,11 +133,13 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
 
-        const resource = await service.create({
-          accountId: req.params.accountId,
-          type: req.body.resourceType,
-          fields: req.body.fields,
-        })
+        const resource = await service.create(
+          req.params.accountId,
+          req.body.resourceType,
+          {
+            fields: req.body.fields,
+          }
+        )
 
         res.status(200).send(resource)
       },
@@ -212,11 +216,13 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
 
-        const resource = await service.update({
-          accountId: req.params.accountId,
-          resourceId: req.params.resourceId,
-          fields: req.body,
-        })
+        const resource = await service.update(
+          req.params.accountId,
+          req.params.resourceId,
+          {
+            fields: req.body,
+          }
+        )
 
         res.status(200).send(resource)
       },
@@ -233,10 +239,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
 
-        await service.delete({
-          accountId: req.params.accountId,
-          id: req.params.resourceId,
-        })
+        await service.delete(req.params.accountId, req.params.resourceId)
 
         res.send()
       },

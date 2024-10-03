@@ -113,9 +113,7 @@ export class QuickBooksVendorService {
 
         if (!vendor || !!vendor.templateId) return
 
-        return this.resourceService.update({
-          accountId,
-          resourceId: vendor.id,
+        return this.resourceService.update(accountId, vendor.id, {
           fields: await this.mapQuickBooksVendorToResourceFields(
             accountId,
             quickBooksVendor
@@ -127,9 +125,9 @@ export class QuickBooksVendorService {
     // `Resource.key` is (currently) created transactionally and thus not parallelizable
     for (const quickBooksVendorToAdd of quickBooksVendorsToAdd) {
       const [vendor] = await this.resourceService.findResourcesByNameOrPoNumber(
+        accountId,
+        'Vendor',
         {
-          accountId,
-          resourceType: 'Vendor',
           input: quickBooksVendorToAdd.DisplayName,
           exact: true,
         }
@@ -137,19 +135,14 @@ export class QuickBooksVendorService {
 
       if (vendor) {
         if (vendor.templateId) return
-
-        await this.resourceService.update({
-          accountId,
-          resourceId: vendor.id,
+        await this.resourceService.update(accountId, vendor.id, {
           fields: await this.mapQuickBooksVendorToResourceFields(
             accountId,
             quickBooksVendorToAdd
           ),
         })
       } else {
-        await this.resourceService.create({
-          accountId,
-          type: 'Vendor',
+        await this.resourceService.create(accountId, 'Vendor', {
           fields: await this.mapQuickBooksVendorToResourceFields(
             accountId,
             quickBooksVendorToAdd
@@ -188,9 +181,7 @@ export class QuickBooksVendorService {
 
     assert(quickBooksVendorIdField, 'quickBooksVendorId field not found')
 
-    await this.resourceService.updateResourceField({
-      accountId,
-      resourceId: vendor.id,
+    await this.resourceService.updateResourceField(accountId, vendor.id, {
       fieldId: quickBooksVendorIdField,
       valueInput: { string: quickBooksVendor.Vendor.Id },
     })

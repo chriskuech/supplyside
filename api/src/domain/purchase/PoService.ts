@@ -28,7 +28,10 @@ export class PoService {
   ) {}
 
   async createPo(accountId: string, resourceId: string) {
-    const schema = await this.schemaService.readMergedSchema(accountId, 'Purchase')
+    const schema = await this.schemaService.readMergedSchema(
+      accountId,
+      'Purchase'
+    )
 
     const documentFieldId = selectSchemaFieldUnsafe(
       schema,
@@ -39,9 +42,7 @@ export class PoService {
       fields.issuedDate
     ).fieldId
 
-    await this.resourceService.updateResourceField({
-      accountId,
-      resourceId,
+    await this.resourceService.updateResourceField(accountId, resourceId, {
       fieldId: issuedDateFieldId,
       valueInput: { date: new Date().toISOString() },
     })
@@ -77,9 +78,7 @@ export class PoService {
       },
     })
 
-    await this.resourceService.updateResourceField({
-      accountId,
-      resourceId,
+    await this.resourceService.updateResourceField(accountId, resourceId, {
       fieldId: documentFieldId,
       valueInput: { fileId },
     })
