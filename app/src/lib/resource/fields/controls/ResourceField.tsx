@@ -100,7 +100,7 @@ function ResourceField(
               <Sync fontSize="small" />
             </IconButton>
           </Tooltip>
-          {['Bill', 'Purchase'].includes(resourceType) ? (
+          {['Bill', 'Job', 'Purchase'].includes(resourceType) ? (
             <Tooltip title={`Open ${resourceType} page`}>
               <IconButton
                 href={`/${resourceType.toLowerCase()}s/${resource.key}`}

@@ -106,7 +106,17 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: "Part",
-    fields: [fields.name, fields.partNumber, fields.revision, fields.partFiles],
+    sections: [
+      {
+        name: "Part Info",
+        fields: [
+          fields.name,
+          fields.partNumber,
+          fields.revision,
+          fields.partFiles,
+        ],
+      },
+    ],
   },
   {
     resourceType: "Purchase",
