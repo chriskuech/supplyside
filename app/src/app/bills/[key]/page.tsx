@@ -18,7 +18,7 @@ import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
-import { getBillUrl } from '@/quickBooks'
+import { getBillUrl } from '@/lib/quickBooks/helpers'
 
 export default async function BillsDetail({
   params: { key },

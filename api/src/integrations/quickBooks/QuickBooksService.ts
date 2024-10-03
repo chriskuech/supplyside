@@ -123,12 +123,6 @@ export class QuickBooksService {
     return this.quickBooksCompanyInfoService.getCompanyInfo(accountId, client)
   }
 
-  getVendorUrl(quickBooksVendorId: string) {
-    const qbConfig = this.quickBooksConfigService.configUnsafe
-
-    return `${qbConfig.appBaseUrl}/app/vendordetail?nameId=${quickBooksVendorId}`
-  }
-
   async pushBill(accountId: string, resourceId: string): Promise<void> {
     const token = await this.quickBooksTokenService.getToken(accountId)
     assert(token, 'No token found')

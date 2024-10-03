@@ -1,9 +1,6 @@
 import 'server-only'
 import { client } from '.'
 
-export const getVendorUrl = (vendorId: string) =>
-  `/api/integrations/quickbooks/vendor/${vendorId}`
-
 export const read = async (accountId: string) => {
   const { data } = await client().GET(
     '/api/accounts/{accountId}/integrations/quickbooks/',

@@ -6,7 +6,7 @@ import QuickBooksLink from '../quickBooks/QuickBooksLink'
 import { ResourceDrawerView } from './ResourceDrawerView'
 import { readResource } from '@/actions/resource'
 import { readSchema } from '@/actions/schema'
-import { getVendorUrl } from '@/client/quickBooks'
+import { getVendorUrl } from '@/lib/quickBooks/helpers'
 
 type ResourceFieldDrawerProps = {
   searchParams: Record<string, unknown>
