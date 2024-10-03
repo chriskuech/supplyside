@@ -156,28 +156,6 @@ export const findResourcesByNameOrPoNumber = async (
   return resources
 }
 
-export const findBacklinks = async (
-  accountId: string,
-  resourceType: ResourceType,
-  resourceId: string,
-) => {
-  const { data: resources } = await client().GET(
-    '/api/accounts/{accountId}/resources/find-backlinks/',
-    {
-      params: {
-        path: { accountId },
-        query: {
-          resourceType,
-          resourceId,
-        },
-      },
-      next: { tags: ['Resources'] },
-    },
-  )
-
-  return resources
-}
-
 export const copyFromResource = async (
   accountId: string,
   resourceId: string,

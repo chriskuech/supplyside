@@ -27,7 +27,7 @@ import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import { createPunchOutServiceRequest } from '@/client/mcmaster'
-import { findBacklinks, readResources } from '@/client/resource'
+import { readResources } from '@/client/resource'
 
 export default async function PurchaseDetail({
   params: { key },
@@ -78,7 +78,11 @@ export default async function PurchaseDetail({
     )
   }
 
-  const orderBills = (await findBacklinks(accountId, 'Bill', resource.id)) ?? []
+  const orderBills = await readResources(accountId, 'Bill', {
+    where: {
+      '==': [{ var: 'Purchase' }, resource.id],
+    },
+  })
 
   const status =
     selectResourceFieldValue(resource, fields.purchaseStatus)?.option ??
@@ -108,7 +112,8 @@ export default async function PurchaseDetail({
       resource={resource}
       searchParams={searchParams}
       tools={[
-        ...orderBills.map((bill) => <BillLink key={bill.id} bill={bill} />),
+        ...(orderBills?.map((bill) => <BillLink key={bill.id} bill={bill} />) ??
+          []),
         <TrackingControl
           key={TrackingControl.name}
           resourceId={resource.id}
