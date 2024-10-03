@@ -180,6 +180,12 @@ const _fields = {
       optionTemplateId: billStatusOptions.draft.templateId,
     },
   },
+  billingAddress: {
+    templateId: "b0069350-92a0-4d02-8eae-c2a04405c94b",
+    name: "Billing Address",
+    type: "Address",
+    description: "Indicates the ship-to address on the order",
+  },
   billingContact: {
     templateId: "de26b300-e05b-4d50-9289-3f940c7b0901",
     name: "Billing Contact",
@@ -204,6 +210,11 @@ const _fields = {
     name: "Customer Description",
     type: "Textarea",
     description: "Brief, identifiable description of the customer",
+  },
+  customerReferenceNumber: {
+    templateId: "cb1b5458-b938-4b5b-aa50-41065f4a84c8",
+    name: "Customer Reference Number",
+    type: "Text",
   },
   document: {
     templateId: "cb4a0c88-df20-485d-9881-e2c3b1b2b180",
@@ -444,12 +455,6 @@ const _fields = {
     name: "Shipping Method",
     type: "Select",
     description: "Required form of shipping",
-  },
-  shippingNotes: {
-    templateId: "0d5a6944-49e6-45bc-ac1e-5ed1c2ccc55c",
-    name: "Shipping Notes",
-    type: "Textarea",
-    description: "Shipping notes included in the purchase order header",
   },
   subtotalCost: {
     templateId: "3234298a-d186-424e-a4b4-7678b4eec7d0",
