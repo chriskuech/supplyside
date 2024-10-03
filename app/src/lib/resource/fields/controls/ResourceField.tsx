@@ -51,7 +51,9 @@ function ResourceField(
   const schema = useSchema(resourceType)
 
   const open = (resourceId: string) =>
-    router.push(window.location.pathname + `?drawerResourceId=${resourceId}`)
+    router.push(window.location.pathname + `?drawerResourceId=${resourceId}`, {
+      scroll: false,
+    })
 
   const handleCreate = (nameOrNumber: string) =>
     createResource(resourceType, [
