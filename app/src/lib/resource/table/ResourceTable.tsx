@@ -15,6 +15,7 @@ import { useMemo } from 'react'
 import { z } from 'zod'
 import { Resource, Schema } from '@supplyside/model'
 import { P, match } from 'ts-pattern'
+import { useRouter } from 'next/navigation'
 import { mapSchemaFieldToGridColDef } from './mapSchemaFieldToGridColDef'
 import { Row, Column } from './types'
 import { handleProcessRowUpdate } from './processRowUpdate'
@@ -45,6 +46,8 @@ export default function ResourceTable({
 }: Props) {
   const { apiRef, initialState, saveStateToLocalstorage } =
     usePersistDatagridState(tableKey)
+
+  const { push } = useRouter()
 
   const columns = useMemo<Column[]>(
     () => [
@@ -100,13 +103,13 @@ export default function ResourceTable({
       processRowUpdate={handleProcessRowUpdate}
       onRowClick={({ row: { type, key, id } }: { row: Row }) =>
         match(type)
-          .with(
-            P.union('Bill', 'Job', 'Purchase'),
-            () => (window.location.href = `/${type.toLowerCase()}s/${key}`),
+          .with(P.union('Bill', 'Job', 'Purchase'), () =>
+            push(`/${type.toLowerCase()}s/${key}`),
           )
-          .with(
-            P.union('Customer', 'Item', 'Part', 'Vendor'),
-            () => (window.location.search = `drawerResourceId=${id}`),
+          .with(P.union('Customer', 'Item', 'Part', 'Vendor'), () =>
+            push(window.location.pathname + `?drawerResourceId=${id}`, {
+              scroll: false,
+            }),
           )
           .with(P.union('JobLine', 'PurchaseLine'), () => null)
           .exhaustive()
