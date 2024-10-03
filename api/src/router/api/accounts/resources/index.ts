@@ -83,33 +83,6 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       },
     })
     .route({
-      method: 'GET',
-      url: '/find-backlinks/',
-      schema: {
-        params: z.object({
-          accountId: z.string().uuid(),
-        }),
-        querystring: z.object({
-          resourceType: ResourceTypeSchema,
-          resourceId: z.string().uuid(),
-        }),
-        response: {
-          200: z.array(ResourceSchema),
-        },
-      },
-      handler: async (req, res) => {
-        const service = container.resolve(ResourceService)
-
-        const resources = await service.findBacklinks(
-          req.params.accountId,
-          req.query.resourceType,
-          req.query.resourceId
-        )
-
-        res.status(200).send(resources)
-      },
-    })
-    .route({
       method: 'POST',
       url: '/',
       schema: {

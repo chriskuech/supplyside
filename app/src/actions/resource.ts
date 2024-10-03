@@ -20,7 +20,6 @@ export const deleteResource = withAccountId(client.deleteResource)
 export const findResourcesByNameOrPoNumber = withAccountId(
   client.findResourcesByNameOrPoNumber,
 )
-export const findBacklinks = withAccountId(client.findBacklinks)
 export const copyFromResource = withAccountId(client.copyFromResource)
 export const copyFromFiles = withAccountId(client.copyFromFiles)
 
