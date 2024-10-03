@@ -13,6 +13,7 @@ import { mountWebhooks } from './webhooks'
 import { mountHealth } from './health'
 import { JsonLogicSchema } from '../domain/resource/json-logic/types'
 import { mountSelf } from './api/self'
+import { mountIntegrations } from './integrations'
 
 export const createServer = (isDev?: boolean) => fastify({
   logger: isDev
@@ -49,5 +50,6 @@ export const createServer = (isDev?: boolean) => fastify({
   .register(mountApi, { prefix: '/api' })
   .register(mountHealth, { prefix: '/health' })
   .register(mountSelf, { prefix: '/self' })
+  .register(mountIntegrations, { prefix: '/integrations' })
   .register(mountWebhooks, { prefix: '/webhooks' })
   .setNotFoundHandler((request, reply) => reply.code(404).send('Not Found'))

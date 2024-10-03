@@ -11,9 +11,6 @@ export const mountIntegrations = async <App extends FastifyInstance>(
     .register(mountQuickBooks, {
       prefix: '/quickbooks',
     })
-    // .register(mountPlaid, {
-    //   prefix: "/plaid",
-    // })
     .register(mountMcMasterCarr, {
       prefix: '/mcmaster',
     })

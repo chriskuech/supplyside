@@ -66,12 +66,9 @@ export const createPunchOutServiceRequest = async (
 }
 
 export const processPoom = async (cxmlString: string) => {
-  const { data } = await client().POST(
-    '/api/integrations/mcmaster/process-poom/',
-    {
-      body: cxmlString,
-    },
-  )
+  const { data } = await client().POST('/integrations/mcmaster/process-poom/', {
+    body: cxmlString,
+  })
 
   return data
 }
