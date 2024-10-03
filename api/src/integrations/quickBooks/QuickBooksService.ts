@@ -13,7 +13,12 @@ import { QuickBooksBillPaymentService } from './QuickBooksBillPaymentService'
 import { isRequestError } from './utils'
 import { groupBy } from 'remeda'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
-import { billStatusOptions, fields, selectSchemaFieldOptionUnsafe, selectSchemaFieldUnsafe } from '@supplyside/model'
+import {
+  billStatusOptions,
+  fields,
+  selectSchemaFieldOptionUnsafe,
+  selectSchemaFieldUnsafe,
+} from '@supplyside/model'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 
 @injectable()
@@ -233,12 +238,14 @@ export class QuickBooksService {
                     billStatusOptions.paid
                   ).id
 
-                  await this.resourceService.updateResourceField({
+                  await this.resourceService.updateResourceField(
                     accountId,
-                    resourceId: bill.id,
-                    fieldId: billStatusFieldId,
-                    valueInput: { optionId: paidOptionId },
-                  })
+                    bill.id,
+                    {
+                      fieldId: billStatusFieldId,
+                      valueInput: { optionId: paidOptionId },
+                    }
+                  )
                 }
               })
             )
