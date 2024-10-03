@@ -12,6 +12,7 @@ import { inject, injectable } from 'inversify'
 import { BlobService } from '@supplyside/api/domain/blob/BlobService'
 import { ConfigService } from '@supplyside/api/ConfigService'
 import { File } from '@supplyside/model'
+import { createDataUrl } from '@supplyside/api/domain/blob/util'
 
 const exec = promisify(execCallback)
 
@@ -61,9 +62,7 @@ export class CompletionPartsService {
     return {
       type: 'image_url',
       image_url: {
-        url: `data:${file.contentType};base64,${blob.buffer.toString(
-          'base64'
-        )}`,
+        url: createDataUrl({ mimeType: file.contentType, buffer: blob.buffer }),
         detail: 'auto',
       },
     }
@@ -72,7 +71,10 @@ export class CompletionPartsService {
   private async readPdfToBase64s(
     file: File
   ): Promise<ChatCompletionContentPartImage[]> {
-    const blob = await this.blobService.readBlobWithData(file.accountId, file.blobId)
+    const blob = await this.blobService.readBlobWithData(
+      file.accountId,
+      file.blobId
+    )
 
     const containerPath = `${this.configService.config.TEMP_PATH}/${file.id}`
     await mkdir(containerPath, { recursive: true })

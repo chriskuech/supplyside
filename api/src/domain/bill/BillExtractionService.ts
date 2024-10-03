@@ -1,6 +1,5 @@
 import { fail } from 'assert'
 import { assert } from 'console'
-import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 import { validate as isUuid } from 'uuid'
 import {
@@ -9,7 +8,6 @@ import {
 } from '../resource/ResourceService'
 import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
 import { SchemaService } from '../schema/SchemaService'
-import { CompletionPartsService } from '@supplyside/api/integrations/openai/mapFileToCompletionParts'
 import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
 import {
   fields,
@@ -51,8 +49,6 @@ export class BillExtractionService {
   constructor(
     @inject(OpenAiService) private readonly openai: OpenAiService,
     @inject(SchemaService) private readonly schemaService: SchemaService,
-    @inject(CompletionPartsService)
-    private readonly completionPartsService: CompletionPartsService,
     @inject(ResourceService)
     private readonly resourceService: ResourceService
   ) {}
@@ -67,49 +63,19 @@ export class BillExtractionService {
       }),
     ])
 
-    const vendorList = mapVendorsToVendorList(vendors)
-
     const billFiles =
       selectResourceFieldValue(billResource, fields.billFiles)?.files ??
       fail('Files not found')
 
     if (!billFiles.length) return
 
-    const completionParts = (
-      await Promise.all(
-        billFiles.map((f) =>
-          this.completionPartsService.mapFileToCompletionParts(f)
-        )
-      )
-    ).flat()
+    const vendorList = mapVendorsToVendorList(vendors)
 
-    if (!completionParts.length) return
-
-    const completion = await this.openai.beta.chat.completions.parse({
-      model: 'gpt-4o-2024-08-06',
-      messages: [
-        {
-          role: 'system',
-          content: prompt,
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: vendorList,
-            },
-            ...completionParts,
-          ],
-        },
-      ],
-      response_format: zodResponseFormat(
-        ExtractedBillDataSchema,
-        'extractedBillData'
-      ),
+    const data = await this.openai.extractContent({
+      systemPrompt: prompt,
+      schema: ExtractedBillDataSchema,
+      files: [vendorList, ...billFiles],
     })
-
-    const data = completion.choices[0]?.message.parsed
 
     const poNumber = data?.poNumber
     const vendorId = data?.vendorId
@@ -118,7 +84,7 @@ export class BillExtractionService {
       .int()
       .positive()
       .safeParse(poNumber)?.data
-    const [pruchase, ...purchases] =
+    const [purchase, ...purchases] =
       poNumberAsNumber && vendorId
         ? await this.resourceService.list({
             accountId,
@@ -154,12 +120,12 @@ export class BillExtractionService {
             },
           ]
         : []),
-      ...(pruchase
+      ...(purchase
         ? [
             {
               fieldId: selectSchemaFieldUnsafe(billSchema, fields.purchase)
                 .fieldId,
-              valueInput: { resourceId: pruchase.id },
+              valueInput: { resourceId: purchase.id },
             },
           ]
         : []),
@@ -176,10 +142,7 @@ export class BillExtractionService {
 
     if (!updatedFields.length) return
 
-    await this.resourceService.update(
-      accountId,
-      resourceId,
-      {
+    await this.resourceService.update(accountId, resourceId, {
       fields: updatedFields,
     })
   }

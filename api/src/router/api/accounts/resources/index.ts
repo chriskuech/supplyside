@@ -13,6 +13,7 @@ import { mountCosts } from './costs'
 import { JsonLogicSchema } from '@supplyside/api/domain/resource/json-logic/types'
 import { pick } from 'remeda'
 import { parse } from 'qs'
+import { ResourceExtractionService } from '@supplyside/api/domain/resource/ResourceExtractionService'
 
 export const mountResources = async <App extends FastifyInstance>(app: App) =>
   app
@@ -269,25 +270,43 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'POST',
-      url: '/:resourceId/copy-from/',
+      url: '/:resourceId/copy-from-resource/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
           resourceId: z.string().uuid(),
         }),
         body: z.object({
-          fromResourceId: z.string().uuid(),
+          resourceId: z.string().uuid(),
         }),
       },
       handler: async (req) => {
         const service = container.resolve(ResourceService)
 
-        const resource = await service.copyFields(
+        await service.copyFields(req.params.accountId, req.params.resourceId, {
+          fromResourceId: req.body.resourceId,
+        })
+      },
+    })
+    .route({
+      method: 'POST',
+      url: '/:resourceId/copy-from-files/',
+      schema: {
+        params: z.object({
+          accountId: z.string().uuid(),
+          resourceId: z.string().uuid(),
+        }),
+        body: z.object({
+          fieldId: z.string().uuid(),
+        }),
+      },
+      handler: async (req) => {
+        const service = container.resolve(ResourceExtractionService)
+
+        await service.extractContent(
           req.params.accountId,
           req.params.resourceId,
-          { fromResourceId: req.body.fromResourceId }
+          req.body
         )
-
-        return resource
       },
     })

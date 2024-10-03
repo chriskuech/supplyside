@@ -211,7 +211,8 @@ export class QuickBooksBillService {
     )
 
     const quickBooksAccountId =
-      quickBooksAccountQuery.QueryResponse.Account[0].Id
+      quickBooksAccountQuery.QueryResponse.Account[0]?.Id
+    assert(quickBooksAccountId, 'Account not found')
 
     const vendorId = selectResourceFieldValue(bill, fields.vendor)?.resource
       ?.id

@@ -22,6 +22,7 @@ export const findResourcesByNameOrPoNumber = withAccountId(
 )
 export const findBacklinks = withAccountId(client.findBacklinks)
 export const copyFromResource = withAccountId(client.copyFromResource)
+export const copyFromFiles = withAccountId(client.copyFromFiles)
 
 export const updateResourceField = (
   resourceId: string,

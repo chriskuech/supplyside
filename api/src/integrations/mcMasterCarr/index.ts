@@ -234,7 +234,7 @@ export class McMasterService {
     const responseObject: unknown = await parseStringPromise(rawResponse)
 
     const response = posrResponseSchema.parse(responseObject)
-    const statusCode = response.cXML.Response[0]?.Status[0].$.code
+    const statusCode = response.cXML.Response[0]?.Status[0]?.$.code
 
     return statusCode === '200'
   }
@@ -304,6 +304,8 @@ export class McMasterService {
 
     for (const item of items) {
       const { description, quantity, unitOfMeasure, unitPrice } = item
+
+      assert(description && quantity && unitOfMeasure && unitPrice)
 
       // TODO: Should we match by id?
       const [matchedItem] =
@@ -468,7 +470,7 @@ function parseCxml(cxmlString: string) {
 
   //items
   const itemsIn = poomCxml.cXML.Message[0]?.PunchOutOrderMessage[0]?.ItemIn
-  const items = itemsIn.map((item) => ({
+  const items = itemsIn?.map((item) => ({
     quantity: item.$.quantity,
     supplierPartID: item.ItemID[0]?.SupplierPartID[0],
     supplierPartAuxiliaryID: item.ItemID[0]?.SupplierPartAuxiliaryID[0],
@@ -491,6 +493,8 @@ function parseCxml(cxmlString: string) {
         fail(`Invalid Unit of Measure ${item.ItemDetail[0]?.UnitOfMeasure[0]}`)
       ),
   }))
+
+  assert(total && items && senderDomain && senderIdentity && sharedSecret)
 
   return {
     orderId,

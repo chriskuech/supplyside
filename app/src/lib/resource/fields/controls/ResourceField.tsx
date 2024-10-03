@@ -91,7 +91,7 @@ function ResourceField(
           <Tooltip title={`Sync data from ${resourceType}`}>
             <IconButton
               onClick={() =>
-                copyFromResource(resourceId, { fromResourceId: resource.id })
+                copyFromResource(resourceId, { resourceId: resource.id })
               }
               size="small"
             >
