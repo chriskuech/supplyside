@@ -149,17 +149,13 @@ export class ResourceService {
       where: {
         accountId,
         type: resourceType,
-        Value: {
+        ResourceField: {
           some: {
-            ResourceFieldValue: {
-              some: {
-                Resource: {
-                  id: linkedToResourceId,
-                },
-              },
-            },
-          },
-        },
+            Value: {
+              resourceId: linkedToResourceId
+            }
+          }
+        }
       },
       include: resourceInclude,
     })
