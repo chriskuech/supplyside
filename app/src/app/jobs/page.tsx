@@ -5,7 +5,7 @@ import ListPage from '@/lib/resource/ListPage'
 import { requireSession } from '@/session'
 import CopyableTextInput from '@/lib/ux/CopyableTextInput'
 
-export default async function Bills({
+export default async function Jobs({
   searchParams,
 }: {
   searchParams: Record<string, unknown>
@@ -17,14 +17,14 @@ export default async function Bills({
 
   return (
     <ListPage
-      tableKey="billsList"
-      resourceType="Bill"
+      tableKey="jobsList"
+      resourceType="Job"
       searchParams={searchParams}
       callToActions={[
         <CopyableTextInput
           key={CopyableTextInput.name}
-          label="Bills Inbox"
-          content={`${account.key}@${config().BILLS_EMAIL_DOMAIN}`}
+          label="Jobs Inbox"
+          content={`${account.key}@${config().JOBS_EMAIL_DOMAIN}`}
         />,
       ]}
     />

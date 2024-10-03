@@ -52,7 +52,7 @@ export const updateAccount = async (
 }
 
 export const applyTemplate = async (accountId: string) => {
-  revalidateTag('Account')
+  revalidateTag('Schemas')
 
   await client().POST('/api/accounts/{accountId}/apply-template/', {
     params: {

@@ -4,13 +4,15 @@ import AccountsTable from './AccountsTable'
 import { readAccounts } from '@/client/account'
 import { createAccount } from '@/actions/account'
 import { requireSession } from '@/session'
-import { systemAccountId } from '@/lib/const'
+import { readSelf } from '@/client/user'
 
 export default async function AdminPage() {
-  const { accountId } = await requireSession()
+  const { userId } = await requireSession()
+  const user = await readSelf(userId)
 
-  if (accountId !== systemAccountId)
+  if (!user?.isGlobalAdmin) {
     return <Alert severity="error">Not an admin</Alert>
+  }
 
   const accounts = await readAccounts()
 
