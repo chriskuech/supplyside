@@ -6,7 +6,7 @@ import QuickBooksLink from '../quickBooks/QuickBooksLink'
 import { ResourceDrawerView } from './ResourceDrawerView'
 import { readResource } from '@/actions/resource'
 import { readSchema } from '@/actions/schema'
-import { getVendorUrl } from '@/lib/quickBooks/helpers'
+import { getCustomerUrl, getVendorUrl } from '@/lib/quickBooks/helpers'
 
 type ResourceFieldDrawerProps = {
   searchParams: Record<string, unknown>
@@ -44,6 +44,21 @@ export const ResourceDrawer = async ({
             <QuickBooksLink
               key={QuickBooksLink.name}
               quickBooksAppUrl={getVendorUrl(quickBooksVendorId)}
+            />,
+          ]
+        })
+        .with({ type: 'Customer' }, (resource) => {
+          const quickBooksCustomerId = selectResourceFieldValue(
+            resource,
+            fields.quickBooksCustomerId,
+          )?.string
+
+          if (!quickBooksCustomerId) return []
+
+          return [
+            <QuickBooksLink
+              key={QuickBooksLink.name}
+              quickBooksAppUrl={getCustomerUrl(quickBooksCustomerId)}
             />,
           ]
         })

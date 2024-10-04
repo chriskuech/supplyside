@@ -159,10 +159,42 @@ export const vendorSchema = z.object({
   MetaData: metadataSchema.optional(),
 })
 
+export const customerSchema = z.object({
+  PrimaryEmailAddr: emailSchema.optional(),
+  domain: z.string(),
+  GivenName: z.string().optional(),
+  DisplayName: z.string(),
+  FullyQualifiedName: z.string().optional(),
+  BillAddr: addressSchema.optional(),
+  BillWithParent: z.boolean().optional(),
+  SyncToken: z.string(),
+  PrintOnCheckName: z.string().optional(),
+  FamilyName: z.string().optional(),
+  PrimaryPhone: phoneSchema.optional(),
+  CompanyName: z.string().optional(),
+  sparse: z.boolean(),
+  Active: z.boolean().optional(),
+  Balance: z.number(),
+  Id: z.string(),
+  MetaData: metadataSchema.optional(),
+  Job: z.boolean().optional(),
+  BalanceWithJobs: z.number().optional(),
+  PreferredDeliveryMethod: z.string().optional(),
+  Taxable: z.boolean().optional(),
+})
+
 export const vendorQuerySchema = z.object({
   QueryResponse: z.object({
     startPosition: z.number(),
     Vendor: z.array(vendorSchema).optional(),
+    maxResults: z.number(),
+  }),
+})
+
+export const customerQuerySchema = z.object({
+  QueryResponse: z.object({
+    startPosition: z.number(),
+    Customer: z.array(customerSchema).optional(),
     maxResults: z.number(),
   }),
 })
@@ -204,6 +236,10 @@ export const readAccountSchema = z.object({
 
 export const readVendorSchema = z.object({
   Vendor: vendorSchema,
+})
+
+export const readCustomerSchema = z.object({
+  Customer: customerSchema,
 })
 
 export const readBillSchema = z.object({

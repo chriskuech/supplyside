@@ -20,6 +20,7 @@ import {
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
+import { QuickBooksCustomerService } from './QuickBooksCustomerService'
 
 @injectable()
 export class QuickBooksService {
@@ -44,6 +45,8 @@ export class QuickBooksService {
     private readonly quickBooksBillService: QuickBooksBillService,
     @inject(QuickBooksVendorService)
     private readonly quickBooksVendorService: QuickBooksVendorService,
+    @inject(QuickBooksCustomerService)
+    private readonly quickBooksCustomerService: QuickBooksCustomerService,
     @inject(QuickBooksBillPaymentService)
     private readonly quickBooksBillPaymentService: QuickBooksBillPaymentService
   ) {}
@@ -108,6 +111,10 @@ export class QuickBooksService {
         accountId
       ),
       this.quickBooksVendorService.upsertVendorsFromQuickBooks(
+        client,
+        accountId
+      ),
+      this.quickBooksCustomerService.upsertCustomersFromQuickBooks(
         client,
         accountId
       ),
