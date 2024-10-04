@@ -1,6 +1,9 @@
 import { container } from '@supplyside/api/di'
 import { PoRenderingService } from '@supplyside/api/domain/purchase/PoRenderingService'
 import { PoService } from '@supplyside/api/domain/purchase/PoService'
+import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
+import { fields, purchaseStatusOptions, selectSchemaFieldOptionUnsafe, selectSchemaFieldUnsafe } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
@@ -33,9 +36,27 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
         }),
       },
       handler: async (req) => {
-        const service = container.resolve(PoService)
+        const poService = container.resolve(PoService)
+        const resourceService = container.resolve(ResourceService)
+        const schemaService = container.resolve(SchemaService)
 
-        await service.sendPo(req.params.accountId, req.params.resourceId)
+        const schema = await schemaService.readMergedSchema(
+          req.params.accountId,
+          'Purchase'
+        )
+
+        const field = selectSchemaFieldUnsafe(schema, fields.purchaseStatus)
+        const option = selectSchemaFieldOptionUnsafe(schema, fields.purchaseStatus, purchaseStatusOptions.purchased)
+
+        await poService.sendPo(req.params.accountId, req.params.resourceId)
+        await resourceService.updateResourceField(
+          req.params.accountId,
+          req.params.resourceId,
+          {
+            fieldId: field.fieldId,
+            valueInput: { optionId: option.id },
+          }
+        )
       },
     })
     .route({
