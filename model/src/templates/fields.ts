@@ -445,6 +445,11 @@ const _fields = {
     name: "QuickBooks Vendor ID",
     type: "Text",
   },
+  quickBooksCustomerId: {
+    templateId: "77c06a2a-f156-4425-a310-05e0315db9a0",
+    name: "QuickBooks Customer ID",
+    type: "Text",
+  },
   revision: {
     templateId: "1abdda53-334a-49d7-9b8f-3edae4e3c384",
     name: "Revision",
