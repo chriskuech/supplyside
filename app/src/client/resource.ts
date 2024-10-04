@@ -4,11 +4,12 @@ import { components } from '@supplyside/api'
 import { stringify } from 'qs'
 import { revalidateTag } from 'next/cache'
 import { client } from '.'
+import { Session } from '@/session'
 
 export type JsonLogic = components['schemas']['JsonLogic']
 
 export const createResource = async (
-  accountId: string,
+  { userId, accountId }: Session,
   resourceType: ResourceType,
   fields: { fieldId: string; valueInput: ValueInput }[],
 ) => {
@@ -18,9 +19,9 @@ export const createResource = async (
     '/api/accounts/{accountId}/resources/',
     {
       params: {
-        path: { accountId },
+        path: { accountId: accountId },
       },
-      body: { resourceType, fields },
+      body: { resourceType, fields, userId },
     },
   )
 
