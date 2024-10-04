@@ -44,9 +44,7 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: "Customer",
-    fields: [
-      fields.quickBooksCustomerId
-    ],
+    fields: [fields.quickBooksCustomerId],
     sections: [
       {
         name: "Summary",
