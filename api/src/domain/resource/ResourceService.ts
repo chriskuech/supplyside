@@ -888,6 +888,7 @@ export class ResourceService {
     ])
 
     const fieldsToUpdate = fromResource.fields
+      .filter((rf) => selectSchemaField(fromSchema, rf))
       .map((rf) => ({
         rf,
         sf: selectSchemaFieldUnsafe(fromSchema, rf),
