@@ -116,6 +116,7 @@ export default function ResourceForm({
                             {f.type === 'Resource' && (
                               <Tooltip title={`Sync data from ${f.name}`}>
                                 <IconButton
+                                  color="secondary"
                                   disabled={
                                     !selectResourceFieldValue(resource, f)
                                       ?.resource
@@ -147,6 +148,7 @@ export default function ResourceForm({
                             {['File', 'Files'].includes(f.type) && (
                               <Tooltip title={`Sync data from ${f.name}`}>
                                 <IconButton
+                                  color="secondary"
                                   disabled={
                                     !selectResourceFieldValue(resource, f)
                                       ?.file &&
