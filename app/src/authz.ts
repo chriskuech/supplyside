@@ -1,6 +1,7 @@
 import 'server-only'
 import { readUser } from './client/user'
 import { requireSession } from './session'
+import { Session } from '@/session'
 
 export const withGlobalAdmin =
   <Rest extends unknown[], Return>(fn: (...rest: Rest) => Promise<Return>) =>
@@ -22,3 +23,10 @@ export const withSessionId =
   ) =>
   (...args: Rest): Promise<Return> =>
     requireSession().then(({ id }) => fn(id, ...args))
+
+export const withSession =
+  <Rest extends unknown[], Return>(
+    fn: (session: Session, ...rest: Rest) => Promise<Return>,
+  ) =>
+  (...args: Rest): Promise<Return> =>
+    requireSession().then((session) => fn(session, ...args))

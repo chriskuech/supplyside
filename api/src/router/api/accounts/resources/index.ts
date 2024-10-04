@@ -93,6 +93,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         }),
         body: z.object({
           resourceType: ResourceTypeSchema,
+          userId: z.string().uuid().optional(),
           fields: z
             .array(
               z.object({
@@ -114,7 +115,8 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           req.body.resourceType,
           {
             fields: req.body.fields,
-          }
+          },
+          req.body.userId
         )
 
         res.status(200).send(resource)
