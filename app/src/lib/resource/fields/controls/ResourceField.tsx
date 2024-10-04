@@ -96,6 +96,7 @@ function ResourceField(
                 copyFromResource(resourceId, { resourceId: resource.id })
               }
               size="small"
+              color="secondary"
             >
               <Sync fontSize="small" />
             </IconButton>
