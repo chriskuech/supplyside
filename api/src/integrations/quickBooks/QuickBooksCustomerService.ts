@@ -4,7 +4,7 @@ import { inject, injectable } from 'inversify'
 import {
   countQuerySchema,
   customerQuerySchema,
-  readCustomerSchema
+  readCustomerSchema,
 } from './schemas'
 import { Customer } from './types'
 import { MAX_ENTITIES_PER_PAGE } from './constants'
@@ -12,12 +12,12 @@ import { QuickBooksApiService } from './QuickBooksApiService'
 import {
   fields,
   selectResourceFieldValue,
-  selectSchemaFieldUnsafe
+  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
   ResourceFieldInput,
-  ResourceService
+  ResourceService,
 } from '@supplyside/api/domain/resource/ResourceService'
 
 @injectable()
@@ -26,38 +26,38 @@ export class QuickBooksCustomerService {
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(ResourceService) private readonly resourceService: ResourceService,
     @inject(QuickBooksApiService)
-    private readonly quickBooksApiService: QuickBooksApiService
+    private readonly quickBooksApiService: QuickBooksApiService,
   ) {}
 
   async readCustomer(
     accountId: string,
     client: OAuthClient,
-    customerId: string
+    customerId: string,
   ): Promise<Customer> {
     return this.quickBooksApiService
       .makeApiCall(accountId, client, {
         url: `${this.quickBooksApiService.getBaseUrl(
-          client.token.realmId
+          client.token.realmId,
         )}/customer/${customerId}`,
-        method: 'GET'
+        method: 'GET',
       })
       .then((data) => readCustomerSchema.parse(data.json))
   }
 
   async upsertCustomersFromQuickBooks(
     client: OAuthClient,
-    accountId: string
+    accountId: string,
   ): Promise<void> {
     const quickBooksCustomersCount = await this.quickBooksApiService.query(
       accountId,
       client,
       { entity: 'Customer', getCount: true },
-      countQuerySchema
+      countQuerySchema,
     )
     const totalQuickBooksCustomers =
       quickBooksCustomersCount.QueryResponse.totalCount
     const numberOfRequests = Math.ceil(
-      totalQuickBooksCustomers / MAX_ENTITIES_PER_PAGE
+      totalQuickBooksCustomers / MAX_ENTITIES_PER_PAGE,
     )
 
     const customerResponses = await Promise.all(
@@ -68,20 +68,20 @@ export class QuickBooksCustomerService {
           {
             entity: 'Customer',
             startPosition: i * MAX_ENTITIES_PER_PAGE + 1,
-            maxResults: MAX_ENTITIES_PER_PAGE
+            maxResults: MAX_ENTITIES_PER_PAGE,
           },
-          customerQuerySchema
-        )
-      )
+          customerQuerySchema,
+        ),
+      ),
     )
 
     const quickBooksCustomers = customerResponses.flatMap(
-      (customerResponse) => customerResponse.QueryResponse.Customer ?? []
+      (customerResponse) => customerResponse.QueryResponse.Customer ?? [],
     )
 
     const currentCustomers = await this.resourceService.list(
       accountId,
-      'Customer'
+      'Customer',
     )
 
     const quickBooksCustomersToAdd = quickBooksCustomers.filter(
@@ -89,13 +89,13 @@ export class QuickBooksCustomerService {
         !currentCustomers.some(
           (customer) =>
             selectResourceFieldValue(customer, fields.quickBooksCustomerId)
-              ?.string === quickBooksCustomer.Id
-        )
+              ?.string === quickBooksCustomer.Id,
+        ),
     )
 
     const quickBooksCustomersToUpdate = difference(
       quickBooksCustomers,
-      quickBooksCustomersToAdd
+      quickBooksCustomersToAdd,
     )
 
     await Promise.all(
@@ -104,8 +104,8 @@ export class QuickBooksCustomerService {
           (currentCustomer) =>
             selectResourceFieldValue(
               currentCustomer,
-              fields.quickBooksCustomerId
-            )?.string === quickBooksCustomer.Id
+              fields.quickBooksCustomerId,
+            )?.string === quickBooksCustomer.Id,
         )
 
         if (!customer || !!customer.templateId) return
@@ -113,10 +113,10 @@ export class QuickBooksCustomerService {
         return this.resourceService.update(accountId, customer.id, {
           fields: await this.mapQuickBooksCustomerToResourceFields(
             accountId,
-            quickBooksCustomer
-          )
+            quickBooksCustomer,
+          ),
         })
-      })
+      }),
     )
 
     // `Resource.key` is (currently) created transactionally and thus not parallelizable
@@ -127,8 +127,8 @@ export class QuickBooksCustomerService {
           'Customer',
           {
             input: quickBooksCustomerToAdd.DisplayName,
-            exact: true
-          }
+            exact: true,
+          },
         )
 
       if (customer) {
@@ -136,15 +136,15 @@ export class QuickBooksCustomerService {
         await this.resourceService.update(accountId, customer.id, {
           fields: await this.mapQuickBooksCustomerToResourceFields(
             accountId,
-            quickBooksCustomerToAdd
-          )
+            quickBooksCustomerToAdd,
+          ),
         })
       } else {
         await this.resourceService.create(accountId, 'Customer', {
           fields: await this.mapQuickBooksCustomerToResourceFields(
             accountId,
-            quickBooksCustomerToAdd
-          )
+            quickBooksCustomerToAdd,
+          ),
         })
       }
     }
@@ -152,33 +152,33 @@ export class QuickBooksCustomerService {
 
   private async mapQuickBooksCustomerToResourceFields(
     accountId: string,
-    quickBooksCustomer: Customer['Customer']
+    quickBooksCustomer: Customer['Customer'],
   ): Promise<ResourceFieldInput[]> {
     const customerSchema = await this.schemaService.readMergedSchema(
       accountId,
-      'Customer'
+      'Customer',
     )
     const customerNameField = selectSchemaFieldUnsafe(
       customerSchema,
-      fields.name
+      fields.name,
     )
     const quickBooksCustomerIdField = selectSchemaFieldUnsafe(
       customerSchema,
-      fields.quickBooksCustomerId
+      fields.quickBooksCustomerId,
     )
     const primaryAddressField = selectSchemaFieldUnsafe(
       customerSchema,
-      fields.primaryAddress
+      fields.primaryAddress,
     )
 
     return [
       {
         fieldId: customerNameField.fieldId,
-        valueInput: { string: quickBooksCustomer.DisplayName }
+        valueInput: { string: quickBooksCustomer.DisplayName },
       },
       {
         fieldId: quickBooksCustomerIdField.fieldId,
-        valueInput: { string: quickBooksCustomer.Id }
+        valueInput: { string: quickBooksCustomer.Id },
       },
       {
         fieldId: primaryAddressField.fieldId,
@@ -188,10 +188,10 @@ export class QuickBooksCustomerService {
             country: quickBooksCustomer.BillAddr?.Country ?? null,
             state: quickBooksCustomer.BillAddr?.CountrySubDivisionCode ?? null,
             streetAddress: quickBooksCustomer.BillAddr?.Line1 ?? null,
-            zip: quickBooksCustomer.BillAddr?.PostalCode ?? null
-          }
-        }
-      }
+            zip: quickBooksCustomer.BillAddr?.PostalCode ?? null,
+          },
+        },
+      },
     ]
   }
 }

@@ -15,12 +15,12 @@ export class QuickBooksTokenService {
     @inject(QuickBooksClientService)
     private readonly quickBooksClientService: QuickBooksClientService,
     @inject(QuickBooksConfigService)
-    private readonly quickBooksConfigService: QuickBooksConfigService
+    private readonly quickBooksConfigService: QuickBooksConfigService,
   ) {}
 
   async getToken(accountId: string): Promise<QuickBooksToken | undefined> {
     const account = await this.prisma.account.findUniqueOrThrow({
-      where: { id: accountId }
+      where: { id: accountId },
     })
 
     if (!account.quickBooksConnectedAt || !account.quickBooksToken) {
@@ -28,7 +28,7 @@ export class QuickBooksTokenService {
     }
 
     const { success, data: token } = quickbooksTokenSchema.safeParse(
-      account.quickBooksToken
+      account.quickBooksToken,
     )
 
     if (!success || !token) {
@@ -59,8 +59,8 @@ export class QuickBooksTokenService {
       where: { id: accountId },
       data: {
         quickBooksConnectedAt: new Date(),
-        quickBooksToken: token
-      }
+        quickBooksToken: token,
+      },
     })
   }
 
@@ -73,7 +73,7 @@ export class QuickBooksTokenService {
 
     const { csrf } = z
       .object({
-        csrf: z.string().min(1)
+        csrf: z.string().min(1),
       })
       .parse(JSON.parse(tokenExchange.token.state ?? ''))
 
@@ -87,8 +87,8 @@ export class QuickBooksTokenService {
       where: { id: accountId },
       data: {
         quickBooksConnectedAt: new Date(),
-        quickBooksToken: token
-      }
+        quickBooksToken: token,
+      },
     })
   }
 
@@ -97,8 +97,8 @@ export class QuickBooksTokenService {
       where: { id: accountId },
       data: {
         quickBooksConnectedAt: null,
-        quickBooksToken: Prisma.NullableJsonNullValueInput.DbNull
-      }
+        quickBooksToken: Prisma.NullableJsonNullValueInput.DbNull,
+      },
     })
   }
 
@@ -112,7 +112,7 @@ export class QuickBooksTokenService {
       realmId: token.realmId,
       refresh_token: token.refresh_token,
       token_type: token.token_type,
-      x_refresh_token_expires_in: token.x_refresh_token_expires_in
+      x_refresh_token_expires_in: token.x_refresh_token_expires_in,
     }
   }
 

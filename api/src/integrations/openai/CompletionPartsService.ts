@@ -5,7 +5,7 @@ import { promisify } from 'util'
 import {
   ChatCompletionContentPart,
   ChatCompletionContentPartImage,
-  ChatCompletionContentPartText
+  ChatCompletionContentPartText,
 } from 'openai/resources/index.mjs'
 import { P, match } from 'ts-pattern'
 import { inject, injectable } from 'inversify'
@@ -20,60 +20,60 @@ const exec = promisify(execCallback)
 export class CompletionPartsService {
   constructor(
     @inject(BlobService) private readonly blobService: BlobService,
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   mapFileToCompletionParts(file: File): Promise<ChatCompletionContentPart[]> {
     return match(file.contentType)
       .with('application/pdf', async () => await this.readPdfToBase64s(file))
       .with(P.union('image/png', 'image/jpeg', 'image/webp'), async () => [
-        await this.readImageFileToBase64(file)
+        await this.readImageFileToBase64(file),
       ])
       .with(P.union('text/html', 'text/plain'), async () => [
-        await this.readTextFileToString(file)
+        await this.readTextFileToString(file),
       ])
       .otherwise(async () => [])
   }
 
   private async readTextFileToString(
-    file: File
+    file: File,
   ): Promise<ChatCompletionContentPartText> {
     const blob = await this.blobService.readBlobWithData(
       file.accountId,
-      file.blobId
+      file.blobId,
     )
 
     assert(blob)
 
     return {
       type: 'text',
-      text: blob.buffer.toString()
+      text: blob.buffer.toString(),
     }
   }
 
   private async readImageFileToBase64(
-    file: File
+    file: File,
   ): Promise<ChatCompletionContentPartImage> {
     const blob = await this.blobService.readBlobWithData(
       file.accountId,
-      file.blobId
+      file.blobId,
     )
 
     return {
       type: 'image_url',
       image_url: {
         url: createDataUrl({ mimeType: file.contentType, buffer: blob.buffer }),
-        detail: 'auto'
-      }
+        detail: 'auto',
+      },
     }
   }
 
   private async readPdfToBase64s(
-    file: File
+    file: File,
   ): Promise<ChatCompletionContentPartImage[]> {
     const blob = await this.blobService.readBlobWithData(
       file.accountId,
-      file.blobId
+      file.blobId,
     )
 
     const containerPath = `${this.configService.config.TEMP_PATH}/${file.id}`
@@ -91,16 +91,16 @@ export class CompletionPartsService {
         containerFileNames
           .filter((fileName) => fileName.startsWith(`${outputFileNamePrefix}-`))
           .map((pngFileName) =>
-            readFile(`${containerPath}/${pngFileName}`, { encoding: 'base64' })
-          )
+            readFile(`${containerPath}/${pngFileName}`, { encoding: 'base64' }),
+          ),
       )
 
       return base64s.map((base64) => ({
         type: 'image_url',
         image_url: {
           url: `data:image/png;base64,${base64}`,
-          detail: 'auto'
-        }
+          detail: 'auto',
+        },
       }))
     } finally {
       await rm(containerPath, { recursive: true, force: true })

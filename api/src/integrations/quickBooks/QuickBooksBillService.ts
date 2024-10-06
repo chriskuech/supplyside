@@ -18,20 +18,20 @@ import { ConfigService } from '@supplyside/api/ConfigService'
 const fieldsMap = [
   {
     field: fields.quickBooksBillId,
-    key: 'Id'
+    key: 'Id',
   },
   {
     field: fields.invoiceDate,
-    key: 'TxnDate'
+    key: 'TxnDate',
   },
   {
     field: fields.paymentDueDate,
-    key: 'DueDate'
+    key: 'DueDate',
   },
   {
     field: fields.invoiceNumber,
-    key: 'DocNumber'
-  }
+    key: 'DocNumber',
+  },
 ]
 
 @injectable()
@@ -43,20 +43,20 @@ export class QuickBooksBillService {
     @inject(QuickBooksVendorService)
     private readonly quickBooksVendorService: QuickBooksVendorService,
     @inject(ResourceService) private readonly resourceService: ResourceService,
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   async readBill(
     accountId: string,
     client: OAuthClient,
-    id: string
+    id: string,
   ): Promise<Bill> {
     const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
     return await this.quickBooksApiService
       .makeApiCall(accountId, client, {
         url: `${baseUrl}/bill/${id}`,
-        method: 'GET'
+        method: 'GET',
       })
       .then((data) => readBillSchema.parse(data.json))
   }
@@ -66,7 +66,7 @@ export class QuickBooksBillService {
     accountId: string,
     bill: Resource,
     quickBooksAccountId: string,
-    quickBooksVendorId: string
+    quickBooksVendorId: string,
   ): Promise<Bill> {
     const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
@@ -77,27 +77,27 @@ export class QuickBooksBillService {
         url: `${baseUrl}/bill`,
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       })
       .then((data) => readBillSchema.parse(data.json))
 
     const vendorSchema = await this.schemaService.readMergedSchema(
       accountId,
-      'Bill'
+      'Bill',
     )
 
     const quickBooksBillIdField = selectSchemaField(
       vendorSchema,
-      fields.quickBooksBillId
+      fields.quickBooksBillId,
     )?.fieldId
 
     assert(quickBooksBillIdField, 'quickBooksBillId field not found')
 
     await this.resourceService.updateResourceField(accountId, bill.id, {
       fieldId: quickBooksBillIdField,
-      valueInput: { string: quickBooksBill.Bill.Id }
+      valueInput: { string: quickBooksBill.Bill.Id },
     })
 
     return quickBooksBill
@@ -108,13 +108,13 @@ export class QuickBooksBillService {
     client: OAuthClient,
     bill: Resource,
     quickBooksAccountId: string,
-    quickBooksVendorId: string
+    quickBooksVendorId: string,
   ): Promise<Bill> {
     const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
     const quickBooksBillId = selectResourceFieldValue(
       bill,
-      fields.quickBooksBillId
+      fields.quickBooksBillId,
     )?.string
 
     assert(quickBooksBillId, 'Bill has no quickBooksBillId')
@@ -123,14 +123,14 @@ export class QuickBooksBillService {
     const quickBooksBill = await this.readBill(
       accountId,
       client,
-      quickBooksBillId
+      quickBooksBillId,
     )
 
     const billBody = this.mapBill(bill, quickBooksAccountId, quickBooksVendorId)
 
     const body = {
       ...quickBooksBill.Bill,
-      ...billBody
+      ...billBody,
     }
 
     return this.quickBooksApiService
@@ -138,9 +138,9 @@ export class QuickBooksBillService {
         url: `${baseUrl}/bill`,
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       })
       .then((data) => readBillSchema.parse(data.json))
   }
@@ -150,11 +150,11 @@ export class QuickBooksBillService {
     accountId: string,
     bill: Resource,
     quickBooksAccountId: string,
-    quickBooksVendorId: string
+    quickBooksVendorId: string,
   ): Promise<Bill> {
     const quickBooksBillId = selectResourceFieldValue(
       bill,
-      fields.quickBooksBillId
+      fields.quickBooksBillId,
     )?.string
 
     if (quickBooksBillId) {
@@ -163,7 +163,7 @@ export class QuickBooksBillService {
         client,
         bill,
         quickBooksAccountId,
-        quickBooksVendorId
+        quickBooksVendorId,
       )
     } else {
       return this.createBillOnQuickBooks(
@@ -171,7 +171,7 @@ export class QuickBooksBillService {
         accountId,
         bill,
         quickBooksAccountId,
-        quickBooksVendorId
+        quickBooksVendorId,
       )
     }
   }
@@ -179,13 +179,13 @@ export class QuickBooksBillService {
   async syncBill(
     client: OAuthClient,
     accountId: string,
-    resourceId: string
+    resourceId: string,
   ): Promise<void> {
     const bill = await this.resourceService.read(accountId, resourceId)
 
     const quickBooksAccountName = selectResourceFieldValue(
       bill,
-      fields.quickBooksAccount
+      fields.quickBooksAccount,
     )?.option?.name
     assert(quickBooksAccountName, 'Account not set')
 
@@ -194,16 +194,16 @@ export class QuickBooksBillService {
       client,
       {
         entity: 'Account',
-        where: `FullyQualifiedName = '${quickBooksAccountName}'`
+        where: `FullyQualifiedName = '${quickBooksAccountName}'`,
       },
-      accountQuerySchema
+      accountQuerySchema,
     )
 
     assert(
       quickBooksAccountQuery.QueryResponse.Account,
       new QuickBooksExpectedError(
-        'Accounting category does not exist or is not active in QuickBooks'
-      )
+        'Accounting category does not exist or is not active in QuickBooks',
+      ),
     )
 
     const quickBooksAccountId =
@@ -218,7 +218,7 @@ export class QuickBooksBillService {
       await this.quickBooksVendorService.upsertVendorOnQuickBooks(
         client,
         accountId,
-        vendorResource
+        vendorResource,
       )
     const quickBooksVendorId = quickBooksVendor.Vendor.Id
 
@@ -227,28 +227,28 @@ export class QuickBooksBillService {
       accountId,
       bill,
       quickBooksAccountId,
-      quickBooksVendorId
+      quickBooksVendorId,
     )
   }
 
   mapBill(
     billResource: Resource,
     quickBooksAccountId: string,
-    quickBooksVendorId: string
+    quickBooksVendorId: string,
   ) {
     const quickBooksBill = fieldsMap.reduce(
       (bill, fieldMap) => ({
         ...bill,
-        [fieldMap.key]: mapValue(billResource, fieldMap.field)
+        [fieldMap.key]: mapValue(billResource, fieldMap.field),
       }),
-      {}
+      {},
     )
 
     return {
       ...quickBooksBill,
       PrivateNote: `${this.configService.config.APP_BASE_URL}/bills/${billResource.key}`,
       VendorRef: {
-        value: quickBooksVendorId
+        value: quickBooksVendorId,
       },
       Line: [
         {
@@ -257,11 +257,11 @@ export class QuickBooksBillService {
           Amount: mapValue(billResource, fields.totalCost) ?? 0,
           AccountBasedExpenseLineDetail: {
             AccountRef: {
-              value: quickBooksAccountId
-            }
-          }
-        }
-      ]
+              value: quickBooksAccountId,
+            },
+          },
+        },
+      ],
     }
   }
 }

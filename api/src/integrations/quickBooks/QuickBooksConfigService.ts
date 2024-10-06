@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify'
 @injectable()
 export class QuickBooksConfigService {
   constructor(
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   get config() {
@@ -14,7 +14,7 @@ export class QuickBooksConfigService {
       QUICKBOOKS_CLIENT_SECRET: clientSecret,
       QUICKBOOKS_CSRF_SECRET: csrfSecret,
       QUICKBOOKS_ENVIRONMENT: environment,
-      APP_BASE_URL
+      APP_BASE_URL,
     } = this.configService.config
 
     if (!clientId || !clientSecret || !csrfSecret || !environment) {
@@ -29,12 +29,12 @@ export class QuickBooksConfigService {
       redirectUri: APP_BASE_URL + '/api/integrations/quickbooks/login',
       apiBaseUrl: {
         sandbox: 'https://sandbox-quickbooks.api.intuit.com',
-        production: 'https://quickbooks.api.intuit.com'
+        production: 'https://quickbooks.api.intuit.com',
       }[environment],
       appBaseUrl: {
         sandbox: 'https://sandbox.qbo.intuit.com',
-        production: 'https://qbo.intuit.com'
-      }[environment]
+        production: 'https://qbo.intuit.com',
+      }[environment],
     }
   }
 

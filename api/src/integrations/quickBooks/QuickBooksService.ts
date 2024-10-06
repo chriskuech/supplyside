@@ -17,7 +17,7 @@ import {
   billStatusOptions,
   fields,
   selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe
+  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import { QuickBooksCustomerService } from './QuickBooksCustomerService'
@@ -48,7 +48,7 @@ export class QuickBooksService {
     @inject(QuickBooksCustomerService)
     private readonly quickBooksCustomerService: QuickBooksCustomerService,
     @inject(QuickBooksBillPaymentService)
-    private readonly quickBooksBillPaymentService: QuickBooksBillPaymentService
+    private readonly quickBooksBillPaymentService: QuickBooksBillPaymentService,
   ) {}
 
   get isEnabled() {
@@ -91,7 +91,7 @@ export class QuickBooksService {
 
   async getConnectedAt(accountId: string) {
     const account = await this.prisma.account.findFirstOrThrow({
-      where: { id: accountId }
+      where: { id: accountId },
     })
 
     return account.quickBooksConnectedAt
@@ -105,16 +105,16 @@ export class QuickBooksService {
     await Promise.all([
       this.quickBooksAccountService.upsertAccountsFromQuickBooks(
         client,
-        accountId
+        accountId,
       ),
       this.quickBooksVendorService.upsertVendorsFromQuickBooks(
         client,
-        accountId
+        accountId,
       ),
       this.quickBooksCustomerService.upsertCustomersFromQuickBooks(
         client,
-        accountId
-      )
+        accountId,
+      ),
     ])
   }
 
@@ -138,7 +138,7 @@ export class QuickBooksService {
 
   async findAccountIdByRealmId(realmId: string) {
     const account = await this.prisma.account.findFirst({
-      where: { quickBooksToken: { path: ['realmId'], equals: realmId } }
+      where: { quickBooksToken: { path: ['realmId'], equals: realmId } },
     })
     if (!account) return null
 
@@ -154,7 +154,7 @@ export class QuickBooksService {
 
   async getBillPayment(
     accountId: string,
-    billPaymentId: string
+    billPaymentId: string,
   ): Promise<BillPayment> {
     const token = await this.quickBooksTokenService.getToken(accountId)
     assert(token, 'No token found')
@@ -164,7 +164,7 @@ export class QuickBooksService {
     return this.quickBooksBillPaymentService.readBillPayment(
       accountId,
       client,
-      billPaymentId
+      billPaymentId,
     )
   }
 
@@ -185,13 +185,13 @@ export class QuickBooksService {
     await Promise.all(
       data.eventNotifications.map(async (notification) => {
         const accountId = await this.findAccountIdByRealmId(
-          notification.realmId
+          notification.realmId,
         )
         if (!accountId) return
 
         const entities = groupBy(
           notification.dataChangeEvent.entities,
-          (entity) => entity.id
+          (entity) => entity.id,
         )
 
         return Promise.all(
@@ -200,8 +200,8 @@ export class QuickBooksService {
             const billPayment = await this.getBillPayment(accountId, entityId)
             const billIds = billPayment.BillPayment.Line.flatMap((line) =>
               line.LinkedTxn.filter((txn) => txn.TxnType === 'Bill').map(
-                (txn) => txn.TxnId
-              )
+                (txn) => txn.TxnId,
+              ),
             )
 
             return Promise.all(
@@ -211,7 +211,7 @@ export class QuickBooksService {
                     accountId,
                     'Bill',
                     fields.quickBooksBillId,
-                    { string: billId }
+                    { string: billId },
                   )
 
                 if (!bill) return
@@ -222,18 +222,18 @@ export class QuickBooksService {
                 if (quickBooksBill.Bill.Balance === 0) {
                   const billSchema = await this.schemaService.readMergedSchema(
                     accountId,
-                    'Bill'
+                    'Bill',
                   )
 
                   const billStatusFieldId = selectSchemaFieldUnsafe(
                     billSchema,
-                    fields.billStatus
+                    fields.billStatus,
                   ).fieldId
 
                   const paidOptionId = selectSchemaFieldOptionUnsafe(
                     billSchema,
                     fields.billStatus,
-                    billStatusOptions.paid
+                    billStatusOptions.paid,
                   ).id
 
                   await this.resourceService.updateResourceField(
@@ -241,15 +241,15 @@ export class QuickBooksService {
                     bill.id,
                     {
                       fieldId: billStatusFieldId,
-                      valueInput: { optionId: paidOptionId }
-                    }
+                      valueInput: { optionId: paidOptionId },
+                    },
                   )
                 }
-              })
+              }),
             )
-          })
+          }),
         )
-      })
+      }),
     )
   }
 }

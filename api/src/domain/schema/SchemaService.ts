@@ -13,18 +13,18 @@ export class SchemaService {
   async readMergedSchema(
     accountId: string,
     resourceType: ResourceType,
-    isSystem?: boolean
+    isSystem?: boolean,
   ): Promise<Schema> {
     const schemas = await this.prisma.schema.findMany({
       where: {
         accountId,
         resourceType,
-        isSystem
+        isSystem,
       },
       include: schemaIncludes,
       orderBy: {
-        isSystem: 'desc'
-      }
+        isSystem: 'desc',
+      },
     })
 
     return {
@@ -35,31 +35,31 @@ export class SchemaService {
           id: s.id,
           name: s.name,
           fields: s.SectionField.map((sf) => sf.Field).map(
-            mapFieldModelToEntity
-          )
+            mapFieldModelToEntity,
+          ),
         })),
       fields: [
         ...schemas.flatMap((s) => s.SchemaField),
-        ...schemas.flatMap((s) => s.Section).flatMap((s) => s.SectionField)
+        ...schemas.flatMap((s) => s.Section).flatMap((s) => s.SectionField),
       ]
         .map((sf) => sf.Field)
-        .map(mapFieldModelToEntity)
+        .map(mapFieldModelToEntity),
     }
   }
 
   async readCustomSchema(
     accountId: string,
-    resourceType: ResourceType
+    resourceType: ResourceType,
   ): Promise<Schema> {
     const schema = await this.prisma.schema.findUniqueOrThrow({
       where: {
         accountId_resourceType_isSystem: {
           accountId,
           resourceType,
-          isSystem: false
-        }
+          isSystem: false,
+        },
       },
-      include: schemaIncludes
+      include: schemaIncludes,
     })
 
     return mapSchemaModelToEntity(schema)
@@ -69,13 +69,13 @@ export class SchemaService {
     const existingSchemas = await this.prisma.schema.findMany({
       where: { accountId, isSystem: false },
       select: {
-        resourceType: true
-      }
+        resourceType: true,
+      },
     })
 
     const missingResourceTypes = difference(
       Object.values(ResourceTypeModel),
-      existingSchemas.map((schema) => schema.resourceType)
+      existingSchemas.map((schema) => schema.resourceType),
     )
 
     if (missingResourceTypes.length) {
@@ -84,9 +84,9 @@ export class SchemaService {
           (resourceType) => ({
             accountId,
             resourceType,
-            isSystem: false
-          })
-        )
+            isSystem: false,
+          }),
+        ),
       })
     }
 
@@ -102,22 +102,22 @@ export class SchemaService {
             SectionField: {
               select: {
                 Field: {
-                  include: fieldIncludes
-                }
+                  include: fieldIncludes,
+                },
               },
               orderBy: {
-                order: 'asc'
-              }
-            }
+                order: 'asc',
+              },
+            },
           },
           orderBy: {
-            order: 'asc'
-          }
-        }
+            order: 'asc',
+          },
+        },
       },
       orderBy: {
-        resourceType: 'asc'
-      }
+        resourceType: 'asc',
+      },
     })
 
     return schemas.map((s) => ({
@@ -127,9 +127,9 @@ export class SchemaService {
       sections: s.Section.map((s) => ({
         id: s.id,
         name: s.name,
-        fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity)
+        fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity),
       })),
-      allFields: []
+      allFields: [],
     }))
   }
 }

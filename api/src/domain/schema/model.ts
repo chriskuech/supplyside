@@ -5,19 +5,19 @@ import {
   Schema,
   SchemaField,
   Section,
-  SectionField
+  SectionField,
 } from '@prisma/client'
 import { ValueModel, valueInclude } from '../resource/model'
 
 export const fieldIncludes = {
   DefaultValue: {
-    include: valueInclude
+    include: valueInclude,
   },
   Option: {
     orderBy: {
-      order: 'asc'
-    }
-  }
+      order: 'asc',
+    },
+  },
 } satisfies Prisma.FieldInclude
 
 export type FieldModel = Field & {
@@ -38,28 +38,28 @@ export const schemaIncludes = {
   SchemaField: {
     include: {
       Field: {
-        include: fieldIncludes
-      }
+        include: fieldIncludes,
+      },
     },
     orderBy: {
-      order: 'asc'
-    }
+      order: 'asc',
+    },
   },
   Section: {
     include: {
       SectionField: {
         include: {
           Field: {
-            include: fieldIncludes
-          }
+            include: fieldIncludes,
+          },
         },
         orderBy: {
-          order: 'asc'
-        }
-      }
+          order: 'asc',
+        },
+      },
     },
     orderBy: {
-      order: 'asc'
-    }
-  }
+      order: 'asc',
+    },
+  },
 } satisfies Prisma.SchemaInclude

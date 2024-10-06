@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { validate as isUuid } from 'uuid'
 import {
   ResourceFieldInput,
-  ResourceService
+  ResourceService,
 } from '../resource/ResourceService'
 import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
 import { SchemaService } from '../schema/SchemaService'
@@ -12,7 +12,7 @@ import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService
 import {
   fields,
   selectResourceFieldValue,
-  selectSchemaFieldUnsafe
+  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 
@@ -34,14 +34,14 @@ const ExtractedBillDataSchema = z.object({
     .string()
     .nullish()
     .describe(
-      'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.'
+      'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.',
     ),
   vendorId: z
     .string()
     .nullish()
     .describe(
-      'The Vendor ID. The Vendor ID is a UUIDv4 for identifying the Vendor. The Bill will contain the Vendor Name, not the Vendor ID. The Vendor ID must be looked up in the provided "Vendor List" TSV file by identifying the Vendor Name in the file (accounting for minor spelling/punctuation differences) and returning the associated Vendor ID for that Vendor Name. If no Vendor ID can be determined with high confidence, this field should be null/missing.'
-    )
+      'The Vendor ID. The Vendor ID is a UUIDv4 for identifying the Vendor. The Bill will contain the Vendor Name, not the Vendor ID. The Vendor ID must be looked up in the provided "Vendor List" TSV file by identifying the Vendor Name in the file (accounting for minor spelling/punctuation differences) and returning the associated Vendor ID for that Vendor Name. If no Vendor ID can be determined with high confidence, this field should be null/missing.',
+    ),
 })
 
 @injectable()
@@ -50,14 +50,14 @@ export class BillExtractionService {
     @inject(OpenAiService) private readonly openai: OpenAiService,
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(ResourceService)
-    private readonly resourceService: ResourceService
+    private readonly resourceService: ResourceService,
   ) {}
 
   async extractContent(accountId: string, resourceId: string) {
     const [billSchema, billResource, vendors] = await Promise.all([
       this.schemaService.readMergedSchema(accountId, 'Bill'),
       this.resourceService.read(accountId, resourceId),
-      this.resourceService.list(accountId, 'Vendor')
+      this.resourceService.list(accountId, 'Vendor'),
     ])
 
     const billFiles =
@@ -71,7 +71,7 @@ export class BillExtractionService {
     const data = await this.openai.extractContent({
       systemPrompt: prompt,
       schema: ExtractedBillDataSchema,
-      files: [vendorList, ...billFiles]
+      files: [vendorList, ...billFiles],
     })
 
     const poNumber = data?.poNumber
@@ -89,20 +89,20 @@ export class BillExtractionService {
                 {
                   '==': [
                     {
-                      var: fields.poNumber.name
+                      var: fields.poNumber.name,
                     },
-                    poNumberAsNumber.toString()
-                  ]
+                    poNumberAsNumber.toString(),
+                  ],
                 },
-                { '==': [{ var: fields.vendor.name }, vendorId] }
-              ]
-            }
+                { '==': [{ var: fields.vendor.name }, vendorId] },
+              ],
+            },
           })
         : []
 
     assert(
       !purchases.length,
-      `Found ${purchases.length + 1} Purchases with PO Number ${poNumber}`
+      `Found ${purchases.length + 1} Purchases with PO Number ${poNumber}`,
     )
 
     const updatedFields: ResourceFieldInput[] = [
@@ -111,8 +111,8 @@ export class BillExtractionService {
             {
               fieldId: selectSchemaFieldUnsafe(billSchema, fields.poNumber)
                 .fieldId,
-              valueInput: { string: poNumber }
-            }
+              valueInput: { string: poNumber },
+            },
           ]
         : []),
       ...(purchase
@@ -120,8 +120,8 @@ export class BillExtractionService {
             {
               fieldId: selectSchemaFieldUnsafe(billSchema, fields.purchase)
                 .fieldId,
-              valueInput: { resourceId: purchase.id }
-            }
+              valueInput: { resourceId: purchase.id },
+            },
           ]
         : []),
       ...(vendorId && isUuid(vendorId)
@@ -129,16 +129,16 @@ export class BillExtractionService {
             {
               fieldId: selectSchemaFieldUnsafe(billSchema, fields.vendor)
                 .fieldId,
-              valueInput: { resourceId: vendorId }
-            }
+              valueInput: { resourceId: vendorId },
+            },
           ]
-        : [])
+        : []),
     ]
 
     if (!updatedFields.length) return
 
     await this.resourceService.update(accountId, resourceId, {
-      fields: updatedFields
+      fields: updatedFields,
     })
   }
 }

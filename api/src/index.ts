@@ -27,6 +27,6 @@ const isDev = process.env.NODE_ENV === 'development'
 
   app.listen({
     port: z.coerce.number().optional().parse(process.env.PORT),
-    host: '0.0.0.0'
+    host: '0.0.0.0',
   })
 })()

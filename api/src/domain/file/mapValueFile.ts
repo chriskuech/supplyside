@@ -6,5 +6,5 @@ export const mapFile = (file: FileModel): File => ({
   accountId: file.accountId,
   blobId: file.blobId,
   name: file.name,
-  contentType: file.Blob.mimeType
+  contentType: file.Blob.mimeType,
 })

@@ -14,7 +14,7 @@ export const mountWebhooks = async <App extends FastifyInstance>(app: App) =>
       method: 'POST',
       url: '/bills-inbox',
       schema: {
-        body: z.any()
+        body: z.any(),
       },
       handler: async (request, reply) => {
         const billService = container.resolve(BillService)
@@ -23,7 +23,7 @@ export const mountWebhooks = async <App extends FastifyInstance>(app: App) =>
         await billService.handleMessage(request.body as Message)
 
         reply.status(200).send()
-      }
+      },
     })
     .route({
       method: 'POST',
@@ -36,9 +36,9 @@ export const mountWebhooks = async <App extends FastifyInstance>(app: App) =>
         const accounts = await accountService.list()
 
         await Promise.all(
-          accounts.map((account) => templateService.applyTemplate(account.id))
+          accounts.map((account) => templateService.applyTemplate(account.id)),
         )
 
         reply.status(200).send()
-      }
+      },
     })

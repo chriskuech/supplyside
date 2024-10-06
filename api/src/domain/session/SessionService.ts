@@ -24,12 +24,12 @@ export class SessionService {
   constructor(
     @inject(PrismaService) private readonly prisma: PrismaService,
     @inject(SmtpService) private readonly smtpService: SmtpService,
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   async create(email: string, tat: string): Promise<Session> {
     const user = await this.prisma.user.findUnique({
-      where: { email }
+      where: { email },
     })
 
     if (!user) {
@@ -38,19 +38,19 @@ export class SessionService {
 
     if (!tat) {
       throw new SessionCreationError(
-        'No token provided. Please retry with a valid token.'
+        'No token provided. Please retry with a valid token.',
       )
     }
 
     if (!user.tatExpiresAt || user.tat !== tat) {
       throw new SessionCreationError(
-        'The token provided is incorrect. Please retry with the correct token.'
+        'The token provided is incorrect. Please retry with the correct token.',
       )
     }
 
     if (user.tatExpiresAt < new Date()) {
       throw new SessionCreationError(
-        'The token provided has expired. Please retry with a new token.'
+        'The token provided has expired. Please retry with a new token.',
       )
     }
 
@@ -60,16 +60,16 @@ export class SessionService {
       data: {
         expiresAt,
         Account: { connect: { id: user.accountId } },
-        User: { connect: { id: user.id } }
-      }
+        User: { connect: { id: user.id } },
+      },
     })
 
     await this.prisma.user.update({
       where: { id: user.id },
       data: {
         tat: null,
-        tatExpiresAt: null
-      }
+        tatExpiresAt: null,
+      },
     })
 
     return mapSessionModelToEntity(session)
@@ -77,7 +77,7 @@ export class SessionService {
 
   async read(sessionId: string): Promise<Session | null> {
     const session = await this.prisma.session.findUnique({
-      where: { id: sessionId, revokedAt: null }
+      where: { id: sessionId, revokedAt: null },
     })
 
     if (!session) return null
@@ -90,8 +90,8 @@ export class SessionService {
       const session = await this.prisma.session.update({
         where: { id: sessionId, revokedAt: null },
         data: {
-          expiresAt: new Date(Date.now() + lifespanInSeconds * 1000)
-        }
+          expiresAt: new Date(Date.now() + lifespanInSeconds * 1000),
+        },
       })
 
       return mapSessionModelToEntity(session)
@@ -105,7 +105,7 @@ export class SessionService {
   async clear(sessionId: string) {
     await this.prisma.session.update({
       where: { id: sessionId },
-      data: { revokedAt: new Date() }
+      data: { revokedAt: new Date() },
     })
   }
 
@@ -114,28 +114,28 @@ export class SessionService {
       where: {
         id: sessionId,
         User: {
-          accountId: systemAccountId
-        }
+          accountId: systemAccountId,
+        },
       },
-      data: { accountId }
+      data: { accountId },
     })
   }
 
   async startEmailVerification({
     email,
-    returnTo
+    returnTo,
   }: StartEmailVerificationInput): Promise<void> {
     const tokenLifespanInMinutes = 5
 
     const tat = uuid()
     const tatExpiresAt = new Date(
-      Date.now() + 1000 * 60 * tokenLifespanInMinutes
+      Date.now() + 1000 * 60 * tokenLifespanInMinutes,
     )
 
     try {
       await this.prisma.user.update({
         where: { email },
-        data: { tat, tatExpiresAt }
+        data: { tat, tatExpiresAt },
       })
     } catch (error) {
       if (isPrismaError('notFound')(error)) {
@@ -156,8 +156,8 @@ export class SessionService {
             this.configService.config.APP_BASE_URL
           }${verifyLoginPath}?email=${encodeURIComponent(email)}&token=${tat}` +
           (returnTo ? `&returnTo=${returnTo}` : ''),
-        product_url: this.configService.config.APP_BASE_URL
-      }
+        product_url: this.configService.config.APP_BASE_URL,
+      },
     })
   }
 }

@@ -15,8 +15,8 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
       url: '/disconnect/',
       schema: {
         querystring: z.object({
-          realmId: z.string().min(1)
-        })
+          realmId: z.string().min(1),
+        }),
       },
       handler: async (req, res) => {
         const quickBooksService = container.resolve(QuickBooksService)
@@ -24,7 +24,7 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
         await quickBooksService.disconnect(req.query.realmId)
 
         res.status(200).send()
-      }
+      },
     })
     .route({
       method: 'POST',
@@ -54,5 +54,5 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
         await quickBooksService.processWebhook(data)
 
         return res.status(200).send()
-      }
+      },
     })

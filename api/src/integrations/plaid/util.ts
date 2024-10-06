@@ -6,14 +6,14 @@ import { ConfigService } from '@supplyside/api/ConfigService'
 @injectable()
 export class PlaidConfigService {
   constructor(
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   getPlaidConfig() {
     const {
       PLAID_ENV: environment,
       PLAID_CLIENT_ID: clientId,
-      PLAID_SECRET: clientSecret
+      PLAID_SECRET: clientSecret,
     } = this.configService.config
 
     if (!clientId || !clientSecret || !environment) {
@@ -37,10 +37,10 @@ export class PlaidConfigService {
           headers: {
             'PLAID-CLIENT-ID': config.clientId,
             'PLAID-SECRET': config.clientSecret,
-            'Plaid-Version': '2020-09-14'
-          }
-        }
-      })
+            'Plaid-Version': '2020-09-14',
+          },
+        },
+      }),
     )
   }
 }

@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify'
 import {
   countQuerySchema,
   readVendorSchema,
-  vendorQuerySchema
+  vendorQuerySchema,
 } from './schemas'
 import { Vendor } from './types'
 import { handleNotFoundError } from './errors'
@@ -17,12 +17,12 @@ import {
   fields,
   selectResourceFieldValue,
   selectSchemaField,
-  selectSchemaFieldUnsafe
+  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
   ResourceFieldInput,
-  ResourceService
+  ResourceService,
 } from '@supplyside/api/domain/resource/ResourceService'
 
 @injectable()
@@ -31,38 +31,38 @@ export class QuickBooksVendorService {
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(ResourceService) private readonly resourceService: ResourceService,
     @inject(QuickBooksApiService)
-    private readonly quickBooksApiService: QuickBooksApiService
+    private readonly quickBooksApiService: QuickBooksApiService,
   ) {}
 
   async readVendor(
     accountId: string,
     client: OAuthClient,
-    vendorId: string
+    vendorId: string,
   ): Promise<Vendor> {
     return this.quickBooksApiService
       .makeApiCall(accountId, client, {
         url: `${this.quickBooksApiService.getBaseUrl(
-          client.token.realmId
+          client.token.realmId,
         )}/vendor/${vendorId}`,
-        method: 'GET'
+        method: 'GET',
       })
       .then((data) => readVendorSchema.parse(data.json))
   }
 
   async upsertVendorsFromQuickBooks(
     client: OAuthClient,
-    accountId: string
+    accountId: string,
   ): Promise<void> {
     const quickBooksVendorsCount = await this.quickBooksApiService.query(
       accountId,
       client,
       { entity: 'Vendor', getCount: true },
-      countQuerySchema
+      countQuerySchema,
     )
     const totalQuickBooksVendors =
       quickBooksVendorsCount.QueryResponse.totalCount
     const numberOfRequests = Math.ceil(
-      totalQuickBooksVendors / MAX_ENTITIES_PER_PAGE
+      totalQuickBooksVendors / MAX_ENTITIES_PER_PAGE,
     )
 
     const vendorResponses = await Promise.all(
@@ -73,15 +73,15 @@ export class QuickBooksVendorService {
           {
             entity: 'Vendor',
             startPosition: i * MAX_ENTITIES_PER_PAGE + 1,
-            maxResults: MAX_ENTITIES_PER_PAGE
+            maxResults: MAX_ENTITIES_PER_PAGE,
           },
-          vendorQuerySchema
-        )
-      )
+          vendorQuerySchema,
+        ),
+      ),
     )
 
     const quickBooksVendors = vendorResponses.flatMap(
-      (vendorResponse) => vendorResponse.QueryResponse.Vendor ?? []
+      (vendorResponse) => vendorResponse.QueryResponse.Vendor ?? [],
     )
 
     const currentVendors = await this.resourceService.list(accountId, 'Vendor')
@@ -91,13 +91,13 @@ export class QuickBooksVendorService {
         !currentVendors.some(
           (vendor) =>
             selectResourceFieldValue(vendor, fields.quickBooksVendorId)
-              ?.string === quickBooksVendor.Id
-        )
+              ?.string === quickBooksVendor.Id,
+        ),
     )
 
     const quickBooksVendorsToUpdate = difference(
       quickBooksVendors,
-      quickBooksVendorsToAdd
+      quickBooksVendorsToAdd,
     )
 
     await Promise.all(
@@ -105,7 +105,7 @@ export class QuickBooksVendorService {
         const vendor = currentVendors.find(
           (currentVendor) =>
             selectResourceFieldValue(currentVendor, fields.quickBooksVendorId)
-              ?.string === quickBooksVendor.Id
+              ?.string === quickBooksVendor.Id,
         )
 
         if (!vendor || !!vendor.templateId) return
@@ -113,10 +113,10 @@ export class QuickBooksVendorService {
         return this.resourceService.update(accountId, vendor.id, {
           fields: await this.mapQuickBooksVendorToResourceFields(
             accountId,
-            quickBooksVendor
-          )
+            quickBooksVendor,
+          ),
         })
-      })
+      }),
     )
 
     // `Resource.key` is (currently) created transactionally and thus not parallelizable
@@ -126,8 +126,8 @@ export class QuickBooksVendorService {
         'Vendor',
         {
           input: quickBooksVendorToAdd.DisplayName,
-          exact: true
-        }
+          exact: true,
+        },
       )
 
       if (vendor) {
@@ -135,15 +135,15 @@ export class QuickBooksVendorService {
         await this.resourceService.update(accountId, vendor.id, {
           fields: await this.mapQuickBooksVendorToResourceFields(
             accountId,
-            quickBooksVendorToAdd
-          )
+            quickBooksVendorToAdd,
+          ),
         })
       } else {
         await this.resourceService.create(accountId, 'Vendor', {
           fields: await this.mapQuickBooksVendorToResourceFields(
             accountId,
-            quickBooksVendorToAdd
-          )
+            quickBooksVendorToAdd,
+          ),
         })
       }
     }
@@ -152,7 +152,7 @@ export class QuickBooksVendorService {
   createVendorOnQuickBooks = async (
     client: OAuthClient,
     accountId: string,
-    vendor: Resource
+    vendor: Resource,
   ): Promise<Vendor> => {
     const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
@@ -161,26 +161,26 @@ export class QuickBooksVendorService {
         url: `${baseUrl}/vendor`,
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(QuickBooksVendorService.mapVendor(vendor))
+        body: JSON.stringify(QuickBooksVendorService.mapVendor(vendor)),
       })
       .then((data) => readVendorSchema.parse(data.json))
 
     const vendorSchema = await this.schemaService.readMergedSchema(
       accountId,
-      'Vendor'
+      'Vendor',
     )
     const quickBooksVendorIdField = selectSchemaField(
       vendorSchema,
-      fields.quickBooksVendorId
+      fields.quickBooksVendorId,
     )?.fieldId
 
     assert(quickBooksVendorIdField, 'quickBooksVendorId field not found')
 
     await this.resourceService.updateResourceField(accountId, vendor.id, {
       fieldId: quickBooksVendorIdField,
-      valueInput: { string: quickBooksVendor.Vendor.Id }
+      valueInput: { string: quickBooksVendor.Vendor.Id },
     })
 
     return quickBooksVendor
@@ -189,13 +189,13 @@ export class QuickBooksVendorService {
   async updateVendorOnQuickBooks(
     accountId: string,
     client: OAuthClient,
-    vendor: Resource
+    vendor: Resource,
   ): Promise<Vendor> {
     const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
     const quickBooksVendorId = selectResourceFieldValue(
       vendor,
-      fields.quickBooksVendorId
+      fields.quickBooksVendorId,
     )?.string
 
     assert(quickBooksVendorId, 'Vendor has no quickBooksVendorId')
@@ -203,17 +203,17 @@ export class QuickBooksVendorService {
     const quickBooksVendor = await this.readVendor(
       accountId,
       client,
-      quickBooksVendorId
+      quickBooksVendorId,
     ).catch((e) =>
       handleNotFoundError(
         e,
-        'Vendor does not exist or is not active in QuickBooks'
-      )
+        'Vendor does not exist or is not active in QuickBooks',
+      ),
     )
 
     const body = {
       ...quickBooksVendor.Vendor,
-      ...QuickBooksVendorService.mapVendor(vendor)
+      ...QuickBooksVendorService.mapVendor(vendor),
     }
 
     return this.quickBooksApiService
@@ -221,9 +221,9 @@ export class QuickBooksVendorService {
         url: `${baseUrl}/vendor`,
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       })
       .then((data) => readVendorSchema.parse(data.json))
   }
@@ -231,11 +231,11 @@ export class QuickBooksVendorService {
   async upsertVendorOnQuickBooks(
     client: OAuthClient,
     accountId: string,
-    vendor: Resource
+    vendor: Resource,
   ): Promise<Vendor> {
     const quickBooksVendorId = selectResourceFieldValue(
       vendor,
-      fields.quickBooksVendorId
+      fields.quickBooksVendorId,
     )?.string
 
     if (quickBooksVendorId) {
@@ -248,7 +248,7 @@ export class QuickBooksVendorService {
   private static mapVendor(vendorResource: Resource) {
     const addressValue = selectResourceFieldValue(
       vendorResource,
-      fields.primaryAddress
+      fields.primaryAddress,
     )
     return {
       Id: mapValue(vendorResource, fields.quickBooksVendorId),
@@ -258,37 +258,37 @@ export class QuickBooksVendorService {
         Country: addressValue?.address?.country,
         CountrySubDivisionCode: addressValue?.address?.state,
         Line1: addressValue?.address?.streetAddress,
-        PostalCode: addressValue?.address?.zip
-      }
+        PostalCode: addressValue?.address?.zip,
+      },
     }
   }
 
   private async mapQuickBooksVendorToResourceFields(
     accountId: string,
-    quickBooksVendor: Vendor['Vendor']
+    quickBooksVendor: Vendor['Vendor'],
   ): Promise<ResourceFieldInput[]> {
     const vendorSchema = await this.schemaService.readMergedSchema(
       accountId,
-      'Vendor'
+      'Vendor',
     )
     const vendorNameField = selectSchemaFieldUnsafe(vendorSchema, fields.name)
     const quickBooksVendorIdField = selectSchemaFieldUnsafe(
       vendorSchema,
-      fields.quickBooksVendorId
+      fields.quickBooksVendorId,
     )
     const primaryAddressField = selectSchemaFieldUnsafe(
       vendorSchema,
-      fields.primaryAddress
+      fields.primaryAddress,
     )
 
     return [
       {
         fieldId: vendorNameField.fieldId,
-        valueInput: { string: quickBooksVendor.DisplayName }
+        valueInput: { string: quickBooksVendor.DisplayName },
       },
       {
         fieldId: quickBooksVendorIdField.fieldId,
-        valueInput: { string: quickBooksVendor.Id }
+        valueInput: { string: quickBooksVendor.Id },
       },
       {
         fieldId: primaryAddressField.fieldId,
@@ -298,10 +298,10 @@ export class QuickBooksVendorService {
             country: quickBooksVendor.BillAddr?.Country ?? null,
             state: quickBooksVendor.BillAddr?.CountrySubDivisionCode ?? null,
             streetAddress: quickBooksVendor.BillAddr?.Line1 ?? null,
-            zip: quickBooksVendor.BillAddr?.PostalCode ?? null
-          }
-        }
-      }
+            zip: quickBooksVendor.BillAddr?.PostalCode ?? null,
+          },
+        },
+      },
     ]
   }
 }

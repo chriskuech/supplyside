@@ -7,14 +7,14 @@ export type OrderBy = JsonLogicVariable & { dir: 'asc' | 'desc' }
 
 export const JsonLogicSchema = z.union([
   z.object({
-    '==': z.tuple([z.object({ var: z.string() }), z.any()])
+    '==': z.tuple([z.object({ var: z.string() }), z.any()]),
   }),
   z.object({
-    '!=': z.tuple([z.object({ var: z.string() }), z.any()])
+    '!=': z.tuple([z.object({ var: z.string() }), z.any()]),
   }),
   z.object({
-    and: z.array(z.any())
-  })
+    and: z.array(z.any()),
+  }),
 ])
 
 export type JsonLogic = z.infer<typeof JsonLogicSchema>

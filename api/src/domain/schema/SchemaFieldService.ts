@@ -4,7 +4,7 @@ import {
   FieldType,
   ResourceType,
   SchemaField,
-  ValueInput
+  ValueInput,
 } from '@supplyside/model'
 import { mapFieldModelToEntity } from './mappers'
 import { fieldIncludes } from './model'
@@ -16,18 +16,18 @@ import { match } from 'ts-pattern'
 export class SchemaFieldService {
   constructor(
     @inject(PrismaService)
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {}
 
   async list(accountId: string): Promise<SchemaField[]> {
     const fields = await this.prisma.field.findMany({
       where: {
-        accountId
+        accountId,
       },
       orderBy: {
-        name: 'asc'
+        name: 'asc',
       },
-      include: fieldIncludes
+      include: fieldIncludes,
     })
 
     return fields.map(mapFieldModelToEntity)
@@ -40,20 +40,20 @@ export class SchemaFieldService {
       type: FieldType
       resourceType?: ResourceType
       isRequired: boolean
-    }
+    },
   ) {
     await this.prisma.field.create({
       data: {
         ...data,
         Account: {
           connect: {
-            id: accountId
-          }
+            id: accountId,
+          },
         },
         DefaultValue: {
-          create: {}
-        }
-      }
+          create: {},
+        },
+      },
     })
   }
 
@@ -68,7 +68,7 @@ export class SchemaFieldService {
       options?: OptionPatch[]
       defaultToToday?: boolean
       defaultValue?: ValueInput
-    }
+    },
   ) {
     if (dto.options)
       await Promise.all(
@@ -80,13 +80,13 @@ export class SchemaFieldService {
                   Field: {
                     connect: {
                       id: fieldId,
-                      accountId
-                    }
+                      accountId,
+                    },
                   },
                   name: o.name,
-                  order: i
-                }
-              })
+                  order: i,
+                },
+              }),
             )
             .with({ op: 'update' }, (o) =>
               this.prisma.option.update({
@@ -94,14 +94,14 @@ export class SchemaFieldService {
                   id: o.optionId,
                   Field: {
                     id: fieldId,
-                    accountId
-                  }
+                    accountId,
+                  },
                 },
                 data: {
                   name: o.name,
-                  order: i
-                }
-              })
+                  order: i,
+                },
+              }),
             )
             .with({ op: 'remove' }, (o) =>
               this.prisma.option.delete({
@@ -109,13 +109,13 @@ export class SchemaFieldService {
                   id: o.optionId,
                   Field: {
                     id: fieldId,
-                    accountId
-                  }
-                }
-              })
+                    accountId,
+                  },
+                },
+              }),
             )
-            .exhaustive()
-        )
+            .exhaustive(),
+        ),
       )
 
     await this.prisma.field.update({
@@ -127,9 +127,9 @@ export class SchemaFieldService {
         isRequired: dto.isRequired,
         defaultToToday: dto.defaultToToday,
         DefaultValue: dto.defaultValue && {
-          update: mapValueInputToPrismaValueUpdate(dto.defaultValue)
-        }
-      }
+          update: mapValueInputToPrismaValueUpdate(dto.defaultValue),
+        },
+      },
     })
   }
 
@@ -137,8 +137,8 @@ export class SchemaFieldService {
     await this.prisma.field.delete({
       where: {
         id: fieldId,
-        accountId
-      }
+        accountId,
+      },
     })
   }
 }

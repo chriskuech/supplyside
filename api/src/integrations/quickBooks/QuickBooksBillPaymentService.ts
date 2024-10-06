@@ -8,20 +8,20 @@ import { QuickBooksApiService } from './QuickBooksApiService'
 export class QuickBooksBillPaymentService {
   constructor(
     @inject(QuickBooksApiService)
-    private readonly quickBooksApiService: QuickBooksApiService
+    private readonly quickBooksApiService: QuickBooksApiService,
   ) {}
 
   async readBillPayment(
     accountId: string,
     client: OAuthClient,
-    id: string
+    id: string,
   ): Promise<BillPayment> {
     const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
     return this.quickBooksApiService
       .makeApiCall(accountId, client, {
         url: `${baseUrl}/billpayment/${id}`,
-        method: 'GET'
+        method: 'GET',
       })
       .then((data) => readBillPaymentSchema.parse(data.json))
   }

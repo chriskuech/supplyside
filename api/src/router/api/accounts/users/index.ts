@@ -1,7 +1,7 @@
 import { container } from '@supplyside/api/di'
 import {
   UpdateUserSchema,
-  UserService
+  UserService,
 } from '@supplyside/api/domain/user/UserService'
 import { UserSchema } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
@@ -16,11 +16,11 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
       url: '/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid()
+          accountId: z.string().uuid(),
         }),
         response: {
-          200: z.array(UserSchema)
-        }
+          200: z.array(UserSchema),
+        },
       },
       handler: async (req, res) => {
         const service = container.resolve(UserService)
@@ -28,18 +28,18 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
         const users = await service.list(req.params.accountId)
 
         res.send(users)
-      }
+      },
     })
     .route({
       method: 'POST',
       url: '/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid()
+          accountId: z.string().uuid(),
         }),
         body: z.object({
-          email: z.string().email()
-        })
+          email: z.string().email(),
+        }),
       },
       handler: async (req, res) => {
         const service = container.resolve(UserService)
@@ -47,7 +47,7 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
         await service.invite(req.params.accountId, req.body)
 
         res.send()
-      }
+      },
     })
     .route({
       method: 'GET',
@@ -55,11 +55,11 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          userId: z.string().uuid()
+          userId: z.string().uuid(),
         }),
         response: {
-          200: UserSchema
-        }
+          200: UserSchema,
+        },
       },
       handler: async (req, res) => {
         const service = container.resolve(UserService)
@@ -67,7 +67,7 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
         const user = await service.read(req.params.accountId, req.params.userId)
 
         res.send(user)
-      }
+      },
     })
     .route({
       method: 'PATCH',
@@ -75,9 +75,9 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          userId: z.string().uuid()
+          userId: z.string().uuid(),
         }),
-        body: UpdateUserSchema
+        body: UpdateUserSchema,
       },
       handler: async (req, res) => {
         const service = container.resolve(UserService)
@@ -85,7 +85,7 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
         await service.update(req.params.accountId, req.params.userId, req.body)
 
         res.send()
-      }
+      },
     })
     .route({
       method: 'DELETE',
@@ -93,8 +93,8 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          userId: z.string().uuid()
-        })
+          userId: z.string().uuid(),
+        }),
       },
       handler: async (req, res) => {
         const service = container.resolve(UserService)
@@ -102,5 +102,5 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
         await service.delete(req.params.accountId, req.params.userId)
 
         res.send()
-      }
+      },
     })
