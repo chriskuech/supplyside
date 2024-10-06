@@ -24,7 +24,10 @@ export const mountFiles = async <App extends FastifyInstance>(app: App) =>
       handler: async (request) => {
         const service = container.resolve(FileService)
 
-        const file = await service.create(request.params.accountId, request.body)
+        const file = await service.create(
+          request.params.accountId,
+          request.body,
+        )
 
         return file
       },
@@ -44,10 +47,7 @@ export const mountFiles = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(FileService)
 
-        const file = await service.read(
-          req.params.accountId,
-          req.params.fileId
-        )
+        const file = await service.read(req.params.accountId, req.params.fileId)
 
         if (!file) {
           res.status(404)

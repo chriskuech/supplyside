@@ -3,7 +3,7 @@ import { inject, injectable } from 'inversify'
 import { ConfigService } from '../ConfigService'
 import { isTruthy } from 'remeda'
 
-type User = { name?: string | null; email?: string | null };
+type User = { name?: string | null; email?: string | null }
 
 const mapToEmail = (user: User): string | undefined =>
   user.email ? `${user.name} <${user.email}>` : undefined
@@ -20,16 +20,16 @@ export default class SmtpService {
   }
 
   sendEmail(params: {
-    to?: User[] | null;
-    cc?: User[] | null;
-    replyTo?: User[] | null;
-    templateAlias: string;
-    templateModel: Record<string, unknown>;
+    to?: User[] | null
+    cc?: User[] | null
+    replyTo?: User[] | null
+    templateAlias: string
+    templateModel: Record<string, unknown>
     attachments?: {
-      name: string;
-      contentBase64: string;
-      contentType: string;
-    }[];
+      name: string
+      contentBase64: string
+      contentType: string
+    }[]
   }) {
     return this.client.sendEmailWithTemplate({
       From: 'SupplySide <bot@supplyside.io>',

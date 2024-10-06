@@ -261,10 +261,9 @@ export const webhookBodySchema = z.object({
             operation: z.enum(['Create', 'Update', 'Merge', 'Delete', 'Void']),
             name: z.enum(['BillPayment']),
             lastUpdated: z.string(),
-          })
+          }),
         ),
       }),
-    })
+    }),
   ),
 })
-

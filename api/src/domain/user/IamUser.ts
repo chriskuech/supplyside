@@ -14,4 +14,4 @@ export const IamUserSchema = z.object({
   isGlobalAdmin: z.boolean(),
 })
 
-export type IamUser = z.infer<typeof IamUserSchema>;
+export type IamUser = z.infer<typeof IamUserSchema>

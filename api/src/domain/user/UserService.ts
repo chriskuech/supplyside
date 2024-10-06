@@ -19,12 +19,12 @@ export const UpdateUserSchema = z.object({
   isApprover: z.boolean().optional(),
 })
 
-export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
+export type UpdateUserInput = z.infer<typeof UpdateUserSchema>
 
 export type InviteUserInput = {
-  email: string;
-  isAdmin?: boolean;
-};
+  email: string
+  isAdmin?: boolean
+}
 
 @injectable()
 export class UserService {
@@ -34,7 +34,7 @@ export class UserService {
     @inject(PrismaService)
     private readonly prisma: PrismaService,
     @inject(ConfigService)
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {}
 
   async readSelf(userId: string): Promise<User> {

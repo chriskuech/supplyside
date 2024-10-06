@@ -16,30 +16,30 @@ import { userInclude } from '../user/model'
 import { FileModel } from '@supplyside/api/domain/file/model'
 
 export type ResourceModel = Resource & {
-  Cost: Cost[];
+  Cost: Cost[]
   ResourceField: (ResourceField & {
-    Field: Field;
-    Value: ValueModel;
-  })[];
-};
+    Field: Field
+    Value: ValueModel
+  })[]
+}
 
 export type ValueResourceModel = Resource & {
   ResourceField: (ResourceField & {
-    Field: Field;
-    Value: Value;
-  })[];
-};
+    Field: Field
+    Value: Value
+  })[]
+}
 
 export type ValueModel = Value & {
-  Address: Address | null;
-  Contact: Contact | null;
-  File: FileModel | null;
-  Option: Option | null;
-  User: (User & { ImageBlob: Blob | null }) | null;
-  Files: { File: FileModel }[];
-  ValueOption: (ValueOption & { Option: Option })[];
-  Resource: ValueResourceModel | null;
-};
+  Address: Address | null
+  Contact: Contact | null
+  File: FileModel | null
+  Option: Option | null
+  User: (User & { ImageBlob: Blob | null }) | null
+  Files: { File: FileModel }[]
+  ValueOption: (ValueOption & { Option: Option })[]
+  Resource: ValueResourceModel | null
+}
 
 export const valueInclude = {
   Address: true,

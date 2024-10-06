@@ -29,7 +29,7 @@ export class McMasterService {
     @inject(PrismaService) private readonly prisma: PrismaService,
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(ResourceService) private readonly resourceService: ResourceService,
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   async getConnectedAt(accountId: string) {
@@ -44,12 +44,12 @@ export class McMasterService {
   async createConnection(
     accountId: string,
     username: string,
-    password: string
+    password: string,
   ) {
     const validCredentials = await this.credentialsAreValid(
       accountId,
       username,
-      password
+      password,
     )
 
     if (!validCredentials) {
@@ -63,12 +63,12 @@ export class McMasterService {
         {
           input: 'McMaster-Carr',
           exact: true,
-        }
+        },
       )
 
     const vendorSchema = await this.schemaService.readMergedSchema(
       accountId,
-      'Vendor'
+      'Vendor',
     )
     const mcMasterCarrSystemResource = resources().mcMasterCarrVendor
 
@@ -94,7 +94,7 @@ export class McMasterService {
           mcMasterCarrVendor.id,
           {
             templateId: mcMasterCarrSystemResource.templateId,
-          }
+          },
         )
       }
     }
@@ -112,7 +112,7 @@ export class McMasterService {
   async disconnect(accountId: string) {
     const mcMasterCarrVendor = await this.resourceService.readByTemplateId(
       accountId,
-      resources().mcMasterCarrVendor.templateId
+      resources().mcMasterCarrVendor.templateId,
     )
 
     if (mcMasterCarrVendor) {
@@ -121,7 +121,7 @@ export class McMasterService {
         mcMasterCarrVendor.id,
         {
           templateId: null,
-        }
+        },
       )
     }
 
@@ -137,7 +137,7 @@ export class McMasterService {
 
   async createPunchOutServiceRequest(
     accountId: string,
-    resourceId: string
+    resourceId: string,
   ): Promise<string> {
     const { posrUrl } = this.getMcMasterCarrConfigUnsafe()
     const { mcMasterCarrPassword, mcMasterCarrUsername } =
@@ -146,7 +146,7 @@ export class McMasterService {
       accountId,
       resourceId,
       mcMasterCarrUsername,
-      mcMasterCarrPassword
+      mcMasterCarrPassword,
     )
 
     const rawResponse = await sendRequest(posrUrl, body)
@@ -163,11 +163,11 @@ export class McMasterService {
 
     const purchaseSchema = await this.schemaService.readMergedSchema(
       accountId,
-      'Purchase'
+      'Purchase',
     )
     const fieldId = selectSchemaFieldUnsafe(
       purchaseSchema,
-      fields.punchoutSessionUrl
+      fields.punchoutSessionUrl,
     ).fieldId
     await this.resourceService.updateResourceField(accountId, resourceId, {
       fieldId,
@@ -189,7 +189,7 @@ export class McMasterService {
 
     assert(
       mcMasterCarrUsername && mcMasterCarrConnectedAt && mcMasterCarrPassword,
-      'McMaster-Carr not configured'
+      'McMaster-Carr not configured',
     )
 
     return { mcMasterCarrUsername, mcMasterCarrPassword }
@@ -222,14 +222,14 @@ export class McMasterService {
   async credentialsAreValid(
     accountId: string,
     username: string,
-    password: string
+    password: string,
   ) {
     const { posrUrl } = await this.getMcMasterCarrConfigUnsafe()
     const body = await this.createPunchOutServiceRequestBody(
       accountId,
       '',
       username,
-      password
+      password,
     )
 
     const rawResponse = await sendRequest(posrUrl, body)
@@ -247,7 +247,7 @@ export class McMasterService {
     accountId: string,
     resourceId: string,
     mcMasterCarrUsername: string,
-    mcMasterCarrPassword: string
+    mcMasterCarrPassword: string,
   ): Promise<string> {
     const { secret, supplierDomain, supplierIdentity } =
       this.getMcMasterCarrConfigUnsafe()
@@ -271,7 +271,7 @@ export class McMasterService {
   authenticatePoom(
     senderDomain: string,
     senderIdentity: string,
-    sharedSecret: string
+    sharedSecret: string,
   ): void {
     const { secret, supplierDomain, supplierIdentity } =
       this.getMcMasterCarrConfigUnsafe()
@@ -292,12 +292,12 @@ export class McMasterService {
 
     const purchaseSchema = await this.schemaService.readMergedSchema(
       accountId,
-      'Purchase'
+      'Purchase',
     )
 
     const issuedDateFieldId = selectSchemaFieldUnsafe(
       purchaseSchema,
-      fields.issuedDate
+      fields.issuedDate,
     ).fieldId
     await this.resourceService.updateResourceField(accountId, orderId, {
       fieldId: issuedDateFieldId,
@@ -319,7 +319,7 @@ export class McMasterService {
           {
             input: description,
             exact: true,
-          }
+          },
         )
 
       let matchedItemId = matchedItem?.id
@@ -327,20 +327,20 @@ export class McMasterService {
       if (!matchedItemId) {
         const itemSchema = await this.schemaService.readMergedSchema(
           accountId,
-          'Item'
+          'Item',
         )
         const nameFieldId = selectSchemaFieldUnsafe(
           itemSchema,
-          fields.name
+          fields.name,
         ).fieldId
         const itemUnitofMesureFieldId = selectSchemaFieldUnsafe(
           itemSchema,
-          fields.unitOfMeasure
+          fields.unitOfMeasure,
         ).fieldId
         const itemUnitOfMeasureOptionId = selectSchemaFieldOptionUnsafe(
           itemSchema,
           fields.unitOfMeasure,
-          unitOfMeasure
+          unitOfMeasure,
         ).id
 
         const newResource = await this.resourceService.create(
@@ -354,39 +354,39 @@ export class McMasterService {
                 valueInput: { optionId: itemUnitOfMeasureOptionId },
               },
             ],
-          }
+          },
         )
         matchedItemId = newResource.id
       }
 
       const lineSchema = await this.schemaService.readMergedSchema(
         accountId,
-        'PurchaseLine'
+        'PurchaseLine',
       )
       const itemFieldId = selectSchemaFieldUnsafe(
         lineSchema,
-        fields.item
+        fields.item,
       ).fieldId
       const orderFieldId = selectSchemaFieldUnsafe(
         lineSchema,
-        fields.purchase
+        fields.purchase,
       ).fieldId
       const quantityFieldId = selectSchemaFieldUnsafe(
         lineSchema,
-        fields.quantity
+        fields.quantity,
       ).fieldId
       const unitPriceFieldId = selectSchemaFieldUnsafe(
         lineSchema,
-        fields.unitCost
+        fields.unitCost,
       ).fieldId
       const lineUnitofMesureFieldId = selectSchemaFieldUnsafe(
         lineSchema,
-        fields.unitOfMeasure
+        fields.unitOfMeasure,
       ).fieldId
       const lineUnitOfMeasureOptionId = selectSchemaFieldOptionUnsafe(
         lineSchema,
         fields.unitOfMeasure,
-        unitOfMeasure
+        unitOfMeasure,
       ).id
 
       const createdLine = await this.resourceService.create(
@@ -407,7 +407,7 @@ export class McMasterService {
               valueInput: { optionId: lineUnitOfMeasureOptionId },
             },
           ],
-        }
+        },
       )
 
       // Updating the resource to trigger calculations
@@ -432,9 +432,9 @@ function renderTemplate(data: RenderPOSRTemplateParams): string {
   const templateFile = readFileSync(
     path.resolve(
       process.cwd(),
-      './src/integrations/mcMasterCarr/templates/mcmaster_posr_template.xml.hbs'
+      './src/integrations/mcMasterCarr/templates/mcmaster_posr_template.xml.hbs',
     ),
-    { encoding: 'utf-8' }
+    { encoding: 'utf-8' },
   )
   const template = handlebars.compile(templateFile)
   return template(data)
@@ -457,7 +457,7 @@ function parseCxml(cxmlString: string) {
 
   const [orderId, accountId] =
     poomCxml.cXML.Message[0]?.PunchOutOrderMessage[0]?.BuyerCookie[0]?.split(
-      '|'
+      '|',
     ) ?? []
   if (!orderId || !accountId) throw new Error('Invalid Buyer Cookie')
 
@@ -494,7 +494,7 @@ function parseCxml(cxmlString: string) {
       .with('ST', () => unitOfMeasureOptions.set)
       .with('YD', () => unitOfMeasureOptions.yard)
       .otherwise(() =>
-        fail(`Invalid Unit of Measure ${item.ItemDetail[0]?.UnitOfMeasure[0]}`)
+        fail(`Invalid Unit of Measure ${item.ItemDetail[0]?.UnitOfMeasure[0]}`),
       ),
   }))
 

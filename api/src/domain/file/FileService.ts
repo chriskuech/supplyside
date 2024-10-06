@@ -6,13 +6,11 @@ import { File } from '@supplyside/model'
 
 @injectable()
 export class FileService {
-  constructor(
-    @inject(PrismaService) private readonly prisma: PrismaService
-  ) {}
+  constructor(@inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async create(
     accountId: string,
-    data: { name: string; blobId: string }
+    data: { name: string; blobId: string },
   ): Promise<File> {
     const model = await this.prisma.file.create({
       data: {

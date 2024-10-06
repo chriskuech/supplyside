@@ -26,7 +26,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
 
         const schema: Schema = await service.readMergedSchema(
           req.params.accountId,
-          req.params.resourceType
+          req.params.resourceType,
         )
 
         res.send(schema)
@@ -69,7 +69,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         const schema: Schema = await service.readMergedSchema(
           req.params.accountId,
           req.params.resourceType,
-          false
+          false,
         )
 
         res.send(schema)
@@ -91,7 +91,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         await service.updateCustomSchema(
           req.params.accountId,
           req.params.resourceType,
-          {sectionIds: req.body}
+          { sectionIds: req.body },
         )
 
         res.send()
@@ -117,7 +117,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
           req.params.resourceType,
           {
             name: req.body.name,
-          }
+          },
         )
       },
     })
@@ -145,7 +145,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
           {
             name: req.body.name,
             fieldIds: req.body.fieldIds,
-          }
+          },
         )
 
         res.send()

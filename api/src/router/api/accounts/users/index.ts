@@ -64,10 +64,7 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
       handler: async (req, res) => {
         const service = container.resolve(UserService)
 
-        const user = await service.read(
-          req.params.accountId,
-          req.params.userId
-        )
+        const user = await service.read(req.params.accountId, req.params.userId)
 
         res.send(user)
       },

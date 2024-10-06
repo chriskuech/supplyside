@@ -8,12 +8,12 @@ import { QuickBooksApiService } from './QuickBooksApiService'
 export class QuickBooksCompanyInfoService {
   constructor(
     @inject(QuickBooksApiService)
-    private readonly quickBooksApiService: QuickBooksApiService
+    private readonly quickBooksApiService: QuickBooksApiService,
   ) {}
 
   async getCompanyInfo(
     accountId: string,
-    client: OAuthClient
+    client: OAuthClient,
   ): Promise<CompanyInfo> {
     const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 

@@ -5,7 +5,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
 export const mountMcMasterCarr = async <App extends FastifyInstance>(
-  app: App
+  app: App,
 ) =>
   app
     .withTypeProvider<ZodTypeProvider>()
@@ -55,7 +55,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
 
         await service.createPunchOutServiceRequest(
           req.params.accountId,
-          req.params.resourceId
+          req.params.resourceId,
         )
 
         res.status(200).send()
@@ -79,7 +79,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
         await service.createConnection(
           req.params.accountId,
           req.body.username,
-          req.body.password
+          req.body.password,
         )
 
         res.status(200).send({})

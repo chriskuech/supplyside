@@ -6,6 +6,6 @@ export const BlobSchema = z.object({
   mimeType: z.string().regex(/^\w+\/\w+$/),
 })
 
-export type Blob = z.infer<typeof BlobSchema>;
+export type Blob = z.infer<typeof BlobSchema>
 
-export type BlobWithData = Blob & { buffer: Buffer };
+export type BlobWithData = Blob & { buffer: Buffer }

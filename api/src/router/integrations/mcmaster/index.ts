@@ -5,7 +5,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
 export const mountMcMasterCarr = async <App extends FastifyInstance>(
-  app: App
+  app: App,
 ) =>
   app.withTypeProvider<ZodTypeProvider>().route({
     method: 'POST',

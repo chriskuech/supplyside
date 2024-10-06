@@ -26,18 +26,18 @@ export class QuickBooksCustomerService {
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(ResourceService) private readonly resourceService: ResourceService,
     @inject(QuickBooksApiService)
-    private readonly quickBooksApiService: QuickBooksApiService
+    private readonly quickBooksApiService: QuickBooksApiService,
   ) {}
 
   async readCustomer(
     accountId: string,
     client: OAuthClient,
-    customerId: string
+    customerId: string,
   ): Promise<Customer> {
     return this.quickBooksApiService
       .makeApiCall(accountId, client, {
         url: `${this.quickBooksApiService.getBaseUrl(
-          client.token.realmId
+          client.token.realmId,
         )}/customer/${customerId}`,
         method: 'GET',
       })
@@ -46,18 +46,18 @@ export class QuickBooksCustomerService {
 
   async upsertCustomersFromQuickBooks(
     client: OAuthClient,
-    accountId: string
+    accountId: string,
   ): Promise<void> {
     const quickBooksCustomersCount = await this.quickBooksApiService.query(
       accountId,
       client,
       { entity: 'Customer', getCount: true },
-      countQuerySchema
+      countQuerySchema,
     )
     const totalQuickBooksCustomers =
       quickBooksCustomersCount.QueryResponse.totalCount
     const numberOfRequests = Math.ceil(
-      totalQuickBooksCustomers / MAX_ENTITIES_PER_PAGE
+      totalQuickBooksCustomers / MAX_ENTITIES_PER_PAGE,
     )
 
     const customerResponses = await Promise.all(
@@ -70,37 +70,42 @@ export class QuickBooksCustomerService {
             startPosition: i * MAX_ENTITIES_PER_PAGE + 1,
             maxResults: MAX_ENTITIES_PER_PAGE,
           },
-          customerQuerySchema
-        )
-      )
+          customerQuerySchema,
+        ),
+      ),
     )
 
     const quickBooksCustomers = customerResponses.flatMap(
-      (customerResponse) => customerResponse.QueryResponse.Customer ?? []
+      (customerResponse) => customerResponse.QueryResponse.Customer ?? [],
     )
 
-    const currentCustomers = await this.resourceService.list(accountId, 'Customer')
+    const currentCustomers = await this.resourceService.list(
+      accountId,
+      'Customer',
+    )
 
     const quickBooksCustomersToAdd = quickBooksCustomers.filter(
       (quickBooksCustomer) =>
         !currentCustomers.some(
           (customer) =>
             selectResourceFieldValue(customer, fields.quickBooksCustomerId)
-              ?.string === quickBooksCustomer.Id
-        )
+              ?.string === quickBooksCustomer.Id,
+        ),
     )
 
     const quickBooksCustomersToUpdate = difference(
       quickBooksCustomers,
-      quickBooksCustomersToAdd
+      quickBooksCustomersToAdd,
     )
 
     await Promise.all(
       quickBooksCustomersToUpdate.map(async (quickBooksCustomer) => {
         const customer = currentCustomers.find(
           (currentCustomer) =>
-            selectResourceFieldValue(currentCustomer, fields.quickBooksCustomerId)
-              ?.string === quickBooksCustomer.Id
+            selectResourceFieldValue(
+              currentCustomer,
+              fields.quickBooksCustomerId,
+            )?.string === quickBooksCustomer.Id,
         )
 
         if (!customer || !!customer.templateId) return
@@ -108,36 +113,37 @@ export class QuickBooksCustomerService {
         return this.resourceService.update(accountId, customer.id, {
           fields: await this.mapQuickBooksCustomerToResourceFields(
             accountId,
-            quickBooksCustomer
+            quickBooksCustomer,
           ),
         })
-      })
+      }),
     )
 
     // `Resource.key` is (currently) created transactionally and thus not parallelizable
     for (const quickBooksCustomerToAdd of quickBooksCustomersToAdd) {
-      const [customer] = await this.resourceService.findResourcesByNameOrPoNumber(
-        accountId,
-        'Customer',
-        {
-          input: quickBooksCustomerToAdd.DisplayName,
-          exact: true,
-        }
-      )
+      const [customer] =
+        await this.resourceService.findResourcesByNameOrPoNumber(
+          accountId,
+          'Customer',
+          {
+            input: quickBooksCustomerToAdd.DisplayName,
+            exact: true,
+          },
+        )
 
       if (customer) {
         if (customer.templateId) return
         await this.resourceService.update(accountId, customer.id, {
           fields: await this.mapQuickBooksCustomerToResourceFields(
             accountId,
-            quickBooksCustomerToAdd
+            quickBooksCustomerToAdd,
           ),
         })
       } else {
         await this.resourceService.create(accountId, 'Customer', {
           fields: await this.mapQuickBooksCustomerToResourceFields(
             accountId,
-            quickBooksCustomerToAdd
+            quickBooksCustomerToAdd,
           ),
         })
       }
@@ -146,23 +152,23 @@ export class QuickBooksCustomerService {
 
   private async mapQuickBooksCustomerToResourceFields(
     accountId: string,
-    quickBooksCustomer: Customer['Customer']
+    quickBooksCustomer: Customer['Customer'],
   ): Promise<ResourceFieldInput[]> {
     const customerSchema = await this.schemaService.readMergedSchema(
       accountId,
-      'Customer'
+      'Customer',
     )
     const customerNameField = selectSchemaFieldUnsafe(
       customerSchema,
-      fields.name
+      fields.name,
     )
     const quickBooksCustomerIdField = selectSchemaFieldUnsafe(
       customerSchema,
-      fields.quickBooksCustomerId
+      fields.quickBooksCustomerId,
     )
     const primaryAddressField = selectSchemaFieldUnsafe(
       customerSchema,
-      fields.primaryAddress
+      fields.primaryAddress,
     )
 
     return [

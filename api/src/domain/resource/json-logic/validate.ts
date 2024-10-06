@@ -8,9 +8,9 @@ export const getInvalidVars = ({
   where,
   orderBy,
 }: {
-  schema: Schema;
-  where?: JsonLogic;
-  orderBy?: OrderBy[];
+  schema: Schema
+  where?: JsonLogic
+  orderBy?: OrderBy[]
 }): string[] => {
   const expected = new Set(schema.fields.map((f) => f.name))
 
@@ -19,14 +19,14 @@ export const getInvalidVars = ({
     concat(orderBy ? extractVarsFromOrderBy(orderBy) : []),
     concat(where ? extractVarsFromWhere(where) : []),
     unique(),
-    filter((var_) => !expected.has(var_))
+    filter((var_) => !expected.has(var_)),
   )
 }
 
 const extractVarsFromWhere = (where: JsonLogic): string[] =>
   match(where)
     .with({ and: P.any }, ({ and: clauses }) =>
-      clauses.flatMap(extractVarsFromWhere)
+      clauses.flatMap(extractVarsFromWhere),
     )
     .with({ '==': P.any }, ({ '==': [{ var: var_ }] }) => [var_])
     .with({ '!=': P.any }, ({ '!=': [{ var: var_ }] }) => [var_])

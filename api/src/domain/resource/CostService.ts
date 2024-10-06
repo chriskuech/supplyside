@@ -6,7 +6,7 @@ import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 export class CostService {
   constructor(
     @inject(PrismaService) private readonly prisma: PrismaService,
-    @inject(ResourceService) private readonly resourceService: ResourceService
+    @inject(ResourceService) private readonly resourceService: ResourceService,
   ) {}
 
   async create(accountId: string, resourceId: string) {
@@ -27,10 +27,10 @@ export class CostService {
     resourceId: string,
     costId: string,
     data: {
-      name?: string;
-      isPercentage?: boolean;
-      value?: number;
-    }
+      name?: string
+      isPercentage?: boolean
+      value?: number
+    },
   ) {
     await this.prisma.cost.update({
       where: {

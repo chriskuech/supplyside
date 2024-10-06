@@ -36,9 +36,7 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
         const isConnected = await service.isConnected(req.params.accountId)
 
         if (isConnected) {
-          const companyInfo = await service.getCompanyInfo(
-            req.params.accountId
-          )
+          const companyInfo = await service.getCompanyInfo(req.params.accountId)
           const realmId = await service.getAccountRealmId(req.params.accountId)
           const connectedAt = await service.getConnectedAt(req.params.accountId)
 
@@ -46,7 +44,9 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
             status: 'connected',
             companyName: companyInfo.CompanyInfo.CompanyName,
             realmId,
-            connectedAt: connectedAt?.toISOString() ?? fail('"quickBooks connected at" not set'),
+            connectedAt:
+              connectedAt?.toISOString() ??
+              fail('"quickBooks connected at" not set'),
           })
         } else {
           const setupUrl = await service.getSetupUrl()

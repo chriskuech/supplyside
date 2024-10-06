@@ -36,7 +36,7 @@ export const mountWebhooks = async <App extends FastifyInstance>(app: App) =>
         const accounts = await accountService.list()
 
         await Promise.all(
-          accounts.map((account) => templateService.applyTemplate(account.id))
+          accounts.map((account) => templateService.applyTemplate(account.id)),
         )
 
         reply.status(200).send()

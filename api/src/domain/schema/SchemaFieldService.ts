@@ -16,7 +16,7 @@ import { match } from 'ts-pattern'
 export class SchemaFieldService {
   constructor(
     @inject(PrismaService)
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
   ) {}
 
   async list(accountId: string): Promise<SchemaField[]> {
@@ -36,11 +36,11 @@ export class SchemaFieldService {
   async create(
     accountId: string,
     data: {
-      name: string;
-      type: FieldType;
-      resourceType?: ResourceType;
-      isRequired: boolean;
-    }
+      name: string
+      type: FieldType
+      resourceType?: ResourceType
+      isRequired: boolean
+    },
   ) {
     await this.prisma.field.create({
       data: {
@@ -61,14 +61,14 @@ export class SchemaFieldService {
     accountId: string,
     fieldId: string,
     dto: {
-      name?: string;
-      description?: string | null;
-      resourceType?: ResourceType | null;
-      isRequired?: boolean;
-      options?: OptionPatch[];
-      defaultToToday?: boolean;
-      defaultValue?: ValueInput;
-    }
+      name?: string
+      description?: string | null
+      resourceType?: ResourceType | null
+      isRequired?: boolean
+      options?: OptionPatch[]
+      defaultToToday?: boolean
+      defaultValue?: ValueInput
+    },
   ) {
     if (dto.options)
       await Promise.all(
@@ -86,7 +86,7 @@ export class SchemaFieldService {
                   name: o.name,
                   order: i,
                 },
-              })
+              }),
             )
             .with({ op: 'update' }, (o) =>
               this.prisma.option.update({
@@ -101,7 +101,7 @@ export class SchemaFieldService {
                   name: o.name,
                   order: i,
                 },
-              })
+              }),
             )
             .with({ op: 'remove' }, (o) =>
               this.prisma.option.delete({
@@ -112,10 +112,10 @@ export class SchemaFieldService {
                     accountId,
                   },
                 },
-              })
+              }),
             )
-            .exhaustive()
-        )
+            .exhaustive(),
+        ),
       )
 
     await this.prisma.field.update({

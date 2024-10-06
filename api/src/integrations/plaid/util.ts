@@ -6,7 +6,7 @@ import { ConfigService } from '@supplyside/api/ConfigService'
 @injectable()
 export class PlaidConfigService {
   constructor(
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   getPlaidConfig() {
@@ -40,7 +40,7 @@ export class PlaidConfigService {
             'Plaid-Version': '2020-09-14',
           },
         },
-      })
+      }),
     )
   }
 }

@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
-type JsonLogicVariable = { var: string };
-export type JsonLogicValue = string | number | boolean | null;
+type JsonLogicVariable = { var: string }
+export type JsonLogicValue = string | number | boolean | null
 
-export type OrderBy = JsonLogicVariable & { dir: 'asc' | 'desc' };
+export type OrderBy = JsonLogicVariable & { dir: 'asc' | 'desc' }
 
 export const JsonLogicSchema = z.union([
   z.object({
@@ -17,4 +17,4 @@ export const JsonLogicSchema = z.union([
   }),
 ])
 
-export type JsonLogic = z.infer<typeof JsonLogicSchema>;
+export type JsonLogic = z.infer<typeof JsonLogicSchema>

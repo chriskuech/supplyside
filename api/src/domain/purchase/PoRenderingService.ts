@@ -30,13 +30,13 @@ export class PoRenderingService {
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(AccountService) private readonly accountService: AccountService,
     @inject(ResourceService) private readonly resourceService: ResourceService,
-    @inject(OsService) private readonly osService: OsService
+    @inject(OsService) private readonly osService: OsService,
   ) {}
 
   async renderPo(
     accountId: string,
     resourceId: string,
-    { isPreview }: { isPreview?: boolean } = {}
+    { isPreview }: { isPreview?: boolean } = {},
   ) {
     return await this.osService.withTempDir(async (path) => {
       const viewModel = await this.createViewModel(accountId, resourceId)
@@ -51,7 +51,7 @@ export class PoRenderingService {
       await writeFile(`${path}/out.html`, html)
 
       await this.osService.exec(
-        `weasyprint '${path}/out.html' '${path}/out.pdf'`
+        `weasyprint '${path}/out.html' '${path}/out.pdf'`,
       )
 
       return await readFile(`${path}/out.pdf`)
@@ -60,7 +60,7 @@ export class PoRenderingService {
 
   async createViewModel(
     accountId: string,
-    purchaseId: string
+    purchaseId: string,
   ): Promise<PurchaseViewModel> {
     const [order, lines, lineSchema, account] = await Promise.all([
       this.resourceService.read(accountId, purchaseId),
@@ -91,7 +91,7 @@ export class PoRenderingService {
           fields.unitOfMeasure.templateId,
           fields.unitCost.templateId,
           fields.quantity.templateId,
-        ].includes(field.templateId as string)
+        ].includes(field.templateId as string),
     )
 
     return {
@@ -117,14 +117,14 @@ export class PoRenderingService {
             additionalFields: lineAdditionalFields
               .map(({ name, fieldId }) => {
                 const value = renderFieldValue(
-                  selectResourceField(line, { fieldId })
+                  selectResourceField(line, { fieldId }),
                 )
 
                 return value && { key: name, value }
               })
               .filter(isTruthy),
           } satisfies LineViewModel
-        })
+        }),
       ),
       notes: renderTemplateField(order, fields.purchaseNotes),
       termsAndConditions: renderTemplateField(order, fields.termsAndConditions),
@@ -155,12 +155,12 @@ export class PoRenderingService {
       shippingMethod: renderTemplateField(order, fields.shippingMethod),
       shippingAccountNumber: renderTemplateField(
         order,
-        fields.shippingAccountNumber
+        fields.shippingAccountNumber,
       ),
       poRecipientName: renderTemplateField(order, fields.poRecipient),
       vendorPrimaryAddress: renderAddressViewModel(
         vendor,
-        fields.primaryAddress
+        fields.primaryAddress,
       ),
     }
   }
@@ -213,7 +213,7 @@ export class PoRenderingService {
 
 const renderTemplateField = (
   resource: Resource | undefined,
-  fieldRef: FieldReference
+  fieldRef: FieldReference,
 ) => renderFieldValue(resource && selectResourceField(resource, fieldRef))
 
 const renderFieldValue = (resourceField: ResourceField | undefined) =>
@@ -221,24 +221,24 @@ const renderFieldValue = (resourceField: ResourceField | undefined) =>
     .with('Address', () =>
       resourceField?.value?.address
         ? formatInlineAddress(resourceField.value.address)
-        : null
+        : null,
     )
     .with('Checkbox', () =>
       match(resourceField?.value.boolean)
         .with(true, () => 'Yes')
         .with(false, () => 'No')
         .with(P.nullish, () => null)
-        .exhaustive()
+        .exhaustive(),
     )
     .with('Contact', () => resourceField?.value?.contact?.name || null)
     .with('Date', () =>
       resourceField?.value?.date
         ? new Date(resourceField.value.date).toLocaleDateString()
-        : null
+        : null,
     )
     .with('File', () => (resourceField?.value?.file ? 'File Attached' : null))
     .with('Files', () =>
-      resourceField?.value?.files?.length ? 'Files Attached' : null
+      resourceField?.value?.files?.length ? 'Files Attached' : null,
     )
     .with(
       'Money',
@@ -246,12 +246,13 @@ const renderFieldValue = (resourceField: ResourceField | undefined) =>
         resourceField?.value?.number?.toLocaleString('en-US', {
           style: 'currency',
           currency: 'USD',
-        }) ?? null
+        }) ?? null,
     )
     .with('Number', () => resourceField?.value?.number?.toString() ?? null)
     .with(
       'MultiSelect',
-      () => resourceField?.value?.options?.map((o) => o.name).join(', ') ?? null
+      () =>
+        resourceField?.value?.options?.map((o) => o.name).join(', ') ?? null,
     )
     .with('Text', () => resourceField?.value?.string || null)
     .with('Textarea', () => resourceField?.value?.string || null)
@@ -263,7 +264,7 @@ const renderFieldValue = (resourceField: ResourceField | undefined) =>
 
 const renderAddressViewModel = (
   resource: Resource | undefined,
-  field: FieldReference
+  field: FieldReference,
 ): AddressViewModel => {
   if (!resource)
     return {

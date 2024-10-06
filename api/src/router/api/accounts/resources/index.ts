@@ -1,5 +1,7 @@
 import { container } from '@supplyside/api/di'
+import { ResourceExtractionService } from '@supplyside/api/domain/resource/ResourceExtractionService'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
+import { JsonLogicSchema } from '@supplyside/api/domain/resource/json-logic/types'
 import {
   ResourceSchema,
   ResourceTypeSchema,
@@ -8,12 +10,10 @@ import {
 } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { parse } from 'qs'
+import { pick } from 'remeda'
 import { z } from 'zod'
 import { mountCosts } from './costs'
-import { JsonLogicSchema } from '@supplyside/api/domain/resource/json-logic/types'
-import { pick } from 'remeda'
-import { parse } from 'qs'
-import { ResourceExtractionService } from '@supplyside/api/domain/resource/ResourceExtractionService'
 
 export const mountResources = async <App extends FastifyInstance>(app: App) =>
   app
@@ -32,7 +32,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           z.object({
             resourceType: ResourceTypeSchema,
             where: JsonLogicSchema.optional(),
-          })
+          }),
         ),
         response: {
           200: z.array(ResourceSchema),
@@ -47,7 +47,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           req.query.resourceType,
           {
             where: req.query.where,
-          }
+          },
         )
 
         res.status(200).send(resources)
@@ -78,7 +78,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           {
             input: req.query.input,
             exact: req.query.exact,
-          }
+          },
         )
 
         res.status(200).send(resources)
@@ -99,7 +99,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
               z.object({
                 fieldId: z.string().uuid(),
                 valueInput: ValueInputSchema,
-              })
+              }),
             )
             .optional(),
         }),
@@ -116,7 +116,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           {
             fields: req.body.fields,
           },
-          req.body.userId
+          req.body.userId,
         )
 
         res.status(200).send(resource)
@@ -147,7 +147,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         const resource = await service.readByKey(
           req.params.accountId,
           req.query.resourceType,
-          req.query.resourceKey
+          req.query.resourceKey,
         )
 
         res.status(200).send(pick(resource, ['id', 'key', 'type']))
@@ -170,7 +170,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
 
         const resource = await service.read(
           req.params.accountId,
-          req.params.resourceId
+          req.params.resourceId,
         )
 
         res.send(resource)
@@ -185,7 +185,10 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           resourceId: z.string().uuid(),
         }),
         body: z.array(
-          z.object({ fieldId: z.string().uuid(), valueInput: ValueInputSchema })
+          z.object({
+            fieldId: z.string().uuid(),
+            valueInput: ValueInputSchema,
+          }),
         ),
         response: {
           200: ResourceSchema,
@@ -199,7 +202,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           req.params.resourceId,
           {
             fields: req.body,
-          }
+          },
         )
 
         res.status(200).send(resource)
@@ -239,7 +242,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
 
         const resource = await service.cloneResource(
           req.params.accountId,
-          req.params.resourceId
+          req.params.resourceId,
         )
 
         res.send(resource)
@@ -283,7 +286,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         await service.extractContent(
           req.params.accountId,
           req.params.resourceId,
-          req.body
+          req.body,
         )
       },
     })

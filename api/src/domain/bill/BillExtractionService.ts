@@ -34,13 +34,13 @@ const ExtractedBillDataSchema = z.object({
     .string()
     .nullish()
     .describe(
-      'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.'
+      'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.',
     ),
   vendorId: z
     .string()
     .nullish()
     .describe(
-      'The Vendor ID. The Vendor ID is a UUIDv4 for identifying the Vendor. The Bill will contain the Vendor Name, not the Vendor ID. The Vendor ID must be looked up in the provided "Vendor List" TSV file by identifying the Vendor Name in the file (accounting for minor spelling/punctuation differences) and returning the associated Vendor ID for that Vendor Name. If no Vendor ID can be determined with high confidence, this field should be null/missing.'
+      'The Vendor ID. The Vendor ID is a UUIDv4 for identifying the Vendor. The Bill will contain the Vendor Name, not the Vendor ID. The Vendor ID must be looked up in the provided "Vendor List" TSV file by identifying the Vendor Name in the file (accounting for minor spelling/punctuation differences) and returning the associated Vendor ID for that Vendor Name. If no Vendor ID can be determined with high confidence, this field should be null/missing.',
     ),
 })
 
@@ -50,7 +50,7 @@ export class BillExtractionService {
     @inject(OpenAiService) private readonly openai: OpenAiService,
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(ResourceService)
-    private readonly resourceService: ResourceService
+    private readonly resourceService: ResourceService,
   ) {}
 
   async extractContent(accountId: string, resourceId: string) {
@@ -102,7 +102,7 @@ export class BillExtractionService {
 
     assert(
       !purchases.length,
-      `Found ${purchases.length + 1} Purchases with PO Number ${poNumber}`
+      `Found ${purchases.length + 1} Purchases with PO Number ${poNumber}`,
     )
 
     const updatedFields: ResourceFieldInput[] = [

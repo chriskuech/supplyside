@@ -2,18 +2,14 @@ import { FieldType, Value } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { OrderBy, JsonLogic } from './types'
 import { mapUuidToBase64, sanitizeValue } from './sanitize'
-import {
-  Schema,
-  SchemaField,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { Schema, SchemaField, selectSchemaFieldUnsafe } from '@supplyside/model'
 
 export type MapToSqlParams = {
-  accountId: string;
-  schema: Schema;
-  where: JsonLogic | undefined;
-  orderBy: OrderBy[] | undefined;
-};
+  accountId: string
+  schema: Schema
+  where: JsonLogic | undefined
+  orderBy: OrderBy[] | undefined
+}
 
 export const createSql = ({
   accountId,
@@ -28,8 +24,8 @@ export const createSql = ({
           ...schema.fields.map(
             (f) =>
               `(${createPropertySubquery(f)}) AS "${mapUuidToBase64(
-                f.fieldId
-              )}"`
+                f.fieldId,
+              )}"`,
           ),
         ].join(', ')}
       FROM "Resource"
@@ -45,17 +41,17 @@ export const createSql = ({
 const createWhere = (where: JsonLogic, schema: Schema): string =>
   match(where)
     .with({ and: P.any }, ({ and: clauses }) =>
-      clauses.map((c) => `(${createWhere(c, schema)})`).join(' AND ')
+      clauses.map((c) => `(${createWhere(c, schema)})`).join(' AND '),
     )
     .with(
       { '==': P.any },
       ({ '==': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} = ${sanitizeValue(val)}`
+        `${resolveFieldNameToColumn(schema, var_)} = ${sanitizeValue(val)}`,
     )
     .with(
       { '!=': P.any },
       ({ '!=': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} <> ${sanitizeValue(val)}`
+        `${resolveFieldNameToColumn(schema, var_)} <> ${sanitizeValue(val)}`,
     )
     .exhaustive()
 
@@ -79,7 +75,7 @@ const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
         LEFT JOIN "Address" ON "Address"."id" = "Value"."addressId"
         WHERE "Resource"."id" = "ResourceField"."resourceId"
           AND "ResourceField"."fieldId" = '${fieldId}'
-      `
+      `,
     )
     .with(
       'Contact',
@@ -90,7 +86,7 @@ const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
         LEFT JOIN "Contact" ON "Contact"."id" = "Value"."contactId"
         WHERE "Resource"."id" = "ResourceField"."resourceId"
           AND "ResourceField"."fieldId" = '${fieldId}'
-      `
+      `,
     )
     .with(
       'Files',
@@ -100,7 +96,7 @@ const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
         LEFT JOIN "ValueFile" ON "ValueFile"."valueId" = "ResourceField"."valueId"
         WHERE "Resource"."id" = "ResourceField"."resourceId"
           AND "ResourceField"."fieldId" = '${fieldId}'
-      `
+      `,
     )
     .with(
       'MultiSelect',
@@ -110,7 +106,7 @@ const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
         LEFT JOIN "ValueOption" ON "ValueOption"."valueId" = "ResourceField"."valueId"
         WHERE "Resource"."id" = "ResourceField"."resourceId"
           AND "ResourceField"."fieldId" = '${fieldId}'
-      `
+      `,
     )
     .with(
       P.any,
@@ -120,14 +116,14 @@ const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
         LEFT JOIN "Value" ON "Value"."id" = "ResourceField"."valueId"
         WHERE "Resource"."id" = "ResourceField"."resourceId"
           AND "ResourceField"."fieldId" = '${fieldId}'
-      `
+      `,
     )
     .exhaustive()
 
 type PrimitiveFieldType = Exclude<
   FieldType,
   'Address' | 'Contact' | 'Files' | 'MultiSelect'
->;
+>
 
 const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
   match<PrimitiveFieldType, keyof Value>(t)

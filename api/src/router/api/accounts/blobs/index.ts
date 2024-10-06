@@ -7,7 +7,7 @@ import { BlobSchema } from '@supplyside/api/domain/blob/entity'
 
 export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
   app.addContentTypeParser('*', { parseAs: 'buffer' }, (req, body, done) =>
-    Buffer.isBuffer(body) ? done(null, body) : done(new Error('Invalid body'))
+    Buffer.isBuffer(body) ? done(null, body) : done(new Error('Invalid body')),
   )
 
   return app
@@ -60,7 +60,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
 
         const blob = await service.readBlob(
           req.params.accountId,
-          req.params.blobId
+          req.params.blobId,
         )
 
         res.send(blob)
@@ -81,7 +81,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
 
         const blob = await service.readBlobWithData(
           req.params.accountId,
-          req.params.blobId
+          req.params.blobId,
         )
 
         if (!blob) {

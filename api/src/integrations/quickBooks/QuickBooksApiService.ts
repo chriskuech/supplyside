@@ -12,13 +12,13 @@ export class QuickBooksApiService {
     @inject(QuickBooksTokenService)
     private readonly quickBooksTokenService: QuickBooksTokenService,
     @inject(QuickBooksConfigService)
-    private readonly quickBooksConfigService: QuickBooksConfigService
+    private readonly quickBooksConfigService: QuickBooksConfigService,
   ) {}
 
   makeApiCall(
     accountId: string,
     client: OAuthClient,
-    params: MakeApiCallParams
+    params: MakeApiCallParams,
   ) {
     return client.makeApiCall(params).catch((e) => {
       if (isRequestError(e) && e.response.status === 401) {
@@ -33,7 +33,7 @@ export class QuickBooksApiService {
     accountId: string,
     client: OAuthClient,
     { entity, getCount, maxResults, startPosition, where }: QueryOptions,
-    schema: z.ZodType<T>
+    schema: z.ZodType<T>,
   ): Promise<T> {
     const mappedWhere = where && encodeURIComponent(where)
 

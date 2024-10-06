@@ -1,4 +1,3 @@
-
 import { File } from '@supplyside/model'
 import { FileModel } from './model'
 

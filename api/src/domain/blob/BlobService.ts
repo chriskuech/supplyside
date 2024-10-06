@@ -13,19 +13,19 @@ export class BlobService {
 
   constructor(
     @inject(PrismaService) private readonly prisma: PrismaService,
-    @inject(ConfigService) { config }: ConfigService
+    @inject(ConfigService) { config }: ConfigService,
   ) {
     this.client = BlobServiceClient.fromConnectionString(
-      config.AZURE_STORAGE_CONNECTION_STRING
+      config.AZURE_STORAGE_CONNECTION_STRING,
     )
   }
 
   async createBlob(
     accountId: string,
     data: {
-      buffer: Buffer;
-      contentType: string;
-    }
+      buffer: Buffer
+      contentType: string
+    },
   ): Promise<Blob> {
     const blobName = randomUUID()
     const contentType = data.contentType.toLowerCase()
@@ -57,7 +57,7 @@ export class BlobService {
 
   async readBlobWithData(
     accountId: string,
-    blobId: string
+    blobId: string,
   ): Promise<BlobWithData> {
     const blob = await this.prisma.blob.findUniqueOrThrow({
       where: { accountId, id: blobId },
@@ -75,8 +75,8 @@ export class BlobService {
     accountId,
     blobId,
   }: {
-    accountId: string;
-    blobId: string;
+    accountId: string
+    blobId: string
   }): Promise<void> {
     const blob = await this.prisma.blob.findUniqueOrThrow({
       where: { accountId, id: blobId },

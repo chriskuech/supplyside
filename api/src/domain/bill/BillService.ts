@@ -10,16 +10,16 @@ import { FileService } from '../file/FileService'
 import { BlobService } from '../blob/BlobService'
 
 type FileParam = {
-  content: string;
-  encoding: BufferEncoding;
-  contentType: string;
-  fileName: string;
-};
+  content: string
+  encoding: BufferEncoding
+  contentType: string
+  fileName: string
+}
 
 type Params = {
-  accountId: string;
-  files: FileParam[];
-};
+  accountId: string
+  files: FileParam[]
+}
 
 const createBill = async (params: Params): Promise<Resource> => {
   const blobService = container.resolve(BlobService)
@@ -29,7 +29,7 @@ const createBill = async (params: Params): Promise<Resource> => {
 
   const billSchema = await schemaService.readMergedSchema(
     params.accountId,
-    'Bill'
+    'Bill',
   )
 
   const fileIds = await Promise.all(
@@ -45,7 +45,7 @@ const createBill = async (params: Params): Promise<Resource> => {
       })
 
       return fileId
-    })
+    }),
   )
 
   console.log('Creating Bill', fileIds)
@@ -66,13 +66,13 @@ const createBill = async (params: Params): Promise<Resource> => {
 export class BillService {
   constructor(
     @inject(AccountService) private readonly accountService: AccountService,
-    @inject(ResourceService) private readonly resourceService: ResourceService
+    @inject(ResourceService) private readonly resourceService: ResourceService,
   ) {}
 
   async linkPurchase(
     accountId: string,
     resourceId: string,
-    { purchaseId }: { purchaseId: string }
+    { purchaseId }: { purchaseId: string },
   ) {
     await this.resourceService.copyFields(accountId, resourceId, {
       fromResourceId: purchaseId,
@@ -109,7 +109,7 @@ export class BillService {
         encoding: 'base64',
         contentType: attachment.ContentType,
         fileName: attachment.Name,
-      })
+      }),
     )
 
     const email: FileParam | null = message.HtmlBody
@@ -120,13 +120,13 @@ export class BillService {
           fileName: 'email.html',
         }
       : message.TextBody
-      ? {
-          content: message.TextBody,
-          encoding: 'utf-8',
-          contentType: 'text/plain',
-          fileName: 'email.txt',
-        }
-      : null
+        ? {
+            content: message.TextBody,
+            encoding: 'utf-8',
+            contentType: 'text/plain',
+            fileName: 'email.txt',
+          }
+        : null
 
     await createBill({
       accountId: account.id,

@@ -8,4 +8,4 @@ export const AccountSchema = z.object({
   logoBlobId: z.string().nullable(),
 })
 
-export type Account = z.infer<typeof AccountSchema>;
+export type Account = z.infer<typeof AccountSchema>

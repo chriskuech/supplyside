@@ -13,7 +13,7 @@ export class AccountService {
     @inject(PrismaService)
     private readonly prisma: PrismaService,
     @inject(TemplateService)
-    private readonly templateService: TemplateService
+    private readonly templateService: TemplateService,
   ) {}
 
   async create(): Promise<void> {
@@ -72,11 +72,11 @@ export class AccountService {
   async update(
     accountId: string,
     data: {
-      name?: string;
-      key?: string;
-      address?: string;
-      logoBlobId?: string;
-    }
+      name?: string
+      key?: string
+      address?: string
+      logoBlobId?: string
+    },
   ) {
     await this.prisma.account.update({
       where: { id: accountId },

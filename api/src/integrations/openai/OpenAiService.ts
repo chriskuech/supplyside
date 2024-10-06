@@ -13,7 +13,7 @@ export class OpenAiService {
 
   constructor(
     @inject(CompletionPartsService)
-    private readonly completionPartsService: CompletionPartsService
+    private readonly completionPartsService: CompletionPartsService,
   ) {
     this.client = new OpenAI({
       // These are required to use our specific model
@@ -23,19 +23,23 @@ export class OpenAiService {
   }
 
   async extractContent<T>(params: {
-    systemPrompt: string;
-    files: (File | string)[];
-    schema: ZodSchema<T>;
+    systemPrompt: string
+    files: (File | string)[]
+    schema: ZodSchema<T>
   }): Promise<T | undefined> {
     const completionParts = (
       await Promise.all(
         params.files.map((file) =>
           match(file)
-            .with(P.string, (text) => ({ type: 'text', text } satisfies ChatCompletionContentPart))
-            .otherwise((file) =>
-              this.completionPartsService.mapFileToCompletionParts(file)
+            .with(
+              P.string,
+              (text) =>
+                ({ type: 'text', text }) satisfies ChatCompletionContentPart,
             )
-        )
+            .otherwise((file) =>
+              this.completionPartsService.mapFileToCompletionParts(file),
+            ),
+        ),
       )
     ).flat()
 

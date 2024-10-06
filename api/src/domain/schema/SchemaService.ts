@@ -1,7 +1,7 @@
 import { Prisma, ResourceType as ResourceTypeModel } from '@prisma/client'
 import { difference } from 'remeda'
 import { inject, injectable } from 'inversify'
-import { mapFieldModelToEntity , mapSchemaModelToEntity} from './mappers'
+import { mapFieldModelToEntity, mapSchemaModelToEntity } from './mappers'
 import { fieldIncludes, schemaIncludes } from './model'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { type ResourceType, Schema } from '@supplyside/model'
@@ -13,7 +13,7 @@ export class SchemaService {
   async readMergedSchema(
     accountId: string,
     resourceType: ResourceType,
-    isSystem?: boolean
+    isSystem?: boolean,
   ): Promise<Schema> {
     const schemas = await this.prisma.schema.findMany({
       where: {
@@ -29,11 +29,15 @@ export class SchemaService {
 
     return {
       resourceType,
-      sections: schemas.flatMap((s) => s.Section).flatMap((s) => ({
-        id: s.id,
-        name: s.name,
-        fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity),
-      })),
+      sections: schemas
+        .flatMap((s) => s.Section)
+        .flatMap((s) => ({
+          id: s.id,
+          name: s.name,
+          fields: s.SectionField.map((sf) => sf.Field).map(
+            mapFieldModelToEntity,
+          ),
+        })),
       fields: [
         ...schemas.flatMap((s) => s.SchemaField),
         ...schemas.flatMap((s) => s.Section).flatMap((s) => s.SectionField),
@@ -45,7 +49,7 @@ export class SchemaService {
 
   async readCustomSchema(
     accountId: string,
-    resourceType: ResourceType
+    resourceType: ResourceType,
   ): Promise<Schema> {
     const schema = await this.prisma.schema.findUniqueOrThrow({
       where: {
@@ -53,14 +57,14 @@ export class SchemaService {
           accountId,
           resourceType,
           isSystem: false,
-        }
+        },
       },
       include: schemaIncludes,
     })
 
     return mapSchemaModelToEntity(schema)
   }
-      
+
   async readCustomSchemas(accountId: string): Promise<Schema[]> {
     const existingSchemas = await this.prisma.schema.findMany({
       where: { accountId, isSystem: false },
@@ -71,7 +75,7 @@ export class SchemaService {
 
     const missingResourceTypes = difference(
       Object.values(ResourceTypeModel),
-      existingSchemas.map((schema) => schema.resourceType)
+      existingSchemas.map((schema) => schema.resourceType),
     )
 
     if (missingResourceTypes.length) {
@@ -81,7 +85,7 @@ export class SchemaService {
             accountId,
             resourceType,
             isSystem: false,
-          })
+          }),
         ),
       })
     }

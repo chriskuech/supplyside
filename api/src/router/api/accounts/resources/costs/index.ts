@@ -48,7 +48,7 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
           req.params.accountId,
           req.params.resourceId,
           req.params.costId,
-          req.body
+          req.body,
         )
 
         res.send()
@@ -70,7 +70,7 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
         await service.delete(
           req.params.accountId,
           req.params.resourceId,
-          req.params.costId
+          req.params.costId,
         )
 
         res.send()

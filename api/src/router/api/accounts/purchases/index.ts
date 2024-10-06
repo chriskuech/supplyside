@@ -3,7 +3,12 @@ import { PoRenderingService } from '@supplyside/api/domain/purchase/PoRenderingS
 import { PoService } from '@supplyside/api/domain/purchase/PoService'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import { fields, purchaseStatusOptions, selectSchemaFieldOptionUnsafe, selectSchemaFieldUnsafe } from '@supplyside/model'
+import {
+  fields,
+  purchaseStatusOptions,
+  selectSchemaFieldOptionUnsafe,
+  selectSchemaFieldUnsafe,
+} from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
@@ -42,11 +47,15 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
 
         const schema = await schemaService.readMergedSchema(
           req.params.accountId,
-          'Purchase'
+          'Purchase',
         )
 
         const field = selectSchemaFieldUnsafe(schema, fields.purchaseStatus)
-        const option = selectSchemaFieldOptionUnsafe(schema, fields.purchaseStatus, purchaseStatusOptions.purchased)
+        const option = selectSchemaFieldOptionUnsafe(
+          schema,
+          fields.purchaseStatus,
+          purchaseStatusOptions.purchased,
+        )
 
         await poService.sendPo(req.params.accountId, req.params.resourceId)
         await resourceService.updateResourceField(
@@ -55,7 +64,7 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
           {
             fieldId: field.fieldId,
             valueInput: { optionId: option.id },
-          }
+          },
         )
       },
     })
@@ -75,31 +84,31 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
         const buffer = await service.renderPo(
           req.params.accountId,
           req.params.resourceId,
-          { isPreview: true }
+          { isPreview: true },
         )
 
         res.header('Content-Type', 'application/pdf')
         res.send(buffer)
       },
     })
-    // .route({
-    //   method: 'GET',
-    //   url: '/:resourceId/po/download/',
-    //   schema: {
-    //     params: z.object({
-    //       accountId: z.string().uuid(),
-    //       resourceId: z.string().uuid(),
-    //     }),
-    //   },
-    //   handler: async (req) => {
-    //     const service = container.resolve(PoRenderingService)
+// .route({
+//   method: 'GET',
+//   url: '/:resourceId/po/download/',
+//   schema: {
+//     params: z.object({
+//       accountId: z.string().uuid(),
+//       resourceId: z.string().uuid(),
+//     }),
+//   },
+//   handler: async (req) => {
+//     const service = container.resolve(PoRenderingService)
 
-    //     const buffer = await service.renderPo(
-    //       req.params.accountId,
-    //       req.params.resourceId,
-    //       { isPreview: false }
-    //     )
+//     const buffer = await service.renderPo(
+//       req.params.accountId,
+//       req.params.resourceId,
+//       { isPreview: false }
+//     )
 
-    //     return buffer
-    //   },
-    // })
+//     return buffer
+//   },
+// })

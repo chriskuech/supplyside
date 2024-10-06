@@ -11,7 +11,7 @@ export class PlaidService {
     @inject(PrismaService) private readonly prisma: PrismaService,
     @inject(PlaidConfigService)
     private readonly plaidConfigService: PlaidConfigService,
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   async createConnection(accountId: string, publicToken: string) {

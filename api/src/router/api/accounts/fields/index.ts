@@ -12,13 +12,13 @@ import { SchemaFieldService } from '@supplyside/api/domain/schema/SchemaFieldSer
 
 // TODO: consolidate
 export type OptionPatch = {
-  id: string; // patch ID -- must be `id` to work with mui
-  name: string;
+  id: string // patch ID -- must be `id` to work with mui
+  name: string
 } & (
   | { op: 'add' }
   | { op: 'update'; optionId: string }
   | { op: 'remove'; optionId: string }
-);
+)
 
 // TODO: move this
 const OptionPatchSchema: ZodType<OptionPatch> = z.intersection(
@@ -27,7 +27,7 @@ const OptionPatchSchema: ZodType<OptionPatch> = z.intersection(
     z.object({ op: z.literal('add') }),
     z.object({ op: z.literal('update'), optionId: z.string() }),
     z.object({ op: z.literal('remove'), optionId: z.string() }),
-  ])
+  ]),
 )
 
 z.object({
@@ -99,11 +99,7 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
       },
       handler: async (req, res) => {
         const service = container.resolve(SchemaFieldService)
-        await service.update(
-          req.params.accountId,
-          req.params.fieldId,
-          req.body
-        )
+        await service.update(req.params.accountId, req.params.fieldId, req.body)
 
         res.send()
       },

@@ -93,7 +93,7 @@ export class TemplateService {
               order,
               name: option.name,
             },
-          })
+          }),
       )
 
       const cleaningOptions =
@@ -199,7 +199,7 @@ export class TemplateService {
             },
           },
         })
-      })
+      }),
     )
   }
 }

@@ -34,7 +34,7 @@ export const mapResourceModelToEntity = (model: ResourceModel): Resource => ({
 })
 
 export const mapResourceToValueResource = (
-  resource: Resource
+  resource: Resource,
 ): ValueResource => ({
   id: resource.id,
   type: resource.type,
@@ -48,7 +48,7 @@ export const mapResourceToValueResource = (
 
 export const mapValueToValueInput = (
   fieldType: FieldType,
-  value: Value
+  value: Value,
 ): ValueInput =>
   match<FieldType, ValueInput>(fieldType)
     .with('Address', () => ({
@@ -96,7 +96,7 @@ export const mapValueModelToEntity = (model: ValueModel): Value => ({
 })
 
 export const mapValueResourceModelToEntity = (
-  resource: ValueResourceModel
+  resource: ValueResourceModel,
 ): ValueResource => ({
   id: resource.id,
   templateId: resource.templateId,
@@ -108,12 +108,12 @@ export const mapValueResourceModelToEntity = (
         rf.Field.templateId &&
         (
           [fields.name.templateId, fields.poNumber.templateId] as string[]
-        ).includes(rf.Field.templateId)
+        ).includes(rf.Field.templateId),
     )?.Value.string ?? '',
 })
 
 export const mapValueInputToPrismaValueUpdate = (
-  value: ValueInput
+  value: ValueInput,
 ): Prisma.ValueUpdateWithoutResourceFieldValueInput =>
   match<ValueInput, Prisma.ValueUpdateWithoutResourceFieldValueInput>(value)
     .with({ address: P.not(undefined) }, ({ address }) =>
@@ -126,7 +126,7 @@ export const mapValueInputToPrismaValueUpdate = (
               },
             },
           }
-        : { Address: { disconnect: true } }
+        : { Address: { disconnect: true } },
     )
     .with({ boolean: P.not(undefined) }, ({ boolean }) => ({ boolean }))
     .with({ contact: P.not(undefined) }, ({ contact }) =>
@@ -139,30 +139,30 @@ export const mapValueInputToPrismaValueUpdate = (
               },
             },
           }
-        : { Contact: { disconnect: true } }
+        : { Contact: { disconnect: true } },
     )
     .with({ date: P.not(undefined) }, ({ date }) => ({ date }))
     .with({ number: P.not(undefined) }, ({ number }) => ({ number }))
     .with({ optionId: P.not(undefined) }, ({ optionId }) =>
       optionId
         ? { Option: { connect: { id: optionId } } }
-        : { Option: { disconnect: true } }
+        : { Option: { disconnect: true } },
     )
     .with({ string: P.not(undefined) }, ({ string }) => ({ string }))
     .with({ userId: P.not(undefined) }, ({ userId }) =>
       userId
         ? { User: { connect: { id: userId } } }
-        : { User: { disconnect: true } }
+        : { User: { disconnect: true } },
     )
     .with({ fileId: P.not(undefined) }, ({ fileId }) =>
       fileId
         ? { File: { connect: { id: fileId } } }
-        : { File: { disconnect: true } }
+        : { File: { disconnect: true } },
     )
     .with({ resourceId: P.not(undefined) }, ({ resourceId }) =>
       resourceId
         ? { Resource: { connect: { id: resourceId } } }
-        : { Resource: { disconnect: true } }
+        : { Resource: { disconnect: true } },
     )
     .with({ fileIds: P.not(undefined) }, ({ fileIds }) => ({
       Files: {
@@ -188,7 +188,7 @@ export const mapValueInputToPrismaValueUpdate = (
 
 export const mapValueInputToPrismaValueCreate = (
   value: ValueInput,
-  { defaultToToday, defaultValue }: SchemaField
+  { defaultToToday, defaultValue }: SchemaField,
 ): Prisma.ValueCreateWithoutResourceFieldValueInput =>
   match<ValueInput, Prisma.ValueCreateWithoutResourceFieldValueInput>(value)
     .with({ address: P.not(undefined) }, ({ address: value }) => {
@@ -254,8 +254,8 @@ export const mapValueInputToPrismaValueCreate = (
       const fileIds = value.length
         ? value
         : defaultValue?.files?.length
-        ? defaultValue.files.map((f) => f.id)
-        : []
+          ? defaultValue.files.map((f) => f.id)
+          : []
       return {
         Files: {
           create: fileIds.map((fileId) => ({
@@ -268,8 +268,8 @@ export const mapValueInputToPrismaValueCreate = (
       const optionIds = value.length
         ? value
         : defaultValue?.options.length
-        ? defaultValue.options.map((o) => o.id)
-        : []
+          ? defaultValue.options.map((o) => o.id)
+          : []
       return {
         ValueOption: {
           create: optionIds.map((id) => ({ Option: { connect: { id } } })),
@@ -279,7 +279,7 @@ export const mapValueInputToPrismaValueCreate = (
     .exhaustive()
 
 export const mapValueInputToPrismaValueWhere = (
-  value: ValueInput
+  value: ValueInput,
 ): Prisma.ValueWhereInput =>
   match<ValueInput, Prisma.ValueWhereInput>(value)
     .with({ address: P.not(undefined) }, ({ address: value }) => ({

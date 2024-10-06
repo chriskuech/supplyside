@@ -15,16 +15,16 @@ const verifyLoginPath = '/auth/verify-login'
 const lifespanInSeconds = 1000 * 60 * 24 * SESSION_LIFESPAN_IN_DAYS
 
 export type StartEmailVerificationInput = {
-  email: string;
-  returnTo?: string;
-};
+  email: string
+  returnTo?: string
+}
 
 @injectable()
 export class SessionService {
   constructor(
     @inject(PrismaService) private readonly prisma: PrismaService,
     @inject(SmtpService) private readonly smtpService: SmtpService,
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   async create(email: string, tat: string): Promise<Session> {
@@ -38,19 +38,19 @@ export class SessionService {
 
     if (!tat) {
       throw new SessionCreationError(
-        'No token provided. Please retry with a valid token.'
+        'No token provided. Please retry with a valid token.',
       )
     }
 
     if (!user.tatExpiresAt || user.tat !== tat) {
       throw new SessionCreationError(
-        'The token provided is incorrect. Please retry with the correct token.'
+        'The token provided is incorrect. Please retry with the correct token.',
       )
     }
 
     if (user.tatExpiresAt < new Date()) {
       throw new SessionCreationError(
-        'The token provided has expired. Please retry with a new token.'
+        'The token provided has expired. Please retry with a new token.',
       )
     }
 
@@ -129,7 +129,7 @@ export class SessionService {
 
     const tat = uuid()
     const tatExpiresAt = new Date(
-      Date.now() + 1000 * 60 * tokenLifespanInMinutes
+      Date.now() + 1000 * 60 * tokenLifespanInMinutes,
     )
 
     try {

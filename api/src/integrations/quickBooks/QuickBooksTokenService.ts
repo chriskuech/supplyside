@@ -15,7 +15,7 @@ export class QuickBooksTokenService {
     @inject(QuickBooksClientService)
     private readonly quickBooksClientService: QuickBooksClientService,
     @inject(QuickBooksConfigService)
-    private readonly quickBooksConfigService: QuickBooksConfigService
+    private readonly quickBooksConfigService: QuickBooksConfigService,
   ) {}
 
   async getToken(accountId: string): Promise<QuickBooksToken | undefined> {
@@ -28,7 +28,7 @@ export class QuickBooksTokenService {
     }
 
     const { success, data: token } = quickbooksTokenSchema.safeParse(
-      account.quickBooksToken
+      account.quickBooksToken,
     )
 
     if (!success || !token) {

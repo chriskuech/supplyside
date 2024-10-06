@@ -9,7 +9,7 @@ export class SchemaSectionService {
   async createCustomSection(
     accountId: string,
     resourceType: ResourceType,
-    dto: { name: string }
+    dto: { name: string },
   ) {
     await this.prisma.section.create({
       data: {
@@ -31,7 +31,7 @@ export class SchemaSectionService {
   async updateCustomSchema(
     accountId: string,
     resourceType: ResourceType,
-    data: { sectionIds: string[] }
+    data: { sectionIds: string[] },
   ) {
     await this.prisma.schema.update({
       where: {
@@ -61,9 +61,9 @@ export class SchemaSectionService {
     resourceType: ResourceType,
     sectionId: string,
     data: {
-      name?: string;
-      fieldIds: string[];
-    }
+      name?: string
+      fieldIds: string[]
+    },
   ) {
     await Promise.all([
       this.prisma.sectionField.deleteMany({

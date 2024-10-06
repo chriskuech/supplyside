@@ -16,7 +16,7 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
         }),
         response: {
           200: z.object({
-            token: z.string().nullable()
+            token: z.string().nullable(),
           }),
         },
       },
@@ -26,7 +26,7 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
         const token = await service.getPlaidToken(req.params.accountId)
 
         res.send({
-          token
+          token,
         })
       },
     })
@@ -43,7 +43,7 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
               z.object({
                 id: z.string(),
                 name: z.string(),
-              })
+              }),
             ),
             connectedAt: z.string().datetime(),
           }),
@@ -68,12 +68,12 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
           accountId: z.string().uuid(),
         }),
         querystring: z.object({
-          token: z.string().min(1)
-        })
+          token: z.string().min(1),
+        }),
       },
       handler: async (req, res) => {
         const service = container.resolve(PlaidService)
-        await service.createConnection(req.params.accountId, req.query.token )
+        await service.createConnection(req.params.accountId, req.query.token)
 
         res.send()
       },
@@ -88,7 +88,7 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
       },
       handler: async (req, res) => {
         const service = container.resolve(PlaidService)
-        await service.deletePlaidToken(req.params.accountId )
+        await service.deletePlaidToken(req.params.accountId)
 
         res.send()
       },
@@ -108,9 +108,9 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
         const service = container.resolve(PlaidService)
 
         const { link_token } = await service.createLinkToken(
-          req.params.accountId
+          req.params.accountId,
         )
 
-        res.send({token: link_token})
+        res.send({ token: link_token })
       },
     })
