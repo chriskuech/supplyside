@@ -32,8 +32,8 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
       method: 'GET',
       schema: {
         response: {
-          200: z.array(AccountSchema)
-        }
+          200: z.array(AccountSchema),
+        },
       },
       handler: async (req, res) => {
         const service = container.resolve(AccountService)
@@ -41,13 +41,13 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
         const accounts = await service.list()
 
         res.send(accounts)
-      }
+      },
     })
     .route({
       url: '/',
       method: 'POST',
       schema: {
-        response: { 200: AccountSchema }
+        response: { 200: AccountSchema },
       },
       handler: async (req, res) => {
         const service = container.resolve(AccountService)
@@ -55,18 +55,18 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
         await service.create()
 
         res.send()
-      }
+      },
     })
     .route({
       url: '/:accountId/',
       method: 'GET',
       schema: {
         params: z.object({
-          accountId: z.string().uuid()
+          accountId: z.string().uuid(),
         }),
         response: {
-          200: AccountSchema
-        }
+          200: AccountSchema,
+        },
       },
       handler: async (req, res) => {
         const service = container.resolve(AccountService)
@@ -74,23 +74,23 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
         const account = await service.read(req.params.accountId)
 
         res.send(account)
-      }
+      },
     })
     .route({
       method: 'PATCH',
       url: '/:accountId/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid()
+          accountId: z.string().uuid(),
         }),
         body: z
           .object({
             name: z.string().min(1),
             key: z.string().min(1),
             address: z.string().min(1),
-            logoBlobId: z.string().uuid()
+            logoBlobId: z.string().uuid(),
           })
-          .partial()
+          .partial(),
       },
       handler: async (req, res) => {
         const service = container.resolve(AccountService)
@@ -98,15 +98,15 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
         await service.update(req.params.accountId, req.body)
 
         res.send()
-      }
+      },
     })
     .route({
       url: '/:accountId/',
       method: 'DELETE',
       schema: {
         params: z.object({
-          accountId: z.string().uuid()
-        })
+          accountId: z.string().uuid(),
+        }),
       },
       handler: async (req, res) => {
         const service = container.resolve(AccountService)
@@ -114,15 +114,15 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
         await service.delete(req.params.accountId)
 
         res.send()
-      }
+      },
     })
     .route({
       method: 'POST',
       url: '/:accountId/apply-template/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid()
-        })
+          accountId: z.string().uuid(),
+        }),
       },
       handler: async (req, res) => {
         const service = container.resolve(TemplateService)
@@ -130,5 +130,5 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
         await service.applyTemplate(req.params.accountId)
 
         res.send()
-      }
+      },
     })

@@ -6,5 +6,5 @@ export const mapAccountModelToEntity = (model: AccountModel): Account => ({
   key: model.key,
   name: model.name,
   address: model.address,
-  logoBlobId: model.LogoBlob?.id ?? null
+  logoBlobId: model.LogoBlob?.id ?? null,
 })

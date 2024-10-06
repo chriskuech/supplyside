@@ -4,7 +4,7 @@ import { SchemaService } from '../schema/SchemaService'
 import {
   fields,
   selectResourceFieldValue,
-  selectSchemaFieldUnsafe
+  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { AccountService } from '../account/AccountService'
 import { ResourceService } from '../resource/ResourceService'
@@ -44,7 +44,7 @@ export class PoService {
 
     await this.resourceService.updateResourceField(accountId, resourceId, {
       fieldId: issuedDateFieldId,
-      valueInput: { date: new Date().toISOString() }
+      valueInput: { date: new Date().toISOString() },
     })
 
     const buffer = await this.poRenderingService.renderPo(accountId, resourceId)
@@ -52,9 +52,9 @@ export class PoService {
     const [blob, resource] = await Promise.all([
       this.blobService.createBlob(accountId, {
         buffer,
-        contentType: 'application/pdf'
+        contentType: 'application/pdf',
       }),
-      this.resourceService.read(accountId, resourceId)
+      this.resourceService.read(accountId, resourceId),
     ])
 
     const vendorName = selectResourceFieldValue(resource, fields.vendor)
@@ -71,20 +71,20 @@ export class PoService {
           issuedDate ? new Date(issuedDate).toDateString() : ''
         } - ${vendorName}.pdf`,
         accountId,
-        blobId: blob.id
-      }
+        blobId: blob.id,
+      },
     })
 
     await this.resourceService.updateResourceField(accountId, resourceId, {
       fieldId: documentFieldId,
-      valueInput: { fileId }
+      valueInput: { fileId },
     })
   }
 
   async sendPo(accountId: string, resourceId: string) {
     const [order, account] = await Promise.all([
       this.resourceService.read(accountId, resourceId),
-      this.accountService.read(accountId)
+      this.accountService.read(accountId),
     ])
 
     const poRecipient = selectResourceFieldValue(
@@ -103,7 +103,7 @@ export class PoService {
       this.blobService.readBlobWithData(accountId, po.blobId),
       account.logoBlobId
         ? this.blobService.readBlobWithData(accountId, account.logoBlobId)
-        : undefined
+        : undefined,
     ])
 
     if (!poBlob) return
@@ -125,15 +125,15 @@ export class PoService {
         buyer_user_name: assignee?.name ?? '(Unassigned)',
         supplier_company_name: vendor?.name ?? '(No Vendor)',
         order_number: number ?? '(No Number)',
-        date: date ? new Date(date).toLocaleDateString() : '(No Date)'
+        date: date ? new Date(date).toLocaleDateString() : '(No Date)',
       },
       attachments: [
         {
           name: po.name,
           contentBase64: poBlob.buffer.toString('base64'),
-          contentType: po.contentType
-        }
-      ]
+          contentType: po.contentType,
+        },
+      ],
     })
   }
 }

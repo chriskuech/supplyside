@@ -27,7 +27,7 @@ const ConfigSchema = z.object({
   PUNCHOUT_MCMASTER_SHARED_SECRET: z.string().min(1).optional(),
   PUNCHOUT_MCMASTER_POSR_URL: z.string().min(1).optional(),
 
-  TEMP_PATH: z.string().min(1).default('/tmp/supplyside')
+  TEMP_PATH: z.string().min(1).default('/tmp/supplyside'),
 })
 
 export type Config = z.infer<typeof ConfigSchema>

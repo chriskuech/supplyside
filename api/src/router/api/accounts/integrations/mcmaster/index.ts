@@ -14,13 +14,13 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
       url: '/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid()
+          accountId: z.string().uuid(),
         }),
         response: {
           200: z.object({
-            connectedAt: z.string().datetime()
-          })
-        }
+            connectedAt: z.string().datetime(),
+          }),
+        },
       },
       handler: async (req, res) => {
         const service = container.resolve(McMasterService)
@@ -29,12 +29,12 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
 
         if (connectedAt) {
           res.status(200).send({
-            connectedAt: connectedAt?.toISOString()
+            connectedAt: connectedAt?.toISOString(),
           })
         } else {
           res.status(404).send()
         }
-      }
+      },
     })
     .route({
       method: 'POST',
@@ -42,13 +42,13 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceId: z.string().uuid()
+          resourceId: z.string().uuid(),
         }),
         response: {
           200: z.object({
-            url: z.string().url()
-          })
-        }
+            url: z.string().url(),
+          }),
+        },
       },
       handler: async (req, res) => {
         const service = container.resolve(McMasterService)
@@ -59,19 +59,19 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
         )
 
         res.status(200).send()
-      }
+      },
     })
     .route({
       method: 'POST',
       url: '/connect/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid()
+          accountId: z.string().uuid(),
         }),
         body: z.object({
           username: z.string(),
-          password: z.string()
-        })
+          password: z.string(),
+        }),
       },
       handler: async (req, res) => {
         const service = container.resolve(McMasterService)
@@ -83,15 +83,15 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
         )
 
         res.status(200).send({})
-      }
+      },
     })
     .route({
       method: 'POST',
       url: '/disconnect/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid()
-        })
+          accountId: z.string().uuid(),
+        }),
       },
       handler: async (req, res) => {
         const service = container.resolve(McMasterService)
@@ -99,16 +99,16 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
         await service.disconnect(req.params.accountId)
 
         res.status(200).send({})
-      }
+      },
     })
     .route({
       method: 'POST',
       url: '/process-poom/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid()
+          accountId: z.string().uuid(),
         }),
-        body: z.string()
+        body: z.string(),
       },
       handler: async (req, res) => {
         const service = container.resolve(McMasterService)
@@ -116,5 +116,5 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
         await service.processPoom(req.body)
 
         res.status(200).send({})
-      }
+      },
     })

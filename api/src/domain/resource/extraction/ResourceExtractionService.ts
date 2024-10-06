@@ -7,12 +7,12 @@ import {
   Schema,
   ValueInput,
   fields,
-  selectResourceFieldValue
+  selectResourceFieldValue,
 } from '@supplyside/model'
 import {
   ExtractionFieldModel,
   ExtractionModel,
-  ExtractionModelSchema
+  ExtractionModelSchema,
 } from './ResourceExtractionModel'
 import { P, match } from 'ts-pattern'
 import { sanitizeLineSchema, sanitizeSchema } from './mappers'
@@ -25,7 +25,7 @@ export class ResourceExtractionService {
   constructor(
     @inject(ResourceService) private readonly resourceService: ResourceService,
     @inject(SchemaService) private readonly schemaService: SchemaService,
-    @inject(OpenAiService) private readonly openAiService: OpenAiService
+    @inject(OpenAiService) private readonly openAiService: OpenAiService,
   ) {}
 
   /**
@@ -37,7 +37,7 @@ export class ResourceExtractionService {
   async extractAndApplyContent(
     accountId: string,
     resourceId: string,
-    data: { fieldId: string }
+    data: { fieldId: string },
   ): Promise<void> {
     const model = await this.extractContent(accountId, resourceId, data)
 
@@ -49,7 +49,7 @@ export class ResourceExtractionService {
   async extractContent(
     accountId: string,
     resourceId: string,
-    data: { fieldId: string }
+    data: { fieldId: string },
   ): Promise<ExtractionModel | undefined> {
     const resource = await this.resourceService.read(accountId, resourceId)
 
@@ -66,7 +66,7 @@ export class ResourceExtractionService {
 
     const [schema, lineSchema]: [Schema, Schema | null] = await Promise.all([
       this.schemaService.readMergedSchema(accountId, resource.type),
-      lineType && this.schemaService.readMergedSchema(accountId, lineType)
+      lineType && this.schemaService.readMergedSchema(accountId, lineType),
     ])
 
     const { file, files } = selectResourceFieldValue(resource, data) ?? {}
@@ -75,23 +75,23 @@ export class ResourceExtractionService {
       csvTypes.map((type) =>
         match(type)
           .with(P.union('Customer', 'Item', 'Part', 'Vendor'), (type) =>
-            this.createResourceListCsv(accountId, type)
+            this.createResourceListCsv(accountId, type),
           )
-          .otherwise(() => null)
-      )
+          .otherwise(() => null),
+      ),
     )
 
     const systemPrompt: string = prompt({
       resourceType: resource.type,
       schemaFields: sanitizeSchema(schema.fields),
       lineSchemaFields: lineSchema && sanitizeLineSchema(lineSchema.fields),
-      csvs: csvs.filter(isTruthy)
+      csvs: csvs.filter(isTruthy),
     })
 
     const result = await this.openAiService.extractContent({
       systemPrompt: systemPrompt,
       schema: ExtractionModelSchema,
-      files: [...(file ? [file] : []), ...(files ?? [])]
+      files: [...(file ? [file] : []), ...(files ?? [])],
     })
 
     return result
@@ -100,15 +100,15 @@ export class ResourceExtractionService {
   async applyExtractedContent(
     accountId: string,
     resourceId: string,
-    { costs, headerFields, lines }: ExtractionModel
+    { costs, headerFields, lines }: ExtractionModel,
   ) {
     await this.resourceService.update(accountId, resourceId, {
       fields: headerFields.map((field) => ({
         fieldId: field.fieldId,
         valueInput:
-          ResourceExtractionService.mapExtractionFieldModelToValueInput(field)
+          ResourceExtractionService.mapExtractionFieldModelToValueInput(field),
       })),
-      costs
+      costs,
     })
 
     for (const line of lines) {
@@ -117,15 +117,17 @@ export class ResourceExtractionService {
         fields: line.fields.map((field) => ({
           fieldId: field.fieldId,
           valueInput:
-            ResourceExtractionService.mapExtractionFieldModelToValueInput(field)
-        }))
+            ResourceExtractionService.mapExtractionFieldModelToValueInput(
+              field,
+            ),
+        })),
       })
     }
   }
 
   private async createResourceListCsv(
     accountId: string,
-    resourceType: 'Customer' | 'Item' | 'Part' | 'Vendor'
+    resourceType: 'Customer' | 'Item' | 'Part' | 'Vendor',
   ) {
     const resources = await this.resourceService.list(accountId, resourceType)
 
@@ -135,8 +137,8 @@ export class ResourceExtractionService {
         resource.id,
         selectResourceFieldValue(resource, fields.name)?.string?.replace(
           '"',
-          ''
-        )
+          '',
+        ),
       ])
       .filter(([, name]) => !!name)
 
@@ -144,19 +146,19 @@ export class ResourceExtractionService {
       name: `${resourceType}s list`,
       content: [header, ...rows]
         .map((row) => row.map((value) => `"${value}"`).join(','))
-        .join('\n')
+        .join('\n'),
     }
   }
 
   private static mapExtractionFieldModelToValueInput(
-    field: ExtractionFieldModel
+    field: ExtractionFieldModel,
   ): ValueInput {
     return match<ExtractionFieldModel, ValueInput>(field)
       .with({ type: 'Address' }, ({ address }) => ({ address }))
       .with({ type: 'Checkbox' }, ({ boolean }) => ({ boolean }))
       .with({ type: 'Contact' }, ({ contact }) => ({ contact }))
       .with({ type: 'Date' }, ({ date }) => ({
-        date: date ? new Date(date).toISOString() : null
+        date: date ? new Date(date).toISOString() : null,
       }))
       .with({ type: 'Money' }, ({ number }) => ({ number }))
       .with({ type: 'MultiSelect' }, ({ optionIds }) => ({ optionIds }))

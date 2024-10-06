@@ -10,13 +10,13 @@ export const sanitizeSchema = (schemaFields: SchemaField[]) =>
         'type',
         'description',
         'resourceType',
-        'options'
-      ])
+        'options',
+      ]),
     )
     .map(({ options, resourceType, ...field }) => ({
       ...field,
       resourceType: resourceType ?? undefined,
-      options: options?.map((o) => pick(o, ['id', 'name']))
+      options: options?.map((o) => pick(o, ['id', 'name'])),
     }))
 
 export const sanitizeLineSchema = (schemaFields: SchemaField[]) =>
@@ -26,6 +26,6 @@ export const sanitizeLineSchema = (schemaFields: SchemaField[]) =>
         !templateId ||
         [fields.purchase, fields.bill, fields.job, fields.vendor]
           .map((ft) => ft.templateId)
-          .includes(templateId)
-    )
+          .includes(templateId),
+    ),
   )

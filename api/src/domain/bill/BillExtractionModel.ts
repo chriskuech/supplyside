@@ -5,7 +5,7 @@ import { z } from 'zod'
 const unitOfMeasures = pipe(
   unitOfMeasureOptions,
   values(),
-  map((o) => o.name)
+  map((o) => o.name),
 )
 type UnitOfMeasure = (typeof unitOfMeasures)[number]
 
@@ -19,7 +19,7 @@ const LineSchema = z.object({
   unitCost: z.number(),
   totalCost: z.number(),
   needDate: z.string().optional(),
-  otherNotes: z.string().optional()
+  otherNotes: z.string().optional(),
 })
 
 const CostSchema = z.object({
@@ -29,13 +29,13 @@ const CostSchema = z.object({
   isPercentage: z
     .boolean()
     .describe(
-      'Whether `value` represents a percentage of the subtotal or a flat dollar amount'
+      'Whether `value` represents a percentage of the subtotal or a flat dollar amount',
     ),
   value: z
     .number()
     .describe(
-      'The cost value. If `isPercentage` is true, then this value is interpreted as a percentage instead of a dollar amount.'
-    )
+      'The cost value. If `isPercentage` is true, then this value is interpreted as a percentage instead of a dollar amount.',
+    ),
 })
 
 export const BillExtractionModelSchema = z.object({
@@ -52,16 +52,16 @@ export const BillExtractionModelSchema = z.object({
     .number()
     .optional()
     .describe(
-      'The number of days the payment is due. This is the *n* in "Net *n*", ex: Net 30 or Net 60'
+      'The number of days the payment is due. This is the *n* in "Net *n*", ex: Net 30 or Net 60',
     ),
   paymentMethod: z.string().optional(),
   lineItems: z
     .array(LineSchema)
     .min(1)
     .describe(
-      'The line items of the bill. All bills must have at least one line item.'
+      'The line items of the bill. All bills must have at least one line item.',
     ),
-  itemizedCosts: z.array(CostSchema).describe('The itemized costs of the bill')
+  itemizedCosts: z.array(CostSchema).describe('The itemized costs of the bill'),
 })
 
 export type BillExtractionModel = z.infer<typeof BillExtractionModelSchema>

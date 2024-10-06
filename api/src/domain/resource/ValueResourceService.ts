@@ -4,7 +4,7 @@ import {
   ResourceType,
   ResourceTypeSchema,
   ValueResource,
-  fields
+  fields,
 } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 import { z } from 'zod'
@@ -16,7 +16,7 @@ export class ValueResourceService {
   async findResourcesByNameOrPoNumber(
     accountId: string,
     resourceType: ResourceType,
-    { input, exact, take }: { input: string; exact?: boolean; take?: number }
+    { input, exact, take }: { input: string; exact?: boolean; take?: number },
   ): Promise<ValueResource[]> {
     const results = await this.prisma.$queryRaw`
       WITH "View" AS (
@@ -52,7 +52,7 @@ export class ValueResourceService {
         type: ResourceTypeSchema,
         name: z.string(),
         key: z.number(),
-        templateId: z.string().nullable()
+        templateId: z.string().nullable(),
       })
       .array()
       .parse(results)

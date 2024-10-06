@@ -20,5 +20,5 @@ export const PurchaseExtractionModelSchema = z.object({
   shippingAccountNumber: z.string().optional(),
   termsAndConditions: z.string().optional(),
   lineItems: z.array(PurchaseLineExtractionModelSchema),
-  itemizedCosts: z.array(CostExtractionModelSchema)
+  itemizedCosts: z.array(CostExtractionModelSchema),
 })

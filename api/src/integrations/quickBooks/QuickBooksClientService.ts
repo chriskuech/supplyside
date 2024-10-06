@@ -14,7 +14,7 @@ export class QuickBooksClientService {
   getClient(token?: Token) {
     return new OAuthClient({
       ...this.quickBooksConfigService.configUnsafe,
-      token
+      token,
     })
   }
 
@@ -22,12 +22,12 @@ export class QuickBooksClientService {
     const { csrfSecret } = this.quickBooksConfigService.configUnsafe
 
     const state = {
-      csrf: new Csrf().create(csrfSecret)
+      csrf: new Csrf().create(csrfSecret),
     }
 
     const authUri = this.getClient().authorizeUri({
       scope: [QuickbooksOauthClient.scopes.Accounting],
-      state: JSON.stringify(state)
+      state: JSON.stringify(state),
     })
 
     return authUri

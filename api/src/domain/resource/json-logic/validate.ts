@@ -6,7 +6,7 @@ import { Schema } from '@supplyside/model'
 export const getInvalidVars = ({
   schema,
   where,
-  orderBy
+  orderBy,
 }: {
   schema: Schema
   where?: JsonLogic

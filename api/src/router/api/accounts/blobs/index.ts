@@ -19,7 +19,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
         consumes: ['*'],
         params: z.object({ accountId: z.string().uuid() }),
         body: z.any(),
-        response: { 200: BlobSchema, 400: z.any() }
+        response: { 200: BlobSchema, 400: z.any() },
       },
       handler: async (req, res) => {
         const service = container.resolve(BlobService)
@@ -38,11 +38,11 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
 
         const blob = await service.createBlob(req.params.accountId, {
           buffer: buffer,
-          contentType
+          contentType,
         })
 
         return blob
-      }
+      },
     })
     .route({
       method: 'GET',
@@ -50,9 +50,9 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          blobId: z.string().uuid()
+          blobId: z.string().uuid(),
         }),
-        response: { 200: BlobSchema }
+        response: { 200: BlobSchema },
       },
 
       handler: async (req, res) => {
@@ -64,7 +64,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
         )
 
         res.send(blob)
-      }
+      },
     })
     .route({
       method: 'GET',
@@ -72,9 +72,9 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          blobId: z.string().uuid()
+          blobId: z.string().uuid(),
         }),
-        produces: ['*']
+        produces: ['*'],
       },
       handler: async (req, res) => {
         const service = container.resolve(BlobService)
@@ -91,6 +91,6 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
 
         res.header('Content-Type', blob.mimeType)
         res.send(blob.buffer)
-      }
+      },
     })
 }

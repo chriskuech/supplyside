@@ -18,20 +18,20 @@ import { ConfigService } from '@supplyside/api/ConfigService'
 const fieldsMap = [
   {
     field: fields.quickBooksBillId,
-    key: 'Id'
+    key: 'Id',
   },
   {
     field: fields.invoiceDate,
-    key: 'TxnDate'
+    key: 'TxnDate',
   },
   {
     field: fields.paymentDueDate,
-    key: 'DueDate'
+    key: 'DueDate',
   },
   {
     field: fields.invoiceNumber,
-    key: 'DocNumber'
-  }
+    key: 'DocNumber',
+  },
 ]
 
 @injectable()
@@ -56,7 +56,7 @@ export class QuickBooksBillService {
     return await this.quickBooksApiService
       .makeApiCall(accountId, client, {
         url: `${baseUrl}/bill/${id}`,
-        method: 'GET'
+        method: 'GET',
       })
       .then((data) => readBillSchema.parse(data.json))
   }
@@ -77,9 +77,9 @@ export class QuickBooksBillService {
         url: `${baseUrl}/bill`,
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       })
       .then((data) => readBillSchema.parse(data.json))
 
@@ -97,7 +97,7 @@ export class QuickBooksBillService {
 
     await this.resourceService.updateResourceField(accountId, bill.id, {
       fieldId: quickBooksBillIdField,
-      valueInput: { string: quickBooksBill.Bill.Id }
+      valueInput: { string: quickBooksBill.Bill.Id },
     })
 
     return quickBooksBill
@@ -130,7 +130,7 @@ export class QuickBooksBillService {
 
     const body = {
       ...quickBooksBill.Bill,
-      ...billBody
+      ...billBody,
     }
 
     return this.quickBooksApiService
@@ -138,9 +138,9 @@ export class QuickBooksBillService {
         url: `${baseUrl}/bill`,
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       })
       .then((data) => readBillSchema.parse(data.json))
   }
@@ -194,7 +194,7 @@ export class QuickBooksBillService {
       client,
       {
         entity: 'Account',
-        where: `FullyQualifiedName = '${quickBooksAccountName}'`
+        where: `FullyQualifiedName = '${quickBooksAccountName}'`,
       },
       accountQuerySchema,
     )
@@ -239,7 +239,7 @@ export class QuickBooksBillService {
     const quickBooksBill = fieldsMap.reduce(
       (bill, fieldMap) => ({
         ...bill,
-        [fieldMap.key]: mapValue(billResource, fieldMap.field)
+        [fieldMap.key]: mapValue(billResource, fieldMap.field),
       }),
       {},
     )
@@ -248,7 +248,7 @@ export class QuickBooksBillService {
       ...quickBooksBill,
       PrivateNote: `${this.configService.config.APP_BASE_URL}/bills/${billResource.key}`,
       VendorRef: {
-        value: quickBooksVendorId
+        value: quickBooksVendorId,
       },
       Line: [
         {
@@ -257,11 +257,11 @@ export class QuickBooksBillService {
           Amount: mapValue(billResource, fields.totalCost) ?? 0,
           AccountBasedExpenseLineDetail: {
             AccountRef: {
-              value: quickBooksAccountId
-            }
-          }
-        }
-      ]
+              value: quickBooksAccountId,
+            },
+          },
+        },
+      ],
     }
   }
 }

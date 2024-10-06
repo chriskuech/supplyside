@@ -10,7 +10,7 @@ import {
   Resource,
   ResourceField,
   Prisma,
-  Cost
+  Cost,
 } from '@prisma/client'
 import { userInclude } from '../user/model'
 import { FileModel } from '@supplyside/api/domain/file/model'
@@ -46,26 +46,26 @@ export const valueInclude = {
   Contact: true,
   File: {
     include: {
-      Blob: true
-    }
+      Blob: true,
+    },
   },
   Files: {
     include: {
       File: {
         include: {
-          Blob: true
-        }
-      }
-    }
+          Blob: true,
+        },
+      },
+    },
   },
   Option: true,
   User: {
-    include: userInclude
+    include: userInclude,
   },
   ValueOption: {
     include: {
-      Option: true
-    }
+      Option: true,
+    },
   },
   Resource: {
     include: {
@@ -80,23 +80,23 @@ export const valueInclude = {
         // },
         include: {
           Field: true,
-          Value: true
-        }
-      }
-    }
-  }
+          Value: true,
+        },
+      },
+    },
+  },
 } satisfies Prisma.ValueInclude
 
 export const resourceInclude = {
   Cost: {
-    orderBy: { createdAt: 'asc' }
+    orderBy: { createdAt: 'asc' },
   },
   ResourceField: {
     include: {
       Field: true,
       Value: {
-        include: valueInclude
-      }
-    }
-  }
+        include: valueInclude,
+      },
+    },
+  },
 } satisfies Prisma.ResourceInclude

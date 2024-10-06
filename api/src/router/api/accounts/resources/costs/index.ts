@@ -13,8 +13,8 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceId: z.string().uuid()
-        })
+          resourceId: z.string().uuid(),
+        }),
       },
       handler: async (req, res) => {
         const service = container.resolve(CostService)
@@ -22,7 +22,7 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
         await service.create(req.params.accountId, req.params.resourceId)
 
         res.send()
-      }
+      },
     })
     .route({
       method: 'PATCH',
@@ -31,15 +31,15 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
         params: z.object({
           accountId: z.string().uuid(),
           resourceId: z.string().uuid(),
-          costId: z.string().uuid()
+          costId: z.string().uuid(),
         }),
         body: z
           .object({
             name: z.string(),
             isPercentage: z.boolean(),
-            value: z.number()
+            value: z.number(),
           })
-          .partial()
+          .partial(),
       },
       handler: async (req, res) => {
         const service = container.resolve(CostService)
@@ -52,7 +52,7 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
         )
 
         res.send()
-      }
+      },
     })
     .route({
       method: 'DELETE',
@@ -61,8 +61,8 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
         params: z.object({
           accountId: z.string().uuid(),
           resourceId: z.string().uuid(),
-          costId: z.string().uuid()
-        })
+          costId: z.string().uuid(),
+        }),
       },
       handler: async (req, res) => {
         const service = container.resolve(CostService)
@@ -74,5 +74,5 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
         )
 
         res.send()
-      }
+      },
     })

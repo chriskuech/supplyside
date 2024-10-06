@@ -43,7 +43,7 @@ export class QuickBooksApiService {
       } from ${entity} ${where ? `where ${mappedWhere}` : ''} ${
         startPosition ? `STARTPOSITION ${startPosition}` : ''
       } ${maxResults ? `MAXRESULTS ${maxResults}` : ''}`,
-      method: 'GET'
+      method: 'GET',
     }).then((data) => schema.parse(data.json))
   }
 

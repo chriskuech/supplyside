@@ -9,7 +9,7 @@ export const JobExtractionModelSchema = z.object({
   totalCost: z.number(),
   customerName: z.string(),
   lineItems: z.array(JobLineExtractionModelSchema),
-  itemizedCosts: z.array(CostExtractionModelSchema)
+  itemizedCosts: z.array(CostExtractionModelSchema),
 })
 
 export type JobExtractionModel = z.infer<typeof JobExtractionModelSchema>

@@ -20,7 +20,7 @@ export class QuickBooksCompanyInfoService {
     return this.quickBooksApiService
       .makeApiCall(accountId, client, {
         url: `${baseUrl}/companyinfo/${client.token.realmId}`,
-        method: 'GET'
+        method: 'GET',
       })
       .then((data) => companyInfoSchema.parse(data.json))
   }

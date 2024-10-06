@@ -5,7 +5,7 @@ import { z } from 'zod'
 const unitOfMeasures = pipe(
   unitOfMeasureOptions,
   values(),
-  map((o) => o.name)
+  map((o) => o.name),
 )
 
 type UnitOfMeasure = (typeof unitOfMeasures)[number]
@@ -20,5 +20,5 @@ export const PurchaseLineExtractionModelSchema = z.object({
   unitCost: z.number(),
   totalCost: z.number(),
   needDate: z.string().optional(),
-  otherNotes: z.string().optional()
+  otherNotes: z.string().optional(),
 })

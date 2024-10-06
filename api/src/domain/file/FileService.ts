@@ -16,9 +16,9 @@ export class FileService {
       data: {
         accountId,
         blobId: data.blobId,
-        name: data.name
+        name: data.name,
       },
-      include: fileInclude
+      include: fileInclude,
     })
 
     return mapFile(model)
@@ -27,7 +27,7 @@ export class FileService {
   async read(accountId: string, fileId: string): Promise<File> {
     const model = await this.prisma.file.findUniqueOrThrow({
       where: { accountId, id: fileId },
-      include: fileInclude
+      include: fileInclude,
     })
 
     return mapFile(model)

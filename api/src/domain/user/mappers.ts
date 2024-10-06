@@ -14,5 +14,5 @@ export const mapUserModelToEntity = (model: UserModel): User => ({
   isAdmin: model.isAdmin,
   isApprover: model.isApprover,
   isGlobalAdmin: model.accountId === systemAccountId,
-  profilePicBlobId: model.imageBlobId
+  profilePicBlobId: model.imageBlobId,
 })

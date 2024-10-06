@@ -2,14 +2,14 @@ import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService
 import {
   TypedResource,
   fields,
-  selectResourceFieldValue
+  selectResourceFieldValue,
 } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 import { ResourceService } from '../resource/ResourceService'
 import { SchemaService } from '../schema/SchemaService'
 import {
   JobExtractionModel,
-  JobExtractionModelSchema
+  JobExtractionModelSchema,
 } from './JobExtractionModel'
 
 const prompt = `
@@ -31,7 +31,7 @@ export class JobExtractionService {
     @inject(OpenAiService) private readonly openai: OpenAiService,
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(ResourceService)
-    private readonly resourceService: ResourceService
+    private readonly resourceService: ResourceService,
   ) {}
 
   async extractContent(accountId: string, resourceId: string) {
@@ -43,7 +43,7 @@ export class JobExtractionService {
     const model = await this.openai.extractContent({
       systemPrompt: prompt,
       schema: JobExtractionModelSchema,
-      files: jobFiles
+      files: jobFiles,
     })
 
     if (!model) return
@@ -54,7 +54,7 @@ export class JobExtractionService {
   private async saveModel(
     accountId: string,
     resourceId: string,
-    model: JobExtractionModel
+    model: JobExtractionModel,
   ) {
     const [job, jobSchema, lineSchema, [customer]] = await Promise.all([
       this.resourceService.read(accountId, resourceId),
@@ -63,12 +63,12 @@ export class JobExtractionService {
       this.resourceService.findResourcesByNameOrPoNumber(
         accountId,
         'Customer',
-        { input: model.customerName, take: 1 }
+        { input: model.customerName, take: 1 },
       ),
       this.resourceService.findResourcesByNameOrPoNumber(accountId, 'Part', {
         input: model.partName,
-        take: 1
-      })
+        take: 1,
+      }),
     ])
 
     const { updatedFields } = new TypedResource(jobSchema, job)
@@ -80,7 +80,7 @@ export class JobExtractionService {
 
     await this.resourceService.update(accountId, resourceId, {
       fields: updatedFields,
-      costs: model.itemizedCosts
+      costs: model.itemizedCosts,
     })
 
     for (const line of model.lineItems) {
@@ -90,7 +90,7 @@ export class JobExtractionService {
         .setNumber(fields.totalCost, line.totalCost)
         .setResource(fields.part, line.partId)
       await this.resourceService.create(accountId, 'JobLine', {
-        fields: updatedFields
+        fields: updatedFields,
       })
     }
   }

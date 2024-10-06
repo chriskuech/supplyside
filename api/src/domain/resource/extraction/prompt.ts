@@ -5,7 +5,7 @@ export const prompt = ({
   resourceType,
   schemaFields,
   lineSchemaFields,
-  csvs
+  csvs,
 }: {
   resourceType: ResourceType
   schemaFields: SanitizedFieldModel[]

@@ -2,7 +2,7 @@ import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService
 import {
   TypedResource,
   fields,
-  selectResourceFieldValue
+  selectResourceFieldValue,
 } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 import { ResourceService } from '../resource/ResourceService'
@@ -22,21 +22,6 @@ You will be provided with the following context:
 You MUST only return high-confidence data. If the data is uncertain or ambiguous, do not include it in the output.
 `
 
-const ExtractedBillDataSchema = z.object({
-  poNumber: z
-    .string()
-    .nullish()
-    .describe(
-      'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.',
-    ),
-  vendorId: z
-    .string()
-    .nullish()
-    .describe(
-      'The Vendor ID. The Vendor ID is a UUIDv4 for identifying the Vendor. The Bill will contain the Vendor Name, not the Vendor ID. The Vendor ID must be looked up in the provided "Vendor List" TSV file by identifying the Vendor Name in the file (accounting for minor spelling/punctuation differences) and returning the associated Vendor ID for that Vendor Name. If no Vendor ID can be determined with high confidence, this field should be null/missing.',
-    ),
-})
-
 @injectable()
 export class BillExtractionService {
   constructor(
@@ -55,29 +40,29 @@ export class BillExtractionService {
     const model = await this.openai.extractContent({
       systemPrompt: prompt,
       schema: BillExtractionModelSchema,
-      files: billFiles
+      files: billFiles,
     })
 
     if (!model) return
 
-    assert(
-      !purchases.length,
-      `Found ${purchases.length + 1} Purchases with PO Number ${poNumber}`,
-    )
+    const {
+      itemizedCosts,
+      // lineItems, // TODO: add line items
+      vendorName,
 
       billingContact,
       invoiceNumber,
       invoiceDate,
       poNumber,
       purchaseDescription,
-      paymentTerms
+      paymentTerms,
       // paymentMethod, // TODO: add payment method
     } = model
 
     const [billSchema, billResource] = await Promise.all([
       this.schemaService.readMergedSchema(accountId, 'Bill'),
       this.resourceService.read(accountId, resourceId),
-      this.schemaService.readMergedSchema(accountId, 'PurchaseLine')
+      this.schemaService.readMergedSchema(accountId, 'PurchaseLine'),
     ])
 
     const typedBill = new TypedResource(billSchema, billResource)
@@ -91,7 +76,7 @@ export class BillExtractionService {
       const [vendor] = await this.resourceService.findResourcesByNameOrPoNumber(
         accountId,
         'Vendor',
-        { input: vendorName }
+        { input: vendorName },
       )
       if (vendor) {
         typedBill.setResource(fields.vendor, vendor.id)
@@ -107,10 +92,10 @@ export class BillExtractionService {
           where: {
             and: [
               { '==': [{ var: fields.poNumber.name }, poNumber] },
-              { '==': [{ var: fields.vendor.name }, vendor.id] }
-            ]
-          }
-        }
+              { '==': [{ var: fields.vendor.name }, vendor.id] },
+            ],
+          },
+        },
       )
       if (purchase) {
         typedBill.setResource(fields.purchase, purchase.id)
@@ -119,7 +104,7 @@ export class BillExtractionService {
 
     await this.resourceService.update(accountId, resourceId, {
       fields: typedBill.updatedFields,
-      costs: itemizedCosts
+      costs: itemizedCosts,
     })
   }
 }

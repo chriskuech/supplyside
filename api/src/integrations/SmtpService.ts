@@ -43,8 +43,8 @@ export default class SmtpService {
         Name: a.name,
         ContentID: '', // bad typings
         Content: a.contentBase64,
-        ContentType: a.contentType
-      }))
+        ContentType: a.contentType,
+      })),
     })
   }
 }

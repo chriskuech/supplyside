@@ -5,5 +5,5 @@ export type AccountModel = Account & {
 }
 
 export const accountInclude = {
-  LogoBlob: true
+  LogoBlob: true,
 } satisfies Prisma.AccountInclude

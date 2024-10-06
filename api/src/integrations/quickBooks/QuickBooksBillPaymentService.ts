@@ -21,7 +21,7 @@ export class QuickBooksBillPaymentService {
     return this.quickBooksApiService
       .makeApiCall(accountId, client, {
         url: `${baseUrl}/billpayment/${id}`,
-        method: 'GET'
+        method: 'GET',
       })
       .then((data) => readBillPaymentSchema.parse(data.json))
   }

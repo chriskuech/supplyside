@@ -11,7 +11,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
     method: 'POST',
     url: '/process-poom/',
     schema: {
-      body: z.string().min(1)
+      body: z.string().min(1),
     },
     handler: async (req, res) => {
       const service = container.resolve(McMasterService)
@@ -19,5 +19,5 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
       await service.processPoom(req.body)
 
       res.status(200).send({})
-    }
+    },
   })
