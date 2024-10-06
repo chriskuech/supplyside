@@ -1,12 +1,12 @@
 import { container } from '@supplyside/api/di'
-import { FastifyInstance } from 'fastify'
-import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { z } from 'zod'
-import { UserSchema } from '@supplyside/model'
 import {
   UpdateUserSchema,
   UserService,
 } from '@supplyside/api/domain/user/UserService'
+import { UserSchema } from '@supplyside/model'
+import { FastifyInstance } from 'fastify'
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
 export const mountSelf = async <App extends FastifyInstance>(app: App) =>
   app

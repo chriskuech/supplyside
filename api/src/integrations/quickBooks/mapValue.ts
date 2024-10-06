@@ -1,11 +1,11 @@
-import dayjs from 'dayjs'
-import { match, P } from 'ts-pattern'
 import {
   FieldTemplate,
   formatInlineAddress,
   Resource,
   selectResourceFieldValue,
 } from '@supplyside/model'
+import dayjs from 'dayjs'
+import { match, P } from 'ts-pattern'
 
 export const mapValue = (resource: Resource, field: FieldTemplate) => {
   const fieldValue = selectResourceFieldValue(resource, field)

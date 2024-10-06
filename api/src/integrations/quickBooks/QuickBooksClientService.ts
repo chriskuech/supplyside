@@ -1,6 +1,9 @@
-import OAuthClient, { Token } from 'intuit-oauth'
 import Csrf from 'csrf'
-import QuickbooksOauthClient from 'intuit-oauth'
+import {
+  default as OAuthClient,
+  default as QuickbooksOauthClient,
+  Token,
+} from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
 import { QuickBooksConfigService } from './QuickBooksConfigService'
 

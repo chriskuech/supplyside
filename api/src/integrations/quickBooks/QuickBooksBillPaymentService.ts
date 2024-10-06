@@ -1,8 +1,8 @@
-import { inject, injectable } from 'inversify'
 import OAuthClient from 'intuit-oauth'
-import { BillPayment } from './types'
-import { readBillPaymentSchema } from './schemas'
+import { inject, injectable } from 'inversify'
 import { QuickBooksApiService } from './QuickBooksApiService'
+import { readBillPaymentSchema } from './schemas'
+import { BillPayment } from './types'
 
 @injectable()
 export class QuickBooksBillPaymentService {

@@ -1,7 +1,7 @@
-import { isTruthy } from 'remeda'
-import { UserModel } from './model'
 import { systemAccountId } from '@supplyside/api/const'
 import { User } from '@supplyside/model'
+import { isTruthy } from 'remeda'
+import { UserModel } from './model'
 
 export const mapUserModelToEntity = (model: UserModel): User => ({
   id: model.id,

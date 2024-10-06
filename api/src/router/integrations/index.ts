@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { mountQuickBooks } from './quickbooks'
 import { mountMcMasterCarr } from './mcmaster'
+import { mountQuickBooks } from './quickbooks'
 
 export const mountIntegrations = async <App extends FastifyInstance>(
   app: App,

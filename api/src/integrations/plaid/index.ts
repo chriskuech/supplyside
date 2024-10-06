@@ -1,9 +1,9 @@
-import { CountryCode, Products } from 'plaid'
+import { ConfigService } from '@supplyside/api/ConfigService'
+import { fail } from 'assert'
 import { inject, injectable } from 'inversify'
+import { CountryCode, Products } from 'plaid'
 import { PrismaService } from '../PrismaService'
 import { PlaidConfigService } from './util'
-import { fail } from 'assert'
-import { ConfigService } from '@supplyside/api/ConfigService'
 
 @injectable()
 export class PlaidService {

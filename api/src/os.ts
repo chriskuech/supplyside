@@ -1,9 +1,9 @@
-import { promisify } from 'util'
 import { exec as execCallback } from 'child_process'
 import { mkdir } from 'fs/promises'
+import { inject, injectable } from 'inversify'
+import { promisify } from 'util'
 import { v4 as uuid } from 'uuid'
 import { ConfigService } from './ConfigService'
-import { inject, injectable } from 'inversify'
 
 const exec = promisify(execCallback)
 
