@@ -1,8 +1,8 @@
-import { z } from "zod";
-import { FieldTypeSchema } from "./field-type";
-import { OptionSchema } from "./option";
-import { ResourceTypeSchema } from "./resource-type";
-import { ValueSchema } from "./value";
+import { z } from 'zod'
+import { FieldTypeSchema } from './field-type'
+import { OptionSchema } from './option'
+import { ResourceTypeSchema } from './resource-type'
+import { ValueSchema } from './value'
 
 export const SchemaFieldSchema = z.object({
   fieldId: z.string(),
@@ -15,6 +15,6 @@ export const SchemaFieldSchema = z.object({
   defaultToToday: z.boolean(),
   isRequired: z.boolean(),
   options: z.array(OptionSchema),
-});
+})
 
-export type SchemaField = z.infer<typeof SchemaFieldSchema>;
+export type SchemaField = z.infer<typeof SchemaFieldSchema>
