@@ -8,7 +8,7 @@ import { QuickBooksConfigService } from './QuickBooksConfigService'
 export class QuickBooksClientService {
   constructor(
     @inject(QuickBooksConfigService)
-    private readonly quickBooksConfigService: QuickBooksConfigService
+    private readonly quickBooksConfigService: QuickBooksConfigService,
   ) {}
 
   getClient(token?: Token) {

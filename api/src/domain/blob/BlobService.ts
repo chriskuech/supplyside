@@ -1,9 +1,9 @@
-import { randomUUID } from 'crypto'
 import { BlobServiceClient } from '@azure/storage-blob'
+import { ConfigService } from '@supplyside/api/ConfigService'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { randomUUID } from 'crypto'
 import { inject, injectable } from 'inversify'
 import { Blob, BlobWithData } from './entity'
-import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import { ConfigService } from '@supplyside/api/ConfigService'
 
 const containerName = 'app-data'
 
@@ -13,10 +13,10 @@ export class BlobService {
 
   constructor(
     @inject(PrismaService) private readonly prisma: PrismaService,
-    @inject(ConfigService) { config }: ConfigService
+    @inject(ConfigService) { config }: ConfigService,
   ) {
     this.client = BlobServiceClient.fromConnectionString(
-      config.AZURE_STORAGE_CONNECTION_STRING
+      config.AZURE_STORAGE_CONNECTION_STRING,
     )
   }
 
@@ -25,7 +25,7 @@ export class BlobService {
     data: {
       buffer: Buffer
       contentType: string
-    }
+    },
   ): Promise<Blob> {
     const blobName = randomUUID()
     const contentType = data.contentType.toLowerCase()
@@ -35,15 +35,15 @@ export class BlobService {
     await containerClient.createIfNotExists()
 
     await containerClient.getBlockBlobClient(blobName).uploadData(data.buffer, {
-      blobHTTPHeaders: { blobContentType: contentType }
+      blobHTTPHeaders: { blobContentType: contentType },
     })
 
     const blob = await this.prisma.blob.create({
       data: {
         accountId,
         mimeType: contentType,
-        name: blobName
-      }
+        name: blobName,
+      },
     })
 
     return blob
@@ -51,16 +51,16 @@ export class BlobService {
 
   async readBlob(accountId: string, blobId: string): Promise<Blob> {
     return await this.prisma.blob.findUniqueOrThrow({
-      where: { accountId, id: blobId }
+      where: { accountId, id: blobId },
     })
   }
 
   async readBlobWithData(
     accountId: string,
-    blobId: string
+    blobId: string,
   ): Promise<BlobWithData> {
     const blob = await this.prisma.blob.findUniqueOrThrow({
-      where: { accountId, id: blobId }
+      where: { accountId, id: blobId },
     })
 
     const buffer = await this.client
@@ -73,13 +73,13 @@ export class BlobService {
 
   async deleteBlob({
     accountId,
-    blobId
+    blobId,
   }: {
     accountId: string
     blobId: string
   }): Promise<void> {
     const blob = await this.prisma.blob.findUniqueOrThrow({
-      where: { accountId, id: blobId }
+      where: { accountId, id: blobId },
     })
 
     await this.client

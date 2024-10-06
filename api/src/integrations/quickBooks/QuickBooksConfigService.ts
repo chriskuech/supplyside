@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify'
 @injectable()
 export class QuickBooksConfigService {
   constructor(
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   get config() {

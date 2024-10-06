@@ -1,11 +1,11 @@
 import { faker } from '@faker-js/faker'
+import { systemAccountId } from '@supplyside/api/const'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { inject, injectable } from 'inversify'
 import { TemplateService } from '../schema/TemplateService'
 import { Account } from './entity'
 import { mapAccountModelToEntity } from './mappers'
 import { accountInclude } from './model'
-import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import { systemAccountId } from '@supplyside/api/const'
 
 @injectable()
 export class AccountService {
@@ -13,7 +13,7 @@ export class AccountService {
     @inject(PrismaService)
     private readonly prisma: PrismaService,
     @inject(TemplateService)
-    private readonly templateService: TemplateService
+    private readonly templateService: TemplateService,
   ) {}
 
   async create(): Promise<void> {
@@ -22,8 +22,8 @@ export class AccountService {
     const { id: accountId } = await this.prisma.account.create({
       data: {
         key: temporaryKey,
-        name: 'New Account - ' + temporaryKey
-      }
+        name: 'New Account - ' + temporaryKey,
+      },
     })
 
     await this.templateService.applyTemplate(accountId)
@@ -32,9 +32,9 @@ export class AccountService {
   async read(accountId: string): Promise<Account> {
     const model = await this.prisma.account.findUniqueOrThrow({
       where: {
-        id: accountId
+        id: accountId,
       },
-      include: accountInclude
+      include: accountInclude,
     })
 
     return mapAccountModelToEntity(model)
@@ -43,9 +43,9 @@ export class AccountService {
   async readByKey(key: string): Promise<Account> {
     const model = await this.prisma.account.findUniqueOrThrow({
       where: {
-        key
+        key,
       },
-      include: accountInclude
+      include: accountInclude,
     })
 
     return mapAccountModelToEntity(model)
@@ -56,14 +56,14 @@ export class AccountService {
       where: {
         id: {
           not: {
-            equals: systemAccountId
-          }
-        }
+            equals: systemAccountId,
+          },
+        },
       },
       orderBy: {
-        name: 'asc'
+        name: 'asc',
       },
-      include: accountInclude
+      include: accountInclude,
     })
 
     return models.map(mapAccountModelToEntity)
@@ -76,19 +76,19 @@ export class AccountService {
       key?: string
       address?: string
       logoBlobId?: string
-    }
+    },
   ) {
     await this.prisma.account.update({
       where: { id: accountId },
-      data
+      data,
     })
   }
 
   async delete(accountId: string): Promise<void> {
     await this.prisma.account.delete({
       where: {
-        id: accountId
-      }
+        id: accountId,
+      },
     })
   }
 }

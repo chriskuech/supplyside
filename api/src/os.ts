@@ -10,7 +10,7 @@ const exec = promisify(execCallback)
 @injectable()
 export class OsService {
   constructor(
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   async exec(command: string) {

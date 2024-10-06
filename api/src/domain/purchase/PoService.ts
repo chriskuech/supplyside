@@ -24,22 +24,22 @@ export class PoService {
     @inject(ResourceService) private readonly resourceService: ResourceService,
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(SmtpService) private readonly smtpService: SmtpService,
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   async createPo(accountId: string, resourceId: string) {
     const schema = await this.schemaService.readMergedSchema(
       accountId,
-      'Purchase'
+      'Purchase',
     )
 
     const documentFieldId = selectSchemaFieldUnsafe(
       schema,
-      fields.document
+      fields.document,
     ).fieldId
     const issuedDateFieldId = selectSchemaFieldUnsafe(
       schema,
-      fields.issuedDate
+      fields.issuedDate,
     ).fieldId
 
     await this.resourceService.updateResourceField(accountId, resourceId, {
@@ -61,7 +61,7 @@ export class PoService {
       ?.resource?.name
     const issuedDate = selectResourceFieldValue(
       resource,
-      fields.issuedDate
+      fields.issuedDate,
     )?.date
     const number = selectResourceFieldValue(resource, fields.poNumber)?.string
 
@@ -89,7 +89,7 @@ export class PoService {
 
     const poRecipient = selectResourceFieldValue(
       order,
-      fields.poRecipient
+      fields.poRecipient,
     )?.contact
     const po = selectResourceFieldValue(order, fields.document)?.file
     const assignee = selectResourceFieldValue(order, fields.assignee)?.user

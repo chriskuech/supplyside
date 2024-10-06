@@ -11,17 +11,17 @@ export const mountBills = async <App extends FastifyInstance>(app: App) =>
     schema: {
       params: z.object({
         accountId: z.string().uuid(),
-        resourceId: z.string().uuid()
+        resourceId: z.string().uuid(),
       }),
       body: z.object({
-        purchaseId: z.string().uuid()
-      })
+        purchaseId: z.string().uuid(),
+      }),
     },
     handler: async (req) => {
       const service = container.resolve(BillService)
 
       await service.linkPurchase(req.params.accountId, req.params.resourceId, {
-        purchaseId: req.body.purchaseId
+        purchaseId: req.body.purchaseId,
       })
-    }
+    },
   })

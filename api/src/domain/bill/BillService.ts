@@ -1,13 +1,13 @@
-import { inject, injectable } from 'inversify'
 import { container } from '@supplyside/api/di'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import { Resource, fields, selectSchemaFieldUnsafe } from '@supplyside/model'
 import assert from 'assert'
+import { inject, injectable } from 'inversify'
 import { Message } from 'postmark'
 import { AccountService } from '../account/AccountService'
-import { FileService } from '../file/FileService'
 import { BlobService } from '../blob/BlobService'
+import { FileService } from '../file/FileService'
 
 type FileParam = {
   content: string
@@ -29,23 +29,23 @@ const createBill = async (params: Params): Promise<Resource> => {
 
   const billSchema = await schemaService.readMergedSchema(
     params.accountId,
-    'Bill'
+    'Bill',
   )
 
   const fileIds = await Promise.all(
     params.files.map(async (file) => {
       const { id: blobId } = await blobService.createBlob(params.accountId, {
         buffer: Buffer.from(file.content, file.encoding),
-        contentType: file.contentType
+        contentType: file.contentType,
       })
 
       const { id: fileId } = await fileService.create(params.accountId, {
         name: file.fileName,
-        blobId
+        blobId,
       })
 
       return fileId
-    })
+    }),
   )
 
   console.log('Creating Bill', fileIds)
@@ -54,9 +54,9 @@ const createBill = async (params: Params): Promise<Resource> => {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(billSchema, fields.billFiles).fieldId,
-        valueInput: { fileIds }
-      }
-    ]
+        valueInput: { fileIds },
+      },
+    ],
   })
 
   return bill
@@ -66,22 +66,22 @@ const createBill = async (params: Params): Promise<Resource> => {
 export class BillService {
   constructor(
     @inject(AccountService) private readonly accountService: AccountService,
-    @inject(ResourceService) private readonly resourceService: ResourceService
+    @inject(ResourceService) private readonly resourceService: ResourceService,
   ) {}
 
   async linkPurchase(
     accountId: string,
     resourceId: string,
-    { purchaseId }: { purchaseId: string }
+    { purchaseId }: { purchaseId: string },
   ) {
     await this.resourceService.copyFields(accountId, resourceId, {
-      fromResourceId: purchaseId
+      fromResourceId: purchaseId,
     })
 
     await this.resourceService.cloneCosts({
       accountId,
       fromResourceId: purchaseId,
-      toResourceId: resourceId
+      toResourceId: resourceId,
     })
 
     await this.resourceService.linkLines({
@@ -89,7 +89,7 @@ export class BillService {
       fromResourceId: purchaseId,
       toResourceId: resourceId,
       fromResourceField: fields.purchase,
-      toResourceField: fields.bill
+      toResourceField: fields.bill,
     })
   }
 
@@ -108,8 +108,8 @@ export class BillService {
         content: attachment.Content,
         encoding: 'base64',
         contentType: attachment.ContentType,
-        fileName: attachment.Name
-      })
+        fileName: attachment.Name,
+      }),
     )
 
     const email: FileParam | null = message.HtmlBody
@@ -117,20 +117,20 @@ export class BillService {
           content: message.HtmlBody,
           encoding: 'utf-8',
           contentType: 'text/html',
-          fileName: 'email.html'
+          fileName: 'email.html',
         }
       : message.TextBody
         ? {
             content: message.TextBody,
             encoding: 'utf-8',
             contentType: 'text/plain',
-            fileName: 'email.txt'
+            fileName: 'email.txt',
           }
         : null
 
     await createBill({
       accountId: account.id,
-      files: [...(email ? [email] : []), ...(attachments ?? [])]
+      files: [...(email ? [email] : []), ...(attachments ?? [])],
     })
   }
 }

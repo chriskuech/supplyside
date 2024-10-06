@@ -34,7 +34,7 @@ export class UserService {
     @inject(PrismaService)
     private readonly prisma: PrismaService,
     @inject(ConfigService)
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {}
 
   async readSelf(userId: string): Promise<User> {

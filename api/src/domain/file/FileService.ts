@@ -10,7 +10,7 @@ export class FileService {
 
   async create(
     accountId: string,
-    data: { name: string; blobId: string }
+    data: { name: string; blobId: string },
   ): Promise<File> {
     const model = await this.prisma.file.create({
       data: {

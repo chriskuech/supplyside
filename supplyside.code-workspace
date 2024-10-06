@@ -1,7 +1,7 @@
 {
   "folders": [
     {
-      "path": ".github"
+      "path": ".github",
     },
     {
       "path": ".ops"
@@ -18,10 +18,12 @@
   ],
   "settings": {
     "editor.tabSize": 2,
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "always"
-    }
+      "source.fixAll.eslint": "always",
+      "source.fixAll": "always",
+      "source.organizeImports": "always"
+    },
   },
   "extensions": {
     "recommendations": [

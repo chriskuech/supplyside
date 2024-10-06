@@ -7,7 +7,7 @@ import {
   fields,
   purchaseStatusOptions,
   selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe
+  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -22,14 +22,14 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceId: z.string().uuid()
-        })
+          resourceId: z.string().uuid(),
+        }),
       },
       handler: async (req) => {
         const service = container.resolve(PoService)
 
         await service.createPo(req.params.accountId, req.params.resourceId)
-      }
+      },
     })
     .route({
       method: 'POST',
@@ -37,8 +37,8 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceId: z.string().uuid()
-        })
+          resourceId: z.string().uuid(),
+        }),
       },
       handler: async (req) => {
         const poService = container.resolve(PoService)
@@ -47,14 +47,14 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
 
         const schema = await schemaService.readMergedSchema(
           req.params.accountId,
-          'Purchase'
+          'Purchase',
         )
 
         const field = selectSchemaFieldUnsafe(schema, fields.purchaseStatus)
         const option = selectSchemaFieldOptionUnsafe(
           schema,
           fields.purchaseStatus,
-          purchaseStatusOptions.purchased
+          purchaseStatusOptions.purchased,
         )
 
         await poService.sendPo(req.params.accountId, req.params.resourceId)
@@ -63,10 +63,10 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
           req.params.resourceId,
           {
             fieldId: field.fieldId,
-            valueInput: { optionId: option.id }
-          }
+            valueInput: { optionId: option.id },
+          },
         )
-      }
+      },
     })
     .route({
       method: 'GET',
@@ -74,9 +74,9 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceId: z.string().uuid()
+          resourceId: z.string().uuid(),
         }),
-        produces: ['*']
+        produces: ['*'],
       },
       handler: async (req, res) => {
         const service = container.resolve(PoRenderingService)
@@ -84,12 +84,12 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
         const buffer = await service.renderPo(
           req.params.accountId,
           req.params.resourceId,
-          { isPreview: true }
+          { isPreview: true },
         )
 
         res.header('Content-Type', 'application/pdf')
         res.send(buffer)
-      }
+      },
     })
 // .route({
 //   method: 'GET',

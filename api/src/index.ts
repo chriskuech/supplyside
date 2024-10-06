@@ -1,8 +1,8 @@
-import 'reflect-metadata'
-import process from 'process'
 import { createServer as createRouter } from '@supplyside/api/router'
 import { writeFileSync } from 'fs'
 import openapiTS, { astToString } from 'openapi-typescript'
+import process from 'process'
+import 'reflect-metadata'
 import { z } from 'zod'
 
 const isDev = process.env.NODE_ENV === 'development'
@@ -27,6 +27,6 @@ const isDev = process.env.NODE_ENV === 'development'
 
   app.listen({
     port: z.coerce.number().optional().parse(process.env.PORT),
-    host: '0.0.0.0'
+    host: '0.0.0.0',
   })
 })()

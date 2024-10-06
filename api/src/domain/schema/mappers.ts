@@ -2,32 +2,32 @@ import {
   AddressSchema,
   ContactSchema,
   Schema,
-  SchemaField
+  SchemaField,
 } from '@supplyside/model'
+import { isTruthy } from 'remeda'
+import { P, match } from 'ts-pattern'
+import { ZodType, ZodTypeAny, z } from 'zod'
 import { mapValueModelToEntity } from '../resource/mappers'
 import { FieldModel, SchemaModel } from './model'
-import { ZodType, ZodTypeAny, z } from 'zod'
-import { P, match } from 'ts-pattern'
-import { isTruthy } from 'remeda'
 
 export const mapSchemaModelToEntity = (model: SchemaModel): Schema => ({
   resourceType: model.resourceType,
   sections: model.Section.flatMap((s) => ({
     id: s.id,
     name: s.name,
-    fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity)
+    fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity),
   })),
   fields: [
     ...model.SchemaField,
-    ...model.Section.flatMap((s) => s.SectionField)
+    ...model.Section.flatMap((s) => s.SectionField),
   ]
     .map((sf) => sf.Field)
     .map(mapFieldModelToEntity)
     .reduce<SchemaField[]>(
       (acc, field) =>
         acc.some((f) => f.fieldId === field.fieldId) ? acc : [...acc, field],
-      []
-    )
+      [],
+    ),
 })
 
 export const mapFieldModelToEntity = (model: FieldModel): SchemaField => ({
@@ -39,12 +39,12 @@ export const mapFieldModelToEntity = (model: FieldModel): SchemaField => ({
   options: model.Option.map((o) => ({
     id: o.id,
     name: o.name,
-    templateId: o.templateId
+    templateId: o.templateId,
   })),
   resourceType: model.resourceType,
   defaultValue: model.DefaultValue && mapValueModelToEntity(model.DefaultValue),
   defaultToToday: model.defaultToToday,
-  isRequired: model.isRequired
+  isRequired: model.isRequired,
 })
 
 const nameEnum = (field: SchemaField) =>
@@ -56,7 +56,7 @@ const resolveNames = (field: SchemaField, names: string[]) =>
     .filter(isTruthy)
 
 const mapSchemaFieldToZodType = (
-  field: SchemaField
+  field: SchemaField,
 ): ZodTypeAny | undefined => {
   let schema: ZodTypeAny | undefined = match(field.type)
     .with('Address', () => AddressSchema.optional())
@@ -67,7 +67,7 @@ const mapSchemaFieldToZodType = (
         .string()
         .date()
         .transform((d) => new Date(d))
-        .optional()
+        .optional(),
     )
     .with(P.union('Money', 'Number'), () => z.number().optional())
     .with('MultiSelect', () =>
@@ -76,29 +76,29 @@ const mapSchemaFieldToZodType = (
             .array(nameEnum(field))
             .transform((names) => resolveNames(field, names))
             .optional()
-        : undefined
+        : undefined,
     )
     .with('Resource', () =>
       z
         .string()
         .describe('The name or number that primarily identifies the resource')
-        .optional()
+        .optional(),
     )
     .with('Select', () =>
       field.options.length
         ? nameEnum(field)
             .transform((name) => resolveNames(field, [name]))
             .optional()
-        : undefined
+        : undefined,
     )
     .with(P.union('Text', 'Textarea'), () => z.string().optional())
     .with('User', () =>
       z
         .object({
           email: z.string().nullable(),
-          name: z.string().nullable()
+          name: z.string().nullable(),
         })
-        .optional()
+        .optional(),
     )
     .with(P.union('File', 'Files'), () => undefined)
     .exhaustive()

@@ -22,13 +22,28 @@ You will be provided with the following context:
 You MUST only return high-confidence data. If the data is uncertain or ambiguous, do not include it in the output.
 `
 
+const ExtractedBillDataSchema = z.object({
+  poNumber: z
+    .string()
+    .nullish()
+    .describe(
+      'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.',
+    ),
+  vendorId: z
+    .string()
+    .nullish()
+    .describe(
+      'The Vendor ID. The Vendor ID is a UUIDv4 for identifying the Vendor. The Bill will contain the Vendor Name, not the Vendor ID. The Vendor ID must be looked up in the provided "Vendor List" TSV file by identifying the Vendor Name in the file (accounting for minor spelling/punctuation differences) and returning the associated Vendor ID for that Vendor Name. If no Vendor ID can be determined with high confidence, this field should be null/missing.',
+    ),
+})
+
 @injectable()
 export class BillExtractionService {
   constructor(
     @inject(OpenAiService) private readonly openai: OpenAiService,
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(ResourceService)
-    private readonly resourceService: ResourceService
+    private readonly resourceService: ResourceService,
   ) {}
 
   async extractContent(accountId: string, resourceId: string) {
@@ -45,10 +60,10 @@ export class BillExtractionService {
 
     if (!model) return
 
-    const {
-      itemizedCosts,
-      // lineItems, // TODO: add line items
-      vendorName,
+    assert(
+      !purchases.length,
+      `Found ${purchases.length + 1} Purchases with PO Number ${poNumber}`,
+    )
 
       billingContact,
       invoiceNumber,

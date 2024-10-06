@@ -5,7 +5,7 @@ import { mountPlaid } from './plaid'
 import { mountMcMasterCarr } from './mcmaster'
 
 export const mountIntegrations = async <App extends FastifyInstance>(
-  app: App
+  app: App,
 ) =>
   app
     .withTypeProvider<ZodTypeProvider>()

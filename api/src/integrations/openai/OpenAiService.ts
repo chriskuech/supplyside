@@ -1,11 +1,11 @@
+import { File } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 import { OpenAI } from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod.mjs'
-import { CompletionPartsService } from './CompletionPartsService'
-import { File } from '@supplyside/model'
-import { ZodSchema } from 'zod'
-import { P, match } from 'ts-pattern'
 import { ChatCompletionContentPart } from 'openai/resources/index.mjs'
+import { P, match } from 'ts-pattern'
+import { ZodSchema } from 'zod'
+import { CompletionPartsService } from './CompletionPartsService'
 
 @injectable()
 export class OpenAiService {
@@ -13,12 +13,12 @@ export class OpenAiService {
 
   constructor(
     @inject(CompletionPartsService)
-    private readonly completionPartsService: CompletionPartsService
+    private readonly completionPartsService: CompletionPartsService,
   ) {
     this.client = new OpenAI({
       // These are required to use our specific model
       organization: 'org-u3vWSqIyPWvKu4xGpMEcH5l4',
-      project: 'proj_RYX76NcxQN2NpLHkQuH7l33b'
+      project: 'proj_RYX76NcxQN2NpLHkQuH7l33b',
     })
   }
 
@@ -34,12 +34,12 @@ export class OpenAiService {
             .with(
               P.string,
               (text) =>
-                ({ type: 'text', text }) satisfies ChatCompletionContentPart
+                ({ type: 'text', text }) satisfies ChatCompletionContentPart,
             )
             .otherwise((file) =>
-              this.completionPartsService.mapFileToCompletionParts(file)
-            )
-        )
+              this.completionPartsService.mapFileToCompletionParts(file),
+            ),
+        ),
       )
     ).flat()
 
@@ -50,14 +50,14 @@ export class OpenAiService {
       messages: [
         {
           role: 'system',
-          content: params.systemPrompt
+          content: params.systemPrompt,
         },
         {
           role: 'user',
-          content: completionParts
-        }
+          content: completionParts,
+        },
       ],
-      response_format: zodResponseFormat(params.schema, 'extractedContent')
+      response_format: zodResponseFormat(params.schema, 'extractedContent'),
     })
 
     return completion.choices[0]?.message.parsed ?? undefined

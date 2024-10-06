@@ -8,11 +8,11 @@ import {
   selectSchemaField,
 } from '@supplyside/model'
 import { requireSession } from '@/session'
-import { withAccountId } from '@/authz'
+import { withAccountId, withSession } from '@/authz'
 import * as client from '@/client/resource'
 import { readSchema } from '@/client/schema'
 
-export const createResource = withAccountId(client.createResource)
+export const createResource = withSession(client.createResource)
 export const readResource = withAccountId(client.readResource)
 export const readResources = withAccountId(client.readResources)
 export const updateResource = withAccountId(client.updateResource)

@@ -20,7 +20,7 @@ const exec = promisify(execCallback)
 export class CompletionPartsService {
   constructor(
     @inject(BlobService) private readonly blobService: BlobService,
-    @inject(ConfigService) private readonly configService: ConfigService
+    @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   mapFileToCompletionParts(file: File): Promise<ChatCompletionContentPart[]> {
@@ -36,11 +36,11 @@ export class CompletionPartsService {
   }
 
   private async readTextFileToString(
-    file: File
+    file: File,
   ): Promise<ChatCompletionContentPartText> {
     const blob = await this.blobService.readBlobWithData(
       file.accountId,
-      file.blobId
+      file.blobId,
     )
 
     assert(blob)
@@ -52,11 +52,11 @@ export class CompletionPartsService {
   }
 
   private async readImageFileToBase64(
-    file: File
+    file: File,
   ): Promise<ChatCompletionContentPartImage> {
     const blob = await this.blobService.readBlobWithData(
       file.accountId,
-      file.blobId
+      file.blobId,
     )
 
     return {
@@ -69,11 +69,11 @@ export class CompletionPartsService {
   }
 
   private async readPdfToBase64s(
-    file: File
+    file: File,
   ): Promise<ChatCompletionContentPartImage[]> {
     const blob = await this.blobService.readBlobWithData(
       file.accountId,
-      file.blobId
+      file.blobId,
     )
 
     const containerPath = `${this.configService.config.TEMP_PATH}/${file.id}`
@@ -91,8 +91,8 @@ export class CompletionPartsService {
         containerFileNames
           .filter((fileName) => fileName.startsWith(`${outputFileNamePrefix}-`))
           .map((pngFileName) =>
-            readFile(`${containerPath}/${pngFileName}`, { encoding: 'base64' })
-          )
+            readFile(`${containerPath}/${pngFileName}`, { encoding: 'base64' }),
+          ),
       )
 
       return base64s.map((base64) => ({
