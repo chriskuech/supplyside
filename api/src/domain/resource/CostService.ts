@@ -15,10 +15,10 @@ export class CostService {
         Resource: {
           connect: {
             id: resourceId,
-            accountId,
-          },
-        },
-      },
+            accountId
+          }
+        }
+      }
     })
   }
 
@@ -27,9 +27,9 @@ export class CostService {
     resourceId: string,
     costId: string,
     data: {
-      name?: string;
-      isPercentage?: boolean;
-      value?: number;
+      name?: string
+      isPercentage?: boolean
+      value?: number
     }
   ) {
     await this.prisma.cost.update({
@@ -37,17 +37,17 @@ export class CostService {
         id: costId,
         Resource: {
           id: resourceId,
-          accountId,
-        },
+          accountId
+        }
       },
       data: {
         name: data.name,
         isPercentage: data.isPercentage,
-        value: data.value,
+        value: data.value
       },
       include: {
-        Resource: true,
-      },
+        Resource: true
+      }
     })
 
     await this.resourceService.recalculateItemizedCosts(accountId, resourceId)
@@ -59,9 +59,9 @@ export class CostService {
         id: costId,
         Resource: {
           id: resourceId,
-          accountId,
-        },
-      },
+          accountId
+        }
+      }
     })
 
     await this.resourceService.recalculateItemizedCosts(accountId, resourceId)

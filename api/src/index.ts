@@ -5,9 +5,9 @@ import { writeFileSync } from 'fs'
 import openapiTS, { astToString } from 'openapi-typescript'
 import { z } from 'zod'
 
-const isDev =  process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === 'development'
 
-(async () => {
+;(async () => {
   const app = createRouter(isDev)
 
   process.on('exit', () => app.close())
@@ -25,5 +25,8 @@ const isDev =  process.env.NODE_ENV === 'development';
     process.exit(0)
   }
 
-  app.listen({ port: z.coerce.number().optional().parse(process.env.PORT), host: '0.0.0.0' })
+  app.listen({
+    port: z.coerce.number().optional().parse(process.env.PORT),
+    host: '0.0.0.0'
+  })
 })()

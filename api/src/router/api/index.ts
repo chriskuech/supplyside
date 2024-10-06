@@ -10,7 +10,7 @@ export const mountApi = <App extends FastifyInstance>(app: App) =>
   app
     .addHook('preHandler', (req, reply, next) => {
       const { config } = container.resolve(ConfigService)
-      
+
       const [scheme, token] = req.headers.authorization?.split(' ') ?? []
 
       if (scheme !== 'Bearer') {

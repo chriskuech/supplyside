@@ -9,13 +9,13 @@ import { PrismaService } from '../PrismaService'
 import {
   cxmlSchema,
   posrResponseSchema,
-  RenderPOSRTemplateParams,
+  RenderPOSRTemplateParams
 } from './types'
 import { McMasterInvalidCredentials } from './errors'
 import {
   resources,
   selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe,
+  selectSchemaFieldUnsafe
 } from '@supplyside/model'
 import { fields, unitOfMeasureOptions } from '@supplyside/model'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
@@ -35,7 +35,7 @@ export class McMasterService {
   async getConnectedAt(accountId: string) {
     const account = await this.prisma.account.findUniqueOrThrow({
       where: { id: accountId },
-      include: accountInclude,
+      include: accountInclude
     })
 
     return account.mcMasterCarrConnectedAt
@@ -62,7 +62,7 @@ export class McMasterService {
         'Vendor',
         {
           input: 'McMaster-Carr',
-          exact: true,
+          exact: true
         }
       )
 
@@ -77,15 +77,15 @@ export class McMasterService {
         templateId: mcMasterCarrSystemResource.templateId,
         fields: mcMasterCarrSystemResource.fields.map((f) => ({
           fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).fieldId,
-          valueInput: f.value,
-        })),
+          valueInput: f.value
+        }))
       })
     } else {
       await this.resourceService.update(accountId, mcMasterCarrVendor.id, {
         fields: mcMasterCarrSystemResource.fields.map((f) => ({
           fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).fieldId,
-          valueInput: f.value,
-        })),
+          valueInput: f.value
+        }))
       })
 
       if (!mcMasterCarrVendor.templateId) {
@@ -93,7 +93,7 @@ export class McMasterService {
           accountId,
           mcMasterCarrVendor.id,
           {
-            templateId: mcMasterCarrSystemResource.templateId,
+            templateId: mcMasterCarrSystemResource.templateId
           }
         )
       }
@@ -104,8 +104,8 @@ export class McMasterService {
       data: {
         mcMasterCarrConnectedAt: new Date(),
         mcMasterCarrUsername: username,
-        mcMasterCarrPassword: password,
-      },
+        mcMasterCarrPassword: password
+      }
     })
   }
 
@@ -120,7 +120,7 @@ export class McMasterService {
         accountId,
         mcMasterCarrVendor.id,
         {
-          templateId: null,
+          templateId: null
         }
       )
     }
@@ -130,8 +130,8 @@ export class McMasterService {
       data: {
         mcMasterCarrUsername: null,
         mcMasterCarrPassword: null,
-        mcMasterCarrConnectedAt: null,
-      },
+        mcMasterCarrConnectedAt: null
+      }
     })
   }
 
@@ -171,7 +171,7 @@ export class McMasterService {
     ).fieldId
     await this.resourceService.updateResourceField(accountId, resourceId, {
       fieldId,
-      valueInput: { string: punchoutSessionUrl },
+      valueInput: { string: punchoutSessionUrl }
     })
 
     return punchoutSessionUrl
@@ -182,9 +182,9 @@ export class McMasterService {
     const {
       mcMasterCarrUsername,
       mcMasterCarrConnectedAt,
-      mcMasterCarrPassword,
+      mcMasterCarrPassword
     } = await this.prisma.account.findFirstOrThrow({
-      where: { id: accountId },
+      where: { id: accountId }
     })
 
     assert(
@@ -200,7 +200,7 @@ export class McMasterService {
       PUNCHOUT_MCMASTER_POSR_URL: posrUrl,
       PUNCHOUT_MCMASTER_SHARED_SECRET: secret,
       PUNCHOUT_MCMASTER_SUPPLIER_DOMAIN: supplierDomain,
-      PUNCHOUT_MCMASTER_SUPPLIER_IDENTITY: supplierIdentity,
+      PUNCHOUT_MCMASTER_SUPPLIER_IDENTITY: supplierIdentity
     } = this.configService.config
 
     if (!posrUrl || !secret || !supplierDomain || !supplierIdentity) {
@@ -211,7 +211,7 @@ export class McMasterService {
       posrUrl,
       secret,
       supplierDomain,
-      supplierIdentity,
+      supplierIdentity
     }
   }
 
@@ -262,7 +262,7 @@ export class McMasterService {
       clientName: supplierIdentity,
       punchOutSharedSecret: secret,
       buyerCookie: `${resourceId}|${accountId}`,
-      poomReturnEndpoint: `${this.configService.config.APP_BASE_URL}/api/integrations/mcmaster`,
+      poomReturnEndpoint: `${this.configService.config.APP_BASE_URL}/api/integrations/mcmaster`
     })
 
     return renderedPunchoutSetupRequest
@@ -302,8 +302,8 @@ export class McMasterService {
     await this.resourceService.updateResourceField(accountId, orderId, {
       fieldId: issuedDateFieldId,
       valueInput: {
-        date: orderDate.toISOString(),
-      },
+        date: orderDate.toISOString()
+      }
     })
 
     for (const item of items) {
@@ -318,7 +318,7 @@ export class McMasterService {
           'Item',
           {
             input: description,
-            exact: true,
+            exact: true
           }
         )
 
@@ -351,9 +351,9 @@ export class McMasterService {
               { fieldId: nameFieldId, valueInput: { string: description } },
               {
                 fieldId: itemUnitofMesureFieldId,
-                valueInput: { optionId: itemUnitOfMeasureOptionId },
-              },
-            ],
+                valueInput: { optionId: itemUnitOfMeasureOptionId }
+              }
+            ]
           }
         )
         matchedItemId = newResource.id
@@ -396,17 +396,17 @@ export class McMasterService {
           fields: [
             {
               fieldId: itemFieldId,
-              valueInput: { resourceId: matchedItemId },
+              valueInput: { resourceId: matchedItemId }
             },
             {
               fieldId: orderFieldId,
-              valueInput: { resourceId: orderId },
+              valueInput: { resourceId: orderId }
             },
             {
               fieldId: lineUnitofMesureFieldId,
-              valueInput: { optionId: lineUnitOfMeasureOptionId },
-            },
-          ],
+              valueInput: { optionId: lineUnitOfMeasureOptionId }
+            }
+          ]
         }
       )
 
@@ -416,13 +416,13 @@ export class McMasterService {
         fields: [
           {
             fieldId: quantityFieldId,
-            valueInput: { number: quantity },
+            valueInput: { number: quantity }
           },
           {
             fieldId: unitPriceFieldId,
-            valueInput: { number: unitPrice },
-          },
-        ],
+            valueInput: { number: unitPrice }
+          }
+        ]
       })
     }
   }
@@ -445,8 +445,8 @@ async function sendRequest(url: string, body: string) {
     method: 'POST',
     body,
     headers: {
-      'Content-Type': 'text/xml',
-    },
+      'Content-Type': 'text/xml'
+    }
   })
 
   return response.text()
@@ -495,7 +495,7 @@ function parseCxml(cxmlString: string) {
       .with('YD', () => unitOfMeasureOptions.yard)
       .otherwise(() =>
         fail(`Invalid Unit of Measure ${item.ItemDetail[0]?.UnitOfMeasure[0]}`)
-      ),
+      )
   }))
 
   assert(total && items && senderDomain && senderIdentity && sharedSecret)
@@ -506,6 +506,6 @@ function parseCxml(cxmlString: string) {
     total,
     orderDate,
     items,
-    sender: { domain: senderDomain, identity: senderIdentity, sharedSecret },
+    sender: { domain: senderDomain, identity: senderIdentity, sharedSecret }
   }
 }

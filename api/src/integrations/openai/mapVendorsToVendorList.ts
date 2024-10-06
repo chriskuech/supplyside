@@ -5,12 +5,12 @@ export const mapVendorsToVendorList = (vendors: Resource[]) =>
   [
     {
       id: 'ID',
-      name: 'Name',
+      name: 'Name'
     },
     ...vendors.map((vendor) => ({
       id: vendor.id,
-      name: selectResourceFieldValue(vendor, fields.name)?.string,
-    })),
+      name: selectResourceFieldValue(vendor, fields.name)?.string
+    }))
   ]
     .filter(({ name }) => !!name)
     .map(({ id, name }) => `${id}\t${name}`)

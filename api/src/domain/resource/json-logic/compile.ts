@@ -2,24 +2,20 @@ import { FieldType, Value } from '@prisma/client'
 import { P, match } from 'ts-pattern'
 import { OrderBy, JsonLogic } from './types'
 import { mapUuidToBase64, sanitizeValue } from './sanitize'
-import {
-  Schema,
-  SchemaField,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { Schema, SchemaField, selectSchemaFieldUnsafe } from '@supplyside/model'
 
 export type MapToSqlParams = {
-  accountId: string;
-  schema: Schema;
-  where: JsonLogic | undefined;
-  orderBy: OrderBy[] | undefined;
-};
+  accountId: string
+  schema: Schema
+  where: JsonLogic | undefined
+  orderBy: OrderBy[] | undefined
+}
 
 export const createSql = ({
   accountId,
   schema,
   where,
-  orderBy,
+  orderBy
 }: MapToSqlParams) => /*sql*/ `
     WITH "View" AS (
       SELECT
@@ -30,7 +26,7 @@ export const createSql = ({
               `(${createPropertySubquery(f)}) AS "${mapUuidToBase64(
                 f.fieldId
               )}"`
-          ),
+          )
         ].join(', ')}
       FROM "Resource"
       WHERE "Resource"."accountId" = '${accountId}'
@@ -127,7 +123,7 @@ const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
 type PrimitiveFieldType = Exclude<
   FieldType,
   'Address' | 'Contact' | 'Files' | 'MultiSelect'
->;
+>
 
 const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
   match<PrimitiveFieldType, keyof Value>(t)

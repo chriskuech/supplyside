@@ -5,7 +5,7 @@ import { promisify } from 'util'
 import {
   ChatCompletionContentPart,
   ChatCompletionContentPartImage,
-  ChatCompletionContentPartText,
+  ChatCompletionContentPartText
 } from 'openai/resources/index.mjs'
 import { P, match } from 'ts-pattern'
 import { inject, injectable } from 'inversify'
@@ -27,10 +27,10 @@ export class CompletionPartsService {
     return match(file.contentType)
       .with('application/pdf', async () => await this.readPdfToBase64s(file))
       .with(P.union('image/png', 'image/jpeg', 'image/webp'), async () => [
-        await this.readImageFileToBase64(file),
+        await this.readImageFileToBase64(file)
       ])
       .with(P.union('text/html', 'text/plain'), async () => [
-        await this.readTextFileToString(file),
+        await this.readTextFileToString(file)
       ])
       .otherwise(async () => [])
   }
@@ -47,7 +47,7 @@ export class CompletionPartsService {
 
     return {
       type: 'text',
-      text: blob.buffer.toString(),
+      text: blob.buffer.toString()
     }
   }
 
@@ -63,8 +63,8 @@ export class CompletionPartsService {
       type: 'image_url',
       image_url: {
         url: createDataUrl({ mimeType: file.contentType, buffer: blob.buffer }),
-        detail: 'auto',
-      },
+        detail: 'auto'
+      }
     }
   }
 
@@ -99,8 +99,8 @@ export class CompletionPartsService {
         type: 'image_url',
         image_url: {
           url: `data:image/png;base64,${base64}`,
-          detail: 'auto',
-        },
+          detail: 'auto'
+        }
       }))
     } finally {
       await rm(containerPath, { recursive: true, force: true })

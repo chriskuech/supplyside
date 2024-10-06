@@ -2,12 +2,12 @@ import { z } from 'zod'
 
 const metadataSchema = z.object({
   CreateTime: z.string(),
-  LastUpdatedTime: z.string(),
+  LastUpdatedTime: z.string()
 })
 
 const refSchema = z.object({
   name: z.string().optional(),
-  value: z.string(),
+  value: z.string()
 })
 
 const addressSchema = z.object({
@@ -16,7 +16,7 @@ const addressSchema = z.object({
   Line1: z.string().optional(),
   PostalCode: z.string().optional(),
   CountrySubDivisionCode: z.string().optional(),
-  Id: z.string(),
+  Id: z.string()
 })
 
 const accountSchema = z.object({
@@ -34,7 +34,7 @@ const accountSchema = z.object({
   Active: z.boolean().optional(),
   SyncToken: z.string(),
   Id: z.string(),
-  SubAccount: z.boolean(),
+  SubAccount: z.boolean()
 })
 
 const lineSchema = z.object({
@@ -47,8 +47,8 @@ const lineSchema = z.object({
     TaxCodeRef: refSchema.optional(),
     AccountRef: refSchema,
     BillableStatus: z.string().optional(),
-    CustomerRef: refSchema.optional(),
-  }),
+    CustomerRef: refSchema.optional()
+  })
 })
 
 const billSchema = z.object({
@@ -63,8 +63,8 @@ const billSchema = z.object({
     .array(
       z.object({
         TxnId: z.string(),
-        TxnType: z.string(),
-      }),
+        TxnType: z.string()
+      })
     )
     .optional(),
   SalesTermRef: refSchema.optional(),
@@ -73,25 +73,25 @@ const billSchema = z.object({
   Line: z.array(lineSchema).optional(),
   Balance: z.number(),
   Id: z.string(),
-  MetaData: metadataSchema,
+  MetaData: metadataSchema
 })
 
 const emailSchema = z.object({
-  Address: z.string(),
+  Address: z.string()
 })
 
 const phoneSchema = z.object({
-  FreeFormNumber: z.string().optional(),
+  FreeFormNumber: z.string().optional()
 })
 
 const urlSchema = z.object({
-  URI: z.string(),
+  URI: z.string()
 })
 
 export const countQuerySchema = z.object({
   QueryResponse: z.object({
-    totalCount: z.number(),
-  }),
+    totalCount: z.number()
+  })
 })
 
 export const quickbooksTokenSchema = z.object({
@@ -103,15 +103,15 @@ export const quickbooksTokenSchema = z.object({
   realmId: z.string(),
   refresh_token: z.string(),
   token_type: z.string(),
-  x_refresh_token_expires_in: z.number(),
+  x_refresh_token_expires_in: z.number()
 })
 
 export type QuickBooksToken = z.infer<typeof quickbooksTokenSchema>
 
 export const accountQuerySchema = z.object({
   QueryResponse: z.object({
-    Account: z.array(accountSchema).optional(),
-  }),
+    Account: z.array(accountSchema).optional()
+  })
 })
 
 export const companyInfoSchema = z.object({
@@ -134,8 +134,8 @@ export const companyInfoSchema = z.object({
     NameValue: z
       .array(z.object({ Name: z.string(), Value: z.string() }))
       .optional(),
-    MetaData: metadataSchema.optional(),
-  }),
+    MetaData: metadataSchema.optional()
+  })
 })
 
 export const vendorSchema = z.object({
@@ -156,7 +156,7 @@ export const vendorSchema = z.object({
   Active: z.boolean().optional(),
   Balance: z.number(),
   Id: z.string(),
-  MetaData: metadataSchema.optional(),
+  MetaData: metadataSchema.optional()
 })
 
 export const customerSchema = z.object({
@@ -180,23 +180,23 @@ export const customerSchema = z.object({
   Job: z.boolean().optional(),
   BalanceWithJobs: z.number().optional(),
   PreferredDeliveryMethod: z.string().optional(),
-  Taxable: z.boolean().optional(),
+  Taxable: z.boolean().optional()
 })
 
 export const vendorQuerySchema = z.object({
   QueryResponse: z.object({
     startPosition: z.number(),
     Vendor: z.array(vendorSchema).optional(),
-    maxResults: z.number(),
-  }),
+    maxResults: z.number()
+  })
 })
 
 export const customerQuerySchema = z.object({
   QueryResponse: z.object({
     startPosition: z.number(),
     Customer: z.array(customerSchema).optional(),
-    maxResults: z.number(),
-  }),
+    maxResults: z.number()
+  })
 })
 
 export const billPaymentSchema = z.object({
@@ -204,7 +204,7 @@ export const billPaymentSchema = z.object({
   PayType: z.string(),
   CreditCardPayment: z
     .object({
-      CCAccountRef: refSchema.optional(),
+      CCAccountRef: refSchema.optional()
     })
     .optional(),
   TotalAmt: z.number(),
@@ -223,31 +223,31 @@ export const billPaymentSchema = z.object({
       LinkedTxn: z.array(
         z.object({
           TxnId: z.string(),
-          TxnType: z.string(),
-        }),
-      ),
-    }),
-  ),
+          TxnType: z.string()
+        })
+      )
+    })
+  )
 })
 
 export const readAccountSchema = z.object({
-  Account: accountSchema,
+  Account: accountSchema
 })
 
 export const readVendorSchema = z.object({
-  Vendor: vendorSchema,
+  Vendor: vendorSchema
 })
 
 export const readCustomerSchema = z.object({
-  Customer: customerSchema,
+  Customer: customerSchema
 })
 
 export const readBillSchema = z.object({
-  Bill: billSchema,
+  Bill: billSchema
 })
 
 export const readBillPaymentSchema = z.object({
-  BillPayment: billPaymentSchema,
+  BillPayment: billPaymentSchema
 })
 
 export const webhookBodySchema = z.object({
@@ -260,11 +260,10 @@ export const webhookBodySchema = z.object({
             id: z.string(),
             operation: z.enum(['Create', 'Update', 'Merge', 'Delete', 'Void']),
             name: z.enum(['BillPayment']),
-            lastUpdated: z.string(),
+            lastUpdated: z.string()
           })
-        ),
-      }),
+        )
+      })
     })
-  ),
+  )
 })
-

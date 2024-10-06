@@ -6,9 +6,7 @@ import { File } from '@supplyside/model'
 
 @injectable()
 export class FileService {
-  constructor(
-    @inject(PrismaService) private readonly prisma: PrismaService
-  ) {}
+  constructor(@inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async create(
     accountId: string,
@@ -18,9 +16,9 @@ export class FileService {
       data: {
         accountId,
         blobId: data.blobId,
-        name: data.name,
+        name: data.name
       },
-      include: fileInclude,
+      include: fileInclude
     })
 
     return mapFile(model)
@@ -29,7 +27,7 @@ export class FileService {
   async read(accountId: string, fileId: string): Promise<File> {
     const model = await this.prisma.file.findUniqueOrThrow({
       where: { accountId, id: fileId },
-      include: fileInclude,
+      include: fileInclude
     })
 
     return mapFile(model)

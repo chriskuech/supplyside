@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { UserSchema } from '@supplyside/model'
 import {
   UpdateUserSchema,
-  UserService,
+  UserService
 } from '@supplyside/api/domain/user/UserService'
 
 export const mountSelf = async <App extends FastifyInstance>(app: App) =>
@@ -16,11 +16,11 @@ export const mountSelf = async <App extends FastifyInstance>(app: App) =>
       url: '/:userId/',
       schema: {
         params: z.object({
-          userId: z.string().uuid(),
+          userId: z.string().uuid()
         }),
         response: {
-          200: UserSchema,
-        },
+          200: UserSchema
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(UserService)
@@ -30,16 +30,16 @@ export const mountSelf = async <App extends FastifyInstance>(app: App) =>
         if (!user) return res.status(404).send()
 
         res.send(user)
-      },
+      }
     })
     .route({
       method: 'PATCH',
       url: '/:userId/',
       schema: {
         params: z.object({
-          userId: z.string().uuid(),
+          userId: z.string().uuid()
         }),
-        body: UpdateUserSchema,
+        body: UpdateUserSchema
       },
       handler: async (req, res) => {
         const service = container.resolve(UserService)
@@ -47,5 +47,5 @@ export const mountSelf = async <App extends FastifyInstance>(app: App) =>
         await service.updateSelf(req.params.userId, req.body)
 
         res.send()
-      },
+      }
     })

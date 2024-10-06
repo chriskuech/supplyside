@@ -143,7 +143,7 @@ export const unitOfMeasureOptions = {
     templateId: "1e7be07c-c121-4a6f-8af2-239e5da18a4e",
     name: "square foot",
   },
-};
+} as const;
 
 const _fields = {
   assignee: {
@@ -285,6 +285,12 @@ const _fields = {
     name: "Job Description",
     type: "Textarea",
     description: "Brief, identifiable description of the job",
+  },
+  jobFiles: {
+    templateId: "",
+    name: "Job Files",
+    type: "Files",
+    description: "The files that originally comprised the job, such as from the original customer email. You can sync Job information from these files.",
   },
   jobStatus: {
     templateId: "70912291-2b48-4e1f-9300-b7dbca8ce5ab",
@@ -535,7 +541,8 @@ const _fields = {
   },
 } satisfies Record<string, FieldTemplate>;
 
-export const fields: Record<keyof typeof _fields, FieldTemplate> = _fields;
+// export const fields: Record<keyof typeof _fields, FieldTemplate> = _fields;
+export const fields: { [key in keyof typeof _fields]: FieldTemplate & (typeof _fields)[key] } = _fields;
 
 export const findTemplateField = (templateId: string | null | undefined) =>
   templateId

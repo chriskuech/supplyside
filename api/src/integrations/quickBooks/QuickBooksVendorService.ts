@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify'
 import {
   countQuerySchema,
   readVendorSchema,
-  vendorQuerySchema,
+  vendorQuerySchema
 } from './schemas'
 import { Vendor } from './types'
 import { handleNotFoundError } from './errors'
@@ -17,12 +17,12 @@ import {
   fields,
   selectResourceFieldValue,
   selectSchemaField,
-  selectSchemaFieldUnsafe,
+  selectSchemaFieldUnsafe
 } from '@supplyside/model'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
   ResourceFieldInput,
-  ResourceService,
+  ResourceService
 } from '@supplyside/api/domain/resource/ResourceService'
 
 @injectable()
@@ -44,7 +44,7 @@ export class QuickBooksVendorService {
         url: `${this.quickBooksApiService.getBaseUrl(
           client.token.realmId
         )}/vendor/${vendorId}`,
-        method: 'GET',
+        method: 'GET'
       })
       .then((data) => readVendorSchema.parse(data.json))
   }
@@ -73,7 +73,7 @@ export class QuickBooksVendorService {
           {
             entity: 'Vendor',
             startPosition: i * MAX_ENTITIES_PER_PAGE + 1,
-            maxResults: MAX_ENTITIES_PER_PAGE,
+            maxResults: MAX_ENTITIES_PER_PAGE
           },
           vendorQuerySchema
         )
@@ -114,7 +114,7 @@ export class QuickBooksVendorService {
           fields: await this.mapQuickBooksVendorToResourceFields(
             accountId,
             quickBooksVendor
-          ),
+          )
         })
       })
     )
@@ -126,7 +126,7 @@ export class QuickBooksVendorService {
         'Vendor',
         {
           input: quickBooksVendorToAdd.DisplayName,
-          exact: true,
+          exact: true
         }
       )
 
@@ -136,14 +136,14 @@ export class QuickBooksVendorService {
           fields: await this.mapQuickBooksVendorToResourceFields(
             accountId,
             quickBooksVendorToAdd
-          ),
+          )
         })
       } else {
         await this.resourceService.create(accountId, 'Vendor', {
           fields: await this.mapQuickBooksVendorToResourceFields(
             accountId,
             quickBooksVendorToAdd
-          ),
+          )
         })
       }
     }
@@ -161,9 +161,9 @@ export class QuickBooksVendorService {
         url: `${baseUrl}/vendor`,
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(QuickBooksVendorService.mapVendor(vendor)),
+        body: JSON.stringify(QuickBooksVendorService.mapVendor(vendor))
       })
       .then((data) => readVendorSchema.parse(data.json))
 
@@ -180,7 +180,7 @@ export class QuickBooksVendorService {
 
     await this.resourceService.updateResourceField(accountId, vendor.id, {
       fieldId: quickBooksVendorIdField,
-      valueInput: { string: quickBooksVendor.Vendor.Id },
+      valueInput: { string: quickBooksVendor.Vendor.Id }
     })
 
     return quickBooksVendor
@@ -213,7 +213,7 @@ export class QuickBooksVendorService {
 
     const body = {
       ...quickBooksVendor.Vendor,
-      ...QuickBooksVendorService.mapVendor(vendor),
+      ...QuickBooksVendorService.mapVendor(vendor)
     }
 
     return this.quickBooksApiService
@@ -221,9 +221,9 @@ export class QuickBooksVendorService {
         url: `${baseUrl}/vendor`,
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(body)
       })
       .then((data) => readVendorSchema.parse(data.json))
   }
@@ -258,8 +258,8 @@ export class QuickBooksVendorService {
         Country: addressValue?.address?.country,
         CountrySubDivisionCode: addressValue?.address?.state,
         Line1: addressValue?.address?.streetAddress,
-        PostalCode: addressValue?.address?.zip,
-      },
+        PostalCode: addressValue?.address?.zip
+      }
     }
   }
 
@@ -284,11 +284,11 @@ export class QuickBooksVendorService {
     return [
       {
         fieldId: vendorNameField.fieldId,
-        valueInput: { string: quickBooksVendor.DisplayName },
+        valueInput: { string: quickBooksVendor.DisplayName }
       },
       {
         fieldId: quickBooksVendorIdField.fieldId,
-        valueInput: { string: quickBooksVendor.Id },
+        valueInput: { string: quickBooksVendor.Id }
       },
       {
         fieldId: primaryAddressField.fieldId,
@@ -298,10 +298,10 @@ export class QuickBooksVendorService {
             country: quickBooksVendor.BillAddr?.Country ?? null,
             state: quickBooksVendor.BillAddr?.CountrySubDivisionCode ?? null,
             streetAddress: quickBooksVendor.BillAddr?.Line1 ?? null,
-            zip: quickBooksVendor.BillAddr?.PostalCode ?? null,
-          },
-        },
-      },
+            zip: quickBooksVendor.BillAddr?.PostalCode ?? null
+          }
+        }
+      }
     ]
   }
 }

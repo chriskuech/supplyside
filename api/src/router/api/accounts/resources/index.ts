@@ -4,7 +4,7 @@ import {
   ResourceSchema,
   ResourceTypeSchema,
   ValueInputSchema,
-  ValueResourceSchema,
+  ValueResourceSchema
 } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -13,7 +13,8 @@ import { mountCosts } from './costs'
 import { JsonLogicSchema } from '@supplyside/api/domain/resource/json-logic/types'
 import { pick } from 'remeda'
 import { parse } from 'qs'
-import { ResourceExtractionService } from '@supplyside/api/domain/resource/ResourceExtractionService'
+import { ResourceExtractionService } from '@supplyside/api/domain/resource/extraction/ResourceExtractionService'
+import assert from 'assert'
 
 export const mountResources = async <App extends FastifyInstance>(app: App) =>
   app
@@ -24,20 +25,20 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       url: '/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
+          accountId: z.string().uuid()
         }),
         // TODO: there must be a cleaner way to parse deep objects
         querystring: z.preprocess(
           (a) => parse(a as string),
           z.object({
             resourceType: ResourceTypeSchema,
-            where: JsonLogicSchema.optional(),
+            where: JsonLogicSchema.optional()
           })
         ),
         response: {
-          200: z.array(ResourceSchema),
+          200: z.array(ResourceSchema)
         },
-        tags: ['Resources'],
+        tags: ['Resources']
       },
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
@@ -46,28 +47,28 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           req.params.accountId,
           req.query.resourceType,
           {
-            where: req.query.where,
+            where: req.query.where
           }
         )
 
         res.status(200).send(resources)
-      },
+      }
     })
     .route({
       method: 'GET',
       url: '/find-by-name-or-po-number/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
+          accountId: z.string().uuid()
         }),
         querystring: z.object({
           resourceType: ResourceTypeSchema,
           input: z.string(),
-          exact: z.boolean().optional(),
+          exact: z.boolean().optional()
         }),
         response: {
-          200: z.array(ValueResourceSchema),
-        },
+          200: z.array(ValueResourceSchema)
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
@@ -77,19 +78,19 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           req.query.resourceType,
           {
             input: req.query.input,
-            exact: req.query.exact,
+            exact: req.query.exact
           }
         )
 
         res.status(200).send(resources)
-      },
+      }
     })
     .route({
       method: 'POST',
       url: '/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
+          accountId: z.string().uuid()
         }),
         body: z.object({
           resourceType: ResourceTypeSchema,
@@ -97,14 +98,14 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
             .array(
               z.object({
                 fieldId: z.string().uuid(),
-                valueInput: ValueInputSchema,
+                valueInput: ValueInputSchema
               })
             )
-            .optional(),
+            .optional()
         }),
         response: {
-          200: ResourceSchema,
-        },
+          200: ResourceSchema
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
@@ -113,31 +114,31 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           req.params.accountId,
           req.body.resourceType,
           {
-            fields: req.body.fields,
+            fields: req.body.fields
           }
         )
 
         res.status(200).send(resource)
-      },
+      }
     })
     .route({
       method: 'GET',
       url: '/head/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
+          accountId: z.string().uuid()
         }),
         querystring: z.object({
           resourceType: ResourceTypeSchema,
-          resourceKey: z.coerce.number(),
+          resourceKey: z.coerce.number()
         }),
         response: {
           200: z.object({
             id: z.string().uuid(),
             key: z.number().int().positive(),
-            type: ResourceTypeSchema,
-          }),
-        },
+            type: ResourceTypeSchema
+          })
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
@@ -149,7 +150,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         )
 
         res.status(200).send(pick(resource, ['id', 'key', 'type']))
-      },
+      }
     })
     .route({
       method: 'GET',
@@ -157,11 +158,11 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceId: z.string().uuid(),
+          resourceId: z.string().uuid()
         }),
         response: {
-          200: ResourceSchema,
-        },
+          200: ResourceSchema
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
@@ -172,7 +173,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         )
 
         res.send(resource)
-      },
+      }
     })
     .route({
       method: 'PATCH',
@@ -180,14 +181,17 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceId: z.string().uuid(),
+          resourceId: z.string().uuid()
         }),
         body: z.array(
-          z.object({ fieldId: z.string().uuid(), valueInput: ValueInputSchema })
+          z.object({
+            fieldId: z.string().uuid(),
+            valueInput: ValueInputSchema
+          })
         ),
         response: {
-          200: ResourceSchema,
-        },
+          200: ResourceSchema
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
@@ -196,12 +200,12 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           req.params.accountId,
           req.params.resourceId,
           {
-            fields: req.body,
+            fields: req.body
           }
         )
 
         res.status(200).send(resource)
-      },
+      }
     })
     .route({
       method: 'DELETE',
@@ -209,8 +213,8 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceId: z.string().uuid(),
-        }),
+          resourceId: z.string().uuid()
+        })
       },
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
@@ -218,7 +222,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         await service.delete(req.params.accountId, req.params.resourceId)
 
         res.send()
-      },
+      }
     })
     .route({
       method: 'POST',
@@ -226,11 +230,11 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceId: z.string().uuid(),
+          resourceId: z.string().uuid()
         }),
         response: {
-          200: ResourceSchema,
-        },
+          200: ResourceSchema
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(ResourceService)
@@ -241,7 +245,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         )
 
         res.send(resource)
-      },
+      }
     })
     .route({
       method: 'POST',
@@ -249,19 +253,19 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceId: z.string().uuid(),
+          resourceId: z.string().uuid()
         }),
         body: z.object({
-          resourceId: z.string().uuid(),
-        }),
+          resourceId: z.string().uuid()
+        })
       },
       handler: async (req) => {
         const service = container.resolve(ResourceService)
 
         await service.copyFields(req.params.accountId, req.params.resourceId, {
-          fromResourceId: req.body.resourceId,
+          fromResourceId: req.body.resourceId
         })
-      },
+      }
     })
     .route({
       method: 'POST',
@@ -269,19 +273,29 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceId: z.string().uuid(),
+          resourceId: z.string().uuid()
         }),
         body: z.object({
-          fieldId: z.string().uuid(),
-        }),
+          fieldId: z.string().uuid()
+        })
       },
       handler: async (req) => {
         const service = container.resolve(ResourceExtractionService)
 
-        await service.extractContent(
+        const model = await service.extractContent(
           req.params.accountId,
           req.params.resourceId,
           req.body
         )
-      },
+
+        app.log.warn(model)
+
+        assert(model, 'Failed to extract content')
+
+        await service.applyExtractedContent(
+          req.params.accountId,
+          req.params.resourceId,
+          model
+        )
+      }
     })

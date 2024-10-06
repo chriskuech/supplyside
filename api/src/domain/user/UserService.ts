@@ -16,15 +16,15 @@ export const UpdateUserSchema = z.object({
   imageBlobId: z.string().uuid().optional(),
   tsAndCsSignedAt: z.string().datetime().optional(),
   isAdmin: z.boolean().optional(),
-  isApprover: z.boolean().optional(),
+  isApprover: z.boolean().optional()
 })
 
-export type UpdateUserInput = z.infer<typeof UpdateUserSchema>;
+export type UpdateUserInput = z.infer<typeof UpdateUserSchema>
 
 export type InviteUserInput = {
-  email: string;
-  isAdmin?: boolean;
-};
+  email: string
+  isAdmin?: boolean
+}
 
 @injectable()
 export class UserService {
@@ -40,9 +40,9 @@ export class UserService {
   async readSelf(userId: string): Promise<User> {
     const model = await this.prisma.user.findUniqueOrThrow({
       where: {
-        id: userId,
+        id: userId
       },
-      include: userInclude,
+      include: userInclude
     })
 
     return mapUserModelToEntity(model)
@@ -52,9 +52,9 @@ export class UserService {
     const model = await this.prisma.user.findUniqueOrThrow({
       where: {
         id: userId,
-        accountId,
+        accountId
       },
-      include: userInclude,
+      include: userInclude
     })
 
     return mapUserModelToEntity(model)
@@ -63,7 +63,7 @@ export class UserService {
   async list(accountId: string): Promise<User[]> {
     const users = await this.prisma.user.findMany({
       where: { accountId },
-      include: userInclude,
+      include: userInclude
     })
 
     return users.map(mapUserModelToEntity)
@@ -72,14 +72,14 @@ export class UserService {
   async update(accountId: string, userId: string, data: UpdateUserInput) {
     await this.prisma.user.update({
       where: { accountId, id: userId },
-      data,
+      data
     })
   }
 
   async updateSelf(userId: string, data: UpdateUserInput) {
     await this.prisma.user.update({
       where: { id: userId },
-      data,
+      data
     })
   }
 
@@ -87,8 +87,8 @@ export class UserService {
     await this.prisma.user.delete({
       where: {
         accountId,
-        id: userId,
-      },
+        id: userId
+      }
     })
   }
 
@@ -97,8 +97,8 @@ export class UserService {
       data: {
         email: email.toLowerCase(),
         accountId,
-        isAdmin,
-      },
+        isAdmin
+      }
     })
 
     await this.smtpService.sendEmail({
@@ -107,8 +107,8 @@ export class UserService {
       templateModel: {
         invite_email: email,
         action_url: `${this.configService.config.APP_BASE_URL}${loginPath}`,
-        product_url: this.configService.config.APP_BASE_URL,
-      },
+        product_url: this.configService.config.APP_BASE_URL
+      }
     })
   }
 }

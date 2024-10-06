@@ -18,15 +18,15 @@ export class TemplateService {
         accountId,
         AND: [
           {
-            templateId: { not: null },
+            templateId: { not: null }
           },
           {
             templateId: {
-              notIn: Object.values(fields).map((f) => f.templateId),
-            },
-          },
-        ],
-      },
+              notIn: Object.values(fields).map((f) => f.templateId)
+            }
+          }
+        ]
+      }
     })
 
     for (const {
@@ -38,23 +38,23 @@ export class TemplateService {
       description,
       type,
       resourceType,
-      defaultToToday,
+      defaultToToday
     } of Object.values(fields)) {
       const { id: fieldId } = await this.prisma.field.upsert({
         where: {
           accountId_templateId: {
             accountId,
-            templateId,
-          },
+            templateId
+          }
         },
         create: {
           Account: {
             connect: {
-              id: accountId,
-            },
+              id: accountId
+            }
           },
           DefaultValue: {
-            create: {},
+            create: {}
           },
           templateId,
           name,
@@ -62,7 +62,7 @@ export class TemplateService {
           type,
           resourceType,
           isRequired,
-          defaultToToday,
+          defaultToToday
         },
         update: {
           name,
@@ -70,8 +70,8 @@ export class TemplateService {
           description: description ?? null,
           type,
           resourceType,
-          defaultToToday,
-        },
+          defaultToToday
+        }
       })
 
       const upsertingOptions = options?.map(
@@ -80,19 +80,19 @@ export class TemplateService {
             where: {
               fieldId_templateId: {
                 fieldId,
-                templateId,
-              },
+                templateId
+              }
             },
             create: {
               fieldId,
               templateId,
               order,
-              name: option.name,
+              name: option.name
             },
             update: {
               order,
-              name: option.name,
-            },
+              name: option.name
+            }
           })
       )
 
@@ -104,10 +104,10 @@ export class TemplateService {
             templateId: { not: null },
             NOT: {
               templateId: {
-                in: options?.map(({ templateId }) => templateId),
-              },
-            },
-          },
+                in: options?.map(({ templateId }) => templateId)
+              }
+            }
+          }
         })
 
       await Promise.all([cleaningOptions, ...(upsertingOptions ?? [])])
@@ -127,24 +127,24 @@ export class TemplateService {
                     connect: {
                       fieldId_templateId: {
                         fieldId,
-                        templateId,
-                      },
-                    },
-                  },
+                        templateId
+                      }
+                    }
+                  }
                 },
                 update: {
                   Option: {
                     connect: {
                       fieldId_templateId: {
                         fieldId,
-                        templateId,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
+                        templateId
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         })
       }
     }
@@ -154,8 +154,8 @@ export class TemplateService {
     await this.prisma.schema.deleteMany({
       where: {
         accountId,
-        isSystem: true,
-      },
+        isSystem: true
+      }
     })
 
     await Promise.all(
@@ -172,11 +172,11 @@ export class TemplateService {
                   connect: {
                     accountId_templateId: {
                       accountId,
-                      templateId,
-                    },
-                  },
-                },
-              })),
+                      templateId
+                    }
+                  }
+                }
+              }))
             },
             Section: {
               create: sections?.map(({ name, fields }, order) => ({
@@ -189,15 +189,15 @@ export class TemplateService {
                       connect: {
                         accountId_templateId: {
                           accountId,
-                          templateId,
-                        },
-                      },
-                    },
-                  })),
-                },
-              })),
-            },
-          },
+                          templateId
+                        }
+                      }
+                    }
+                  }))
+                }
+              }))
+            }
+          }
         })
       })
     )

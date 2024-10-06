@@ -1,20 +1,13 @@
-import { fail } from 'assert'
-import { assert } from 'console'
-import { z } from 'zod'
-import { validate as isUuid } from 'uuid'
-import {
-  ResourceFieldInput,
-  ResourceService,
-} from '../resource/ResourceService'
-import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
-import { SchemaService } from '../schema/SchemaService'
 import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
 import {
+  TypedResource,
   fields,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
+  selectResourceFieldValue
 } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
+import { ResourceService } from '../resource/ResourceService'
+import { SchemaService } from '../schema/SchemaService'
+import { BillExtractionModelSchema } from './BillExtractionModel'
 
 const prompt = `
 You are a context extraction tool within a "Procure-to-Pay" B2B SaaS application.
@@ -29,21 +22,6 @@ You will be provided with the following context:
 You MUST only return high-confidence data. If the data is uncertain or ambiguous, do not include it in the output.
 `
 
-const ExtractedBillDataSchema = z.object({
-  poNumber: z
-    .string()
-    .nullish()
-    .describe(
-      'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.'
-    ),
-  vendorId: z
-    .string()
-    .nullish()
-    .describe(
-      'The Vendor ID. The Vendor ID is a UUIDv4 for identifying the Vendor. The Bill will contain the Vendor Name, not the Vendor ID. The Vendor ID must be looked up in the provided "Vendor List" TSV file by identifying the Vendor Name in the file (accounting for minor spelling/punctuation differences) and returning the associated Vendor ID for that Vendor Name. If no Vendor ID can be determined with high confidence, this field should be null/missing.'
-    ),
-})
-
 @injectable()
 export class BillExtractionService {
   constructor(
@@ -54,91 +32,79 @@ export class BillExtractionService {
   ) {}
 
   async extractContent(accountId: string, resourceId: string) {
-    const [billSchema, billResource, vendors] = await Promise.all([
-      this.schemaService.readMergedSchema(accountId, 'Bill'),
-      this.resourceService.read(accountId, resourceId),
-      this.resourceService.list(accountId, 'Vendor'),
-    ])
+    const bill = await this.resourceService.read(accountId, resourceId)
+    const billFiles = selectResourceFieldValue(bill, fields.billFiles)?.files
 
-    const billFiles =
-      selectResourceFieldValue(billResource, fields.billFiles)?.files ??
-      fail('Files not found')
+    if (!billFiles?.length) return
 
-    if (!billFiles.length) return
-
-    const vendorList = mapVendorsToVendorList(vendors)
-
-    const data = await this.openai.extractContent({
+    const model = await this.openai.extractContent({
       systemPrompt: prompt,
-      schema: ExtractedBillDataSchema,
-      files: [vendorList, ...billFiles],
+      schema: BillExtractionModelSchema,
+      files: billFiles
     })
 
-    const poNumber = data?.poNumber
-    const vendorId = data?.vendorId
-    const poNumberAsNumber = z.coerce
-      .number()
-      .int()
-      .positive()
-      .safeParse(poNumber)?.data
-    const [purchase, ...purchases] =
-      poNumberAsNumber && vendorId
-        ? await this.resourceService.list(accountId, 'Purchase', {
-            where: {
-              and: [
-                {
-                  '==': [
-                    {
-                      var: fields.poNumber.name,
-                    },
-                    poNumberAsNumber.toString(),
-                  ],
-                },
-                { '==': [{ var: fields.vendor.name }, vendorId] },
-              ],
-            },
-          })
-        : []
+    if (!model) return
 
-    assert(
-      !purchases.length,
-      `Found ${purchases.length + 1} Purchases with PO Number ${poNumber}`
-    )
+    const {
+      itemizedCosts,
+      // lineItems, // TODO: add line items
+      vendorName,
 
-    const updatedFields: ResourceFieldInput[] = [
-      ...(poNumber
-        ? [
-            {
-              fieldId: selectSchemaFieldUnsafe(billSchema, fields.poNumber)
-                .fieldId,
-              valueInput: { string: poNumber },
-            },
-          ]
-        : []),
-      ...(purchase
-        ? [
-            {
-              fieldId: selectSchemaFieldUnsafe(billSchema, fields.purchase)
-                .fieldId,
-              valueInput: { resourceId: purchase.id },
-            },
-          ]
-        : []),
-      ...(vendorId && isUuid(vendorId)
-        ? [
-            {
-              fieldId: selectSchemaFieldUnsafe(billSchema, fields.vendor)
-                .fieldId,
-              valueInput: { resourceId: vendorId },
-            },
-          ]
-        : []),
-    ]
+      billingContact,
+      invoiceNumber,
+      invoiceDate,
+      poNumber,
+      purchaseDescription,
+      paymentTerms
+      // paymentMethod, // TODO: add payment method
+    } = model
 
-    if (!updatedFields.length) return
+    const [billSchema, billResource] = await Promise.all([
+      this.schemaService.readMergedSchema(accountId, 'Bill'),
+      this.resourceService.read(accountId, resourceId),
+      this.schemaService.readMergedSchema(accountId, 'PurchaseLine')
+    ])
+
+    const typedBill = new TypedResource(billSchema, billResource)
+      .setContact(fields.billingContact, billingContact)
+      .setString(fields.invoiceNumber, invoiceNumber)
+      .setDate(fields.invoiceDate, invoiceDate)
+      .setString(fields.purchaseDescription, purchaseDescription)
+      .setNumber(fields.paymentTerms, paymentTerms)
+
+    if (vendorName) {
+      const [vendor] = await this.resourceService.findResourcesByNameOrPoNumber(
+        accountId,
+        'Vendor',
+        { input: vendorName }
+      )
+      if (vendor) {
+        typedBill.setResource(fields.vendor, vendor.id)
+      }
+    }
+
+    const vendor = typedBill.getResource(fields.vendor)
+    if (poNumber && vendor) {
+      const [purchase] = await this.resourceService.list(
+        accountId,
+        'Purchase',
+        {
+          where: {
+            and: [
+              { '==': [{ var: fields.poNumber.name }, poNumber] },
+              { '==': [{ var: fields.vendor.name }, vendor.id] }
+            ]
+          }
+        }
+      )
+      if (purchase) {
+        typedBill.setResource(fields.purchase, purchase.id)
+      }
+    }
 
     await this.resourceService.update(accountId, resourceId, {
-      fields: updatedFields,
+      fields: typedBill.updatedFields,
+      costs: itemizedCosts
     })
   }
 }

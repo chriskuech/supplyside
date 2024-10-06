@@ -17,7 +17,7 @@ import {
   billStatusOptions,
   fields,
   selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe,
+  selectSchemaFieldUnsafe
 } from '@supplyside/model'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import { QuickBooksCustomerService } from './QuickBooksCustomerService'
@@ -60,10 +60,7 @@ export class QuickBooksService {
   }
 
   async connect(accountId: string, url: string) {
-    await this.quickBooksTokenService.createQuickBooksConnection(
-      accountId,
-      url
-    )
+    await this.quickBooksTokenService.createQuickBooksConnection(accountId, url)
   }
 
   async disconnect(realmId: string) {
@@ -94,7 +91,7 @@ export class QuickBooksService {
 
   async getConnectedAt(accountId: string) {
     const account = await this.prisma.account.findFirstOrThrow({
-      where: { id: accountId },
+      where: { id: accountId }
     })
 
     return account.quickBooksConnectedAt
@@ -117,7 +114,7 @@ export class QuickBooksService {
       this.quickBooksCustomerService.upsertCustomersFromQuickBooks(
         client,
         accountId
-      ),
+      )
     ])
   }
 
@@ -141,7 +138,7 @@ export class QuickBooksService {
 
   async findAccountIdByRealmId(realmId: string) {
     const account = await this.prisma.account.findFirst({
-      where: { quickBooksToken: { path: ['realmId'], equals: realmId } },
+      where: { quickBooksToken: { path: ['realmId'], equals: realmId } }
     })
     if (!account) return null
 
@@ -244,7 +241,7 @@ export class QuickBooksService {
                     bill.id,
                     {
                       fieldId: billStatusFieldId,
-                      valueInput: { optionId: paidOptionId },
+                      valueInput: { optionId: paidOptionId }
                     }
                   )
                 }

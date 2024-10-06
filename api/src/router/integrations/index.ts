@@ -9,8 +9,8 @@ export const mountIntegrations = async <App extends FastifyInstance>(
   app
     .withTypeProvider<ZodTypeProvider>()
     .register(mountQuickBooks, {
-      prefix: '/quickbooks',
+      prefix: '/quickbooks'
     })
     .register(mountMcMasterCarr, {
-      prefix: '/mcmaster',
+      prefix: '/mcmaster'
     })

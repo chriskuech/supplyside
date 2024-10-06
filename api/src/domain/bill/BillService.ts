@@ -10,16 +10,16 @@ import { FileService } from '../file/FileService'
 import { BlobService } from '../blob/BlobService'
 
 type FileParam = {
-  content: string;
-  encoding: BufferEncoding;
-  contentType: string;
-  fileName: string;
-};
+  content: string
+  encoding: BufferEncoding
+  contentType: string
+  fileName: string
+}
 
 type Params = {
-  accountId: string;
-  files: FileParam[];
-};
+  accountId: string
+  files: FileParam[]
+}
 
 const createBill = async (params: Params): Promise<Resource> => {
   const blobService = container.resolve(BlobService)
@@ -36,12 +36,12 @@ const createBill = async (params: Params): Promise<Resource> => {
     params.files.map(async (file) => {
       const { id: blobId } = await blobService.createBlob(params.accountId, {
         buffer: Buffer.from(file.content, file.encoding),
-        contentType: file.contentType,
+        contentType: file.contentType
       })
 
       const { id: fileId } = await fileService.create(params.accountId, {
         name: file.fileName,
-        blobId,
+        blobId
       })
 
       return fileId
@@ -54,9 +54,9 @@ const createBill = async (params: Params): Promise<Resource> => {
     fields: [
       {
         fieldId: selectSchemaFieldUnsafe(billSchema, fields.billFiles).fieldId,
-        valueInput: { fileIds },
-      },
-    ],
+        valueInput: { fileIds }
+      }
+    ]
   })
 
   return bill
@@ -75,13 +75,13 @@ export class BillService {
     { purchaseId }: { purchaseId: string }
   ) {
     await this.resourceService.copyFields(accountId, resourceId, {
-      fromResourceId: purchaseId,
+      fromResourceId: purchaseId
     })
 
     await this.resourceService.cloneCosts({
       accountId,
       fromResourceId: purchaseId,
-      toResourceId: resourceId,
+      toResourceId: resourceId
     })
 
     await this.resourceService.linkLines({
@@ -89,7 +89,7 @@ export class BillService {
       fromResourceId: purchaseId,
       toResourceId: resourceId,
       fromResourceField: fields.purchase,
-      toResourceField: fields.bill,
+      toResourceField: fields.bill
     })
   }
 
@@ -108,7 +108,7 @@ export class BillService {
         content: attachment.Content,
         encoding: 'base64',
         contentType: attachment.ContentType,
-        fileName: attachment.Name,
+        fileName: attachment.Name
       })
     )
 
@@ -117,20 +117,20 @@ export class BillService {
           content: message.HtmlBody,
           encoding: 'utf-8',
           contentType: 'text/html',
-          fileName: 'email.html',
+          fileName: 'email.html'
         }
       : message.TextBody
-      ? {
-          content: message.TextBody,
-          encoding: 'utf-8',
-          contentType: 'text/plain',
-          fileName: 'email.txt',
-        }
-      : null
+        ? {
+            content: message.TextBody,
+            encoding: 'utf-8',
+            contentType: 'text/plain',
+            fileName: 'email.txt'
+          }
+        : null
 
     await createBill({
       accountId: account.id,
-      files: [...(email ? [email] : []), ...(attachments ?? [])],
+      files: [...(email ? [email] : []), ...(attachments ?? [])]
     })
   }
 }

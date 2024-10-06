@@ -11,7 +11,7 @@ export const IamUserSchema = z.object({
   tsAndCsSignedAt: z.string().datetime().nullable(),
   isApprover: z.boolean(),
   isAdmin: z.boolean(),
-  isGlobalAdmin: z.boolean(),
+  isGlobalAdmin: z.boolean()
 })
 
-export type IamUser = z.infer<typeof IamUserSchema>;
+export type IamUser = z.infer<typeof IamUserSchema>
