@@ -1,42 +1,42 @@
-import { fail } from 'assert'
 import { Prisma } from '@prisma/client'
-import { z } from 'zod'
-import { isNullish, map, pipe, sum } from 'remeda'
-import { match } from 'ts-pattern'
-import { inject, injectable } from 'inversify'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import {
   FieldReference,
   FieldTemplate,
+  Resource,
+  ResourceType,
+  ResourceTypeSchema,
   Schema,
   SchemaField,
+  Value,
+  ValueInput,
+  ValueResource,
   billStatusOptions,
+  emptyValue,
   fields,
   findTemplateField,
   purchaseStatusOptions,
   selectResourceFieldValue,
   selectSchemaField,
   selectSchemaFieldUnsafe,
-  Resource,
-  Value,
-  ResourceType,
-  emptyValue,
-  ValueInput,
-  ResourceTypeSchema,
-  ValueResource,
 } from '@supplyside/model'
+import { fail } from 'assert'
+import { inject, injectable } from 'inversify'
+import { isNullish, map, pipe, sum } from 'remeda'
+import { match } from 'ts-pattern'
+import { z } from 'zod'
 import { SchemaService } from '../schema/SchemaService'
+import { DuplicateResourceError } from './errors'
+import { createSql } from './json-logic/compile'
+import { JsonLogic, OrderBy } from './json-logic/types'
 import {
+  mapResourceModelToEntity,
   mapValueInputToPrismaValueCreate,
   mapValueInputToPrismaValueUpdate,
   mapValueInputToPrismaValueWhere,
   mapValueToValueInput,
 } from './mappers'
-import { createSql } from './json-logic/compile'
-import { OrderBy, JsonLogic } from './json-logic/types'
-import { mapResourceModelToEntity } from './mappers'
 import { resourceInclude } from './model'
-import { DuplicateResourceError } from './errors'
-import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 
 export type ResourceFieldInput = {
   fieldId: string
@@ -110,6 +110,7 @@ export class ResourceService {
       templateId?: string
       fields?: ResourceFieldInput[]
     },
+    userId?: string,
   ): Promise<Resource> {
     const schema = await this.schemaService.readMergedSchema(accountId, type)
 
@@ -122,20 +123,54 @@ export class ResourceService {
 
     const key = (latestKey ?? 0) + 1
 
-    const poNumberField = selectSchemaField(schema, fields.poNumber)
+    const defaultFields = match<ResourceType, ResourceFieldInput[]>(type)
+      .with('Purchase', () => {
+        const poNumberFieldId = selectSchemaFieldUnsafe(
+          schema,
+          fields.poNumber,
+        ).fieldId
+
+        const asigneeFieldId = selectSchemaFieldUnsafe(
+          schema,
+          fields.assignee,
+        ).fieldId
+
+        return [
+          {
+            fieldId: poNumberFieldId,
+            valueInput: { string: key.toString() },
+          },
+          ...(userId
+            ? [
+                {
+                  fieldId: asigneeFieldId,
+                  valueInput: { userId },
+                },
+              ]
+            : []),
+        ]
+      })
+      .with('Bill', () => {
+        const asigneeFieldId = selectSchemaFieldUnsafe(
+          schema,
+          fields.assignee,
+        ).fieldId
+
+        if (!userId) return []
+
+        return [
+          {
+            fieldId: asigneeFieldId,
+            valueInput: { userId },
+          },
+        ]
+      })
+      .otherwise(() => [])
 
     const resourceFields: ResourceFieldInput[] = [
       ...(inputResourceFields ?? []),
-      ...(poNumberField
-        ? [
-            {
-              fieldId: poNumberField.fieldId,
-              valueInput: { string: key.toString() },
-            },
-          ]
-        : []),
+      ...defaultFields,
     ]
-
     const model = await this.prisma.resource.create({
       data: {
         accountId,
@@ -174,7 +209,6 @@ export class ResourceService {
       },
       include: resourceInclude,
     })
-
     return mapResourceModelToEntity(model)
   }
 
@@ -853,6 +887,7 @@ export class ResourceService {
     ])
 
     const fieldsToUpdate = fromResource.fields
+      .filter((rf) => selectSchemaField(fromSchema, rf))
       .map((rf) => ({
         rf,
         sf: selectSchemaFieldUnsafe(fromSchema, rf),

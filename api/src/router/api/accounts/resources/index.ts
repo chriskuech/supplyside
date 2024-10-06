@@ -1,5 +1,7 @@
 import { container } from '@supplyside/api/di'
+import { ResourceExtractionService } from '@supplyside/api/domain/resource/ResourceExtractionService'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
+import { JsonLogicSchema } from '@supplyside/api/domain/resource/json-logic/types'
 import {
   ResourceSchema,
   ResourceTypeSchema,
@@ -8,12 +10,10 @@ import {
 } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { parse } from 'qs'
+import { pick } from 'remeda'
 import { z } from 'zod'
 import { mountCosts } from './costs'
-import { JsonLogicSchema } from '@supplyside/api/domain/resource/json-logic/types'
-import { pick } from 'remeda'
-import { parse } from 'qs'
-import { ResourceExtractionService } from '@supplyside/api/domain/resource/ResourceExtractionService'
 
 export const mountResources = async <App extends FastifyInstance>(app: App) =>
   app
@@ -93,6 +93,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         }),
         body: z.object({
           resourceType: ResourceTypeSchema,
+          userId: z.string().uuid().optional(),
           fields: z
             .array(
               z.object({
@@ -115,6 +116,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           {
             fields: req.body.fields,
           },
+          req.body.userId,
         )
 
         res.status(200).send(resource)
