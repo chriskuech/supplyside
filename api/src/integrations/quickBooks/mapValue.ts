@@ -4,7 +4,7 @@ import {
   FieldTemplate,
   formatInlineAddress,
   Resource,
-  selectResourceFieldValue,
+  selectResourceFieldValue
 } from '@supplyside/model'
 
 export const mapValue = (resource: Resource, field: FieldTemplate) => {

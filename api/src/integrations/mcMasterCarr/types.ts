@@ -7,29 +7,29 @@ export const posrResponseSchema = z.object({
         Status: z.array(
           z.object({
             $: z.object({
-              code: z.string(),
-            }),
-          }),
+              code: z.string()
+            })
+          })
         ),
         PunchOutSetupResponse: z.array(
           z.object({
             StartPage: z.array(
               z.object({
-                URL: z.array(z.string()),
-              }),
-            ),
-          }),
-        ),
-      }),
-    ),
-  }),
+                URL: z.array(z.string())
+              })
+            )
+          })
+        )
+      })
+    )
+  })
 })
 
 export const cxmlSchema = z.object({
   cXML: z.object({
     $: z.object({
       timestamp: z.string().transform((value) => new Date(value)),
-      payloadID: z.string(),
+      payloadID: z.string()
     }),
     Header: z
       .object({
@@ -38,11 +38,11 @@ export const cxmlSchema = z.object({
             Credential: z
               .object({
                 $: z.object({
-                  domain: z.string(),
+                  domain: z.string()
                 }),
-                Identity: z.string().array(),
+                Identity: z.string().array()
               })
-              .array(),
+              .array()
           })
           .array(),
         To: z
@@ -50,11 +50,11 @@ export const cxmlSchema = z.object({
             Credential: z
               .object({
                 $: z.object({
-                  domain: z.string(),
+                  domain: z.string()
                 }),
-                Identity: z.string().array(),
+                Identity: z.string().array()
               })
-              .array(),
+              .array()
           })
           .array(),
         Sender: z
@@ -62,15 +62,15 @@ export const cxmlSchema = z.object({
             Credential: z
               .object({
                 $: z.object({
-                  domain: z.string(),
+                  domain: z.string()
                 }),
                 Identity: z.string().array(),
-                SharedSecret: z.string().array(),
+                SharedSecret: z.string().array()
               })
               .array(),
-            UserAgent: z.string().array(),
+            UserAgent: z.string().array()
           })
-          .array(),
+          .array()
       })
       .array(),
     Message: z
@@ -81,31 +81,31 @@ export const cxmlSchema = z.object({
             PunchOutOrderMessageHeader: z
               .object({
                 $: z.object({
-                  operationAllowed: z.string(),
+                  operationAllowed: z.string()
                 }),
                 Total: z
                   .object({
                     Money: z
                       .object({
                         $: z.object({
-                          currency: z.string(),
+                          currency: z.string()
                         }),
-                        _: z.coerce.number(),
+                        _: z.coerce.number()
                       })
-                      .array(),
+                      .array()
                   })
-                  .array(),
+                  .array()
               })
               .array(),
             ItemIn: z.array(
               z.object({
                 $: z.object({
-                  quantity: z.coerce.number(),
+                  quantity: z.coerce.number()
                 }),
                 ItemID: z
                   .object({
                     SupplierPartID: z.string().array(),
-                    SupplierPartAuxiliaryID: z.string().array(),
+                    SupplierPartAuxiliaryID: z.string().array()
                   })
                   .array(),
                 ItemDetail: z
@@ -115,19 +115,19 @@ export const cxmlSchema = z.object({
                         Money: z
                           .object({
                             $: z.object({
-                              currency: z.string(),
+                              currency: z.string()
                             }),
-                            _: z.coerce.number(),
+                            _: z.coerce.number()
                           })
-                          .array(),
+                          .array()
                       })
                       .array(),
                     Description: z
                       .object({
                         _: z.string(),
                         $: z.object({
-                          'xml:lang': z.string(),
-                        }),
+                          'xml:lang': z.string()
+                        })
                       })
                       .array(),
                     UnitOfMeasure: z.string().array(),
@@ -135,21 +135,21 @@ export const cxmlSchema = z.object({
                       .object({
                         $: z.object({
                           domain: z.string(),
-                          _: z.string().optional(),
-                        }),
+                          _: z.string().optional()
+                        })
                       })
                       .array(),
                     ManufacturerPartID: z.string().array(),
-                    ManufacturerName: z.string().array(),
+                    ManufacturerName: z.string().array()
                   })
-                  .array(),
-              }),
-            ),
+                  .array()
+              })
+            )
           })
-          .array(),
+          .array()
       })
-      .array(),
-  }),
+      .array()
+  })
 })
 
 export type RenderPOSRTemplateParams = {

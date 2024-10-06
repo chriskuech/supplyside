@@ -30,7 +30,7 @@ export class QuickBooksAccountService {
     return this.quickBooksApiService
       .makeApiCall(accountId, client, {
         url: `${baseUrl}/account/${id}`,
-        method: 'GET',
+        method: 'GET'
       })
       .then((data) => readAccountSchema.parse(data.json))
   }
@@ -71,7 +71,7 @@ export class QuickBooksAccountService {
     const options: OptionPatch[] = accountsToAdd.map((accountName) => ({
       id: faker.string.uuid(),
       op: 'add',
-      name: accountName,
+      name: accountName
     }))
 
     await this.schemaFieldService.update(
@@ -81,11 +81,11 @@ export class QuickBooksAccountService {
         description: quickBooksAccountField.description,
         name: quickBooksAccountField.name,
         defaultValue: {
-          optionId: quickBooksAccountField.defaultValue?.option?.id ?? null,
+          optionId: quickBooksAccountField.defaultValue?.option?.id ?? null
         },
         defaultToToday: quickBooksAccountField.defaultToToday,
         isRequired: quickBooksAccountField.isRequired,
-        options,
+        options
       }
     )
   }

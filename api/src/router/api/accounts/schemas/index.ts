@@ -15,11 +15,11 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceType: ResourceTypeSchema,
+          resourceType: ResourceTypeSchema
         }),
         response: {
-          200: SchemaSchema,
-        },
+          200: SchemaSchema
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(SchemaService)
@@ -30,18 +30,18 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         )
 
         res.send(schema)
-      },
+      }
     })
     .route({
       method: 'GET',
       url: '/custom/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
+          accountId: z.string().uuid()
         }),
         response: {
-          200: z.array(SchemaSchema),
-        },
+          200: z.array(SchemaSchema)
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(SchemaService)
@@ -49,7 +49,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         const schemas = await service.readCustomSchemas(req.params.accountId)
 
         res.send(schemas)
-      },
+      }
     })
     .route({
       method: 'GET',
@@ -57,11 +57,11 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceType: ResourceTypeSchema,
+          resourceType: ResourceTypeSchema
         }),
         response: {
-          200: SchemaSchema,
-        },
+          200: SchemaSchema
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(SchemaService)
@@ -73,7 +73,7 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         )
 
         res.send(schema)
-      },
+      }
     })
     .route({
       method: 'PATCH',
@@ -81,9 +81,9 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceType: ResourceTypeSchema,
+          resourceType: ResourceTypeSchema
         }),
-        body: z.array(z.string().uuid()),
+        body: z.array(z.string().uuid())
       },
       handler: async (req, res) => {
         const service = container.resolve(SchemaSectionService)
@@ -91,11 +91,11 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         await service.updateCustomSchema(
           req.params.accountId,
           req.params.resourceType,
-          {sectionIds: req.body}
+          { sectionIds: req.body }
         )
 
         res.send()
-      },
+      }
     })
     .route({
       method: 'POST',
@@ -103,11 +103,11 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          resourceType: ResourceTypeSchema,
+          resourceType: ResourceTypeSchema
         }),
         body: z.object({
-          name: z.string(),
-        }),
+          name: z.string()
+        })
       },
       handler: async (req) => {
         const schemaSectionService = container.resolve(SchemaSectionService)
@@ -116,10 +116,10 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
           req.params.accountId,
           req.params.resourceType,
           {
-            name: req.body.name,
+            name: req.body.name
           }
         )
-      },
+      }
     })
     .route({
       method: 'PATCH',
@@ -128,12 +128,12 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         params: z.object({
           accountId: z.string().uuid(),
           resourceType: ResourceTypeSchema,
-          sectionId: z.string(),
+          sectionId: z.string()
         }),
         body: z.object({
           name: z.string().optional(),
-          fieldIds: z.array(z.string().uuid()),
-        }),
+          fieldIds: z.array(z.string().uuid())
+        })
       },
       handler: async (req, res) => {
         const service = container.resolve(SchemaSectionService)
@@ -144,12 +144,12 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
           req.params.sectionId,
           {
             name: req.body.name,
-            fieldIds: req.body.fieldIds,
+            fieldIds: req.body.fieldIds
           }
         )
 
         res.send()
-      },
+      }
     })
     .route({
       method: 'DELETE',
@@ -158,8 +158,8 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         params: z.object({
           accountId: z.string().uuid(),
           resourceType: ResourceTypeSchema,
-          sectionId: z.string(),
-        }),
+          sectionId: z.string()
+        })
       },
       handler: async (req, res) => {
         const service = container.resolve(SchemaSectionService)
@@ -167,5 +167,5 @@ export const mountSchemas = <App extends FastifyInstance>(app: App) =>
         await service.deleteSection(req.params.accountId, req.params.sectionId)
 
         res.send()
-      },
+      }
     })

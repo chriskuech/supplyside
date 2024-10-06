@@ -6,7 +6,10 @@ export const mountHealth = async <App extends FastifyInstance>(app: App) =>
     try {
       const build = await readFile(`${__dirname}/build.json`, 'utf-8')
 
-      reply.send({ timestamp: new Date().toISOString(), build: JSON.parse(build) })
+      reply.send({
+        timestamp: new Date().toISOString(),
+        build: JSON.parse(build)
+      })
     } catch {
       reply.status(500).send('Failed to read build.json')
     }

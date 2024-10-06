@@ -12,13 +12,13 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
       url: '/token/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
+          accountId: z.string().uuid()
         }),
         response: {
           200: z.object({
             token: z.string().nullable()
-          }),
-        },
+          })
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(PlaidService)
@@ -28,26 +28,26 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
         res.send({
           token
         })
-      },
+      }
     })
     .route({
       method: 'GET',
       url: '/accounts/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
+          accountId: z.string().uuid()
         }),
         response: {
           200: z.object({
             accounts: z.array(
               z.object({
                 id: z.string(),
-                name: z.string(),
+                name: z.string()
               })
             ),
-            connectedAt: z.string().datetime(),
-          }),
-        },
+            connectedAt: z.string().datetime()
+          })
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(PlaidService)
@@ -56,16 +56,16 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
 
         res.send({
           accounts: accounts.map((a) => ({ id: a.account_id, name: a.name })),
-          connectedAt: new Date().toISOString(),
+          connectedAt: new Date().toISOString()
         })
-      },
+      }
     })
     .route({
       method: 'POST',
       url: '/connect/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
+          accountId: z.string().uuid()
         }),
         querystring: z.object({
           token: z.string().min(1)
@@ -73,36 +73,36 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
       },
       handler: async (req, res) => {
         const service = container.resolve(PlaidService)
-        await service.createConnection(req.params.accountId, req.query.token )
+        await service.createConnection(req.params.accountId, req.query.token)
 
         res.send()
-      },
+      }
     })
     .route({
       method: 'POST',
       url: '/disconnect/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
-        }),
+          accountId: z.string().uuid()
+        })
       },
       handler: async (req, res) => {
         const service = container.resolve(PlaidService)
-        await service.deletePlaidToken(req.params.accountId )
+        await service.deletePlaidToken(req.params.accountId)
 
         res.send()
-      },
+      }
     })
     .route({
       method: 'POST',
       url: '/link-token/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
+          accountId: z.string().uuid()
         }),
         response: {
-          200: z.object({ token: z.string() }),
-        },
+          200: z.object({ token: z.string() })
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(PlaidService)
@@ -111,6 +111,6 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
           req.params.accountId
         )
 
-        res.send({token: link_token})
-      },
+        res.send({ token: link_token })
+      }
     })

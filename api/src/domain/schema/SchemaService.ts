@@ -1,7 +1,7 @@
 import { Prisma, ResourceType as ResourceTypeModel } from '@prisma/client'
 import { difference } from 'remeda'
 import { inject, injectable } from 'inversify'
-import { mapFieldModelToEntity , mapSchemaModelToEntity} from './mappers'
+import { mapFieldModelToEntity, mapSchemaModelToEntity } from './mappers'
 import { fieldIncludes, schemaIncludes } from './model'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { type ResourceType, Schema } from '@supplyside/model'
@@ -19,27 +19,31 @@ export class SchemaService {
       where: {
         accountId,
         resourceType,
-        isSystem,
+        isSystem
       },
       include: schemaIncludes,
       orderBy: {
-        isSystem: 'desc',
-      },
+        isSystem: 'desc'
+      }
     })
 
     return {
       resourceType,
-      sections: schemas.flatMap((s) => s.Section).flatMap((s) => ({
-        id: s.id,
-        name: s.name,
-        fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity),
-      })),
+      sections: schemas
+        .flatMap((s) => s.Section)
+        .flatMap((s) => ({
+          id: s.id,
+          name: s.name,
+          fields: s.SectionField.map((sf) => sf.Field).map(
+            mapFieldModelToEntity
+          )
+        })),
       fields: [
         ...schemas.flatMap((s) => s.SchemaField),
-        ...schemas.flatMap((s) => s.Section).flatMap((s) => s.SectionField),
+        ...schemas.flatMap((s) => s.Section).flatMap((s) => s.SectionField)
       ]
         .map((sf) => sf.Field)
-        .map(mapFieldModelToEntity),
+        .map(mapFieldModelToEntity)
     }
   }
 
@@ -52,21 +56,21 @@ export class SchemaService {
         accountId_resourceType_isSystem: {
           accountId,
           resourceType,
-          isSystem: false,
+          isSystem: false
         }
       },
-      include: schemaIncludes,
+      include: schemaIncludes
     })
 
     return mapSchemaModelToEntity(schema)
   }
-      
+
   async readCustomSchemas(accountId: string): Promise<Schema[]> {
     const existingSchemas = await this.prisma.schema.findMany({
       where: { accountId, isSystem: false },
       select: {
-        resourceType: true,
-      },
+        resourceType: true
+      }
     })
 
     const missingResourceTypes = difference(
@@ -80,9 +84,9 @@ export class SchemaService {
           (resourceType) => ({
             accountId,
             resourceType,
-            isSystem: false,
+            isSystem: false
           })
-        ),
+        )
       })
     }
 
@@ -98,22 +102,22 @@ export class SchemaService {
             SectionField: {
               select: {
                 Field: {
-                  include: fieldIncludes,
-                },
+                  include: fieldIncludes
+                }
               },
               orderBy: {
-                order: 'asc',
-              },
-            },
+                order: 'asc'
+              }
+            }
           },
           orderBy: {
-            order: 'asc',
-          },
-        },
+            order: 'asc'
+          }
+        }
       },
       orderBy: {
-        resourceType: 'asc',
-      },
+        resourceType: 'asc'
+      }
     })
 
     return schemas.map((s) => ({
@@ -123,9 +127,9 @@ export class SchemaService {
       sections: s.Section.map((s) => ({
         id: s.id,
         name: s.name,
-        fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity),
+        fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity)
       })),
-      allFields: [],
+      allFields: []
     }))
   }
 }

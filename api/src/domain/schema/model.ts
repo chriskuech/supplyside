@@ -1,21 +1,29 @@
-import { Field, Option, Prisma, Schema, SchemaField, Section, SectionField } from '@prisma/client'
+import {
+  Field,
+  Option,
+  Prisma,
+  Schema,
+  SchemaField,
+  Section,
+  SectionField
+} from '@prisma/client'
 import { ValueModel, valueInclude } from '../resource/model'
 
 export const fieldIncludes = {
   DefaultValue: {
-    include: valueInclude,
+    include: valueInclude
   },
   Option: {
     orderBy: {
-      order: 'asc',
-    },
-  },
+      order: 'asc'
+    }
+  }
 } satisfies Prisma.FieldInclude
 
 export type FieldModel = Field & {
-  Option: Option[];
-  DefaultValue: ValueModel | null;
-};
+  Option: Option[]
+  DefaultValue: ValueModel | null
+}
 
 export type SectionModel = Section & {
   SectionField: (SectionField & { Field: FieldModel })[]
@@ -30,28 +38,28 @@ export const schemaIncludes = {
   SchemaField: {
     include: {
       Field: {
-        include: fieldIncludes,
-      },
+        include: fieldIncludes
+      }
     },
     orderBy: {
-      order: 'asc',
-    },
+      order: 'asc'
+    }
   },
   Section: {
     include: {
       SectionField: {
         include: {
           Field: {
-            include: fieldIncludes,
-          },
+            include: fieldIncludes
+          }
         },
         orderBy: {
-          order: 'asc',
-        },
-      },
+          order: 'asc'
+        }
+      }
     },
     orderBy: {
-      order: 'asc',
-    },
-  },
+      order: 'asc'
+    }
+  }
 } satisfies Prisma.SchemaInclude

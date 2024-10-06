@@ -1,4 +1,3 @@
-
 export const createDataUrl = (params: {
   mimeType: string
   buffer: Buffer

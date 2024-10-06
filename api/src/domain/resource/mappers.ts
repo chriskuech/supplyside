@@ -11,7 +11,7 @@ import {
   ValueInput,
   ValueResource,
   fields,
-  selectResourceFieldValue,
+  selectResourceFieldValue
 } from '@supplyside/model'
 import { mapFile } from '../file/mapValueFile'
 import { mapUserModelToEntity } from '../user/mappers'
@@ -28,9 +28,9 @@ export const mapResourceModelToEntity = (model: ResourceModel): Resource => ({
     fieldType: rf.Field.type,
     name: rf.Field.name,
     templateId: rf.Field.templateId,
-    value: mapValueModelToEntity(rf.Value),
+    value: mapValueModelToEntity(rf.Value)
   })),
-  costs: model.Cost,
+  costs: model.Cost
 })
 
 export const mapResourceToValueResource = (
@@ -43,7 +43,7 @@ export const mapResourceToValueResource = (
   name:
     selectResourceFieldValue(resource, fields.name)?.string ??
     selectResourceFieldValue(resource, fields.poNumber)?.string ??
-    fail('Resource type does not have a name or number field'),
+    fail('Resource type does not have a name or number field')
 })
 
 export const mapValueToValueInput = (
@@ -58,9 +58,9 @@ export const mapValueToValueInput = (
             'city',
             'state',
             'zip',
-            'country',
+            'country'
           ])
-        : null,
+        : null
     }))
     .with('Checkbox', () => ({ boolean: value.boolean }))
     .with('Date', () => ({ date: value.date ?? null }))
@@ -73,7 +73,7 @@ export const mapValueToValueInput = (
     .with('Contact', () => ({
       contact: value.contact
         ? pick(value.contact, ['name', 'title', 'email', 'phone'])
-        : null,
+        : null
     }))
     .with('Files', () => ({ fileIds: value.files?.map((f) => f.id) }))
     .with('MultiSelect', () => ({ optionIds: value.options?.map((o) => o.id) }))
@@ -92,7 +92,7 @@ export const mapValueModelToEntity = (model: ValueModel): Value => ({
   user: model.User && mapUserModelToEntity(model.User),
   resource: model.Resource && mapValueResourceModelToEntity(model.Resource),
   file: model.File ? mapFile(model.File) : null,
-  files: model.Files.map(({ File: file }) => mapFile(file)),
+  files: model.Files.map(({ File: file }) => mapFile(file))
 })
 
 export const mapValueResourceModelToEntity = (
@@ -109,7 +109,7 @@ export const mapValueResourceModelToEntity = (
         (
           [fields.name.templateId, fields.poNumber.templateId] as string[]
         ).includes(rf.Field.templateId)
-    )?.Value.string ?? '',
+    )?.Value.string ?? ''
 })
 
 export const mapValueInputToPrismaValueUpdate = (
@@ -122,9 +122,9 @@ export const mapValueInputToPrismaValueUpdate = (
             Address: {
               upsert: {
                 create: address,
-                update: address,
-              },
-            },
+                update: address
+              }
+            }
           }
         : { Address: { disconnect: true } }
     )
@@ -135,9 +135,9 @@ export const mapValueInputToPrismaValueUpdate = (
             Contact: {
               upsert: {
                 create: contact,
-                update: contact,
-              },
-            },
+                update: contact
+              }
+            }
           }
         : { Contact: { disconnect: true } }
     )
@@ -168,21 +168,21 @@ export const mapValueInputToPrismaValueUpdate = (
       Files: {
         createMany: {
           data: fileIds.map((fileId) => ({ fileId })),
-          skipDuplicates: true,
+          skipDuplicates: true
         },
         deleteMany: {
-          fileId: { notIn: fileIds },
-        },
-      },
+          fileId: { notIn: fileIds }
+        }
+      }
     }))
     .with({ optionIds: P.not(undefined) }, ({ optionIds }) => ({
       ValueOption: {
         createMany: {
           data: optionIds.map((optionId) => ({ optionId })),
-          skipDuplicates: true,
+          skipDuplicates: true
         },
-        deleteMany: { optionId: { notIn: optionIds } },
-      },
+        deleteMany: { optionId: { notIn: optionIds } }
+      }
     }))
     .exhaustive()
 
@@ -199,14 +199,14 @@ export const mapValueInputToPrismaValueCreate = (
             country: defaultAddress.country,
             state: defaultAddress.state,
             streetAddress: defaultAddress.streetAddress,
-            zip: defaultAddress.zip,
+            zip: defaultAddress.zip
           }
         : null
       const address = value ?? defaultAdressValue
       return address ? { Address: { create: address } } : {}
     })
     .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
-      boolean: value ?? defaultValue?.boolean ?? null,
+      boolean: value ?? defaultValue?.boolean ?? null
     }))
     .with({ contact: P.not(undefined) }, ({ contact: value }) => {
       const defaultContact = defaultValue?.contact
@@ -215,7 +215,7 @@ export const mapValueInputToPrismaValueCreate = (
             email: defaultContact.email,
             name: defaultContact.name,
             phone: defaultContact.phone,
-            title: defaultContact.title,
+            title: defaultContact.title
           }
         : null
       const contact = value ?? defaultContactValue
@@ -226,17 +226,17 @@ export const mapValueInputToPrismaValueCreate = (
         value ??
         (defaultToToday ? new Date() : null) ??
         defaultValue?.date ??
-        null,
+        null
     }))
     .with({ number: P.not(undefined) }, ({ number: value }) => ({
-      number: value ?? defaultValue?.number ?? null,
+      number: value ?? defaultValue?.number ?? null
     }))
     .with({ optionId: P.not(undefined) }, ({ optionId: value }) => {
       const optionId = value ?? defaultValue?.option?.id ?? null
       return optionId ? { Option: { connect: { id: optionId } } } : {}
     })
     .with({ string: P.not(undefined) }, ({ string: value }) => ({
-      string: value ?? defaultValue?.string ?? null,
+      string: value ?? defaultValue?.string ?? null
     }))
     .with({ userId: P.not(undefined) }, ({ userId: value }) => {
       const userId = value ?? defaultValue?.user?.id ?? null
@@ -254,26 +254,26 @@ export const mapValueInputToPrismaValueCreate = (
       const fileIds = value.length
         ? value
         : defaultValue?.files?.length
-        ? defaultValue.files.map((f) => f.id)
-        : []
+          ? defaultValue.files.map((f) => f.id)
+          : []
       return {
         Files: {
           create: fileIds.map((fileId) => ({
-            File: { connect: { id: fileId } },
-          })),
-        },
+            File: { connect: { id: fileId } }
+          }))
+        }
       }
     })
     .with({ optionIds: P.not(undefined) }, ({ optionIds: value }) => {
       const optionIds = value.length
         ? value
         : defaultValue?.options.length
-        ? defaultValue.options.map((o) => o.id)
-        : []
+          ? defaultValue.options.map((o) => o.id)
+          : []
       return {
         ValueOption: {
-          create: optionIds.map((id) => ({ Option: { connect: { id } } })),
-        },
+          create: optionIds.map((id) => ({ Option: { connect: { id } } }))
+        }
       }
     })
     .exhaustive()
@@ -288,54 +288,54 @@ export const mapValueInputToPrismaValueWhere = (
         city: value?.city?.trim() || null,
         state: value?.state?.trim() || null,
         zip: value?.zip?.trim() || null,
-        country: value?.country?.trim() || null,
-      },
+        country: value?.country?.trim() || null
+      }
     }))
     .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
-      boolean: value,
+      boolean: value
     }))
     .with({ contact: P.not(undefined) }, ({ contact: value }) => ({
       Contact: {
         name: {
           equals: value?.name ?? null,
-          mode: 'insensitive',
+          mode: 'insensitive'
         },
         title: {
           equals: value?.title ?? null,
-          mode: 'insensitive',
+          mode: 'insensitive'
         },
         email: value?.email ?? null,
-        phone: value?.phone ?? null,
-      },
+        phone: value?.phone ?? null
+      }
     }))
     .with({ date: P.not(undefined) }, ({ date: value }) => ({
-      date: value,
+      date: value
     }))
     .with({ number: P.not(undefined) }, ({ number: value }) => ({
-      number: value,
+      number: value
     }))
     .with({ optionId: P.not(undefined) }, ({ optionId: value }) => ({
-      optionId: value,
+      optionId: value
     }))
     .with({ string: P.not(undefined) }, ({ string: value }) => ({
       string: {
         equals: value,
-        mode: 'insensitive',
-      },
+        mode: 'insensitive'
+      }
     }))
     .with({ userId: P.not(undefined) }, ({ userId: value }) => ({
-      userId: value,
+      userId: value
     }))
     .with({ fileId: P.not(undefined) }, ({ fileId: value }) => ({
-      fileId: value,
+      fileId: value
     }))
     .with({ resourceId: P.not(undefined) }, ({ resourceId: value }) => ({
-      resourceId: value,
+      resourceId: value
     }))
     .with({ fileIds: P.not(undefined) }, ({ fileIds: value }) => ({
-      fileId: { in: value },
+      fileId: { in: value }
     }))
     .with({ optionIds: P.not(undefined) }, ({ optionIds: value }) => ({
-      optionId: { in: value },
+      optionId: { in: value }
     }))
     .exhaustive()

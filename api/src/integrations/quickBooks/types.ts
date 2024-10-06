@@ -6,7 +6,7 @@ import {
   readBillSchema,
   readCustomerSchema,
   readVendorSchema,
-  webhookBodySchema,
+  webhookBodySchema
 } from './schemas'
 
 export type CompanyInfo = z.infer<typeof companyInfoSchema>

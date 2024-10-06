@@ -5,8 +5,8 @@ export class QuickBooksExpectedError extends Error {}
 
 const errorResponsePattern = {
   response: {
-    data: { Fault: { Error: P.array({ code: P.string }) } },
-  },
+    data: { Fault: { Error: P.array({ code: P.string }) } }
+  }
 }
 
 export const handleNotFoundError = (e: unknown, errorMessage: string) => {

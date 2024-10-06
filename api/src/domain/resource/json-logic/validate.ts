@@ -6,11 +6,11 @@ import { Schema } from '@supplyside/model'
 export const getInvalidVars = ({
   schema,
   where,
-  orderBy,
+  orderBy
 }: {
-  schema: Schema;
-  where?: JsonLogic;
-  orderBy?: OrderBy[];
+  schema: Schema
+  where?: JsonLogic
+  orderBy?: OrderBy[]
 }): string[] => {
   const expected = new Set(schema.fields.map((f) => f.name))
 

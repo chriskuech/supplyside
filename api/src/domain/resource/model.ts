@@ -10,62 +10,62 @@ import {
   Resource,
   ResourceField,
   Prisma,
-  Cost,
+  Cost
 } from '@prisma/client'
 import { userInclude } from '../user/model'
 import { FileModel } from '@supplyside/api/domain/file/model'
 
 export type ResourceModel = Resource & {
-  Cost: Cost[];
+  Cost: Cost[]
   ResourceField: (ResourceField & {
-    Field: Field;
-    Value: ValueModel;
-  })[];
-};
+    Field: Field
+    Value: ValueModel
+  })[]
+}
 
 export type ValueResourceModel = Resource & {
   ResourceField: (ResourceField & {
-    Field: Field;
-    Value: Value;
-  })[];
-};
+    Field: Field
+    Value: Value
+  })[]
+}
 
 export type ValueModel = Value & {
-  Address: Address | null;
-  Contact: Contact | null;
-  File: FileModel | null;
-  Option: Option | null;
-  User: (User & { ImageBlob: Blob | null }) | null;
-  Files: { File: FileModel }[];
-  ValueOption: (ValueOption & { Option: Option })[];
-  Resource: ValueResourceModel | null;
-};
+  Address: Address | null
+  Contact: Contact | null
+  File: FileModel | null
+  Option: Option | null
+  User: (User & { ImageBlob: Blob | null }) | null
+  Files: { File: FileModel }[]
+  ValueOption: (ValueOption & { Option: Option })[]
+  Resource: ValueResourceModel | null
+}
 
 export const valueInclude = {
   Address: true,
   Contact: true,
   File: {
     include: {
-      Blob: true,
-    },
+      Blob: true
+    }
   },
   Files: {
     include: {
       File: {
         include: {
-          Blob: true,
-        },
-      },
-    },
+          Blob: true
+        }
+      }
+    }
   },
   Option: true,
   User: {
-    include: userInclude,
+    include: userInclude
   },
   ValueOption: {
     include: {
-      Option: true,
-    },
+      Option: true
+    }
   },
   Resource: {
     include: {
@@ -80,23 +80,23 @@ export const valueInclude = {
         // },
         include: {
           Field: true,
-          Value: true,
-        },
-      },
-    },
-  },
+          Value: true
+        }
+      }
+    }
+  }
 } satisfies Prisma.ValueInclude
 
 export const resourceInclude = {
   Cost: {
-    orderBy: { createdAt: 'asc' },
+    orderBy: { createdAt: 'asc' }
   },
   ResourceField: {
     include: {
       Field: true,
       Value: {
-        include: valueInclude,
-      },
-    },
-  },
+        include: valueInclude
+      }
+    }
+  }
 } satisfies Prisma.ResourceInclude

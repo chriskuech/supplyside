@@ -13,22 +13,22 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
       url: '/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
+          accountId: z.string().uuid()
         }),
         response: {
           200: z.discriminatedUnion('status', [
             z.object({
               status: z.literal('disconnected'),
-              setupUrl: z.string().url(),
+              setupUrl: z.string().url()
             }),
             z.object({
               status: z.literal('connected'),
               companyName: z.string().min(1),
               realmId: z.string().min(1),
-              connectedAt: z.string().datetime(),
-            }),
-          ]),
-        },
+              connectedAt: z.string().datetime()
+            })
+          ])
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(QuickBooksService)
@@ -36,9 +36,7 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
         const isConnected = await service.isConnected(req.params.accountId)
 
         if (isConnected) {
-          const companyInfo = await service.getCompanyInfo(
-            req.params.accountId
-          )
+          const companyInfo = await service.getCompanyInfo(req.params.accountId)
           const realmId = await service.getAccountRealmId(req.params.accountId)
           const connectedAt = await service.getConnectedAt(req.params.accountId)
 
@@ -46,13 +44,15 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
             status: 'connected',
             companyName: companyInfo.CompanyInfo.CompanyName,
             realmId,
-            connectedAt: connectedAt?.toISOString() ?? fail('"quickBooks connected at" not set'),
+            connectedAt:
+              connectedAt?.toISOString() ??
+              fail('"quickBooks connected at" not set')
           })
         } else {
           const setupUrl = await service.getSetupUrl()
           res.status(200).send({ setupUrl, status: 'disconnected' })
         }
-      },
+      }
     })
     .route({
       method: 'PUT',
@@ -60,13 +60,13 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          billResourceId: z.string().uuid(),
+          billResourceId: z.string().uuid()
         }),
         response: {
           200: z.object({
-            success: z.boolean(),
-          }),
-        },
+            success: z.boolean()
+          })
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(QuickBooksService)
@@ -74,18 +74,18 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
         await service.pushBill(req.params.accountId, req.params.billResourceId)
 
         res.send({ success: true })
-      },
+      }
     })
     .route({
       method: 'POST',
       url: '/connect/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
+          accountId: z.string().uuid()
         }),
         querystring: z.object({
-          url: z.string(),
-        }),
+          url: z.string()
+        })
       },
       handler: async (req, res) => {
         const service = container.resolve(QuickBooksService)
@@ -93,15 +93,15 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
         await service.connect(req.params.accountId, req.query.url)
 
         res.send()
-      },
+      }
     })
     .route({
       method: 'POST',
       url: '/pull-data/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
-        }),
+          accountId: z.string().uuid()
+        })
       },
       handler: async (req, res) => {
         const service = container.resolve(QuickBooksService)
@@ -109,5 +109,5 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
         await service.pullData(req.params.accountId)
 
         res.send()
-      },
+      }
     })

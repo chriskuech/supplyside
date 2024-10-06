@@ -8,12 +8,11 @@ export const mapUserModelToEntity = (model: UserModel): User => ({
   accountId: model.accountId,
   firstName: model.firstName,
   lastName: model.lastName,
-  name:
-    [model.firstName, model.lastName].filter(isTruthy).join(' ') || null,
+  name: [model.firstName, model.lastName].filter(isTruthy).join(' ') || null,
   email: model.email,
   tsAndCsSignedAt: model.tsAndCsSignedAt?.toISOString() ?? null,
   isAdmin: model.isAdmin,
   isApprover: model.isApprover,
   isGlobalAdmin: model.accountId === systemAccountId,
-  profilePicBlobId: model.imageBlobId,
+  profilePicBlobId: model.imageBlobId
 })

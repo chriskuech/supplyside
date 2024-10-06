@@ -18,13 +18,13 @@ export class SchemaSectionService {
             accountId_resourceType_isSystem: {
               accountId,
               resourceType,
-              isSystem: false,
-            },
-          },
+              isSystem: false
+            }
+          }
         },
         name: dto.name,
-        order: 0,
-      },
+        order: 0
+      }
     })
   }
 
@@ -38,21 +38,21 @@ export class SchemaSectionService {
         accountId_resourceType_isSystem: {
           accountId,
           resourceType,
-          isSystem: false,
-        },
+          isSystem: false
+        }
       },
       data: {
         Section: {
           update: data.sectionIds.map((sectionId, i) => ({
             where: {
-              id: sectionId,
+              id: sectionId
             },
             data: {
-              order: i,
-            },
-          })),
-        },
-      },
+              order: i
+            }
+          }))
+        }
+      }
     })
   }
 
@@ -61,51 +61,51 @@ export class SchemaSectionService {
     resourceType: ResourceType,
     sectionId: string,
     data: {
-      name?: string;
-      fieldIds: string[];
+      name?: string
+      fieldIds: string[]
     }
   ) {
     await Promise.all([
       this.prisma.sectionField.deleteMany({
         where: {
           fieldId: {
-            notIn: data.fieldIds,
+            notIn: data.fieldIds
           },
           Section: {
             id: sectionId,
             Schema: {
               resourceType,
-              accountId,
-            },
-          },
-        },
+              accountId
+            }
+          }
+        }
       }),
       this.prisma.section.update({
         where: {
           id: sectionId,
           Schema: {
             resourceType,
-            accountId,
-          },
+            accountId
+          }
         },
         data: {
           name: data.name,
           SectionField: {
             upsert: data.fieldIds.map((fieldId, i) => ({
               where: {
-                sectionId_fieldId: { sectionId, fieldId },
+                sectionId_fieldId: { sectionId, fieldId }
               },
               create: {
                 fieldId,
-                order: i,
+                order: i
               },
               update: {
-                order: i,
-              },
-            })),
-          },
-        },
-      }),
+                order: i
+              }
+            }))
+          }
+        }
+      })
     ])
   }
 
@@ -114,9 +114,9 @@ export class SchemaSectionService {
       where: {
         id: sectionId,
         Schema: {
-          accountId,
-        },
-      },
+          accountId
+        }
+      }
     })
   }
 }

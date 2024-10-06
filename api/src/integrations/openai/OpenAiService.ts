@@ -18,20 +18,24 @@ export class OpenAiService {
     this.client = new OpenAI({
       // These are required to use our specific model
       organization: 'org-u3vWSqIyPWvKu4xGpMEcH5l4',
-      project: 'proj_RYX76NcxQN2NpLHkQuH7l33b',
+      project: 'proj_RYX76NcxQN2NpLHkQuH7l33b'
     })
   }
 
   async extractContent<T>(params: {
-    systemPrompt: string;
-    files: (File | string)[];
-    schema: ZodSchema<T>;
+    systemPrompt: string
+    files: (File | string)[]
+    schema: ZodSchema<T>
   }): Promise<T | undefined> {
     const completionParts = (
       await Promise.all(
         params.files.map((file) =>
           match(file)
-            .with(P.string, (text) => ({ type: 'text', text } satisfies ChatCompletionContentPart))
+            .with(
+              P.string,
+              (text) =>
+                ({ type: 'text', text }) satisfies ChatCompletionContentPart
+            )
             .otherwise((file) =>
               this.completionPartsService.mapFileToCompletionParts(file)
             )
@@ -46,14 +50,14 @@ export class OpenAiService {
       messages: [
         {
           role: 'system',
-          content: params.systemPrompt,
+          content: params.systemPrompt
         },
         {
           role: 'user',
-          content: completionParts,
-        },
+          content: completionParts
+        }
       ],
-      response_format: zodResponseFormat(params.schema, 'extractedContent'),
+      response_format: zodResponseFormat(params.schema, 'extractedContent')
     })
 
     return completion.choices[0]?.message.parsed ?? undefined

@@ -13,21 +13,24 @@ export const mountFiles = async <App extends FastifyInstance>(app: App) =>
       url: '/',
       schema: {
         params: z.object({
-          accountId: z.string().uuid(),
+          accountId: z.string().uuid()
         }),
         body: z.object({
           name: z.string(),
-          blobId: z.string().uuid(),
+          blobId: z.string().uuid()
         }),
-        response: { 200: FileSchema },
+        response: { 200: FileSchema }
       },
       handler: async (request) => {
         const service = container.resolve(FileService)
 
-        const file = await service.create(request.params.accountId, request.body)
+        const file = await service.create(
+          request.params.accountId,
+          request.body
+        )
 
         return file
-      },
+      }
     })
     .route({
       method: 'GET',
@@ -35,19 +38,16 @@ export const mountFiles = async <App extends FastifyInstance>(app: App) =>
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
-          fileId: z.string().uuid(),
+          fileId: z.string().uuid()
         }),
         response: {
-          200: FileSchema,
-        },
+          200: FileSchema
+        }
       },
       handler: async (req, res) => {
         const service = container.resolve(FileService)
 
-        const file = await service.read(
-          req.params.accountId,
-          req.params.fileId
-        )
+        const file = await service.read(req.params.accountId, req.params.fileId)
 
         if (!file) {
           res.status(404)
@@ -55,5 +55,5 @@ export const mountFiles = async <App extends FastifyInstance>(app: App) =>
         }
 
         res.send(file)
-      },
+      }
     })

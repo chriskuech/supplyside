@@ -5,7 +5,7 @@ export const AccountSchema = z.object({
   key: z.string(),
   name: z.string(),
   address: z.string(),
-  logoBlobId: z.string().nullable(),
+  logoBlobId: z.string().nullable()
 })
 
-export type Account = z.infer<typeof AccountSchema>;
+export type Account = z.infer<typeof AccountSchema>

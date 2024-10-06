@@ -41,7 +41,7 @@ export class ResourceExtractionService {
     const result = await this.openAiService.extractContent({
       systemPrompt: prompt(resource.type),
       schema: mapSchemaEntityToZod(schema),
-      files: [...(file ? [file] : []), ...(files ?? [])],
+      files: [...(file ? [file] : []), ...(files ?? [])]
     })
 
     return result

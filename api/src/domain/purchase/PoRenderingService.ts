@@ -14,12 +14,12 @@ import {
   fields,
   formatInlineAddress,
   selectResourceField,
-  selectResourceFieldValue,
+  selectResourceFieldValue
 } from '@supplyside/model'
 import {
   AddressViewModel,
   LineViewModel,
-  PurchaseViewModel,
+  PurchaseViewModel
 } from './doc/ViewModel'
 import { OsService } from '@supplyside/api/os'
 
@@ -66,11 +66,11 @@ export class PoRenderingService {
       this.resourceService.read(accountId, purchaseId),
       this.resourceService.list(accountId, 'PurchaseLine', {
         where: {
-          '==': [{ var: 'Purchase' }, purchaseId],
-        },
+          '==': [{ var: 'Purchase' }, purchaseId]
+        }
       }),
       this.schemaService.readMergedSchema(accountId, 'PurchaseLine'),
-      this.accountService.read(accountId),
+      this.accountService.read(accountId)
     ])
 
     const vendorId = selectResourceFieldValue(order, fields.vendor)?.resource
@@ -90,7 +90,7 @@ export class PoRenderingService {
           fields.totalCost.templateId,
           fields.unitOfMeasure.templateId,
           fields.unitCost.templateId,
-          fields.quantity.templateId,
+          fields.quantity.templateId
         ].includes(field.templateId as string)
     )
 
@@ -122,7 +122,7 @@ export class PoRenderingService {
 
                 return value && { key: name, value }
               })
-              .filter(isTruthy),
+              .filter(isTruthy)
           } satisfies LineViewModel
         })
       ),
@@ -148,8 +148,8 @@ export class PoRenderingService {
           : cost.value
         ).toLocaleString('en-US', {
           style: 'currency',
-          currency: 'USD',
-        }),
+          currency: 'USD'
+        })
       })),
       incoterms: renderTemplateField(order, fields.incoterms),
       shippingMethod: renderTemplateField(order, fields.shippingMethod),
@@ -161,7 +161,7 @@ export class PoRenderingService {
       vendorPrimaryAddress: renderAddressViewModel(
         vendor,
         fields.primaryAddress
-      ),
+      )
     }
   }
 }
@@ -245,7 +245,7 @@ const renderFieldValue = (resourceField: ResourceField | undefined) =>
       () =>
         resourceField?.value?.number?.toLocaleString('en-US', {
           style: 'currency',
-          currency: 'USD',
+          currency: 'USD'
         }) ?? null
     )
     .with('Number', () => resourceField?.value?.number?.toString() ?? null)
@@ -269,19 +269,19 @@ const renderAddressViewModel = (
     return {
       line1: null,
       line2: null,
-      line3: null,
+      line3: null
     }
 
   const addressValue = selectResourceFieldValue(resource, field)?.address
   const line2Values = [
     addressValue?.city,
     addressValue?.state,
-    addressValue?.zip,
+    addressValue?.zip
   ].filter(Boolean)
 
   return {
     line1: addressValue?.streetAddress ?? null,
     line2: line2Values.length ? line2Values.join(' ') : null,
-    line3: addressValue?.country ?? null,
+    line3: addressValue?.country ?? null
   }
 }
