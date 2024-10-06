@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { AddressSchema } from "./address";
-import { ContactSchema } from "./contact";
+import { z } from 'zod'
+import { AddressSchema } from './address'
+import { ContactSchema } from './contact'
 
 export const ValueInputSchema = z
   .object({
@@ -17,6 +17,6 @@ export const ValueInputSchema = z
     fileIds: z.array(z.string().uuid()),
     resourceId: z.string().uuid().nullable(),
   })
-  .partial();
+  .partial()
 
-export type ValueInput = z.infer<typeof ValueInputSchema>;
+export type ValueInput = z.infer<typeof ValueInputSchema>

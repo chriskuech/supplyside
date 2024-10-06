@@ -1,7 +1,4 @@
-import { fail } from 'assert'
 import { FieldType, Prisma } from '@prisma/client'
-import { P, match } from 'ts-pattern'
-import { pick } from 'remeda'
 import {
   Address,
   Contact,
@@ -13,6 +10,9 @@ import {
   fields,
   selectResourceFieldValue,
 } from '@supplyside/model'
+import { fail } from 'assert'
+import { pick } from 'remeda'
+import { P, match } from 'ts-pattern'
 import { mapFile } from '../file/mapValueFile'
 import { mapUserModelToEntity } from '../user/mappers'
 import { ResourceModel, ValueModel, ValueResourceModel } from './model'
