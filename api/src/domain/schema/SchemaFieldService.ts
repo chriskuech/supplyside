@@ -1,16 +1,16 @@
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import { inject, injectable } from 'inversify'
+import { OptionPatch } from '@supplyside/api/router/api/accounts/fields'
 import {
   FieldType,
   ResourceType,
   SchemaField,
   ValueInput,
 } from '@supplyside/model'
+import { inject, injectable } from 'inversify'
+import { match } from 'ts-pattern'
+import { mapValueInputToPrismaValueUpdate } from '../resource/mappers'
 import { mapFieldModelToEntity } from './mappers'
 import { fieldIncludes } from './model'
-import { mapValueInputToPrismaValueUpdate } from '../resource/mappers'
-import { OptionPatch } from '@supplyside/api/router/api/accounts/fields'
-import { match } from 'ts-pattern'
 
 @injectable()
 export class SchemaFieldService {

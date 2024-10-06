@@ -1,10 +1,10 @@
 import OAuthClient, { MakeApiCallParams } from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
 import { z } from 'zod'
-import { isRequestError } from './utils'
+import { QuickBooksConfigService } from './QuickBooksConfigService'
 import { QuickBooksTokenService } from './QuickBooksTokenService'
 import { QueryOptions } from './types'
-import { QuickBooksConfigService } from './QuickBooksConfigService'
+import { isRequestError } from './utils'
 
 @injectable()
 export class QuickBooksApiService {

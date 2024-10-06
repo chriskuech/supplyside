@@ -1,13 +1,13 @@
-import { inject, injectable } from 'inversify'
 import { container } from '@supplyside/api/di'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import { Resource, fields, selectSchemaFieldUnsafe } from '@supplyside/model'
 import assert from 'assert'
+import { inject, injectable } from 'inversify'
 import { Message } from 'postmark'
 import { AccountService } from '../account/AccountService'
-import { FileService } from '../file/FileService'
 import { BlobService } from '../blob/BlobService'
+import { FileService } from '../file/FileService'
 
 type FileParam = {
   content: string

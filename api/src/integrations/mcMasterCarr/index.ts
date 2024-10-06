@@ -1,27 +1,28 @@
-import { readFileSync } from 'fs'
-import path from 'path'
-import assert, { fail } from 'assert'
-import handlebars from 'handlebars'
-import { parseStringPromise } from 'xml2js'
-import { match } from 'ts-pattern'
-import { inject, injectable } from 'inversify'
-import { PrismaService } from '../PrismaService'
+import { ConfigService } from '@supplyside/api/ConfigService'
+import { accountInclude } from '@supplyside/api/domain/account/model'
+import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
-  cxmlSchema,
-  posrResponseSchema,
-  RenderPOSRTemplateParams,
-} from './types'
-import { McMasterInvalidCredentials } from './errors'
-import {
+  fields,
   resources,
   selectSchemaFieldOptionUnsafe,
   selectSchemaFieldUnsafe,
+  unitOfMeasureOptions,
 } from '@supplyside/model'
-import { fields, unitOfMeasureOptions } from '@supplyside/model'
-import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
-import { ConfigService } from '@supplyside/api/ConfigService'
-import { accountInclude } from '@supplyside/api/domain/account/model'
+import assert, { fail } from 'assert'
+import { readFileSync } from 'fs'
+import handlebars from 'handlebars'
+import { inject, injectable } from 'inversify'
+import path from 'path'
+import { match } from 'ts-pattern'
+import { parseStringPromise } from 'xml2js'
+import { PrismaService } from '../PrismaService'
+import { McMasterInvalidCredentials } from './errors'
+import {
+  RenderPOSRTemplateParams,
+  cxmlSchema,
+  posrResponseSchema,
+} from './types'
 
 @injectable()
 export class McMasterService {

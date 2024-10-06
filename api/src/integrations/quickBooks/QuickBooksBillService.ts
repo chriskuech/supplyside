@@ -1,19 +1,22 @@
+import { ConfigService } from '@supplyside/api/ConfigService'
+import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
+import {
+  Resource,
+  fields,
+  selectResourceFieldValue,
+  selectSchemaField,
+} from '@supplyside/model'
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
+import { QuickBooksApiService } from './QuickBooksApiService'
+import { QuickBooksVendorService } from './QuickBooksVendorService'
+import { ACCOUNT_BASED_EXPENSE } from './constants'
+import { QuickBooksExpectedError } from './errors'
+import { mapValue } from './mapValue'
 import { accountQuerySchema, readBillSchema } from './schemas'
 import { Bill } from './types'
-import { ACCOUNT_BASED_EXPENSE } from './constants'
-import { mapValue } from './mapValue'
-import { QuickBooksVendorService } from './QuickBooksVendorService'
-import { QuickBooksExpectedError } from './errors'
-import { QuickBooksApiService } from './QuickBooksApiService'
-import { selectResourceFieldValue } from '@supplyside/model'
-import { Resource, fields } from '@supplyside/model'
-import { selectSchemaField } from '@supplyside/model'
-import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
-import { ConfigService } from '@supplyside/api/ConfigService'
 
 const fieldsMap = [
   {

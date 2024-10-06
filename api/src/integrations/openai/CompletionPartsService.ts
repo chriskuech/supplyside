@@ -1,18 +1,18 @@
+import { ConfigService } from '@supplyside/api/ConfigService'
+import { BlobService } from '@supplyside/api/domain/blob/BlobService'
+import { createDataUrl } from '@supplyside/api/domain/blob/util'
+import { File } from '@supplyside/model'
 import assert from 'assert'
-import { mkdir, readFile, readdir, rm, writeFile } from 'fs/promises'
 import { exec as execCallback } from 'child_process'
-import { promisify } from 'util'
+import { mkdir, readFile, readdir, rm, writeFile } from 'fs/promises'
+import { inject, injectable } from 'inversify'
 import {
   ChatCompletionContentPart,
   ChatCompletionContentPartImage,
   ChatCompletionContentPartText,
 } from 'openai/resources/index.mjs'
 import { P, match } from 'ts-pattern'
-import { inject, injectable } from 'inversify'
-import { BlobService } from '@supplyside/api/domain/blob/BlobService'
-import { ConfigService } from '@supplyside/api/ConfigService'
-import { File } from '@supplyside/model'
-import { createDataUrl } from '@supplyside/api/domain/blob/util'
+import { promisify } from 'util'
 
 const exec = promisify(execCallback)
 

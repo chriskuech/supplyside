@@ -1,14 +1,14 @@
-import { FastifyInstance } from 'fastify'
-import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { container } from '@supplyside/api/di'
+import { SchemaFieldService } from '@supplyside/api/domain/schema/SchemaFieldService'
 import {
   FieldTypeSchema,
   ResourceTypeSchema,
   SchemaFieldSchema,
   ValueInputSchema,
 } from '@supplyside/model'
+import { FastifyInstance } from 'fastify'
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { ZodType, z } from 'zod'
-import { container } from '@supplyside/api/di'
-import { SchemaFieldService } from '@supplyside/api/domain/schema/SchemaFieldService'
 
 // TODO: consolidate
 export type OptionPatch = {

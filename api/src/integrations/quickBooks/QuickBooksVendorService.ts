@@ -1,17 +1,8 @@
-import assert from 'assert'
-import { difference, range } from 'remeda'
-import OAuthClient from 'intuit-oauth'
-import { inject, injectable } from 'inversify'
 import {
-  countQuerySchema,
-  readVendorSchema,
-  vendorQuerySchema,
-} from './schemas'
-import { Vendor } from './types'
-import { handleNotFoundError } from './errors'
-import { MAX_ENTITIES_PER_PAGE } from './constants'
-import { mapValue } from './mapValue'
-import { QuickBooksApiService } from './QuickBooksApiService'
+  ResourceFieldInput,
+  ResourceService,
+} from '@supplyside/api/domain/resource/ResourceService'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
   Resource,
   fields,
@@ -19,11 +10,20 @@ import {
   selectSchemaField,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
-import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
+import assert from 'assert'
+import OAuthClient from 'intuit-oauth'
+import { inject, injectable } from 'inversify'
+import { difference, range } from 'remeda'
+import { QuickBooksApiService } from './QuickBooksApiService'
+import { MAX_ENTITIES_PER_PAGE } from './constants'
+import { handleNotFoundError } from './errors'
+import { mapValue } from './mapValue'
 import {
-  ResourceFieldInput,
-  ResourceService,
-} from '@supplyside/api/domain/resource/ResourceService'
+  countQuerySchema,
+  readVendorSchema,
+  vendorQuerySchema,
+} from './schemas'
+import { Vendor } from './types'
 
 @injectable()
 export class QuickBooksVendorService {

@@ -1,20 +1,20 @@
-import { fail } from 'assert'
-import { assert } from 'console'
-import { z } from 'zod'
-import { validate as isUuid } from 'uuid'
-import {
-  ResourceFieldInput,
-  ResourceService,
-} from '../resource/ResourceService'
-import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
-import { SchemaService } from '../schema/SchemaService'
 import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
 import {
   fields,
   selectResourceFieldValue,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
+import { fail } from 'assert'
+import { assert } from 'console'
 import { inject, injectable } from 'inversify'
+import { validate as isUuid } from 'uuid'
+import { z } from 'zod'
+import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
+import {
+  ResourceFieldInput,
+  ResourceService,
+} from '../resource/ResourceService'
+import { SchemaService } from '../schema/SchemaService'
 
 const prompt = `
 You are a context extraction tool within a "Procure-to-Pay" B2B SaaS application.

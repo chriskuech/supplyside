@@ -1,8 +1,8 @@
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { File } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 import { mapFile } from './mapValueFile'
 import { fileInclude } from './model'
-import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import { File } from '@supplyside/model'
 
 @injectable()
 export class FileService {

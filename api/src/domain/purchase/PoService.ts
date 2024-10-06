@@ -1,17 +1,17 @@
-import { inject, injectable } from 'inversify'
-import { BlobService } from '../blob/BlobService'
-import { SchemaService } from '../schema/SchemaService'
+import { ConfigService } from '@supplyside/api/ConfigService'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import SmtpService from '@supplyside/api/integrations/SmtpService'
 import {
   fields,
   selectResourceFieldValue,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
+import { inject, injectable } from 'inversify'
 import { AccountService } from '../account/AccountService'
+import { BlobService } from '../blob/BlobService'
 import { ResourceService } from '../resource/ResourceService'
+import { SchemaService } from '../schema/SchemaService'
 import { PoRenderingService } from './PoRenderingService'
-import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import SmtpService from '@supplyside/api/integrations/SmtpService'
-import { ConfigService } from '@supplyside/api/ConfigService'
 
 @injectable()
 export class PoService {

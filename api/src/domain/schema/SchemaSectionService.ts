@@ -1,6 +1,6 @@
-import { inject, injectable } from 'inversify'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { ResourceType } from '@supplyside/model'
+import { inject, injectable } from 'inversify'
 
 @injectable()
 export class SchemaSectionService {

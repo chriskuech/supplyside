@@ -1,9 +1,9 @@
-import { FastifyInstance } from 'fastify'
-import { BlobService } from '@supplyside/api/domain/blob/BlobService'
-import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { container } from '@supplyside/api/di'
-import { z } from 'zod'
+import { BlobService } from '@supplyside/api/domain/blob/BlobService'
 import { BlobSchema } from '@supplyside/api/domain/blob/entity'
+import { FastifyInstance } from 'fastify'
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
 export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
   app.addContentTypeParser('*', { parseAs: 'buffer' }, (req, body, done) =>

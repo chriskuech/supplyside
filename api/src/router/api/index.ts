@@ -1,10 +1,10 @@
+import { ConfigService } from '@supplyside/api/ConfigService'
+import { container } from '@supplyside/api/di'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { mountSessions } from './sessions'
 import { mountAccounts } from './accounts'
 import { mountSelf } from './self'
-import { container } from '@supplyside/api/di'
-import { ConfigService } from '@supplyside/api/ConfigService'
+import { mountSessions } from './sessions'
 
 export const mountApi = <App extends FastifyInstance>(app: App) =>
   app

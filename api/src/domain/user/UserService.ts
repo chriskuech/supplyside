@@ -1,11 +1,11 @@
-import { inject, injectable } from 'inversify'
-import { mapUserModelToEntity } from './mappers'
-import { userInclude } from './model'
+import { ConfigService } from '@supplyside/api/ConfigService'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import SmtpService from '@supplyside/api/integrations/SmtpService'
-import { z } from 'zod'
-import { ConfigService } from '@supplyside/api/ConfigService'
 import { User } from '@supplyside/model'
+import { inject, injectable } from 'inversify'
+import { z } from 'zod'
+import { mapUserModelToEntity } from './mappers'
+import { userInclude } from './model'
 
 const loginPath = '/auth/login'
 

@@ -1,8 +1,8 @@
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
+import { QuickBooksApiService } from './QuickBooksApiService'
 import { companyInfoSchema } from './schemas'
 import { CompanyInfo } from './types'
-import { QuickBooksApiService } from './QuickBooksApiService'
 
 @injectable()
 export class QuickBooksCompanyInfoService {

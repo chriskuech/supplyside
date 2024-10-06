@@ -1,12 +1,5 @@
-import { readFile, writeFile } from 'fs/promises'
-import { isTruthy } from 'remeda'
-import { P, match } from 'ts-pattern'
 import { FieldType } from '@prisma/client'
-import { inject, injectable } from 'inversify'
-import { BlobService } from '../blob/BlobService'
-import { ResourceService } from '../resource/ResourceService'
-import { AccountService } from '../account/AccountService'
-import { SchemaService } from '../schema/SchemaService'
+import { OsService } from '@supplyside/api/os'
 import {
   FieldReference,
   Resource,
@@ -16,12 +9,19 @@ import {
   selectResourceField,
   selectResourceFieldValue,
 } from '@supplyside/model'
+import { readFile, writeFile } from 'fs/promises'
+import { inject, injectable } from 'inversify'
+import { isTruthy } from 'remeda'
+import { P, match } from 'ts-pattern'
+import { AccountService } from '../account/AccountService'
+import { BlobService } from '../blob/BlobService'
+import { ResourceService } from '../resource/ResourceService'
+import { SchemaService } from '../schema/SchemaService'
 import {
   AddressViewModel,
   LineViewModel,
   PurchaseViewModel,
 } from './doc/ViewModel'
-import { OsService } from '@supplyside/api/os'
 
 @injectable()
 export class PoRenderingService {
