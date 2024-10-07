@@ -63,7 +63,7 @@ export class BillExtractionService {
     ])
 
     const billFiles =
-      selectResourceFieldValue(billResource, fields.billFiles)?.files ??
+      selectResourceFieldValue(billResource, fields.billAttachments)?.files ??
       fail('Files not found')
 
     if (!billFiles.length) return

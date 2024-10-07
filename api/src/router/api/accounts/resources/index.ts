@@ -1,5 +1,4 @@
 import { container } from '@supplyside/api/di'
-import { ResourceExtractionService } from '@supplyside/api/domain/resource/ResourceExtractionService'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { JsonLogicSchema } from '@supplyside/api/domain/resource/json-logic/types'
 import {
@@ -266,27 +265,5 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         await service.copyFields(req.params.accountId, req.params.resourceId, {
           fromResourceId: req.body.resourceId,
         })
-      },
-    })
-    .route({
-      method: 'POST',
-      url: '/:resourceId/copy-from-files/',
-      schema: {
-        params: z.object({
-          accountId: z.string().uuid(),
-          resourceId: z.string().uuid(),
-        }),
-        body: z.object({
-          fieldId: z.string().uuid(),
-        }),
-      },
-      handler: async (req) => {
-        const service = container.resolve(ResourceExtractionService)
-
-        await service.extractContent(
-          req.params.accountId,
-          req.params.resourceId,
-          req.body,
-        )
       },
     })

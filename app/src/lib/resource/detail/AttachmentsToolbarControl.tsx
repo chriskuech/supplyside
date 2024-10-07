@@ -16,14 +16,13 @@ import { useDisclosure } from '@/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import LoadingButton from '@/lib/ux/LoadingButton'
 import { useAsyncCallback } from '@/hooks/useAsyncCallback'
-import { syncFromAttachments as syncFromAttachmentsAction } from '@/actions/purchase'
 
 type AttachmentsToolbarControlProps = {
   resourceId: string
   resourceType: ResourceType
   field: SchemaField
   value: Value | undefined
-  showSyncButton?: boolean
+  onSync?: () => Promise<void>
 }
 
 export default function AttachmentsToolbarControl({
@@ -31,11 +30,11 @@ export default function AttachmentsToolbarControl({
   resourceId,
   field,
   value,
-  showSyncButton,
+  onSync,
 }: AttachmentsToolbarControlProps) {
   const { isOpen, open, close } = useDisclosure()
-  const [{ isLoading }, syncFromAttachments] = useAsyncCallback(() =>
-    syncFromAttachmentsAction(resourceId).then(close),
+  const [{ isLoading }, syncFromAttachments] = useAsyncCallback(async () =>
+    onSync?.().then(close),
   )
 
   return (
@@ -68,7 +67,7 @@ export default function AttachmentsToolbarControl({
           <Button onClick={close} variant="text">
             Close
           </Button>
-          {showSyncButton && (
+          {onSync && (
             <LoadingButton
               color="secondary"
               isLoading={isLoading}
