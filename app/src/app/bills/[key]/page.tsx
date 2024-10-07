@@ -13,13 +13,13 @@ import CallToAction from './CallToAction'
 import PurchaseLink from './tools/PurchaseLink'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
+import { BillAttachmentsControl } from './tools/BillAttachmentsControl'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
 import { getBillUrl } from '@/lib/quickBooks/helpers'
-import { syncFromAttachments } from '@/actions/bills'
 
 export default async function BillsDetail({
   params: { key },
@@ -80,16 +80,10 @@ export default async function BillsDetail({
         ...(purchase
           ? [<PurchaseLink key={purchase.id} purchase={purchase} />]
           : []),
-        <AttachmentsToolbarControl
+        <BillAttachmentsControl
           key={AttachmentsToolbarControl.name}
-          resourceId={resource.id}
-          resourceType="Bill"
-          onSync={() => syncFromAttachments(resource.id)}
-          field={
-            selectSchemaField(schema, fields.billAttachments) ??
-            fail('Field not found')
-          }
-          value={selectResourceFieldValue(resource, fields.billAttachments)}
+          schema={schema}
+          resource={resource}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}

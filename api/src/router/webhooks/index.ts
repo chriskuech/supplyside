@@ -1,6 +1,6 @@
 import { container } from '@supplyside/api/di'
 import { AccountService } from '@supplyside/api/domain/account/AccountService'
-import { BillService } from '@supplyside/api/domain/bill/BillService'
+import { BillInboxService } from '@supplyside/api/domain/bill/BillInboxService'
 import { TemplateService } from '@supplyside/api/domain/schema/TemplateService'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -17,10 +17,10 @@ export const mountWebhooks = async <App extends FastifyInstance>(app: App) =>
         body: z.any(),
       },
       handler: async (request, reply) => {
-        const billService = container.resolve(BillService)
+        const service = container.resolve(BillInboxService)
 
         // TODO: validate the message
-        await billService.handleMessage(request.body as Message)
+        await service.handleMessage(request.body as Message)
 
         reply.status(200).send()
       },
