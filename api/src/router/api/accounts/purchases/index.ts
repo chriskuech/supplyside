@@ -1,6 +1,7 @@
 import { container } from '@supplyside/api/di'
 import { PoRenderingService } from '@supplyside/api/domain/purchase/PoRenderingService'
 import { PoService } from '@supplyside/api/domain/purchase/PoService'
+import { PurchaseExtractionService } from '@supplyside/api/domain/purchase/PurchaseExtractionService'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
@@ -89,6 +90,24 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
 
         res.header('Content-Type', 'application/pdf')
         res.send(buffer)
+      },
+    })
+    .route({
+      method: 'POST',
+      url: '/:resourceId/sync-from-attachments/',
+      schema: {
+        params: z.object({
+          accountId: z.string().uuid(),
+          resourceId: z.string().uuid(),
+        }),
+      },
+      handler: async (req) => {
+        const service = container.resolve(PurchaseExtractionService)
+
+        await service.extractContent(
+          req.params.accountId,
+          req.params.resourceId,
+        )
       },
     })
 // .route({
