@@ -18,7 +18,9 @@ Your task is to extract relevant information from uploaded files associated with
 The documents may contain a mix of images, text, and HTML content and the actual Bill file may or may not be included.
 Your goal is to determine specific information from the Bill files, if available, as specified by the output schema; if the data is uncertain or ambiguous, do not include it in the output.
 
-You will be provided images of the uploaded documents associated with the Bill.
+As input, you will receive images of the uploaded documents associated with the Bill.
+
+As output, you will produce a JSON object containing the fields described in the output schema.
 
 You MUST only return high-confidence data. If the data is uncertain or ambiguous, do not include it in the output.
 `
