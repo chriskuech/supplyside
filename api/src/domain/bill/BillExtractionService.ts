@@ -6,7 +6,6 @@ import {
 } from '@supplyside/model'
 import { fail } from 'assert'
 import { inject, injectable } from 'inversify'
-import { validate as isUuid } from 'uuid'
 import { z } from 'zod'
 import { ResourceService } from '../resource/ResourceService'
 import { SchemaService } from '../schema/SchemaService'
@@ -37,6 +36,12 @@ const ExtractedBillDataSchema = z.object({
     .nullish()
     .describe(
       'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.',
+    ),
+  invoiceNumber: z
+    .string()
+    .nullish()
+    .describe(
+      'The Invoice Number. This is a unique identifier for the Invoice associated with the Bill. If no Invoice Number is found in the Bill, this field should be null/missing.',
     ),
 })
 
@@ -69,7 +74,9 @@ export class BillExtractionService {
       files: billFiles,
     })
 
-    const [vendor] = data?.vendorName
+    if (!data) return
+
+    const [vendor] = data.vendorName
       ? await this.resourceService.findResourcesByNameOrPoNumber(
           accountId,
           'Vendor',
@@ -79,7 +86,7 @@ export class BillExtractionService {
 
     await this.resourceService.update(accountId, resourceId, {
       fields: [
-        ...(data?.poNumber
+        ...(data.poNumber
           ? [
               {
                 fieldId: selectSchemaFieldUnsafe(billSchema, fields.poNumber)
@@ -88,7 +95,7 @@ export class BillExtractionService {
               },
             ]
           : []),
-        ...(vendor?.id && isUuid(vendor.id)
+        ...(vendor
           ? [
               {
                 fieldId: selectSchemaFieldUnsafe(billSchema, fields.vendor)
@@ -97,11 +104,22 @@ export class BillExtractionService {
               },
             ]
           : []),
+        ...(data.invoiceNumber
+          ? [
+              {
+                fieldId: selectSchemaFieldUnsafe(
+                  billSchema,
+                  fields.invoiceNumber,
+                ).fieldId,
+                valueInput: { string: data.invoiceNumber },
+              },
+            ]
+          : []),
       ],
     })
 
     const [purchase, ...purchases] =
-      data?.poNumber && vendor?.id
+      data.poNumber && vendor?.id
         ? await this.resourceService.list(accountId, 'Purchase', {
             where: {
               and: [
