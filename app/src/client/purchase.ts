@@ -41,3 +41,19 @@ export const previewPo = async (
 
   return buffer as Buffer | undefined
 }
+
+export const syncFromAttachments = async (
+  accountId: string,
+  resourceId: string,
+) => {
+  revalidateTag('Purchase')
+
+  await client().POST(
+    '/api/accounts/{accountId}/purchases/{resourceId}/sync-from-attachments/',
+    {
+      params: {
+        path: { accountId, resourceId },
+      },
+    },
+  )
+}

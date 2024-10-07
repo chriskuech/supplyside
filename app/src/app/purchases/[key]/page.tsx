@@ -131,6 +131,7 @@ export default async function PurchaseDetail({
           key={AttachmentsToolbarControl.name}
           resourceId={resource.id}
           resourceType="Purchase"
+          showSyncButton={isDraft}
           field={
             selectSchemaField(schema, fields.purchaseAttachments) ??
             fail('Field not found')

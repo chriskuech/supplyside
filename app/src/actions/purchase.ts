@@ -18,3 +18,4 @@ export const approveAndCreatePo = withAccountId(
 
 export const sendPo = withAccountId(client.sendPo)
 export const previewPo = withAccountId(client.previewPo)
+export const syncFromAttachments = withAccountId(client.syncFromAttachments)

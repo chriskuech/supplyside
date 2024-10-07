@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import {
+  Cost,
   FieldReference,
   FieldTemplate,
   Resource,
@@ -246,7 +247,7 @@ export class ResourceService {
   async update(
     accountId: string,
     resourceId: string,
-    { fields }: { fields: ResourceFieldInput[] },
+    { fields, costs }: { fields: ResourceFieldInput[]; costs?: Cost[] },
   ) {
     const resource = await this.read(accountId, resourceId)
     const schema = await this.schemaService.readMergedSchema(
@@ -302,6 +303,28 @@ export class ResourceService {
           },
         })
       }),
+    )
+
+    await Promise.all(
+      costs?.map((cost) =>
+        this.prisma.cost.upsert({
+          where: {
+            id: cost.id,
+            resourceId,
+          },
+          create: {
+            resourceId,
+            name: cost.name,
+            isPercentage: cost.isPercentage,
+            value: cost.value,
+          },
+          update: {
+            name: cost.name,
+            isPercentage: cost.isPercentage,
+            value: cost.value,
+          },
+        }),
+      ) ?? [],
     )
 
     const entity = await this.read(accountId, resourceId)
