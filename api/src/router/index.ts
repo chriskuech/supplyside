@@ -17,17 +17,16 @@ import { mountWebhooks } from './webhooks'
 
 export const createServer = (isDev?: boolean) =>
   fastify({
-    logger: isDev
-      ? {
-          transport: {
-            target: 'pino-pretty',
-            options: {
-              translateTime: 'HH:MM:ss Z',
-              ignore: 'pid,hostname',
-            },
-          },
-        }
-      : true,
+    logger: {
+      level: isDev ? 'debug' : 'warn',
+      transport: {
+        target: 'pino-pretty',
+        options: {
+          translateTime: 'HH:MM:ss Z',
+          ignore: 'pid,hostname',
+        },
+      },
+    },
   })
     .setValidatorCompiler(validatorCompiler)
     .setSerializerCompiler(serializerCompiler)
