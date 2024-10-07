@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from 'zod'
 
 export const cxmlSchema = z.object({
   cXML: z.object({
