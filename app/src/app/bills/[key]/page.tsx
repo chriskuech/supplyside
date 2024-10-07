@@ -126,8 +126,6 @@ export default async function BillsDetail({
                 <BillStatusTracker resource={resource} />
               </Box>
               <Stack
-                width={400}
-                flexShrink={0}
                 direction="row"
                 justifyContent="end"
                 alignItems="center"

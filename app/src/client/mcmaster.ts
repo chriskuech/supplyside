@@ -1,5 +1,6 @@
 import 'server-only'
 import { revalidateTag } from 'next/cache'
+import { Cxml } from '@supplyside/model'
 import { client } from '.'
 
 export const readConnection = async (accountId: string) => {
@@ -54,7 +55,7 @@ export const createPunchOutServiceRequest = async (
   resourceId: string,
 ) => {
   const { data } = await client().POST(
-    '/api/accounts/{accountId}/integrations/mcmaster/create-punchout-session/',
+    '/api/accounts/{accountId}/integrations/mcmaster/{resourceId}/create-punchout-session/',
     {
       params: {
         path: { accountId, resourceId },
@@ -65,9 +66,9 @@ export const createPunchOutServiceRequest = async (
   return data
 }
 
-export const processPoom = async (cxmlString: string) => {
+export const processPoom = async (cxml: Cxml) => {
   const { data } = await client().POST('/integrations/mcmaster/process-poom/', {
-    body: cxmlString,
+    body: cxml,
   })
 
   return data
