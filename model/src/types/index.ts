@@ -1,6 +1,7 @@
 export * from './address'
 export * from './contact'
 export * from './cost'
+export * from './cxml'
 export * from './field-type'
 export * from './file'
 export * from './option'

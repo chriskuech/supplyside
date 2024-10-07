@@ -1,5 +1,7 @@
+import { fail } from 'assert'
 import { NextRequest, NextResponse } from 'next/server'
 import { parseStringPromise } from 'xml2js'
+import { cxmlSchema } from '@supplyside/model'
 import { config } from '@/config'
 import { processPoom } from '@/client/mcmaster'
 
@@ -7,12 +9,16 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const cxmlUrlEncoded = await request.text()
-  const cxml = decodeURIComponent(cxmlUrlEncoded)
+  const cxmlString = decodeURIComponent(cxmlUrlEncoded)
     .replace('cxml-urlencoded=', '')
     .replaceAll('+', ' ')
-  const cxmlString = await parseStringPromise(cxml)
+  const parsedCxmlString = await parseStringPromise(cxmlString)
+  const cxml = cxmlSchema.parse(parsedCxmlString)
+  const resourceKey =
+    request.nextUrl.searchParams.get('resourceKey') ??
+    fail('resource key not found')
 
-  await processPoom(cxmlString)
+  await processPoom(cxml)
 
   return new NextResponse(
     `
@@ -24,7 +30,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               // Check if the current frame is not the topmost frame
               if (window !== window.top) {
                 // Change location of the parent frame
-                window.top.location.href = "${config().BASE_URL}/purchases";
+                window.top.location.href = "${config().BASE_URL}/purchases/${resourceKey}";
               }
             };
           </script>
