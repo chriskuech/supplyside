@@ -16,11 +16,9 @@ const prompt = `
 You are a context extraction tool within a "Procure-to-Pay" B2B SaaS application.
 Your task is to extract relevant information from uploaded files associated with a Bill (aka Invoice).
 The documents may contain a mix of images, text, and HTML content and the actual Bill file may or may not be included.
-Your goal is to determine the Purchase Order (PO) number and the Vendor ID, if available; if the data is uncertain or ambiguous, do not include it in the output.
+Your goal is to determine specific information from the Bill files, if available, as specified by the output schema; if the data is uncertain or ambiguous, do not include it in the output.
 
-You will be provided with the following context:
-- A "Vendor List" TSV file containing Vendor IDs and Vendor Names.
-- The content of the uploaded documents associated with the Bill.
+You will be provided images of the uploaded documents associated with the Bill.
 
 You MUST only return high-confidence data. If the data is uncertain or ambiguous, do not include it in the output.
 `
@@ -30,7 +28,7 @@ const ExtractedBillDataSchema = z.object({
     .string()
     .nullish()
     .describe(
-      'The name of the vendor associated with the Bill. If no Vendor Name is found in the Bill, this field should be null/missing.',
+      'The Vendor Name associated with the vendor who created the Bill. If no Vendor Name is found in the Bill, this field should be null/missing.',
     ),
   poNumber: z
     .string()
