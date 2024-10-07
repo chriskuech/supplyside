@@ -38,7 +38,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
     })
     .route({
       method: 'POST',
-      url: '/create-punchout-session/',
+      url: '/:resourceId/create-punchout-session/',
       schema: {
         params: z.object({
           accountId: z.string().uuid(),
@@ -53,12 +53,12 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
       handler: async (req, res) => {
         const service = container.resolve(McMasterService)
 
-        await service.createPunchOutServiceRequest(
+        const url = await service.createPunchOutServiceRequest(
           req.params.accountId,
           req.params.resourceId,
         )
 
-        res.status(200).send()
+        res.status(200).send({url})
       },
     })
     .route({
@@ -97,23 +97,6 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
         const service = container.resolve(McMasterService)
 
         await service.disconnect(req.params.accountId)
-
-        res.status(200).send({})
-      },
-    })
-    .route({
-      method: 'POST',
-      url: '/process-poom/',
-      schema: {
-        params: z.object({
-          accountId: z.string().uuid(),
-        }),
-        body: z.string(),
-      },
-      handler: async (req, res) => {
-        const service = container.resolve(McMasterService)
-
-        await service.processPoom(req.body)
 
         res.status(200).send({})
       },
