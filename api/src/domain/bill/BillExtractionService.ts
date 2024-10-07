@@ -5,16 +5,12 @@ import {
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { fail } from 'assert'
-import { assert } from 'console'
 import { inject, injectable } from 'inversify'
 import { validate as isUuid } from 'uuid'
 import { z } from 'zod'
-import { mapVendorsToVendorList } from '../../integrations/openai/mapVendorsToVendorList'
-import {
-  ResourceFieldInput,
-  ResourceService,
-} from '../resource/ResourceService'
+import { ResourceService } from '../resource/ResourceService'
 import { SchemaService } from '../schema/SchemaService'
+import { BillService } from './BillService'
 
 const prompt = `
 You are a context extraction tool within a "Procure-to-Pay" B2B SaaS application.
@@ -30,17 +26,17 @@ You MUST only return high-confidence data. If the data is uncertain or ambiguous
 `
 
 const ExtractedBillDataSchema = z.object({
+  vendorName: z
+    .string()
+    .nullish()
+    .describe(
+      'The name of the vendor associated with the Bill. If no Vendor Name is found in the Bill, this field should be null/missing.',
+    ),
   poNumber: z
     .string()
     .nullish()
     .describe(
       'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Bill. If no PO Number is found in the Bill, this field should be null/missing.',
-    ),
-  vendorId: z
-    .string()
-    .nullish()
-    .describe(
-      'The Vendor ID. The Vendor ID is a UUIDv4 for identifying the Vendor. The Bill will contain the Vendor Name, not the Vendor ID. The Vendor ID must be looked up in the provided "Vendor List" TSV file by identifying the Vendor Name in the file (accounting for minor spelling/punctuation differences) and returning the associated Vendor ID for that Vendor Name. If no Vendor ID can be determined with high confidence, this field should be null/missing.',
     ),
 })
 
@@ -51,10 +47,11 @@ export class BillExtractionService {
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(ResourceService)
     private readonly resourceService: ResourceService,
+    @inject(BillService) private readonly billService: BillService,
   ) {}
 
   async extractContent(accountId: string, resourceId: string) {
-    const [billSchema, billResource, vendors] = await Promise.all([
+    const [billSchema, billResource] = await Promise.all([
       this.schemaService.readMergedSchema(accountId, 'Bill'),
       this.resourceService.read(accountId, resourceId),
       this.resourceService.list(accountId, 'Vendor'),
@@ -66,79 +63,59 @@ export class BillExtractionService {
 
     if (!billFiles.length) return
 
-    const vendorList = mapVendorsToVendorList(vendors)
-
     const data = await this.openai.extractContent({
       systemPrompt: prompt,
       schema: ExtractedBillDataSchema,
-      files: [vendorList, ...billFiles],
+      files: billFiles,
     })
 
-    const poNumber = data?.poNumber
-    const vendorId = data?.vendorId
-    const poNumberAsNumber = z.coerce
-      .number()
-      .int()
-      .positive()
-      .safeParse(poNumber)?.data
+    const [vendor] = data?.vendorName
+      ? await this.resourceService.findResourcesByNameOrPoNumber(
+          accountId,
+          'Vendor',
+          { input: data.vendorName, take: 1 },
+        )
+      : []
+
+    await this.resourceService.update(accountId, resourceId, {
+      fields: [
+        ...(data?.poNumber
+          ? [
+              {
+                fieldId: selectSchemaFieldUnsafe(billSchema, fields.poNumber)
+                  .fieldId,
+                valueInput: { string: data.poNumber },
+              },
+            ]
+          : []),
+        ...(vendor?.id && isUuid(vendor.id)
+          ? [
+              {
+                fieldId: selectSchemaFieldUnsafe(billSchema, fields.vendor)
+                  .fieldId,
+                valueInput: { resourceId: vendor.id },
+              },
+            ]
+          : []),
+      ],
+    })
+
     const [purchase, ...purchases] =
-      poNumberAsNumber && vendorId
+      data?.poNumber && vendor?.id
         ? await this.resourceService.list(accountId, 'Purchase', {
             where: {
               and: [
-                {
-                  '==': [
-                    {
-                      var: fields.poNumber.name,
-                    },
-                    poNumberAsNumber.toString(),
-                  ],
-                },
-                { '==': [{ var: fields.vendor.name }, vendorId] },
+                { '==': [{ var: fields.poNumber.name }, data.poNumber] },
+                { '==': [{ var: fields.vendor.name }, vendor.id] },
               ],
             },
           })
         : []
 
-    assert(
-      !purchases.length,
-      `Found ${purchases.length + 1} Purchases with PO Number ${poNumber}`,
-    )
-
-    const updatedFields: ResourceFieldInput[] = [
-      ...(poNumber
-        ? [
-            {
-              fieldId: selectSchemaFieldUnsafe(billSchema, fields.poNumber)
-                .fieldId,
-              valueInput: { string: poNumber },
-            },
-          ]
-        : []),
-      ...(purchase
-        ? [
-            {
-              fieldId: selectSchemaFieldUnsafe(billSchema, fields.purchase)
-                .fieldId,
-              valueInput: { resourceId: purchase.id },
-            },
-          ]
-        : []),
-      ...(vendorId && isUuid(vendorId)
-        ? [
-            {
-              fieldId: selectSchemaFieldUnsafe(billSchema, fields.vendor)
-                .fieldId,
-              valueInput: { resourceId: vendorId },
-            },
-          ]
-        : []),
-    ]
-
-    if (!updatedFields.length) return
-
-    await this.resourceService.update(accountId, resourceId, {
-      fields: updatedFields,
-    })
+    if (purchase && !purchases.length) {
+      await this.billService.linkPurchase(accountId, resourceId, {
+        purchaseId: purchase.id,
+      })
+    }
   }
 }

@@ -402,7 +402,11 @@ export class ResourceService {
   async findResourcesByNameOrPoNumber(
     accountId: string,
     resourceType: ResourceType,
-    { input, exact }: { input: string; exact?: boolean },
+    {
+      input,
+      exact,
+      take = 15,
+    }: { input: string; exact?: boolean; take?: number },
   ): Promise<ValueResource[]> {
     const results = await this.prisma.$queryRaw`
     WITH "View" AS (
@@ -429,7 +433,7 @@ export class ResourceService {
         : Prisma.sql`WHERE "name" ILIKE '%' || ${input} || '%' OR "name" % ${input} -- % operator uses pg_trgm for similarity matching`
     }
     ORDER BY similarity("name", ${input}) DESC
-    LIMIT 15
+    LIMIT ${take}
   `
 
     return z
