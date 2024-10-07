@@ -176,23 +176,3 @@ export const copyFromResource = async (
 
   return resource
 }
-
-export const copyFromFiles = async (
-  accountId: string,
-  resourceId: string,
-  data: { fieldId: string },
-) => {
-  revalidateTag('Resources')
-
-  const { data: resource } = await client().POST(
-    '/api/accounts/{accountId}/resources/{resourceId}/copy-from-files/',
-    {
-      params: {
-        path: { accountId, resourceId },
-      },
-      body: data,
-    },
-  )
-
-  return resource
-}

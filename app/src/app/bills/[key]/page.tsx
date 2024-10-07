@@ -19,6 +19,7 @@ import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
 import { getBillUrl } from '@/lib/quickBooks/helpers'
+import { syncFromAttachments } from '@/actions/bills'
 
 export default async function BillsDetail({
   params: { key },
@@ -83,6 +84,7 @@ export default async function BillsDetail({
           key={AttachmentsToolbarControl.name}
           resourceId={resource.id}
           resourceType="Bill"
+          onSync={() => syncFromAttachments(resource.id)}
           field={
             selectSchemaField(schema, fields.billAttachments) ??
             fail('Field not found')

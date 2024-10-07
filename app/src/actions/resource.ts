@@ -21,7 +21,6 @@ export const findResourcesByNameOrPoNumber = withAccountId(
   client.findResourcesByNameOrPoNumber,
 )
 export const copyFromResource = withAccountId(client.copyFromResource)
-export const copyFromFiles = withAccountId(client.copyFromFiles)
 
 export const updateResourceField = (
   resourceId: string,

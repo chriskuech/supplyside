@@ -46,7 +46,7 @@ export const syncFromAttachments = async (
   accountId: string,
   resourceId: string,
 ) => {
-  revalidateTag('Purchase')
+  revalidateTag('Resources')
 
   await client().POST(
     '/api/accounts/{accountId}/purchases/{resourceId}/sync-from-attachments/',

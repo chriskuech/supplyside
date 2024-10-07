@@ -28,6 +28,7 @@ import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import { createPunchOutServiceRequest } from '@/client/mcmaster'
 import { readResources } from '@/client/resource'
+import { syncFromAttachments } from '@/actions/purchase'
 
 export default async function PurchaseDetail({
   params: { key },
@@ -131,7 +132,7 @@ export default async function PurchaseDetail({
           key={AttachmentsToolbarControl.name}
           resourceId={resource.id}
           resourceType="Purchase"
-          showSyncButton={isDraft}
+          onSync={() => syncFromAttachments(resource.id)}
           field={
             selectSchemaField(schema, fields.purchaseAttachments) ??
             fail('Field not found')

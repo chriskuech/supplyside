@@ -18,3 +18,19 @@ export const linkPurchase = async (
     },
   )
 }
+
+export const syncFromAttachments = async (
+  accountId: string,
+  resourceId: string,
+) => {
+  revalidateTag('Resources')
+
+  await client().POST(
+    '/api/accounts/{accountId}/bills/{resourceId}/sync-from-attachments/',
+    {
+      params: {
+        path: { accountId, resourceId },
+      },
+    },
+  )
+}
