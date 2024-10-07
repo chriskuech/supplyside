@@ -8,7 +8,7 @@ import {
   resources,
   selectSchemaFieldOptionUnsafe,
   selectSchemaFieldUnsafe,
-  unitOfMeasureOptions
+  unitOfMeasureOptions,
 } from '@supplyside/model'
 import assert, { fail } from 'assert'
 import { readFileSync } from 'fs'
@@ -19,10 +19,7 @@ import { match } from 'ts-pattern'
 import { parseStringPromise } from 'xml2js'
 import { PrismaService } from '../PrismaService'
 import { McMasterInvalidCredentials } from './errors'
-import {
-  RenderPOSRTemplateParams,
-  posrResponseSchema,
-} from './types'
+import { RenderPOSRTemplateParams, posrResponseSchema } from './types'
 
 @injectable()
 export class McMasterService {
@@ -143,7 +140,7 @@ export class McMasterService {
     const { posrUrl } = this.getMcMasterCarrConfigUnsafe()
     const { mcMasterCarrPassword, mcMasterCarrUsername } =
       await this.getCredentials(accountId)
-    
+
     const { key } = await this.resourceService.read(accountId, resourceId)
     const body = await this.createPunchOutServiceRequestBody(
       accountId,
@@ -459,7 +456,6 @@ async function sendRequest(url: string, body: string) {
 }
 
 function parseCxml(poomCxml: Cxml) {
-
   const [orderId, accountId] =
     poomCxml.cXML.Message[0]?.PunchOutOrderMessage[0]?.BuyerCookie[0]?.split(
       '|',

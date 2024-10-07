@@ -58,7 +58,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
           req.params.resourceId,
         )
 
-        res.status(200).send({url})
+        res.status(200).send({ url })
       },
     })
     .route({
