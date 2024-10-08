@@ -20,6 +20,10 @@ export type PurchaseViewModel = {
   logoBlobDataUrl: string | null
   poRecipientName: string | null
   vendorPrimaryAddress: AddressViewModel
+  paymentMethod: string | null
+  billingAddress: AddressViewModel
+  vendorReferenceNumber: string | null
+  isPreview: boolean
 }
 
 export type KeyValueModel = {

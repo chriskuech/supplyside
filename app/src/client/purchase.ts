@@ -36,6 +36,7 @@ export const previewPo = async (
         path: { accountId, resourceId },
       },
       next: { tags: ['Purchase'] },
+      parseAs: 'stream',
     },
   )
 
