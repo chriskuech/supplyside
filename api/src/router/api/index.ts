@@ -6,7 +6,7 @@ import { mountAccounts } from './accounts'
 import { mountSelf } from './self'
 import { mountSessions } from './sessions'
 
-export const mountApi = <App extends FastifyInstance>(app: App) =>
+export const mountApi = async <App extends FastifyInstance>(app: App) =>
   app
     .addHook('preHandler', (req, reply, next) => {
       const { config } = container.resolve(ConfigService)

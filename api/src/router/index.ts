@@ -1,4 +1,5 @@
 import fastifySwagger from '@fastify/swagger'
+import * as Sentry from '@sentry/node'
 import { AccountSchema } from '@supplyside/api/domain/account/entity'
 import { SessionSchema } from '@supplyside/api/domain/session/entity'
 import fastify from 'fastify'
@@ -16,8 +17,8 @@ import { mountHealth } from './health'
 import { mountIntegrations } from './integrations'
 import { mountWebhooks } from './webhooks'
 
-export const createServer = (isDev?: boolean) =>
-  fastify({
+export const createServer = async (isDev?: boolean) => {
+  const app = fastify({
     logger: {
       level: isDev ? 'debug' : 'warn',
       transport: {
@@ -55,3 +56,8 @@ export const createServer = (isDev?: boolean) =>
     .register(mountIntegrations, { prefix: '/integrations' })
     .register(mountWebhooks, { prefix: '/webhooks' })
     .setNotFoundHandler((request, reply) => reply.code(404).send('Not Found'))
+
+  Sentry.setupFastifyErrorHandler(app)
+
+  return app
+}
