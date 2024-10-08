@@ -18,7 +18,6 @@ export const schemas: SchemaTemplate[] = [
       {
         name: 'Bill Info',
         fields: [
-          fields.billFiles,
           fields.vendor,
           fields.billingContact,
           fields.invoiceNumber,
@@ -173,7 +172,7 @@ export const schemas: SchemaTemplate[] = [
   {
     resourceType: 'PurchaseLine',
     fields: [
-      fields.item,
+      fields.itemName,
       fields.unitOfMeasure,
       fields.quantity,
       fields.unitCost,
