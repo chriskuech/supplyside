@@ -17,7 +17,7 @@ COPY ./model ./model
 COPY ./api ./api
 COPY ./app ./app
 
-RUN cd ./api && npm run gen
+RUN cd ./api && npm run gen:prisma && npm run build && npm run gen:client
 RUN cd ./app && npm run build
 
 ##

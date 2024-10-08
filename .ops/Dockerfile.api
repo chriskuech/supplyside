@@ -40,7 +40,7 @@ RUN npm ci --include production
 COPY --from=builder --chown=api:nodejs /api/prisma ./prisma/
 RUN npm run gen:prisma
 
-COPY --from=builder --chown=api:nodejs /api/dist ./
+COPY --from=builder --chown=api:nodejs /api/dist ./dist/
 
 USER api
 
@@ -49,4 +49,4 @@ ENV HOSTNAME="0.0.0.0"
 
 EXPOSE ${PORT}
 
-CMD [ "node", "index.js" ]
+CMD [ "npm", "run", "start" ]
