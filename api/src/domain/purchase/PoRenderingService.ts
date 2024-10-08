@@ -1,12 +1,5 @@
-import { readFile, writeFile } from 'fs/promises'
-import { isTruthy } from 'remeda'
-import { P, match } from 'ts-pattern'
 import { FieldType } from '@prisma/client'
-import { inject, injectable } from 'inversify'
-import { BlobService } from '../blob/BlobService'
-import { ResourceService } from '../resource/ResourceService'
-import { AccountService } from '../account/AccountService'
-import { SchemaService } from '../schema/SchemaService'
+import { OsService } from '@supplyside/api/os'
 import {
   FieldReference,
   Resource,
@@ -16,12 +9,22 @@ import {
   selectResourceField,
   selectResourceFieldValue,
 } from '@supplyside/model'
+import fs from 'fs'
+import { readFile, writeFile } from 'fs/promises'
+import Handlebars from 'handlebars'
+import { inject, injectable } from 'inversify'
+import path from 'path'
+import { isTruthy } from 'remeda'
+import { P, match } from 'ts-pattern'
+import { AccountService } from '../account/AccountService'
+import { BlobService } from '../blob/BlobService'
+import { ResourceService } from '../resource/ResourceService'
+import { SchemaService } from '../schema/SchemaService'
 import {
   AddressViewModel,
   LineViewModel,
   PurchaseViewModel,
 } from './doc/ViewModel'
-import { OsService } from '@supplyside/api/os'
 
 @injectable()
 export class PoRenderingService {
@@ -31,36 +34,63 @@ export class PoRenderingService {
     @inject(AccountService) private readonly accountService: AccountService,
     @inject(ResourceService) private readonly resourceService: ResourceService,
     @inject(OsService) private readonly osService: OsService,
-  ) {}
+  ) {
+    Handlebars.registerHelper('add', function (a, b) {
+      return a + b
+    })
+  }
 
   async renderPo(
     accountId: string,
     resourceId: string,
     { isPreview }: { isPreview?: boolean } = {},
   ) {
-    return await this.osService.withTempDir(async (path) => {
-      const viewModel = await this.createViewModel(accountId, resourceId)
+    return await this.osService.withTempDir(async (tempDir) => {
+      try {
+        const viewModel = await this.createViewModel(
+          accountId,
+          resourceId,
+          isPreview,
+        )
 
-      // TODO: render to html
-      // const html = htmlDocument(
-      //   renderToStaticMarkup(PoDocument(viewModel)),
-      //   isPreview
-      // )
-      const html = `${viewModel.number}${isPreview}`
+        // Read the Handlebars template
+        const templatePath = path.join(__dirname, 'doc', 'PoDocument.hbs')
+        if (!fs.existsSync(templatePath)) {
+          throw new Error(`Template file not found at ${templatePath}`)
+        }
+        const templateSource = await readFile(templatePath, 'utf-8')
 
-      await writeFile(`${path}/out.html`, html)
+        // Compile the template
+        const template = Handlebars.compile(templateSource)
 
-      await this.osService.exec(
-        `weasyprint '${path}/out.html' '${path}/out.pdf'`,
-      )
+        // Render the HTML
+        const html = template(viewModel)
 
-      return await readFile(`${path}/out.pdf`)
+        // Save the HTML to a file
+        const htmlPath = `${tempDir}/out.html`
+        await writeFile(htmlPath, html)
+
+        // Convert the HTML file to a PDF file
+        const pdfPath = `${tempDir}/out.pdf`
+        await this.osService.exec(
+          `weasyprint '${htmlPath}' '${pdfPath}' --pdf-variant=pdf/ua-1`,
+        )
+        if (!fs.existsSync(pdfPath)) {
+          throw new Error(`PDF file not generated at ${pdfPath}`)
+        }
+
+        return await readFile(pdfPath)
+      } catch (error) {
+        console.error('Error in renderPo:', error)
+        throw error
+      }
     })
   }
 
   async createViewModel(
     accountId: string,
     purchaseId: string,
+    isPreview?: boolean,
   ): Promise<PurchaseViewModel> {
     const [order, lines, lineSchema, account] = await Promise.all([
       this.resourceService.read(accountId, purchaseId),
@@ -162,54 +192,16 @@ export class PoRenderingService {
         vendor,
         fields.primaryAddress,
       ),
+      vendorReferenceNumber: renderTemplateField(
+        vendor,
+        fields.customerReferenceNumber,
+      ),
+      billingAddress: renderAddressViewModel(order, fields.billingAddress),
+      paymentMethod: renderTemplateField(order, fields.paymentMethod),
+      isPreview: isPreview ?? false,
     }
   }
 }
-
-// const htmlDocument = (content: string, isPreview?: boolean) => `
-//   <!DOCTYPE html>
-//   <html lang="en">
-//     <head>
-//       <meta charset="UTF-8">
-//       <title>Purchase Order</title>
-//       <style>
-//         .page-counter::after {
-//           content: "Page " counter(page) " of " counter(pages);
-//         }
-
-//         @page {
-//           size: Letter;
-//           margin: 15px;
-//         }
-
-//         body {
-//           ${
-//             isPreview
-//               ? `background-image: url('data:image/svg+xml;utf8,${encodeURIComponent(
-//                   watermark
-//                 )}');`
-//               : ''
-//           }
-//           margin: 0;
-//           padding: 0;
-//           height: 100%;
-//           font-family: Arial, sans-serif;
-//           font-size: 12px;
-//         }
-//       </style>
-//     </head>
-//     <body>
-//       ${content}
-//     </body>
-//   </html>
-// `
-
-// const watermark = `
-//   <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-//     <rect width="100%" height="100%" fill="none"/>
-//     <text x="100" y="100" font-family="sans-serif" font-size="40" fill="rgba(0,0,0,0.2)" font-weight="bold" text-anchor="middle" dominant-baseline="middle" transform="rotate(-27 100 100)">PREVIEW</text>
-//   </svg>
-// `
 
 const renderTemplateField = (
   resource: Resource | undefined,
