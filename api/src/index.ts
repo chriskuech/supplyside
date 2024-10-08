@@ -1,5 +1,7 @@
 import 'reflect-metadata'
+import './instrument'
 
+import * as Sentry from '@sentry/node'
 import { createServer as createRouter } from '@supplyside/api/router'
 import { writeFileSync } from 'fs'
 import openapiTS, { astToString } from 'openapi-typescript'
@@ -25,6 +27,8 @@ const isDev = process.env.NODE_ENV === 'development'
   if (process.argv.includes('--gen')) {
     process.exit(0)
   }
+
+  Sentry.setupFastifyErrorHandler(app)
 
   app.listen({
     port: z.coerce.number().optional().parse(process.env.PORT),

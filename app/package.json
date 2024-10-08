@@ -21,6 +21,7 @@
     "@mui/x-data-grid": "^7.15.0",
     "@mui/x-data-grid-pro": "^7.18.0",
     "@mui/x-date-pickers": "^7.18.0",
+    "@sentry/nextjs": "^8.33.1",
     "client-only": "^0.0.1",
     "dayjs": "^1.11.13",
     "next": "14.2.13",
