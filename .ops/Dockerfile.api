@@ -18,7 +18,7 @@ RUN cd ./api && npm run gen:prisma
 RUN cd ./api && npm run lint && npm run check
 
 COPY .sentryclirc .
-RUN cd ./api && npm run build
+RUN cd ./api && npm run build && npm run sentry:sourcemaps
 
 
 ##
