@@ -6,7 +6,6 @@ import {
   fields,
   isMissingRequiredFields,
   purchaseStatusOptions,
-  resources,
   selectResourceFieldValue,
   selectSchemaField,
 } from '@supplyside/model'
@@ -22,11 +21,11 @@ import BillLink from './tools/BillLink'
 import PreviewPoControl from './tools/PreviewPoControl'
 import DownloadPoControl from './tools/DownloadPoControl'
 import { PurchaseAttachmentsControl } from './tools/PurchaseAttachmentsControl'
+import PunchoutControl from './tools/PunchoutControl'
 import PreviewDraftPoButton from '@/app/purchases/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
-import { createPunchOutServiceRequest } from '@/client/mcmaster'
 import { readResources } from '@/client/resource'
 
 export default async function PurchaseDetail({
@@ -44,10 +43,6 @@ export default async function PurchaseDetail({
     user,
   } = await readDetailPageModel('Purchase', key)
 
-  const vendorTemplateId = selectResourceFieldValue(resource, fields.vendor)
-    ?.resource?.templateId
-  const isVendorMcMasterCarr =
-    vendorTemplateId === resources().mcMasterCarrVendor.templateId
   const purchaseLines = await readResources(
     resource.accountId,
     'PurchaseLine',
@@ -58,25 +53,6 @@ export default async function PurchaseDetail({
     },
   )
   const purchaseHasLines = !!purchaseLines?.length
-  if (isVendorMcMasterCarr && !purchaseHasLines) {
-    const punchoutSessionUrl =
-      selectResourceFieldValue(resource, fields.punchoutSessionUrl)?.string ??
-      (await createPunchOutServiceRequest(accountId, resource.id))?.url ??
-      fail('Failed to create punchout session')
-
-    return (
-      <iframe
-        src={punchoutSessionUrl}
-        style={{
-          position: 'fixed',
-          width: '100%',
-          height: '100%',
-        }}
-      >
-        Your browser does not support iFrames.
-      </iframe>
-    )
-  }
 
   const orderBills = await readResources(accountId, 'Bill', {
     where: {
@@ -114,6 +90,11 @@ export default async function PurchaseDetail({
       tools={[
         ...(orderBills?.map((bill) => <BillLink key={bill.id} bill={bill} />) ??
           []),
+        <PunchoutControl
+          key={PunchoutControl.name}
+          purchaseHasLines={purchaseHasLines}
+          resource={resource}
+        />,
         <TrackingControl
           key={TrackingControl.name}
           resourceId={resource.id}
