@@ -203,4 +203,4 @@ jobs:
           SHA: ${{ github.sha }}
 
       - name: Apply configuration
-        run: curl -X POST $APP_BASE_URL/api/system/post-deployment
+        run: curl -X POST $API_BASE_URL/webhooks/post-deployment
