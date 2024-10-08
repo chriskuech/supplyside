@@ -19,7 +19,7 @@ jobs:
       - name: Lint model
         run: cd model && npm ci && npm run lint
 
-  build:
+  build-app:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: ${{ github.event_name != 'pull_request' }}
@@ -65,9 +65,6 @@ jobs:
       - name: Copy build.json to app
         run: cp ./build.json app/src/app/api/health/build.json
 
-      - name: Copy build.json to api
-        run: cp ./build.json api/src/router/health/build.json
-
       - name: Build and push app container image to registry
         uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
         with:
@@ -77,6 +74,52 @@ jobs:
           file: .ops/Dockerfile.app
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  build-api:
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name != 'pull_request' }}
+
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@c47758b77c9736f4b2ef4073d4d51994fabfe349 # v3.7.1
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: supplyside.azurecr.io
+          username: supplyside-github-actions
+          password: ${{ secrets.ACR_TOKEN }}
+
+      - name: Create build.json
+        shell: pwsh
+        run: |
+          $path = './build.json'
+          @{
+            commit    = $env:SHA
+            version   = $env:PR_NUMBER
+            timestamp = "$(Get-Date -Format 's')Z"
+          }
+          | ConvertTo-Json
+          | Set-Content -Path $path
+          Get-Content -Path $path
+        env:
+          SHA: ${{ github.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: Copy build.json to api
+        run: cp ./build.json api/src/router/health/build.json
 
       - name: Create .sentryclirc
         run: echo "[auth]\ntoken=${{ secrets.SENTRY_AUTH_TOKEN }}\n" > .sentryclirc
@@ -95,7 +138,10 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    needs: build
+    needs:
+      - lint-model
+      - build-app
+      - build-api
     if: ${{ github.event_name != 'pull_request' }}
 
     environment:
