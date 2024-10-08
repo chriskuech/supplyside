@@ -2,7 +2,7 @@ import { Prisma, ResourceType as ResourceTypeModel } from '@prisma/client'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { Schema, type ResourceType } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
-import { difference } from 'remeda'
+import { difference, map, pipe, uniqueBy } from 'remeda'
 import { mapFieldModelToEntity, mapSchemaModelToEntity } from './mappers'
 import { fieldIncludes, schemaIncludes } from './model'
 
@@ -38,12 +38,15 @@ export class SchemaService {
             mapFieldModelToEntity,
           ),
         })),
-      fields: [
-        ...schemas.flatMap((s) => s.SchemaField),
-        ...schemas.flatMap((s) => s.Section).flatMap((s) => s.SectionField),
-      ]
-        .map((sf) => sf.Field)
-        .map(mapFieldModelToEntity),
+      fields: pipe(
+        [
+          ...schemas.flatMap((s) => s.SchemaField),
+          ...schemas.flatMap((s) => s.Section).flatMap((s) => s.SectionField),
+        ],
+        map((sf) => sf.Field),
+        map(mapFieldModelToEntity),
+        uniqueBy((field) => field.fieldId),
+      ),
     }
   }
 
@@ -129,7 +132,6 @@ export class SchemaService {
         name: s.name,
         fields: s.SectionField.map((sf) => sf.Field).map(mapFieldModelToEntity),
       })),
-      allFields: [],
     }))
   }
 }
