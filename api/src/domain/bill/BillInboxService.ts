@@ -32,7 +32,7 @@ export class BillInboxService {
     if (!account) return
 
     const attachments =
-      message.Attachments?.map(
+      message.Attachments?.filter((a) => a.Name !== 'winmail.dat').map(
         (attachment) =>
           ({
             content: attachment.Content,
