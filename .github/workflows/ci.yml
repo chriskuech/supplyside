@@ -20,9 +20,6 @@ jobs:
         run: cd model && npm ci && npm run lint
 
   build-app:
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: ${{ github.event_name != 'pull_request' }}
 
     permissions:
       contents: read
@@ -76,9 +73,6 @@ jobs:
           cache-to: type=gha,mode=max
 
   build-api:
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: ${{ github.event_name != 'pull_request' }}
 
     permissions:
       contents: read
