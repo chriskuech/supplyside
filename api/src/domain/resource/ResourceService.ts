@@ -115,6 +115,21 @@ export class ResourceService {
   ): Promise<Resource> {
     const schema = await this.schemaService.readMergedSchema(accountId, type)
 
+    await Promise.all(
+      inputResourceFields?.map((field) => {
+        if (!field) return
+        const schemaField = selectSchemaFieldUnsafe(schema, field)
+
+        return this.checkForDuplicateNamedResource(
+          schemaField,
+          accountId,
+          type,
+          field.valueInput,
+          null,
+        )
+      }) ?? [],
+    )
+
     const {
       _max: { key: latestKey },
     } = await this.prisma.resource.aggregate({
@@ -267,10 +282,10 @@ export class ResourceService {
           throw new Error("Can't update a system value on a system resource")
         }
 
-        await this.checkForDuplicateResource(
+        await this.checkForDuplicateNamedResource(
           sf,
           accountId,
-          resource,
+          resource.type,
           valueInput,
           resourceId,
         )
@@ -388,18 +403,18 @@ export class ResourceService {
     })
   }
 
-  private async checkForDuplicateResource(
+  private async checkForDuplicateNamedResource(
     sf: SchemaField,
     accountId: string,
-    resource: Resource,
+    type: ResourceType,
     valueInput: ValueInput,
-    resourceId: string,
+    resourceId: string | null,
   ) {
     if (sf.templateId === fields.name.templateId) {
       const resourceExists = await this.prisma.resource.findFirst({
         where: {
           accountId,
-          type: resource.type,
+          type,
           ResourceField: {
             some: {
               Field: {
@@ -408,9 +423,13 @@ export class ResourceService {
               Value: mapValueInputToPrismaValueWhere(valueInput),
             },
           },
-          NOT: {
-            id: resourceId,
-          },
+          ...(resourceId
+            ? {
+                NOT: {
+                  id: resourceId,
+                },
+              }
+            : {}),
         },
       })
 
