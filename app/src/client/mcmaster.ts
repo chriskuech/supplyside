@@ -54,6 +54,8 @@ export const createPunchOutServiceRequest = async (
   accountId: string,
   resourceId: string,
 ) => {
+  revalidateTag('Resources')
+
   const { data } = await client().POST(
     '/api/accounts/{accountId}/integrations/mcmaster/{resourceId}/create-punchout-session/',
     {
