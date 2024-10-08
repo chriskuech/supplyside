@@ -11,6 +11,7 @@ import {
 import { JsonLogicSchema } from '../domain/resource/json-logic/types'
 import { mountApi } from './api'
 import { mountSelf } from './api/self'
+import { mountError } from './error'
 import { mountHealth } from './health'
 import { mountIntegrations } from './integrations'
 import { mountWebhooks } from './webhooks'
@@ -48,6 +49,7 @@ export const createServer = (isDev?: boolean) =>
     })
     .get('/', (request, reply) => reply.status(200).send('OK')) // required by App Service
     .register(mountApi, { prefix: '/api' })
+    .register(mountError, { prefix: '/error' })
     .register(mountHealth, { prefix: '/health' })
     .register(mountSelf, { prefix: '/self' })
     .register(mountIntegrations, { prefix: '/integrations' })
