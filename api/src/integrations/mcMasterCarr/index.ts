@@ -14,7 +14,6 @@ import assert, { fail } from 'assert'
 import { readFileSync } from 'fs'
 import handlebars from 'handlebars'
 import { inject, injectable } from 'inversify'
-import path from 'path'
 import { match } from 'ts-pattern'
 import { parseStringPromise } from 'xml2js'
 import { PrismaService } from '../PrismaService'
@@ -433,10 +432,7 @@ export class McMasterService {
 
 function renderTemplate(data: RenderPOSRTemplateParams): string {
   const templateFile = readFileSync(
-    path.resolve(
-      process.cwd(),
-      './src/integrations/mcMasterCarr/templates/mcmaster_posr_template.xml.hbs',
-    ),
+    `${import.meta.url}/data/mcmaster_posr_template.xml.hbs`,
     { encoding: 'utf-8' },
   )
   const template = handlebars.compile(templateFile)

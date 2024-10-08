@@ -46,7 +46,7 @@ jobs:
       - name: Create build.json
         shell: pwsh
         run: |
-          $path = './build.json'
+          $path = './app/src/app/api/health/build.json'
           @{
             commit    = $env:SHA
             version   = $env:PR_NUMBER
@@ -58,9 +58,6 @@ jobs:
         env:
           SHA: ${{ github.sha }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-
-      - name: Copy build.json to app
-        run: cp ./build.json app/src/app/api/health/build.json
 
       - name: Build and push app container image to registry
         uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
@@ -99,7 +96,7 @@ jobs:
       - name: Create build.json
         shell: pwsh
         run: |
-          $path = './build.json'
+          $path = './api/src/data/build.json'
           @{
             commit    = $env:SHA
             version   = $env:PR_NUMBER
@@ -111,9 +108,6 @@ jobs:
         env:
           SHA: ${{ github.sha }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-
-      - name: Copy build.json to api
-        run: cp ./build.json api/src/router/health/build.json
 
       - name: Create .sentryclirc
         run: echo "[auth]\ntoken=${{ secrets.SENTRY_AUTH_TOKEN }}\n" > .sentryclirc

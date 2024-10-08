@@ -14,7 +14,7 @@
     "start": "node dist/index.js",
     "lint": "eslint src",
     "build": "tsup && npm run build:copy-artifacts",
-    "build:copy-artifacts": "cpx 'src/**/*.{hbs,json}' 'dist'",
+    "build:copy-artifacts": "cpx 'src/data/*' 'dist/data'",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org supplyside --project api ./dist && sentry-cli sourcemaps upload --org supplyside --project api ./dist"
   },
   "author": "",

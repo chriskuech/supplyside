@@ -13,7 +13,6 @@ import fs from 'fs'
 import { readFile, writeFile } from 'fs/promises'
 import Handlebars from 'handlebars'
 import { inject, injectable } from 'inversify'
-import path from 'path'
 import { isTruthy } from 'remeda'
 import { P, match } from 'ts-pattern'
 import { AccountService } from '../account/AccountService'
@@ -24,7 +23,7 @@ import {
   AddressViewModel,
   LineViewModel,
   PurchaseViewModel,
-} from './doc/ViewModel'
+} from './PurchaseViewModel'
 
 @injectable()
 export class PoRenderingService {
@@ -54,7 +53,7 @@ export class PoRenderingService {
         )
 
         // Read the Handlebars template
-        const templatePath = path.join(__dirname, 'doc', 'PoDocument.hbs')
+        const templatePath = `${import.meta.url}/data/PoDocument.hbs`
         if (!fs.existsSync(templatePath)) {
           throw new Error(`Template file not found at ${templatePath}`)
         }
