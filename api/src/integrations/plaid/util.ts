@@ -1,7 +1,7 @@
-import { fail } from 'assert'
-import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid'
-import { inject, injectable } from 'inversify'
 import { ConfigService } from '@supplyside/api/ConfigService'
+import { fail } from 'assert'
+import { inject, injectable } from 'inversify'
+import { Configuration, PlaidApi, PlaidEnvironments } from 'plaid'
 
 @injectable()
 export class PlaidConfigService {

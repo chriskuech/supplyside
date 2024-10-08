@@ -1,9 +1,9 @@
-import { randomUUID } from 'crypto'
 import { BlobServiceClient } from '@azure/storage-blob'
+import { ConfigService } from '@supplyside/api/ConfigService'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { randomUUID } from 'crypto'
 import { inject, injectable } from 'inversify'
 import { Blob, BlobWithData } from './entity'
-import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import { ConfigService } from '@supplyside/api/ConfigService'
 
 const containerName = 'app-data'
 

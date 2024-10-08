@@ -13,10 +13,18 @@ import {
   selectResourceFieldValue,
 } from '@supplyside/model'
 import {
+  getGridBooleanOperators,
+  getGridDateOperators,
+  getGridNumericOperators,
+  getGridStringOperators,
   gridDateComparator,
+  GridFilterItem,
+  GridFilterOperator,
   gridNumberComparator,
   gridStringOrNumberComparator,
 } from '@mui/x-data-grid'
+import { MutableRefObject } from 'react'
+import { GridApiCommunity } from '@mui/x-data-grid/internals'
 import ContactCard from '../fields/views/ContactCard'
 import UserCard from '../fields/views/UserCard'
 import ResourceFieldView from '../fields/views/ResourceFieldView'
@@ -24,6 +32,54 @@ import AddressCard from '../fields/views/AddressCard'
 import FieldGridEditCell from './FieldGridEditCell'
 import { Cell, Column, Display, Row } from './types'
 import { formatDate, formatMoney } from '@/lib/format'
+
+const wrapFilterOperator = (
+  operator: GridFilterOperator,
+  fieldType: FieldType,
+): GridFilterOperator => {
+  const getApplyFilterFn = (filterItem: GridFilterItem, column: Column) => {
+    const innerFilterFn = operator.getApplyFilterFn(filterItem, column)
+    if (!innerFilterFn) return null
+
+    return (
+      value: Value,
+      row: Row,
+      col: Column,
+      apiRef: MutableRefObject<GridApiCommunity>,
+    ) => {
+      const mappedValue = match(fieldType)
+        .with(P.union('Text', 'Textarea'), () => value.string)
+        .with(P.union('Number', 'Money'), () => value.number)
+        .with(
+          'Address',
+          () => value.address && formatInlineAddress(value.address),
+        )
+        .with('Checkbox', () => value.boolean)
+        .with('Contact', () => value.contact?.name)
+        .with('Date', () => value.date)
+        .with('File', () => value.file?.name)
+        .with('User', () => value.user?.name)
+        .with('Resource', () => value.resource?.name)
+        .with('Select', () => value.option?.name)
+        .with('Files', () =>
+          value.files.reduce((value, file) => `${value} ${file.name}`, ''),
+        )
+        .with('MultiSelect', () =>
+          value.options.reduce(
+            (value, option) => `${value} ${option.name}`,
+            '',
+          ),
+        )
+        .exhaustive()
+      return innerFilterFn(mappedValue, row, col, apiRef)
+    }
+  }
+
+  return {
+    ...operator,
+    getApplyFilterFn,
+  }
+}
 
 export const mapSchemaFieldToGridColDef = (
   field: SchemaField,
@@ -61,6 +117,28 @@ export const mapSchemaFieldToGridColDef = (
     options.isEditable && !findTemplateField(field.templateId)?.isDerived,
 
   type: 'custom',
+
+  filterOperators: match(field.type)
+    .with(
+      P.union(
+        'Address',
+        'Contact',
+        'File',
+        'Files',
+        'Resource',
+        'Text',
+        'Textarea',
+        'User',
+        'Select',
+        'MultiSelect',
+      ),
+      () => getGridStringOperators(),
+    )
+    .with('Checkbox', () => getGridBooleanOperators())
+    .with('Date', () => getGridDateOperators())
+    .with(P.union('Money', 'Number'), () => getGridNumericOperators())
+    .exhaustive()
+    .map((operator) => wrapFilterOperator(operator, field.type)),
 
   sortComparator: (v1, v2, param1, param2) =>
     match(field.type)

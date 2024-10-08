@@ -26,7 +26,7 @@ import useSchema from '@/lib/schema/useSchema'
 import { useConfirmation } from '@/lib/confirmation'
 import { useAsyncCallback } from '@/hooks/useAsyncCallback'
 import { updateResourceField } from '@/actions/resource'
-import { linkPurchase } from '@/actions/bills'
+import { linkPurchase } from '@/actions/bill'
 
 type Props = {
   schema: Schema

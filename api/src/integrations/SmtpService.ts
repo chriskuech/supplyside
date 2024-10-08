@@ -1,7 +1,7 @@
-import { ServerClient } from 'postmark'
 import { inject, injectable } from 'inversify'
-import { ConfigService } from '../ConfigService'
+import { ServerClient } from 'postmark'
 import { isTruthy } from 'remeda'
+import { ConfigService } from '../ConfigService'
 
 type User = { name?: string | null; email?: string | null }
 

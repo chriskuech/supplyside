@@ -1,27 +1,50 @@
 import { container } from '@supplyside/api/di'
+import { BillExtractionService } from '@supplyside/api/domain/bill/BillExtractionService'
 import { BillService } from '@supplyside/api/domain/bill/BillService'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
 export const mountBills = async <App extends FastifyInstance>(app: App) =>
-  app.withTypeProvider<ZodTypeProvider>().route({
-    method: 'POST',
-    url: '/:resourceId/link-purchase/',
-    schema: {
-      params: z.object({
-        accountId: z.string().uuid(),
-        resourceId: z.string().uuid(),
-      }),
-      body: z.object({
-        purchaseId: z.string().uuid(),
-      }),
-    },
-    handler: async (req) => {
-      const service = container.resolve(BillService)
+  app
+    .withTypeProvider<ZodTypeProvider>()
+    .route({
+      method: 'POST',
+      url: '/:resourceId/link-purchase/',
+      schema: {
+        params: z.object({
+          accountId: z.string().uuid(),
+          resourceId: z.string().uuid(),
+        }),
+        body: z.object({
+          purchaseId: z.string().uuid(),
+        }),
+      },
+      handler: async (req) => {
+        const service = container.resolve(BillService)
 
-      await service.linkPurchase(req.params.accountId, req.params.resourceId, {
-        purchaseId: req.body.purchaseId,
-      })
-    },
-  })
+        await service.linkPurchase(
+          req.params.accountId,
+          req.params.resourceId,
+          { purchaseId: req.body.purchaseId },
+        )
+      },
+    })
+    .route({
+      method: 'POST',
+      url: '/:resourceId/sync-from-attachments/',
+      schema: {
+        params: z.object({
+          accountId: z.string().uuid(),
+          resourceId: z.string().uuid(),
+        }),
+      },
+      handler: async (req) => {
+        const service = container.resolve(BillExtractionService)
+
+        await service.extractContent(
+          req.params.accountId,
+          req.params.resourceId,
+        )
+      },
+    })

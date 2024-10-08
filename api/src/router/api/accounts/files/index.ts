@@ -1,9 +1,9 @@
-import { FastifyInstance } from 'fastify'
-import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { z } from 'zod'
 import { container } from '@supplyside/api/di'
 import { FileService } from '@supplyside/api/domain/file/FileService'
 import { FileSchema } from '@supplyside/model'
+import { FastifyInstance } from 'fastify'
+import { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 
 export const mountFiles = async <App extends FastifyInstance>(app: App) =>
   app

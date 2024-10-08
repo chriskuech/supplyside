@@ -1,5 +1,5 @@
 'use client'
-import { AttachFile } from '@mui/icons-material'
+import { AttachFile, Sync } from '@mui/icons-material'
 import {
   Badge,
   Button,
@@ -14,12 +14,15 @@ import {
 import { ResourceType, SchemaField, Value } from '@supplyside/model'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
+import LoadingButton from '@/lib/ux/LoadingButton'
+import { useAsyncCallback } from '@/hooks/useAsyncCallback'
 
 type AttachmentsToolbarControlProps = {
   resourceId: string
   resourceType: ResourceType
   field: SchemaField
   value: Value | undefined
+  onSync?: () => Promise<void>
 }
 
 export default function AttachmentsToolbarControl({
@@ -27,8 +30,12 @@ export default function AttachmentsToolbarControl({
   resourceId,
   field,
   value,
+  onSync,
 }: AttachmentsToolbarControlProps) {
   const { isOpen, open, close } = useDisclosure()
+  const [{ isLoading }, syncFromAttachments] = useAsyncCallback(async () =>
+    onSync?.().then(close),
+  )
 
   return (
     <>
@@ -57,7 +64,19 @@ export default function AttachmentsToolbarControl({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={close}>Close</Button>
+          <Button onClick={close} variant="text">
+            Close
+          </Button>
+          {onSync && (
+            <LoadingButton
+              color="secondary"
+              isLoading={isLoading}
+              onClick={syncFromAttachments}
+              endIcon={<Sync />}
+            >
+              Sync
+            </LoadingButton>
+          )}
         </DialogActions>
       </Dialog>
     </>

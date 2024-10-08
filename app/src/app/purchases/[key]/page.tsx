@@ -21,11 +21,11 @@ import EditControl from './tools/EditControl'
 import BillLink from './tools/BillLink'
 import PreviewPoControl from './tools/PreviewPoControl'
 import DownloadPoControl from './tools/DownloadPoControl'
+import { PurchaseAttachmentsControl } from './tools/PurchaseAttachmentsControl'
 import PreviewDraftPoButton from '@/app/purchases/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
-import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import { createPunchOutServiceRequest } from '@/client/mcmaster'
 import { readResources } from '@/client/resource'
 
@@ -127,15 +127,10 @@ export default async function PurchaseDetail({
         ...(poFile
           ? [<DownloadPoControl key={poFile.id} file={poFile} />]
           : []),
-        <AttachmentsToolbarControl
-          key={AttachmentsToolbarControl.name}
-          resourceId={resource.id}
-          resourceType="Purchase"
-          field={
-            selectSchemaField(schema, fields.purchaseAttachments) ??
-            fail('Field not found')
-          }
-          value={selectResourceFieldValue(resource, fields.purchaseAttachments)}
+        <PurchaseAttachmentsControl
+          key={PurchaseAttachmentsControl.name}
+          schema={schema}
+          resource={resource}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}

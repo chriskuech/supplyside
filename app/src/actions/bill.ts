@@ -25,3 +25,5 @@ export const linkPurchase = withAccountId(
     await client.linkPurchase(accountId, resourceId, { purchaseId })
   },
 )
+
+export const syncFromAttachments = withAccountId(client.syncFromAttachments)

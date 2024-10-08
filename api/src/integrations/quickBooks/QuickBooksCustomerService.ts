@@ -1,24 +1,24 @@
-import { difference, range } from 'remeda'
+import {
+  ResourceFieldInput,
+  ResourceService,
+} from '@supplyside/api/domain/resource/ResourceService'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
+import {
+  fields,
+  selectResourceFieldValue,
+  selectSchemaFieldUnsafe,
+} from '@supplyside/model'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
+import { difference, range } from 'remeda'
+import { QuickBooksApiService } from './QuickBooksApiService'
+import { MAX_ENTITIES_PER_PAGE } from './constants'
 import {
   countQuerySchema,
   customerQuerySchema,
   readCustomerSchema,
 } from './schemas'
 import { Customer } from './types'
-import { MAX_ENTITIES_PER_PAGE } from './constants'
-import { QuickBooksApiService } from './QuickBooksApiService'
-import {
-  fields,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
-import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import {
-  ResourceFieldInput,
-  ResourceService,
-} from '@supplyside/api/domain/resource/ResourceService'
 
 @injectable()
 export class QuickBooksCustomerService {

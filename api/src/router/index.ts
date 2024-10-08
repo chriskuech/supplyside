@@ -1,3 +1,6 @@
+import fastifySwagger from '@fastify/swagger'
+import { AccountSchema } from '@supplyside/api/domain/account/entity'
+import { SessionSchema } from '@supplyside/api/domain/session/entity'
 import fastify from 'fastify'
 import {
   createJsonSchemaTransformObject,
@@ -5,29 +8,25 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from 'fastify-type-provider-zod'
-import { mountApi } from './api'
-import fastifySwagger from '@fastify/swagger'
-import { SessionSchema } from '@supplyside/api/domain/session/entity'
-import { AccountSchema } from '@supplyside/api/domain/account/entity'
-import { mountWebhooks } from './webhooks'
-import { mountHealth } from './health'
 import { JsonLogicSchema } from '../domain/resource/json-logic/types'
+import { mountApi } from './api'
 import { mountSelf } from './api/self'
+import { mountHealth } from './health'
 import { mountIntegrations } from './integrations'
+import { mountWebhooks } from './webhooks'
 
 export const createServer = (isDev?: boolean) =>
   fastify({
-    logger: isDev
-      ? {
-          transport: {
-            target: 'pino-pretty',
-            options: {
-              translateTime: 'HH:MM:ss Z',
-              ignore: 'pid,hostname',
-            },
-          },
-        }
-      : true,
+    logger: {
+      level: isDev ? 'debug' : 'warn',
+      transport: {
+        target: 'pino-pretty',
+        options: {
+          translateTime: 'HH:MM:ss Z',
+          ignore: 'pid,hostname',
+        },
+      },
+    },
   })
     .setValidatorCompiler(validatorCompiler)
     .setSerializerCompiler(serializerCompiler)

@@ -1,3 +1,3 @@
-export * from "./extensions";
-export * from "./templates";
-export * from "./types";
+export * from './extensions'
+export * from './templates'
+export * from './types'

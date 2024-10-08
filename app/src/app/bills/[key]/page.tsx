@@ -13,6 +13,7 @@ import CallToAction from './CallToAction'
 import PurchaseLink from './tools/PurchaseLink'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
+import { BillAttachmentsControl } from './tools/BillAttachmentsControl'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
@@ -79,15 +80,10 @@ export default async function BillsDetail({
         ...(purchase
           ? [<PurchaseLink key={purchase.id} purchase={purchase} />]
           : []),
-        <AttachmentsToolbarControl
+        <BillAttachmentsControl
           key={AttachmentsToolbarControl.name}
-          resourceId={resource.id}
-          resourceType="Bill"
-          field={
-            selectSchemaField(schema, fields.billAttachments) ??
-            fail('Field not found')
-          }
-          value={selectResourceFieldValue(resource, fields.billAttachments)}
+          schema={schema}
+          resource={resource}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
@@ -126,8 +122,6 @@ export default async function BillsDetail({
                 <BillStatusTracker resource={resource} />
               </Box>
               <Stack
-                width={400}
-                flexShrink={0}
                 direction="row"
                 justifyContent="end"
                 alignItems="center"

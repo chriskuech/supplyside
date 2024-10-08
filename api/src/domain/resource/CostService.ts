@@ -1,6 +1,6 @@
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { inject, injectable } from 'inversify'
 import { ResourceService } from './ResourceService'
-import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 
 @injectable()
 export class CostService {

@@ -1,8 +1,8 @@
 import { container } from '@supplyside/api/di'
 import { McMasterService } from '@supplyside/api/integrations/mcMasterCarr'
+import { cxmlSchema } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { z } from 'zod'
 
 export const mountMcMasterCarr = async <App extends FastifyInstance>(
   app: App,
@@ -11,7 +11,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
     method: 'POST',
     url: '/process-poom/',
     schema: {
-      body: z.string().min(1),
+      body: cxmlSchema,
     },
     handler: async (req, res) => {
       const service = container.resolve(McMasterService)

@@ -1,11 +1,11 @@
+import { File } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 import { OpenAI } from 'openai'
 import { zodResponseFormat } from 'openai/helpers/zod.mjs'
-import { CompletionPartsService } from './CompletionPartsService'
-import { File } from '@supplyside/model'
-import { ZodSchema } from 'zod'
-import { P, match } from 'ts-pattern'
 import { ChatCompletionContentPart } from 'openai/resources/index.mjs'
+import { P, match } from 'ts-pattern'
+import { ZodSchema } from 'zod'
+import { CompletionPartsService } from './CompletionPartsService'
 
 @injectable()
 export class OpenAiService {

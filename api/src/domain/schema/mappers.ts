@@ -4,11 +4,11 @@ import {
   Schema,
   SchemaField,
 } from '@supplyside/model'
+import { isTruthy } from 'remeda'
+import { P, match } from 'ts-pattern'
+import { ZodType, ZodTypeAny, z } from 'zod'
 import { mapValueModelToEntity } from '../resource/mappers'
 import { FieldModel, SchemaModel } from './model'
-import { ZodType, ZodTypeAny, z } from 'zod'
-import { P, match } from 'ts-pattern'
-import { isTruthy } from 'remeda'
 
 export const mapSchemaModelToEntity = (model: SchemaModel): Schema => ({
   resourceType: model.resourceType,

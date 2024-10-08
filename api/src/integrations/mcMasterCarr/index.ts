@@ -1,27 +1,25 @@
-import { readFileSync } from 'fs'
-import path from 'path'
-import assert, { fail } from 'assert'
-import handlebars from 'handlebars'
-import { parseStringPromise } from 'xml2js'
-import { match } from 'ts-pattern'
-import { inject, injectable } from 'inversify'
-import { PrismaService } from '../PrismaService'
+import { ConfigService } from '@supplyside/api/ConfigService'
+import { accountInclude } from '@supplyside/api/domain/account/model'
+import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
-  cxmlSchema,
-  posrResponseSchema,
-  RenderPOSRTemplateParams,
-} from './types'
-import { McMasterInvalidCredentials } from './errors'
-import {
+  Cxml,
+  fields,
   resources,
   selectSchemaFieldOptionUnsafe,
   selectSchemaFieldUnsafe,
+  unitOfMeasureOptions,
 } from '@supplyside/model'
-import { fields, unitOfMeasureOptions } from '@supplyside/model'
-import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
-import { ConfigService } from '@supplyside/api/ConfigService'
-import { accountInclude } from '@supplyside/api/domain/account/model'
+import assert, { fail } from 'assert'
+import { readFileSync } from 'fs'
+import handlebars from 'handlebars'
+import { inject, injectable } from 'inversify'
+import path from 'path'
+import { match } from 'ts-pattern'
+import { parseStringPromise } from 'xml2js'
+import { PrismaService } from '../PrismaService'
+import { McMasterInvalidCredentials } from './errors'
+import { RenderPOSRTemplateParams, posrResponseSchema } from './types'
 
 @injectable()
 export class McMasterService {
@@ -142,9 +140,12 @@ export class McMasterService {
     const { posrUrl } = this.getMcMasterCarrConfigUnsafe()
     const { mcMasterCarrPassword, mcMasterCarrUsername } =
       await this.getCredentials(accountId)
+
+    const { key } = await this.resourceService.read(accountId, resourceId)
     const body = await this.createPunchOutServiceRequestBody(
       accountId,
       resourceId,
+      key,
       mcMasterCarrUsername,
       mcMasterCarrPassword,
     )
@@ -227,7 +228,8 @@ export class McMasterService {
     const { posrUrl } = await this.getMcMasterCarrConfigUnsafe()
     const body = await this.createPunchOutServiceRequestBody(
       accountId,
-      '',
+      null,
+      null,
       username,
       password,
     )
@@ -245,7 +247,8 @@ export class McMasterService {
 
   async createPunchOutServiceRequestBody(
     accountId: string,
-    resourceId: string,
+    resourceId: string | null,
+    resourceKey: number | null,
     mcMasterCarrUsername: string,
     mcMasterCarrPassword: string,
   ): Promise<string> {
@@ -262,7 +265,7 @@ export class McMasterService {
       clientName: supplierIdentity,
       punchOutSharedSecret: secret,
       buyerCookie: `${resourceId}|${accountId}`,
-      poomReturnEndpoint: `${this.configService.config.APP_BASE_URL}/api/integrations/mcmaster`,
+      poomReturnEndpoint: `${this.configService.config.APP_BASE_URL}/api/integrations/mcmaster?resourceKey=${resourceKey}`,
     })
 
     return renderedPunchoutSetupRequest
@@ -284,7 +287,7 @@ export class McMasterService {
       throw new Error('Not authenticated')
   }
 
-  async processPoom(cxmlString: string) {
+  async processPoom(cxmlString: Cxml) {
     const { items, orderDate, orderId, sender, accountId } =
       parseCxml(cxmlString)
 
@@ -452,9 +455,7 @@ async function sendRequest(url: string, body: string) {
   return response.text()
 }
 
-function parseCxml(cxmlString: string) {
-  const poomCxml = cxmlSchema.parse(cxmlString)
-
+function parseCxml(poomCxml: Cxml) {
   const [orderId, accountId] =
     poomCxml.cXML.Message[0]?.PunchOutOrderMessage[0]?.BuyerCookie[0]?.split(
       '|',
@@ -470,7 +471,7 @@ function parseCxml(cxmlString: string) {
   const total =
     poomCxml.cXML.Message[0]?.PunchOutOrderMessage[0]
       ?.PunchOutOrderMessageHeader[0]?.Total[0]?.Money[0]?._
-  const orderDate = poomCxml.cXML.$.timestamp
+  const orderDate = new Date(poomCxml.cXML.$.timestamp)
 
   //items
   const itemsIn = poomCxml.cXML.Message[0]?.PunchOutOrderMessage[0]?.ItemIn

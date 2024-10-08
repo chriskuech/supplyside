@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import {
+  Cost,
   FieldReference,
   FieldTemplate,
   Resource,
@@ -246,7 +247,7 @@ export class ResourceService {
   async update(
     accountId: string,
     resourceId: string,
-    { fields }: { fields: ResourceFieldInput[] },
+    { fields, costs }: { fields: ResourceFieldInput[]; costs?: Cost[] },
   ) {
     const resource = await this.read(accountId, resourceId)
     const schema = await this.schemaService.readMergedSchema(
@@ -302,6 +303,28 @@ export class ResourceService {
           },
         })
       }),
+    )
+
+    await Promise.all(
+      costs?.map((cost) =>
+        this.prisma.cost.upsert({
+          where: {
+            id: cost.id,
+            resourceId,
+          },
+          create: {
+            resourceId,
+            name: cost.name,
+            isPercentage: cost.isPercentage,
+            value: cost.value,
+          },
+          update: {
+            name: cost.name,
+            isPercentage: cost.isPercentage,
+            value: cost.value,
+          },
+        }),
+      ) ?? [],
     )
 
     const entity = await this.read(accountId, resourceId)
@@ -402,7 +425,11 @@ export class ResourceService {
   async findResourcesByNameOrPoNumber(
     accountId: string,
     resourceType: ResourceType,
-    { input, exact }: { input: string; exact?: boolean },
+    {
+      input,
+      exact,
+      take = 15,
+    }: { input: string; exact?: boolean; take?: number },
   ): Promise<ValueResource[]> {
     const results = await this.prisma.$queryRaw`
     WITH "View" AS (
@@ -429,7 +456,7 @@ export class ResourceService {
         : Prisma.sql`WHERE "name" ILIKE '%' || ${input} || '%' OR "name" % ${input} -- % operator uses pg_trgm for similarity matching`
     }
     ORDER BY similarity("name", ${input}) DESC
-    LIMIT 15
+    LIMIT ${take}
   `
 
     return z

@@ -1,9 +1,9 @@
-import { fields } from "./fields";
-import { SchemaTemplate } from "./types";
+import { fields } from './fields'
+import { SchemaTemplate } from './types'
 
 export const schemas: SchemaTemplate[] = [
   {
-    resourceType: "Bill",
+    resourceType: 'Bill',
     fields: [
       fields.purchase,
       fields.billStatus,
@@ -16,7 +16,7 @@ export const schemas: SchemaTemplate[] = [
     ],
     sections: [
       {
-        name: "Bill Info",
+        name: 'Bill Info',
         fields: [
           fields.billFiles,
           fields.vendor,
@@ -28,11 +28,11 @@ export const schemas: SchemaTemplate[] = [
         ],
       },
       {
-        name: "Accounting Info",
+        name: 'Accounting Info',
         fields: [fields.quickBooksAccount],
       },
       {
-        name: "Payment Info",
+        name: 'Payment Info',
         fields: [
           fields.paymentTerms,
           fields.paymentDueDate,
@@ -43,11 +43,11 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
-    resourceType: "Customer",
+    resourceType: 'Customer',
     fields: [fields.quickBooksCustomerId],
     sections: [
       {
-        name: "Summary",
+        name: 'Summary',
         fields: [
           fields.name,
           fields.customerDescription,
@@ -55,20 +55,20 @@ export const schemas: SchemaTemplate[] = [
         ],
       },
       {
-        name: "Contacts",
+        name: 'Contacts',
         fields: [fields.primaryContact],
       },
       {
-        name: "Payment Info",
+        name: 'Payment Info',
         fields: [fields.paymentTerms, fields.paymentMethod],
       },
     ],
   },
   {
-    resourceType: "Item",
+    resourceType: 'Item',
     sections: [
       {
-        name: "Summary",
+        name: 'Summary',
         fields: [
           fields.name,
           fields.itemDescription,
@@ -80,11 +80,11 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
-    resourceType: "Job",
+    resourceType: 'Job',
     fields: [fields.jobStatus],
     sections: [
       {
-        name: "Job Info",
+        name: 'Job Info',
         fields: [
           fields.name,
           fields.jobDescription,
@@ -96,7 +96,7 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
-    resourceType: "JobLine",
+    resourceType: 'JobLine',
     fields: [
       fields.job,
       fields.part,
@@ -106,10 +106,10 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
-    resourceType: "Part",
+    resourceType: 'Part',
     sections: [
       {
-        name: "Part Info",
+        name: 'Part Info',
         fields: [
           fields.name,
           fields.partNumber,
@@ -120,7 +120,7 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
-    resourceType: "Purchase",
+    resourceType: 'Purchase',
     fields: [
       fields.purchaseStatus,
       fields.poNumber,
@@ -136,7 +136,7 @@ export const schemas: SchemaTemplate[] = [
     ],
     sections: [
       {
-        name: "Purchase Info",
+        name: 'Purchase Info',
         fields: [
           fields.vendor,
           fields.poRecipient,
@@ -146,7 +146,7 @@ export const schemas: SchemaTemplate[] = [
         ],
       },
       {
-        name: "Billing Info",
+        name: 'Billing Info',
         fields: [
           fields.billingAddress,
           fields.currency,
@@ -156,7 +156,7 @@ export const schemas: SchemaTemplate[] = [
         ],
       },
       {
-        name: "Shipping Info",
+        name: 'Shipping Info',
         fields: [
           fields.shippingAddress,
           fields.shippingMethod,
@@ -171,7 +171,7 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
-    resourceType: "PurchaseLine",
+    resourceType: 'PurchaseLine',
     fields: [
       fields.item,
       fields.unitOfMeasure,
@@ -186,11 +186,11 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
-    resourceType: "Vendor",
+    resourceType: 'Vendor',
     fields: [fields.quickBooksVendorId],
     sections: [
       {
-        name: "Summary",
+        name: 'Summary',
         fields: [
           fields.name,
           fields.vendorDescription,
@@ -199,13 +199,13 @@ export const schemas: SchemaTemplate[] = [
         ],
       },
       {
-        name: "Contacts",
+        name: 'Contacts',
         fields: [fields.poRecipient, fields.billingContact],
       },
       {
-        name: "Payment Info",
+        name: 'Payment Info',
         fields: [fields.paymentTerms, fields.paymentMethod],
       },
     ],
   },
-];
+]

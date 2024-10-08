@@ -18,11 +18,7 @@ import { selectResourceFieldValue } from '@supplyside/model'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
 import Field from './fields/controls/Field'
-import {
-  copyFromFiles,
-  updateResourceField,
-  copyFromResource,
-} from '@/actions/resource'
+import { updateResourceField, copyFromResource } from '@/actions/resource'
 
 type Props = {
   schema: Schema
@@ -35,7 +31,7 @@ export default function ResourceForm({
   resource,
   singleColumn,
 }: Props) {
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar()
+  const { enqueueSnackbar } = useSnackbar()
 
   const columns = singleColumn ? 1 : 3
 
@@ -138,45 +134,6 @@ export default function ResourceForm({
                                         `Failed to extract data from ${f.name}`,
                                         { variant: 'error' },
                                       )
-                                    }
-                                  }}
-                                >
-                                  <Sync fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                            {['File', 'Files'].includes(f.type) && (
-                              <Tooltip title={`Sync data from ${f.name}`}>
-                                <IconButton
-                                  color="secondary"
-                                  disabled={
-                                    !selectResourceFieldValue(resource, f)
-                                      ?.file &&
-                                    !selectResourceFieldValue(resource, f)
-                                      ?.files?.length
-                                  }
-                                  onClick={async () => {
-                                    const sb = enqueueSnackbar({
-                                      persist: true,
-                                      message: (
-                                        <Stack direction="row">
-                                          <Typography flexGrow={1}>
-                                            Extracting data from files...
-                                          </Typography>
-                                          <CircularProgress />
-                                        </Stack>
-                                      ),
-                                    })
-
-                                    try {
-                                      copyFromFiles(resource.id, f)
-                                    } catch {
-                                      enqueueSnackbar(
-                                        `Failed to extract data from ${f.name}`,
-                                        { variant: 'error' },
-                                      )
-                                    } finally {
-                                      closeSnackbar(sb)
                                     }
                                   }}
                                 >

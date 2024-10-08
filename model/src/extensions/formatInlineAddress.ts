@@ -1,9 +1,9 @@
-import { Address } from "../types";
+import { Address } from '../types'
 
 export const formatInlineAddress = (address: Address): string => {
-  const { streetAddress, city, state, zip, country } = address;
+  const { streetAddress, city, state, zip, country } = address
 
-  const stateZip = [state, zip].filter(Boolean).join(" ");
+  const stateZip = [state, zip].filter(Boolean).join(' ')
 
-  return [streetAddress, city, stateZip, country].filter(Boolean).join(", ");
-};
+  return [streetAddress, city, stateZip, country].filter(Boolean).join(', ')
+}

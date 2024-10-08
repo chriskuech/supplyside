@@ -1,11 +1,11 @@
 import { faker } from '@faker-js/faker'
+import { systemAccountId } from '@supplyside/api/const'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { inject, injectable } from 'inversify'
 import { TemplateService } from '../schema/TemplateService'
 import { Account } from './entity'
 import { mapAccountModelToEntity } from './mappers'
 import { accountInclude } from './model'
-import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import { systemAccountId } from '@supplyside/api/const'
 
 @injectable()
 export class AccountService {

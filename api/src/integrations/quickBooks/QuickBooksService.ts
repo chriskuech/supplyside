@@ -1,26 +1,26 @@
-import assert from 'assert'
-import { inject, injectable } from 'inversify'
-import { PrismaService } from '../PrismaService'
-import { QuickBooksTokenService } from './QuickBooksTokenService'
-import { QuickBooksConfigService } from './QuickBooksConfigService'
-import { QuickBooksClientService } from './QuickBooksClientService'
-import { Bill, BillPayment, CompanyInfo, WebhookBody } from './types'
-import { QuickBooksCompanyInfoService } from './QuickBooksCompanyInfoService'
-import { QuickBooksAccountService } from './QuickBooksAccountService'
-import { QuickBooksVendorService } from './QuickBooksVendorService'
-import { QuickBooksBillService } from './QuickBooksBillService'
-import { QuickBooksBillPaymentService } from './QuickBooksBillPaymentService'
-import { isRequestError } from './utils'
-import { groupBy } from 'remeda'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
   billStatusOptions,
   fields,
   selectSchemaFieldOptionUnsafe,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
-import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
+import assert from 'assert'
+import { inject, injectable } from 'inversify'
+import { groupBy } from 'remeda'
+import { PrismaService } from '../PrismaService'
+import { QuickBooksAccountService } from './QuickBooksAccountService'
+import { QuickBooksBillPaymentService } from './QuickBooksBillPaymentService'
+import { QuickBooksBillService } from './QuickBooksBillService'
+import { QuickBooksClientService } from './QuickBooksClientService'
+import { QuickBooksCompanyInfoService } from './QuickBooksCompanyInfoService'
+import { QuickBooksConfigService } from './QuickBooksConfigService'
 import { QuickBooksCustomerService } from './QuickBooksCustomerService'
+import { QuickBooksTokenService } from './QuickBooksTokenService'
+import { QuickBooksVendorService } from './QuickBooksVendorService'
+import { Bill, BillPayment, CompanyInfo, WebhookBody } from './types'
+import { isRequestError } from './utils'
 
 @injectable()
 export class QuickBooksService {

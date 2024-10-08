@@ -1,7 +1,7 @@
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { fields, schemas } from '@supplyside/model'
 import { fail } from 'assert'
 import { inject, injectable } from 'inversify'
-import { fields, schemas } from '@supplyside/model'
-import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 
 @injectable()
 export class TemplateService {

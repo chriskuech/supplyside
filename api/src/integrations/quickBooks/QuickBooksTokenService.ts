@@ -1,12 +1,12 @@
-import { Token } from 'intuit-oauth'
 import { Prisma } from '@prisma/client'
 import Csrf from 'csrf'
-import { z } from 'zod'
+import { Token } from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
+import { z } from 'zod'
 import { PrismaService } from '../PrismaService'
-import { QuickBooksToken, quickbooksTokenSchema } from './schemas'
 import { QuickBooksClientService } from './QuickBooksClientService'
 import { QuickBooksConfigService } from './QuickBooksConfigService'
+import { QuickBooksToken, quickbooksTokenSchema } from './schemas'
 
 @injectable()
 export class QuickBooksTokenService {

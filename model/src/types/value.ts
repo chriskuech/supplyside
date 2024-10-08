@@ -1,10 +1,10 @@
-import { z } from "zod";
-import { ContactSchema } from "../types/contact";
-import { UserSchema } from "../types/user";
-import { AddressSchema } from "../types/address";
-import { FileSchema } from "../types/file";
-import { OptionSchema } from "../types/option";
-import { ValueResourceSchema } from "../types/value-resource";
+import { z } from 'zod'
+import { ContactSchema } from '../types/contact'
+import { UserSchema } from '../types/user'
+import { AddressSchema } from '../types/address'
+import { FileSchema } from '../types/file'
+import { OptionSchema } from '../types/option'
+import { ValueResourceSchema } from '../types/value-resource'
 
 export const ValueSchema = z.object({
   address: AddressSchema.nullable(),
@@ -20,9 +20,9 @@ export const ValueSchema = z.object({
   files: z.array(FileSchema),
   resource: ValueResourceSchema.nullable(),
   updatedAt: z.string().datetime(),
-});
+})
 
-export type Value = z.infer<typeof ValueSchema>;
+export type Value = z.infer<typeof ValueSchema>
 
 // TODO: obsolete
 export const emptyValue: Value = {
@@ -39,4 +39,4 @@ export const emptyValue: Value = {
   files: [],
   options: [],
   updatedAt: new Date(0).toISOString(),
-};
+}

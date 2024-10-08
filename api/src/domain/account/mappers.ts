@@ -1,5 +1,5 @@
-import { AccountModel } from './model'
 import { Account } from './entity'
+import { AccountModel } from './model'
 
 export const mapAccountModelToEntity = (model: AccountModel): Account => ({
   id: model.id,
