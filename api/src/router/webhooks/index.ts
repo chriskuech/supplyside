@@ -1,6 +1,7 @@
 import { container } from '@supplyside/api/di'
 import { AccountService } from '@supplyside/api/domain/account/AccountService'
 import { BillInboxService } from '@supplyside/api/domain/bill/BillInboxService'
+import { MigrationService } from '@supplyside/api/domain/migration/MigrationService'
 import { TemplateService } from '@supplyside/api/domain/schema/TemplateService'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -32,11 +33,15 @@ export const mountWebhooks = async <App extends FastifyInstance>(app: App) =>
       handler: async (request, reply) => {
         const accountService = container.resolve(AccountService)
         const templateService = container.resolve(TemplateService)
+        const migrationService = container.resolve(MigrationService)
 
         const accounts = await accountService.list()
 
         await Promise.all(
-          accounts.map((account) => templateService.applyTemplate(account.id)),
+          accounts.map(async (account) => {
+            await templateService.applyTemplate(account.id)
+            await migrationService.migrate(account.id)
+          }),
         )
 
         reply.status(200).send()

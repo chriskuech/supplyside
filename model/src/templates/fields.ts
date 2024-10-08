@@ -252,6 +252,12 @@ const _fields = {
     type: 'Textarea',
     description: 'Brief, identifiable description of the item',
   },
+  itemName: {
+    templateId: '403dd522-a972-4a24-8012-936f56135d41',
+    name: 'Item Name',
+    type: 'Text',
+    description: 'Unique identifier for a item',
+  },
   itemNumber: {
     templateId: '9e0115e1-e10c-4e21-a399-47ad9bfc1a6f',
     name: 'Item Number',
