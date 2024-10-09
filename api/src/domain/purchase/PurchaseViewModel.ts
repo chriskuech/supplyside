@@ -33,7 +33,6 @@ export type KeyValueModel = {
 
 export type LineViewModel = {
   itemName: string | null
-  itemDescription: string | null
   unitOfMeasure: string | null
   quantity: string | null
   unitCost: string | null
