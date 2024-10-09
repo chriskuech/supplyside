@@ -1,8 +1,8 @@
 import { deepStrictEqual } from 'assert'
 import { entries, filter, flatMap, groupBy, map, mapValues, pipe } from 'remeda'
-import { ResourceTemplate } from './types'
+import { z } from 'zod'
 import { fields } from './fields'
-import { config } from '../config'
+import { ResourceTemplate } from './types'
 
 const _resources = (
   environment: 'development' | 'integration' | 'production',
@@ -32,7 +32,10 @@ const _resources = (
   }) as const satisfies Record<string, ResourceTemplate>
 
 export const resources = () => {
-  const data = _resources(config.NODE_ENV)
+  const env = z
+    .enum(['development', 'integration', 'production'])
+    .parse(process.env.NODE_ENV ?? process.env.SS_ENV)
+  const data = _resources(env)
 
   // Ensure that the templateIds are unique
   deepStrictEqual(
