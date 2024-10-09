@@ -1,16 +1,16 @@
 import 'reflect-metadata'
+
+import { ResourceType } from '@prisma/client'
+import { systemAccountId } from '@supplyside/api/const'
+import { container } from '@supplyside/api/di'
+import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
+import { TemplateService } from '@supplyside/api/domain/schema/TemplateService'
+import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { fields, selectSchemaFieldUnsafe } from '@supplyside/model'
 import { config as loadDotenv } from 'dotenv'
 import { expand as expandDotenv } from 'dotenv-expand'
 import { z } from 'zod'
-import { ResourceType } from '@prisma/client'
-import { selectSchemaFieldUnsafe } from '@supplyside/model'
-import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
-import { container } from '@supplyside/api/di'
-import { TemplateService } from '@supplyside/api/domain/schema/TemplateService'
-import { fields } from '@supplyside/model'
-import { systemAccountId } from '@supplyside/api/const'
 
 expandDotenv(loadDotenv())
 
@@ -87,7 +87,7 @@ async function main() {
 
   const vendorSchema = await schemaService.readMergedSchema(
     customerAccount.id,
-    ResourceType.Vendor
+    ResourceType.Vendor,
   )
 
   const vendor = await resourceService.create(
@@ -100,12 +100,12 @@ async function main() {
           valueInput: { string: 'ACME Supplies' },
         },
       ],
-    }
+    },
   )
 
   const purchaseSchema = await schemaService.readMergedSchema(
     customerAccount.id,
-    ResourceType.Purchase
+    ResourceType.Purchase,
   )
 
   const purchase = await resourceService.create(
@@ -129,40 +129,12 @@ async function main() {
           valueInput: { resourceId: vendor.id },
         },
       ],
-    }
-  )
-
-  const itemSchema = await schemaService.readMergedSchema(
-    customerAccount.id,
-    ResourceType.Item
-  )
-
-  const item1 = await resourceService.create(
-    customerAccount.id,
-    ResourceType.Item,
-    {
-      fields: [
-        {
-          fieldId: selectSchemaFieldUnsafe(itemSchema, fields.name)?.fieldId,
-          valueInput: { string: 'Item Name 1' },
-        },
-        {
-          fieldId: selectSchemaFieldUnsafe(itemSchema, fields.itemDescription)
-            ?.fieldId,
-          valueInput: { string: 'Item Desc 1' },
-        },
-        {
-          fieldId: selectSchemaFieldUnsafe(itemSchema, fields.unitOfMeasure)
-            ?.fieldId,
-          valueInput: { optionId: unitOfMeasureOption.id },
-        },
-      ],
-    }
+    },
   )
 
   const lineSchema = await schemaService.readMergedSchema(
     customerAccount.id,
-    'PurchaseLine'
+    'PurchaseLine',
   )
 
   await resourceService.create(customerAccount.id, 'PurchaseLine', {
@@ -172,35 +144,17 @@ async function main() {
         valueInput: { resourceId: purchase.id },
       },
       {
-        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.item).fieldId,
-        valueInput: { resourceId: item1.id },
+        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName).fieldId,
+        valueInput: { string: 'Item name 1' },
+      },
+      {
+        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitOfMeasure)
+          .fieldId,
+        valueInput: { optionId: unitOfMeasureOption.id },
       },
     ],
   })
 
-  const item2 = await resourceService.create(
-    customerAccount.id,
-    ResourceType.Item,
-    {
-      fields: [
-        {
-          fieldId: selectSchemaFieldUnsafe(itemSchema, fields.name)?.fieldId,
-          valueInput: { string: 'Item Name 2' },
-        },
-        {
-          fieldId: selectSchemaFieldUnsafe(itemSchema, fields.itemDescription)
-            ?.fieldId,
-          valueInput: { string: 'Item Desc 2' },
-        },
-        {
-          fieldId: selectSchemaFieldUnsafe(itemSchema, fields.unitOfMeasure)
-            ?.fieldId,
-          valueInput: { optionId: unitOfMeasureOption.id },
-        },
-      ],
-    }
-  )
-
   await resourceService.create(customerAccount.id, 'PurchaseLine', {
     fields: [
       {
@@ -208,8 +162,13 @@ async function main() {
         valueInput: { resourceId: purchase.id },
       },
       {
-        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.item).fieldId,
-        valueInput: { resourceId: item2.id },
+        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName).fieldId,
+        valueInput: { string: 'Item name 2' },
+      },
+      {
+        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitOfMeasure)
+          .fieldId,
+        valueInput: { optionId: unitOfMeasureOption.id },
       },
     ],
   })
