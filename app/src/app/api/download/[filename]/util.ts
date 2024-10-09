@@ -5,7 +5,7 @@ import { Query } from './schema'
 import { Account } from '@/client/account'
 
 const getDownloadPath = (fileName: string, { preview, ...query }: Query) =>
-  `/api/download/${fileName}?${preview ? 'preview=true&' : ''}${new URLSearchParams(mapValues(query, encodeURIComponent)).toString()}`
+  `/api/download/${encodeURIComponent(fileName)}?${preview ? 'preview=true&' : ''}${new URLSearchParams(mapValues(query, encodeURIComponent)).toString()}`
 
 export const download = (file: File | undefined) =>
   window.open(getFilePath(file))
