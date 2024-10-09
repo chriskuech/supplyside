@@ -72,7 +72,7 @@ export class McMasterService {
       accountId,
       'Vendor',
     )
-    const mcMasterCarrSystemResource = resources().mcMasterCarrVendor
+    const mcMasterCarrSystemResource = resources.mcMasterCarrVendor
 
     if (!mcMasterCarrVendor) {
       await this.resourceService.create(accountId, 'Vendor', {
@@ -114,7 +114,7 @@ export class McMasterService {
   async disconnect(accountId: string) {
     const mcMasterCarrVendor = await this.resourceService.readByTemplateId(
       accountId,
-      resources().mcMasterCarrVendor.templateId,
+      resources.mcMasterCarrVendor.templateId,
     )
 
     if (mcMasterCarrVendor) {
