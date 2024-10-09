@@ -1,9 +1,9 @@
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 
 @injectable()
 export class MigrationUtilityService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async copyOverTextField(
     fromResourceId: string,

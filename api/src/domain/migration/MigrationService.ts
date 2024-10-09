@@ -1,5 +1,5 @@
 import { fields, selectResourceFieldValue } from '@supplyside/model'
-import { injectable } from 'inversify'
+import { inject, injectable } from 'inversify'
 import { ResourceService } from '../resource/ResourceService'
 import { SchemaFieldService } from '../schema/SchemaFieldService'
 import { MigrationUtilityService } from './MigrationUtilityService'
@@ -7,9 +7,10 @@ import { MigrationUtilityService } from './MigrationUtilityService'
 @injectable()
 export class MigrationService {
   constructor(
-    private readonly resources: ResourceService,
+    @inject(ResourceService) private readonly resources: ResourceService,
+    @inject(MigrationUtilityService)
     private readonly utils: MigrationUtilityService,
-    private readonly fields: SchemaFieldService,
+    @inject(SchemaFieldService) private readonly fields: SchemaFieldService,
   ) {}
 
   async migrate(accountId: string) {

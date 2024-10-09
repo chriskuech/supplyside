@@ -237,4 +237,5 @@ jobs:
           SHA: ${{ github.sha }}
 
       - name: Apply configuration
-        run: curl -X POST $API_BASE_URL/webhooks/post-deployment
+        shell: pwsh
+        run: Invoke-RestMethod -Method POST -Uri $env:API_BASE_URL/webhooks/post-deployment
