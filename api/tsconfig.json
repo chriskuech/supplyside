@@ -129,12 +129,14 @@
 
     "typeRoots": ["./types"],
     "sourceMap": true,
-    "inlineSources": true,
+    "inlineSources": true
 
+    // This has been disabled because it messes with `model` references. We can fix after migrating to `lerna`/equivalent
+    // --
     // Set `sourceRoot` to  "/" to strip the build path prefix
     // from generated source code references.
     // This improves issue grouping in Sentry.
-    "sourceRoot": "/"
+    // "sourceRoot": "/"
   },
   "exclude": ["node_modules", "dist", "./*.mjs"]
 }
