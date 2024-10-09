@@ -238,4 +238,4 @@ jobs:
 
       - name: Apply configuration
         shell: pwsh
-        run: Invoke-RestMethod -Method POST -Uri $env:API_BASE_URL/webhooks/post-deployment
+        run: Invoke-RestMethod -ContentType 'application/json' -Method POST -Uri $env:API_BASE_URL/webhooks/post-deployment
