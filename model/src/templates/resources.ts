@@ -1,58 +1,42 @@
 import { deepStrictEqual } from 'assert'
-import { entries, filter, flatMap, groupBy, map, mapValues, pipe } from 'remeda'
-import { z } from 'zod'
+import { entries, filter, groupBy, map, mapValues, pipe } from 'remeda'
 import { fields } from './fields'
 import { ResourceTemplate } from './types'
 
-const _resources = (
-  environment: 'development' | 'integration' | 'production',
-) =>
-  ({
-    mcMasterCarrVendor: {
-      templateId: '5a71b50c-0a97-4c6a-aec0-2467c1655ce7',
-      type: 'Vendor',
-      fields: [
-        {
-          field: fields.name,
-          value: { string: 'McMaster-Carr' },
-        },
-        {
-          field: fields.poRecipient,
-          value: {
-            contact: {
-              email: environment === 'production' ? 'sales@mcmaster.com' : null,
-              name: null,
-              phone: '(562) 692-5911',
-              title: null,
-            },
+export const resources = {
+  mcMasterCarrVendor: {
+    templateId: '5a71b50c-0a97-4c6a-aec0-2467c1655ce7',
+    type: 'Vendor',
+    fields: [
+      {
+        field: fields.name,
+        value: { string: 'McMaster-Carr' },
+      },
+      {
+        field: fields.poRecipient,
+        value: {
+          contact: {
+            email: 'sales@mcmaster.com',
+            name: null,
+            phone: '(562) 692-5911',
+            title: null,
           },
         },
-      ],
-    },
-  }) as const satisfies Record<string, ResourceTemplate>
+      },
+    ],
+  },
+} as const satisfies Record<string, ResourceTemplate>
 
-export const resources = () => {
-  const env = z
-    .enum(['development', 'integration', 'production'])
-    .parse(process.env.NODE_ENV ?? process.env.SS_ENV)
-  const data = _resources(env)
-
-  // Ensure that the templateIds are unique
-  deepStrictEqual(
-    pipe(
-      [data],
-      flatMap((e) => Object.values(e)),
-      map((e) => e.templateId),
-      groupBy((e) => e),
-      mapValues((group) => group.length),
-      entries(),
-      filter(([, count]) => count > 1),
-      map(([templateId]) => templateId),
-    ),
-    [],
-  )
-
-  return data
-}
-
-// TODO: Ensure that fields respect system schemas and values respect fieldType
+// Ensure that the templateIds are unique
+deepStrictEqual(
+  pipe(
+    Object.values(resources),
+    map((e) => e.templateId),
+    groupBy((e) => e),
+    mapValues((group) => group.length),
+    entries(),
+    filter(([, count]) => count > 1),
+    map(([templateId]) => templateId),
+  ),
+  [],
+)

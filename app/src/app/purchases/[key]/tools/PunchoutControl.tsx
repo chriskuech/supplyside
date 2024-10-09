@@ -27,7 +27,7 @@ export default function PunchoutControl({ resource, purchaseHasLines }: Props) {
     const vendorTemplateId = selectResourceFieldValue(resource, fields.vendor)
       ?.resource?.templateId
     const isVendorMcMasterCarr =
-      vendorTemplateId === resources().mcMasterCarrVendor.templateId
+      vendorTemplateId === resources.mcMasterCarrVendor.templateId
 
     if (isVendorMcMasterCarr && !purchaseHasLines && !punchoutSessionUrl) {
       createPunchOutServiceRequest(resource.id).then((response) => {

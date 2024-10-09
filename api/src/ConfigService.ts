@@ -7,7 +7,7 @@ const ConfigSchema = z.object({
 
   POSTMARK_API_KEY: z.string().min(1),
   AZURE_STORAGE_CONNECTION_STRING: z.string().min(1),
-  NODE_ENV: z.enum(['development', 'integration', 'production']),
+  SS_ENV: z.enum(['development', 'integration', 'production']),
   CI: z.coerce.boolean().optional(),
   GEN: z.coerce.boolean().optional(),
   PORT: z.coerce.number(),
