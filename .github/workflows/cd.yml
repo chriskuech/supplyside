@@ -14,7 +14,8 @@ jobs:
       url: https://app.supplyside.io
 
     env:
-      BASE_URL: https://app.supplyside.io
+      APP_BASE_URL: https://app.supplyside.io
+      API_BASE_URL: https://api.supplyside.io
 
     steps:
       - uses: actions/checkout@v4
