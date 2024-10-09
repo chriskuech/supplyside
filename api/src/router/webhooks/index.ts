@@ -1,3 +1,4 @@
+import { systemAccountId } from '@supplyside/api/const'
 import { container } from '@supplyside/api/di'
 import { AccountService } from '@supplyside/api/domain/account/AccountService'
 import { BillInboxService } from '@supplyside/api/domain/bill/BillInboxService'
@@ -38,10 +39,12 @@ export const mountWebhooks = async <App extends FastifyInstance>(app: App) =>
         const accounts = await accountService.list()
 
         await Promise.all(
-          accounts.map(async (account) => {
-            await templateService.applyTemplate(account.id)
-            await migrationService.migrate(account.id)
-          }),
+          accounts
+            .filter((account) => account.id !== systemAccountId)
+            .map(async (account) => {
+              await templateService.applyTemplate(account.id)
+              await migrationService.migrate(account.id)
+            }),
         )
 
         reply.status(200).send()
