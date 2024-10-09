@@ -78,7 +78,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
         }),
         produces: ['*'],
       },
-      handler: async (req) => {
+      handler: async (req, res) => {
         const service = container.resolve(BlobService)
 
         const blob = await service.readBlobWithData(
@@ -90,6 +90,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
           throw new NotFoundError('Blob not found')
         }
 
+        res.header('Content-Type', blob.mimeType)
         return blob.buffer
       },
     })
