@@ -318,61 +318,13 @@ export class McMasterService {
 
       assert(description && quantity && unitOfMeasure && unitPrice)
 
-      // TODO: Should we match by id?
-      const [matchedItem] =
-        await this.resourceService.findResourcesByNameOrPoNumber(
-          accountId,
-          'Item',
-          {
-            input: description,
-            exact: true,
-          },
-        )
-
-      let matchedItemId = matchedItem?.id
-
-      if (!matchedItemId) {
-        const itemSchema = await this.schemaService.readMergedSchema(
-          accountId,
-          'Item',
-        )
-        const nameFieldId = selectSchemaFieldUnsafe(
-          itemSchema,
-          fields.name,
-        ).fieldId
-        const itemUnitofMesureFieldId = selectSchemaFieldUnsafe(
-          itemSchema,
-          fields.unitOfMeasure,
-        ).fieldId
-        const itemUnitOfMeasureOptionId = selectSchemaFieldOptionUnsafe(
-          itemSchema,
-          fields.unitOfMeasure,
-          unitOfMeasure,
-        ).id
-
-        const newResource = await this.resourceService.create(
-          accountId,
-          'Item',
-          {
-            fields: [
-              { fieldId: nameFieldId, valueInput: { string: description } },
-              {
-                fieldId: itemUnitofMesureFieldId,
-                valueInput: { optionId: itemUnitOfMeasureOptionId },
-              },
-            ],
-          },
-        )
-        matchedItemId = newResource.id
-      }
-
       const lineSchema = await this.schemaService.readMergedSchema(
         accountId,
         'PurchaseLine',
       )
-      const itemFieldId = selectSchemaFieldUnsafe(
+      const itemNameFieldId = selectSchemaFieldUnsafe(
         lineSchema,
-        fields.item,
+        fields.itemName,
       ).fieldId
       const orderFieldId = selectSchemaFieldUnsafe(
         lineSchema,
@@ -402,8 +354,8 @@ export class McMasterService {
         {
           fields: [
             {
-              fieldId: itemFieldId,
-              valueInput: { resourceId: matchedItemId },
+              fieldId: itemNameFieldId,
+              valueInput: { string: description },
             },
             {
               fieldId: orderFieldId,
