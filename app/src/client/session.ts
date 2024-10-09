@@ -43,7 +43,7 @@ export const readSession = async (
 }
 
 export const clearSession = async (sessionId: string) => {
-  const { data: session } = await client().DELETE('/api/sessions/', {
+  const { data: session } = await client().DELETE('/api/sessions/{sessionId}', {
     params: {
       path: { sessionId },
     },
