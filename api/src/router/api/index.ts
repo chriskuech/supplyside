@@ -1,5 +1,6 @@
 import { ConfigService } from '@supplyside/api/ConfigService'
 import { container } from '@supplyside/api/di'
+import { UnauthorizedError } from '@supplyside/api/integrations/fastify/UnauthorizedError'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { mountAccounts } from './accounts'
@@ -14,18 +15,15 @@ export const mountApi = async <App extends FastifyInstance>(app: App) =>
       const [scheme, token] = req.headers.authorization?.split(' ') ?? []
 
       if (scheme !== 'Bearer') {
-        reply.code(401).send('Unsupported authorization scheme')
-        return
+        throw new UnauthorizedError('Unsupported authorization scheme')
       }
 
       if (!token) {
-        reply.code(401).send('Missing authorization token')
-        return
+        throw new UnauthorizedError('Missing authorization token')
       }
 
       if (token !== config.API_KEY) {
-        reply.code(401).send('Invalid authorization token')
-        return
+        throw new UnauthorizedError('Invalid authorization token')
       }
 
       next()
