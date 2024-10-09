@@ -42,6 +42,8 @@ RUN npm run gen:prisma
 
 COPY --from=builder --chown=api:nodejs /api/dist ./dist/
 
+RUN ls -R ./dist/
+
 USER api
 
 ENV PORT=8080
