@@ -34,7 +34,7 @@ const _resources = (
 export const resources = () => {
   const env = z
     .enum(['development', 'integration', 'production'])
-    .parse(process.env.SS_ENV ?? process.env.SS_ENV)
+    .parse(process.env.SS_ENV)
   const data = _resources(env)
 
   // Ensure that the templateIds are unique
