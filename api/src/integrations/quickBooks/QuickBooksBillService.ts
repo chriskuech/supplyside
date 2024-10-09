@@ -10,10 +10,10 @@ import {
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
+import { BadRequestError } from '../fastify/BadRequestError'
 import { QuickBooksApiService } from './QuickBooksApiService'
 import { QuickBooksVendorService } from './QuickBooksVendorService'
 import { ACCOUNT_BASED_EXPENSE } from './constants'
-import { QuickBooksExpectedError } from './errors'
 import { mapValue } from './mapValue'
 import { accountQuerySchema, readBillSchema } from './schemas'
 import { Bill } from './types'
@@ -204,7 +204,7 @@ export class QuickBooksBillService {
 
     assert(
       quickBooksAccountQuery.QueryResponse.Account,
-      new QuickBooksExpectedError(
+      new BadRequestError(
         'Accounting category does not exist or is not active in QuickBooks',
       ),
     )

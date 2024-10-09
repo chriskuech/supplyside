@@ -2,12 +2,12 @@ import { ConfigService } from '@supplyside/api/ConfigService'
 import { systemAccountId } from '@supplyside/api/const'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import SmtpService from '@supplyside/api/integrations/SmtpService'
+import { BadRequestError } from '@supplyside/api/integrations/fastify/BadRequestError'
+import { NotFoundError } from '@supplyside/api/integrations/fastify/NotFoundError'
 import { isPrismaError } from '@supplyside/api/integrations/prisma-extensions'
 import { inject, injectable } from 'inversify'
 import { v4 as uuid } from 'uuid'
-import { IamUserNotFoundError } from '../user/errors'
 import { Session } from './entity'
-import { SessionCreationError } from './errors'
 import { mapSessionModelToEntity } from './mappers'
 
 const SESSION_LIFESPAN_IN_DAYS = 7
@@ -33,23 +33,23 @@ export class SessionService {
     })
 
     if (!user) {
-      throw new SessionCreationError('No user found with that email.')
+      throw new BadRequestError('No user found with that email.')
     }
 
     if (!tat) {
-      throw new SessionCreationError(
+      throw new BadRequestError(
         'No token provided. Please retry with a valid token.',
       )
     }
 
     if (!user.tatExpiresAt || user.tat !== tat) {
-      throw new SessionCreationError(
+      throw new BadRequestError(
         'The token provided is incorrect. Please retry with the correct token.',
       )
     }
 
     if (user.tatExpiresAt < new Date()) {
-      throw new SessionCreationError(
+      throw new BadRequestError(
         'The token provided has expired. Please retry with a new token.',
       )
     }
@@ -139,7 +139,7 @@ export class SessionService {
       })
     } catch (error) {
       if (isPrismaError('notFound')(error)) {
-        throw new IamUserNotFoundError()
+        throw new NotFoundError('IAM user not found')
       }
 
       throw error

@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { ConflictError } from '@supplyside/api/integrations/fastify/ConflictError'
 import {
   Cost,
   FieldReference,
@@ -27,7 +28,6 @@ import { isNullish, map, pipe, sum } from 'remeda'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 import { SchemaService } from '../schema/SchemaService'
-import { DuplicateResourceError } from './errors'
 import { createSql } from './json-logic/compile'
 import { JsonLogic, OrderBy } from './json-logic/types'
 import {
@@ -434,8 +434,8 @@ export class ResourceService {
       })
 
       if (resourceExists) {
-        throw new DuplicateResourceError(
-          Object.values(valueInput)[0]?.toString() ?? '',
+        throw new ConflictError(
+          `A Resource already exists with ${sf.name} = ${Object.values(valueInput)[0]?.toString()}`,
         )
       }
     }
