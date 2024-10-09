@@ -15,7 +15,6 @@ export class HttpClientError extends Error implements FastifyHttpError {
 
   constructor({ statusCode, message, cause }: HttpErrorParams) {
     super(message, { cause })
-    this.name = 'HttpError'
     this.statusCode = statusCode
     this.message = message
   }
