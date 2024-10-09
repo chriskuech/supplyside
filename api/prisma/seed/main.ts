@@ -1,3 +1,5 @@
+import 'reflect-metadata'
+
 import { ResourceType } from '@prisma/client'
 import { systemAccountId } from '@supplyside/api/const'
 import { container } from '@supplyside/api/di'
@@ -8,7 +10,6 @@ import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { fields, selectSchemaFieldUnsafe } from '@supplyside/model'
 import { config as loadDotenv } from 'dotenv'
 import { expand as expandDotenv } from 'dotenv-expand'
-import 'reflect-metadata'
 import { z } from 'zod'
 
 expandDotenv(loadDotenv())
