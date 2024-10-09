@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "remeda": "^2.14.0",
+    "ts-pattern": "^5.4.0",
     "zod": "^3.23.8"
   },
   "version": "1.0.0",
