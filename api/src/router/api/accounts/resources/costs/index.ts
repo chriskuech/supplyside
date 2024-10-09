@@ -16,12 +16,10 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
           resourceId: z.string().uuid(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(CostService)
 
         await service.create(req.params.accountId, req.params.resourceId)
-
-        res.send()
       },
     })
     .route({
@@ -41,7 +39,7 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
           })
           .partial(),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(CostService)
 
         await service.update(
@@ -50,8 +48,6 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
           req.params.costId,
           req.body,
         )
-
-        res.send()
       },
     })
     .route({
@@ -64,7 +60,7 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
           costId: z.string().uuid(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(CostService)
 
         await service.delete(
@@ -72,7 +68,5 @@ export const mountCosts = async <App extends FastifyInstance>(app: App) =>
           req.params.resourceId,
           req.params.costId,
         )
-
-        res.send()
       },
     })

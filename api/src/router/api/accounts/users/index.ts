@@ -22,12 +22,12 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
           200: z.array(UserSchema),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(UserService)
 
         const users = await service.list(req.params.accountId)
 
-        res.send(users)
+        return users
       },
     })
     .route({
@@ -41,12 +41,10 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
           email: z.string().email(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(UserService)
 
         await service.invite(req.params.accountId, req.body)
-
-        res.send()
       },
     })
     .route({
@@ -61,12 +59,12 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
           200: UserSchema,
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(UserService)
 
         const user = await service.read(req.params.accountId, req.params.userId)
 
-        res.send(user)
+        return user
       },
     })
     .route({
@@ -79,12 +77,10 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
         }),
         body: UpdateUserSchema,
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(UserService)
 
         await service.update(req.params.accountId, req.params.userId, req.body)
-
-        res.send()
       },
     })
     .route({
@@ -96,11 +92,9 @@ export const mountUsers = async <App extends FastifyInstance>(app: App) =>
           userId: z.string().uuid(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(UserService)
 
         await service.delete(req.params.accountId, req.params.userId)
-
-        res.send()
       },
     })

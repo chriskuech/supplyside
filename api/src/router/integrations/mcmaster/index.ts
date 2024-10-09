@@ -13,11 +13,11 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
     schema: {
       body: cxmlSchema,
     },
-    handler: async (req, res) => {
+    handler: async (req) => {
       const service = container.resolve(McMasterService)
 
       await service.processPoom(req.body)
 
-      res.status(200).send({})
+      return {}
     },
   })

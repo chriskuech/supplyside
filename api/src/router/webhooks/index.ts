@@ -18,20 +18,18 @@ export const mountWebhooks = async <App extends FastifyInstance>(app: App) =>
       schema: {
         body: z.any(),
       },
-      handler: async (request, reply) => {
+      handler: async (req) => {
         const service = container.resolve(BillInboxService)
 
         // TODO: validate the message
-        await service.handleMessage(request.body as Message)
-
-        reply.status(200).send()
+        await service.handleMessage(req.body as Message)
       },
     })
     .route({
       method: 'POST',
       url: '/post-deployment',
       schema: {},
-      handler: async (request, reply) => {
+      handler: async () => {
         const accountService = container.resolve(AccountService)
         const templateService = container.resolve(TemplateService)
         const migrationService = container.resolve(MigrationService)
@@ -46,7 +44,5 @@ export const mountWebhooks = async <App extends FastifyInstance>(app: App) =>
               await migrationService.migrate(account.id)
             }),
         )
-
-        reply.status(200).send()
       },
     })

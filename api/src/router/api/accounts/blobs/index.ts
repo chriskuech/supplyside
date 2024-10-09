@@ -1,6 +1,8 @@
 import { container } from '@supplyside/api/di'
 import { BlobService } from '@supplyside/api/domain/blob/BlobService'
 import { BlobSchema } from '@supplyside/api/domain/blob/entity'
+import { BadRequestError } from '@supplyside/api/integrations/fastify/BadRequestError'
+import { NotFoundError } from '@supplyside/api/integrations/fastify/NotFoundError'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
@@ -21,19 +23,19 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
         body: z.any(),
         response: { 200: BlobSchema, 400: z.any() },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(BlobService)
 
         const contentType = req.headers['content-type']
         if (!contentType || !/^\w+\/\w+$/.test(contentType)) {
-          res.status(400).send(`Missing Content-Type header "${contentType}"`)
-          return
+          throw new BadRequestError(
+            `Missing Content-Type header "${contentType}"`,
+          )
         }
 
         const buffer = req.body
         if (!Buffer.isBuffer(buffer)) {
-          res.status(400).send('Invalid body')
-          return
+          throw new BadRequestError('Invalid body')
         }
 
         const blob = await service.createBlob(req.params.accountId, {
@@ -55,7 +57,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
         response: { 200: BlobSchema },
       },
 
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(BlobService)
 
         const blob = await service.readBlob(
@@ -63,7 +65,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
           req.params.blobId,
         )
 
-        res.send(blob)
+        return blob
       },
     })
     .route({
@@ -85,12 +87,11 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
         )
 
         if (!blob) {
-          res.status(404)
-          return
+          throw new NotFoundError('Blob not found')
         }
 
         res.header('Content-Type', blob.mimeType)
-        res.send(blob.buffer)
+        return blob.buffer
       },
     })
 }

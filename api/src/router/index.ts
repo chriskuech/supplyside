@@ -10,6 +10,7 @@ import {
   validatorCompiler,
 } from 'fastify-type-provider-zod'
 import { JsonLogicSchema } from '../domain/resource/json-logic/types'
+import { NotFoundError } from '../integrations/fastify/NotFoundError'
 import { mountApi } from './api'
 import { mountSelf } from './api/self'
 import { mountError } from './error'
@@ -48,14 +49,16 @@ export const createServer = async (isDev?: boolean) => {
         },
       }),
     })
-    .get('/', (request, reply) => reply.status(200).send('OK')) // required by App Service
+    .get('/', async () => 'OK') // required by App Service
     .register(mountApi, { prefix: '/api' })
     .register(mountError, { prefix: '/error' })
     .register(mountHealth, { prefix: '/health' })
     .register(mountSelf, { prefix: '/self' })
     .register(mountIntegrations, { prefix: '/integrations' })
     .register(mountWebhooks, { prefix: '/webhooks' })
-    .setNotFoundHandler((request, reply) => reply.code(404).send('Not Found'))
+    .setNotFoundHandler(async () => {
+      throw new NotFoundError('No matching routes')
+    })
 
   Sentry.setupFastifyErrorHandler(app)
 

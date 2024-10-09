@@ -89,7 +89,8 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
         )
 
         res.header('Content-Type', 'application/pdf')
-        res.send(buffer)
+
+        return buffer
       },
     })
     .route({

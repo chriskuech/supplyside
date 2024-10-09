@@ -1,6 +1,7 @@
 import { container } from '@supplyside/api/di'
 import { SessionService } from '@supplyside/api/domain/session/SessionService'
 import { SessionSchema } from '@supplyside/api/domain/session/entity'
+import { NotFoundError } from '@supplyside/api/integrations/fastify/NotFoundError'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
@@ -20,12 +21,12 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
           200: SessionSchema,
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(SessionService)
 
         const session = await service.create(req.body.email, req.body.tat)
 
-        res.send(session)
+        return session
       },
     })
     .route({
@@ -39,17 +40,14 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
           200: SessionSchema,
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(SessionService)
 
         const session = await service.extend(req.params.sessionId)
 
-        if (!session) {
-          res.status(404)
-          return
-        }
+        if (!session) throw new NotFoundError('Session not found')
 
-        res.send(session)
+        return session
       },
     })
     .route({
@@ -66,12 +64,10 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
           200: z.void(),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(SessionService)
 
         await service.impersonate(req.params.sessionId, req.body.accountId)
-
-        res.send()
       },
     })
     .route({
@@ -85,17 +81,16 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
           200: SessionSchema,
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(SessionService)
 
         const session = await service.read(req.params.sessionId)
 
         if (!session) {
-          res.status(404)
-          return
+          throw new NotFoundError('Session not found')
         }
 
-        res.send(session)
+        return session
       },
     })
     .route({
@@ -109,12 +104,10 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
           200: z.void(),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(SessionService)
 
         await service.clear(req.params.sessionId)
-
-        res.send()
       },
     })
     .route({
@@ -126,11 +119,9 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
           returnTo: z.string().optional(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(SessionService)
 
         await service.startEmailVerification(req.body)
-
-        res.send()
       },
     })
