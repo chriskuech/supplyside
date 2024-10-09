@@ -121,6 +121,7 @@ export class PoRenderingService {
     const lineAdditionalFields = lineSchema.fields.filter(
       (field) =>
         ![
+          fields.itemName.templateId,
           fields.totalCost.templateId,
           fields.unitOfMeasure.templateId,
           fields.unitCost.templateId,
@@ -134,16 +135,8 @@ export class PoRenderingService {
         : null,
       lines: await Promise.all(
         lines.map(async (line) => {
-          const itemId = selectResourceFieldValue(line, fields.item)?.resource
-            ?.id
-
-          const item = itemId
-            ? await this.resourceService.read(account.id, itemId)
-            : undefined
-
           return {
-            itemName: renderTemplateField(item, fields.name),
-            itemDescription: renderTemplateField(item, fields.itemDescription),
+            itemName: renderTemplateField(line, fields.itemName),
             quantity: renderTemplateField(line, fields.quantity),
             unitOfMeasure: renderTemplateField(line, fields.unitOfMeasure),
             unitCost: renderTemplateField(line, fields.unitCost),
