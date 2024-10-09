@@ -46,7 +46,7 @@ jobs:
           npx prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.DB_SERVER_URL }}/production
-        working-directory: app
+        working-directory: api
 
       - name: Login to Docker
         uses: docker/login-action@v3
@@ -113,4 +113,6 @@ jobs:
           SHA: ${{ github.sha }}
 
       - name: Apply configuration
-        run: curl -X POST $BASE_URL/api/system/post-deployment
+        shell: pwsh
+        run: Invoke-RestMethod -ContentType 'application/json' -Method POST -Uri $env:API_BASE_URL/webhooks/post-deployment -Body '{}'
+  
