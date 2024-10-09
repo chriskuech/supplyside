@@ -13,7 +13,7 @@ export const mountHealth = async <App extends FastifyInstance>(app: App) =>
         timestamp: new Date().toISOString(),
         build: JSON.parse(build),
       })
-    } catch {
-      reply.status(500).send('Failed to read build.json')
+    } catch (e) {
+      reply.status(500).send(JSON.stringify(e, null, 2))
     }
   })
