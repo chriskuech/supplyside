@@ -19,7 +19,7 @@ import { match } from 'ts-pattern'
 import { fileURLToPath } from 'url'
 import { parseStringPromise } from 'xml2js'
 import { PrismaService } from '../PrismaService'
-import { McMasterInvalidCredentials } from './errors'
+import { BadRequestError } from '../fastify/BadRequestError'
 import { RenderPOSRTemplateParams, posrResponseSchema } from './types'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -55,7 +55,7 @@ export class McMasterService {
     )
 
     if (!validCredentials) {
-      throw new McMasterInvalidCredentials('Invalid credentials')
+      throw new BadRequestError('Invalid McMaster credentials')
     }
 
     const [mcMasterCarrVendor] =
