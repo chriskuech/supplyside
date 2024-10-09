@@ -35,12 +35,12 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
           200: z.array(AccountSchema),
         },
       },
-      handler: async (req, res) => {
+      handler: async () => {
         const service = container.resolve(AccountService)
 
         const accounts = await service.list()
 
-        res.send(accounts)
+        return accounts
       },
     })
     .route({
@@ -49,12 +49,10 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
       schema: {
         response: { 200: AccountSchema },
       },
-      handler: async (req, res) => {
+      handler: async () => {
         const service = container.resolve(AccountService)
 
         await service.create()
-
-        res.send()
       },
     })
     .route({
@@ -68,12 +66,12 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
           200: AccountSchema,
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(AccountService)
 
         const account = await service.read(req.params.accountId)
 
-        res.send(account)
+        return account
       },
     })
     .route({
@@ -92,12 +90,10 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
           })
           .partial(),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(AccountService)
 
         await service.update(req.params.accountId, req.body)
-
-        res.send()
       },
     })
     .route({
@@ -108,12 +104,10 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
           accountId: z.string().uuid(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(AccountService)
 
         await service.delete(req.params.accountId)
-
-        res.send()
       },
     })
     .route({
@@ -124,11 +118,9 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
           accountId: z.string().uuid(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(TemplateService)
 
         await service.applyTemplate(req.params.accountId)
-
-        res.send()
       },
     })

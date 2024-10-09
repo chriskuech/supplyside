@@ -30,7 +30,7 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
           ]),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(QuickBooksService)
 
         const isConnected = await service.isConnected(req.params.accountId)
@@ -40,17 +40,18 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
           const realmId = await service.getAccountRealmId(req.params.accountId)
           const connectedAt = await service.getConnectedAt(req.params.accountId)
 
-          res.status(200).send({
-            status: 'connected',
+          return {
+            status: 'connected' as const,
             companyName: companyInfo.CompanyInfo.CompanyName,
             realmId,
             connectedAt:
               connectedAt?.toISOString() ??
               fail('"quickBooks connected at" not set'),
-          })
+          }
         } else {
           const setupUrl = await service.getSetupUrl()
-          res.status(200).send({ setupUrl, status: 'disconnected' })
+
+          return { status: 'disconnected' as const, setupUrl }
         }
       },
     })
@@ -68,12 +69,12 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
           }),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(QuickBooksService)
 
         await service.pushBill(req.params.accountId, req.params.billResourceId)
 
-        res.send({ success: true })
+        return { success: true }
       },
     })
     .route({
@@ -87,12 +88,10 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
           url: z.string(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(QuickBooksService)
 
         await service.connect(req.params.accountId, req.query.url)
-
-        res.send()
       },
     })
     .route({
@@ -103,11 +102,9 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
           accountId: z.string().uuid(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(QuickBooksService)
 
         await service.pullData(req.params.accountId)
-
-        res.send()
       },
     })

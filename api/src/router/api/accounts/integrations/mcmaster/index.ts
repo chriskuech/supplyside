@@ -1,4 +1,5 @@
 import { container } from '@supplyside/api/di'
+import { NotFoundError } from '@supplyside/api/integrations/fastify/NotFoundError'
 import { McMasterService } from '@supplyside/api/integrations/mcMasterCarr'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -22,18 +23,14 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
           }),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(McMasterService)
 
         const connectedAt = await service.getConnectedAt(req.params.accountId)
 
-        if (connectedAt) {
-          res.status(200).send({
-            connectedAt: connectedAt?.toISOString(),
-          })
-        } else {
-          res.status(404).send()
-        }
+        if (!connectedAt) throw new NotFoundError('Not connected')
+
+        return { connectedAt: connectedAt?.toISOString() }
       },
     })
     .route({
@@ -50,7 +47,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
           }),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(McMasterService)
 
         const url = await service.createPunchOutServiceRequest(
@@ -58,7 +55,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
           req.params.resourceId,
         )
 
-        res.status(200).send({ url })
+        return { url }
       },
     })
     .route({
@@ -73,7 +70,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
           password: z.string(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(McMasterService)
 
         await service.createConnection(
@@ -82,7 +79,7 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
           req.body.password,
         )
 
-        res.status(200).send({})
+        return {}
       },
     })
     .route({
@@ -93,11 +90,11 @@ export const mountMcMasterCarr = async <App extends FastifyInstance>(
           accountId: z.string().uuid(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(McMasterService)
 
         await service.disconnect(req.params.accountId)
 
-        res.status(200).send({})
+        return {}
       },
     })

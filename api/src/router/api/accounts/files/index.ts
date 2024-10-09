@@ -1,5 +1,6 @@
 import { container } from '@supplyside/api/di'
 import { FileService } from '@supplyside/api/domain/file/FileService'
+import { NotFoundError } from '@supplyside/api/integrations/fastify/NotFoundError'
 import { FileSchema } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -44,16 +45,15 @@ export const mountFiles = async <App extends FastifyInstance>(app: App) =>
           200: FileSchema,
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(FileService)
 
         const file = await service.read(req.params.accountId, req.params.fileId)
 
         if (!file) {
-          res.status(404)
-          return
+          throw new NotFoundError('File not found')
         }
 
-        res.send(file)
+        return file
       },
     })

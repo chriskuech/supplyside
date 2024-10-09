@@ -51,11 +51,11 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
           200: z.array(SchemaFieldSchema),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(SchemaFieldService)
         const fields = await service.list(req.params.accountId)
 
-        res.send(fields)
+        return fields
       },
     })
     .route({
@@ -72,11 +72,9 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
           isRequired: z.boolean(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(SchemaFieldService)
         await service.create(req.params.accountId, req.body)
-
-        res.send()
       },
     })
     .route({
@@ -97,11 +95,9 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
           defaultToToday: z.boolean().optional(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(SchemaFieldService)
         await service.update(req.params.accountId, req.params.fieldId, req.body)
-
-        res.send()
       },
     })
     .route({
@@ -113,10 +109,8 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
           fieldId: z.string().uuid(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(SchemaFieldService)
         await service.delete(req.params.accountId, req.params.fieldId)
-
-        res.send()
       },
     })

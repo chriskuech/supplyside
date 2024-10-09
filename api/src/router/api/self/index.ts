@@ -3,6 +3,7 @@ import {
   UpdateUserSchema,
   UserService,
 } from '@supplyside/api/domain/user/UserService'
+import { NotFoundError } from '@supplyside/api/integrations/fastify/NotFoundError'
 import { UserSchema } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -22,14 +23,14 @@ export const mountSelf = async <App extends FastifyInstance>(app: App) =>
           200: UserSchema,
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(UserService)
 
         const user = await service.readSelf(req.params.userId)
 
-        if (!user) return res.status(404).send()
+        if (!user) throw new NotFoundError('User not found')
 
-        res.send(user)
+        return user
       },
     })
     .route({
@@ -41,11 +42,9 @@ export const mountSelf = async <App extends FastifyInstance>(app: App) =>
         }),
         body: UpdateUserSchema,
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(UserService)
 
         await service.updateSelf(req.params.userId, req.body)
-
-        res.send()
       },
     })

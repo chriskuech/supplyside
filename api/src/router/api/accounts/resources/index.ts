@@ -38,7 +38,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         },
         tags: ['Resources'],
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(ResourceService)
 
         const resources = await service.list(
@@ -49,7 +49,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           },
         )
 
-        res.status(200).send(resources)
+        return resources
       },
     })
     .route({
@@ -68,7 +68,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           200: z.array(ValueResourceSchema),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(ResourceService)
 
         const resources = await service.findResourcesByNameOrPoNumber(
@@ -80,7 +80,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           },
         )
 
-        res.status(200).send(resources)
+        return resources
       },
     })
     .route({
@@ -106,7 +106,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           200: ResourceSchema,
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(ResourceService)
 
         const resource = await service.create(
@@ -118,7 +118,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           req.body.userId,
         )
 
-        res.status(200).send(resource)
+        return resource
       },
     })
     .route({
@@ -140,7 +140,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           }),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(ResourceService)
 
         const resource = await service.readByKey(
@@ -149,7 +149,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           req.query.resourceKey,
         )
 
-        res.status(200).send(pick(resource, ['id', 'key', 'type']))
+        return pick(resource, ['id', 'key', 'type'])
       },
     })
     .route({
@@ -164,7 +164,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           200: ResourceSchema,
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(ResourceService)
 
         const resource = await service.read(
@@ -172,7 +172,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           req.params.resourceId,
         )
 
-        res.send(resource)
+        return resource
       },
     })
     .route({
@@ -193,7 +193,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           200: ResourceSchema,
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(ResourceService)
 
         const resource = await service.update(
@@ -204,7 +204,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           },
         )
 
-        res.status(200).send(resource)
+        return resource
       },
     })
     .route({
@@ -216,12 +216,10 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           resourceId: z.string().uuid(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(ResourceService)
 
         await service.delete(req.params.accountId, req.params.resourceId)
-
-        res.send()
       },
     })
     .route({
@@ -236,7 +234,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           200: ResourceSchema,
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(ResourceService)
 
         const resource = await service.cloneResource(
@@ -244,7 +242,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           req.params.resourceId,
         )
 
-        res.send(resource)
+        return resource
       },
     })
     .route({

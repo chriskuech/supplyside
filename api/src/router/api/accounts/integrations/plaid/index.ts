@@ -20,14 +20,14 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
           }),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(PlaidService)
 
         const token = await service.getPlaidToken(req.params.accountId)
 
-        res.send({
+        return {
           token,
-        })
+        }
       },
     })
     .route({
@@ -49,15 +49,15 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
           }),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(PlaidService)
 
         const accounts = await service.getPlaidAccounts(req.params.accountId)
 
-        res.send({
+        return {
           accounts: accounts.map((a) => ({ id: a.account_id, name: a.name })),
           connectedAt: new Date().toISOString(),
-        })
+        }
       },
     })
     .route({
@@ -71,11 +71,9 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
           token: z.string().min(1),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(PlaidService)
         await service.createConnection(req.params.accountId, req.query.token)
-
-        res.send()
       },
     })
     .route({
@@ -86,11 +84,9 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
           accountId: z.string().uuid(),
         }),
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(PlaidService)
         await service.deletePlaidToken(req.params.accountId)
-
-        res.send()
       },
     })
     .route({
@@ -104,13 +100,13 @@ export const mountPlaid = async <App extends FastifyInstance>(app: App) =>
           200: z.object({ token: z.string() }),
         },
       },
-      handler: async (req, res) => {
+      handler: async (req) => {
         const service = container.resolve(PlaidService)
 
         const { link_token } = await service.createLinkToken(
           req.params.accountId,
         )
 
-        res.send({ token: link_token })
+        return { token: link_token }
       },
     })
