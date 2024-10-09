@@ -6,7 +6,7 @@ export default async function Logout() {
   async function handleLogout() {
     'use server'
 
-    clearSession()
+    await clearSession()
     redirect('/', RedirectType.replace)
   }
 
