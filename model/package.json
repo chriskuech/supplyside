@@ -1,5 +1,6 @@
 {
   "name": "@supplyside/model",
+  "type": "module",
   "devDependencies": {
     "@types/node": "^22.7.4",
     "eslint": "^9.12.0",
