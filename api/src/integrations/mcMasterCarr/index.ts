@@ -14,11 +14,16 @@ import assert, { fail } from 'assert'
 import { readFileSync } from 'fs'
 import handlebars from 'handlebars'
 import { inject, injectable } from 'inversify'
+import { dirname } from 'path'
 import { match } from 'ts-pattern'
+import { fileURLToPath } from 'url'
 import { parseStringPromise } from 'xml2js'
 import { PrismaService } from '../PrismaService'
 import { McMasterInvalidCredentials } from './errors'
 import { RenderPOSRTemplateParams, posrResponseSchema } from './types'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 @injectable()
 export class McMasterService {
@@ -432,7 +437,7 @@ export class McMasterService {
 
 function renderTemplate(data: RenderPOSRTemplateParams): string {
   const templateFile = readFileSync(
-    `${import.meta.url}/data/mcmaster_posr_template.xml.hbs`,
+    `${__dirname}/data/mcmaster_posr_template.xml.hbs`,
     { encoding: 'utf-8' },
   )
   const template = handlebars.compile(templateFile)
