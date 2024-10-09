@@ -100,7 +100,7 @@ export const mountSessions = async <App extends FastifyInstance>(app: App) =>
     })
     .route({
       method: 'DELETE',
-      url: '/',
+      url: '/:sessionId',
       schema: {
         params: z.object({
           sessionId: z.string(),
