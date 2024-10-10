@@ -1,6 +1,8 @@
 'use client'
-import { Link } from '@mui/material'
 import { useConfirmation } from '@/lib/confirmation'
+import LoadingButton from '@/lib/ux/LoadingButton'
+import { useAsyncCallback } from '@/hooks/useAsyncCallback'
+import { disconnect } from '@/actions/quickBooks'
 
 type Props = {
   realmId: string
@@ -8,9 +10,14 @@ type Props = {
 
 export default function QuickBooksDisconnectLink({ realmId }: Props) {
   const confirm = useConfirmation()
+  const [{ isLoading }, handleDisconnect] = useAsyncCallback(() =>
+    disconnect(realmId),
+  )
 
   return (
-    <Link
+    <LoadingButton
+      variant="text"
+      isLoading={isLoading}
       onClick={async () => {
         const isConfirmed = await confirm({
           title: 'Disconnect QuickBooks',
@@ -21,10 +28,10 @@ export default function QuickBooksDisconnectLink({ realmId }: Props) {
 
         if (!isConfirmed) return
 
-        window.location.href = `/api/integrations/quickbooks/logout?realmId=${realmId}`
+        handleDisconnect()
       }}
     >
       Disconnect
-    </Link>
+    </LoadingButton>
   )
 }

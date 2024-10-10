@@ -1,4 +1,5 @@
 import 'server-only'
+import { revalidateTag } from 'next/cache'
 import { client } from '.'
 
 export const read = async (accountId: string) => {
@@ -8,6 +9,7 @@ export const read = async (accountId: string) => {
       params: {
         path: { accountId },
       },
+      next: { tags: ['QuickBooks'] },
     },
   )
 
@@ -15,6 +17,8 @@ export const read = async (accountId: string) => {
 }
 
 export const connect = async (accountId: string, url: string) => {
+  revalidateTag('QuickBooks')
+
   const { data } = await client().POST(
     '/api/accounts/{accountId}/integrations/quickbooks/connect/',
     {
@@ -29,6 +33,8 @@ export const connect = async (accountId: string, url: string) => {
 }
 
 export const disconnect = async (realmId: string) => {
+  revalidateTag('QuickBooks')
+
   const { data } = await client().POST('/integrations/quickbooks/disconnect/', {
     params: {
       query: { realmId },
