@@ -6,6 +6,7 @@ import {
   fields,
   isMissingRequiredFields,
   purchaseStatusOptions,
+  resources,
   selectResourceFieldValue,
   selectSchemaField,
 } from '@supplyside/model'
@@ -81,6 +82,11 @@ export default async function PurchaseDetail({
   const hasInvalidFields = isMissingRequiredFields(schema, resource)
   const poFile = selectResourceFieldValue(resource, fields.document)?.file
 
+  const vendorTemplateId = selectResourceFieldValue(resource, fields.vendor)
+    ?.resource?.templateId
+  const isVendorMcMasterCarr =
+    vendorTemplateId === resources.mcMasterCarrVendor.templateId
+
   return (
     <ResourceDetailPage
       lineSchema={lineSchema}
@@ -154,7 +160,7 @@ export default async function PurchaseDetail({
                 mr={3}
               >
                 {isDraft &&
-                  (!purchaseHasLines ? (
+                  (isVendorMcMasterCarr && !purchaseHasLines ? (
                     <PunchoutButton resource={resource} />
                   ) : (
                     <>
