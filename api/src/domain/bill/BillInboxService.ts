@@ -1,7 +1,7 @@
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
+import { BadRequestError } from '@supplyside/api/integrations/fastify/BadRequestError'
 import { fields, selectSchemaFieldUnsafe } from '@supplyside/model'
-import assert from 'assert'
 import { inject, injectable } from 'inversify'
 import { Message } from 'postmark'
 import { AccountService } from '../account/AccountService'
@@ -22,17 +22,23 @@ export class BillInboxService {
   ) {}
 
   async handleMessage(message: Message): Promise<void> {
-    // for some reason this is (sometimes?) wrapped in quotes
-    const accountKey = message.To?.split('@').shift()?.replace(/^"/, '')
+    if (!message.To) throw new BadRequestError('No "To" address found')
 
-    assert(accountKey, 'Account key not found in To: ' + message.To)
+    const accountKey = BillInboxService.parseAllEmails(message.To)
+      .find((email) => email.endsWith('@bills.supplyside.com'))
+      ?.split('@')
+      .shift()
+
+    if (!accountKey)
+      throw new BadRequestError('Could not infer account ID from "To" address')
 
     const account = await this.accountService.readByKey(accountKey)
 
-    if (!account) return
+    if (!account)
+      throw new BadRequestError(`Account not found with key ${accountKey}`)
 
     const attachments =
-      message.Attachments?.filter((a) => a.Name !== 'winmail.dat').map(
+      message.Attachments?.map(
         (attachment) =>
           ({
             content: attachment.Content,
@@ -94,5 +100,13 @@ export class BillInboxService {
     })
 
     await this.billExtractionService.extractContent(account.id, bill.id)
+  }
+
+  private static parseAllEmails(input: string): string[] {
+    const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g
+
+    const matches = input.match(emailRegex)
+
+    return matches ?? []
   }
 }
