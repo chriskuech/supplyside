@@ -43,6 +43,18 @@ const ExtractedBillDataSchema = z.object({
     .describe(
       'The Invoice Number. This is a unique identifier for the Invoice associated with the Bill. If no Invoice Number is found in the Bill, this field should be null/missing.',
     ),
+  invoiceDate: z
+    .string()
+    .nullish()
+    .describe(
+      'Date the Bill was issued. The date should be in ISO 8601 Date Only format, ex: 2023-01-31',
+    ),
+  paymentTerms: z
+    .number()
+    .nullish()
+    .describe(
+      'Payment terms expressed in days. For example, "Net 30" is expressed as 30.',
+    ),
 })
 
 @injectable()
@@ -112,6 +124,26 @@ export class BillExtractionService {
                   fields.invoiceNumber,
                 ).fieldId,
                 valueInput: { string: data.invoiceNumber },
+              },
+            ]
+          : []),
+        ...(data.invoiceDate && !isNaN(new Date(data.invoiceDate).getTime())
+          ? [
+              {
+                fieldId: selectSchemaFieldUnsafe(billSchema, fields.invoiceDate)
+                  .fieldId,
+                valueInput: { date: new Date(data.invoiceDate).toISOString() },
+              },
+            ]
+          : []),
+        ...(data.paymentTerms
+          ? [
+              {
+                fieldId: selectSchemaFieldUnsafe(
+                  billSchema,
+                  fields.paymentTerms,
+                ).fieldId,
+                valueInput: { number: data.paymentTerms },
               },
             ]
           : []),
