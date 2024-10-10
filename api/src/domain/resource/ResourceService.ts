@@ -4,7 +4,6 @@ import { ConflictError } from '@supplyside/api/integrations/fastify/ConflictErro
 import {
   Cost,
   FieldReference,
-  FieldTemplate,
   Resource,
   ResourceType,
   ResourceTypeSchema,
@@ -514,7 +513,7 @@ export class ResourceService {
     })
   }
 
-  private async recalculateSubtotalCost(
+  async recalculateSubtotalCost(
     accountId: string,
     resourceType: ResourceType,
     resourceId: string,
@@ -647,19 +646,6 @@ export class ResourceService {
       })
     }
 
-    // When the Purchase field of a Bill resource has been updated (an Purchase has been linked to a Bill)
-    // Then recalculate the Bill."Subtotal Cost"
-    if (
-      resource.type === 'Bill' &&
-      updatedFields.some(
-        (rf) => rf.field.templateId === fields.purchase.templateId,
-      )
-    ) {
-      await this.recalculateSubtotalCost(accountId, 'Bill', resource.id)
-
-      resource = await this.read(accountId, resource.id)
-    }
-
     // When the Bill.“Invoice Date” field or Bill.“Payment Terms” field changes,
     // Given the “Invoice Date” field and “Payment Terms” fields are not null,
     // Then set “Payment Due Date” = “Invoice Date” + “Payment Terms”
@@ -693,51 +679,6 @@ export class ResourceService {
         })
       }
     }
-
-    // // When the "Bill Files" field is updated,
-    // // Then extract their PO # and Vendor ID
-    // if (
-    //   resource.type === "Bill" &&
-    //   updatedFields.some(
-    //     (rf) => rf.field.templateId === fields.billFiles.templateId
-    //   )
-    // ) {
-    //   await this.billExtractionService.extractContent(accountId, resource.id);
-    // }
-  }
-
-  async linkLines({
-    accountId,
-    fromResourceId,
-    toResourceId,
-    fromResourceField,
-    toResourceField,
-  }: {
-    accountId: string
-    fromResourceId: string
-    toResourceId: string
-    fromResourceField: FieldTemplate
-    toResourceField: FieldTemplate
-  }) {
-    const lineSchema = await this.schemaService.readMergedSchema(
-      accountId,
-      'PurchaseLine',
-    )
-
-    const lines = await this.list(accountId, 'PurchaseLine', {
-      where: {
-        '==': [{ var: fromResourceField.name }, fromResourceId],
-      },
-    })
-
-    await Promise.all(
-      lines.map((line) =>
-        this.updateResourceField(accountId, line.id, {
-          fieldId: selectSchemaFieldUnsafe(lineSchema, toResourceField).fieldId,
-          valueInput: { resourceId: toResourceId },
-        }),
-      ),
-    )
   }
 
   async cloneResource(accountId: string, resourceId: string) {
