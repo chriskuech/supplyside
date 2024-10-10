@@ -71,7 +71,7 @@ jobs:
       - name: Wait for healthcheck
         shell: pwsh
         run: |
-          $timeoutInMinutes = 5
+          $timeoutInMinutes = 10
           $waitInSeconds = 10
 
           $timeout = (Get-Date).AddMinutes($timeoutInMinutes)
