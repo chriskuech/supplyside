@@ -195,7 +195,7 @@ jobs:
         shell: pwsh
         run: |
           $timeoutInMinutes = 5
-          $waitInSeconds = 10
+          $waitInSeconds = 5
 
           $timeout = (Get-Date).AddMinutes($timeoutInMinutes)
 
