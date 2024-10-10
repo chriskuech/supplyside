@@ -40,13 +40,15 @@ export class AccountService {
     return mapAccountModelToEntity(model)
   }
 
-  async readByKey(key: string): Promise<Account> {
-    const model = await this.prisma.account.findUniqueOrThrow({
+  async readByKey(key: string): Promise<Account | null> {
+    const model = await this.prisma.account.findUnique({
       where: {
         key,
       },
       include: accountInclude,
     })
+
+    if (!model) return null
 
     return mapAccountModelToEntity(model)
   }
