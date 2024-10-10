@@ -21,7 +21,7 @@ import BillLink from './tools/BillLink'
 import PreviewPoControl from './tools/PreviewPoControl'
 import DownloadPoControl from './tools/DownloadPoControl'
 import { PurchaseAttachmentsControl } from './tools/PurchaseAttachmentsControl'
-import PunchoutControl from './tools/PunchoutControl'
+import PunchoutButton from './cta/PunchoutButton'
 import PreviewDraftPoButton from '@/app/purchases/[key]/cta/PreviewDraftPoButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
@@ -90,11 +90,6 @@ export default async function PurchaseDetail({
       tools={[
         ...(orderBills?.map((bill) => <BillLink key={bill.id} bill={bill} />) ??
           []),
-        <PunchoutControl
-          key={PunchoutControl.name}
-          purchaseHasLines={purchaseHasLines}
-          resource={resource}
-        />,
         <TrackingControl
           key={TrackingControl.name}
           resourceId={resource.id}
@@ -158,22 +153,25 @@ export default async function PurchaseDetail({
                 spacing={2}
                 mr={3}
               >
-                {isDraft && (
-                  <>
-                    <PreviewDraftPoButton resourceId={resource.id} />
-                    <StatusTransitionButton
-                      isDisabled={hasInvalidFields}
-                      tooltip={
-                        hasInvalidFields
-                          ? 'Please fill in all required fields before submitting'
-                          : undefined
-                      }
-                      resourceId={resource.id}
-                      statusOption={purchaseStatusOptions.submitted}
-                      label="Submit"
-                    />
-                  </>
-                )}
+                {isDraft &&
+                  (!purchaseHasLines ? (
+                    <PunchoutButton resource={resource} />
+                  ) : (
+                    <>
+                      <PreviewDraftPoButton resourceId={resource.id} />
+                      <StatusTransitionButton
+                        isDisabled={hasInvalidFields}
+                        tooltip={
+                          hasInvalidFields
+                            ? 'Please fill in all required fields before submitting'
+                            : undefined
+                        }
+                        resourceId={resource.id}
+                        statusOption={purchaseStatusOptions.submitted}
+                        label="Submit"
+                      />
+                    </>
+                  ))}
                 {status.templateId ===
                   purchaseStatusOptions.submitted.templateId && (
                   <>

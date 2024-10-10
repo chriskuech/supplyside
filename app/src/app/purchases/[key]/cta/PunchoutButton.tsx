@@ -1,6 +1,6 @@
 'use client'
 
-import { Tooltip, IconButton } from '@mui/material'
+import { Tooltip, Button } from '@mui/material'
 import {
   fields,
   Resource,
@@ -13,11 +13,10 @@ import { createPunchOutServiceRequest } from '@/actions/mcMaster'
 import { useDisclosure } from '@/hooks/useDisclosure'
 
 type Props = {
-  purchaseHasLines: boolean
   resource: Resource
 }
 
-export default function PunchoutControl({ resource, purchaseHasLines }: Props) {
+export default function PunchoutButton({ resource }: Props) {
   const { isOpen, open } = useDisclosure()
   const [punchoutSessionUrl, setPunchoutSessionUrl] = useState(
     () => selectResourceFieldValue(resource, fields.punchoutSessionUrl)?.string,
@@ -29,7 +28,7 @@ export default function PunchoutControl({ resource, purchaseHasLines }: Props) {
     const isVendorMcMasterCarr =
       vendorTemplateId === resources.mcMasterCarrVendor.templateId
 
-    if (isVendorMcMasterCarr && !purchaseHasLines && !punchoutSessionUrl) {
+    if (isVendorMcMasterCarr && !punchoutSessionUrl) {
       createPunchOutServiceRequest(resource.id).then((response) => {
         if (!response) return
         setPunchoutSessionUrl(response.url)
@@ -39,13 +38,17 @@ export default function PunchoutControl({ resource, purchaseHasLines }: Props) {
   })
 
   return (
-    !!punchoutSessionUrl &&
-    !purchaseHasLines && (
+    !!punchoutSessionUrl && (
       <>
         <Tooltip title="Continue punchout session">
-          <IconButton onClick={open}>
-            <ShopIcon fontSize="large" />
-          </IconButton>
+          <Button
+            onClick={open}
+            size="large"
+            color="secondary"
+            endIcon={<ShopIcon />}
+          >
+            Continue Punchout
+          </Button>
         </Tooltip>
         {isOpen && punchoutSessionUrl && (
           // TODO: change top and height when moving appBar to side
