@@ -1,11 +1,12 @@
-import Sentry, {
+import {
   fastifyIntegration,
+  init,
   prismaIntegration,
   zodErrorsIntegration,
 } from '@sentry/node'
 import { nodeProfilingIntegration } from '@sentry/profiling-node'
 
-Sentry.init({
+init({
   environment: process.env.SS_ENV,
   enabled: process.env.SS_ENV !== 'development',
 
