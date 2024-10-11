@@ -1,13 +1,19 @@
-import { ResourceType } from '@supplyside/model'
 import { RedirectType, notFound, redirect } from 'next/navigation'
+import { resourceTypes } from '@supplyside/model'
 import { requireSession } from '@/session'
-import 'server-only'
 import { resolveKey } from '@/client/resource'
 
-export const redirectToDrawer = async (
-  resourceType: ResourceType,
-  resourceKey: string,
-) => {
+export default async function CustomersDetail({
+  params: { type: paramsType, key: resourceKey },
+}: {
+  params: { type?: string; key?: string }
+  searchParams: Record<string, unknown>
+}) {
+  const resourceType = resourceTypes.find(
+    (rt) => paramsType?.replace(/s$/, '') === rt.toLowerCase(),
+  )
+  if (!resourceType) notFound()
+
   const key = Number(resourceKey)
   if (isNaN(key)) notFound()
 
