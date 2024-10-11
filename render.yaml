@@ -1,0 +1,56 @@
+
+
+
+services:
+  - type: web
+    runtime: node
+    name: app
+    plan: free
+    buildCommand: npm ci && npm build
+    startCommand: npm start
+    autoDeploy: true
+    repo: 138tech/supplyside
+    branch: main
+    rootDir: app
+    healthCheckPath: /api/health
+    # envVars:
+    #   - key: NEXT_PUBLIC_API_URL
+    #     value: <API_URL_PLACEHOLDER> # Link to the Fastify API service or a placeholder
+    #   - key: OTHER_ENV_VAR
+    #     value: <PLACEHOLDER>
+    region: oregon
+    scaling:
+      minInstances: 1
+      maxInstances: 3
+
+  - type: web
+    name: api
+    runtime: docker
+    plan: free
+    dockerfilePath: .ops/Dockerfile.api
+    repo: 138tech/supplyside
+    branch: main
+    healthCheckPath: /health # Customize if needed
+    autoDeploy: true
+    # envVars:
+    #   - key: PORT
+    #     value: 3000 # Fastify API port
+    #   - key: DATABASE_URL
+    #     fromDatabase:
+    #       name: app-db
+    #       property: connectionString
+    #   - key: OTHER_ENV_VAR
+    #     value: <PLACEHOLDER>
+    region: oregon
+    scaling:
+      minInstances: 1
+
+# databases:
+#   - name: app-db
+#     databaseName: app_db
+#     plan: free
+#     region: oregon
+#     # user: <DB_USER_PLACEHOLDER>
+#     # password: <DB_PASSWORD_PLACEHOLDER>
+#     # databases:
+#     #   - app_db

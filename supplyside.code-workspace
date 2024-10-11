@@ -33,7 +33,8 @@
       "esbenp.prettier-vscode",
       "ruschaaf.extended-embedded-languages",
       "yoavbls.pretty-ts-errors",
-      "linear.linear-open-issue"
+      "linear.linear-open-issue",
+      "redhat.vscode-yaml"
     ]
   }
 }
