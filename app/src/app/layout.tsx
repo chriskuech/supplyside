@@ -5,7 +5,7 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import dynamic from 'next/dynamic'
 import { QuestionMark } from '@mui/icons-material'
 import MuiXLicense from '@/lib/ux/MuiXLicense'
-import { requireSession } from '@/session'
+import { readSession } from '@/session'
 import { readSelf } from '@/client/user'
 import ImpersonationControl from '@/lib/ux/appbar/ImpersonationControl'
 import { readAccount, readAccounts } from '@/client/account'
@@ -22,10 +22,10 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<PropsWithChildren>) {
-  const { userId, accountId } = await requireSession()
+  const sesion = await readSession()
   const [user, account, accounts] = await Promise.all([
-    userId ? readSelf(userId) : null,
-    accountId ? readAccount(accountId) : null,
+    sesion?.userId ? readSelf(sesion.userId) : null,
+    sesion?.accountId ? readAccount(sesion.accountId) : null,
     readAccounts(),
   ])
 
