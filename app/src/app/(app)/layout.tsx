@@ -17,6 +17,7 @@ import { UserMenu } from '@/lib/ux/appbar/UserMenu'
 import { requireSession } from '@/session'
 import { readAccount } from '@/client/account'
 import { readSelf } from '@/client/user'
+import { SIDEBAR_WIDTH } from '@/lib/const'
 
 export default async function Layout({
   children,
@@ -31,7 +32,7 @@ export default async function Layout({
 
   return (
     <Stack direction="row" height="100vh" width="100vw">
-      <Stack width="min-content" m={2} spacing={2}>
+      <Stack width={SIDEBAR_WIDTH} m={2} spacing={2}>
         <Stack justifyContent="center" component={Link} href="/">
           <Logo />
         </Stack>

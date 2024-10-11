@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import ShopIcon from '@mui/icons-material/Shop'
 import { createPunchOutServiceRequest } from '@/actions/mcMaster'
 import { useDisclosure } from '@/hooks/useDisclosure'
+import { SIDEBAR_WIDTH } from '@/lib/const'
 
 type Props = {
   resource: Resource
@@ -40,15 +41,14 @@ export default function PunchoutButton({ resource }: Props) {
         </Button>
       </Tooltip>
       {isOpen && punchoutSessionUrl && (
-        // TODO: change top and height when moving appBar to side
         <iframe
           src={punchoutSessionUrl}
           style={{
             position: 'fixed',
-            top: 64,
-            left: 0,
-            width: '100vw',
-            height: 'calc(100vh - 64px)',
+            top: 0,
+            left: SIDEBAR_WIDTH,
+            width: `calc(100vw - ${SIDEBAR_WIDTH}px`,
+            height: '100vh',
             zIndex: 2000,
           }}
         >
