@@ -263,7 +263,6 @@ const themes = {
         styleOverrides: {
           root: {
             backgroundColor: colors.white,
-            // boxShadow: 'rgba(0, 0, 0, 0.05) 0px 20px 27px 0px',
           },
           columnHeader: {
             backgroundColor: colors.white,
@@ -341,7 +340,6 @@ const themes = {
         styleOverrides: {
           root: {
             backgroundColor: colors.black,
-            // boxShadow: 'rgba(0, 0, 0, 0.5) 0px 20px 27px 0px',
           },
           columnHeader: {
             backgroundColor: colors.black,
