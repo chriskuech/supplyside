@@ -292,7 +292,7 @@ export class McMasterService {
   }
 
   async processPoom(cxmlString: Cxml) {
-    const { items, orderDate, orderId, sender, accountId } =
+    const { lines, orderDate, orderId, sender, accountId } =
       parseCxml(cxmlString)
 
     this.authenticatePoom(sender.domain, sender.identity, sender.sharedSecret)
@@ -313,8 +313,14 @@ export class McMasterService {
       },
     })
 
-    for (const item of items) {
-      const { description, quantity, unitOfMeasure, unitPrice } = item
+    for (const line of lines) {
+      const {
+        description,
+        quantity,
+        unitOfMeasure,
+        unitPrice,
+        supplierPartID,
+      } = line
 
       assert(description && quantity && unitOfMeasure && unitPrice)
 
@@ -337,6 +343,10 @@ export class McMasterService {
       const unitPriceFieldId = selectSchemaFieldUnsafe(
         lineSchema,
         fields.unitCost,
+      ).fieldId
+      const itemNumberFieldId = selectSchemaFieldUnsafe(
+        lineSchema,
+        fields.itemNumber,
       ).fieldId
       const lineUnitofMesureFieldId = selectSchemaFieldUnsafe(
         lineSchema,
@@ -365,6 +375,14 @@ export class McMasterService {
               fieldId: lineUnitofMesureFieldId,
               valueInput: { optionId: lineUnitOfMeasureOptionId },
             },
+            ...(supplierPartID
+              ? [
+                  {
+                    fieldId: itemNumberFieldId,
+                    valueInput: { string: supplierPartID },
+                  },
+                ]
+              : []),
           ],
         },
       )
@@ -428,7 +446,7 @@ function parseCxml(poomCxml: Cxml) {
 
   //items
   const itemsIn = poomCxml.cXML.Message[0]?.PunchOutOrderMessage[0]?.ItemIn
-  const items = itemsIn?.map((item) => ({
+  const lines = itemsIn?.map((item) => ({
     quantity: item.$.quantity,
     supplierPartID: item.ItemID[0]?.SupplierPartID[0],
     supplierPartAuxiliaryID: item.ItemID[0]?.SupplierPartAuxiliaryID[0],
@@ -452,14 +470,14 @@ function parseCxml(poomCxml: Cxml) {
       ),
   }))
 
-  assert(total && items && senderDomain && senderIdentity && sharedSecret)
+  assert(total && lines && senderDomain && senderIdentity && sharedSecret)
 
   return {
     orderId,
     accountId,
     total,
     orderDate,
-    items,
+    lines,
     sender: { domain: senderDomain, identity: senderIdentity, sharedSecret },
   }
 }
