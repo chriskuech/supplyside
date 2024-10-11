@@ -1,4 +1,4 @@
-import { Stack, Typography, Box, Alert } from '@mui/material'
+import { Stack, Typography, Box, Alert, Card } from '@mui/material'
 import { Resource, Schema, ValueInput, fields } from '@supplyside/model'
 import { ResourceTable } from '../table'
 import ItemizedCostLines from '../costs/ItemizedCostLines'
@@ -56,20 +56,29 @@ export default async function LinesAndCosts({
         )}
       </Stack>
       <Stack>
-        <ResourceTable
-          schema={strippedSchema}
-          resources={lines ?? []}
-          isEditable={!isReadOnly}
+        <Card
+          variant="elevation"
           sx={{
+            border: '1px solid',
+            borderColor: 'divider',
             borderBottomRightRadius: 0,
           }}
-          disableColumnFilter
-          disableColumnResize
-          disableColumnMenu
-          disableColumnReorder
-          hideFooter
-          indexed
-        />
+        >
+          <ResourceTable
+            schema={strippedSchema}
+            resources={lines ?? []}
+            isEditable={!isReadOnly}
+            sx={{
+              borderBottomRightRadius: 0,
+            }}
+            disableColumnFilter
+            disableColumnResize
+            disableColumnMenu
+            disableColumnReorder
+            hideFooter
+            indexed
+          />
+        </Card>
         <Box alignSelf="flex-end">
           <ItemizedCostLines resource={resource} isReadOnly={isReadOnly} />
         </Box>

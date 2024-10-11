@@ -1,4 +1,4 @@
-import { Box, Chip, Divider, Paper, Stack, Typography } from '@mui/material'
+import { Box, Card, Chip, Divider, Stack, Typography } from '@mui/material'
 import NextLink from 'next/link'
 import { FC, ReactNode } from 'react'
 import {
@@ -151,17 +151,18 @@ export default async function Layout({
           {user && <UserMenu self={user} />}
         </Stack>
       </Stack>
-      <Paper
+      <Card
         component={Box}
         flexGrow={1}
         margin={1}
         borderRadius={1}
         elevation={0}
-        overflow="auto"
-        maxHeight="100%"
+        variant="elevation"
       >
-        {children}
-      </Paper>
+        <Box height="100%" width="100%" overflow="auto">
+          {children}
+        </Box>
+      </Card>
     </Stack>
   )
 }

@@ -46,13 +46,14 @@ export default async function ListPage({
 
   return (
     <>
-      <Container sx={{ my: 5 }}>
+      {/* the container also has `px: 2`, which can't be overridden normally */}
+      <Container maxWidth="xl" sx={{ py: 2 }}>
         <Stack spacing={4}>
           <Stack direction="row" alignItems="center" gap={1}>
             <Typography
               variant="h3"
               flexGrow={1}
-              sx={{ textShadow: '0px 7px 27px rgba(0, 0, 0, 0.3)' }}
+              // sx={{ textShadow: '0px 7px 27px rgba(0, 0, 0, 0.3)' }}
             >
               {resourceType}s
             </Typography>
