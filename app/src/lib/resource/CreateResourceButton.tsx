@@ -46,7 +46,7 @@ export default function CreateResourceButton({
       endIcon={shouldRedirect && <Add />}
       {...buttonProps}
     >
-      {resourceType}
+      {resourceType.replace(/([a-z])([A-Z])/g, '$1 $2')}
     </Button>
   )
 }

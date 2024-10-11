@@ -51,7 +51,7 @@ export default async function ListPage({
         <Stack spacing={4}>
           <Stack direction="row" alignItems="center" gap={1}>
             <Typography variant="h3" flexGrow={1}>
-              {resourceType}s
+              {resourceType.replace(/([a-z])([A-Z])/g, '$1 $2')}s
             </Typography>
             {[
               ...callToActions,
