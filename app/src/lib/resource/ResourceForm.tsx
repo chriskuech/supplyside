@@ -45,11 +45,27 @@ export default function ResourceForm({
             ? s.fields.at(0)
             : null
 
+        const sectionHasRequiredFields = s.fields.some((f) => f.isRequired)
+
         return (
-          <Accordion key={s.id} defaultExpanded={i === 0} variant="outlined">
+          <Accordion
+            key={s.id}
+            defaultExpanded={i === 0 || sectionHasRequiredFields}
+            variant="outlined"
+          >
             <AccordionSummary expandIcon={<ExpandMore />}>
               <Typography variant="h6" fontWeight="bold">
-                {s.name}
+                {s.name}{' '}
+                {sectionHasRequiredFields && (
+                  <Typography
+                    color="error"
+                    display="inline"
+                    variant="overline"
+                    fontWeight="bold"
+                  >
+                    *
+                  </Typography>
+                )}
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
