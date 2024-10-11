@@ -120,30 +120,26 @@ export default async function Layout({
             />
           </Box>
         </Box>
-        <Box>
-          <Typography variant="overline" color="text.secondary">
-            References
-          </Typography>
-          <Box>
-            <ItemLink
-              icon={<Business fontSize="small" />}
-              title="Customers"
-              href="/customers"
-            />
-            <ItemLink
-              icon={<Storefront fontSize="small" />}
-              title="Vendors"
-              href="/vendors"
-            />
-            <ItemLink
-              icon={<Widgets fontSize="small" />}
-              title="Parts"
-              href="/parts"
-            />
-          </Box>
-        </Box>
 
         <Box flexGrow={1} />
+
+        <Box>
+          <ItemLink
+            icon={<Business fontSize="small" />}
+            title="Customers"
+            href="/customers"
+          />
+          <ItemLink
+            icon={<Storefront fontSize="small" />}
+            title="Vendors"
+            href="/vendors"
+          />
+          <ItemLink
+            icon={<Widgets fontSize="small" />}
+            title="Parts"
+            href="/parts"
+          />
+        </Box>
 
         <Divider />
         <Stack direction="row" justifyContent="space-evenly">
