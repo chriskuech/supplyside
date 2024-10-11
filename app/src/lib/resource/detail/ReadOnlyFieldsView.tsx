@@ -31,12 +31,7 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                   <Stack direction="row" spacing={1} alignItems="center">
                     <Typography variant="overline">{field.name}</Typography>
                     {field.description && (
-                      <Info
-                        color="primary"
-                        // fontSize="small"
-                        sx={{ fontSize: '0.8em' }}
-                        // fontSizeAdjust="0.3em"
-                      />
+                      <Info color="primary" sx={{ fontSize: '0.8em' }} />
                     )}
                   </Stack>
                 </Tooltip>
