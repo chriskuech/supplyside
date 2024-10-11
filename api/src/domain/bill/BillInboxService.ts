@@ -37,6 +37,23 @@ export class BillInboxService {
     if (!account)
       throw new BadRequestError(`Account not found with key ${accountKey}`)
 
+    const meta = {
+      content: JSON.stringify(
+        {
+          subject: message.Subject,
+          from: message.From,
+          to: message.To,
+          cc: message.Cc,
+          bcc: message.Bcc,
+        },
+        null,
+        2,
+      ),
+      encoding: 'utf-8',
+      contentType: 'application/json',
+      fileName: 'email.meta.json',
+    } as const
+
     const attachments =
       message.Attachments?.map(
         (attachment) =>
@@ -74,7 +91,7 @@ export class BillInboxService {
     )
 
     const fileIds = await Promise.all(
-      [...emails, ...attachments].map(async (file) => {
+      [meta, ...emails, ...attachments].map(async (file) => {
         const { id: blobId } = await this.blobService.createBlob(account.id, {
           buffer: Buffer.from(file.content, file.encoding),
           contentType: file.contentType,
