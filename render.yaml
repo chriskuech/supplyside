@@ -6,7 +6,9 @@ services:
     runtime: node
     name: app
     plan: free
-    buildCommand: npm ci && npm run build
+    buildCommand: |
+      pushd ../model && npm ci && popd
+      npm ci && npm run build
     startCommand: npm start
     autoDeploy: true
     repo: https://github.com/138tech/supplyside
