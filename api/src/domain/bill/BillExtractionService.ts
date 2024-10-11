@@ -24,7 +24,7 @@ As output, you will produce a JSON object containing the fields described in the
 You MUST only return high-confidence data. If the data is uncertain or ambiguous, do not include it in the output.
 `
 
-const ExtractedBillDataSchema = z.object({
+export const ExtractedBillDataSchema = z.object({
   vendorName: z
     .string()
     .nullish()
