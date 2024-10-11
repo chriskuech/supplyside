@@ -9,7 +9,7 @@ services:
     buildCommand: npm ci && npm build
     startCommand: npm start
     autoDeploy: true
-    repo: 138tech/supplyside
+    repo: https://github.com/138tech/supplyside
     branch: main
     rootDir: app
     healthCheckPath: /api/health
@@ -22,13 +22,15 @@ services:
     scaling:
       minInstances: 1
       maxInstances: 3
+      targetCPUPercent: 50
+      targetMemoryPercent: 50
 
   - type: web
     name: api
     runtime: docker
     plan: free
     dockerfilePath: .ops/Dockerfile.api
-    repo: 138tech/supplyside
+    repo: https://github.com/138tech/supplyside
     branch: main
     healthCheckPath: /health # Customize if needed
     autoDeploy: true
@@ -44,6 +46,9 @@ services:
     region: oregon
     scaling:
       minInstances: 1
+      maxInstances: 3
+      targetCPUPercent: 50
+      targetMemoryPercent: 50
 
 # databases:
 #   - name: app-db
