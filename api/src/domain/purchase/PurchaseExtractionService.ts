@@ -73,6 +73,22 @@ const ExtractedPurchaseDataSchema = z.object({
     .array(CostSchema)
     .nullish()
     .describe('Additional costs, such as Taxes, Shipping, Fees, etc.'),
+  lineItems: z
+    .array(
+      z.object({
+        itemName: z.string().nullish().describe('The name of the item'),
+        // unitOfMeasure: z.string().nullish().describe('The unit of measure'),
+        quantity: z.number().nullish().describe('The quantity of the item'),
+        unitCost: z.number().nullish().describe('The unit cost of the item'),
+        totalCost: z.number().nullish().describe('The total cost of the item'),
+        needDate: z.string().nullish().describe('The date the item is needed'),
+        itemNumber: z.string().nullish().describe('The item number'),
+      }),
+    )
+    .nullish()
+    .describe(
+      'The individual items in the order. There must be at least one line item in an purchase order.',
+    ),
 })
 
 @injectable()
@@ -218,5 +234,49 @@ export class PurchaseExtractionService {
       ],
       costs: data.itemizedCosts ?? undefined,
     })
+
+    await Promise.all(
+      data.lineItems?.map((lineItem) =>
+        this.resourceService.create(accountId, 'PurchaseLine', {
+          fields: [
+            {
+              fieldId: selectSchemaFieldUnsafe(schema, fields.purchase).fieldId,
+              valueInput: { resourceId },
+            },
+            {
+              fieldId: selectSchemaFieldUnsafe(schema, fields.itemName).fieldId,
+              valueInput: { string: lineItem.itemName },
+            },
+            // {
+            //   fieldId: selectSchemaFieldUnsafe(schema, fields.unitOfMeasure)
+            //     .fieldId,
+            //   valueInput: { string: lineItem.unitOfMeasure },
+            // },
+            {
+              fieldId: selectSchemaFieldUnsafe(schema, fields.quantity).fieldId,
+              valueInput: { number: lineItem.quantity },
+            },
+            {
+              fieldId: selectSchemaFieldUnsafe(schema, fields.unitCost).fieldId,
+              valueInput: { number: lineItem.unitCost },
+            },
+            {
+              fieldId: selectSchemaFieldUnsafe(schema, fields.totalCost)
+                .fieldId,
+              valueInput: { number: lineItem.totalCost },
+            },
+            {
+              fieldId: selectSchemaFieldUnsafe(schema, fields.needDate).fieldId,
+              valueInput: { date: lineItem.needDate },
+            },
+            {
+              fieldId: selectSchemaFieldUnsafe(schema, fields.itemNumber)
+                .fieldId,
+              valueInput: { string: lineItem.itemNumber },
+            },
+          ],
+        }),
+      ) ?? [],
+    )
   }
 }
