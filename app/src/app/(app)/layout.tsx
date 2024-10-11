@@ -122,7 +122,7 @@ export default async function Layout({
         </Box>
         <Box>
           <Typography variant="overline" color="text.secondary">
-            Inventory
+            References
           </Typography>
           <Box>
             <ItemLink
