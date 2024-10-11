@@ -14,11 +14,16 @@ import assert, { fail } from 'assert'
 import { readFileSync } from 'fs'
 import handlebars from 'handlebars'
 import { inject, injectable } from 'inversify'
+import { dirname } from 'path'
 import { match } from 'ts-pattern'
+import { fileURLToPath } from 'url'
 import { parseStringPromise } from 'xml2js'
 import { PrismaService } from '../PrismaService'
 import { BadRequestError } from '../fastify/BadRequestError'
 import { RenderPOSRTemplateParams, posrResponseSchema } from './types'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 @injectable()
 export class McMasterService {
@@ -309,13 +314,7 @@ export class McMasterService {
     })
 
     for (const item of items) {
-      const {
-        description,
-        quantity,
-        unitOfMeasure,
-        unitPrice,
-        supplierPartID,
-      } = item
+      const { description, quantity, unitOfMeasure, unitPrice } = item
 
       assert(description && quantity && unitOfMeasure && unitPrice)
 
@@ -343,10 +342,6 @@ export class McMasterService {
         lineSchema,
         fields.unitOfMeasure,
       ).fieldId
-      const itemNumberFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.itemNumber,
-      ).fieldId
       const lineUnitOfMeasureOptionId = selectSchemaFieldOptionUnsafe(
         lineSchema,
         fields.unitOfMeasure,
@@ -370,14 +365,6 @@ export class McMasterService {
               fieldId: lineUnitofMesureFieldId,
               valueInput: { optionId: lineUnitOfMeasureOptionId },
             },
-            ...(supplierPartID
-              ? [
-                  {
-                    fieldId: itemNumberFieldId,
-                    valueInput: { string: supplierPartID },
-                  },
-                ]
-              : []),
           ],
         },
       )
@@ -402,7 +389,7 @@ export class McMasterService {
 
 function renderTemplate(data: RenderPOSRTemplateParams): string {
   const templateFile = readFileSync(
-    `${process.cwd()}/src/data/mcmaster_posr_template.xml.hbs`,
+    `${__dirname}/data/mcmaster_posr_template.xml.hbs`,
     { encoding: 'utf-8' },
   )
   const template = handlebars.compile(templateFile)
