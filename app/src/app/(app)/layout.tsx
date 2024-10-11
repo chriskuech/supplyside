@@ -44,20 +44,12 @@ export default async function Layout({
               icon={<Build fontSize="small" />}
             />
             <ItemLink
-              title="New Jobs"
-              href="/jobs?filter=%7B%22items%22%3A%5B%7B%22field%22%3A%2245071e3b-1fa0-4517-9676-e120d59c0822%22%2C%22operator%22%3A%22isAnyOf%22%2C%22id%22%3A78408%2C%22value%22%3A%5B%22Draft%22%2C%22Quoted%22%5D%7D%5D%2C%22quickFilterValues%22%3A%5B%5D%7D"
-            />
-            <ItemLink
               title="Open Jobs"
-              href="/jobs?filter=%7B%22items%22%3A%5B%7B%22field%22%3A%2245071e3b-1fa0-4517-9676-e120d59c0822%22%2C%22operator%22%3A%22isAnyOf%22%2C%22id%22%3A78408%2C%22value%22%3A%5B%22Ordered%22%2C%22In%20Process%22%2C%22Shipped%22%2C%22Invoiced%22%5D%7D%5D%2C%22quickFilterValues%22%3A%5B%5D%7D"
+              href='/jobs?filter=%7B"items"%3A%5B%7B"field"%3A"45071e3b-1fa0-4517-9676-e120d59c0822"%2C"operator"%3A"isAnyOf"%2C"id"%3A91182%2C"value"%3A%5B"2fdc9fdd-e8a5-4f85-ac54-53e1c283c8c1"%2C"676a1fbd-3ac6-40f1-b85e-21b5bc04536a"%2C"733b4f1d-57de-402a-ad34-65125aa828f7"%2C"c363420a-eecc-4ed0-9cdb-e264d8a8004e"%2C"a3011ed0-618b-4bed-b1d8-f5bdfd4c9925"%5D%7D%5D%2C"quickFilterValues"%3A%5B%5D%7D'
             />
             <ItemLink
-              title="Invoiced"
-              href="/jobs?filter=%7B%22items%22%3A%5B%7B%22field%22%3A%2245071e3b-1fa0-4517-9676-e120d59c0822%22%2C%22operator%22%3A%22isAnyOf%22%2C%22id%22%3A78408%2C%22value%22%3A%5B%22Invoiced%22%5D%7D%5D%2C%22quickFilterValues%22%3A%5B%5D%7D"
-            />
-            <ItemLink
-              title="Paid"
-              href="/jobs?filter=%7B%22items%22%3A%5B%7B%22field%22%3A%2245071e3b-1fa0-4517-9676-e120d59c0822%22%2C%22operator%22%3A%22isAnyOf%22%2C%22id%22%3A78408%2C%22value%22%3A%5B%22Paid%22%5D%7D%5D%2C%22quickFilterValues%22%3A%5B%5D%7D"
+              title="Closed Jobs"
+              href='/jobs?filter=%7B"items"%3A%5B%7B"field"%3A"45071e3b-1fa0-4517-9676-e120d59c0822"%2C"operator"%3A"isAnyOf"%2C"id"%3A91182%2C"value"%3A%5B"97b63da6-6811-4b6a-a4ca-bd8d0a2a4323"%2C"5e42f169-a781-4669-8008-ed619066ee10"%5D%7D%5D%2C"quickFilterValues"%3A%5B%5D%7D'
             />
             <ItemLink
               title="Lines"
@@ -78,11 +70,11 @@ export default async function Layout({
             />
             <ItemLink
               title="Open Purchases"
-              href="/purchases?filter=%7B%22items%22%3A%5B%7B%22field%22%3A%222e96b5eb-ce9e-4600-baaa-b166ca1cfc00%22%2C%22operator%22%3A%22isAnyOf%22%2C%22id%22%3A66054%2C%22value%22%3A%5B%22Draft%22%2C%22Submitted%22%2C%22Approved%22%2C%22Purchased%22%5D%7D%5D%2C%22quickFilterValues%22%3A%5B%5D%7D"
+              href='/purchases?filter=%7B"items"%3A%5B%7B"field"%3A"2e96b5eb-ce9e-4600-baaa-b166ca1cfc00"%2C"operator"%3A"isAnyOf"%2C"id"%3A79188%2C"value"%3A%5B"d71a14c4-8e37-4546-a5fe-38c93bcd26e9"%2C"26b564b8-42d7-4bbc-b27a-2cb96cce19b8"%2C"6bb96a3a-9bdb-4d39-a028-ec3e18183237"%2C"4d76a126-7945-420f-b81a-2c39081318a7"%5D%7D%5D%2C"quickFilterValues"%3A%5B%5D%7D'
             />
             <ItemLink
-              title="Received"
-              href="/purchases?filter=%7B%22items%22%3A%5B%7B%22field%22%3A%222e96b5eb-ce9e-4600-baaa-b166ca1cfc00%22%2C%22operator%22%3A%22isAnyOf%22%2C%22id%22%3A66054%2C%22value%22%3A%5B%22Received%22%5D%7D%5D%2C%22quickFilterValues%22%3A%5B%5D%7D"
+              title="Closed Purchases"
+              href='/purchases?filter=%7B"items"%3A%5B%7B"field"%3A"2e96b5eb-ce9e-4600-baaa-b166ca1cfc00"%2C"operator"%3A"isAnyOf"%2C"id"%3A79188%2C"value"%3A%5B"d704f4b9-6f2d-4c11-931b-bfe298adec35"%2C"c98639c7-ecc9-4f93-93d3-24c467761bcc"%5D%7D%5D%2C"quickFilterValues"%3A%5B%5D%7D'
             />
             <ItemLink
               title="Lines"
@@ -102,16 +94,12 @@ export default async function Layout({
               icon={<Receipt fontSize="small" />}
             />
             <ItemLink
-              title="New Bills"
-              href="/bills?filter=%7B%22items%22%3A%5B%7B%22field%22%3A%2214be6f56-c5af-48e7-be69-303439197029%22%2C%22operator%22%3A%22isAnyOf%22%2C%22id%22%3A38677%2C%22value%22%3A%5B%22Draft%22%5D%2C%22fromInput%22%3A%22%3Ar5b%3A%22%7D%5D%2C%22quickFilterValues%22%3A%5B%5D%7D"
-            />
-            <ItemLink
               title="Unpaid Bills"
-              href="/bills?filter=%7B%22items%22%3A%5B%7B%22field%22%3A%2214be6f56-c5af-48e7-be69-303439197029%22%2C%22operator%22%3A%22doesNotEqual%22%2C%22id%22%3A38677%2C%22value%22%3A%22Paid%22%2C%22fromInput%22%3A%22%3Ar6s%3A%22%7D%5D%2C%22quickFilterValues%22%3A%5B%5D%7D"
+              href='/bills?filter=%7B"items"%3A%5B%7B"field"%3A"14be6f56-c5af-48e7-be69-303439197029"%2C"operator"%3A"isAnyOf"%2C"id"%3A32869%2C"value"%3A%5B"1fab6b3c-aa21-457f-aa55-4eebeac60b76"%2C"bef7fae8-1e82-433c-ac5e-31e5c43763e9"%2C"ab178575-e75d-45de-a905-72153c72fa7c"%5D%7D%5D%2C"quickFilterValues"%3A%5B%5D%7D'
             />
             <ItemLink
-              title="Paid Bills"
-              href="/bills?filter=%7B%22items%22%3A%5B%7B%22field%22%3A%2214be6f56-c5af-48e7-be69-303439197029%22%2C%22operator%22%3A%22equals%22%2C%22id%22%3A38677%2C%22value%22%3A%22Paid%22%2C%22fromInput%22%3A%22%3Ar6s%3A%22%7D%5D%2C%22quickFilterValues%22%3A%5B%5D%7D"
+              title="Closed Bills"
+              href='/bills?filter=%7B"items"%3A%5B%7B"field"%3A"14be6f56-c5af-48e7-be69-303439197029"%2C"operator"%3A"isAnyOf"%2C"id"%3A32869%2C"value"%3A%5B"ba775746-a2ba-4ef9-b20e-3a611f5581bd"%2C"93a44743-2890-49d8-9087-87d92d6dea7d"%5D%7D%5D%2C"quickFilterValues"%3A%5B%5D%7D'
             />
             <ItemLink
               title="Lines"
