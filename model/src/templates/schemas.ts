@@ -90,6 +90,8 @@ export const schemas: SchemaTemplate[] = [
           fields.needDate,
           fields.totalCost,
           fields.customer,
+          fields.paymentTerms,
+          fields.paymentDueDate,
         ],
       },
     ],
