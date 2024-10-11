@@ -6,7 +6,7 @@ import {
   selectResourceFieldValue,
 } from '@supplyside/model'
 import StatusTrackerView from '@/lib/ux/StatusTrackerView'
-//TODO: missing in progress and paid statuses, do we delete them?
+
 const happyPath: string[] = [
   jobStatusOptions.draft.name,
   jobStatusOptions.ordered.name,
