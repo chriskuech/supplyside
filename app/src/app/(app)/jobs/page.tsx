@@ -1,9 +1,7 @@
 import { Alert } from '@mui/material'
 import { readAccount } from '@/client/account'
-import { config } from '@/config'
 import ListPage from '@/lib/resource/ListPage'
 import { requireSession } from '@/session'
-import CopyableTextInput from '@/lib/ux/CopyableTextInput'
 
 export default async function Jobs({
   searchParams,
@@ -20,13 +18,15 @@ export default async function Jobs({
       tableKey="jobsList"
       resourceType="Job"
       searchParams={searchParams}
-      callToActions={[
-        <CopyableTextInput
-          key={CopyableTextInput.name}
-          label="Jobs Inbox"
-          content={`${account.key}@${config().JOBS_EMAIL_DOMAIN}`}
-        />,
-      ]}
+      callToActions={
+        [
+          // <CopyableTextInput
+          //   key={CopyableTextInput.name}
+          //   label="Jobs Inbox"
+          //   content={`${account.key}@${config().JOBS_EMAIL_DOMAIN}`}
+          // />,
+        ]
+      }
     />
   )
 }
