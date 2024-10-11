@@ -6,10 +6,10 @@ import {
   selectResourceFieldValue,
 } from '@supplyside/model'
 import { Container, Stack, Typography } from '@mui/material'
-import EditControl from '../tools/editControl'
-import CancelControl from '../tools/CancelControl'
 import StatusTransitionButton from './cta/StatusTransitionButton'
 import JobStatusTracker from './JobStatusTracker'
+import EditControl from './tools/EditControl'
+import CancelControl from './tools/CancelControl'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { readResources } from '@/actions/resource'
