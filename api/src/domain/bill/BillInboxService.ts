@@ -25,7 +25,7 @@ export class BillInboxService {
     if (!message.To) throw new BadRequestError('No "To" address found')
 
     const accountKey = BillInboxService.parseAllEmails(message.To)
-      .find((email) => email.endsWith('@bills.supplyside.com'))
+      .find((email) => email.endsWith('.supplyside.io'))
       ?.split('@')
       .shift()
 
