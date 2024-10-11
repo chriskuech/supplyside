@@ -8,12 +8,17 @@ services:
     plan: free
     buildCommand: |
       pushd ../model && npm ci && popd
+      pushd ../api &&
+        npm ci &&
+        npm run gen:prisma &&
+        npm run build &&
+        npm run gen:client &&
+        popd
       npm ci && npm run build
-    startCommand: npm start
+    startCommand: pushd app && npm run start
     autoDeploy: true
     repo: https://github.com/138tech/supplyside
     branch: main
-    rootDir: app
     healthCheckPath: /api/health
     # envVars:
     #   - key: NEXT_PUBLIC_API_URL
