@@ -64,13 +64,18 @@ export default async function JobsDetail({
                 resourceId={resource.id}
                 statusOption={jobStatusOptions.ordered}
                 label="Ordered"
+                tooltip={
+                  hasInvalidFields || !jobHasLines
+                    ? 'Please fill in all required fields and add at least one Line before submitting'
+                    : undefined
+                }
               />
             )}
             {status.templateId === jobStatusOptions.ordered.templateId && (
               <StatusTransitionButton
                 resourceId={resource.id}
                 statusOption={jobStatusOptions.inProcess}
-                label="In process"
+                label="In Process"
               />
             )}
             {status.templateId === jobStatusOptions.inProcess.templateId && (
