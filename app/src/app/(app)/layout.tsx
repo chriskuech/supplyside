@@ -71,10 +71,10 @@ export default async function Layout({
   assert(billSchema, 'Bill schema not found')
 
   const jobStatusField = selectSchemaFieldUnsafe(jobSchema, fields.jobStatus)
-  const jobStatusDraftOptionId = selectSchemaFieldOptionUnsafe(
+  const jobStatusPaidOptionId = selectSchemaFieldOptionUnsafe(
     jobSchema,
     fields.jobStatus,
-    jobStatusOptions.draft,
+    jobStatusOptions.paid,
   ).id
   const jobStatusCanceledOptionId = selectSchemaFieldOptionUnsafe(
     jobSchema,
@@ -87,7 +87,7 @@ export default async function Layout({
       {
         field: jobStatusField.fieldId,
         operator: 'isAnyOf',
-        value: [jobStatusDraftOptionId, jobStatusCanceledOptionId],
+        value: [jobStatusPaidOptionId, jobStatusCanceledOptionId],
       },
     ],
   }
@@ -100,7 +100,7 @@ export default async function Layout({
         value: jobStatusField.options
           .filter(
             (option) =>
-              ![jobStatusDraftOptionId, jobStatusCanceledOptionId].includes(
+              ![jobStatusPaidOptionId, jobStatusCanceledOptionId].includes(
                 option.id,
               ),
           )
