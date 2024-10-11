@@ -8,7 +8,7 @@ import { nodeProfilingIntegration } from '@sentry/profiling-node'
 
 init({
   environment: process.env.SS_ENV,
-  enabled: process.env.SS_ENV !== 'development',
+  enabled: !!process.env.SS_ENV && process.env.SS_ENV !== 'development',
 
   dsn: 'https://889d72f14e15ac08f76d686aa96f5239@o4507972004610048.ingest.us.sentry.io/4508084675477504',
   integrations: [

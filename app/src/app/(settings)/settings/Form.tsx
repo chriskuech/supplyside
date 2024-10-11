@@ -4,8 +4,8 @@ import { Avatar, Button, Stack, TextField, Typography } from '@mui/material'
 import { CloudUpload } from '@mui/icons-material'
 import { useState } from 'react'
 import { User } from '@supplyside/model'
-import { getProfilePicPath } from '../api/download/[filename]/util'
 import { Errors, handleSaveSettings } from './actions'
+import { getProfilePicPath } from '@/app/api/download/[filename]/util'
 import { useImagePreview } from '@/hooks/useImagePreview'
 
 type Props = {
