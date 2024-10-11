@@ -679,6 +679,36 @@ export class ResourceService {
         })
       }
     }
+
+    // When the {Job,Purchase}.“Need Date” field or {Job,Purchase}.“Payment Terms” field changes,
+    // Given the “Need Date” field and “Payment Terms” fields are not null,
+    // Then set “Payment Due Date” = “Need Date” + “Payment Terms”
+    if (
+      (resource.type === 'Job' || resource.type === 'Purchase') &&
+      updatedFields.some(
+        (rf) =>
+          rf.field.templateId === fields.needDate.templateId ||
+          rf.field.templateId === fields.paymentTerms.templateId,
+      )
+    ) {
+      const needDate = selectResourceFieldValue(resource, fields.needDate)?.date
+      const paymentTerms = selectResourceFieldValue(
+        resource,
+        fields.paymentTerms,
+      )?.number
+
+      if (!isNullish(needDate) && !isNullish(paymentTerms)) {
+        await this.updateResourceField(accountId, resource.id, {
+          fieldId: selectSchemaFieldUnsafe(schema, fields.paymentDueDate)
+            .fieldId,
+          valueInput: {
+            date: new Date(
+              new Date(needDate).getTime() + paymentTerms * millisecondsPerDay,
+            ).toISOString(),
+          },
+        })
+      }
+    }
   }
 
   async cloneResource(accountId: string, resourceId: string) {
