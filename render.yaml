@@ -7,8 +7,8 @@ services:
     name: app
     plan: free
     buildCommand: |
-      pushd ../model && npm ci && popd
-      pushd ../api &&
+      pushd model && npm ci && popd
+      pushd api &&
         npm ci &&
         npm run gen:prisma &&
         npm run build &&
