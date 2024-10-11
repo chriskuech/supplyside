@@ -1,9 +1,17 @@
-import { Box, CssBaseline, Fab } from '@mui/material'
+import {
+  Box,
+  CssBaseline,
+  Fab,
+  IconButton,
+  Stack,
+  Tooltip,
+} from '@mui/material'
 import type { Metadata } from 'next'
 import { PropsWithChildren } from 'react'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import dynamic from 'next/dynamic'
-import { QuestionMark } from '@mui/icons-material'
+import { ManageAccounts, QuestionMark } from '@mui/icons-material'
+import NextLink from 'next/link'
 import MuiXLicense from '@/lib/ux/MuiXLicense'
 import { readSession } from '@/session'
 import { readSelf } from '@/client/user'
@@ -50,19 +58,26 @@ export default async function RootLayout({
               {children}
             </Box>
             {user?.isGlobalAdmin && account && accounts ? (
-              <Fab
-                color="warning"
+              <Stack
+                direction="row"
+                bgcolor="warning.main"
+                p={0.5}
+                spacing={0.5}
+                borderRadius={0.5}
                 sx={{
                   width: 400,
                   position: 'fixed',
                   bottom: '2rem',
                   right: '2rem',
-                  borderRadius: 1,
-                  padding: 1,
                 }}
               >
+                <Tooltip title="Manage Accounts">
+                  <IconButton component={NextLink} href="/accounts">
+                    <ManageAccounts />
+                  </IconButton>
+                </Tooltip>
                 <ImpersonationControl account={account} accounts={accounts} />
-              </Fab>
+              </Stack>
             ) : (
               <Fab
                 color="primary"
