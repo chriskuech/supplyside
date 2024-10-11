@@ -142,7 +142,6 @@ export const schemas: SchemaTemplate[] = [
           fields.purchaseDescription,
           fields.issuedDate,
           fields.purchaseNotes,
-          fields.needDate,
         ],
       },
       {
@@ -151,7 +150,6 @@ export const schemas: SchemaTemplate[] = [
           fields.billingAddress,
           fields.currency,
           fields.paymentTerms,
-          fields.paymentDueDate,
           fields.paymentMethod,
           fields.taxable,
         ],

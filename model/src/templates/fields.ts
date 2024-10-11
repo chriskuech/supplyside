@@ -313,7 +313,6 @@ const _fields = {
     name: 'Need Date',
     type: 'Date',
     description: 'Represents the latest delivery date',
-    isRequired: true,
   },
   otherNotes: {
     templateId: 'ca79749f-b8f0-4a76-b4bf-080fae2d229b',
