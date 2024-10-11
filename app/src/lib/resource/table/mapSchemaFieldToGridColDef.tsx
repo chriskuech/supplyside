@@ -22,6 +22,7 @@ import {
   GridFilterOperator,
   gridNumberComparator,
   gridStringOrNumberComparator,
+  getGridSingleSelectOperators,
 } from '@mui/x-data-grid'
 import { MutableRefObject } from 'react'
 import { GridApiCommunity } from '@mui/x-data-grid/internals'
@@ -60,16 +61,11 @@ const wrapFilterOperator = (
         .with('File', () => value.file?.name)
         .with('User', () => value.user?.name)
         .with('Resource', () => value.resource?.name)
-        .with('Select', () => value.option?.name)
+        .with('Select', () => value.option?.id)
         .with('Files', () =>
           value.files.reduce((value, file) => `${value} ${file.name}`, ''),
         )
-        .with('MultiSelect', () =>
-          value.options.reduce(
-            (value, option) => `${value} ${option.name}`,
-            '',
-          ),
-        )
+        .with('MultiSelect', () => value.options.map((option) => option.id))
         .exhaustive()
       return innerFilterFn(mappedValue, row, col, apiRef)
     }
@@ -116,7 +112,17 @@ export const mapSchemaFieldToGridColDef = (
   editable:
     options.isEditable && !findTemplateField(field.templateId)?.isDerived,
 
-  type: 'custom',
+  ...(['Select', 'MultiSelect'].includes(field.type)
+    ? {
+        type: 'singleSelect',
+        valueOptions: field.options.map((option) => ({
+          label: option.name,
+          value: option.id,
+        })),
+      }
+    : {
+        type: 'custom',
+      }),
 
   filterOperators: match(field.type)
     .with(
@@ -129,14 +135,15 @@ export const mapSchemaFieldToGridColDef = (
         'Text',
         'Textarea',
         'User',
-        'Select',
-        'MultiSelect',
       ),
       () => getGridStringOperators(),
     )
     .with('Checkbox', () => getGridBooleanOperators())
     .with('Date', () => getGridDateOperators())
     .with(P.union('Money', 'Number'), () => getGridNumericOperators())
+    .with(P.union('Select', 'MultiSelect'), () =>
+      getGridSingleSelectOperators(),
+    )
     .exhaustive()
     .map((operator) => wrapFilterOperator(operator, field.type)),
 
