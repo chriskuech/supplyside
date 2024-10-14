@@ -1,7 +1,7 @@
 import { Stack, Typography, Box, Alert, Card } from '@mui/material'
 import { FieldTemplate, Resource, Schema, ValueInput } from '@supplyside/model'
 import { ResourceTable } from '../table'
-import ItemizedCostLines from '../costs/ItemizedCostLines'
+import ItemizedCosts from '../costs/ItemizedCosts'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { JsonLogic, readResources } from '@/client/resource'
 
@@ -77,7 +77,7 @@ export default async function LinesAndCosts({
           />
         </Card>
         <Box alignSelf="flex-end">
-          <ItemizedCostLines resource={resource} isReadOnly={isReadOnly} />
+          <ItemizedCosts resource={resource} isReadOnly={isReadOnly} />
         </Box>
       </Stack>
     </Stack>
