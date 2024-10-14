@@ -97,6 +97,5 @@ export const mapResourceToValueResource = (
   name:
     selectResourceFieldValue(resource, fields.name)?.string ??
     selectResourceFieldValue(resource, fields.poNumber)?.string ??
-    selectResourceFieldValue(resource, fields.vendor)?.string ??
     resource.key.toString(),
 })
