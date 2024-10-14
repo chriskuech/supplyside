@@ -1,7 +1,5 @@
 import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
 import {
-  AddressSchema,
-  ContactSchema,
   fields,
   selectResourceFieldValue,
   selectSchemaFieldUnsafe,
@@ -36,10 +34,7 @@ Purchases and Quotes all share a common structure consisting of 3 sections:
 
 * "poNumber" - a unique identifier for the Purchase Order. This is typically a number or code that is assigned by the vendor or supplier.
 * "vendorName" - the name of the vendor or supplier who will be fulfilling the Purchase Order.
-* "poRecipient" - the primary contact for the Purchase Order. This is the individual at the vendor or supplier who will receive the order.
 * "purchaseDescription" - a brief, internal description of the Purchase Order. If there is no description, then generate your own summary of the document to put in this field.
-* "issuedDate" - the date the Purchase Order was issued. This is typically the date the order was created.
-* "purchaseNotes" - any additional notes included in the Purchase Order.
 
 ## Line Items
 
@@ -56,7 +51,6 @@ Each Line Item has the following fields:
 * "quantity" - the quantity of the item being ordered.
 * "unitCost" - the unit cost of the item being ordered.
 * "totalCost" - the total cost of the item being ordered (quantity * unitCost).
-
 
 ## Itemized Costs
 
@@ -81,29 +75,10 @@ Use the ISO 8601 Date Only format, ex: 2023-01-31.
 {
   "poNumber": "123456789",
   "vendorName": "Acme Corp.",
-  "poRecipient": {
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john.doe@acme.com"
-  },
   "purchaseDescription": "Purchase of Item 1",
-  "issuedDate": "2023-01-01",
-  "purchaseNotes": "Purchase notes",
-  "billingAddress": {
-    "street": "123 Main St.",
-    "city": "Anytown",
-    "state": "CA",
-    "zip": "12345"
-  },
   "paymentTerms": 30,
   "paymentMethod": "Credit Card",
   "taxable": true,
-  "shippingAddress": {
-    "street": "123 Main St.",
-    "city": "Anytown",
-    "state": "CA",
-    "zip": "12345"
-  },
   "shippingMethod": "FedEx",
   "shippingAccountNumber": "123456789",
   "incoterms": "FedEx",
@@ -153,16 +128,11 @@ Use the ISO 8601 Date Only format, ex: 2023-01-31.
 export const ExtractedPurchaseDataSchema = z.object({
   poNumber: z.string().optional(),
   vendorName: z.string().optional(),
-  poRecipient: ContactSchema.optional(),
   purchaseDescription: z.string().optional(),
-  issuedDate: z.string().optional(),
-  purchaseNotes: z.string().optional(),
-  billingAddress: AddressSchema.optional(),
   // currency: z.string().optional(),
   paymentTerms: z.number().optional(),
   // paymentMethod: z.string().optional(),
   taxable: z.boolean().optional(),
-  shippingAddress: AddressSchema.optional(),
   // shippingMethod: z.string().optional(),
   // shippingAccountNumber: z.string().optional(),
   // incoterms: z.string().optional(),
@@ -232,8 +202,6 @@ export class PurchaseExtractionService {
         )
       : []
 
-    const issuedDate = coerceDateStringToISO8601(data.issuedDate)
-
     await this.resourceService.update(accountId, resourceId, {
       fields: [
         ...(data.poNumber
@@ -253,15 +221,6 @@ export class PurchaseExtractionService {
               },
             ]
           : []),
-        ...(data.poRecipient
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.poRecipient)
-                  .fieldId,
-                valueInput: { contact: data.poRecipient },
-              },
-            ]
-          : []),
         ...(data.purchaseDescription
           ? [
               {
@@ -270,33 +229,6 @@ export class PurchaseExtractionService {
                   fields.purchaseDescription,
                 ).fieldId,
                 valueInput: { string: data.purchaseDescription },
-              },
-            ]
-          : []),
-        ...(issuedDate
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.issuedDate)
-                  .fieldId,
-                valueInput: { date: issuedDate },
-              },
-            ]
-          : []),
-        ...(data.purchaseNotes
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.purchaseNotes)
-                  .fieldId,
-                valueInput: { string: data.purchaseNotes },
-              },
-            ]
-          : []),
-        ...(data.billingAddress
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.billingAddress)
-                  .fieldId,
-                valueInput: { address: data.billingAddress },
               },
             ]
           : []),
@@ -315,15 +247,6 @@ export class PurchaseExtractionService {
                 fieldId: selectSchemaFieldUnsafe(schema, fields.taxable)
                   .fieldId,
                 valueInput: { boolean: data.taxable },
-              },
-            ]
-          : []),
-        ...(data.shippingAddress
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.shippingAddress)
-                  .fieldId,
-                valueInput: { address: data.shippingAddress },
               },
             ]
           : []),

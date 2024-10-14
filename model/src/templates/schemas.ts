@@ -80,16 +80,21 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'Job',
-    fields: [fields.jobStatus],
+    fields: [
+      fields.jobStatus,
+      fields.jobAttachments,
+      fields.itemizedCosts,
+      fields.subtotalCost,
+      fields.totalCost,
+    ],
     sections: [
       {
         name: 'Job Info',
         fields: [
           fields.name,
           fields.jobDescription,
-          fields.needDate,
-          fields.totalCost,
           fields.customer,
+          fields.needDate,
           fields.paymentTerms,
           fields.paymentDueDate,
         ],
@@ -100,24 +105,12 @@ export const schemas: SchemaTemplate[] = [
     resourceType: 'JobLine',
     fields: [
       fields.job,
-      fields.part,
+      fields.partName,
+      fields.partNumber,
       fields.quantity,
       fields.unitCost,
       fields.totalCost,
-    ],
-  },
-  {
-    resourceType: 'Part',
-    sections: [
-      {
-        name: 'Part Info',
-        fields: [
-          fields.name,
-          fields.partNumber,
-          fields.revision,
-          fields.partFiles,
-        ],
-      },
+      fields.otherNotes,
     ],
   },
   {

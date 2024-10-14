@@ -111,7 +111,7 @@ export default function ResourceTable({
           .with(P.union('Bill', 'Job', 'Purchase'), () =>
             push(`/${type.toLowerCase()}s/${key}`),
           )
-          .with(P.union('Customer', 'Item', 'Part', 'Vendor'), () =>
+          .with(P.union('Customer', 'Item', 'Vendor'), () =>
             push(window.location.pathname + `?drawerResourceId=${id}`, {
               scroll: false,
             }),

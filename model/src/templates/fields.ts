@@ -278,6 +278,11 @@ const _fields = {
     resourceType: 'Job',
     description: 'Contains all info related to a specific job',
   },
+  jobAttachments: {
+    templateId: '1b0f9594-ac0d-44ef-b45a-574773d1a6a0',
+    name: 'Job Attachments',
+    type: 'Files',
+  },
   jobDescription: {
     templateId: '4522e8be-d0c4-428f-9f54-7ddbfec39687',
     name: 'Job Description',
@@ -321,17 +326,11 @@ const _fields = {
     type: 'Textarea',
     description: 'Other notes included in the purchase order header',
   },
-  part: {
-    templateId: 'fc0189d7-1535-4c3e-8561-d6427be78de8',
-    name: 'Part',
-    type: 'Resource',
-    resourceType: 'Part',
-    isRequired: true,
-  },
-  partFiles: {
-    templateId: '2338256d-f93b-410f-8743-7c39dea26c9d',
-    name: 'Part Files',
-    type: 'Files',
+  partName: {
+    templateId: '068b53c3-332a-40d8-a559-990145960d1d',
+    name: 'Part Name',
+    type: 'Text',
+    description: 'The name of the part',
   },
   partNumber: {
     templateId: 'f84c023e-a3a6-484b-ace2-abb4aa1fb425',
@@ -447,11 +446,6 @@ const _fields = {
   quickBooksCustomerId: {
     templateId: '77c06a2a-f156-4425-a310-05e0315db9a0',
     name: 'QuickBooks Customer ID',
-    type: 'Text',
-  },
-  revision: {
-    templateId: '1abdda53-334a-49d7-9b8f-3edae4e3c384',
-    name: 'Revision',
     type: 'Text',
   },
   shippingAccountNumber: {

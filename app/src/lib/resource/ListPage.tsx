@@ -68,14 +68,18 @@ export default async function ListPage({
             </Typography>
             {[
               ...callToActions,
-              <CreateResourceButton
-                key={CreateResourceButton.name}
-                resourceType={resourceType}
-                buttonProps={{
-                  size: 'large',
-                  color: 'secondary',
-                }}
-              />,
+              ...(!['JobLine', 'PurchaseLine'].includes(resourceType)
+                ? [
+                    <CreateResourceButton
+                      key={CreateResourceButton.name}
+                      resourceType={resourceType}
+                      buttonProps={{
+                        size: 'large',
+                        color: 'secondary',
+                      }}
+                    />,
+                  ]
+                : []),
             ].map((cta, i) => (
               <Box key={i} height="min-content">
                 {cta}

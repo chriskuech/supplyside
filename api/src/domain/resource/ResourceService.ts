@@ -116,7 +116,7 @@ export class ResourceService {
 
     await Promise.all(
       inputResourceFields?.map((field) => {
-        if (!field) return
+        if (!field?.valueInput.string) return
         const schemaField = selectSchemaFieldUnsafe(schema, field)
 
         return this.checkForDuplicateNamedResource(
@@ -192,13 +192,6 @@ export class ResourceService {
         templateId,
         type,
         key,
-        Cost: {
-          create: {
-            name: 'Taxes',
-            isPercentage: true,
-            value: 0,
-          },
-        },
         ResourceField: {
           create: schema.fields.map((schemaField) => {
             const resourceField = resourceFields?.find(
@@ -224,6 +217,7 @@ export class ResourceService {
       },
       include: resourceInclude,
     })
+
     return mapResourceModelToEntity(model)
   }
 

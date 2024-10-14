@@ -12,6 +12,7 @@ import StatusTransitionButton from './cta/StatusTransitionButton'
 import JobStatusTracker from './JobStatusTracker'
 import EditControl from './tools/EditControl'
 import CancelControl from './tools/CancelControl'
+import { JobAttachmentsControl } from './tools/JobAttachmentsControl'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { readResources } from '@/actions/resource'
@@ -58,6 +59,11 @@ export default async function JobsDetail({
       searchParams={searchParams}
       isReadOnly={!isDraft}
       tools={[
+        <JobAttachmentsControl
+          key={JobAttachmentsControl.name}
+          schema={schema}
+          resource={resource}
+        />,
         ...(!isDraft
           ? [<EditControl key={EditControl.name} resourceId={resource.id} />]
           : []),

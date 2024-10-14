@@ -17,12 +17,12 @@ import {
   Storefront,
   Widgets,
 } from '@mui/icons-material'
-import Logo from '@/lib/ux/appbar/Logo'
 import { AccountMenu } from '@/lib/ux/appbar/AccountMenu'
 import { UserMenu } from '@/lib/ux/appbar/UserMenu'
 import { requireSession } from '@/session'
 import { readAccount } from '@/client/account'
 import { readSelf } from '@/client/user'
+import { NavLogo } from '@/lib/ux/appbar/NavLogo'
 
 export default async function Layout({
   children,
@@ -38,8 +38,7 @@ export default async function Layout({
   return (
     <Stack direction="row" height="100vh" width="100vw">
       <Stack width="min-content" m={2} spacing={2}>
-        <Logo />
-
+        <NavLogo />
         <Box>
           <Typography variant="overline" color="text.secondary">
             Jobs

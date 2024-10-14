@@ -5,6 +5,7 @@ import {
   FieldTemplate,
   Resource,
   Schema,
+  fields,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import ResourceForm from '../ResourceForm'
@@ -115,6 +116,11 @@ export default function ResourceDetailPage({
                     valueInput: { resourceId: resource.id },
                   },
                 ]}
+                hideColumns={match(schema.resourceType)
+                  .with('Bill', () => [fields.bill])
+                  .with('Job', () => [fields.job])
+                  .with('Purchase', () => [fields.purchase])
+                  .otherwise(() => undefined)}
                 isReadOnly={isReadOnly}
               />
             )}
