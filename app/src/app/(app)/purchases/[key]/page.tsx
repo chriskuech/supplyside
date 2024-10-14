@@ -27,7 +27,7 @@ import PunchoutButton from './cta/PunchoutButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
-import { readResources } from '@/client/resource'
+import { readResources } from '@/actions/resource'
 
 export default async function PurchaseDetail({
   params: { key },
@@ -36,26 +36,19 @@ export default async function PurchaseDetail({
   params: { key: string }
   searchParams: Record<string, unknown>
 }) {
-  const {
-    session: { accountId },
-    resource,
-    schema,
-    lineSchema,
-    user,
-  } = await readDetailPageModel('Purchase', key)
-
-  const purchaseLines = await readResources(
-    resource.accountId,
-    'PurchaseLine',
-    {
-      where: {
-        '==': [{ var: fields.purchase.name }, resource.id],
-      },
-    },
+  const { resource, schema, lineSchema, user } = await readDetailPageModel(
+    'Purchase',
+    key,
   )
+
+  const purchaseLines = await readResources('PurchaseLine', {
+    where: {
+      '==': [{ var: fields.purchase.name }, resource.id],
+    },
+  })
   const purchaseHasLines = !!purchaseLines?.length
 
-  const orderBills = await readResources(accountId, 'Bill', {
+  const orderBills = await readResources('Bill', {
     where: {
       '==': [{ var: 'Purchase' }, resource.id],
     },

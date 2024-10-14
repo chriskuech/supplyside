@@ -40,15 +40,15 @@ export default function PunchoutButton({ resource }: Props) {
         </Button>
       </Tooltip>
       {isOpen && punchoutSessionUrl && (
-        // TODO: change top and height when moving appBar to side
         <iframe
           src={punchoutSessionUrl}
           style={{
-            position: 'fixed',
-            top: 64,
+            position: 'absolute',
+            top: 0,
             left: 0,
-            width: '100vw',
-            height: 'calc(100vh - 64px)',
+            margin: -1,
+            height: '100%',
+            width: '100%',
             zIndex: 2000,
           }}
         >

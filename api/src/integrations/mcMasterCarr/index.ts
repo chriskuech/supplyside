@@ -182,7 +182,6 @@ export class McMasterService {
     return punchoutSessionUrl
   }
 
-  // TODO: this references `next` which is not available in the domain layer
   private async getCredentials(accountId: string) {
     const {
       mcMasterCarrUsername,
@@ -320,6 +319,7 @@ export class McMasterService {
         unitOfMeasure,
         unitPrice,
         supplierPartID,
+        notes,
       } = line
 
       assert(description && quantity && unitOfMeasure && unitPrice)
@@ -348,6 +348,10 @@ export class McMasterService {
         lineSchema,
         fields.itemNumber,
       ).fieldId
+      const notesFieldId = selectSchemaFieldUnsafe(
+        lineSchema,
+        fields.otherNotes,
+      ).fieldId
       const lineUnitofMesureFieldId = selectSchemaFieldUnsafe(
         lineSchema,
         fields.unitOfMeasure,
@@ -375,6 +379,18 @@ export class McMasterService {
               fieldId: lineUnitofMesureFieldId,
               valueInput: { optionId: lineUnitOfMeasureOptionId },
             },
+            {
+              fieldId: lineUnitofMesureFieldId,
+              valueInput: { optionId: lineUnitOfMeasureOptionId },
+            },
+            ...(notes
+              ? [
+                  {
+                    fieldId: notesFieldId,
+                    valueInput: { string: notes },
+                  },
+                ]
+              : []),
             ...(supplierPartID
               ? [
                   {
@@ -453,6 +469,7 @@ function parseCxml(poomCxml: Cxml) {
     unitPrice: item.ItemDetail[0]?.UnitPrice[0]?.Money[0]?._,
     currency: item.ItemDetail[0]?.UnitPrice[0]?.Money[0]?.$?.currency,
     description: item.ItemDetail[0]?.Description[0]?._,
+    notes: item.ItemDetail[0]?.Extrinsic?.[0]?._,
     unitOfMeasure: match(item.ItemDetail[0]?.UnitOfMeasure[0])
       .with('BX', () => unitOfMeasureOptions.box)
       .with('CM', () => unitOfMeasureOptions.centimeter)
