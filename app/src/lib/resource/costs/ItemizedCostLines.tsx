@@ -69,7 +69,9 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                   currency: 'USD',
                 })}
               </TableCell>
-              <TableCell sx={{ border: 'none' }} />
+              <TableCell sx={{ border: 'none' }}>
+                <Box width={40} />
+              </TableCell>
             </TableRow>
 
             {resource.costs.map((row) => (
@@ -162,7 +164,9 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
                   currency: 'USD',
                 })}
               </TableCell>
-              <TableCell sx={{ border: 'none' }} />
+              <TableCell sx={{ border: 'none' }}>
+                <Box width={40} />
+              </TableCell>
             </TableRow>
           </TableBody>
         </Table>
