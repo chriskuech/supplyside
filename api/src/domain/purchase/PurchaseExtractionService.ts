@@ -82,7 +82,6 @@ Use the ISO 8601 Date Only format, ex: 2023-01-31.
   "shippingMethod": "FedEx",
   "shippingAccountNumber": "123456789",
   "incoterms": "FedEx",
-  "termsAndConditions": "Terms and conditions",
   "lineItems": [
     {
       "itemName": "Item 1",
@@ -136,7 +135,6 @@ export const ExtractedPurchaseDataSchema = z.object({
   // shippingMethod: z.string().optional(),
   // shippingAccountNumber: z.string().optional(),
   // incoterms: z.string().optional(),
-  termsAndConditions: z.string().optional(),
   itemizedCosts: z
     .array(
       z.object({
@@ -247,17 +245,6 @@ export class PurchaseExtractionService {
                 fieldId: selectSchemaFieldUnsafe(schema, fields.taxable)
                   .fieldId,
                 valueInput: { boolean: data.taxable },
-              },
-            ]
-          : []),
-        ...(data.termsAndConditions
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(
-                  schema,
-                  fields.termsAndConditions,
-                ).fieldId,
-                valueInput: { string: data.termsAndConditions },
               },
             ]
           : []),
