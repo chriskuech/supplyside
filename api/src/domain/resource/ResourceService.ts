@@ -116,7 +116,7 @@ export class ResourceService {
 
     await Promise.all(
       inputResourceFields?.map((field) => {
-        if (!field) return
+        if (!field?.valueInput.string) return
         const schemaField = selectSchemaFieldUnsafe(schema, field)
 
         return this.checkForDuplicateNamedResource(
