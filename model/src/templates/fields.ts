@@ -448,11 +448,6 @@ const _fields = {
     name: 'QuickBooks Customer ID',
     type: 'Text',
   },
-  revision: {
-    templateId: '1abdda53-334a-49d7-9b8f-3edae4e3c384',
-    name: 'Revision',
-    type: 'Text',
-  },
   shippingAccountNumber: {
     templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
     name: 'Shipping Account Number',
