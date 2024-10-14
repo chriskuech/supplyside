@@ -1,5 +1,5 @@
 import { Stack, Typography, Box, Alert, Card } from '@mui/material'
-import { Resource, Schema, ValueInput, fields } from '@supplyside/model'
+import { FieldTemplate, Resource, Schema, ValueInput } from '@supplyside/model'
 import { ResourceTable } from '../table'
 import ItemizedCostLines from '../costs/ItemizedCostLines'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
@@ -10,6 +10,7 @@ type Props = {
   lineSchema: Schema
   lineQuery: JsonLogic
   newLineInitialData: { fieldId: string; valueInput: ValueInput }[]
+  hideColumns?: FieldTemplate[]
   isReadOnly?: boolean
 }
 
@@ -18,14 +19,13 @@ export default async function LinesAndCosts({
   lineSchema,
   lineQuery,
   newLineInitialData,
+  hideColumns,
   isReadOnly,
 }: Props) {
   const lines = await readResources(
     resource.accountId,
     lineSchema.resourceType,
-    {
-      where: lineQuery,
-    },
+    { where: lineQuery },
   )
 
   if (!lines || !lineSchema)
@@ -35,10 +35,7 @@ export default async function LinesAndCosts({
     ...lineSchema,
     fields: lineSchema.fields.filter(
       ({ templateId }) =>
-        !templateId ||
-        ![fields.purchase.templateId, fields.bill.templateId].includes(
-          templateId,
-        ),
+        !templateId || !hideColumns?.some((ft) => ft.templateId === templateId),
     ),
   }
 
