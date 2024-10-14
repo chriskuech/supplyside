@@ -21,9 +21,7 @@ export default function CreateResourceButton({
   const router = useRouter()
 
   const shouldRedirect = ['Bill', 'Job', 'Purchase'].includes(resourceType)
-  const shouldOpenDrawer = ['Customer', 'Item', 'Part', 'Vendor'].includes(
-    resourceType,
-  )
+  const shouldOpenDrawer = ['Customer', 'Item', 'Vendor'].includes(resourceType)
 
   return (
     <Button

@@ -92,7 +92,6 @@ enum ResourceType {
   Item
   Job
   JobLine
-  Part
   Purchase
   PurchaseLine
   Vendor
