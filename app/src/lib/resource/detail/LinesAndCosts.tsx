@@ -47,6 +47,7 @@ export default async function LinesAndCosts({
         </Typography>
         {!isReadOnly && (
           <CreateResourceButton
+            label="Line"
             resourceType={lineSchema.resourceType}
             fields={newLineInitialData}
           />
