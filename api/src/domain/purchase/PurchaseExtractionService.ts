@@ -2,6 +2,7 @@ import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService
 import {
   fields,
   selectResourceFieldValue,
+  selectSchemaField,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import dayjs from 'dayjs'
@@ -11,7 +12,11 @@ import { z } from 'zod'
 import { ResourceService } from '../resource/ResourceService'
 import { SchemaService } from '../schema/SchemaService'
 
-const prompt = `
+const prompt = ({
+  incotermsOptionNames,
+}: {
+  incotermsOptionNames: string[]
+}) => `
 You are a tool for extracting relevant information from uploaded files within a supply chain procurement application.
 Most often, these files will come from an email and the files will contain the text or HTML content of the email, along with the email attachments. Sometimes the information will be in the email, attachments, or both.
 You will need to do your best to extract the information from the files and return it in a JSON object that matches the output schema.
@@ -35,6 +40,9 @@ Purchases and Quotes all share a common structure consisting of 3 sections:
 * "poNumber" - a unique identifier for the Purchase Order. This is typically a number or code that is assigned by the vendor or supplier.
 * "vendorName" - the name of the vendor or supplier who will be fulfilling the Purchase Order.
 * "purchaseDescription" - a brief, internal description of the Purchase Order. If there is no description, then generate your own summary of the document to put in this field.
+* "incoterms" - international commercial terms. This value (if present) MUST be one of the following: ${incotermsOptionNames.join(
+  ', ',
+)}
 
 ## Line Items
 
@@ -138,7 +146,7 @@ export const ExtractedPurchaseDataSchema = z.object({
   taxable: z.boolean().optional(),
   // shippingMethod: z.string().optional(),
   // shippingAccountNumber: z.string().optional(),
-  // incoterms: z.string().optional(),
+  incoterms: z.string().optional(),
   itemizedCosts: z
     .array(
       z.object({
@@ -186,8 +194,13 @@ export class PurchaseExtractionService {
 
     if (!files?.length) return
 
+    const incotermsOptions =
+      selectSchemaField(schema, fields.incoterms)?.options ?? []
+
     const data = await this.openai.extractContent({
-      systemPrompt: prompt,
+      systemPrompt: prompt({
+        incotermsOptionNames: incotermsOptions.map((o) => o.name),
+      }),
       schema: ExtractedPurchaseDataSchema,
       files,
     })
@@ -203,6 +216,10 @@ export class PurchaseExtractionService {
           { input: data.vendorName, take: 1 },
         )
       : []
+
+    const incotermsOptionId = incotermsOptions.find(
+      (o) => o.name === data.incoterms,
+    )?.id
 
     await this.resourceService.update(accountId, resourceId, {
       fields: [
@@ -249,6 +266,15 @@ export class PurchaseExtractionService {
                 fieldId: selectSchemaFieldUnsafe(schema, fields.taxable)
                   .fieldId,
                 valueInput: { boolean: data.taxable },
+              },
+            ]
+          : []),
+        ...(incotermsOptionId
+          ? [
+              {
+                fieldId: selectSchemaFieldUnsafe(schema, fields.incoterms)
+                  .fieldId,
+                valueInput: { optionId: incotermsOptionId },
               },
             ]
           : []),
