@@ -4,6 +4,7 @@ import { BadRequestError } from '@supplyside/api/integrations/fastify/BadRequest
 import { fields, selectSchemaFieldUnsafe } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 import { Message } from 'postmark'
+import YAML from 'yaml'
 import { AccountService } from '../account/AccountService'
 import { BlobService } from '../blob/BlobService'
 import { FileService } from '../file/FileService'
@@ -24,7 +25,10 @@ export class BillInboxService {
   async handleMessage(message: Message): Promise<void> {
     if (!message.To) throw new BadRequestError('No "To" address found')
 
-    const accountKey = BillInboxService.parseAllEmails(message.To)
+    const toEmails = BillInboxService.parseAllEmails(message.To)
+    const ccEmails = BillInboxService.parseAllEmails(message.Cc ?? '')
+
+    const accountKey = [...toEmails, ...ccEmails]
       .find((email) => email.endsWith('.supplyside.io'))
       ?.split('@')
       .shift()
@@ -38,7 +42,7 @@ export class BillInboxService {
       throw new BadRequestError(`Account not found with key ${accountKey}`)
 
     const meta = {
-      content: JSON.stringify(
+      content: YAML.stringify(
         {
           subject: message.Subject,
           from: message.From,
@@ -50,8 +54,8 @@ export class BillInboxService {
         2,
       ),
       encoding: 'utf-8',
-      contentType: 'application/json',
-      fileName: 'email.meta.json',
+      contentType: 'application/yaml',
+      fileName: 'email.meta.yaml',
     } as const
 
     const attachments =
