@@ -61,10 +61,7 @@ function ResourceField(
         fieldId: selectSchemaFieldUnsafe(
           schema ?? fail('Schema not found'),
           match(resourceType)
-            .with(
-              P.union('Customer', 'Item', 'Part', 'Vendor'),
-              () => fields.name,
-            )
+            .with(P.union('Customer', 'Item', 'Vendor'), () => fields.name)
             .with('Purchase', () => fields.poNumber)
             .with(P.union('Bill', 'PurchaseLine', 'Job', 'JobLine'), () =>
               fail('Not implemented'),

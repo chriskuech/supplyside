@@ -6,7 +6,6 @@ export const resourceTypes = [
   'Item',
   'Job',
   'JobLine',
-  'Part',
   'Purchase',
   'PurchaseLine',
   'Vendor',
