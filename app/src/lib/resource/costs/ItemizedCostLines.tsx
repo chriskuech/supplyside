@@ -1,5 +1,6 @@
 'use client'
 
+import { fail } from 'assert'
 import {
   Box,
   Button,
@@ -74,74 +75,76 @@ export default function ItemizedCostLines({ resource, isReadOnly }: Props) {
               </TableCell>
             </TableRow>
 
-            {resource.costs.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell width={400} sx={{ paddingX: '10px' }}>
-                  <TextField
-                    defaultValue={row.name}
-                    onChange={(e) =>
-                      updateCost(resource.id, row.id, { name: e.target.value })
-                    }
-                    placeholder="Description"
-                    size="small"
-                    disabled={isReadOnly}
-                  />
-                </TableCell>
-                <TableCell width={100} sx={{ paddingX: '10px' }}>
-                  <Select
-                    sx={{ width: '100%', textAlign: 'left' }}
-                    defaultValue={row.isPercentage ? '%' : '$'}
-                    onChange={(e) =>
-                      updateCost(resource.id, row.id, {
-                        isPercentage: e.target.value === '%',
-                      })
-                    }
-                    size="small"
-                    disabled={isReadOnly}
-                  >
-                    <MenuItem value="$">$</MenuItem>
-                    <MenuItem value="%">%</MenuItem>
-                  </Select>
-                </TableCell>
-                <TableCell width={120} sx={{ paddingX: '10px' }}>
-                  <TextField
-                    defaultValue={row.value}
-                    onChange={(e) =>
-                      updateCost(resource.id, row.id, {
-                        value: Number(e.target.value),
-                      })
-                    }
-                    type="number"
-                    InputProps={{
-                      startAdornment: !row.isPercentage && <span>$</span>,
-                      endAdornment: row.isPercentage && <span>%</span>,
-                    }}
-                    size="small"
-                    disabled={isReadOnly}
-                  />
-                </TableCell>
-                <TableCell align="right" sx={{ paddingX: '10px' }}>
-                  {(row.isPercentage
-                    ? (row.value * (subtotalCost ?? 0)) / 100
-                    : row.value
-                  ).toLocaleString('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                  })}
-                </TableCell>
-                <TableCell>
-                  <Box width={40}>
-                    {!isReadOnly && (
-                      <IconButton
-                        onClick={() => deleteCost(resource.id, row.id)}
-                      >
-                        <Clear />
-                      </IconButton>
-                    )}
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
+            {resource.costs.map(
+              ({ id = fail('Expected id on Cost'), ...row }) => (
+                <TableRow key={id}>
+                  <TableCell width={400} sx={{ paddingX: '10px' }}>
+                    <TextField
+                      defaultValue={row.name}
+                      onChange={(e) =>
+                        updateCost(resource.id, id, {
+                          name: e.target.value,
+                        })
+                      }
+                      placeholder="Description"
+                      size="small"
+                      disabled={isReadOnly}
+                    />
+                  </TableCell>
+                  <TableCell width={100} sx={{ paddingX: '10px' }}>
+                    <Select
+                      sx={{ width: '100%', textAlign: 'left' }}
+                      defaultValue={row.isPercentage ? '%' : '$'}
+                      onChange={(e) =>
+                        updateCost(resource.id, id, {
+                          isPercentage: e.target.value === '%',
+                        })
+                      }
+                      size="small"
+                      disabled={isReadOnly}
+                    >
+                      <MenuItem value="$">$</MenuItem>
+                      <MenuItem value="%">%</MenuItem>
+                    </Select>
+                  </TableCell>
+                  <TableCell width={120} sx={{ paddingX: '10px' }}>
+                    <TextField
+                      defaultValue={row.value}
+                      onChange={(e) =>
+                        updateCost(resource.id, id, {
+                          value: Number(e.target.value),
+                        })
+                      }
+                      type="number"
+                      InputProps={{
+                        startAdornment: !row.isPercentage && <span>$</span>,
+                        endAdornment: row.isPercentage && <span>%</span>,
+                      }}
+                      size="small"
+                      disabled={isReadOnly}
+                    />
+                  </TableCell>
+                  <TableCell align="right" sx={{ paddingX: '10px' }}>
+                    {(row.isPercentage
+                      ? (row.value * (subtotalCost ?? 0)) / 100
+                      : row.value
+                    ).toLocaleString('en-US', {
+                      style: 'currency',
+                      currency: 'USD',
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    <Box width={40}>
+                      {!isReadOnly && (
+                        <IconButton onClick={() => deleteCost(resource.id, id)}>
+                          <Clear />
+                        </IconButton>
+                      )}
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ),
+            )}
 
             <TableRow sx={{ backgroundColor: 'rgba(0 127 255 / 0.3)' }}>
               <TableCell

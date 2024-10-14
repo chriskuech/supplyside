@@ -108,6 +108,7 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
         await service.extractContent(
           req.params.accountId,
           req.params.resourceId,
+          app.log,
         )
       },
     })

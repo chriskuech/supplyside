@@ -2,93 +2,191 @@ import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService
 import {
   AddressSchema,
   ContactSchema,
-  CostSchema,
   fields,
   selectResourceFieldValue,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
+import dayjs from 'dayjs'
+import { FastifyBaseLogger } from 'fastify'
 import { inject, injectable } from 'inversify'
 import { z } from 'zod'
 import { ResourceService } from '../resource/ResourceService'
 import { SchemaService } from '../schema/SchemaService'
 
 const prompt = `
-You are a context extraction tool within a "Procure-to-Pay" B2B SaaS application.
-Your task is to extract relevant information from uploaded files associated with a Purchase (aka Purchase Order, Order, RFP, or PO). Sometimes, the documents may include the Quote (aka RFQ) or similar documents that do not directly represent the PO, but can be used to populate all the fields of the PO.
-The documents may contain a mix of images, text, and HTML content and the actual Purchase file may or may not be included.
-Your goal is to determine specific information from the Purchase files, if available, as specified by the output schema; if the data is uncertain or ambiguous, do not include it in the output.
+You are a tool for extracting relevant information from uploaded files within a supply chain procurement application.
+Most often, these files will come from an email and the files will contain the text or HTML content of the email, along with the email attachments. Sometimes the information will be in the email, attachments, or both.
+You will need to do your best to extract the information from the files and return it in a JSON object that matches the output schema.
 
-As input, you will receive the text of text files and images of non-text files (ie PDFs) associated with the Purchase.
+# Supported scenarios
 
-As output, you will produce a JSON object containing the fields described in the output schema.
+A user may use this tool to extract information from the following scenarios:
 
-You MUST only return high-confidence data. If the data is uncertain or ambiguous, do not include it in the output.
+* Extracting information from a Purchase document (aka "Purchase Order", "Order", "RFP", or "PO") so they can repurchase the same items.
+* Extracting information from a Quote document (aka "RFQ") so they can order the items described in the responded RFQ.
+
+# Document structure
+
+Purchases and Quotes all share a common structure consisting of 3 sections:
+* "Header information" - the top section of the document that contains the purchase order number, vendor name, and other identifying information.
+* "Line Items" - a list of individual items included in the Purchase Order. All POs must have at least one line item. Most POs will have one line item.
+* "Itemized Costs" - a list of costs associated with the Purchase Order. These costs may include taxes, shipping, and other fees.
+
+## Header information
+
+* "poNumber" - a unique identifier for the Purchase Order. This is typically a number or code that is assigned by the vendor or supplier.
+* "vendorName" - the name of the vendor or supplier who will be fulfilling the Purchase Order.
+* "poRecipient" - the primary contact for the Purchase Order. This is the individual at the vendor or supplier who will receive the order.
+* "purchaseDescription" - a brief, internal description of the Purchase Order. If there is no description, then generate your own summary of the document to put in this field.
+* "issuedDate" - the date the Purchase Order was issued. This is typically the date the order was created.
+* "purchaseNotes" - any additional notes included in the Purchase Order.
+
+## Line Items
+
+Line Items model the expense(s) (either purchased services or actual items) in the Purchase and therefore all Purchases MUST have at least one Line Item.
+
+Purchase documents will come in one of two formats:
+
+* A table of Line Items, in which case ensure every line item is accounted for.
+* Only a single Line Item mixed in with the header information, in which case infer the Line Item from the Purchase document. In this case, the Purchase Subtotal will be the Line Item Total Cost, and the Purchase Total will be the same as the Subtotal Cost + Itemized Costs.
+
+Each Line Item has the following fields:
+
+* "itemName" - the name of the item being ordered.
+* "quantity" - the quantity of the item being ordered.
+* "unitCost" - the unit cost of the item being ordered.
+* "totalCost" - the total cost of the item being ordered (quantity * unitCost).
+
+
+## Itemized Costs
+
+Itemized Costs are additional costs associated with the Purchase Order and may include taxes, shipping, and other fees. Each Cost must have the following fields:
+
+* "name" - the name of the cost.
+* "isPercentage" - a boolean indicating whether the cost is a percentage or a fixed amount.
+* "value" - the value of the cost. If the cost is a percentage, then this value should be a number between 0 and 100.
+
+# Output schema
+
+The output is a JSON object. The JSON object's schema has been provided above and the JSON Schema representation has (or will be) provided by the system.
+
+You should make best effor to extract the data from the Purchase document and then infer the missing fields. If you are unable to reasonably infer a field, then you should leave it out of the output schema.
+
+## Date strings
+
+Use the ISO 8601 Date Only format, ex: 2023-01-31.
+
+## Example
+
+{
+  "poNumber": "123456789",
+  "vendorName": "Acme Corp.",
+  "poRecipient": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@acme.com"
+  },
+  "purchaseDescription": "Purchase of Item 1",
+  "issuedDate": "2023-01-01",
+  "purchaseNotes": "Purchase notes",
+  "billingAddress": {
+    "street": "123 Main St.",
+    "city": "Anytown",
+    "state": "CA",
+    "zip": "12345"
+  },
+  "paymentTerms": 30,
+  "paymentMethod": "Credit Card",
+  "taxable": true,
+  "shippingAddress": {
+    "street": "123 Main St.",
+    "city": "Anytown",
+    "state": "CA",
+    "zip": "12345"
+  },
+  "shippingMethod": "FedEx",
+  "shippingAccountNumber": "123456789",
+  "incoterms": "FedEx",
+  "termsAndConditions": "Terms and conditions",
+  "lineItems": [
+    {
+      "itemName": "Item 1",
+      "quantity": 1,
+      "unitCost": 10,
+      "totalCost": 10
+    },
+    {
+      "itemName": "Item 2",
+      "quantity": 2,
+      "unitCost": 20,
+      "totalCost": 40
+    },
+    {
+      "itemName": "Item 3",
+      "quantity": 3,
+      "unitCost": 30,
+      "totalCost": 90
+    },
+    {
+      "itemName": "Item 4",
+      "quantity": 4,
+      "unitCost": 40,
+      "totalCost": 160
+    }
+  ],
+  "itemizedCosts": [
+    {
+      "name": "Taxes",
+      "isPercentage": true,
+      "value": 0.1
+    }
+  ]
+}
+
+# Instructions
+
+1. Given the context above, read the document extremely carefully and extract all the required information.
+2. Review the information and validate that it is accurate. Accuracy is extremely important, so do not output anything that is not accurate. Do not skip this step. Take extra care that all Line Items and Costs are accounted for.
+3. Output the JSON object as described above.
 `
 
 export const ExtractedPurchaseDataSchema = z.object({
-  poNumber: z
-    .string()
-    .nullish()
-    .describe(
-      'The Purchase Order Number. This is a unique identifier for the Purchase associated with the Purchase. If no PO Number is found in the Purchase, this field should be null/missing.',
-    ),
-  vendorName: z
-    .string()
-    .nullish()
-    .describe(
-      'The Vendor Name associated with the vendor who created the Purchase. If no Vendor Name is found in the Purchase, this field should be null/missing.',
-    ),
-  poRecipient: ContactSchema.nullish().describe(
-    'Primary contact to receive the Purchase Order',
-  ),
-  purchaseDescription: z
-    .string()
-    .nullish()
-    .describe('Brief, identifiable description of the Purchase'),
-  issuedDate: z
-    .string()
-    .nullish()
-    .describe(
-      'Date the order was issued. The date should be in ISO 8601 Date Only format, ex: 2023-01-31',
-    ),
-  purchaseNotes: z.string().nullish().describe('Notes included in the order'),
-  billingAddress: AddressSchema.nullish().describe('Billing address'),
-  // currency: z.string().nullish(),
-  paymentTerms: z
-    .number()
-    .nullish()
-    .describe(
-      'Payment terms expressed in days. For example, "Net 30" is expressed as 30.',
-    ),
-  // paymentMethod: z.string().nullish().describe(),
-  taxable: z.boolean().nullish().describe('True if the order is taxable'),
-  shippingAddress: AddressSchema.nullish().describe(
-    'Address where the items in the order will be shipped',
-  ),
-  // shippingMethod: z.string().nullish(),
-  // shippingAccountNumber: z.string().nullish(),
-  // incoterms: z.string().nullish().describe('International commercial terms'),
-  termsAndConditions: z.string().nullish().describe('Terms and conditions'),
+  poNumber: z.string().optional(),
+  vendorName: z.string().optional(),
+  poRecipient: ContactSchema.optional(),
+  purchaseDescription: z.string().optional(),
+  issuedDate: z.string().optional(),
+  purchaseNotes: z.string().optional(),
+  billingAddress: AddressSchema.optional(),
+  // currency: z.string().optional(),
+  paymentTerms: z.number().optional(),
+  // paymentMethod: z.string().optional(),
+  taxable: z.boolean().optional(),
+  shippingAddress: AddressSchema.optional(),
+  // shippingMethod: z.string().optional(),
+  // shippingAccountNumber: z.string().optional(),
+  // incoterms: z.string().optional(),
+  termsAndConditions: z.string().optional(),
   itemizedCosts: z
-    .array(CostSchema)
-    .nullish()
-    .describe('Additional costs, such as Taxes, Shipping, Fees, etc.'),
-  lineItems: z
     .array(
       z.object({
-        itemName: z.string().nullish().describe('The name of the item'),
-        // unitOfMeasure: z.string().nullish().describe('The unit of measure'),
-        quantity: z.number().nullish().describe('The quantity of the item'),
-        unitCost: z.number().nullish().describe('The unit cost of the item'),
-        totalCost: z.number().nullish().describe('The total cost of the item'),
-        needDate: z.string().nullish().describe('The date the item is needed'),
-        itemNumber: z.string().nullish().describe('The item number'),
+        name: z.string(),
+        isPercentage: z.boolean(),
+        value: z.number(),
       }),
     )
-    .nullish()
-    .describe(
-      'The individual items in the order. There must be at least one line item in an purchase order.',
-    ),
+    .optional(),
+  lineItems: z.array(
+    z.object({
+      itemName: z.string().optional(),
+      // unitOfMeasure: z.string().optional(),
+      quantity: z.number().optional(),
+      unitCost: z.number().optional(),
+      totalCost: z.number().optional(),
+      needDate: z.string().optional(),
+      itemNumber: z.string().optional(),
+    }),
+  ),
 })
 
 @injectable()
@@ -100,10 +198,15 @@ export class PurchaseExtractionService {
     private readonly resourceService: ResourceService,
   ) {}
 
-  async extractContent(accountId: string, resourceId: string) {
-    const [schema, resource] = await Promise.all([
+  async extractContent(
+    accountId: string,
+    resourceId: string,
+    logger: FastifyBaseLogger,
+  ) {
+    const [schema, resource, lineSchema] = await Promise.all([
       this.schemaService.readMergedSchema(accountId, 'Purchase'),
       this.resourceService.read(accountId, resourceId),
+      this.schemaService.readMergedSchema(accountId, 'PurchaseLine'),
     ])
 
     const { files } =
@@ -117,6 +220,8 @@ export class PurchaseExtractionService {
       files,
     })
 
+    logger.info({ accountId, resourceId, data }, 'Extracted Purchase Data')
+
     if (!data) return
 
     const [vendor] = data.vendorName
@@ -126,6 +231,8 @@ export class PurchaseExtractionService {
           { input: data.vendorName, take: 1 },
         )
       : []
+
+    const issuedDate = coerceDateStringToISO8601(data.issuedDate)
 
     await this.resourceService.update(accountId, resourceId, {
       fields: [
@@ -166,12 +273,12 @@ export class PurchaseExtractionService {
               },
             ]
           : []),
-        ...(data.issuedDate && !isNaN(new Date(data.issuedDate).getTime())
+        ...(issuedDate
           ? [
               {
                 fieldId: selectSchemaFieldUnsafe(schema, fields.issuedDate)
                   .fieldId,
-                valueInput: { date: data.issuedDate },
+                valueInput: { date: issuedDate },
               },
             ]
           : []),
@@ -232,51 +339,68 @@ export class PurchaseExtractionService {
             ]
           : []),
       ],
-      costs: data.itemizedCosts ?? undefined,
+      costs: data.itemizedCosts,
     })
 
-    await Promise.all(
-      data.lineItems?.map((lineItem) =>
-        this.resourceService.create(accountId, 'PurchaseLine', {
-          fields: [
-            {
-              fieldId: selectSchemaFieldUnsafe(schema, fields.purchase).fieldId,
-              valueInput: { resourceId },
-            },
-            {
-              fieldId: selectSchemaFieldUnsafe(schema, fields.itemName).fieldId,
-              valueInput: { string: lineItem.itemName },
-            },
-            // {
-            //   fieldId: selectSchemaFieldUnsafe(schema, fields.unitOfMeasure)
-            //     .fieldId,
-            //   valueInput: { string: lineItem.unitOfMeasure },
-            // },
-            {
-              fieldId: selectSchemaFieldUnsafe(schema, fields.quantity).fieldId,
-              valueInput: { number: lineItem.quantity },
-            },
-            {
-              fieldId: selectSchemaFieldUnsafe(schema, fields.unitCost).fieldId,
-              valueInput: { number: lineItem.unitCost },
-            },
-            {
-              fieldId: selectSchemaFieldUnsafe(schema, fields.totalCost)
-                .fieldId,
-              valueInput: { number: lineItem.totalCost },
-            },
-            {
-              fieldId: selectSchemaFieldUnsafe(schema, fields.needDate).fieldId,
-              valueInput: { date: lineItem.needDate },
-            },
-            {
-              fieldId: selectSchemaFieldUnsafe(schema, fields.itemNumber)
-                .fieldId,
-              valueInput: { string: lineItem.itemNumber },
-            },
-          ],
-        }),
-      ) ?? [],
-    )
+    for (const lineItem of data.lineItems ?? []) {
+      const needDate = coerceDateStringToISO8601(lineItem.needDate)
+
+      await this.resourceService.create(accountId, 'PurchaseLine', {
+        fields: [
+          {
+            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase)
+              .fieldId,
+            valueInput: { resourceId },
+          },
+          {
+            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName)
+              .fieldId,
+            valueInput: { string: lineItem.itemName },
+          },
+          // {
+          //   fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitOfMeasure)
+          //     .fieldId,
+          //   valueInput: { string: lineItem.unitOfMeasure },
+          // },
+          {
+            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.quantity)
+              .fieldId,
+            valueInput: { number: lineItem.quantity },
+          },
+          {
+            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitCost)
+              .fieldId,
+            valueInput: { number: lineItem.unitCost },
+          },
+          {
+            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.totalCost)
+              .fieldId,
+            valueInput: { number: lineItem.totalCost },
+          },
+          ...(needDate
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
+                    .fieldId,
+                  valueInput: { date: needDate },
+                },
+              ]
+            : []),
+          {
+            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemNumber)
+              .fieldId,
+            valueInput: { string: lineItem.itemNumber },
+          },
+        ],
+      })
+    }
   }
 }
+
+// use dayjs (if needed) to coerce the date string to ISO 8601 format
+const coerceDateStringToISO8601 = (
+  dateString: string | undefined,
+): string | undefined =>
+  dateString && dayjs(dateString).isValid()
+    ? dayjs(dateString).toISOString()
+    : undefined

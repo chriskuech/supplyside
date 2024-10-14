@@ -321,23 +321,24 @@ export class ResourceService {
 
     await Promise.all(
       costs?.map((cost) =>
-        this.prisma.cost.upsert({
-          where: {
-            id: cost.id,
-            resourceId,
-          },
-          create: {
-            resourceId,
-            name: cost.name,
-            isPercentage: cost.isPercentage,
-            value: cost.value,
-          },
-          update: {
-            name: cost.name,
-            isPercentage: cost.isPercentage,
-            value: cost.value,
-          },
-        }),
+        cost.id
+          ? this.prisma.cost.update({
+              where: { resourceId, id: cost.id },
+              data: {
+                resourceId,
+                name: cost.name,
+                isPercentage: cost.isPercentage,
+                value: cost.value,
+              },
+            })
+          : this.prisma.cost.create({
+              data: {
+                resourceId,
+                name: cost.name,
+                isPercentage: cost.isPercentage,
+                value: cost.value,
+              },
+            }),
       ) ?? [],
     )
 
