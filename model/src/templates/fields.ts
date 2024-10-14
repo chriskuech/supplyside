@@ -278,6 +278,11 @@ const _fields = {
     resourceType: 'Job',
     description: 'Contains all info related to a specific job',
   },
+  jobAttachments: {
+    templateId: '1b0f9594-ac0d-44ef-b45a-574773d1a6a0',
+    name: 'Job Attachments',
+    type: 'Files',
+  },
   jobDescription: {
     templateId: '4522e8be-d0c4-428f-9f54-7ddbfec39687',
     name: 'Job Description',

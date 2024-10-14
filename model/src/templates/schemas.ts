@@ -80,7 +80,7 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'Job',
-    fields: [fields.jobStatus],
+    fields: [fields.jobStatus, fields.jobAttachments],
     sections: [
       {
         name: 'Job Info',
