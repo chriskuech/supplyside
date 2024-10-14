@@ -116,6 +116,7 @@ export const cxmlSchema = z.object({
                       .array(),
                     ManufacturerPartID: z.string().array(),
                     ManufacturerName: z.string().array(),
+                    Extrinsic: z.object({ _: z.string() }).array().optional(),
                   })
                   .array(),
               }),

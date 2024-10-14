@@ -329,6 +329,7 @@ export default async function Layout({
         borderRadius={1}
         elevation={0}
         variant="elevation"
+        position="relative"
       >
         <Box height="100%" width="100%" overflow="auto">
           {children}
