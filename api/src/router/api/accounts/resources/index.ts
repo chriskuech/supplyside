@@ -1,16 +1,20 @@
 import { container } from '@supplyside/api/di'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { JsonLogicSchema } from '@supplyside/api/domain/resource/json-logic/types'
+import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
   ResourceSchema,
   ResourceTypeSchema,
   ValueInputSchema,
   ValueResourceSchema,
+  fields,
+  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { parse } from 'qs'
 import { pick } from 'remeda'
+import { match } from 'ts-pattern'
 import { z } from 'zod'
 import { mountCosts } from './costs'
 
@@ -106,17 +110,50 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           200: ResourceSchema,
         },
       },
-      handler: async (req) => {
+      handler: async ({
+        params: { accountId },
+        body: { resourceType, fields: fieldsInput, userId },
+      }) => {
         const service = container.resolve(ResourceService)
+        const schemaService = container.resolve(SchemaService)
 
         const resource = await service.create(
-          req.params.accountId,
-          req.body.resourceType,
-          {
-            fields: req.body.fields,
-          },
-          req.body.userId,
+          accountId,
+          resourceType,
+          { fields: fieldsInput },
+          userId,
         )
+
+        const result = match(resource.type)
+          .with('Purchase', () => ({
+            ref: fields.purchase,
+            type: 'PurchaseLine' as const,
+          }))
+          .with('Job', () => ({
+            ref: fields.job,
+            type: 'JobLine' as const,
+          }))
+          .otherwise(() => null)
+
+        if (result) {
+          const schema = await schemaService.readMergedSchema(
+            accountId,
+            result.type,
+          )
+          await service.create(
+            accountId,
+            result.type,
+            {
+              fields: [
+                {
+                  fieldId: selectSchemaFieldUnsafe(schema, result.ref).fieldId,
+                  valueInput: { resourceId: resource.id },
+                },
+              ],
+            },
+            userId,
+          )
+        }
 
         return resource
       },
