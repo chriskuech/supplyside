@@ -363,6 +363,7 @@ const _fields = {
     type: 'Number',
     description: 'Payment terms expressed in days',
     prefix: 'Net',
+    isRequired: true,
   },
   poRecipient: {
     templateId: 'b735b67c-be50-4859-9242-00572b4d32cb',

@@ -86,6 +86,7 @@ export const schemas: SchemaTemplate[] = [
       fields.itemizedCosts,
       fields.subtotalCost,
       fields.totalCost,
+      fields.paymentDueDate,
     ],
     sections: [
       {
@@ -96,7 +97,6 @@ export const schemas: SchemaTemplate[] = [
           fields.customer,
           fields.needDate,
           fields.paymentTerms,
-          fields.paymentDueDate,
         ],
       },
     ],
@@ -127,6 +127,7 @@ export const schemas: SchemaTemplate[] = [
       fields.purchaseAttachments,
       fields.punchoutSessionUrl,
       fields.job,
+      fields.paymentDueDate,
     ],
     sections: [
       {
@@ -146,7 +147,6 @@ export const schemas: SchemaTemplate[] = [
           fields.billingAddress,
           fields.currency,
           fields.paymentTerms,
-          fields.paymentDueDate,
           fields.paymentMethod,
           fields.taxable,
         ],
