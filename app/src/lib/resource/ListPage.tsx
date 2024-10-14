@@ -2,7 +2,7 @@ import { Alert, Box, Container, Stack, Typography } from '@mui/material'
 import { ReactNode } from 'react'
 import { ResourceType } from '@supplyside/model'
 import { z } from 'zod'
-import { GridFilterModel } from '@mui/x-data-grid'
+import { GridFilterItem, GridFilterModel } from '@mui/x-data-grid'
 import CreateResourceButton from './CreateResourceButton'
 import { ResourceDrawer } from './ResourceDrawer'
 import { ListPageResourceTable } from './ListPageResourceTable'
@@ -15,6 +15,8 @@ type Props = {
   resourceType: ResourceType
   callToActions?: ReactNode[]
   searchParams: Record<string, unknown>
+  filterItems?: GridFilterItem[]
+  title?: string
 }
 
 export default async function ListPage({
@@ -22,6 +24,8 @@ export default async function ListPage({
   resourceType,
   searchParams,
   callToActions = [],
+  filterItems,
+  title,
 }: Props) {
   const { accountId } = await requireSession()
   const [schema, resources] = await Promise.all([
@@ -29,13 +33,22 @@ export default async function ListPage({
     readResources(accountId, resourceType),
   ])
 
-  const initialGridFilterModel = z
+  const querySearchGridModel = z
     .string()
     .transform(
       (data) => JSON.parse(decodeURIComponent(data)) as GridFilterModel,
     )
     .optional()
     .safeParse(searchParams.filter).data
+
+  const initialGridFilterModel: GridFilterModel = {
+    items: [
+      ...(querySearchGridModel?.items.filter(
+        (item) => !filterItems?.find((fi) => fi.field === item.field),
+      ) ?? []),
+      ...(filterItems ?? []),
+    ],
+  }
 
   if (!schema || !resources)
     return (
@@ -51,7 +64,7 @@ export default async function ListPage({
         <Stack spacing={4}>
           <Stack direction="row" alignItems="center" gap={1}>
             <Typography variant="h4" flexGrow={1}>
-              {resourceType.replace(/([a-z])([A-Z])/g, '$1 $2')}s
+              {title ?? `${resourceType.replace(/([a-z])([A-Z])/g, '$1 $2')}s`}
             </Typography>
             {[
               ...callToActions,
@@ -78,6 +91,7 @@ export default async function ListPage({
             schema={schema}
             resources={resources}
             initialGridFilterModel={initialGridFilterModel}
+            unFilterableFieldIds={filterItems?.map((item) => item.field)}
           />
         </Stack>
       </Container>

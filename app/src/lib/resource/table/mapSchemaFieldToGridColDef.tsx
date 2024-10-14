@@ -81,6 +81,7 @@ export const mapSchemaFieldToGridColDef = (
   field: SchemaField,
   options: {
     isEditable: boolean
+    isFilterable?: boolean
   },
 ): Column => ({
   field: field.fieldId,
@@ -123,6 +124,8 @@ export const mapSchemaFieldToGridColDef = (
     : {
         type: 'custom',
       }),
+
+  filterable: options.isFilterable,
 
   filterOperators: match(field.type)
     .with(

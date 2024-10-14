@@ -12,6 +12,7 @@ type Props = {
   schema: Schema
   resources: Resource[]
   initialGridFilterModel?: GridFilterModel
+  unFilterableFieldIds?: string[]
 }
 
 export const ListPageResourceTable: FC<Props> = ({
@@ -19,6 +20,7 @@ export const ListPageResourceTable: FC<Props> = ({
   schema,
   resources,
   initialGridFilterModel,
+  unFilterableFieldIds,
 }) => {
   const router = useRouter()
 
@@ -47,6 +49,7 @@ export const ListPageResourceTable: FC<Props> = ({
       resources={resources}
       initialGridFilterModel={initialGridFilterModel}
       saveGridFilterModel={saveGridFilterModelDebounced}
+      unFilterableFieldIds={unFilterableFieldIds}
     />
   )
 }

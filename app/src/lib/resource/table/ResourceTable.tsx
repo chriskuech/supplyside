@@ -31,6 +31,7 @@ type Props = {
   initialQuery?: string
   initialGridFilterModel?: GridFilterModel
   saveGridFilterModel?: (model: GridFilterModel) => void
+  unFilterableFieldIds?: string[]
 } & Partial<DataGridProProps<Row>>
 
 export default function ResourceTable({
@@ -42,6 +43,7 @@ export default function ResourceTable({
   initialQuery,
   initialGridFilterModel,
   saveGridFilterModel,
+  unFilterableFieldIds = [],
   ...props
 }: Props) {
   const { apiRef, initialState, saveStateToLocalstorage } =
@@ -66,7 +68,10 @@ export default function ResourceTable({
             editable: false,
           },
       ...schema.fields.map((field) =>
-        mapSchemaFieldToGridColDef(field, { isEditable }),
+        mapSchemaFieldToGridColDef(field, {
+          isEditable,
+          isFilterable: !unFilterableFieldIds.includes(field.fieldId),
+        }),
       ),
       ...(isEditable
         ? [
@@ -87,7 +92,7 @@ export default function ResourceTable({
           ]
         : []),
     ],
-    [indexed, schema, isEditable],
+    [indexed, schema, isEditable, unFilterableFieldIds],
   )
 
   if (tableKey && !initialState) return <CircularProgress />
