@@ -4,6 +4,7 @@ import { match } from 'ts-pattern'
 import { fields, selectResourceFieldValue } from '@supplyside/model'
 import QuickBooksLink from '../quickBooks/QuickBooksLink'
 import { ResourceDrawerView } from './ResourceDrawerView'
+import { CompareModal } from './CompareModal'
 import { readResource } from '@/actions/resource'
 import { readSchema } from '@/actions/schema'
 import { getCustomerUrl, getVendorUrl } from '@/lib/quickBooks/helpers'
@@ -29,41 +30,50 @@ export const ResourceDrawer = async ({
   }
 
   return (
-    <ResourceDrawerView
-      state={schema && resource ? { schema, resource } : undefined}
-      tools={match(resource)
-        .with({ type: 'Vendor' }, (resource) => {
-          const quickBooksVendorId = selectResourceFieldValue(
-            resource,
-            fields.quickBooksVendorId,
-          )?.string
+    <>
+      <ResourceDrawerView
+        state={schema && resource ? { schema, resource } : undefined}
+        tools={match(resource)
+          .with({ type: 'Vendor' }, (resource) => {
+            const quickBooksVendorId = selectResourceFieldValue(
+              resource,
+              fields.quickBooksVendorId,
+            )?.string
 
-          if (!quickBooksVendorId) return []
+            if (!quickBooksVendorId) return []
 
-          return [
-            <QuickBooksLink
-              key={QuickBooksLink.name}
-              quickBooksAppUrl={getVendorUrl(quickBooksVendorId)}
-            />,
-          ]
-        })
-        .with({ type: 'Customer' }, (resource) => {
-          const quickBooksCustomerId = selectResourceFieldValue(
-            resource,
-            fields.quickBooksCustomerId,
-          )?.string
+            return [
+              <QuickBooksLink
+                key={QuickBooksLink.name}
+                quickBooksAppUrl={getVendorUrl(quickBooksVendorId)}
+              />,
+            ]
+          })
+          .with({ type: 'Customer' }, (resource) => {
+            const quickBooksCustomerId = selectResourceFieldValue(
+              resource,
+              fields.quickBooksCustomerId,
+            )?.string
 
-          if (!quickBooksCustomerId) return []
+            if (!quickBooksCustomerId) return []
 
-          return [
-            <QuickBooksLink
-              key={QuickBooksLink.name}
-              quickBooksAppUrl={getCustomerUrl(quickBooksCustomerId)}
-            />,
-          ]
-        })
-        .otherwise(() => [])}
-      onClose={close}
-    />
+            return [
+              <QuickBooksLink
+                key={QuickBooksLink.name}
+                quickBooksAppUrl={getCustomerUrl(quickBooksCustomerId)}
+              />,
+            ]
+          })
+          .otherwise(() => [])}
+        onClose={close}
+      />
+      {resource && schema && (
+        <CompareModal
+          resource={resource}
+          schema={schema}
+          searchParams={searchParams}
+        />
+      )}
+    </>
   )
 }

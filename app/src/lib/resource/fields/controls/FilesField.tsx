@@ -1,5 +1,11 @@
 'use client'
-import { Close, Download, UploadFile, Visibility } from '@mui/icons-material'
+import {
+  Close,
+  Download,
+  UploadFile,
+  VerticalSplit,
+  Visibility,
+} from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -10,6 +16,7 @@ import {
 } from '@mui/material'
 import { useRef } from 'react'
 import { File } from '@supplyside/model'
+import { useRouter, usePathname } from 'next/navigation'
 import { uploadFiles } from '@/actions/files'
 import { download, preview } from '@/app/api/download/[filename]/util'
 
@@ -21,6 +28,8 @@ type Props = {
 
 export default function FilesField({ files, isReadOnly, onChange }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { push } = useRouter()
+  const pathname = usePathname()
 
   return (
     <>
@@ -28,6 +37,13 @@ export default function FilesField({ files, isReadOnly, onChange }: Props) {
         {files.map((file) => (
           <Stack key={file.id} direction="row" alignItems="center">
             <Typography flexGrow={1}>{file.name ?? '-'}</Typography>
+            <Tooltip title="Compare File to Fields">
+              <IconButton
+                onClick={() => push(`${pathname}?compareToFileId=${file.id}`)}
+              >
+                <VerticalSplit />
+              </IconButton>
+            </Tooltip>
             <Tooltip title="View File">
               <IconButton onClick={() => preview(file)}>
                 <Visibility />

@@ -10,6 +10,7 @@ import {
 import ResourceForm from '../ResourceForm'
 import { ResourceDrawer } from '../ResourceDrawer'
 import DeleteResourceButton from '../DeleteResourceButton'
+import { CompareModal } from '../CompareModal'
 import ReadOnlyFieldsView from './ReadOnlyFieldsView'
 import LinesAndCosts from './LinesAndCosts'
 import DuplicateResourceButton from './DuplicateResourceButton'
@@ -121,6 +122,11 @@ export default function ResourceDetailPage({
         </Container>
       </Stack>
       <ResourceDrawer searchParams={searchParams} />
+      <CompareModal
+        resource={resource}
+        schema={schema}
+        searchParams={searchParams}
+      />
     </>
   )
 }

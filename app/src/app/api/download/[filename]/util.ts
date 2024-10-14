@@ -11,7 +11,7 @@ export const download = (file: File | undefined) =>
   window.open(getFilePath(file))
 
 export const preview = (file: File | undefined) =>
-  window.open(getFilePath(file, true))
+  window.open(getPreviewPath(file))
 
 const getFilePath = (
   file: File | undefined,
@@ -23,6 +23,9 @@ const getFilePath = (
     type: 'file',
     fileId: file.id,
   })
+
+export const getPreviewPath = (file: File | undefined) =>
+  getFilePath(file, true)
 
 export const getLogoPath = (account: Account | null | undefined) =>
   account?.logoBlobId
