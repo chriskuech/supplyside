@@ -8,9 +8,7 @@ import {
   ValueInput,
   ValueResource,
   fields,
-  selectResourceFieldValue,
 } from '@supplyside/model'
-import { fail } from 'assert'
 import { pick } from 'remeda'
 import { P, match } from 'ts-pattern'
 import { mapFile } from '../file/mapValueFile'
@@ -31,19 +29,6 @@ export const mapResourceModelToEntity = (model: ResourceModel): Resource => ({
     value: mapValueModelToEntity(rf.Value),
   })),
   costs: model.Cost,
-})
-
-export const mapResourceToValueResource = (
-  resource: Resource,
-): ValueResource => ({
-  id: resource.id,
-  type: resource.type,
-  templateId: resource.templateId,
-  key: resource.key,
-  name:
-    selectResourceFieldValue(resource, fields.name)?.string ??
-    selectResourceFieldValue(resource, fields.poNumber)?.string ??
-    fail('Resource type does not have a name or number field'),
 })
 
 export const mapValueToValueInput = (
@@ -109,7 +94,7 @@ export const mapValueResourceModelToEntity = (
         (
           [fields.name.templateId, fields.poNumber.templateId] as string[]
         ).includes(rf.Field.templateId),
-    )?.Value.string ?? '',
+    )?.Value.string || resource.key.toString(),
 })
 
 export const mapValueInputToPrismaValueUpdate = (

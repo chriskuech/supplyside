@@ -1,11 +1,11 @@
-import { P, match } from 'ts-pattern'
-import { Resource, ResourceField } from '../types/resource'
-import { Schema } from '../types/schema'
 import { isArray, isNullish, pick } from 'remeda'
-import { FieldReference } from './reference'
+import { P, match } from 'ts-pattern'
 import { fields } from '../templates/fields'
 import { FieldType, Value, ValueInput } from '../types'
+import { Resource, ResourceField } from '../types/resource'
+import { Schema } from '../types/schema'
 import { ValueResource } from '../types/value-resource'
+import { FieldReference } from './reference'
 
 export const selectResourceField = (
   resource: Resource,
@@ -97,6 +97,5 @@ export const mapResourceToValueResource = (
   name:
     selectResourceFieldValue(resource, fields.name)?.string ??
     selectResourceFieldValue(resource, fields.poNumber)?.string ??
-    selectResourceFieldValue(resource, fields.vendor)?.string ??
-    '',
+    resource.key.toString(),
 })
