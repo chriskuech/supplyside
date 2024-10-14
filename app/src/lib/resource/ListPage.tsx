@@ -50,7 +50,7 @@ export default async function ListPage({
       <Container maxWidth="xl" sx={{ py: 2 }}>
         <Stack spacing={4}>
           <Stack direction="row" alignItems="center" gap={1}>
-            <Typography variant="h3" flexGrow={1}>
+            <Typography variant="h4" flexGrow={1}>
               {resourceType.replace(/([a-z])([A-Z])/g, '$1 $2')}s
             </Typography>
             {[
