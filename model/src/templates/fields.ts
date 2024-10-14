@@ -326,17 +326,11 @@ const _fields = {
     type: 'Textarea',
     description: 'Other notes included in the purchase order header',
   },
-  part: {
-    templateId: 'fc0189d7-1535-4c3e-8561-d6427be78de8',
-    name: 'Part',
-    type: 'Resource',
-    resourceType: 'Part',
-    isRequired: true,
-  },
-  partFiles: {
-    templateId: '2338256d-f93b-410f-8743-7c39dea26c9d',
-    name: 'Part Files',
-    type: 'Files',
+  partName: {
+    templateId: '068b53c3-332a-40d8-a559-990145960d1d',
+    name: 'Part Name',
+    type: 'Text',
+    description: 'The name of the part',
   },
   partNumber: {
     templateId: 'f84c023e-a3a6-484b-ace2-abb4aa1fb425',
