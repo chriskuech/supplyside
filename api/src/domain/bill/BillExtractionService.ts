@@ -54,6 +54,7 @@ Each Line Item has the following fields:
 * "quantity" - the quantity of the ordered item.
 * "unitCost" - the unit cost of the ordered item.
 * "totalCost" - the total cost of the ordered item (quantity * unitCost).
+* "itemNumber" - the product code of the ordered item (NOT the index number of the Line!)
 
 ## Itemized Costs
 
@@ -92,19 +93,22 @@ Use the ISO 8601 Date Only format, ex: 2023-01-31.
       "itemName": "Item 2",
       "quantity": 2,
       "unitCost": 20,
-      "totalCost": 40
+      "totalCost": 40,
+      "itemNumber": "A75"
     },
     {
       "itemName": "Item 3",
       "quantity": 3,
       "unitCost": 30,
-      "totalCost": 90
+      "totalCost": 90,
+      "itemNumber": "0310001r3"
     },
     {
       "itemName": "Item 4",
       "quantity": 4,
       "unitCost": 40,
-      "totalCost": 160
+      "totalCost": 160,
+      "itemNumber": "ES-4992"
     }
   ],
   "itemizedCosts": [
@@ -300,15 +304,11 @@ export class BillExtractionService {
               .fieldId,
             valueInput: { number: lineItem.totalCost },
           },
-          ...(needDate
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
-                    .fieldId,
-                  valueInput: { date: needDate },
-                },
-              ]
-            : []),
+          {
+            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
+              .fieldId,
+            valueInput: { date: needDate },
+          },
           {
             fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemNumber)
               .fieldId,

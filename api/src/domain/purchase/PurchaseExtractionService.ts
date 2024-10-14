@@ -51,6 +51,7 @@ Each Line Item has the following fields:
 * "quantity" - the quantity of the item being ordered.
 * "unitCost" - the unit cost of the item being ordered.
 * "totalCost" - the total cost of the item being ordered (quantity * unitCost).
+* "itemNumber" - the product code of the item being ordered (NOT the index number of the Line!)
 
 ## Itemized Costs
 
@@ -87,13 +88,15 @@ Use the ISO 8601 Date Only format, ex: 2023-01-31.
       "itemName": "Item 1",
       "quantity": 1,
       "unitCost": 10,
-      "totalCost": 10
+      "totalCost": 10,
+      "itemNumber": "ES-4992"
     },
     {
       "itemName": "Item 2",
       "quantity": 2,
       "unitCost": 20,
-      "totalCost": 40
+      "totalCost": 40,
+      "itemNumber": "A75"
     },
     {
       "itemName": "Item 3",
@@ -105,7 +108,8 @@ Use the ISO 8601 Date Only format, ex: 2023-01-31.
       "itemName": "Item 4",
       "quantity": 4,
       "unitCost": 40,
-      "totalCost": 160
+      "totalCost": 160,
+      "itemNumber": "SKv8"
     }
   ],
   "itemizedCosts": [
@@ -267,11 +271,6 @@ export class PurchaseExtractionService {
               .fieldId,
             valueInput: { string: lineItem.itemName },
           },
-          // {
-          //   fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitOfMeasure)
-          //     .fieldId,
-          //   valueInput: { string: lineItem.unitOfMeasure },
-          // },
           {
             fieldId: selectSchemaFieldUnsafe(lineSchema, fields.quantity)
               .fieldId,
@@ -287,15 +286,11 @@ export class PurchaseExtractionService {
               .fieldId,
             valueInput: { number: lineItem.totalCost },
           },
-          ...(needDate
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
-                    .fieldId,
-                  valueInput: { date: needDate },
-                },
-              ]
-            : []),
+          {
+            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
+              .fieldId,
+            valueInput: { date: needDate },
+          },
           {
             fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemNumber)
               .fieldId,
