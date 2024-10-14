@@ -8,12 +8,14 @@ import { enqueueSnackbar } from 'notistack'
 import { createResource } from '@/actions/resource'
 
 type Props = {
+  label?: string
   resourceType: ResourceType
   fields?: { fieldId: string; valueInput: ValueInput }[]
   buttonProps?: ButtonProps
 }
 
 export default function CreateResourceButton({
+  label,
   resourceType,
   fields = [],
   buttonProps,
@@ -46,7 +48,7 @@ export default function CreateResourceButton({
       endIcon={shouldRedirect && <Add />}
       {...buttonProps}
     >
-      {resourceType.replace(/([a-z])([A-Z])/g, '$1 $2')}
+      {label ?? resourceType.replace(/([a-z])([A-Z])/g, '$1 $2')}
     </Button>
   )
 }
