@@ -15,7 +15,6 @@ import {
   Receipt,
   ShoppingBag,
   Storefront,
-  Widgets,
 } from '@mui/icons-material'
 import { AccountMenu } from '@/lib/ux/appbar/AccountMenu'
 import { UserMenu } from '@/lib/ux/appbar/UserMenu'
@@ -109,11 +108,6 @@ export default async function Layout({
             icon={<Storefront fontSize="small" />}
             title="Vendors"
             href="/vendors"
-          />
-          <ItemLink
-            icon={<Widgets fontSize="small" />}
-            title="Parts"
-            href="/parts"
           />
         </Box>
 
