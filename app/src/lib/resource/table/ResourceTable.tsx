@@ -99,6 +99,7 @@ export default function ResourceTable({
 
   return (
     <DataGridPro<Row>
+      sx={{ paddingTop: '1px' }} // hack to make the "active filter count" bubble overlap
       columns={columns}
       rows={resources.map((resource, i) => ({ ...resource, index: i + 1 }))}
       editMode="row"
