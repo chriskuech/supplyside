@@ -234,13 +234,15 @@ const recalculateItemizedCosts =
         selectResourceFieldValue(context.resource, subtotalCostField)
           ?.number) ??
       0
-    const itemizedCosts =
-      patch.fields.find((f) => f.fieldId === itemizedCostsField.fieldId)
-        ?.valueInput.number ??
-      (context.resource &&
-        selectResourceFieldValue(context.resource, itemizedCostsField)
-          ?.number) ??
-      0
+
+    const itemizedCosts = [
+      ...(context.resource?.costs ?? []),
+      ...patch.costs,
+    ].reduce(
+      (acc, { isPercentage, value }) =>
+        acc + (isPercentage ? (value / 100) * subtotalCost : value),
+      0,
+    )
 
     return {
       ...patch,
@@ -249,7 +251,7 @@ const recalculateItemizedCosts =
         {
           fieldId: itemizedCostsField.fieldId,
           valueInput: {
-            number: subtotalCost + itemizedCosts,
+            number: itemizedCosts,
           },
         },
       ],
