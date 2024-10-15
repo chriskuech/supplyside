@@ -2,6 +2,7 @@ import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService
 import {
   fields,
   selectResourceFieldValue,
+  selectSchemaField,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { fail } from 'assert'
@@ -10,9 +11,12 @@ import { inject, injectable } from 'inversify'
 import { z } from 'zod'
 import { ResourceService } from '../resource/ResourceService'
 import { SchemaService } from '../schema/SchemaService'
-import { BillService } from './BillService'
 
-const prompt = `
+const prompt = ({
+  paymentMethodOptionNames,
+}: {
+  paymentMethodOptionNames: string[]
+}) => `
 You are a tool for extracting relevant information from uploaded files within a supply chain procurement application.
 Most often, these files will come from an email and the files will contain the text or HTML content of the email, along with the email attachments. Sometimes the information will be in the email, attachments, or both.
 You will need to do your best to extract the information from the files and return it in a JSON object that matches the output schema.
@@ -38,6 +42,9 @@ Purchases and Bills all share a common structure consisting of 3 sections:
 * "invoiceNumber" - a unique identifier for the Bill. This is typically a number or code that is assigned by the vendor or supplier.
 * "invoiceDate" - the date the Bill was issued. This is typically the date the order was created.
 * "paymentTerms" - payment terms expressed in days. For example, "Net 30" is expressed as 30.
+* "paymentMethod" - the payment method used to pay the Bill. This value (if present) MUST be one of the following: ${paymentMethodOptionNames.join(
+  ', ',
+)}
 
 ## Line Items
 
@@ -82,6 +89,7 @@ Use the ISO 8601 Date Only format, ex: 2023-01-31.
   "invoiceNumber": "123456789",
   "invoiceDate": "2023-01-01",
   "paymentTerms": 30,
+  "paymentMethod": "Credit Card",
   "lineItems": [
     {
       "itemName": "Item 1",
@@ -133,6 +141,7 @@ export const ExtractedBillDataSchema = z.object({
   invoiceNumber: z.string().optional(),
   invoiceDate: z.string().optional(),
   paymentTerms: z.number().optional(),
+  paymentMethod: z.string().optional(),
   itemizedCosts: z
     .array(
       z.object({
@@ -162,7 +171,6 @@ export class BillExtractionService {
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(ResourceService)
     private readonly resourceService: ResourceService,
-    @inject(BillService) private readonly billService: BillService,
   ) {}
 
   async extractContent(accountId: string, resourceId: string) {
@@ -178,8 +186,13 @@ export class BillExtractionService {
 
     if (!billFiles.length) return
 
+    const paymentMethodOptions =
+      selectSchemaField(billSchema, fields.paymentMethod)?.options ?? []
+
     const data = await this.openai.extractContent({
-      systemPrompt: prompt,
+      systemPrompt: prompt({
+        paymentMethodOptionNames: paymentMethodOptions.map((o) => o.name),
+      }),
       schema: ExtractedBillDataSchema,
       files: billFiles,
     })
@@ -205,6 +218,10 @@ export class BillExtractionService {
             },
           })
         : []
+
+    const paymentMethodOptionId = paymentMethodOptions.find(
+      (o) => o.name === data.paymentMethod,
+    )?.id
 
     await this.resourceService.update(accountId, resourceId, {
       fields: [
@@ -246,6 +263,17 @@ export class BillExtractionService {
               },
             ]
           : []),
+        ...(paymentMethodOptionId
+          ? [
+              {
+                fieldId: selectSchemaFieldUnsafe(
+                  billSchema,
+                  fields.paymentMethod,
+                ).fieldId,
+                valueInput: { optionId: paymentMethodOptionId },
+              },
+            ]
+          : []),
         ...(data.invoiceDate && !isNaN(new Date(data.invoiceDate).getTime())
           ? [
               {
@@ -274,46 +302,71 @@ export class BillExtractionService {
 
       await this.resourceService.create(accountId, 'PurchaseLine', {
         fields: [
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase)
-              .fieldId,
-            valueInput: { resourceId },
-          },
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName)
-              .fieldId,
-            valueInput: { string: lineItem.itemName },
-          },
-          // {
-          //   fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitOfMeasure)
-          //     .fieldId,
-          //   valueInput: { string: lineItem.unitOfMeasure },
-          // },
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.quantity)
-              .fieldId,
-            valueInput: { number: lineItem.quantity },
-          },
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitCost)
-              .fieldId,
-            valueInput: { number: lineItem.unitCost },
-          },
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.totalCost)
-              .fieldId,
-            valueInput: { number: lineItem.totalCost },
-          },
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
-              .fieldId,
-            valueInput: { date: needDate },
-          },
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemNumber)
-              .fieldId,
-            valueInput: { string: lineItem.itemNumber },
-          },
+          ...(resourceId
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase)
+                    .fieldId,
+                  valueInput: { resourceId },
+                },
+              ]
+            : []),
+          ...(lineItem.itemName
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName)
+                    .fieldId,
+                  valueInput: { string: lineItem.itemName },
+                },
+              ]
+            : []),
+          ...(lineItem.quantity
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.quantity)
+                    .fieldId,
+                  valueInput: { number: lineItem.quantity },
+                },
+              ]
+            : []),
+          ...(lineItem.unitCost
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitCost)
+                    .fieldId,
+                  valueInput: { number: lineItem.unitCost },
+                },
+              ]
+            : []),
+          ...(lineItem.totalCost
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.totalCost)
+                    .fieldId,
+                  valueInput: { number: lineItem.totalCost },
+                },
+              ]
+            : []),
+          ...(needDate
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
+                    .fieldId,
+                  valueInput: { date: needDate },
+                },
+              ]
+            : []),
+          ...(lineItem.itemNumber
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(
+                    lineSchema,
+                    fields.itemNumber,
+                  ).fieldId,
+                  valueInput: { string: lineItem.itemNumber },
+                },
+              ]
+            : []),
         ],
       })
     }
