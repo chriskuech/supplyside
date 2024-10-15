@@ -1,5 +1,6 @@
 import fastifySwagger from '@fastify/swagger'
 import * as Sentry from '@sentry/node'
+import { nodeProfilingIntegration } from '@sentry/profiling-node'
 import { AccountSchema } from '@supplyside/api/domain/account/entity'
 import { SessionSchema } from '@supplyside/api/domain/session/entity'
 import fastify from 'fastify'
@@ -64,6 +65,7 @@ export const createServer = async (isDev?: boolean) => {
 
   // bug: https://github.com/getsentry/sentry-javascript/issues/13662#issuecomment-2374187229
   // mitigation: https://github.com/getsentry/sentry-javascript/issues/13662#issuecomment-2342621662
+  Sentry.addIntegration(nodeProfilingIntegration())
   Sentry.addIntegration(Sentry.fastifyIntegration())
   Sentry.addIntegration(Sentry.zodErrorsIntegration())
 
