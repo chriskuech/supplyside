@@ -29,6 +29,7 @@ export class BillInboxService {
     const ccEmails = BillInboxService.parseAllEmails(message.Cc ?? '')
 
     const accountKey = [...toEmails, ...ccEmails]
+      .map((email) => email.toLowerCase())
       .find((email) => email.endsWith('.supplyside.io'))
       ?.split('@')
       .shift()
