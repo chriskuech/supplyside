@@ -42,7 +42,7 @@ Purchases and Bills all share a common structure consisting of 3 sections:
 * "invoiceNumber" - a unique identifier for the Bill. This is typically a number or code that is assigned by the vendor or supplier.
 * "invoiceDate" - the date the Bill was issued. This is typically the date the order was created.
 * "paymentTerms" - payment terms expressed in days. For example, "Net 30" is expressed as 30.
-* "paymentMethod" - the payment method used to pay the Bill. This value (if present) MUST be one of the following: ${paymentMethodOptionNames.join(
+* "paymentMethod" - the payment method used to pay the Bill. This value (if explicitly present, not inferred) MUST be one of the following: ${paymentMethodOptionNames.join(
   ', ',
 )}
 
