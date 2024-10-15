@@ -62,5 +62,10 @@ export const createServer = async (isDev?: boolean) => {
 
   Sentry.setupFastifyErrorHandler(app)
 
+  // bug: https://github.com/getsentry/sentry-javascript/issues/13662#issuecomment-2374187229
+  // mitigation: https://github.com/getsentry/sentry-javascript/issues/13662#issuecomment-2342621662
+  Sentry.addIntegration(Sentry.fastifyIntegration())
+  Sentry.addIntegration(Sentry.zodErrorsIntegration())
+
   return app
 }
