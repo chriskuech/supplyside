@@ -30,7 +30,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
               // Check if the current frame is not the topmost frame
               if (window !== window.top) {
                 // Change location of the parent frame
-                window.top.location.href = "${config().BASE_URL}/purchases/${resourceKey}";
+                window.top.location.href = "${config().APP_BASE_URL}/purchases/${resourceKey}";
               }
             };
           </script>

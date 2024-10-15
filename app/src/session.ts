@@ -19,7 +19,7 @@ export const createSession = async (email: string, tat: string) => {
     sameSite: true,
     secure: config().SS_ENV !== 'development',
     httpOnly: true,
-    domain: new URL(config().BASE_URL).hostname,
+    domain: new URL(config().APP_BASE_URL).hostname,
     expires: new Date(session.expiresAt),
   })
 
