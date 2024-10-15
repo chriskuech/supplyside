@@ -44,11 +44,5 @@ export class BillService {
         }),
       ),
     )
-
-    await this.resourceService.recalculateSubtotalCost(
-      accountId,
-      'Bill',
-      resourceId,
-    )
   }
 }
