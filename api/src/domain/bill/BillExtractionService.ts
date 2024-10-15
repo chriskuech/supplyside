@@ -295,6 +295,7 @@ export class BillExtractionService {
             ]
           : []),
       ],
+      costs: data.itemizedCosts,
     })
 
     for (const lineItem of data.lineItems ?? []) {
@@ -305,7 +306,7 @@ export class BillExtractionService {
           ...(resourceId
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase)
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.bill)
                     .fieldId,
                   valueInput: { resourceId },
                 },
