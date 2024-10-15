@@ -261,41 +261,71 @@ export class PurchaseExtractionService {
 
       await this.resourceService.create(accountId, 'PurchaseLine', {
         fields: [
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase)
-              .fieldId,
-            valueInput: { resourceId },
-          },
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName)
-              .fieldId,
-            valueInput: { string: lineItem.itemName },
-          },
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.quantity)
-              .fieldId,
-            valueInput: { number: lineItem.quantity },
-          },
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitCost)
-              .fieldId,
-            valueInput: { number: lineItem.unitCost },
-          },
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.totalCost)
-              .fieldId,
-            valueInput: { number: lineItem.totalCost },
-          },
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
-              .fieldId,
-            valueInput: { date: needDate },
-          },
-          {
-            fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemNumber)
-              .fieldId,
-            valueInput: { string: lineItem.itemNumber },
-          },
+          ...(resourceId
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase)
+                    .fieldId,
+                  valueInput: { resourceId },
+                },
+              ]
+            : []),
+          ...(lineItem.itemName
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName)
+                    .fieldId,
+                  valueInput: { string: lineItem.itemName },
+                },
+              ]
+            : []),
+          ...(lineItem.quantity
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.quantity)
+                    .fieldId,
+                  valueInput: { number: lineItem.quantity },
+                },
+              ]
+            : []),
+          ...(lineItem.unitCost
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitCost)
+                    .fieldId,
+                  valueInput: { number: lineItem.unitCost },
+                },
+              ]
+            : []),
+          ...(lineItem.totalCost
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.totalCost)
+                    .fieldId,
+                  valueInput: { number: lineItem.totalCost },
+                },
+              ]
+            : []),
+          ...(needDate
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
+                    .fieldId,
+                  valueInput: { date: needDate },
+                },
+              ]
+            : []),
+          ...(lineItem.itemNumber
+            ? [
+                {
+                  fieldId: selectSchemaFieldUnsafe(
+                    lineSchema,
+                    fields.itemNumber,
+                  ).fieldId,
+                  valueInput: { string: lineItem.itemNumber },
+                },
+              ]
+            : []),
         ],
       })
     }
