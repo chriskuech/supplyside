@@ -10,7 +10,6 @@ import {
 } from '@supplyside/model'
 import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
-import PurchaseLink from './tools/PurchaseLink'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
 import { BillAttachmentsControl } from './tools/BillAttachmentsControl'
@@ -20,6 +19,7 @@ import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
 import { getBillUrl } from '@/lib/quickBooks/helpers'
+import ResourceLink from '@/lib/resource/ResourceLink'
 
 export default async function BillsDetail({
   params: { key },
@@ -78,7 +78,14 @@ export default async function BillsDetail({
             ]
           : []),
         ...(purchase
-          ? [<PurchaseLink key={purchase.id} purchase={purchase} />]
+          ? [
+              <ResourceLink
+                key={purchase.id}
+                href={`/purchases/${purchase.key}`}
+                label="Purchase"
+                resourceKey={purchase.key}
+              />,
+            ]
           : []),
         <BillAttachmentsControl
           key={AttachmentsToolbarControl.name}
