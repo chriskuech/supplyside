@@ -59,7 +59,7 @@ Each Line Item has the following fields:
 
 * "itemName" - the name of the ordered item.
 * "quantity" - the quantity of the ordered item.
-* "unitCost" - the unit cost of the ordered item.
+* "unitCost" - the unit cost of the ordered item, often called "Unit Price".
 * "totalCost" - the total cost of the ordered item (quantity * unitCost).
 * "itemNumber" - the product code of the ordered item (NOT the index number of the Line!)
 
@@ -89,7 +89,7 @@ Use the ISO 8601 Date Only format, ex: 2023-01-31.
   "invoiceNumber": "123456789",
   "invoiceDate": "2023-01-01",
   "paymentTerms": 30,
-  "paymentMethod": "Credit Card",
+  "paymentMethod": "${paymentMethodOptionNames[0]}",
   "lineItems": [
     {
       "itemName": "Item 1",
