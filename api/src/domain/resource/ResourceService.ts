@@ -23,10 +23,11 @@ import {
 } from '@supplyside/model'
 import { fail } from 'assert'
 import { inject, injectable } from 'inversify'
-import { isNullish, map, pipe, sum } from 'remeda'
+import { map, pipe, sum } from 'remeda'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 import { SchemaService } from '../schema/SchemaService'
+import { deriveFields } from './deriveFields'
 import { createSql } from './json-logic/compile'
 import { JsonLogic, OrderBy } from './json-logic/types'
 import {
@@ -47,8 +48,6 @@ type FieldUpdate = {
   field: SchemaField
   valueInput: Value
 }
-
-const millisecondsPerDay = 24 * 60 * 60 * 1000
 
 type ResourceCopyParams = {
   accountId: string
@@ -105,7 +104,7 @@ export class ResourceService {
     type: ResourceType,
     {
       templateId,
-      fields: inputResourceFields,
+      fields: inputResourceFields = [],
     }: {
       templateId?: string
       fields?: ResourceFieldInput[]
@@ -115,18 +114,18 @@ export class ResourceService {
     const schema = await this.schemaService.readMergedSchema(accountId, type)
 
     await Promise.all(
-      inputResourceFields?.map((field) => {
+      inputResourceFields.map((field) => {
         if (!field?.valueInput.string) return
         const schemaField = selectSchemaFieldUnsafe(schema, field)
 
-        return this.checkForDuplicateNamedResource(
+        return this.assertNoDuplicateNamedResource(
           schemaField,
           accountId,
           type,
           field.valueInput,
           null,
         )
-      }) ?? [],
+      }),
     )
 
     const {
@@ -145,7 +144,7 @@ export class ResourceService {
           fields.poNumber,
         ).fieldId
 
-        const asigneeFieldId = selectSchemaFieldUnsafe(
+        const assigneeFieldId = selectSchemaFieldUnsafe(
           schema,
           fields.assignee,
         ).fieldId
@@ -158,7 +157,7 @@ export class ResourceService {
           ...(userId
             ? [
                 {
-                  fieldId: asigneeFieldId,
+                  fieldId: assigneeFieldId,
                   valueInput: { userId },
                 },
               ]
@@ -186,6 +185,7 @@ export class ResourceService {
       ...(inputResourceFields ?? []),
       ...defaultFields,
     ]
+
     const model = await this.prisma.resource.create({
       data: {
         accountId,
@@ -255,13 +255,15 @@ export class ResourceService {
   async update(
     accountId: string,
     resourceId: string,
-    { fields, costs }: { fields: ResourceFieldInput[]; costs?: Cost[] },
+    input: { fields?: ResourceFieldInput[]; costs?: Cost[] },
   ) {
     const resource = await this.read(accountId, resourceId)
     const schema = await this.schemaService.readMergedSchema(
       accountId,
       resource.type,
     )
+
+    const { fields, costs } = deriveFields(input, { schema, resource })
 
     await Promise.all(
       fields.map(async ({ fieldId, valueInput }) => {
@@ -275,7 +277,7 @@ export class ResourceService {
           throw new Error("Can't update a system value on a system resource")
         }
 
-        await this.checkForDuplicateNamedResource(
+        await this.assertNoDuplicateNamedResource(
           sf,
           accountId,
           resource.type,
@@ -349,7 +351,7 @@ export class ResourceService {
       })),
     })
 
-    return await this.read(accountId, resourceId)
+    return entity
   }
 
   async delete(accountId: string, resourceId: string): Promise<void> {
@@ -397,7 +399,7 @@ export class ResourceService {
     })
   }
 
-  private async checkForDuplicateNamedResource(
+  private async assertNoDuplicateNamedResource(
     sf: SchemaField,
     accountId: string,
     type: ResourceType,
@@ -543,7 +545,6 @@ export class ResourceService {
 
   private async handleResourceUpdate({
     accountId,
-    schema,
     resource,
     updatedFields,
   }: {
@@ -552,36 +553,6 @@ export class ResourceService {
     resource: Resource
     updatedFields: FieldUpdate[]
   }) {
-    // When the Line."Unit Cost" or Line."Quantity" or a new item is selected field is updated,
-    // Then update Line."Total Cost"
-    if (
-      resource.type === 'PurchaseLine' &&
-      updatedFields.some(
-        (rf) =>
-          rf.field.templateId === fields.unitCost.templateId ||
-          rf.field.templateId === fields.quantity.templateId ||
-          rf.valueInput.resource?.type === 'Item',
-      )
-    ) {
-      const totalCostFieldId = selectSchemaFieldUnsafe(
-        schema,
-        fields.totalCost,
-      ).fieldId
-      const unitCost =
-        selectResourceFieldValue(resource, fields.unitCost)?.number ?? 0
-      const quantity =
-        selectResourceFieldValue(resource, fields.quantity)?.number ?? 0
-
-      await this.updateResourceField(accountId, resource.id, {
-        fieldId: totalCostFieldId,
-        valueInput: {
-          number: unitCost * quantity,
-        },
-      })
-    }
-
-    // When the Line."Total Cost" field is updated,
-    // Then update the {Bill|Purchase}."Subtotal Cost" field
     if (
       resource.type === 'PurchaseLine' &&
       updatedFields.some(
@@ -601,107 +572,15 @@ export class ResourceService {
       }
     }
 
-    // When the {Bill|Purchase}."Subtotal Cost" field is updated,
-    // Then recalculate the {Bill|Purchase}."Itemized Costs" field
     if (
-      ['Bill', 'Purchase'].includes(resource.type) &&
+      resource.type === 'JobLine' &&
       updatedFields.some(
-        (rf) => rf.field.templateId === fields.subtotalCost.templateId,
+        (rf) => rf.field.templateId === fields.totalCost.templateId,
       )
     ) {
-      await this.recalculateItemizedCosts(accountId, resource.id)
-    }
-
-    // When the {Bill|Purchase}."Itemized Costs" or {Bill|Purchase}."Subtotal Cost" field is updated,
-    // Then update {Bill|Purchase}."Total Cost"
-    if (
-      ['Bill', 'Purchase'].includes(resource.type) &&
-      updatedFields.some(
-        (rf) =>
-          rf.field.templateId === fields.subtotalCost.templateId ||
-          rf.field.templateId === fields.itemizedCosts.templateId,
-      )
-    ) {
-      const schema = await this.schemaService.readMergedSchema(
-        accountId,
-        resource.type,
-        true,
-      )
-
-      const itemizedCosts =
-        selectResourceFieldValue(resource, fields.itemizedCosts)?.number ?? 0
-      const subtotalCost =
-        selectResourceFieldValue(resource, fields.subtotalCost)?.number ?? 0
-
-      await this.updateResourceField(accountId, resource.id, {
-        fieldId: selectSchemaFieldUnsafe(schema, fields.totalCost).fieldId,
-        valueInput: {
-          number: itemizedCosts + subtotalCost,
-        },
-      })
-    }
-
-    // When the Bill.“Invoice Date” field or Bill.“Payment Terms” field changes,
-    // Given the “Invoice Date” field and “Payment Terms” fields are not null,
-    // Then set “Payment Due Date” = “Invoice Date” + “Payment Terms”
-    if (
-      resource.type === 'Bill' &&
-      updatedFields.some(
-        (rf) =>
-          rf.field.templateId === fields.invoiceDate.templateId ||
-          rf.field.templateId === fields.paymentTerms.templateId,
-      )
-    ) {
-      const invoiceDate = selectResourceFieldValue(
-        resource,
-        fields.invoiceDate,
-      )?.date
-      const paymentTerms = selectResourceFieldValue(
-        resource,
-        fields.paymentTerms,
-      )?.number
-
-      if (!isNullish(invoiceDate) && !isNullish(paymentTerms)) {
-        await this.updateResourceField(accountId, resource.id, {
-          fieldId: selectSchemaFieldUnsafe(schema, fields.paymentDueDate)
-            .fieldId,
-          valueInput: {
-            date: new Date(
-              new Date(invoiceDate).getTime() +
-                paymentTerms * millisecondsPerDay,
-            ).toISOString(),
-          },
-        })
-      }
-    }
-
-    // When the {Job,Purchase}.“Need Date” field or {Job,Purchase}.“Payment Terms” field changes,
-    // Given the “Need Date” field and “Payment Terms” fields are not null,
-    // Then set “Payment Due Date” = “Need Date” + “Payment Terms”
-    if (
-      (resource.type === 'Job' || resource.type === 'Purchase') &&
-      updatedFields.some(
-        (rf) =>
-          rf.field.templateId === fields.needDate.templateId ||
-          rf.field.templateId === fields.paymentTerms.templateId,
-      )
-    ) {
-      const needDate = selectResourceFieldValue(resource, fields.needDate)?.date
-      const paymentTerms = selectResourceFieldValue(
-        resource,
-        fields.paymentTerms,
-      )?.number
-
-      if (!isNullish(needDate) && !isNullish(paymentTerms)) {
-        await this.updateResourceField(accountId, resource.id, {
-          fieldId: selectSchemaFieldUnsafe(schema, fields.paymentDueDate)
-            .fieldId,
-          valueInput: {
-            date: new Date(
-              new Date(needDate).getTime() + paymentTerms * millisecondsPerDay,
-            ).toISOString(),
-          },
-        })
+      const jobId = selectResourceFieldValue(resource, fields.job)?.resource?.id
+      if (jobId) {
+        await this.recalculateSubtotalCost(accountId, 'Job', jobId)
       }
     }
   }
@@ -908,20 +787,10 @@ export class ResourceService {
       .filter(({ sf }) => selectSchemaField(toSchema, sf))
       .filter(({ tf }) => !tf?.isDerived)
 
-    const resource = await this.update(accountId, resourceId, {
+    await this.update(accountId, resourceId, {
       fields: fieldsToUpdate.map(({ rf, sf }) => ({
         fieldId: sf.fieldId,
         valueInput: mapValueToValueInput(sf.type, rf.value),
-      })),
-    })
-
-    await this.handleResourceUpdate({
-      accountId,
-      schema: toSchema,
-      resource,
-      updatedFields: fieldsToUpdate.map(({ sf, rf }) => ({
-        field: sf,
-        valueInput: rf.value,
       })),
     })
   }
