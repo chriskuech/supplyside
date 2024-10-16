@@ -218,7 +218,20 @@ export class ResourceService {
       include: resourceInclude,
     })
 
-    return mapResourceModelToEntity(model)
+    const entity = mapResourceModelToEntity(model)
+
+    await this.handleResourceUpdate({
+      accountId,
+      resource: entity,
+      schema,
+      updatedFields: resourceFields.map((field) => ({
+        field: selectSchemaFieldUnsafe(schema, field),
+        valueInput:
+          selectResourceFieldValue(entity, field) ?? fail('Value not found'),
+      })),
+    })
+
+    return entity
   }
 
   async list(
@@ -345,7 +358,7 @@ export class ResourceService {
       schema,
       resource: entity,
       updatedFields: fields.map((field) => ({
-        field: selectSchemaField(schema, field) ?? fail('Field not found'),
+        field: selectSchemaFieldUnsafe(schema, field),
         valueInput:
           selectResourceFieldValue(entity, field) ?? fail('Value not found'),
       })),

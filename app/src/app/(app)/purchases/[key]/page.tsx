@@ -18,7 +18,6 @@ import SendPoButton from './cta/SendPoButton'
 import TrackingControl from './tools/TrackingControl'
 import CancelControl from './tools/CancelControl'
 import EditControl from './tools/EditControl'
-import BillLink from './tools/BillLink'
 import PreviewPoControl from './tools/PreviewPoControl'
 import DownloadPoControl from './tools/DownloadPoControl'
 import { PurchaseAttachmentsControl } from './tools/PurchaseAttachmentsControl'
@@ -28,6 +27,7 @@ import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import { readResources } from '@/actions/resource'
+import ResourceLink from '@/lib/resource/ResourceLink'
 
 export default async function PurchaseDetail({
   params: { key },
@@ -48,11 +48,13 @@ export default async function PurchaseDetail({
   })
   const purchaseHasLines = !!purchaseLines?.length
 
-  const orderBills = await readResources('Bill', {
+  const purchaseBills = await readResources('Bill', {
     where: {
-      '==': [{ var: 'Purchase' }, resource.id],
+      '==': [{ var: fields.purchase.name }, resource.id],
     },
   })
+
+  const purchaseJob = selectResourceFieldValue(resource, fields.job)?.resource
 
   const status =
     selectResourceFieldValue(resource, fields.purchaseStatus)?.option ??
@@ -87,8 +89,24 @@ export default async function PurchaseDetail({
       resource={resource}
       searchParams={searchParams}
       tools={[
-        ...(orderBills?.map((bill) => <BillLink key={bill.id} bill={bill} />) ??
-          []),
+        ...(purchaseBills?.map((bill) => (
+          <ResourceLink
+            key={bill.id}
+            href={`/bills/${bill.key}`}
+            label="Bill"
+            resourceKey={bill.key}
+          />
+        )) ?? []),
+        ...(purchaseJob
+          ? [
+              <ResourceLink
+                key={resource.id}
+                href={`/jobs/${purchaseJob.key}`}
+                label="Job"
+                resourceKey={purchaseJob.key}
+              />,
+            ]
+          : []),
         <TrackingControl
           key={TrackingControl.name}
           resourceId={resource.id}

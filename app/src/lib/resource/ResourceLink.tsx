@@ -1,22 +1,25 @@
+'use client'
+
 import { Chip, Typography } from '@mui/material'
 import { Link as LinkIcon } from '@mui/icons-material'
 import Link from 'next/link'
-import { ValueResource } from '@supplyside/model'
 
 type Props = {
-  purchase: ValueResource
+  href: string
+  label: string
+  resourceKey: number
 }
 
-export default function PurchaseLink({ purchase }: Props) {
+export default function ResourceLink({ href, label, resourceKey }: Props) {
   return (
     <Chip
       sx={{ py: 2, cursor: 'pointer' }}
       icon={<LinkIcon fontSize="large" />}
       component={Link}
-      href={`/purchases/${purchase.key}`}
+      href={href}
       label={
         <Typography sx={{ opacity: 0.8 }}>
-          Purchase #<strong>{purchase.key}</strong>
+          {label} #<strong>{resourceKey}</strong>
         </Typography>
       }
     />
