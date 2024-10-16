@@ -16,9 +16,11 @@ import {
   emptyValue,
   fields,
   findTemplateField,
+  jobStatusOptions,
   purchaseStatusOptions,
   selectResourceFieldValue,
   selectSchemaField,
+  selectSchemaFieldOptionUnsafe,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { fail } from 'assert'
@@ -635,6 +637,7 @@ export class ResourceService {
 
         await Promise.all([
           this.cloneLines({
+            resourceType: 'Bill',
             accountId,
             fromResourceId: source.id,
             toResourceId: destination.id,
@@ -682,10 +685,57 @@ export class ResourceService {
 
         await Promise.all([
           this.cloneLines({
+            resourceType: 'Purchase',
             accountId,
             fromResourceId: source.id,
             toResourceId: destination.id,
             backLinkFieldRef: fields.purchase,
+          }),
+          this.cloneCosts({
+            accountId,
+            fromResourceId: source.id,
+            toResourceId: destination.id,
+          }),
+        ])
+
+        return destination
+      })
+      .with('Job', async () => {
+        const schema = await this.schemaService.readMergedSchema(
+          accountId,
+          'Job',
+        )
+
+        const jobStatusField = selectSchemaFieldUnsafe(schema, fields.jobStatus)
+
+        const draftStatusOption = selectSchemaFieldOptionUnsafe(
+          schema,
+          jobStatusField,
+          jobStatusOptions.draft,
+        )
+
+        const destination = await this.create(accountId, source.type, {
+          fields: [
+            ...source.fields
+              .filter((rf) => rf.fieldId !== jobStatusField.fieldId)
+              .map(({ fieldId, fieldType, value }) => ({
+                fieldId,
+                valueInput: mapValueToValueInput(fieldType, value),
+              })),
+            {
+              fieldId: jobStatusField.fieldId,
+              valueInput: { optionId: draftStatusOption?.id ?? null },
+            },
+          ],
+        })
+
+        await Promise.all([
+          this.cloneLines({
+            resourceType: 'Job',
+            accountId,
+            fromResourceId: source.id,
+            toResourceId: destination.id,
+            backLinkFieldRef: fields.job,
           }),
           this.cloneCosts({
             accountId,
@@ -740,15 +790,20 @@ export class ResourceService {
     fromResourceId,
     toResourceId,
     backLinkFieldRef,
-  }: ResourceCopyParams & { backLinkFieldRef: FieldReference }) {
+    resourceType,
+  }: ResourceCopyParams & {
+    backLinkFieldRef: FieldReference
+    resourceType: ResourceType
+  }) {
+    const lineResourceType = resourceType === 'Job' ? 'JobLine' : 'PurchaseLine'
     const lineSchema = await this.schemaService.readMergedSchema(
       accountId,
-      'PurchaseLine',
+      lineResourceType,
     )
 
     const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
 
-    const lines = await this.list(accountId, 'PurchaseLine', {
+    const lines = await this.list(accountId, lineResourceType, {
       where: {
         '==': [{ var: backLinkField.name }, fromResourceId],
       },
@@ -756,7 +811,7 @@ export class ResourceService {
 
     // `createResource` is not (currently) parallelizable
     for (const line of lines) {
-      await this.create(accountId, 'PurchaseLine', {
+      await this.create(accountId, lineResourceType, {
         fields: [
           ...line.fields
             .filter(({ fieldId }) => fieldId !== backLinkField.fieldId)
