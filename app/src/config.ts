@@ -2,14 +2,12 @@ import 'server-only'
 import { P, match } from 'ts-pattern'
 import { z } from 'zod'
 
-export const ConfigSchema = z
+const ConfigSchema = z
   .object({
     API_KEY: z.string().min(1),
     API_BASE_URL: z.string().url(),
-    BASE_URL: z.string().url(),
+    APP_BASE_URL: z.string().url(),
     SS_ENV: z.enum(['development', 'integration', 'production']),
-    PORT: z.coerce.number(),
-    TEMP_PATH: z.string().min(1).default('/tmp/supplyside'),
   })
   .transform((data) => ({
     ...data,

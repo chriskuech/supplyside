@@ -105,6 +105,7 @@ export default function ResourceTable({
     <>
       {Charts && isGridRendered && <Charts gridApiRef={apiRef} />}
       <DataGridPro<Row>
+        sx={{ paddingTop: '1px' }} // hack to make the "active filter count" bubble overlap
         ref={() => setIsGridRendered(true)}
         apiRef={apiRef}
         columns={columns}

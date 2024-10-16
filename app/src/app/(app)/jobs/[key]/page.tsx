@@ -54,6 +54,13 @@ export default async function JobsDetail({
   return (
     <ResourceDetailPage
       lineSchema={lineSchema}
+      linkedResources={[
+        {
+          sectionTitle: 'Purchases',
+          resourceType: 'Purchase',
+          backlinkField: fields.job,
+        },
+      ]}
       schema={schema}
       resource={resource}
       searchParams={searchParams}

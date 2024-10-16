@@ -42,7 +42,7 @@ Purchases and Bills all share a common structure consisting of 3 sections:
 * "invoiceNumber" - a unique identifier for the Bill. This is typically a number or code that is assigned by the vendor or supplier.
 * "invoiceDate" - the date the Bill was issued. This is typically the date the order was created.
 * "paymentTerms" - payment terms expressed in days. For example, "Net 30" is expressed as 30.
-* "paymentMethod" - the payment method used to pay the Bill. This value (if present) MUST be one of the following: ${paymentMethodOptionNames.join(
+* "paymentMethod" - the payment method used to pay the Bill. This value (if explicitly present, not inferred) MUST be one of the following: ${paymentMethodOptionNames.join(
   ', ',
 )}
 
@@ -59,7 +59,7 @@ Each Line Item has the following fields:
 
 * "itemName" - the name of the ordered item.
 * "quantity" - the quantity of the ordered item.
-* "unitCost" - the unit cost of the ordered item.
+* "unitCost" - the unit cost of the ordered item, often called "Unit Price".
 * "totalCost" - the total cost of the ordered item (quantity * unitCost).
 * "itemNumber" - the product code of the ordered item (NOT the index number of the Line!)
 
@@ -89,7 +89,7 @@ Use the ISO 8601 Date Only format, ex: 2023-01-31.
   "invoiceNumber": "123456789",
   "invoiceDate": "2023-01-01",
   "paymentTerms": 30,
-  "paymentMethod": "Credit Card",
+  "paymentMethod": "${paymentMethodOptionNames[0]}",
   "lineItems": [
     {
       "itemName": "Item 1",
@@ -295,6 +295,7 @@ export class BillExtractionService {
             ]
           : []),
       ],
+      costs: data.itemizedCosts,
     })
 
     for (const lineItem of data.lineItems ?? []) {
@@ -305,7 +306,7 @@ export class BillExtractionService {
           ...(resourceId
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase)
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.bill)
                     .fieldId,
                   valueInput: { resourceId },
                 },

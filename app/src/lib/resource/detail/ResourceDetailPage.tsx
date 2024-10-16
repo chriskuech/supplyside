@@ -16,6 +16,9 @@ import ReadOnlyFieldsView from './ReadOnlyFieldsView'
 import LinesAndCosts from './LinesAndCosts'
 import DuplicateResourceButton from './DuplicateResourceButton'
 import HandleJustCloned from './HandleJustCloned'
+import LinkedResourceTable, {
+  LinkedResourceTableProps,
+} from './LinkedResourceTable'
 
 type Props = {
   schema: Schema
@@ -27,6 +30,7 @@ type Props = {
   backlinkField?: FieldTemplate
   actions?: ReactNode
   searchParams: Record<string, unknown>
+  linkedResources?: Omit<LinkedResourceTableProps, 'resourceId'>[]
 }
 
 export default function ResourceDetailPage({
@@ -39,6 +43,7 @@ export default function ResourceDetailPage({
   isReadOnly,
   actions,
   searchParams,
+  linkedResources,
 }: Props) {
   return (
     <>
@@ -124,6 +129,13 @@ export default function ResourceDetailPage({
                 isReadOnly={isReadOnly}
               />
             )}
+            {linkedResources?.map((linkedResource) => (
+              <LinkedResourceTable
+                key={linkedResource.resourceType}
+                resourceId={resource.id}
+                {...linkedResource}
+              />
+            ))}
           </Stack>
         </Container>
       </Stack>

@@ -8,9 +8,13 @@ export async function GET({ url }: NextRequest) {
   const realmId = mappedUrl.searchParams.get('realmId')
 
   if (!realmId)
-    return redirect(`${config().BASE_URL}/integrations/quickbooks/disconnected`)
+    return redirect(
+      `${config().APP_BASE_URL}/integrations/quickbooks/disconnected`,
+    )
 
   await disconnect(realmId)
 
-  return redirect(`${config().BASE_URL}/integrations/quickbooks/disconnected`)
+  return redirect(
+    `${config().APP_BASE_URL}/integrations/quickbooks/disconnected`,
+  )
 }

@@ -7,5 +7,5 @@ export const dynamic = 'force-dynamic'
 export async function GET({ url }: NextRequest): Promise<NextResponse> {
   await connect(url)
 
-  return NextResponse.redirect(`${config().BASE_URL}/account/integrations`)
+  return NextResponse.redirect(`${config().APP_BASE_URL}/account/integrations`)
 }
