@@ -3,6 +3,7 @@
 import {
   DataGridPro,
   DataGridProProps,
+  GridApiPro,
   GridFilterModel,
   GridToolbarColumnsButton,
   GridToolbarContainer,
@@ -11,7 +12,7 @@ import {
 } from '@mui/x-data-grid-pro'
 import { CircularProgress, IconButton } from '@mui/material'
 import { Clear } from '@mui/icons-material'
-import { useMemo } from 'react'
+import { ComponentType, MutableRefObject, useMemo, useState } from 'react'
 import { z } from 'zod'
 import { Resource, Schema } from '@supplyside/model'
 import { P, match } from 'ts-pattern'
@@ -32,6 +33,7 @@ type Props = {
   initialGridFilterModel?: GridFilterModel
   saveGridFilterModel?: (model: GridFilterModel) => void
   unFilterableFieldIds?: string[]
+  Charts?: ComponentType<{ gridApiRef: MutableRefObject<GridApiPro> }>
 } & Partial<DataGridProProps<Row>>
 
 export default function ResourceTable({
@@ -44,8 +46,10 @@ export default function ResourceTable({
   initialGridFilterModel,
   saveGridFilterModel,
   unFilterableFieldIds = [],
+  Charts,
   ...props
 }: Props) {
+  const [isGridRendered, setIsGridRendered] = useState(false)
   const { apiRef, initialState, saveStateToLocalstorage } =
     usePersistDatagridState(tableKey)
 
@@ -98,70 +102,74 @@ export default function ResourceTable({
   if (tableKey && !initialState) return <CircularProgress />
 
   return (
-    <DataGridPro<Row>
-      columns={columns}
-      rows={resources.map((resource, i) => ({ ...resource, index: i + 1 }))}
-      editMode="row"
-      rowSelection={false}
-      autoHeight
-      density="standard"
-      processRowUpdate={handleProcessRowUpdate}
-      onRowClick={({ row: { type, key, id } }: { row: Row }) =>
-        match(type)
-          .with(P.union('Bill', 'Job', 'Purchase'), () =>
-            push(`/${type.toLowerCase()}s/${key}`),
-          )
-          .with(P.union('Customer', 'Item', 'Vendor'), () =>
-            push(window.location.pathname + `?drawerResourceId=${id}`, {
-              scroll: false,
-            }),
-          )
-          .with(P.union('JobLine', 'PurchaseLine'), () => null)
-          .exhaustive()
-      }
-      apiRef={apiRef}
-      initialState={{
-        ...initialState,
-        filter: {
-          filterModel: {
-            items: [],
-            ...initialGridFilterModel,
-            quickFilterValues: parseQuickFilter(initialQuery ?? ''),
+    <>
+      {Charts && isGridRendered && <Charts gridApiRef={apiRef} />}
+      <DataGridPro<Row>
+        ref={() => setIsGridRendered(true)}
+        apiRef={apiRef}
+        columns={columns}
+        rows={resources.map((resource, i) => ({ ...resource, index: i + 1 }))}
+        editMode="row"
+        rowSelection={false}
+        autoHeight
+        density="standard"
+        processRowUpdate={handleProcessRowUpdate}
+        onRowClick={({ row: { type, key, id } }: { row: Row }) =>
+          match(type)
+            .with(P.union('Bill', 'Job', 'Purchase'), () =>
+              push(`/${type.toLowerCase()}s/${key}`),
+            )
+            .with(P.union('Customer', 'Item', 'Vendor'), () =>
+              push(window.location.pathname + `?drawerResourceId=${id}`, {
+                scroll: false,
+              }),
+            )
+            .with(P.union('JobLine', 'PurchaseLine'), () => null)
+            .exhaustive()
+        }
+        initialState={{
+          ...initialState,
+          filter: {
+            filterModel: {
+              items: [],
+              ...initialGridFilterModel,
+              quickFilterValues: parseQuickFilter(initialQuery ?? ''),
+            },
           },
-        },
-        preferencePanel: { open: false },
-      }}
-      onColumnVisibilityModelChange={saveStateToLocalstorage}
-      onColumnWidthChange={saveStateToLocalstorage}
-      onColumnOrderChange={saveStateToLocalstorage}
-      onFilterModelChange={saveGridFilterModel}
-      onSortModelChange={saveStateToLocalstorage}
-      slots={{
-        toolbar: () => (
-          <GridToolbarContainer>
-            <GridToolbarColumnsButton
-              slotProps={{ button: { variant: 'text' } }}
-            />
-            <GridToolbarFilterButton
-              slotProps={{ button: { variant: 'text' } }}
-            />
-            <GridToolbarQuickFilter
-              quickFilterParser={parseQuickFilter}
-              quickFilterFormatter={(quickFilterValues) =>
-                z
-                  .array(z.string().nullable().optional())
-                  .parse(quickFilterValues)
-                  .map((value) => value?.trim())
-                  .filter(Boolean)
-                  .join(' ')
-              }
-              debounceMs={200} // time before applying the new quick filter value
-            />
-          </GridToolbarContainer>
-        ),
-      }}
-      {...props}
-    />
+          preferencePanel: { open: false },
+        }}
+        onColumnVisibilityModelChange={saveStateToLocalstorage}
+        onColumnWidthChange={saveStateToLocalstorage}
+        onColumnOrderChange={saveStateToLocalstorage}
+        onFilterModelChange={saveGridFilterModel}
+        onSortModelChange={saveStateToLocalstorage}
+        slots={{
+          toolbar: () => (
+            <GridToolbarContainer>
+              <GridToolbarColumnsButton
+                slotProps={{ button: { variant: 'text' } }}
+              />
+              <GridToolbarFilterButton
+                slotProps={{ button: { variant: 'text' } }}
+              />
+              <GridToolbarQuickFilter
+                quickFilterParser={parseQuickFilter}
+                quickFilterFormatter={(quickFilterValues) =>
+                  z
+                    .array(z.string().nullable().optional())
+                    .parse(quickFilterValues)
+                    .map((value) => value?.trim())
+                    .filter(Boolean)
+                    .join(' ')
+                }
+                debounceMs={200} // time before applying the new quick filter value
+              />
+            </GridToolbarContainer>
+          ),
+        }}
+        {...props}
+      />
+    </>
   )
 }
 

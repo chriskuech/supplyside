@@ -1,4 +1,5 @@
 import { Alert } from '@mui/material'
+import Charts from './charts/Charts'
 import { readAccount } from '@/client/account'
 import ListPage from '@/lib/resource/ListPage'
 import { requireSession } from '@/session'
@@ -27,6 +28,7 @@ export default async function Jobs({
           // />,
         ]
       }
+      Charts={Charts}
     />
   )
 }
