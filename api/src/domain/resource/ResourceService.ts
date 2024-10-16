@@ -521,11 +521,15 @@ export class ResourceService {
       true,
     )
 
-    const lines = await this.list(accountId, 'PurchaseLine', {
-      where: {
-        '==': [{ var: resourceType }, resourceId],
+    const lines = await this.list(
+      accountId,
+      resourceType === 'Job' ? 'JobLine' : 'PurchaseLine',
+      {
+        where: {
+          '==': [{ var: resourceType }, resourceId],
+        },
       },
-    })
+    )
 
     const subTotal = pipe(
       lines,
