@@ -1,5 +1,5 @@
 import { fail } from 'assert'
-import { Stack, Typography } from '@mui/material'
+import { Paper, Stack, Typography } from '@mui/material'
 import {
   FieldTemplate,
   ResourceType,
@@ -38,7 +38,7 @@ export default async function LinkedResourceTable({
   ).fieldId
 
   return (
-    <>
+    <Stack spacing={2}>
       <Stack direction="row" alignItems="end">
         <Typography variant="h4" flexGrow={1}>
           {sectionTitle}
@@ -48,20 +48,21 @@ export default async function LinkedResourceTable({
           fields={[{ fieldId: backlinkFieldId, valueInput: { resourceId } }]}
         />
       </Stack>
-      <ResourceTable
-        schema={linkedResourceSchema}
-        resources={linkedResources ?? []}
-        isEditable={false}
-        sx={{
-          borderBottomRightRadius: 0,
-        }}
-        disableColumnFilter
-        disableColumnResize
-        disableColumnMenu
-        disableColumnReorder
-        hideFooter
-        indexed
-      />
-    </>
+      <Paper>
+        <ResourceTable
+          tableKey="job-purchases"
+          schema={linkedResourceSchema}
+          resources={linkedResources ?? []}
+          isEditable={false}
+          sx={{
+            borderBottomRightRadius: 0,
+          }}
+          disableColumnFilter
+          disableColumnMenu
+          hideFooter
+          indexed
+        />
+      </Paper>
+    </Stack>
   )
 }
