@@ -198,7 +198,11 @@ export default function ItemizedCosts({ resource, isReadOnly }: Props) {
 
       {!isReadOnly && (
         <Stack direction="row" justifyContent="end">
-          <Button onClick={() => createCost(resource.id)} startIcon={<Add />}>
+          <Button
+            onClick={() => createCost(resource.id)}
+            startIcon={<Add />}
+            size="small"
+          >
             Itemized Cost
           </Button>
         </Stack>

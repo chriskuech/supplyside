@@ -1,5 +1,5 @@
 import { fail } from 'assert'
-import { Paper, Stack, Typography } from '@mui/material'
+import { Card, Stack, Typography } from '@mui/material'
 import {
   FieldTemplate,
   ResourceType,
@@ -48,7 +48,14 @@ export default async function LinkedResourceTable({
           fields={[{ fieldId: backlinkFieldId, valueInput: { resourceId } }]}
         />
       </Stack>
-      <Paper>
+      <Card
+        variant="elevation"
+        sx={{
+          border: '1px solid',
+          borderColor: 'divider',
+          borderBottomRightRadius: 0,
+        }}
+      >
         <ResourceTable
           tableKey="job-purchases"
           schema={linkedResourceSchema}
@@ -62,7 +69,7 @@ export default async function LinkedResourceTable({
           hideFooter
           indexed
         />
-      </Paper>
+      </Card>
     </Stack>
   )
 }
