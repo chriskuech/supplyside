@@ -35,7 +35,7 @@ export default function Charts({ gridApiRef }: Props) {
   }, [gridApiRef])
 
   return (
-    <Accordion defaultExpanded>
+    <Accordion defaultExpanded sx={{ borderRadius: 1 }}>
       <AccordionSummary expandIcon={<ExpandMore />}>
         <Typography variant="h6" gutterBottom>
           Cashflow
