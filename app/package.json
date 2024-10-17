@@ -20,6 +20,7 @@
     "@mui/lab": "^6.0.0-beta.11",
     "@mui/material": "^6.1.1",
     "@mui/material-nextjs": "^6.1.1",
+    "@mui/x-charts": "^7.20.0",
     "@mui/x-data-grid": "^7.15.0",
     "@mui/x-data-grid-pro": "^7.18.0",
     "@mui/x-date-pickers": "^7.18.0",

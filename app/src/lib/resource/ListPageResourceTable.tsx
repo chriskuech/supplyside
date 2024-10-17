@@ -1,10 +1,17 @@
 'use client'
 
-import { FC, useCallback, useMemo } from 'react'
+import {
+  ComponentType,
+  FC,
+  MutableRefObject,
+  useCallback,
+  useMemo,
+} from 'react'
 import { GridFilterModel } from '@mui/x-data-grid'
 import { Resource, Schema } from '@supplyside/model'
 import { useRouter } from 'next/navigation'
 import { debounce } from 'remeda'
+import { GridApiPro } from '@mui/x-data-grid-pro'
 import ResourceTable from './table/ResourceTable'
 
 type Props = {
@@ -13,6 +20,7 @@ type Props = {
   resources: Resource[]
   initialGridFilterModel?: GridFilterModel
   unFilterableFieldIds?: string[]
+  Charts?: ComponentType<{ gridApiRef: MutableRefObject<GridApiPro> }>
 }
 
 export const ListPageResourceTable: FC<Props> = ({
@@ -21,6 +29,7 @@ export const ListPageResourceTable: FC<Props> = ({
   resources,
   initialGridFilterModel,
   unFilterableFieldIds,
+  Charts,
 }) => {
   const router = useRouter()
 
@@ -50,6 +59,7 @@ export const ListPageResourceTable: FC<Props> = ({
       initialGridFilterModel={initialGridFilterModel}
       saveGridFilterModel={saveGridFilterModelDebounced}
       unFilterableFieldIds={unFilterableFieldIds}
+      Charts={Charts}
     />
   )
 }

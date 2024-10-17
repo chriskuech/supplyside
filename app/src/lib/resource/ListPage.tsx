@@ -1,8 +1,9 @@
 import { Alert, Box, Container, Stack, Typography } from '@mui/material'
-import { ReactNode } from 'react'
+import { ComponentType, MutableRefObject, ReactNode } from 'react'
 import { ResourceType } from '@supplyside/model'
 import { z } from 'zod'
 import { GridFilterItem, GridFilterModel } from '@mui/x-data-grid'
+import { GridApiPro } from '@mui/x-data-grid-pro'
 import CreateResourceButton from './CreateResourceButton'
 import { ResourceDrawer } from './ResourceDrawer'
 import { ListPageResourceTable } from './ListPageResourceTable'
@@ -17,6 +18,7 @@ type Props = {
   searchParams: Record<string, unknown>
   filterItems?: GridFilterItem[]
   title?: string
+  Charts?: ComponentType<{ gridApiRef: MutableRefObject<GridApiPro> }>
 }
 
 export default async function ListPage({
@@ -26,6 +28,7 @@ export default async function ListPage({
   callToActions = [],
   filterItems,
   title,
+  Charts,
 }: Props) {
   const { accountId } = await requireSession()
   const [schema, resources] = await Promise.all([
@@ -92,6 +95,7 @@ export default async function ListPage({
             resources={resources}
             initialGridFilterModel={initialGridFilterModel}
             unFilterableFieldIds={filterItems?.map((item) => item.field)}
+            Charts={Charts}
           />
         </Stack>
       </Container>
