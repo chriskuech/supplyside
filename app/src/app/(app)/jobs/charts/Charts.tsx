@@ -26,7 +26,6 @@ export default function Charts({ gridApiRef }: Props) {
       })
     }
   }, [gridApiRef])
-  //5, 3
   return (
     <Stack direction="row" spacing={2} height={200}>
       <Box flexGrow={1}>
