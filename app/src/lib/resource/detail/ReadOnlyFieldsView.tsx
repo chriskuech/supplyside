@@ -1,7 +1,7 @@
 import { Info, Check, Clear } from '@mui/icons-material'
 import { Stack, Typography, Tooltip, Box, Chip } from '@mui/material'
 import { match } from 'ts-pattern'
-import { Resource, Schema } from '@supplyside/model'
+import { Resource, Schema, findTemplateField } from '@supplyside/model'
 import { Masonry } from '@mui/lab'
 import FileField from '../fields/controls/FileField'
 import FilesField from '../fields/controls/FilesField'
@@ -83,7 +83,13 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                     )
                     .with(
                       { fieldType: 'Number' },
-                      ({ value: { number } }) => number?.toString() ?? '-',
+                      ({ templateId, value: { number } }) => {
+                        if (number === null) return '-'
+
+                        const { prefix } = findTemplateField(templateId) ?? {}
+
+                        return prefix ? `${prefix} ${number}` : number
+                      },
                     )
                     .with(
                       { fieldType: 'Text' },
