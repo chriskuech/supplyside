@@ -27,7 +27,7 @@ export default async function BillLines({
       resourceType="PurchaseLine"
       searchParams={searchParams}
       filterItems={[purchasesLines]}
-      title="Purchase lines"
+      title="Purchase Lines"
     />
   )
 }
