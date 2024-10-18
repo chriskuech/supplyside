@@ -1,52 +1,67 @@
 'use client'
 
-import { BarChart, BarSeriesType } from '@mui/x-charts'
+import {
+  BarPlot,
+  BarSeriesType,
+  ChartsReferenceLine,
+  ChartsTooltip,
+  ChartsXAxis,
+  ChartsYAxis,
+  ResponsiveChartContainer,
+} from '@mui/x-charts'
 import { groupBy, sumBy } from 'remeda'
 import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
 import dayjs from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import isBetween from 'dayjs/plugin/isBetween'
 import { useMemo } from 'react'
+import { ChartsNoDataOverlay } from '@mui/x-charts/ChartsOverlay'
 import { formatMoney } from '@/lib/format'
 
 dayjs.extend(weekOfYear)
 dayjs.extend(isBetween)
-
-const NUMBER_OF_WEEKS = 7
 
 type Props = {
   resources: Resource[]
 }
 
 export default function CashflowBarChart({ resources }: Props) {
-  const currentWeek = useMemo(() => dayjs(new Date()).day(1), [])
-  const currentWeekNumber = useMemo(() => currentWeek.week(), [currentWeek])
+  const orderedPaymentDates = resources
+    .filter(
+      (resource) =>
+        !!selectResourceFieldValue(resource, fields.paymentDueDate)?.date,
+    )
+    .map(
+      (resource) =>
+        selectResourceFieldValue(resource, fields.paymentDueDate)?.date,
+    )
+    .sort((date1, date2) => (dayjs(date1).isBefore(date2) ? -1 : 1))
+
+  const minDate = dayjs(orderedPaymentDates[0])
+  const maxDate = dayjs(orderedPaymentDates[orderedPaymentDates.length - 1])
+
+  const numberOfWeeks = useMemo(
+    () => Math.ceil(maxDate.diff(minDate, 'week', true)),
+    [minDate, maxDate],
+  )
+  const startDate = useMemo(() => minDate.day(1), [minDate])
+  const startDateWeekNumber = useMemo(() => startDate.week(), [startDate])
 
   const weeks = useMemo((): string[] => {
-    const data = [...Array(NUMBER_OF_WEEKS).keys()].map((number) =>
-      currentWeek.week(currentWeekNumber + number).format('MM/DD/YYYY'),
+    const data = [...Array(numberOfWeeks).keys()].map((number) =>
+      startDate.week(startDateWeekNumber + number).format('MM/DD/YYYY'),
     )
 
     return data
-  }, [currentWeek, currentWeekNumber])
+  }, [startDate, startDateWeekNumber, numberOfWeeks])
 
   const series = useMemo((): BarSeriesType['data'] => {
     if (!resources) return []
 
-    const resourcesToShow = resources.filter((resource) => {
-      const paymentDueDate = selectResourceFieldValue(
-        resource,
-        fields.paymentDueDate,
-      )?.date
-
-      if (!paymentDueDate) return false
-
-      const lastWeekToShow = currentWeek.week(
-        currentWeekNumber + NUMBER_OF_WEEKS,
-      )
-
-      return dayjs(paymentDueDate).isBetween(currentWeek, lastWeekToShow)
-    })
+    const resourcesToShow = resources.filter(
+      (resource) =>
+        !!selectResourceFieldValue(resource, fields.paymentDueDate)?.date,
+    )
 
     const resourcesGroupedByWeek = groupBy(resourcesToShow, (resource) => {
       const paymentDueDate = selectResourceFieldValue(
@@ -62,7 +77,6 @@ export default function CashflowBarChart({ resources }: Props) {
         return dayjs(paymentDueDate).isBetween(weekDate, nextWeekDate)
       })
     })
-
     return weeks.map((week) =>
       sumBy(
         resourcesGroupedByWeek[week] ?? [],
@@ -70,16 +84,46 @@ export default function CashflowBarChart({ resources }: Props) {
           selectResourceFieldValue(resource, fields.totalCost)?.number ?? 0,
       ),
     )
-  }, [currentWeek, currentWeekNumber, weeks, resources])
+  }, [weeks, resources])
+
+  const currentWeek = useMemo(() => {
+    const today = dayjs(new Date())
+    return weeks.find((week) => today.day(1).isSame(dayjs(week), 'd'))
+  }, [weeks])
 
   return (
-    <BarChart
-      sx={{ padding: 1 }}
-      xAxis={[{ data: weeks, scaleType: 'band' }]}
-      yAxis={[{ valueFormatter: (value) => formatMoney(value) ?? '' }]}
+    <ResponsiveChartContainer
+      sx={{ padding: 1, marginLeft: 2, overflow: 'visible' }}
       series={[
-        { data: series, valueFormatter: (value) => formatMoney(value) ?? '' },
+        {
+          data: series,
+          type: 'bar',
+          valueFormatter: (value) =>
+            formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
+        },
       ]}
-    />
+      xAxis={[{ data: weeks, scaleType: 'band' }]}
+      yAxis={[
+        {
+          valueFormatter: (value) =>
+            formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
+        },
+      ]}
+    >
+      {currentWeek && (
+        <ChartsReferenceLine
+          x={currentWeek}
+          lineStyle={{ stroke: 'red' }}
+          labelStyle={{ fontSize: '12', stroke: 'red' }}
+          label="today"
+          labelAlign="start"
+        />
+      )}
+      <BarPlot />
+      <ChartsTooltip />
+      <ChartsXAxis />
+      <ChartsYAxis />
+      {!series?.length && <ChartsNoDataOverlay />}
+    </ResponsiveChartContainer>
   )
 }

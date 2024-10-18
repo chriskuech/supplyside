@@ -14,12 +14,14 @@ export function formatDate(
 
 export function formatMoney(
   value: number | null | undefined,
+  options?: Intl.NumberFormatOptions,
 ): string | null | undefined {
   return match(value)
     .with(P.number, (v) =>
       v.toLocaleString('en-US', {
         style: 'currency',
         currency: 'USD',
+        ...options,
       }),
     )
     .otherwise((v) => v)
