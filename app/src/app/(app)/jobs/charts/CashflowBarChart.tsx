@@ -110,6 +110,10 @@ export default function CashflowBarChart({ resources }: Props) {
         },
       ]}
     >
+      <BarPlot />
+      <ChartsTooltip />
+      <ChartsXAxis />
+      <ChartsYAxis />
       {currentWeek && (
         <ChartsReferenceLine
           x={currentWeek}
@@ -119,10 +123,6 @@ export default function CashflowBarChart({ resources }: Props) {
           labelAlign="start"
         />
       )}
-      <BarPlot />
-      <ChartsTooltip />
-      <ChartsXAxis />
-      <ChartsYAxis />
       {!series?.length && <ChartsNoDataOverlay />}
     </ResponsiveChartContainer>
   )
