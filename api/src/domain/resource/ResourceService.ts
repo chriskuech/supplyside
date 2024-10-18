@@ -857,7 +857,9 @@ export class ResourceService {
         tf: findTemplateField(rf.templateId),
       }))
       .filter(({ sf }) => selectSchemaField(toSchema, sf))
-      .filter(({ tf }) => !tf?.isDerived)
+      .filter(
+        ({ tf }) => !tf?.isDerived && tf?.templateId !== fields.name.templateId,
+      )
 
     await this.update(accountId, resourceId, {
       fields: fieldsToUpdate.map(({ rf, sf }) => ({
