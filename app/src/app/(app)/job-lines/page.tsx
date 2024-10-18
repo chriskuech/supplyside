@@ -10,7 +10,6 @@ export default async function JobLines({
       tableKey="jobLinesList"
       resourceType="JobLine"
       searchParams={searchParams}
-      title="Job lines"
     />
   )
 }
