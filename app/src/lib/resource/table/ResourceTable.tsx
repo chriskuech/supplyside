@@ -7,11 +7,27 @@ import {
   GridFilterModel,
   GridToolbarColumnsButton,
   GridToolbarContainer,
+  GridToolbarExport,
   GridToolbarFilterButton,
   GridToolbarQuickFilter,
 } from '@mui/x-data-grid-pro'
-import { CircularProgress, IconButton } from '@mui/material'
-import { Clear } from '@mui/icons-material'
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Collapse,
+  Divider,
+  IconButton,
+  Stack,
+  Tooltip,
+} from '@mui/material'
+import {
+  BarChart,
+  Clear,
+  ExpandLess,
+  ExpandMore,
+  PieChart,
+} from '@mui/icons-material'
 import { ComponentType, MutableRefObject, useMemo, useState } from 'react'
 import { z } from 'zod'
 import { Resource, Schema } from '@supplyside/model'
@@ -49,6 +65,8 @@ export default function ResourceTable({
   Charts,
   ...props
 }: Props) {
+  const isChartsEnabled = Charts !== undefined
+  const [showCharts, setShowCharts] = useState(isChartsEnabled)
   const [isGridRendered, setIsGridRendered] = useState(false)
   const { apiRef, initialState, saveStateToLocalstorage } =
     usePersistDatagridState(tableKey)
@@ -103,7 +121,11 @@ export default function ResourceTable({
 
   return (
     <>
-      {Charts && isGridRendered && <Charts gridApiRef={apiRef} />}
+      {isChartsEnabled && (
+        <Collapse in={showCharts} timeout="auto" unmountOnExit>
+          <Box pb={4}>{isGridRendered && <Charts gridApiRef={apiRef} />}</Box>
+        </Collapse>
+      )}
       <DataGridPro<Row>
         sx={{ paddingTop: '1px' }} // hack to make the "active filter count" bubble overlap
         ref={() => setIsGridRendered(true)}
@@ -147,12 +169,6 @@ export default function ResourceTable({
         slots={{
           toolbar: () => (
             <GridToolbarContainer>
-              <GridToolbarColumnsButton
-                slotProps={{ button: { variant: 'text' } }}
-              />
-              <GridToolbarFilterButton
-                slotProps={{ button: { variant: 'text' } }}
-              />
               <GridToolbarQuickFilter
                 quickFilterParser={parseQuickFilter}
                 quickFilterFormatter={(quickFilterValues) =>
@@ -163,8 +179,39 @@ export default function ResourceTable({
                     .filter(Boolean)
                     .join(' ')
                 }
+                sx={{ flexGrow: 1, maxWidth: '700px' }}
                 debounceMs={200} // time before applying the new quick filter value
               />
+              <Box flexGrow={1} />
+              <GridToolbarExport slotProps={{ button: { variant: 'text' } }} />
+              <Divider orientation="vertical" flexItem />
+              <GridToolbarColumnsButton
+                slotProps={{ button: { variant: 'text' } }}
+              />
+              <GridToolbarFilterButton
+                slotProps={{ button: { variant: 'text' } }}
+              />
+              {isChartsEnabled && (
+                <>
+                  <Divider orientation="vertical" flexItem />
+                  <Tooltip title={`${showCharts ? 'Hide' : 'Show'} Charts`}>
+                    <Button
+                      onClick={() => setShowCharts((e) => !e)}
+                      size="small"
+                      variant="text"
+                      startIcon={
+                        <Stack direction="row">
+                          <PieChart fontSize="small" />
+                          <BarChart fontSize="small" />
+                        </Stack>
+                      }
+                      endIcon={showCharts ? <ExpandLess /> : <ExpandMore />}
+                    >
+                      Charts
+                    </Button>
+                  </Tooltip>
+                </>
+              )}
             </GridToolbarContainer>
           ),
         }}
