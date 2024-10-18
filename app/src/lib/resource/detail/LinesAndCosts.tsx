@@ -66,9 +66,7 @@ export default async function LinesAndCosts({
             schema={strippedSchema}
             resources={lines ?? []}
             isEditable={!isReadOnly}
-            sx={{
-              borderBottomRightRadius: 0,
-            }}
+            sx={{ borderBottomRightRadius: 0 }}
             disableColumnFilter
             disableColumnResize
             disableColumnMenu
