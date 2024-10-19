@@ -2,7 +2,7 @@ import { resourceTypes } from '@supplyside/model'
 import { notFound } from 'next/navigation'
 import ListPage from '@/lib/resource/ListPage'
 
-export default async function Lines({
+export default async function GenericListPage({
   params: { type: paramsType },
   searchParams,
 }: {

@@ -11,6 +11,7 @@ import { FC, ReactNode } from 'react'
 import {
   Build,
   Business,
+  EventRepeat,
   List,
   Receipt,
   ShoppingBag,
@@ -52,7 +53,7 @@ export default async function Layout({
             <ItemLink title="Closed Jobs" href="/jobs/closed" />
             <ItemLink
               title="Lines"
-              href="/job-lines"
+              href="/jobs/lines"
               icon={<List fontSize="small" />}
             />
           </Box>
@@ -70,8 +71,13 @@ export default async function Layout({
             <ItemLink title="Open Purchases" href="/purchases/open" />
             <ItemLink title="Closed Purchases" href="/purchases/closed" />
             <ItemLink
+              title="Purchase Schedules"
+              href="/purchases/schedules"
+              icon={<EventRepeat fontSize="small" />}
+            />
+            <ItemLink
               title="Lines"
-              href="/purchase-lines"
+              href="/purchases/lines"
               icon={<List fontSize="small" />}
             />
           </Box>
@@ -90,7 +96,7 @@ export default async function Layout({
             <ItemLink title="Closed Bills" href="/bills/closed" />
             <ItemLink
               title="Lines"
-              href="/bill-lines"
+              href="/bills/lines"
               icon={<List fontSize="small" />}
             />
           </Box>

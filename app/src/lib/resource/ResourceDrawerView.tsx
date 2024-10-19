@@ -26,7 +26,8 @@ export const ResourceDrawerView = ({
       <Stack p={2} minWidth={500}>
         <Stack direction="row" alignItems="center">
           <Typography variant="h5" sx={{ p: 2 }} flexGrow={1}>
-            {state.schema.resourceType} details
+            {state.schema.resourceType.replace(/([a-z])([A-Z])/g, '$1 $2') +
+              ' details'}
           </Typography>
           {tools}
           <DeleteResourceButton

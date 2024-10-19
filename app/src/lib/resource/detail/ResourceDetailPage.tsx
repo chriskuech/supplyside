@@ -27,7 +27,7 @@ type Props = {
   name?: string | null
   tools: readonly ReactNode[]
   isReadOnly?: boolean
-  backlinkField?: FieldTemplate
+  linesBacklinkField?: FieldTemplate
   actions?: ReactNode
   searchParams: Record<string, unknown>
   linkedResources?: Omit<LinkedResourceTableProps, 'resourceId'>[]
@@ -39,7 +39,7 @@ export default function ResourceDetailPage({
   resource,
   name,
   tools,
-  backlinkField,
+  linesBacklinkField,
   isReadOnly,
   actions,
   searchParams,
@@ -53,7 +53,8 @@ export default function ResourceDetailPage({
           {name && (
             <Stack direction="row" alignItems="center">
               <Typography variant="overline">
-                {resource.type} #{resource.key}
+                {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
+                {resource.key}
               </Typography>
             </Stack>
           )}
@@ -64,7 +65,9 @@ export default function ResourceDetailPage({
                 .with(null, () => <span style={{ opacity: 0.5 }}>No Name</span>)
                 .with(undefined, () => (
                   <>
-                    <span style={{ opacity: 0.5 }}>{resource.type} #</span>
+                    <span style={{ opacity: 0.5 }}>
+                      {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
+                    </span>
                     <span>{resource.key}</span>
                   </>
                 ))
@@ -107,17 +110,19 @@ export default function ResourceDetailPage({
             ) : (
               <ResourceForm schema={schema} resource={resource} />
             )}
-            {backlinkField && lineSchema && (
+            {linesBacklinkField && lineSchema && (
               <LinesAndCosts
                 lineSchema={lineSchema}
                 resource={resource}
                 lineQuery={{
-                  '==': [{ var: backlinkField.name }, resource.id],
+                  '==': [{ var: linesBacklinkField.name }, resource.id],
                 }}
                 newLineInitialData={[
                   {
-                    fieldId: selectSchemaFieldUnsafe(lineSchema, backlinkField)
-                      .fieldId,
+                    fieldId: selectSchemaFieldUnsafe(
+                      lineSchema,
+                      linesBacklinkField,
+                    ).fieldId,
                     valueInput: { resourceId: resource.id },
                   },
                 ]}

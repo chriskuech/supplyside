@@ -56,7 +56,6 @@ export default async function JobsDetail({
       lineSchema={lineSchema}
       linkedResources={[
         {
-          sectionTitle: 'Purchases',
           resourceType: 'Purchase',
           backlinkField: fields.job,
         },
@@ -76,7 +75,7 @@ export default async function JobsDetail({
           : []),
         <CancelControl key={CancelControl.name} resourceId={resource.id} />,
       ]}
-      backlinkField={fields.job}
+      linesBacklinkField={fields.job}
       actions={
         <Stack direction="row" height={100} alignItems="center">
           <Box
