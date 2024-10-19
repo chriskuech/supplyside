@@ -7,9 +7,10 @@ import { match } from 'ts-pattern'
 
 type Props = {
   quickBooksAppUrl: string
+  fontSize: 'small' | 'medium' | 'large'
 }
 
-export default function QuickBooksLink({ quickBooksAppUrl }: Props) {
+export default function QuickBooksLink({ quickBooksAppUrl, fontSize }: Props) {
   const {
     palette: { mode },
   } = useTheme()
@@ -20,6 +21,7 @@ export default function QuickBooksLink({ quickBooksAppUrl }: Props) {
 
   return (
     <Chip
+      size={fontSize === 'small' ? 'small' : 'medium'}
       sx={{ cursor: 'pointer', height: 'auto' }}
       component={Link}
       href={quickBooksAppUrl}

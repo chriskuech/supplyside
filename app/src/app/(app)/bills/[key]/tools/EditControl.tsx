@@ -7,9 +7,10 @@ import { transitionStatus } from '@/actions/resource'
 
 type Props = {
   resourceId: string
+  fontSize: 'small' | 'medium' | 'large'
 }
 
-export default function EditControl({ resourceId }: Props) {
+export default function EditControl({ resourceId, fontSize }: Props) {
   return (
     <Tooltip title="Transition back to Draft for editing">
       <IconButton
@@ -21,8 +22,9 @@ export default function EditControl({ resourceId }: Props) {
           )
         }
         sx={{ '.MuiButtonBase-root': { m: 0, p: 0 } }}
+        size={fontSize}
       >
-        <Edit fontSize="large" />
+        <Edit fontSize={fontSize} />
       </IconButton>
     </Tooltip>
   )

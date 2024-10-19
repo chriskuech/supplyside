@@ -91,17 +91,45 @@ export default async function PurchaseDetail({
 
   return (
     <ResourceDetailPage
+      status={{
+        label: status.name,
+        color: match(status.templateId)
+          .with(
+            purchaseStatusOptions.draft.templateId,
+            () => 'inactive' as const,
+          )
+          .with(
+            purchaseStatusOptions.purchased.templateId,
+            () => 'success' as const,
+          )
+          .with(
+            purchaseStatusOptions.canceled.templateId,
+            () => 'error' as const,
+          )
+          .otherwise(() => 'active' as const),
+      }}
+      path={[
+        {
+          label: 'Purchases',
+          href: '/purchases',
+        },
+        {
+          label: resource.key.toString(),
+          href: `/purchases/${resource.key}`,
+        },
+      ]}
       lineSchema={lineSchema}
       schema={schema}
       resource={resource}
       searchParams={searchParams}
-      tools={[
+      tools={(fontSize) => [
         ...(purchaseBills?.map((bill) => (
           <ResourceLink
             key={bill.id}
             href={`/bills/${bill.key}`}
             label="Bill"
             resourceKey={bill.key}
+            fontSize={fontSize}
           />
         )) ?? []),
         ...(purchaseJob
@@ -111,6 +139,7 @@ export default async function PurchaseDetail({
                 href={`/jobs/${purchaseJob.key}`}
                 label="Job"
                 resourceKey={purchaseJob.key}
+                fontSize={fontSize}
               />,
             ]
           : []),
@@ -122,15 +151,31 @@ export default async function PurchaseDetail({
             fail('Field not found')
           }
           value={selectResourceFieldValue(resource, fields.trackingNumber)}
+          fontSize={fontSize}
         />,
-        ...(poFile ? [<PreviewPoControl key={poFile.id} file={poFile} />] : []),
         ...(poFile
-          ? [<DownloadPoControl key={poFile.id} file={poFile} />]
+          ? [
+              <PreviewPoControl
+                key={poFile.id}
+                file={poFile}
+                fontSize={fontSize}
+              />,
+            ]
+          : []),
+        ...(poFile
+          ? [
+              <DownloadPoControl
+                key={poFile.id}
+                file={poFile}
+                fontSize={fontSize}
+              />,
+            ]
           : []),
         <PurchaseAttachmentsControl
           key={PurchaseAttachmentsControl.name}
           schema={schema}
           resource={resource}
+          fontSize={fontSize}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
@@ -141,11 +186,22 @@ export default async function PurchaseDetail({
             fail('Field not found')
           }
           value={selectResourceFieldValue(resource, fields.assignee)}
+          fontSize={fontSize}
         />,
         ...(!isDraft
-          ? [<EditControl key={EditControl.name} resourceId={resource.id} />]
+          ? [
+              <EditControl
+                key={EditControl.name}
+                resourceId={resource.id}
+                fontSize={fontSize}
+              />,
+            ]
           : []),
-        <CancelControl key={CancelControl.name} resourceId={resource.id} />,
+        <CancelControl
+          key={CancelControl.name}
+          resourceId={resource.id}
+          fontSize={fontSize}
+        />,
       ]}
       linesBacklinkField={fields.purchase}
       isReadOnly={!isDraft}

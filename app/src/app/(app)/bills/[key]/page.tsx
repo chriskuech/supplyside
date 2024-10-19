@@ -64,16 +64,35 @@ export default async function BillsDetail({
 
   return (
     <ResourceDetailPage
+      status={{
+        color: match(status.templateId)
+          .with(billStatusOptions.draft.templateId, () => 'inactive' as const)
+          .with(billStatusOptions.paid.templateId, () => 'success' as const)
+          .with(billStatusOptions.canceled.templateId, () => 'error' as const)
+          .otherwise(() => 'active' as const),
+        label: status.name,
+      }}
+      path={[
+        {
+          label: 'Bills',
+          href: '/bills',
+        },
+        {
+          label: resource.key.toString(),
+          href: `/bills/${resource.key}`,
+        },
+      ]}
       lineSchema={lineSchema}
       schema={schema}
       resource={resource}
       searchParams={searchParams}
-      tools={[
+      tools={(fontSize) => [
         ...(quickBooksAppUrl
           ? [
               <QuickBooksLink
                 key={QuickBooksLink.name}
                 quickBooksAppUrl={quickBooksAppUrl}
+                fontSize={fontSize}
               />,
             ]
           : []),
@@ -84,6 +103,7 @@ export default async function BillsDetail({
                 href={`/purchases/${purchase.key}`}
                 label="Purchase"
                 resourceKey={purchase.key}
+                fontSize={fontSize}
               />,
             ]
           : []),
@@ -91,6 +111,7 @@ export default async function BillsDetail({
           key={AttachmentsToolbarControl.name}
           schema={schema}
           resource={resource}
+          fontSize={fontSize}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
@@ -101,11 +122,22 @@ export default async function BillsDetail({
             fail('Field not found')
           }
           value={selectResourceFieldValue(resource, fields.assignee)}
+          fontSize={fontSize}
         />,
         ...(!isDraft
-          ? [<EditControl key={EditControl.name} resourceId={resource.id} />]
+          ? [
+              <EditControl
+                key={EditControl.name}
+                resourceId={resource.id}
+                fontSize={fontSize}
+              />,
+            ]
           : []),
-        <CancelControl key={CancelControl.name} resourceId={resource.id} />,
+        <CancelControl
+          key={CancelControl.name}
+          resourceId={resource.id}
+          fontSize={fontSize}
+        />,
       ]}
       linesBacklinkField={fields.bill}
       isReadOnly={!isDraft}

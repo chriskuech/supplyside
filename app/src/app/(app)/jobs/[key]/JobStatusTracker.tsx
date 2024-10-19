@@ -1,5 +1,6 @@
 import { match } from 'ts-pattern'
 import {
+  OptionTemplate,
   Resource,
   fields,
   jobStatusOptions,
@@ -7,22 +8,22 @@ import {
 } from '@supplyside/model'
 import StatusTrackerView from '@/lib/ux/StatusTrackerView'
 
-const happyPath: string[] = [
-  jobStatusOptions.draft.name,
-  jobStatusOptions.ordered.name,
-  jobStatusOptions.inProcess.name,
-  jobStatusOptions.shipped.name,
-  jobStatusOptions.invoiced.name,
-  jobStatusOptions.paid.name,
+const happyPath: OptionTemplate[] = [
+  jobStatusOptions.draft,
+  jobStatusOptions.ordered,
+  jobStatusOptions.inProcess,
+  jobStatusOptions.shipped,
+  jobStatusOptions.invoiced,
+  jobStatusOptions.paid,
 ]
 
-const sadPath: string[] = [
-  jobStatusOptions.draft.name,
-  jobStatusOptions.ordered.name,
-  jobStatusOptions.inProcess.name,
-  jobStatusOptions.shipped.name,
-  jobStatusOptions.paid.name,
-  jobStatusOptions.canceled.name,
+const sadPath: OptionTemplate[] = [
+  jobStatusOptions.draft,
+  jobStatusOptions.ordered,
+  jobStatusOptions.inProcess,
+  jobStatusOptions.shipped,
+  jobStatusOptions.paid,
+  jobStatusOptions.canceled,
 ]
 
 type Props = {
@@ -30,53 +31,45 @@ type Props = {
 }
 
 export default function JobStatusTracker({ resource }: Props) {
-  const value = selectResourceFieldValue(resource, fields.jobStatus)?.option
+  const option =
+    selectResourceFieldValue(resource, fields.jobStatus)?.option ?? null
 
-  if (!value) return '❌ Field value not found'
+  if (!option) return '❌ Field value not found'
 
-  return match(value.name)
-    .with('Canceled', () => (
+  return match(option)
+    .with({ templateId: jobStatusOptions.canceled.templateId }, () => (
       <StatusTrackerView
-        steps={sadPath.map((label, i) => ({
-          label,
+        steps={sadPath.map(({ name }, i) => ({
+          label: name,
           status: 'fail',
           isActive: i === happyPath.length - 1,
         }))}
       />
     ))
-    .with('Received', () => (
+    .with({ templateId: jobStatusOptions.paid.templateId }, () => (
       <StatusTrackerView
-        steps={happyPath.map((label, i) => ({
-          label,
+        steps={happyPath.map(({ name }, i) => ({
+          label: name,
           status: 'success',
           isActive: i === sadPath.length - 1,
         }))}
       />
     ))
-    .otherwise((statusLabel) => (
+    .otherwise((activeOption) => (
       <StatusTrackerView
-        steps={happyPath.map((label, i) =>
-          match(label)
-            .with(
-              statusLabel,
-              () =>
-                ({
-                  label: statusLabel,
-                  status: 'in-progress',
-                  isActive: true,
-                }) as const,
-            )
-            .otherwise(
-              () =>
-                ({
-                  label,
-                  status:
-                    i < happyPath.indexOf(statusLabel)
-                      ? 'in-progress'
-                      : 'not-started',
-                  isActive: false,
-                }) as const,
-            ),
+        steps={happyPath.map(
+          (option, i) =>
+            ({
+              label: option.name,
+              status:
+                i <=
+                happyPath.findIndex(
+                  (o) => o.templateId === activeOption.templateId,
+                )
+                  ? 'in-progress'
+                  : 'not-started',
+              isActive: option.templateId === activeOption.templateId,
+            }) as const,
         )}
       />
     ))

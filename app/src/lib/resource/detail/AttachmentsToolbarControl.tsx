@@ -23,6 +23,7 @@ type AttachmentsToolbarControlProps = {
   field: SchemaField
   value: Value | undefined
   onSync?: () => Promise<void>
+  fontSize: 'small' | 'medium' | 'large'
 }
 
 export default function AttachmentsToolbarControl({
@@ -31,6 +32,7 @@ export default function AttachmentsToolbarControl({
   field,
   value,
   onSync,
+  fontSize,
 }: AttachmentsToolbarControlProps) {
   const { isOpen, open, close } = useDisclosure()
   const [{ isLoading }, syncFromAttachments] = useAsyncCallback(async () =>
@@ -40,12 +42,12 @@ export default function AttachmentsToolbarControl({
   return (
     <>
       <Tooltip title="View/Edit attachments">
-        <IconButton onClick={open}>
+        <IconButton onClick={open} size={fontSize}>
           <Badge
             badgeContent={value?.files?.length || undefined}
             color="primary"
           >
-            <AttachFile fontSize="large" />
+            <AttachFile fontSize={fontSize} />
           </Badge>
         </IconButton>
       </Tooltip>

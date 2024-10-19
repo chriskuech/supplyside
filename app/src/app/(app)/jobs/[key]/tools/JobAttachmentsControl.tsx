@@ -13,14 +13,19 @@ import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarC
 type Props = {
   schema: Schema
   resource: Resource
+  fontSize: 'small' | 'medium' | 'large'
 }
 
-export const JobAttachmentsControl: FC<Props> = ({ schema, resource }) => (
+export const JobAttachmentsControl: FC<Props> = ({
+  schema,
+  resource,
+  fontSize,
+}) => (
   <AttachmentsToolbarControl
     resourceId={resource.id}
     resourceType="Job"
-    // onSync={() => syncFromAttachments(resource.id)}
     field={selectSchemaFieldUnsafe(schema, fields.jobAttachments)}
     value={selectResourceFieldValue(resource, fields.jobAttachments)}
+    fontSize={fontSize}
   />
 )

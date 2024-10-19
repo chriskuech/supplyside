@@ -53,6 +53,24 @@ export default async function JobsDetail({
 
   return (
     <ResourceDetailPage
+      status={{
+        label: status.name,
+        color: match(status.templateId)
+          .with(jobStatusOptions.draft.templateId, () => 'inactive' as const)
+          .with(jobStatusOptions.paid.templateId, () => 'success' as const)
+          .with(jobStatusOptions.canceled.templateId, () => 'error' as const)
+          .otherwise(() => 'active' as const),
+      }}
+      path={[
+        {
+          label: 'Jobs',
+          href: '/jobs',
+        },
+        {
+          label: resource.key.toString(),
+          href: `/jobs/${resource.key}`,
+        },
+      ]}
       lineSchema={lineSchema}
       linkedResources={[
         {
@@ -64,16 +82,27 @@ export default async function JobsDetail({
       resource={resource}
       searchParams={searchParams}
       isReadOnly={!isDraft}
-      tools={[
+      tools={(fontSize) => [
         <JobAttachmentsControl
           key={JobAttachmentsControl.name}
           schema={schema}
           resource={resource}
+          fontSize={fontSize}
         />,
         ...(!isDraft
-          ? [<EditControl key={EditControl.name} resourceId={resource.id} />]
+          ? [
+              <EditControl
+                key={EditControl.name}
+                resourceId={resource.id}
+                fontSize={fontSize}
+              />,
+            ]
           : []),
-        <CancelControl key={CancelControl.name} resourceId={resource.id} />,
+        <CancelControl
+          key={CancelControl.name}
+          resourceId={resource.id}
+          fontSize={fontSize}
+        />,
       ]}
       linesBacklinkField={fields.job}
       actions={

@@ -22,6 +22,7 @@ type AssigneeControlProps = {
   resourceType: ResourceType
   field: SchemaField
   value: Value | undefined
+  fontSize: 'small' | 'medium' | 'large'
 }
 
 export default function AssigneeToolbarControl({
@@ -29,10 +30,13 @@ export default function AssigneeToolbarControl({
   resourceId,
   field,
   value,
+  fontSize,
 }: AssigneeControlProps) {
   const { isOpen, open, close } = useDisclosure()
 
   const assignee = value?.user
+
+  const avatarSize = fontSize === 'small' ? 24 : 40
 
   return (
     <>
@@ -43,9 +47,13 @@ export default function AssigneeToolbarControl({
             : `Assign the ${resourceType} to a user`
         }
       >
-        <IconButton onClick={open}>
-          <Avatar alt={assignee?.name ?? ''} src={getProfilePicPath(assignee)}>
-            {!assignee && <AssignmentInd />}
+        <IconButton onClick={open} size={fontSize}>
+          <Avatar
+            sx={{ width: avatarSize, height: avatarSize }}
+            alt={assignee?.name ?? ''}
+            src={getProfilePicPath(assignee)}
+          >
+            {!assignee && <AssignmentInd fontSize={fontSize} />}
           </Avatar>
         </IconButton>
       </Tooltip>

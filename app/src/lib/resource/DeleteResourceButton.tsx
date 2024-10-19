@@ -9,7 +9,7 @@ import { deleteResource } from '@/actions/resource'
 type Props = {
   resourceType: ResourceType
   resourceId: string
-  size?: 'small' | 'medium' | 'large'
+  size: 'small' | 'medium' | 'large'
 }
 
 export default function DeleteResourceButton({
@@ -35,6 +35,7 @@ export default function DeleteResourceButton({
           await deleteResource(resourceId)
           router.push(`/${resourceType.toLowerCase()}s`)
         }}
+        size={size}
       >
         <Delete fontSize={size} />
       </IconButton>

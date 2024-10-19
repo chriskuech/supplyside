@@ -20,14 +20,25 @@ export default async function ScheduledDetailPage({
 
   return (
     <ResourceDetailPage
+      path={[
+        {
+          label: 'Purchase Schedules',
+          href: '/purchases/schedules',
+        },
+        {
+          label: resource.key.toString(),
+          href: `/purchases/schedules/${resource.key}`,
+        },
+      ]}
       schema={schema}
       resource={resource}
       searchParams={searchParams}
-      tools={[
+      tools={(fontSize) => [
         <ToggleControl
           key={ToggleControl.name}
           resource={resource}
           schema={schema}
+          fontSize={fontSize}
         />,
       ]}
       lineSchema={null}

@@ -44,6 +44,7 @@ export const ResourceDrawer = async ({
 
             return [
               <QuickBooksLink
+                fontSize="large"
                 key={QuickBooksLink.name}
                 quickBooksAppUrl={getVendorUrl(quickBooksVendorId)}
               />,
@@ -59,6 +60,7 @@ export const ResourceDrawer = async ({
 
             return [
               <QuickBooksLink
+                fontSize="large"
                 key={QuickBooksLink.name}
                 quickBooksAppUrl={getCustomerUrl(quickBooksCustomerId)}
               />,

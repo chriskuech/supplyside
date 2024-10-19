@@ -6,13 +6,14 @@ import { preview } from '@/app/api/download/[filename]/util'
 
 type Props = {
   file: File
+  fontSize: 'small' | 'medium' | 'large'
 }
 
-export default function PreviewPoControl({ file }: Props) {
+export default function PreviewPoControl({ file, fontSize }: Props) {
   return (
     <Tooltip title="Preview Purchase Order file">
-      <IconButton onClick={() => preview(file)}>
-        <Visibility fontSize="large" />
+      <IconButton onClick={() => preview(file)} size={fontSize}>
+        <Visibility fontSize={fontSize} />
       </IconButton>
     </Tooltip>
   )

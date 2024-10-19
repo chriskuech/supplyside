@@ -19,18 +19,24 @@ import HandleJustCloned from './HandleJustCloned'
 import LinkedResourceTable, {
   LinkedResourceTableProps,
 } from './LinkedResourceTable'
+import BreadcrumbFrame from './Breadcrumb'
 
 type Props = {
   schema: Schema
   lineSchema: Schema | null
   resource: Resource
   name?: string | null
-  tools: readonly ReactNode[]
+  tools: (fontSize: 'small' | 'medium' | 'large') => readonly ReactNode[]
   isReadOnly?: boolean
   linesBacklinkField?: FieldTemplate
   actions?: ReactNode
   searchParams: Record<string, unknown>
   linkedResources?: Omit<LinkedResourceTableProps, 'resourceId'>[]
+  path: { label: string; href: string }[]
+  status?: {
+    color: 'inactive' | 'active' | 'success' | 'error'
+    label: string
+  }
 }
 
 export default function ResourceDetailPage({
@@ -38,15 +44,38 @@ export default function ResourceDetailPage({
   lineSchema,
   resource,
   name,
-  tools,
+  tools: customTools,
   linesBacklinkField,
   isReadOnly,
   actions,
   searchParams,
   linkedResources,
+  path,
+  status,
 }: Props) {
+  const tools = (fontSize: 'small' | 'medium' | 'large') => [
+    ...customTools(fontSize),
+    resource.type !== 'Vendor' && (
+      <DuplicateResourceButton
+        key={DuplicateResourceButton.name}
+        resourceId={resource.id}
+        resourceType={resource.type}
+        fontSize={fontSize}
+      />
+    ),
+    !resource.templateId && (
+      <DeleteResourceButton
+        key={DeleteResourceButton.name}
+        resourceType={resource.type}
+        resourceId={resource.id}
+        size={fontSize}
+      />
+    ),
+  ]
+
   return (
     <>
+      <BreadcrumbFrame path={path} tools={tools('small')} status={status} />
       <Stack>
         <HandleJustCloned />
         <Container sx={{ py: 5 }}>
@@ -76,24 +105,7 @@ export default function ResourceDetailPage({
 
             <Box flexGrow={1} />
 
-            {[
-              ...tools,
-              resource.type !== 'Vendor' && (
-                <DuplicateResourceButton
-                  key={DuplicateResourceButton.name}
-                  resourceId={resource.id}
-                  resourceType={resource.type}
-                />
-              ),
-              !resource.templateId && (
-                <DeleteResourceButton
-                  key={DeleteResourceButton.name}
-                  resourceType={resource.type}
-                  resourceId={resource.id}
-                  size="large"
-                />
-              ),
-            ].map((tool, i) => (
+            {tools('large').map((tool, i) => (
               <Box height="min-content" key={i}>
                 {tool}
               </Box>
