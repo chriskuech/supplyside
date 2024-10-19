@@ -36,7 +36,7 @@ export default async function ClosedJobs({
 
   return (
     <ListPage
-      tableKey="closedJobList"
+      tableKey="jobsList"
       resourceType="Job"
       searchParams={searchParams}
       filterItems={[closedJobsFilter]}

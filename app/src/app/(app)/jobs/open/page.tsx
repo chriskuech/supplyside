@@ -44,7 +44,7 @@ export default async function OpenJobs({
 
   return (
     <ListPage
-      tableKey="openJobsList"
+      tableKey="jobsList"
       resourceType="Job"
       searchParams={searchParams}
       filterItems={[openJobsFilter]}

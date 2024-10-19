@@ -43,7 +43,7 @@ export default async function UnpaidBills({
 
   return (
     <ListPage
-      tableKey="unpaidBillList"
+      tableKey="billsList"
       resourceType="Bill"
       searchParams={searchParams}
       filterItems={[unpaidBillsFilter]}

@@ -36,7 +36,7 @@ export default async function ClosedBills({
 
   return (
     <ListPage
-      tableKey="closedBillList"
+      tableKey="billsList"
       resourceType="Bill"
       searchParams={searchParams}
       filterItems={[closedBillsFilter]}
