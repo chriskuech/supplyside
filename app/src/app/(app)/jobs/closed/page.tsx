@@ -6,7 +6,6 @@ import {
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { GridFilterItem } from '@mui/x-data-grid'
-import Charts from '../charts/Charts'
 import ListPage from '@/lib/resource/ListPage'
 import { readSchema } from '@/actions/schema'
 
@@ -42,7 +41,6 @@ export default async function ClosedJobs({
       searchParams={searchParams}
       filterItems={[closedJobsFilter]}
       title="Closed Jobs"
-      Charts={Charts}
     />
   )
 }

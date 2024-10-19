@@ -9,7 +9,16 @@ import {
   ChartsYAxis,
   ResponsiveChartContainer,
 } from '@mui/x-charts'
-import { groupBy, sumBy } from 'remeda'
+import {
+  filter,
+  groupBy,
+  isTruthy,
+  map,
+  pipe,
+  sumBy,
+  mapValues,
+  range,
+} from 'remeda'
 import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
 import dayjs from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
@@ -27,70 +36,77 @@ type Props = {
 }
 
 export default function CashflowBarChart({ resources }: Props) {
-  const orderedPaymentDates = resources
-    .filter(
-      (resource) =>
-        !!selectResourceFieldValue(resource, fields.paymentDueDate)?.date,
-    )
-    .map(
-      (resource) =>
-        selectResourceFieldValue(resource, fields.paymentDueDate)?.date,
-    )
-    .sort((date1, date2) => (dayjs(date1).isBefore(date2) ? -1 : 1))
-
-  const minDate = dayjs(orderedPaymentDates[0])
-  const maxDate = dayjs(orderedPaymentDates[orderedPaymentDates.length - 1])
-
-  const numberOfWeeks = useMemo(
-    () => Math.ceil(maxDate.diff(minDate, 'week', true)),
-    [minDate, maxDate],
-  )
-  const startDate = useMemo(() => minDate.day(1), [minDate])
-  const startDateWeekNumber = useMemo(() => startDate.week(), [startDate])
+  const today = dayjs(new Date()).day(1)
 
   const weeks = useMemo((): string[] => {
-    const data = [...Array(numberOfWeeks).keys()].map((number) =>
-      startDate.week(startDateWeekNumber + number).format('MM/DD/YYYY'),
+    const paymentDueDates = resources
+      .map(
+        (resource) =>
+          selectResourceFieldValue(resource, fields.paymentDueDate)?.date,
+      )
+      .filter(isTruthy)
+      .toSorted()
+      .map((s) => dayjs(s).day(1))
+
+    const minPaymentDueDate = paymentDueDates.at(0)
+    const maxPaymentDueDate = paymentDueDates.at(-1)
+    if (!minPaymentDueDate || !maxPaymentDueDate) return []
+
+    const startDate = minPaymentDueDate.isBefore(today, 'day')
+      ? minPaymentDueDate
+      : today
+    const endDate = maxPaymentDueDate.isAfter(today, 'day')
+      ? maxPaymentDueDate
+      : today
+
+    const numberOfWeeks = endDate.week() - startDate.week() + 1
+
+    const weeks = range(0, numberOfWeeks).map((number) =>
+      startDate.week(startDate.week() + number).format('MM/DD/YYYY'),
     )
 
-    return data
-  }, [startDate, startDateWeekNumber, numberOfWeeks])
+    return weeks
+  }, [resources, today])
 
-  const series = useMemo((): BarSeriesType['data'] => {
+  const totalCosts = useMemo((): BarSeriesType['data'] => {
     if (!resources) return []
 
-    const resourcesToShow = resources.filter(
-      (resource) =>
-        !!selectResourceFieldValue(resource, fields.paymentDueDate)?.date,
+    const totalCostByWeek = pipe(
+      resources,
+      map((resource) => {
+        const paymentDueDate = selectResourceFieldValue(
+          resource,
+          fields.paymentDueDate,
+        )?.date
+        const totalCost =
+          selectResourceFieldValue(resource, fields.totalCost)?.number ?? 0
+
+        if (!paymentDueDate) return null
+
+        return { paymentDueDate: dayjs(paymentDueDate), totalCost }
+      }),
+      filter(isTruthy),
+      map(({ paymentDueDate, totalCost }) => ({
+        week: weeks.find((week, i) => {
+          const weekDate = dayjs(week)
+          if (!weeks[i + 1]) return true
+          const nextWeekDate = dayjs(weeks[i + 1])
+
+          return paymentDueDate.isBetween(weekDate, nextWeekDate)
+        }),
+        totalCost,
+      })),
+      groupBy(({ week }) => week),
+      mapValues(sumBy(({ totalCost }) => totalCost)),
     )
 
-    const resourcesGroupedByWeek = groupBy(resourcesToShow, (resource) => {
-      const paymentDueDate = selectResourceFieldValue(
-        resource,
-        fields.paymentDueDate,
-      )?.date
-
-      return weeks.find((week, i) => {
-        const weekDate = dayjs(week)
-        if (!weeks[i + 1]) return true
-        const nextWeekDate = dayjs(weeks[i + 1])
-
-        return dayjs(paymentDueDate).isBetween(weekDate, nextWeekDate)
-      })
-    })
-    return weeks.map((week) =>
-      sumBy(
-        resourcesGroupedByWeek[week] ?? [],
-        (resource) =>
-          selectResourceFieldValue(resource, fields.totalCost)?.number ?? 0,
-      ),
-    )
+    return weeks.map((week) => totalCostByWeek[week] ?? 0)
   }, [weeks, resources])
 
-  const currentWeek = useMemo(() => {
-    const today = dayjs(new Date())
-    return weeks.find((week) => today.day(1).isSame(dayjs(week), 'd'))
-  }, [weeks])
+  const currentWeek = useMemo(
+    () => weeks.find((week) => today.isSame(dayjs(week), 'd')),
+    [today, weeks],
+  )
 
   return (
     <>
@@ -99,7 +115,7 @@ export default function CashflowBarChart({ resources }: Props) {
         sx={{ padding: 1, marginLeft: 2, overflow: 'visible' }}
         series={[
           {
-            data: series,
+            data: totalCosts,
             type: 'bar',
             valueFormatter: (value) =>
               formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
@@ -126,7 +142,7 @@ export default function CashflowBarChart({ resources }: Props) {
             labelAlign="start"
           />
         )}
-        {!series?.length && <ChartsNoDataOverlay />}
+        {!totalCosts?.length && <ChartsNoDataOverlay />}
       </ResponsiveChartContainer>
     </>
   )

@@ -4,7 +4,7 @@ import { GridFilterItem } from '@mui/x-data-grid'
 import ListPage from '@/lib/resource/ListPage'
 import { readSchema } from '@/actions/schema'
 
-export default async function BillLines({
+export default async function PurchaseLines({
   searchParams,
 }: {
   searchParams: Record<string, unknown>

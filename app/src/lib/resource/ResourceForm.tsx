@@ -55,13 +55,15 @@ export default function ResourceForm({
           >
             <AccordionSummary expandIcon={<ExpandMore />}>
               <Typography variant="h6" fontWeight="bold">
-                {s.name}{' '}
+                {s.name}
                 {sectionHasRequiredFields && (
                   <Typography
                     color="error"
                     display="inline"
                     variant="overline"
                     fontWeight="bold"
+                    ml={0.5}
+                    sx={{ verticalAlign: 'super' }}
                   >
                     *
                   </Typography>
@@ -73,13 +75,14 @@ export default function ResourceForm({
                 <Box>
                   {singleField.name !== s.name && (
                     <Typography variant="overline" gutterBottom>
-                      {singleField.name}{' '}
+                      {singleField.name}
                       {s.fields.at(0)?.isRequired && (
                         <Typography
                           color="error"
                           display="inline"
-                          variant="overline"
                           fontWeight="bold"
+                          ml={0.5}
+                          sx={{ verticalAlign: 'super' }}
                         >
                           *
                         </Typography>
@@ -113,13 +116,15 @@ export default function ResourceForm({
                               lineHeight="unset"
                               flexGrow={1}
                             >
-                              {f.name}{' '}
+                              {f.name}
                               {f.isRequired && (
                                 <Typography
                                   color="error"
                                   display="inline"
                                   variant="overline"
                                   fontWeight="bold"
+                                  ml={0.5}
+                                  sx={{ verticalAlign: 'super' }}
                                 >
                                   *
                                 </Typography>
