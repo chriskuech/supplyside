@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Stack, Typography } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import { MutableRefObject, useLayoutEffect } from 'react'
 import {
   GridApiPro,
@@ -29,11 +29,9 @@ export default function Charts({ gridApiRef }: Props) {
   return (
     <Stack direction="row" spacing={2} height={200}>
       <Box flexGrow={1}>
-        <Typography variant="h6">Jobs</Typography>
         <CashflowPieChart resources={resources ?? []} />
       </Box>
       <Box flexGrow={3}>
-        <Typography variant="h6">Cashflow</Typography>
         <CashflowBarChart resources={resources ?? []} />
       </Box>
     </Stack>
