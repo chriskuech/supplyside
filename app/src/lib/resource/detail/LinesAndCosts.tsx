@@ -44,6 +44,14 @@ export default async function LinesAndCosts({
       <Stack direction="row" alignItems="end">
         <Typography variant="h4" flexGrow={1}>
           Lines
+          <Typography
+            color="error"
+            display="inline"
+            ml={0.5}
+            sx={{ verticalAlign: 'super' }}
+          >
+            *
+          </Typography>
         </Typography>
         {!isReadOnly && (
           <CreateResourceButton
