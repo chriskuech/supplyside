@@ -25,6 +25,7 @@ import weekOfYear from 'dayjs/plugin/weekOfYear'
 import isBetween from 'dayjs/plugin/isBetween'
 import { useMemo } from 'react'
 import { ChartsNoDataOverlay } from '@mui/x-charts/ChartsOverlay'
+import { Typography } from '@mui/material'
 import { formatMoney } from '@/lib/format'
 
 dayjs.extend(weekOfYear)
@@ -108,38 +109,41 @@ export default function CashflowBarChart({ resources }: Props) {
   )
 
   return (
-    <ResponsiveChartContainer
-      sx={{ padding: 1, marginLeft: 2, overflow: 'visible' }}
-      series={[
-        {
-          data: totalCosts,
-          type: 'bar',
-          valueFormatter: (value) =>
-            formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
-        },
-      ]}
-      xAxis={[{ data: weeks, scaleType: 'band' }]}
-      yAxis={[
-        {
-          valueFormatter: (value) =>
-            formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
-        },
-      ]}
-    >
-      <BarPlot />
-      <ChartsTooltip />
-      <ChartsXAxis />
-      <ChartsYAxis />
-      {currentWeek && (
-        <ChartsReferenceLine
-          x={currentWeek}
-          lineStyle={{ stroke: 'red' }}
-          labelStyle={{ fontSize: '12', stroke: 'red' }}
-          label="today"
-          labelAlign="start"
-        />
-      )}
-      {!totalCosts?.length && <ChartsNoDataOverlay />}
-    </ResponsiveChartContainer>
+    <>
+      <Typography variant="h6">Cashflow</Typography>
+      <ResponsiveChartContainer
+        sx={{ padding: 1, marginLeft: 2, overflow: 'visible' }}
+        series={[
+          {
+            data: totalCosts,
+            type: 'bar',
+            valueFormatter: (value) =>
+              formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
+          },
+        ]}
+        xAxis={[{ data: weeks, scaleType: 'band' }]}
+        yAxis={[
+          {
+            valueFormatter: (value) =>
+              formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
+          },
+        ]}
+      >
+        <BarPlot />
+        <ChartsTooltip />
+        <ChartsXAxis />
+        <ChartsYAxis />
+        {currentWeek && (
+          <ChartsReferenceLine
+            x={currentWeek}
+            lineStyle={{ stroke: 'red' }}
+            labelStyle={{ fontSize: '12', stroke: 'red' }}
+            label="today"
+            labelAlign="start"
+          />
+        )}
+        {!totalCosts?.length && <ChartsNoDataOverlay />}
+      </ResponsiveChartContainer>
+    </>
   )
 }

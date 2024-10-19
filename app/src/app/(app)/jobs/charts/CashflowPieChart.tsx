@@ -42,12 +42,11 @@ export default function CashflowPieChart({ resources }: Props) {
 
   return (
     <>
-      {dataHasValues && (
-        <Typography fontSize={15}>
-          {numberOfJobs} Jobs
-          {` (${formatMoney(total, { minimumFractionDigits: 0 })})`}
-        </Typography>
-      )}
+      <Typography variant="h6">
+        {dataHasValues
+          ? `${numberOfJobs} Jobs (${formatMoney(total, { minimumFractionDigits: 0 })})`
+          : 'Jobs'}
+      </Typography>
       <PieChart
         height={160}
         sx={{ padding: 1, overflow: 'visible', mr: 1 }}
