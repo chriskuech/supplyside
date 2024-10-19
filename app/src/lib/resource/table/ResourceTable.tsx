@@ -147,6 +147,7 @@ export default function ResourceTable({
                 scroll: false,
               }),
             )
+            .with('PurchaseSchedule', () => push(`/purchases/schedules/${key}`))
             .with(P.union('JobLine', 'PurchaseLine'), () => null)
             .exhaustive()
         }

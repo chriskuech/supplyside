@@ -139,7 +139,7 @@ export default async function BillsDetail({
           fontSize={fontSize}
         />,
       ]}
-      backlinkField={fields.bill}
+      linesBacklinkField={fields.bill}
       isReadOnly={!isDraft}
       actions={
         <Stack direction="row" height={100}>

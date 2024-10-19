@@ -2,14 +2,6 @@ import { Home } from '@mui/icons-material'
 import { Card, Box, Typography, Stack } from '@mui/material'
 import { Address } from '@supplyside/model'
 
-export const formatInlineAddress = (address: Address): string => {
-  const { streetAddress, city, state, zip, country } = address
-
-  const stateZip = [state, zip].filter(Boolean).join(' ')
-
-  return [streetAddress, city, stateZip, country].filter(Boolean).join(', ')
-}
-
 const formatAddress = (address: Address) => {
   const { streetAddress, city, state, zip, country } = address
 
@@ -30,11 +22,23 @@ export default function AddressCard({ address, inline }: Props) {
     return <Typography color="text.secondary">No address provided</Typography>
   }
 
-  if (inline) {
-    return <Typography>{formatInlineAddress(address)}</Typography>
-  }
-
   const { streetAddress, cityStateZip, country } = formatAddress(address)
+
+  if (inline) {
+    return (
+      <Stack>
+        {streetAddress && (
+          <Typography variant="caption">{streetAddress}</Typography>
+        )}
+        {cityStateZip && (
+          <Typography variant="caption">
+            {cityStateZip}
+            {country ? ` ${country}` : ''}
+          </Typography>
+        )}
+      </Stack>
+    )
+  }
 
   return (
     <Card variant="outlined">

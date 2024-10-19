@@ -41,18 +41,25 @@ export default async function PurchaseDetail({
     key,
   )
 
-  const purchaseLines = await readResources('PurchaseLine', {
-    where: {
-      '==': [{ var: fields.purchase.name }, resource.id],
-    },
-  })
-  const purchaseHasLines = !!purchaseLines?.length
+  const [purchaseLines, purchaseBills] = await Promise.all([
+    readResources('PurchaseLine', {
+      where: {
+        '==': [{ var: fields.purchase.name }, resource.id],
+      },
+    }),
+    readResources('Bill', {
+      where: {
+        '==': [{ var: fields.purchase.name }, resource.id],
+      },
+    }),
+    readResources('PurchaseSchedule', {
+      where: {
+        '==': [{ var: fields.purchaseSchedule.name }, resource.id],
+      },
+    }),
+  ])
 
-  const purchaseBills = await readResources('Bill', {
-    where: {
-      '==': [{ var: fields.purchase.name }, resource.id],
-    },
-  })
+  const purchaseHasLines = !!purchaseLines?.length
 
   const purchaseJob = selectResourceFieldValue(resource, fields.job)?.resource
 
@@ -196,7 +203,7 @@ export default async function PurchaseDetail({
           fontSize={fontSize}
         />,
       ]}
-      backlinkField={fields.purchase}
+      linesBacklinkField={fields.purchase}
       isReadOnly={!isDraft}
       actions={
         <Stack direction="row" height={100}>

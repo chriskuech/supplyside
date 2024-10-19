@@ -12,9 +12,10 @@ import { readSchema } from '@/actions/schema'
 
 export type LinkedResourceTableProps = {
   resourceId: string
-  sectionTitle: string
+  sectionTitle?: string
   resourceType: ResourceType
   backlinkField: FieldTemplate
+  disableCreate?: boolean
 }
 
 export default async function LinkedResourceTable({
@@ -22,6 +23,7 @@ export default async function LinkedResourceTable({
   resourceType,
   sectionTitle,
   backlinkField,
+  disableCreate,
 }: LinkedResourceTableProps) {
   const linkedResources = await readResources(resourceType, {
     where: {
@@ -41,12 +43,15 @@ export default async function LinkedResourceTable({
     <Stack spacing={2}>
       <Stack direction="row" alignItems="end">
         <Typography variant="h4" flexGrow={1}>
-          {sectionTitle}
+          {sectionTitle ??
+            resourceType.replace(/([a-z])([A-Z])/g, '$1 $2') + 's'}
         </Typography>
-        <CreateResourceButton
-          resourceType="Purchase"
-          fields={[{ fieldId: backlinkFieldId, valueInput: { resourceId } }]}
-        />
+        {!disableCreate && (
+          <CreateResourceButton
+            resourceType="Purchase"
+            fields={[{ fieldId: backlinkFieldId, valueInput: { resourceId } }]}
+          />
+        )}
       </Stack>
       <Card
         variant="elevation"

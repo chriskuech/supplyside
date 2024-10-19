@@ -213,6 +213,23 @@ const _fields = {
     name: 'Document',
     type: 'File',
   },
+  executionInterval: {
+    templateId: '15694652-1b69-4f0f-8cc5-784ae10570cb',
+    name: 'Execution Interval',
+    type: 'Number',
+    isRequired: true,
+  },
+  executionIntervalUnits: {
+    templateId: '7c001a12-5ea2-4dc1-bc6d-2facc40de9b9',
+    name: 'Execution Interval Units',
+    type: 'Select',
+    options: [
+      { templateId: '0aede79d-24d8-408c-a769-46a01a3f50c7', name: 'Days' },
+      { templateId: '005724e4-32a6-41b6-b861-754d9a1d7763', name: 'Weeks' },
+      { templateId: 'fcd4cead-9ce0-4631-8fdc-3c4f16b78524', name: 'Months' },
+    ],
+    isRequired: true,
+  },
   incoterms: {
     templateId: '9f1af7c6-c04c-45cc-a97b-188c3a16aaad',
     name: 'Incoterms',
@@ -412,6 +429,13 @@ const _fields = {
     type: 'Textarea',
     description: 'Purchase notes included in the purchase order header',
   },
+  purchaseSchedule: {
+    templateId: 'b0cab848-a8e7-4cb7-a274-cad780868a73',
+    name: 'Purchase Schedule',
+    type: 'Resource',
+    resourceType: 'PurchaseSchedule',
+    description: 'The schedule that created this purchase',
+  },
   purchaseStatus: {
     templateId: 'd51e1004-c999-4ac1-8692-ff3d966c5dc3',
     name: 'Purchase Status',
@@ -449,6 +473,11 @@ const _fields = {
     name: 'QuickBooks Customer ID',
     type: 'Text',
   },
+  running: {
+    templateId: '6bbdd656-8698-4436-a5de-ede24d8f413c',
+    name: 'Running?',
+    type: 'Checkbox',
+  },
   shippingAccountNumber: {
     templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
     name: 'Shipping Account Number',
@@ -479,6 +508,14 @@ const _fields = {
     name: 'Taxable',
     type: 'Checkbox',
     description: 'Indicate if the order is taxable',
+  },
+  templatePurchase: {
+    templateId: 'e9f4dd40-2de0-407f-bf39-cc0e5ae99c6d',
+    name: 'Template Purchase',
+    type: 'Resource',
+    resourceType: 'Purchase',
+    description: 'The Purchase to clone when the schedule triggers',
+    isRequired: true,
   },
   termsAndConditions: {
     templateId: '156bdd18-42d2-427b-bcfe-97b7214c401e',
