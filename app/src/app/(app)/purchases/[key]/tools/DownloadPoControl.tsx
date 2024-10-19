@@ -6,13 +6,14 @@ import { download } from '@/app/api/download/[filename]/util'
 
 type Props = {
   file: File
+  fontSize: 'small' | 'medium' | 'large'
 }
 
-export default function DownloadPoControl({ file }: Props) {
+export default function DownloadPoControl({ file, fontSize }: Props) {
   return (
     <Tooltip title="Download Purchase Order file">
-      <IconButton onClick={() => download(file)}>
-        <Download fontSize="large" />
+      <IconButton onClick={() => download(file)} size={fontSize}>
+        <Download fontSize={fontSize} />
       </IconButton>
     </Tooltip>
   )

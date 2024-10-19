@@ -19,12 +19,14 @@ type TrackingControlProps = {
   resourceId: string
   field: SchemaField
   value: Value | undefined
+  fontSize: 'small' | 'medium' | 'large'
 }
 
 export default function TrackingControl({
   resourceId,
   field,
   value,
+  fontSize,
 }: TrackingControlProps) {
   const { isOpen, open, close } = useDisclosure()
 
@@ -39,6 +41,7 @@ export default function TrackingControl({
           onClick={open}
           icon={<LocalShipping />}
           label={trackingNumber ? `View` : 'Add'}
+          size={fontSize === 'small' ? 'small' : 'medium'}
         />
       </Tooltip>
 

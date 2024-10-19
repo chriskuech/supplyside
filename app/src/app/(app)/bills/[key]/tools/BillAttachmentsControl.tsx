@@ -14,12 +14,18 @@ import { syncFromAttachments } from '@/actions/bill'
 type Props = {
   schema: Schema
   resource: Resource
+  fontSize: 'small' | 'medium' | 'large'
 }
 
-export const BillAttachmentsControl: FC<Props> = ({ schema, resource }) => (
+export const BillAttachmentsControl: FC<Props> = ({
+  schema,
+  resource,
+  fontSize,
+}) => (
   <AttachmentsToolbarControl
     resourceId={resource.id}
     resourceType="Bill"
+    fontSize={fontSize}
     onSync={() => syncFromAttachments(resource.id)}
     field={selectSchemaFieldUnsafe(schema, fields.billAttachments)}
     value={selectResourceFieldValue(resource, fields.billAttachments)}

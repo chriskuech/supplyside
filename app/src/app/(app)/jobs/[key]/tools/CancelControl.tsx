@@ -7,11 +7,12 @@ import { transitionStatus } from '@/actions/resource'
 
 type Props = {
   resourceId: string
+  fontSize: 'small' | 'medium' | 'large'
 }
 
-export default function CancelControl({ resourceId }: Props) {
+export default function CancelControl({ resourceId, fontSize }: Props) {
   return (
-    <Tooltip title="Cancel Purchase">
+    <Tooltip title="Cancel Job">
       <IconButton
         onClick={() =>
           transitionStatus(
@@ -21,8 +22,9 @@ export default function CancelControl({ resourceId }: Props) {
           )
         }
         sx={{ '.MuiButtonBase-root': { m: 0, p: 0 } }}
+        size={fontSize}
       >
-        <CancelOutlined fontSize="large" />
+        <CancelOutlined fontSize={fontSize} />
       </IconButton>
     </Tooltip>
   )

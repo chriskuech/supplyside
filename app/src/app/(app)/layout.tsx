@@ -22,6 +22,7 @@ import { requireSession } from '@/session'
 import { readAccount } from '@/client/account'
 import { readSelf } from '@/client/user'
 import { NavLogo } from '@/lib/ux/appbar/NavLogo'
+import { ScrollProvider } from '@/lib/ux/ScrollContext'
 
 export default async function Layout({
   children,
@@ -126,9 +127,7 @@ export default async function Layout({
         variant="elevation"
         position="relative"
       >
-        <Box height="100%" width="100%" overflow="auto">
-          {children}
-        </Box>
+        <ScrollProvider>{children}</ScrollProvider>
       </Card>
     </Stack>
   )
