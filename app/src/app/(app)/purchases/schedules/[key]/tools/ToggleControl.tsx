@@ -16,9 +16,10 @@ import { updateResourceField } from '@/actions/resource'
 type Props = {
   resource: Resource
   schema: Schema
+  fontSize: 'small' | 'medium' | 'large'
 }
 
-export const ToggleControl: FC<Props> = ({ schema, resource }) => {
+export const ToggleControl: FC<Props> = ({ schema, resource, fontSize }) => {
   const field = selectSchemaFieldUnsafe(schema, fields.running)
   const isRunning =
     selectResourceFieldValue(resource, fields.running)?.boolean ?? false
@@ -45,11 +46,12 @@ export const ToggleControl: FC<Props> = ({ schema, resource }) => {
           disabled={!isRunning && isInvalid}
           sx={{ '.MuiButtonBase-root': { m: 0, p: 0 } }}
           color="secondary"
+          size={fontSize}
         >
           {isRunning ? (
-            <PauseCircle fontSize="large" />
+            <PauseCircle fontSize={fontSize} />
           ) : (
-            <PlayCircle fontSize="large" />
+            <PlayCircle fontSize={fontSize} />
           )}
         </IconButton>
       </Box>

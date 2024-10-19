@@ -33,7 +33,7 @@ type Props = {
   searchParams: Record<string, unknown>
   linkedResources?: Omit<LinkedResourceTableProps, 'resourceId'>[]
   path: { label: string; href: string }[]
-  status: {
+  status?: {
     color: 'inactive' | 'active' | 'success' | 'error'
     label: string
   }

@@ -19,7 +19,7 @@ import { useScrollContext } from '@/lib/ux/ScrollContext'
 type Props = {
   tools: readonly ReactNode[]
   path: { label: string; href: string }[]
-  status: {
+  status?: {
     color: 'inactive' | 'active' | 'success' | 'error'
     label: string
   }
@@ -71,18 +71,20 @@ export default function Breadcrumb({ path, tools, status }: Props) {
               ))}
             </Breadcrumbs>
 
-            <Box pl={1}>
-              <Chip
-                size="small"
-                color={match(status.color)
-                  .with('inactive', () => 'default' as const)
-                  .with('active', () => 'warning' as const)
-                  .with('success', () => 'success' as const)
-                  .with('error', () => 'error' as const)
-                  .exhaustive()}
-                label={status.label}
-              />
-            </Box>
+            {status && (
+              <Box pl={1}>
+                <Chip
+                  size="small"
+                  color={match(status.color)
+                    .with('inactive', () => 'default' as const)
+                    .with('active', () => 'warning' as const)
+                    .with('success', () => 'success' as const)
+                    .with('error', () => 'error' as const)
+                    .exhaustive()}
+                  label={status.label}
+                />
+              </Box>
+            )}
 
             <Box flexGrow={1} />
 
