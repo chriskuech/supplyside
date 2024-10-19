@@ -48,7 +48,7 @@ export default function CashflowPieChart({ resources }: Props) {
           : 'Jobs'}
       </Typography>
       <PieChart
-        height={160}
+        height={200}
         sx={{ padding: 1, overflow: 'visible', mr: 1 }}
         series={[
           {
