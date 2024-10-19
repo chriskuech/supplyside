@@ -429,7 +429,7 @@ export const mapSchemaFieldToGridColDef = (
         }),
       )
       .with('Number', () =>
-        template?.prefix && value?.number
+        template?.prefix && typeof value?.number === 'number'
           ? `${template.prefix} ${value.number}`
           : value?.number,
       )
