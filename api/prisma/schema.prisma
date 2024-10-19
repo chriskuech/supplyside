@@ -94,6 +94,7 @@ enum ResourceType {
   JobLine
   Purchase
   PurchaseLine
+  PurchaseSchedule
   Vendor
 }
 

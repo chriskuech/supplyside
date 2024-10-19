@@ -107,7 +107,7 @@ export default async function BillsDetail({
           : []),
         <CancelControl key={CancelControl.name} resourceId={resource.id} />,
       ]}
-      backlinkField={fields.bill}
+      linesBacklinkField={fields.bill}
       isReadOnly={!isDraft}
       actions={
         <Stack direction="row" height={100}>

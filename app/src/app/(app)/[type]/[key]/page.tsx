@@ -3,7 +3,7 @@ import { resourceTypes } from '@supplyside/model'
 import { requireSession } from '@/session'
 import { resolveKey } from '@/client/resource'
 
-export default async function CustomersDetail({
+export default async function GenericDetailPage({
   params: { type: paramsType, key: resourceKey },
 }: {
   params: { type?: string; key?: string }
