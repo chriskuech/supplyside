@@ -57,6 +57,11 @@ export default function CashflowPieChart({ resources }: Props) {
               formatMoney(item.value, { maximumFractionDigits: 0 }) ?? '',
           },
         ]}
+        slotProps={{
+          legend: {
+            itemMarkHeight: 12,
+          },
+        }}
       />
     </>
   )
