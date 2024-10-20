@@ -147,8 +147,9 @@ jobs:
         uses: tailscale/github-action@main
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-
-      - name: Run Prisma migrations
+      
+      - name: Wait for Tailscale to be ready
+        shell: pwsh
         run: |
           # Wait for the hostname to resolve before attempting to connect to the database
           $hostname = [System.Uri]::new($env:DATABASE_URL).Host
@@ -165,6 +166,8 @@ jobs:
               }
           }
 
+      - name: Run Prisma migrations
+        run: |
           # Extract database connection details from DATABASE_URL
           USER=$(echo $DATABASE_URL | sed -r 's|postgresql://([^:]+):.*|\1|')
           PASSWORD=$(echo $DATABASE_URL | sed -r 's|postgresql://[^:]+:([^@]+)@.*|\1|')
