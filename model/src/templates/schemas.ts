@@ -72,6 +72,7 @@ export const schemas: SchemaTemplate[] = [
       fields.subtotalCost,
       fields.totalCost,
       fields.paymentDueDate,
+      fields.receivedAllPurchases,
     ],
     sections: [
       {
