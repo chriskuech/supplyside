@@ -9,6 +9,7 @@ export const resourceTypes = [
   'PurchaseLine',
   'PurchaseSchedule',
   'Vendor',
+  'WorkCenter',
 ] as const
 
 export const ResourceTypeSchema = z.enum(resourceTypes)

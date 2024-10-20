@@ -118,7 +118,7 @@ export default async function PurchaseDetail({
           href: `/purchases/${resource.key}`,
         },
       ]}
-      lineSchema={lineSchema}
+      lineSchema={lineSchema ?? undefined}
       schema={schema}
       resource={resource}
       searchParams={searchParams}

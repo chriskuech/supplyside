@@ -41,7 +41,6 @@ export default async function ScheduledDetailPage({
           fontSize={fontSize}
         />,
       ]}
-      lineSchema={null}
       linkedResources={[
         {
           resourceType: 'Purchase',

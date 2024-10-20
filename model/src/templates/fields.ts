@@ -563,6 +563,12 @@ const _fields = {
     type: 'Textarea',
     description: 'Brief, internal description of the vendor',
   },
+  workCenter: {
+    templateId: '138c78ea-132f-446d-8d7b-db1c26946e99',
+    name: 'Work Center',
+    type: 'Resource',
+    resourceType: 'WorkCenter',
+  },
 } satisfies Record<string, FieldTemplate>
 
 export const fields: Record<keyof typeof _fields, FieldTemplate> = _fields

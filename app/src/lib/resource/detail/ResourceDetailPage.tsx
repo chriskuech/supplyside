@@ -23,7 +23,7 @@ import BreadcrumbFrame from './Breadcrumb'
 
 type Props = {
   schema: Schema
-  lineSchema: Schema | null
+  lineSchema?: Schema
   resource: Resource
   name?: string | null
   tools: (fontSize: 'small' | 'medium' | 'large') => readonly ReactNode[]

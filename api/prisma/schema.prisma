@@ -95,6 +95,7 @@ enum ResourceType {
   PurchaseLine
   PurchaseSchedule
   Vendor
+  WorkCenter
 }
 
 model Resource {
