@@ -89,7 +89,6 @@ model User {
 enum ResourceType {
   Bill
   Customer
-  Item
   Job
   JobLine
   Purchase
