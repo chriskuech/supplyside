@@ -82,7 +82,7 @@ export default async function BillsDetail({
           href: `/bills/${resource.key}`,
         },
       ]}
-      lineSchema={lineSchema}
+      lineSchema={lineSchema ?? undefined}
       schema={schema}
       resource={resource}
       searchParams={searchParams}

@@ -71,7 +71,7 @@ export default async function JobsDetail({
           href: `/jobs/${resource.key}`,
         },
       ]}
-      lineSchema={lineSchema}
+      lineSchema={lineSchema ?? undefined}
       linkedResources={[
         {
           resourceType: 'Purchase',
