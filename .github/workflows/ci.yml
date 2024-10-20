@@ -165,6 +165,8 @@ jobs:
                   Start-Sleep -Seconds $retryInterval
               }
           }
+        env:
+          DATABASE_URL: ${{ secrets.DB_SERVER_URL }}/integration
 
       - name: Run Prisma migrations
         run: |
