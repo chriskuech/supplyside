@@ -1,13 +1,5 @@
-import {
-  Box,
-  Card,
-  Chip,
-  Divider,
-  Stack,
-  Typography,
-  Link,
-} from '@mui/material'
-import { FC, ReactNode } from 'react'
+import assert from 'assert'
+import { Box, Card, Divider, Stack, Typography } from '@mui/material'
 import {
   Build,
   Business,
@@ -17,6 +9,15 @@ import {
   ShoppingBag,
   Storefront,
 } from '@mui/icons-material'
+import {
+  OptionTemplate,
+  billStatusOptions,
+  fields,
+  jobStatusOptions,
+  purchaseStatusOptions,
+  selectSchemaFieldOptionUnsafe,
+} from '@supplyside/model'
+import { ItemLink } from './NavItem'
 import { AccountMenu } from '@/lib/ux/appbar/AccountMenu'
 import { UserMenu } from '@/lib/ux/appbar/UserMenu'
 import { requireSession } from '@/session'
@@ -24,6 +25,8 @@ import { readAccount } from '@/client/account'
 import { readSelf } from '@/client/user'
 import { NavLogo } from '@/lib/ux/appbar/NavLogo'
 import { ScrollProvider } from '@/lib/ux/ScrollContext'
+import { readResources } from '@/client/resource'
+import { readSchema } from '@/client/schema'
 
 export default async function Layout({
   children,
@@ -31,10 +34,88 @@ export default async function Layout({
   children: React.ReactNode
 }) {
   const { userId, accountId } = await requireSession()
-  const [user, account] = await Promise.all([
-    userId && readSelf(userId),
-    accountId && readAccount(accountId),
-  ])
+  const [user, account, jobSchema, purchaseSchema, billSchema] =
+    await Promise.all([
+      userId && readSelf(userId),
+      accountId && readAccount(accountId),
+      readSchema(accountId, 'Job'),
+      readSchema(accountId, 'Purchase'),
+      readSchema(accountId, 'Bill'),
+    ])
+
+  assert(jobSchema && purchaseSchema && billSchema)
+
+  const jobStatusOptionId = (optionRef: OptionTemplate) =>
+    selectSchemaFieldOptionUnsafe(jobSchema, fields.jobStatus, optionRef).id
+  const purchaseStatusOptionId = (optionRef: OptionTemplate) =>
+    selectSchemaFieldOptionUnsafe(
+      purchaseSchema,
+      fields.purchaseStatus,
+      optionRef,
+    ).id
+  const billStatusOptionId = (optionRef: OptionTemplate) =>
+    selectSchemaFieldOptionUnsafe(billSchema, fields.billStatus, optionRef).id
+
+  const gettingOpenJobs = readResources(accountId, 'Job', {
+    where: {
+      and: [
+        {
+          '!=': [
+            { var: fields.jobStatus.name },
+            jobStatusOptionId(jobStatusOptions.paid),
+          ],
+        },
+        {
+          '!=': [
+            { var: fields.jobStatus.name },
+            jobStatusOptionId(jobStatusOptions.canceled),
+          ],
+        },
+      ],
+    },
+  })
+
+  const gettingOpenPurchases = readResources(accountId, 'Purchase', {
+    where: {
+      and: [
+        {
+          '!=': [
+            { var: fields.purchaseStatus.name },
+            purchaseStatusOptionId(purchaseStatusOptions.received),
+          ],
+        },
+        {
+          '!=': [
+            { var: fields.purchaseStatus.name },
+            purchaseStatusOptionId(purchaseStatusOptions.canceled),
+          ],
+        },
+      ],
+    },
+  })
+
+  const gettingUnpaidBills = readResources(accountId, 'Bill', {
+    where: {
+      and: [
+        {
+          '!=': [
+            { var: fields.billStatus.name },
+            billStatusOptionId(billStatusOptions.paid),
+          ],
+        },
+        {
+          '!=': [
+            { var: fields.billStatus.name },
+            billStatusOptionId(billStatusOptions.canceled),
+          ],
+        },
+      ],
+    },
+  })
+
+  const openJobCount = (await gettingOpenJobs)?.length ?? 0
+  const openPurchaseCount = (await gettingOpenPurchases)?.length ?? 0
+  const unpaidBillCount = (await gettingUnpaidBills)?.length ?? 0
 
   return (
     <Stack direction="row" height="100vh" width="100vw">
@@ -50,7 +131,11 @@ export default async function Layout({
               href="/jobs"
               icon={<Build fontSize="small" />}
             />
-            <ItemLink title="Open Jobs" href="/jobs/open" />
+            <ItemLink
+              title="Open Jobs"
+              href="/jobs/open"
+              count={openJobCount}
+            />
             <ItemLink title="Closed Jobs" href="/jobs/closed" />
             <ItemLink
               title="Lines"
@@ -69,7 +154,11 @@ export default async function Layout({
               href="/purchases"
               icon={<ShoppingBag fontSize="small" />}
             />
-            <ItemLink title="Open Purchases" href="/purchases/open" />
+            <ItemLink
+              title="Open Purchases"
+              href="/purchases/open"
+              count={openPurchaseCount}
+            />
             <ItemLink title="Closed Purchases" href="/purchases/closed" />
             <ItemLink
               title="Purchase Schedules"
@@ -93,7 +182,11 @@ export default async function Layout({
               href="/bills"
               icon={<Receipt fontSize="small" />}
             />
-            <ItemLink title="Unpaid Bills" href="/bills/unpaid" />
+            <ItemLink
+              title="Unpaid Bills"
+              href="/bills/unpaid"
+              count={unpaidBillCount}
+            />
             <ItemLink title="Closed Bills" href="/bills/closed" />
             <ItemLink
               title="Lines"
@@ -138,49 +231,3 @@ export default async function Layout({
     </Stack>
   )
 }
-
-const ItemLink: FC<{
-  title: string
-  href: string
-  icon?: ReactNode
-  count?: number
-}> = ({ title, href, icon, count }) => (
-  <Box
-    marginLeft={!icon ? 2 : undefined}
-    paddingLeft={!icon ? 2 : undefined}
-    borderLeft={!icon ? '1px solid' : undefined}
-    borderColor="divider"
-  >
-    <Typography
-      display="flex"
-      flexDirection="row"
-      component={Link}
-      href={href}
-      color="text.secondary"
-      fontSize="0.8em"
-      alignItems="center"
-      sx={{
-        textDecoration: 'none',
-        '&:hover': {
-          color: 'text.primary',
-        },
-      }}
-      lineHeight="1.7em"
-    >
-      {icon && (
-        <Box
-          width={33}
-          height="min-content"
-          textAlign="center"
-          lineHeight={1}
-          sx={{ verticalAlign: 'middle' }}
-        >
-          {icon}
-        </Box>
-      )}
-      {title}
-      <Box flexGrow={1} />
-      {!!count && <Chip label={count} size="small" color="primary" />}
-    </Typography>
-  </Box>
-)

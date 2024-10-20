@@ -16,7 +16,7 @@ export const createSql = ({
   schema,
   where,
   orderBy,
-}: MapToSqlParams) => /*sql*/ `
+}: MapToSqlParams) => /* sql */ `
     WITH "View" AS (
       SELECT
         ${[
@@ -42,6 +42,9 @@ const createWhere = (where: JsonLogic, schema: Schema): string =>
   match(where)
     .with({ and: P.any }, ({ and: clauses }) =>
       clauses.map((c) => `(${createWhere(c, schema)})`).join(' AND '),
+    )
+    .with({ or: P.any }, ({ or: clauses }) =>
+      clauses.map((c) => `(${createWhere(c, schema)})`).join(' OR '),
     )
     .with(
       { '==': P.any },
