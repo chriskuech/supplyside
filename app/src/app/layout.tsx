@@ -1,22 +1,10 @@
-import {
-  Box,
-  CssBaseline,
-  Fab,
-  IconButton,
-  Stack,
-  Tooltip,
-} from '@mui/material'
+import { Box, CssBaseline, Fab } from '@mui/material'
 import type { Metadata } from 'next'
 import { PropsWithChildren } from 'react'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter'
 import dynamic from 'next/dynamic'
-import { ManageAccounts, QuestionMark } from '@mui/icons-material'
-import NextLink from 'next/link'
+import { QuestionMark } from '@mui/icons-material'
 import MuiXLicense from '@/lib/ux/MuiXLicense'
-import { readSession } from '@/session'
-import { readSelf } from '@/client/user'
-import ImpersonationControl from '@/lib/ux/appbar/ImpersonationControl'
-import { readAccount, readAccounts } from '@/client/account'
 
 const RootProvider = dynamic(() => import('@/lib/ux/RootProvider'), {
   ssr: false,
@@ -30,13 +18,6 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<PropsWithChildren>) {
-  const sesion = await readSession()
-  const [user, account, accounts] = await Promise.all([
-    sesion?.userId ? readSelf(sesion.userId) : null,
-    sesion?.accountId ? readAccount(sesion.accountId) : null,
-    readAccounts(),
-  ])
-
   return (
     <html lang="en">
       <head>
@@ -57,41 +38,18 @@ export default async function RootLayout({
             <Box width="100vw" flexGrow={1}>
               {children}
             </Box>
-            {user?.isGlobalAdmin && account && accounts ? (
-              <Stack
-                direction="row"
-                bgcolor="warning.main"
-                p={0.5}
-                spacing={0.5}
-                borderRadius={0.5}
-                sx={{
-                  width: 400,
-                  position: 'fixed',
-                  bottom: '2rem',
-                  right: '2rem',
-                }}
-              >
-                <Tooltip title="Manage Accounts">
-                  <IconButton component={NextLink} href="/accounts">
-                    <ManageAccounts />
-                  </IconButton>
-                </Tooltip>
-                <ImpersonationControl account={account} accounts={accounts} />
-              </Stack>
-            ) : (
-              <Fab
-                color="primary"
-                aria-label="Contact Support"
-                href="mailto:support@supplyside.io?subject=Support Request"
-                sx={{
-                  position: 'fixed',
-                  bottom: '2rem',
-                  right: '2rem',
-                }}
-              >
-                <QuestionMark />
-              </Fab>
-            )}
+            <Fab
+              color="primary"
+              aria-label="Contact Support"
+              href="mailto:support@supplyside.io?subject=Support Request"
+              sx={{
+                position: 'fixed',
+                bottom: '2rem',
+                right: '2rem',
+              }}
+            >
+              <QuestionMark />
+            </Fab>
           </RootProvider>
         </AppRouterCacheProvider>
       </body>

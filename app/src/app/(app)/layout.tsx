@@ -22,12 +22,13 @@ import { ItemLink } from './NavItem'
 import { AccountMenu } from '@/lib/ux/appbar/AccountMenu'
 import { UserMenu } from '@/lib/ux/appbar/UserMenu'
 import { requireSession } from '@/session'
-import { readAccount } from '@/client/account'
+import { readAccount, readAccounts } from '@/client/account'
 import { readSelf } from '@/client/user'
 import { NavLogo } from '@/lib/ux/appbar/NavLogo'
 import { ScrollProvider } from '@/lib/ux/ScrollContext'
 import { readResources } from '@/client/resource'
 import { readSchema } from '@/client/schema'
+import AdminMenu from '@/lib/ux/appbar/AdminMenu'
 
 export default async function Layout({
   children,
@@ -35,10 +36,11 @@ export default async function Layout({
   children: React.ReactNode
 }) {
   const { userId, accountId } = await requireSession()
-  const [user, account, jobSchema, purchaseSchema, billSchema] =
+  const [user, account, accounts, jobSchema, purchaseSchema, billSchema] =
     await Promise.all([
-      userId && readSelf(userId),
-      accountId && readAccount(accountId),
+      readSelf(userId),
+      readAccount(accountId),
+      readAccounts(),
       readSchema(accountId, 'Job'),
       readSchema(accountId, 'Purchase'),
       readSchema(accountId, 'Bill'),
@@ -221,6 +223,9 @@ export default async function Layout({
         <Stack direction="row" justifyContent="space-evenly">
           {account && <AccountMenu />}
           {user && <UserMenu self={user} />}
+          {user?.isGlobalAdmin && account && accounts && (
+            <AdminMenu account={account} accounts={accounts} />
+          )}
         </Stack>
       </Stack>
       <Card
