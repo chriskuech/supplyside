@@ -54,7 +54,7 @@ export class TemplateService {
             },
           },
           DefaultValue: {
-            create: {},
+            create: { boolean: defaultValue?.boolean },
           },
           templateId,
           name,
@@ -71,6 +71,11 @@ export class TemplateService {
           type,
           resourceType,
           defaultToToday,
+          DefaultValue: {
+            update: {
+              boolean: defaultValue?.boolean,
+            },
+          },
         },
       })
 

@@ -3,7 +3,6 @@ import { z } from 'zod'
 export const resourceTypes = [
   'Bill',
   'Customer',
-  'Item',
   'Job',
   'JobLine',
   'Purchase',
