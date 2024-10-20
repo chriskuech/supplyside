@@ -256,13 +256,6 @@ const _fields = {
     type: 'Date',
     description: 'Date the order was issued',
   },
-  item: {
-    templateId: '9ffd1faf-b650-4a90-ad04-6153aad93c84',
-    name: 'Item',
-    type: 'Resource',
-    resourceType: 'Item',
-    description: 'Contains all info related to a specific item',
-  },
   itemDescription: {
     templateId: 'f7b4e0f7-a1b1-4e1e-8f7b-4e0f7e1e7e5d',
     name: 'Item Description',
@@ -472,6 +465,12 @@ const _fields = {
     templateId: '77c06a2a-f156-4425-a310-05e0315db9a0',
     name: 'QuickBooks Customer ID',
     type: 'Text',
+  },
+  receivedAllPurchases: {
+    templateId: '5fec4a3c-6221-4319-88d4-762713a1db4e',
+    name: 'Received All Purchases?',
+    type: 'Checkbox',
+    defaultValue: { boolean: true },
   },
   running: {
     templateId: '6bbdd656-8698-4436-a5de-ede24d8f413c',

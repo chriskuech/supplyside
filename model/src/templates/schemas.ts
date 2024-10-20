@@ -64,21 +64,6 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
-    resourceType: 'Item',
-    sections: [
-      {
-        name: 'Summary',
-        fields: [
-          fields.name,
-          fields.itemDescription,
-          fields.unitOfMeasure,
-          fields.itemNumber,
-          fields.otherNotes,
-        ],
-      },
-    ],
-  },
-  {
     resourceType: 'Job',
     fields: [
       fields.jobStatus,

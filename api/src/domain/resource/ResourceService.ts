@@ -602,6 +602,20 @@ export class ResourceService {
         await this.recalculateSubtotalCost(accountId, 'Job', jobId)
       }
     }
+
+    if (
+      resource.type === 'Purchase' &&
+      updatedFields.some((rf) =>
+        [fields.job.templateId, fields.purchaseStatus.templateId].includes(
+          rf.field.templateId as string,
+        ),
+      )
+    ) {
+      const jobId = selectResourceFieldValue(resource, fields.job)?.resource?.id
+      if (jobId) {
+        await this.recalculateReceivedAllPurchases(accountId, jobId)
+      }
+    }
   }
 
   async cloneResource(accountId: string, resourceId: string) {
@@ -897,5 +911,36 @@ export class ResourceService {
     if (!resourceField) return null
 
     return this.read(accountId, resourceField.resourceId)
+  }
+
+  private async recalculateReceivedAllPurchases(
+    accountId: string,
+    resourceId: string,
+  ) {
+    const [job, jobSchema, purchases] = await Promise.all([
+      this.read(accountId, resourceId),
+      this.schemaService.readMergedSchema(accountId, 'Job'),
+      this.list(accountId, 'Purchase', {
+        where: {
+          '==': [{ var: fields.job.name }, resourceId],
+        },
+      }),
+    ])
+
+    await this.updateResourceField(accountId, job.id, {
+      fieldId: selectSchemaFieldUnsafe(jobSchema, fields.receivedAllPurchases)
+        .fieldId,
+      valueInput: {
+        boolean: purchases.every((purchase) =>
+          [
+            purchaseStatusOptions.received.templateId,
+            purchaseStatusOptions.canceled.templateId,
+          ].includes(
+            selectResourceFieldValue(purchase, fields.purchaseStatus)?.option
+              ?.templateId as string,
+          ),
+        ),
+      },
+    })
   }
 }

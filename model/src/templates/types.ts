@@ -19,7 +19,8 @@ export type FieldTemplate = {
   resourceType?: ResourceType
   options?: OptionTemplate[]
   defaultValue?: {
-    optionTemplateId: string
+    boolean?: boolean
+    optionTemplateId?: string
   }
   isDerived?: boolean
   isRequired?: boolean
