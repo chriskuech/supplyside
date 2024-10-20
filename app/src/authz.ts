@@ -1,5 +1,5 @@
 import 'server-only'
-import { readUser } from './client/user'
+import { readSelf } from './client/user'
 import { requireSession } from './session'
 import { Session } from '@/session'
 
@@ -7,7 +7,7 @@ export const withGlobalAdmin =
   <Rest extends unknown[], Return>(fn: (...rest: Rest) => Promise<Return>) =>
   (...args: Rest): Promise<Return | undefined> =>
     requireSession()
-      .then(({ accountId, userId }) => readUser(accountId, userId))
+      .then(({ userId }) => readSelf(userId))
       .then((user) => (user?.isGlobalAdmin ? fn(...args) : undefined))
 
 export const withAccountId =

@@ -139,7 +139,7 @@ export default function ResourceTable({
         processRowUpdate={handleProcessRowUpdate}
         onRowClick={({ row: { type, key, id } }: { row: Row }) =>
           match(type)
-            .with(P.union('Bill', 'Job', 'Purchase'), () =>
+            .with(P.union('Bill', 'Job', 'Purchase', 'WorkCenter'), () =>
               push(`/${type.toLowerCase()}s/${key}`),
             )
             .with(P.union('Customer', 'Vendor'), () =>

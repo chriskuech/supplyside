@@ -5,6 +5,7 @@ import {
   Business,
   EventRepeat,
   List,
+  PrecisionManufacturing,
   Receipt,
   ShoppingBag,
   Storefront,
@@ -208,6 +209,11 @@ export default async function Layout({
             icon={<Storefront fontSize="small" />}
             title="Vendors"
             href="/vendors"
+          />
+          <ItemLink
+            icon={<PrecisionManufacturing fontSize="small" />}
+            title="Work Centers"
+            href="/workcenters"
           />
         </Box>
 

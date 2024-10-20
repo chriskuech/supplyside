@@ -48,7 +48,7 @@ export default async function LinkedResourceTable({
         </Typography>
         {!disableCreate && (
           <CreateResourceButton
-            resourceType="Purchase"
+            resourceType={resourceType}
             fields={[{ fieldId: backlinkFieldId, valueInput: { resourceId } }]}
           />
         )}
