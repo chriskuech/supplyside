@@ -3,7 +3,7 @@
 import {
   Autocomplete,
   Box,
-  Collapse,
+  Fade,
   IconButton,
   Stack,
   TextField,
@@ -38,7 +38,7 @@ export default function AdminMenu({ account, accounts }: Props) {
           <ManageAccounts fontSize="large" />
         </IconButton>
       </Tooltip>
-      <Collapse in={isHover} orientation="horizontal">
+      <Fade in={isHover} timeout={300}>
         <Stack
           width={350}
           height="100%"
@@ -63,7 +63,7 @@ export default function AdminMenu({ account, accounts }: Props) {
             />
           </Box>
         </Stack>
-      </Collapse>
+      </Fade>
     </Box>
   )
 }
