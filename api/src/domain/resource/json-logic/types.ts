@@ -1,20 +1,51 @@
-import { z } from 'zod'
+import { ZodType, z } from 'zod'
 
-type JsonLogicVariable = { var: string }
-export type JsonLogicValue = string | number | boolean | null
+export const JsonLogicValueSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+])
+
+export type JsonLogicValue = z.infer<typeof JsonLogicValueSchema>
+
+export const JsonLogicVariableSchema = z.object({
+  var: z.string(),
+})
+
+export const JsonLogicOperationSchema = z.union([
+  z.object({
+    '==': z.tuple([JsonLogicVariableSchema, JsonLogicValueSchema]),
+  }),
+  z.object({
+    '!=': z.tuple([JsonLogicVariableSchema, JsonLogicValueSchema]),
+  }),
+])
+
+export type JsonLogicOperation = z.infer<typeof JsonLogicOperationSchema>
+
+export type JsonLogicExpression =
+  | JsonLogicOperation
+  | { and: JsonLogicExpression[] }
+  | { or: JsonLogicExpression[] }
+
+export const JsonLogicExpressionSchema = z.lazy<ZodType<JsonLogicExpression>>(
+  (): ZodType<JsonLogicExpression> =>
+    z.union([
+      JsonLogicOperationSchema,
+      z.object({
+        and: z.array(JsonLogicExpressionSchema),
+      }),
+      z.object({
+        or: z.array(JsonLogicExpressionSchema),
+      }),
+    ]),
+)
+
+export type JsonLogicVariable = z.infer<typeof JsonLogicVariableSchema>
 
 export type OrderBy = JsonLogicVariable & { dir: 'asc' | 'desc' }
 
-export const JsonLogicSchema = z.union([
-  z.object({
-    '==': z.tuple([z.object({ var: z.string() }), z.any()]),
-  }),
-  z.object({
-    '!=': z.tuple([z.object({ var: z.string() }), z.any()]),
-  }),
-  z.object({
-    and: z.array(z.any()),
-  }),
-])
+export const JsonLogicSchema = JsonLogicExpressionSchema
 
 export type JsonLogic = z.infer<typeof JsonLogicSchema>

@@ -1,7 +1,7 @@
-import { P, match } from 'ts-pattern'
-import { concat, filter, pipe, unique } from 'remeda'
-import { OrderBy, JsonLogic } from './types'
 import { Schema } from '@supplyside/model'
+import { concat, filter, pipe, unique } from 'remeda'
+import { P, match } from 'ts-pattern'
+import { JsonLogic, OrderBy } from './types'
 
 export const getInvalidVars = ({
   schema,
@@ -26,6 +26,9 @@ export const getInvalidVars = ({
 const extractVarsFromWhere = (where: JsonLogic): string[] =>
   match(where)
     .with({ and: P.any }, ({ and: clauses }) =>
+      clauses.flatMap(extractVarsFromWhere),
+    )
+    .with({ or: P.any }, ({ or: clauses }) =>
       clauses.flatMap(extractVarsFromWhere),
     )
     .with({ '==': P.any }, ({ '==': [{ var: var_ }] }) => [var_])
