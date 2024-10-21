@@ -66,6 +66,7 @@ export const schemas: SchemaTemplate[] = [
   {
     resourceType: 'Job',
     fields: [
+      fields.name,
       fields.jobStatus,
       fields.jobAttachments,
       fields.itemizedCosts,
@@ -78,7 +79,6 @@ export const schemas: SchemaTemplate[] = [
       {
         name: 'Job Info',
         fields: [
-          fields.name,
           fields.jobDescription,
           fields.customer,
           fields.needDate,
@@ -209,11 +209,6 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'WorkCenter',
-    sections: [
-      {
-        name: 'Summary',
-        fields: [fields.name],
-      },
-    ],
+    fields: [fields.name],
   },
 ]

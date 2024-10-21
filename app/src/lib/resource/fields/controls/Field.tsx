@@ -2,8 +2,11 @@
 import { fail } from 'assert'
 import {
   Autocomplete,
+  BaseTextFieldProps,
   Checkbox,
+  FilledInputProps,
   InputAdornment,
+  SlotProps,
   Stack,
   TextField,
 } from '@mui/material'
@@ -12,6 +15,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import {
+  ElementType,
   ForwardedRef,
   forwardRef,
   useCallback,
@@ -34,6 +38,12 @@ import UserField from './UserField'
 import ResourceField from './ResourceField'
 import FilesField from './FilesField'
 
+type InputProps = SlotProps<
+  ElementType<FilledInputProps, keyof JSX.IntrinsicElements>,
+  unknown,
+  BaseTextFieldProps
+>
+
 export type Props = {
   inputId: string
   resourceId: string
@@ -43,6 +53,7 @@ export type Props = {
   inline?: boolean
   withoutDebounce?: boolean
   disabled?: boolean
+  inputProps?: InputProps | undefined
 }
 
 function Field(
@@ -55,6 +66,7 @@ function Field(
     inline,
     withoutDebounce,
     disabled,
+    inputProps,
   }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
@@ -254,6 +266,7 @@ function Field(
         onChange={(e) =>
           handleChange({ ...emptyValue, string: e.target.value })
         }
+        slotProps={{ input: inputProps }}
       />
     ))
     .with('Textarea', () => (
