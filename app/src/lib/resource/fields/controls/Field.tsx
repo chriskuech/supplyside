@@ -26,10 +26,12 @@ import {
 import { debounce } from 'remeda'
 import {
   MCMASTER_CARR_NAME,
+  Resource,
   SchemaField,
   Value,
   emptyValue,
   findTemplateField,
+  resources,
 } from '@supplyside/model'
 import { Option } from '@supplyside/model'
 import AddressField from './AddressField'
@@ -48,7 +50,7 @@ type InputProps = SlotProps<
 
 export type Props = {
   inputId: string
-  resourceId: string
+  resource: Resource
   field: SchemaField
   value: Value | undefined
   onChange: (value: Value) => void
@@ -61,7 +63,7 @@ export type Props = {
 function Field(
   {
     inputId,
-    resourceId,
+    resource,
     field,
     value: incomingValue,
     onChange: incomingOnChange,
@@ -153,7 +155,7 @@ function Field(
     .with('File', () => (
       <FileField
         isReadOnly={disabled}
-        resourceId={resourceId}
+        resourceId={resource.id}
         fieldId={field.fieldId}
         file={value?.file ?? null}
         onChange={(file) => handleChange({ ...emptyValue, file })}
@@ -230,7 +232,7 @@ function Field(
     ))
     .with('Resource', () => (
       <ResourceField
-        resourceId={resourceId}
+        resourceId={resource.id}
         isReadOnly={disabled}
         ref={ref}
         onChange={(resource) => handleChange({ ...emptyValue, resource })}
@@ -259,7 +261,9 @@ function Field(
       />
     ))
     .with('Text', () => {
-      const isMcMasterCarr = value?.string === MCMASTER_CARR_NAME
+      const isMcMasterCarr =
+        resource.templateId === resources.mcMasterCarrVendor.templateId &&
+        value?.string === MCMASTER_CARR_NAME
 
       return (
         <TextField

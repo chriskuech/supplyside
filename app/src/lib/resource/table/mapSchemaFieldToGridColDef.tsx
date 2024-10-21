@@ -11,6 +11,7 @@ import {
   emptyValue,
   findTemplateField,
   formatInlineAddress,
+  resources,
   selectResourceFieldValue,
 } from '@supplyside/model'
 import {
@@ -368,7 +369,7 @@ export const mapSchemaFieldToGridColDef = (
           ],
         },
 
-  renderCell: ({ value }) => {
+  renderCell: ({ value, row: resource }) => {
     const children = match<FieldType>(field.type)
       .with(
         'Address',
@@ -404,7 +405,9 @@ export const mapSchemaFieldToGridColDef = (
       .with('Select', () => value?.option && <Chip label={value.option.name} />)
       .with('User', () => value?.user && <UserCard user={value.user} />)
       .with('Text', () => {
-        const isMcMasterCarr = value?.string === MCMASTER_CARR_NAME
+        const isMcMasterCarr =
+          resource?.templateId === resources.mcMasterCarrVendor.templateId &&
+          value?.string === MCMASTER_CARR_NAME
         if (isMcMasterCarr) return <McMasterCarrLogo />
 
         // if it's not McMaster-Carr, fallback to the default value

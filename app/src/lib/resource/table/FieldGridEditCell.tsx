@@ -39,7 +39,7 @@ export default function FieldGridEditCell({ cellParams, field }: Props) {
             debounceMs: 200,
           })
         }
-        resourceId={cellParams.row.id}
+        resource={cellParams.row}
         value={selectResourceFieldValue(cellParams.row, field)}
         inline
       />

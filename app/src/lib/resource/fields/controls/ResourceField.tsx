@@ -20,6 +20,7 @@ import {
   ValueResource,
   fields,
   mapResourceToValueResource,
+  resources,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { useRouter } from 'next/navigation'
@@ -81,7 +82,9 @@ function ResourceField(
       open(resource.id)
     })
 
-  const isMcMasterCarr = resource?.name === MCMASTER_CARR_NAME
+  const isMcMasterCarr =
+    resource?.templateId === resources.mcMasterCarrVendor.templateId &&
+    resource?.name === MCMASTER_CARR_NAME
 
   if (resource) {
     return (

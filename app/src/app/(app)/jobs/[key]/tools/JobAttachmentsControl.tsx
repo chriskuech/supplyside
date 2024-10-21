@@ -22,7 +22,7 @@ export const JobAttachmentsControl: FC<Props> = ({
   fontSize,
 }) => (
   <AttachmentsToolbarControl
-    resourceId={resource.id}
+    resource={resource}
     resourceType="Job"
     field={selectSchemaFieldUnsafe(schema, fields.jobAttachments)}
     value={selectResourceFieldValue(resource, fields.jobAttachments)}

@@ -1,8 +1,9 @@
 'use client'
 
 import { Link } from '@mui/material'
-import { ValueResource } from '@supplyside/model'
+import { MCMASTER_CARR_NAME, resources, ValueResource } from '@supplyside/model'
 import NextLink from 'next/link'
+import { McMasterCarrLogo } from '@/lib/ux/McMasterCarrLogo'
 
 type Props = {
   resource: ValueResource
@@ -13,6 +14,10 @@ export default function ResourceFieldView({ resource }: Props) {
     resource.type,
   )
 
+  const isMcMasterCarr =
+    resource.templateId === resources.mcMasterCarrVendor.templateId &&
+    resource.name === MCMASTER_CARR_NAME
+
   return (
     <Link
       component={NextLink}
@@ -22,8 +27,17 @@ export default function ResourceFieldView({ resource }: Props) {
           : `${window.location.pathname}?drawerResourceId=${resource.id}`
       }
       scroll={false}
+      sx={{
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        padding: 1,
+        '&:hover': {
+          backgroundColor: 'background.default',
+        },
+      }}
     >
-      {resource.name ?? '-'}
+      {isMcMasterCarr ? <McMasterCarrLogo /> : (resource.name ?? '-')}
     </Link>
   )
 }

@@ -5,22 +5,22 @@ import Field, { Props as FieldProps } from './controls/Field'
 import { updateResourceField } from '@/actions/resource'
 
 export default function FieldControl({
-  resourceId,
+  resource,
   field,
   ...fieldProps
 }: Omit<FieldProps, 'onChange'>) {
   const handleChange = useCallback(
     (value: Value) =>
-      updateResourceField(resourceId, {
+      updateResourceField(resource.id, {
         fieldId: field.fieldId,
         valueInput: mapValueToValueInput(field.type, value),
       }),
-    [field.fieldId, field.type, resourceId],
+    [field.fieldId, field.type, resource],
   )
 
   return (
     <Field
-      resourceId={resourceId}
+      resource={resource}
       field={field}
       {...fieldProps}
       onChange={handleChange}

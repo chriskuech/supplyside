@@ -145,7 +145,7 @@ export default async function PurchaseDetail({
           : []),
         <TrackingControl
           key={TrackingControl.name}
-          resourceId={resource.id}
+          resource={resource}
           field={
             selectSchemaField(schema, fields.trackingNumber) ??
             fail('Field not found')
@@ -179,7 +179,7 @@ export default async function PurchaseDetail({
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
-          resourceId={resource.id}
+          resource={resource}
           resourceType="Purchase"
           field={
             selectSchemaField(schema, fields.assignee) ??
