@@ -1,17 +1,20 @@
 import { Box, Container, Stack, Typography } from '@mui/material'
 import { ReactNode } from 'react'
-import { match, P } from 'ts-pattern'
+import { match } from 'ts-pattern'
 import {
   FieldTemplate,
   Resource,
   Schema,
   fields,
+  selectResourceFieldValue,
+  selectSchemaField,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import ResourceForm from '../ResourceForm'
 import { ResourceDrawer } from '../ResourceDrawer'
 import DeleteResourceButton from '../DeleteResourceButton'
 import { CompareModal } from '../CompareModal'
+import FieldControl from '../fields/FieldControl'
 import ReadOnlyFieldsView from './ReadOnlyFieldsView'
 import LinesAndCosts from './LinesAndCosts'
 import DuplicateResourceButton from './DuplicateResourceButton'
@@ -43,7 +46,6 @@ export default function ResourceDetailPage({
   schema,
   lineSchema,
   resource,
-  name,
   tools: customTools,
   linesBacklinkField,
   isReadOnly,
@@ -73,13 +75,21 @@ export default function ResourceDetailPage({
     ),
   ]
 
+  const nameField = selectSchemaField(schema, fields.name)
+  const nameValue = selectResourceFieldValue(resource, fields.name)
+
   return (
     <>
-      <BreadcrumbFrame path={path} tools={tools('small')} status={status} />
+      <BreadcrumbFrame
+        path={path}
+        tools={tools('small')}
+        status={status}
+        name={nameValue?.string ?? undefined}
+      />
       <Stack>
         <HandleJustCloned />
         <Container sx={{ py: 5 }}>
-          {name && (
+          {nameField && (
             <Stack direction="row" alignItems="center">
               <Typography variant="overline">
                 {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
@@ -89,18 +99,27 @@ export default function ResourceDetailPage({
           )}
           <Stack direction="row" alignItems="center" spacing={1}>
             <Typography variant="h3">
-              {match(name)
-                .with(P.string, () => <>{name}</>)
-                .with(null, () => <span style={{ opacity: 0.5 }}>No Name</span>)
-                .with(undefined, () => (
-                  <>
-                    <span style={{ opacity: 0.5 }}>
-                      {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
-                    </span>
-                    <span>{resource.key}</span>
-                  </>
-                ))
-                .exhaustive()}
+              {nameField ? (
+                <Box width={600}>
+                  <FieldControl
+                    value={nameValue}
+                    resourceId={resource.id}
+                    inputId="nameField"
+                    field={nameField}
+                    inputProps={{
+                      placeholder: 'Job Name',
+                      sx: { fontSize: '0.7em' },
+                    }}
+                  />
+                </Box>
+              ) : (
+                <>
+                  <span style={{ opacity: 0.5 }}>
+                    {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
+                  </span>
+                  <span>{resource.key}</span>
+                </>
+              )}
             </Typography>
 
             <Box flexGrow={1} />

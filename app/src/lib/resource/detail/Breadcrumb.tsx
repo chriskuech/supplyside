@@ -23,9 +23,10 @@ type Props = {
     color: 'inactive' | 'active' | 'success' | 'error'
     label: string
   }
+  name?: string
 }
 
-export default function Breadcrumb({ path, tools, status }: Props) {
+export default function Breadcrumb({ path, tools, status, name }: Props) {
   const offset = useScrollContext()
 
   return (
@@ -70,6 +71,21 @@ export default function Breadcrumb({ path, tools, status }: Props) {
                 </Link>
               ))}
             </Breadcrumbs>
+
+            {name && (
+              <>
+                <Typography fontSize={17} color="divider">
+                  •
+                </Typography>
+                <Typography
+                  variant="overline"
+                  textTransform="none"
+                  color="text.secondary"
+                >
+                  {name}
+                </Typography>
+              </>
+            )}
 
             {status && (
               <Box pl={1}>
