@@ -25,6 +25,7 @@ import {
 } from 'react'
 import { debounce } from 'remeda'
 import {
+  MCMASTER_CARR_NAME,
   SchemaField,
   Value,
   emptyValue,
@@ -37,6 +38,7 @@ import FileField from './FileField'
 import UserField from './UserField'
 import ResourceField from './ResourceField'
 import FilesField from './FilesField'
+import { McMasterCarrLogo } from '@/lib/ux/McMasterCarrLogo'
 
 type InputProps = SlotProps<
   ElementType<FilledInputProps, keyof JSX.IntrinsicElements>,
@@ -256,19 +258,32 @@ function Field(
         )}
       />
     ))
-    .with('Text', () => (
-      <TextField
-        disabled={disabled}
-        inputRef={ref}
-        id={inputId}
-        fullWidth
-        value={value?.string ?? ''}
-        onChange={(e) =>
-          handleChange({ ...emptyValue, string: e.target.value })
-        }
-        slotProps={{ input: inputProps }}
-      />
-    ))
+    .with('Text', () => {
+      const isMcMasterCarr = value?.string === MCMASTER_CARR_NAME
+
+      return (
+        <TextField
+          disabled={disabled}
+          inputRef={ref}
+          id={inputId}
+          fullWidth
+          value={value?.string ?? ''}
+          onChange={(e) =>
+            handleChange({ ...emptyValue, string: e.target.value })
+          }
+          slotProps={{
+            input: {
+              ...inputProps,
+              endAdornment: isMcMasterCarr ? (
+                <InputAdornment position="end">
+                  <McMasterCarrLogo />
+                </InputAdornment>
+              ) : null,
+            },
+          }}
+        />
+      )
+    })
     .with('Textarea', () => (
       <TextField
         disabled={disabled}

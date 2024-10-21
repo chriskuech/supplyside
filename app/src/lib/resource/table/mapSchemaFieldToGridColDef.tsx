@@ -5,6 +5,7 @@ import { Check } from '@mui/icons-material'
 import { GridApplyQuickFilter } from '@mui/x-data-grid/models/colDef/gridColDef'
 import {
   FieldType,
+  MCMASTER_CARR_NAME,
   SchemaField,
   Value,
   emptyValue,
@@ -33,6 +34,7 @@ import AddressCard from '../fields/views/AddressCard'
 import FieldGridEditCell from './FieldGridEditCell'
 import { Cell, Column, Display, Row } from './types'
 import { formatDate, formatMoney } from '@/lib/format'
+import { McMasterCarrLogo } from '@/lib/ux/McMasterCarrLogo'
 
 const wrapFilterOperator = (
   operator: GridFilterOperator,
@@ -401,6 +403,13 @@ export const mapSchemaFieldToGridColDef = (
       )
       .with('Select', () => value?.option && <Chip label={value.option.name} />)
       .with('User', () => value?.user && <UserCard user={value.user} />)
+      .with('Text', () => {
+        const isMcMasterCarr = value?.string === MCMASTER_CARR_NAME
+        if (isMcMasterCarr) return <McMasterCarrLogo />
+
+        // if it's not McMaster-Carr, fallback to the default value
+        return undefined
+      })
       .otherwise(() => undefined)
 
     // Fallback to `valueFormatter`
