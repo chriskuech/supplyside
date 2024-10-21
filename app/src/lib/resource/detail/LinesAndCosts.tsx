@@ -2,6 +2,7 @@ import { Stack, Typography, Box, Alert, Card } from '@mui/material'
 import { FieldTemplate, Resource, Schema, ValueInput } from '@supplyside/model'
 import { ResourceTable } from '../table'
 import ItemizedCosts from '../costs/ItemizedCosts'
+import { ColumnWidths } from '../table/ResourceTable'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { JsonLogic, readResources } from '@/client/resource'
 
@@ -12,6 +13,7 @@ type Props = {
   newLineInitialData: { fieldId: string; valueInput: ValueInput }[]
   hideColumns?: FieldTemplate[]
   isReadOnly?: boolean
+  specialColumnWidths?: ColumnWidths
 }
 
 export default async function LinesAndCosts({
@@ -21,6 +23,7 @@ export default async function LinesAndCosts({
   newLineInitialData,
   hideColumns,
   isReadOnly,
+  specialColumnWidths,
 }: Props) {
   const lines = await readResources(
     resource.accountId,
@@ -75,6 +78,7 @@ export default async function LinesAndCosts({
             resources={lines ?? []}
             isEditable={!isReadOnly}
             sx={{ borderBottomRightRadius: 0 }}
+            specialColumnWidths={specialColumnWidths}
             disableColumnFilter
             disableColumnResize
             disableColumnMenu
