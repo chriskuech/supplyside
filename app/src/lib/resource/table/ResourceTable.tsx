@@ -132,7 +132,7 @@ export default function ResourceTable({
         apiRef={apiRef}
         columns={columns}
         rows={resources.map((resource, i) => ({ ...resource, index: i + 1 }))}
-        editMode="row"
+        editMode="cell"
         rowSelection={false}
         autoHeight
         density="standard"
