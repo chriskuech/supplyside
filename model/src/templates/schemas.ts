@@ -171,12 +171,11 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'PurchaseSchedule',
-    fields: [fields.running, fields.workCenter],
+    fields: [fields.name, fields.running, fields.workCenter],
     sections: [
       {
         name: 'Summary',
         fields: [
-          fields.name,
           fields.executionInterval,
           fields.executionIntervalUnits,
           fields.templatePurchase,
