@@ -106,7 +106,9 @@ export default function ResourceDetailPage({
                     inputId="nameField"
                     field={nameField}
                     inputProps={{
-                      placeholder: 'Job Name',
+                      placeholder:
+                        resource.type.replace(/([a-z])([A-Z])/g, '$1 $2') +
+                        ' Name',
                       sx: { fontSize: '0.7em' },
                     }}
                   />

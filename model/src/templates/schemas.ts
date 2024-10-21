@@ -209,11 +209,6 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'WorkCenter',
-    sections: [
-      {
-        name: 'Summary',
-        fields: [fields.name],
-      },
-    ],
+    fields: [fields.name],
   },
 ]
