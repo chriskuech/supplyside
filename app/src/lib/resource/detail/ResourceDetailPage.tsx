@@ -28,7 +28,6 @@ type Props = {
   schema: Schema
   lineSchema?: Schema
   resource: Resource
-  name?: string | null
   tools: (fontSize: 'small' | 'medium' | 'large') => readonly ReactNode[]
   isReadOnly?: boolean
   linesBacklinkField?: FieldTemplate
