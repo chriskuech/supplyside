@@ -26,7 +26,7 @@ export default async function ListPage({
   resourceType,
   searchParams,
   callToActions = [],
-  filterItems,
+  filterItems = [],
   title,
   Charts,
 }: Props) {
