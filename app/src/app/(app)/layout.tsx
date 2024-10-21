@@ -7,6 +7,7 @@ import {
   List,
   PrecisionManufacturing,
   Receipt,
+  Schedule,
   ShoppingBag,
   Storefront,
 } from '@mui/icons-material'
@@ -140,6 +141,13 @@ export default async function Layout({
               count={openJobCount}
             />
             <ItemLink title="Closed Jobs" href="/jobs/closed" />
+            {user?.isGlobalAdmin && (
+              <ItemLink
+                title="Jobs Schedule"
+                href="/jobs/schedule"
+                icon={<Schedule fontSize="small" />}
+              />
+            )}
             <ItemLink
               title="Lines"
               href="/jobs/lines"
@@ -163,11 +171,13 @@ export default async function Layout({
               count={openPurchaseCount}
             />
             <ItemLink title="Closed Purchases" href="/purchases/closed" />
-            <ItemLink
-              title="Purchase Schedules"
-              href="/purchases/schedules"
-              icon={<EventRepeat fontSize="small" />}
-            />
+            {user?.isGlobalAdmin && (
+              <ItemLink
+                title="Purchase Schedules"
+                href="/purchases/schedules"
+                icon={<EventRepeat fontSize="small" />}
+              />
+            )}
             <ItemLink
               title="Lines"
               href="/purchases/lines"
@@ -212,14 +222,17 @@ export default async function Layout({
             title="Vendors"
             href="/vendors"
           />
-          <ItemLink
-            icon={<PrecisionManufacturing fontSize="small" />}
-            title="Work Centers"
-            href="/workcenters"
-          />
+          {user?.isGlobalAdmin && (
+            <ItemLink
+              icon={<PrecisionManufacturing fontSize="small" />}
+              title="Work Centers"
+              href="/workcenters"
+            />
+          )}
         </Box>
 
         <Divider />
+
         <Stack direction="row" justifyContent="space-evenly">
           {account && <AccountMenu />}
           {user && <UserMenu self={user} />}
