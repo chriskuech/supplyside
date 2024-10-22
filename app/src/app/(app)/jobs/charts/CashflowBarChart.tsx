@@ -59,9 +59,9 @@ export default function CashflowBarChart({ resources }: Props) {
       ? maxPaymentDueDate
       : today
 
-    const numberOfWeeks = endDate.week() - startDate.week() + 1
+    const numberOfWeeks = endDate.diff(startDate, 'w')
 
-    const weeks = range(0, numberOfWeeks).map((number) =>
+    const weeks = range(0, numberOfWeeks || 1).map((number) =>
       startDate.week(startDate.week() + number).format('MM/DD/YYYY'),
     )
 
@@ -83,7 +83,7 @@ export default function CashflowBarChart({ resources }: Props) {
 
         if (!paymentDueDate) return null
 
-        return { paymentDueDate: dayjs(paymentDueDate), totalCost }
+        return { paymentDueDate: dayjs(paymentDueDate).day(1), totalCost }
       }),
       filter(isTruthy),
       map(({ paymentDueDate, totalCost }) => ({
@@ -91,7 +91,6 @@ export default function CashflowBarChart({ resources }: Props) {
           const weekDate = dayjs(week)
           if (!weeks[i + 1]) return true
           const nextWeekDate = dayjs(weeks[i + 1])
-
           return paymentDueDate.isBetween(weekDate, nextWeekDate)
         }),
         totalCost,
@@ -107,6 +106,8 @@ export default function CashflowBarChart({ resources }: Props) {
     () => weeks.find((week) => today.isSame(dayjs(week), 'd')),
     [today, weeks],
   )
+
+  const chartHasData = useMemo(() => !!totalCosts?.length, [totalCosts])
 
   return (
     <>
@@ -130,7 +131,7 @@ export default function CashflowBarChart({ resources }: Props) {
         ]}
       >
         <BarPlot />
-        <ChartsTooltip />
+        {chartHasData && <ChartsTooltip />}
         <ChartsXAxis />
         <ChartsYAxis />
         {currentWeek && (
@@ -142,7 +143,7 @@ export default function CashflowBarChart({ resources }: Props) {
             labelAlign="start"
           />
         )}
-        {!totalCosts?.length && <ChartsNoDataOverlay />}
+        {!chartHasData && <ChartsNoDataOverlay />}
       </ResponsiveChartContainer>
     </>
   )
