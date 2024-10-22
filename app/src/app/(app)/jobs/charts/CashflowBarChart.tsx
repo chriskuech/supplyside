@@ -133,7 +133,7 @@ export default function CashflowBarChart({ resources }: Props) {
     [today, weeks],
   )
 
-  const chartHasData = useMemo(() => !!totalCosts?.length, [totalCosts])
+  const chartHasData = !!totalCosts?.length
 
   return (
     <>
