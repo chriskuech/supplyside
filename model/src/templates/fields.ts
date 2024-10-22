@@ -197,6 +197,12 @@ const _fields = {
     description: 'Primary customer for the transaction',
     isRequired: true,
   },
+  customerName: {
+    templateId: 'a10861a5-884d-40fa-912c-857bf942564b',
+    name: 'Customer name',
+    type: 'Text',
+    description: 'Customer name',
+  },
   customerDescription: {
     templateId: '79a53e8a-5b96-4759-8b81-5cdeda01ed34',
     name: 'Customer Description',
@@ -556,6 +562,12 @@ const _fields = {
     resourceType: 'Vendor',
     description: 'Contains all info related to a specific vendor',
     isRequired: true,
+  },
+  vendorName: {
+    templateId: '8d181716-8796-4e4c-a3b1-5cdeff364e46',
+    name: 'Vendor name',
+    type: 'Text',
+    description: 'Vendor name',
   },
   vendorDescription: {
     templateId: 'f7b4e0f7-e1e7-4e1e-8f7b-4e0f7e1e7e5d',

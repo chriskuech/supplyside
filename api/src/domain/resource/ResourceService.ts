@@ -573,14 +573,54 @@ export class ResourceService {
     updatedFields: FieldUpdate[]
   }) {
     if (
+      resource.type === 'Job' &&
+      updatedFields.some(
+        (rf) => rf.field.templateId === fields.customer.templateId,
+      )
+    ) {
+      const jobLines = await this.list(accountId, 'JobLine', {
+        where: {
+          '==': [{ var: fields.job.name }, resource.id],
+        },
+      })
+
+      this.updateJobLinesCustomerName(
+        accountId,
+        resource,
+        jobLines.map((line) => line.id),
+      )
+    }
+    if (
+      resource.type === 'Purchase' &&
+      updatedFields.some(
+        (rf) => rf.field.templateId === fields.vendor.templateId,
+      )
+    ) {
+      const purchaseLines = await this.list(accountId, 'PurchaseLine', {
+        where: {
+          '==': [{ var: fields.purchase.name }, resource.id],
+        },
+      })
+
+      this.updatePurchaseLinesVendorName(
+        accountId,
+        resource,
+        purchaseLines.map((line) => line.id),
+      )
+    }
+    if (
       resource.type === 'PurchaseLine' &&
       updatedFields.some(
-        (rf) => rf.field.templateId === fields.totalCost.templateId,
+        (rf) =>
+          rf.field.templateId === fields.totalCost.templateId ||
+          rf.field.templateId === fields.purchase.templateId,
       )
     ) {
       const purchaseId = selectResourceFieldValue(resource, fields.purchase)
         ?.resource?.id
       if (purchaseId) {
+        const purchase = await this.read(accountId, purchaseId)
+        this.updatePurchaseLinesVendorName(accountId, purchase, [resource.id])
         await this.recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
       }
 
@@ -594,11 +634,15 @@ export class ResourceService {
     if (
       resource.type === 'JobLine' &&
       updatedFields.some(
-        (rf) => rf.field.templateId === fields.totalCost.templateId,
+        (rf) =>
+          rf.field.templateId === fields.totalCost.templateId ||
+          rf.field.templateId === fields.job.templateId,
       )
     ) {
       const jobId = selectResourceFieldValue(resource, fields.job)?.resource?.id
       if (jobId) {
+        const job = await this.read(accountId, jobId)
+        this.updateJobLinesCustomerName(accountId, job, [resource.id])
         await this.recalculateSubtotalCost(accountId, 'Job', jobId)
       }
     }
@@ -942,5 +986,85 @@ export class ResourceService {
         ),
       },
     })
+  }
+  private async updateJobLinesCustomerName(
+    accountId: string,
+    job: Resource,
+    jobLineIds: string[],
+  ) {
+    const jobLineSchema = await this.schemaService.readMergedSchema(
+      accountId,
+      'JobLine',
+    )
+    const customerNameFieldId = selectSchemaFieldUnsafe(
+      jobLineSchema,
+      fields.customerName,
+    ).fieldId
+
+    const jobSchema = await this.schemaService.readMergedSchema(
+      accountId,
+      'Job',
+    )
+    const customerFieldId = selectSchemaFieldUnsafe(
+      jobSchema,
+      fields.customer,
+    ).fieldId
+    const customerName = selectResourceFieldValue(job, {
+      fieldId: customerFieldId,
+    })?.resource?.name
+
+    await Promise.all(
+      jobLineIds.map((jobLineId) => {
+        return this.update(accountId, jobLineId, {
+          fields: [
+            {
+              fieldId: customerNameFieldId,
+              valueInput: { string: customerName ?? '' },
+            },
+          ],
+        })
+      }),
+    )
+  }
+  private async updatePurchaseLinesVendorName(
+    accountId: string,
+    purchase: Resource,
+    purchaseLineIds: string[],
+  ) {
+    const purchaseLineSchema = await this.schemaService.readMergedSchema(
+      accountId,
+      'PurchaseLine',
+    )
+    const vendorNameFieldId = selectSchemaFieldUnsafe(
+      purchaseLineSchema,
+      fields.vendorName,
+    ).fieldId
+
+    const purchaseSchema = await this.schemaService.readMergedSchema(
+      accountId,
+      'Purchase',
+    )
+
+    const vendorFieldId = selectSchemaFieldUnsafe(
+      purchaseSchema,
+      fields.vendor,
+    ).fieldId
+
+    const vendorName = selectResourceFieldValue(purchase, {
+      fieldId: vendorFieldId,
+    })?.resource?.name
+
+    await Promise.all(
+      purchaseLineIds.map((purchaseLineId) => {
+        return this.update(accountId, purchaseLineId, {
+          fields: [
+            {
+              fieldId: vendorNameFieldId,
+              valueInput: { string: vendorName ?? '' },
+            },
+          ],
+        })
+      }),
+    )
   }
 }
