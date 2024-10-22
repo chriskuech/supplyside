@@ -97,7 +97,7 @@ export const schemas: SchemaTemplate[] = [
       fields.unitCost,
       fields.totalCost,
       fields.otherNotes,
-      fields.customerName,
+      fields.customer,
     ],
   },
   {
@@ -168,7 +168,7 @@ export const schemas: SchemaTemplate[] = [
       fields.otherNotes,
       fields.purchase,
       fields.bill,
-      fields.vendorName,
+      fields.vendor,
     ],
   },
   {
