@@ -105,6 +105,10 @@ export default async function JobsDetail({
         />,
       ]}
       linesBacklinkField={fields.job}
+      specialColumnWidths={{
+        [fields.partName.name]: 320,
+        [fields.partNumber.name]: 320,
+      }}
       actions={
         <Stack direction="row" height={100} alignItems="center">
           <Box

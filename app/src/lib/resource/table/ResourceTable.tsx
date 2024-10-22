@@ -30,7 +30,7 @@ import {
 } from '@mui/icons-material'
 import { ComponentType, MutableRefObject, useMemo, useState } from 'react'
 import { z } from 'zod'
-import { Resource, Schema } from '@supplyside/model'
+import { fields, Resource, Schema } from '@supplyside/model'
 import { P, match } from 'ts-pattern'
 import { useRouter } from 'next/navigation'
 import { mapSchemaFieldToGridColDef } from './mapSchemaFieldToGridColDef'
@@ -38,6 +38,16 @@ import { Row, Column } from './types'
 import { handleProcessRowUpdate } from './processRowUpdate'
 import { usePersistDatagridState } from './usePersistDatagridState'
 import { deleteResource } from '@/actions/resource'
+
+type FieldNames = keyof typeof fields
+export type ColumnWidths = Partial<Record<FieldNames, number>>
+
+function isValidColumnWidth(
+  columnWidths: ColumnWidths | undefined,
+  key: string,
+): key is keyof ColumnWidths {
+  return columnWidths !== undefined && key in columnWidths
+}
 
 type Props = {
   tableKey?: string
@@ -50,6 +60,7 @@ type Props = {
   saveGridFilterModel?: (model: GridFilterModel) => void
   unFilterableFieldIds?: string[]
   Charts?: ComponentType<{ gridApiRef: MutableRefObject<GridApiPro> }>
+  specialColumnWidths?: ColumnWidths
 } & Partial<DataGridProProps<Row>>
 
 export default function ResourceTable({
@@ -63,6 +74,7 @@ export default function ResourceTable({
   saveGridFilterModel,
   unFilterableFieldIds = [],
   Charts,
+  specialColumnWidths,
   ...props
 }: Props) {
   const isChartsEnabled = Charts !== undefined
@@ -93,6 +105,9 @@ export default function ResourceTable({
         mapSchemaFieldToGridColDef(field, {
           isEditable,
           isFilterable: !unFilterableFieldIds.includes(field.fieldId),
+          width: isValidColumnWidth(specialColumnWidths, field.name)
+            ? specialColumnWidths?.[field.name]
+            : undefined,
         }),
       ),
       ...(isEditable
@@ -114,7 +129,7 @@ export default function ResourceTable({
           ]
         : []),
     ],
-    [indexed, schema, isEditable, unFilterableFieldIds],
+    [indexed, schema, isEditable, unFilterableFieldIds, specialColumnWidths],
   )
 
   if (tableKey && !initialState) return <CircularProgress />

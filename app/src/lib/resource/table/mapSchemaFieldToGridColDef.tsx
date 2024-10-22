@@ -82,6 +82,7 @@ export const mapSchemaFieldToGridColDef = (
   options: {
     isEditable: boolean
     isFilterable?: boolean
+    width?: number
   },
 ): Column => ({
   field: field.fieldId,
@@ -96,19 +97,21 @@ export const mapSchemaFieldToGridColDef = (
     .with(P.union('Number', 'Money', 'Checkbox'), () => 'right' as const)
     .otherwise(() => 'left' as const),
 
-  width: match(field.type)
-    .with('Resource', () => 440)
-    .with(P.union('Select', 'MultiSelect'), () => 200)
-    .with(P.union('Number', 'Money'), () => 130)
-    .with('Date', () => 150)
-    .with('Checkbox', () => 100)
-    .with(P.union('File', 'Files'), () => 150)
-    .with('Contact', () => 300)
-    .with('Text', () => 440)
-    .with('Textarea', () => 300)
-    .with('User', () => 150)
-    .with('Address', () => 300)
-    .exhaustive(),
+  width:
+    options.width ??
+    match(field.type)
+      .with('Resource', () => 440)
+      .with(P.union('Select', 'MultiSelect'), () => 200)
+      .with(P.union('Number', 'Money'), () => 130)
+      .with('Date', () => 150)
+      .with('Checkbox', () => 100)
+      .with(P.union('File', 'Files'), () => 150)
+      .with('Contact', () => 300)
+      .with('Text', () => 440)
+      .with('Textarea', () => 300)
+      .with('User', () => 150)
+      .with('Address', () => 300)
+      .exhaustive(),
 
   editable:
     options.isEditable && !findTemplateField(field.templateId)?.isDerived,
