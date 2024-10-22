@@ -2,7 +2,6 @@
 
 import {
   BarPlot,
-  BarSeriesType,
   ChartsReferenceLine,
   ChartsTooltip,
   ChartsXAxis,
@@ -59,19 +58,22 @@ export default function CashflowBarChart({ resources }: Props) {
       ? maxPaymentDueDate
       : today
 
-    const numberOfWeeks = endDate.week() - startDate.week() + 1
+    const numberOfWeeks = endDate.diff(startDate, 'w')
 
-    const weeks = range(0, numberOfWeeks).map((number) =>
+    const weeks = range(0, numberOfWeeks || 1).map((number) =>
       startDate.week(startDate.week() + number).format('MM/DD/YYYY'),
     )
 
     return weeks
   }, [resources, today])
 
-  const totalCosts = useMemo((): BarSeriesType['data'] => {
+  const totalCosts = useMemo((): {
+    status: string
+    totalsByWeek: number[]
+  }[] => {
     if (!resources) return []
 
-    const totalCostByWeek = pipe(
+    const totalCostByStatusAndWeeks = pipe(
       resources,
       map((resource) => {
         const paymentDueDate = selectResourceFieldValue(
@@ -80,27 +82,50 @@ export default function CashflowBarChart({ resources }: Props) {
         )?.date
         const totalCost =
           selectResourceFieldValue(resource, fields.totalCost)?.number ?? 0
+        const status =
+          selectResourceFieldValue(resource, fields.jobStatus)?.option?.name ??
+          ''
 
         if (!paymentDueDate) return null
 
-        return { paymentDueDate: dayjs(paymentDueDate), totalCost }
+        return {
+          paymentDueDate: dayjs(paymentDueDate).day(1),
+          totalCost,
+          status,
+        }
       }),
       filter(isTruthy),
-      map(({ paymentDueDate, totalCost }) => ({
+      map(({ paymentDueDate, totalCost, status }) => ({
         week: weeks.find((week, i) => {
           const weekDate = dayjs(week)
           if (!weeks[i + 1]) return true
           const nextWeekDate = dayjs(weeks[i + 1])
-
           return paymentDueDate.isBetween(weekDate, nextWeekDate)
         }),
         totalCost,
+        status,
       })),
-      groupBy(({ week }) => week),
-      mapValues(sumBy(({ totalCost }) => totalCost)),
+      groupBy(({ status }) => status),
+      mapValues((dataByStatus) =>
+        pipe(
+          dataByStatus,
+          groupBy(({ week }) => week),
+          mapValues(sumBy(({ totalCost }) => totalCost)),
+        ),
+      ),
     )
 
-    return weeks.map((week) => totalCostByWeek[week] ?? 0)
+    const totalsByStatuses = Object.entries(totalCostByStatusAndWeeks).map(
+      ([key, value]) => ({
+        status: key,
+        totalsByWeek: weeks.map((week) => value[week] ?? 0),
+      }),
+    )
+
+    return totalsByStatuses.map(({ status, totalsByWeek }) => ({
+      status,
+      totalsByWeek,
+    }))
   }, [weeks, resources])
 
   const currentWeek = useMemo(
@@ -108,19 +133,21 @@ export default function CashflowBarChart({ resources }: Props) {
     [today, weeks],
   )
 
+  const chartHasData = !!totalCosts?.length
+
   return (
     <>
       <Typography variant="h6">Cashflow</Typography>
       <ResponsiveChartContainer
         sx={{ padding: 1, marginLeft: 2, overflow: 'visible' }}
-        series={[
-          {
-            data: totalCosts,
-            type: 'bar',
-            valueFormatter: (value) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
-          },
-        ]}
+        series={totalCosts.map((tc) => ({
+          type: 'bar',
+          stack: 'by status',
+          data: tc.totalsByWeek,
+          label: tc.status,
+          valueFormatter: (value) =>
+            formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
+        }))}
         xAxis={[{ data: weeks, scaleType: 'band' }]}
         yAxis={[
           {
@@ -130,7 +157,7 @@ export default function CashflowBarChart({ resources }: Props) {
         ]}
       >
         <BarPlot />
-        <ChartsTooltip />
+        {chartHasData && <ChartsTooltip />}
         <ChartsXAxis />
         <ChartsYAxis />
         {currentWeek && (
@@ -142,7 +169,7 @@ export default function CashflowBarChart({ resources }: Props) {
             labelAlign="start"
           />
         )}
-        {!totalCosts?.length && <ChartsNoDataOverlay />}
+        {!chartHasData && <ChartsNoDataOverlay />}
       </ResponsiveChartContainer>
     </>
   )
