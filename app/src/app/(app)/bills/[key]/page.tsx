@@ -115,7 +115,7 @@ export default async function BillsDetail({
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
-          resourceId={resource.id}
+          resource={resource}
           resourceType="Bill"
           field={
             selectSchemaField(schema, fields.assignee) ??

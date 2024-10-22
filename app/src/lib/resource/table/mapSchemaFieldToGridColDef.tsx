@@ -5,11 +5,13 @@ import { Check } from '@mui/icons-material'
 import { GridApplyQuickFilter } from '@mui/x-data-grid/models/colDef/gridColDef'
 import {
   FieldType,
+  MCMASTER_CARR_NAME,
   SchemaField,
   Value,
   emptyValue,
   findTemplateField,
   formatInlineAddress,
+  resources,
   selectResourceFieldValue,
 } from '@supplyside/model'
 import {
@@ -33,6 +35,7 @@ import AddressCard from '../fields/views/AddressCard'
 import FieldGridEditCell from './FieldGridEditCell'
 import { Cell, Column, Display, Row } from './types'
 import { formatDate, formatMoney } from '@/lib/format'
+import { McMasterCarrLogo } from '@/lib/ux/McMasterCarrLogo'
 
 const wrapFilterOperator = (
   operator: GridFilterOperator,
@@ -82,6 +85,7 @@ export const mapSchemaFieldToGridColDef = (
   options: {
     isEditable: boolean
     isFilterable?: boolean
+    width?: number
   },
 ): Column => ({
   field: field.fieldId,
@@ -96,19 +100,21 @@ export const mapSchemaFieldToGridColDef = (
     .with(P.union('Number', 'Money', 'Checkbox'), () => 'right' as const)
     .otherwise(() => 'left' as const),
 
-  width: match(field.type)
-    .with('Resource', () => 440)
-    .with(P.union('Select', 'MultiSelect'), () => 200)
-    .with(P.union('Number', 'Money'), () => 130)
-    .with('Date', () => 150)
-    .with('Checkbox', () => 100)
-    .with(P.union('File', 'Files'), () => 150)
-    .with('Contact', () => 300)
-    .with('Text', () => 440)
-    .with('Textarea', () => 300)
-    .with('User', () => 150)
-    .with('Address', () => 300)
-    .exhaustive(),
+  width:
+    options.width ??
+    match(field.type)
+      .with('Resource', () => 440)
+      .with(P.union('Select', 'MultiSelect'), () => 200)
+      .with(P.union('Number', 'Money'), () => 130)
+      .with('Date', () => 150)
+      .with('Checkbox', () => 100)
+      .with(P.union('File', 'Files'), () => 150)
+      .with('Contact', () => 300)
+      .with('Text', () => 440)
+      .with('Textarea', () => 300)
+      .with('User', () => 150)
+      .with('Address', () => 300)
+      .exhaustive(),
 
   editable:
     options.isEditable && !findTemplateField(field.templateId)?.isDerived,
@@ -366,7 +372,7 @@ export const mapSchemaFieldToGridColDef = (
           ],
         },
 
-  renderCell: ({ value }) => {
+  renderCell: ({ value, row: resource }) => {
     const children = match<FieldType>(field.type)
       .with(
         'Address',
@@ -401,6 +407,15 @@ export const mapSchemaFieldToGridColDef = (
       )
       .with('Select', () => value?.option && <Chip label={value.option.name} />)
       .with('User', () => value?.user && <UserCard user={value.user} />)
+      .with('Text', () => {
+        const isMcMasterCarr =
+          resource?.templateId === resources.mcMasterCarrVendor.templateId &&
+          value?.string === MCMASTER_CARR_NAME
+        if (isMcMasterCarr) return <McMasterCarrLogo />
+
+        // if it's not McMaster-Carr, fallback to the default value
+        return undefined
+      })
       .otherwise(() => undefined)
 
     // Fallback to `valueFormatter`

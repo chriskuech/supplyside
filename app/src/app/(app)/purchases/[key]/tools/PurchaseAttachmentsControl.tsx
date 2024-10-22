@@ -23,7 +23,7 @@ export const PurchaseAttachmentsControl: FC<Props> = ({
   fontSize,
 }) => (
   <AttachmentsToolbarControl
-    resourceId={resource.id}
+    resource={resource}
     resourceType="Purchase"
     onSync={() => syncFromAttachments(resource.id)}
     field={selectSchemaFieldUnsafe(schema, fields.purchaseAttachments)}

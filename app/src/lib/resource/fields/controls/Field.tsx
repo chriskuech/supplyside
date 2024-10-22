@@ -25,10 +25,13 @@ import {
 } from 'react'
 import { debounce } from 'remeda'
 import {
+  MCMASTER_CARR_NAME,
+  Resource,
   SchemaField,
   Value,
   emptyValue,
   findTemplateField,
+  resources,
 } from '@supplyside/model'
 import { Option } from '@supplyside/model'
 import AddressField from './AddressField'
@@ -37,6 +40,7 @@ import FileField from './FileField'
 import UserField from './UserField'
 import ResourceField from './ResourceField'
 import FilesField from './FilesField'
+import { McMasterCarrLogo } from '@/lib/ux/McMasterCarrLogo'
 
 type InputProps = SlotProps<
   ElementType<FilledInputProps, keyof JSX.IntrinsicElements>,
@@ -46,7 +50,7 @@ type InputProps = SlotProps<
 
 export type Props = {
   inputId: string
-  resourceId: string
+  resource: Resource
   field: SchemaField
   value: Value | undefined
   onChange: (value: Value) => void
@@ -59,7 +63,7 @@ export type Props = {
 function Field(
   {
     inputId,
-    resourceId,
+    resource,
     field,
     value: incomingValue,
     onChange: incomingOnChange,
@@ -151,7 +155,7 @@ function Field(
     .with('File', () => (
       <FileField
         isReadOnly={disabled}
-        resourceId={resourceId}
+        resourceId={resource.id}
         fieldId={field.fieldId}
         file={value?.file ?? null}
         onChange={(file) => handleChange({ ...emptyValue, file })}
@@ -228,7 +232,7 @@ function Field(
     ))
     .with('Resource', () => (
       <ResourceField
-        resourceId={resourceId}
+        resourceId={resource.id}
         isReadOnly={disabled}
         ref={ref}
         onChange={(resource) => handleChange({ ...emptyValue, resource })}
@@ -256,19 +260,34 @@ function Field(
         )}
       />
     ))
-    .with('Text', () => (
-      <TextField
-        disabled={disabled}
-        inputRef={ref}
-        id={inputId}
-        fullWidth
-        value={value?.string ?? ''}
-        onChange={(e) =>
-          handleChange({ ...emptyValue, string: e.target.value })
-        }
-        slotProps={{ input: inputProps }}
-      />
-    ))
+    .with('Text', () => {
+      const isMcMasterCarr =
+        resource.templateId === resources.mcMasterCarrVendor.templateId &&
+        value?.string === MCMASTER_CARR_NAME
+
+      return (
+        <TextField
+          disabled={disabled}
+          inputRef={ref}
+          id={inputId}
+          fullWidth
+          value={value?.string ?? ''}
+          onChange={(e) =>
+            handleChange({ ...emptyValue, string: e.target.value })
+          }
+          slotProps={{
+            input: {
+              ...inputProps,
+              endAdornment: isMcMasterCarr ? (
+                <InputAdornment position="end">
+                  <McMasterCarrLogo />
+                </InputAdornment>
+              ) : null,
+            },
+          }}
+        />
+      )
+    })
     .with('Textarea', () => (
       <TextField
         disabled={disabled}

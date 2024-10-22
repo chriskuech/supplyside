@@ -15,6 +15,7 @@ import { ResourceDrawer } from '../ResourceDrawer'
 import DeleteResourceButton from '../DeleteResourceButton'
 import { CompareModal } from '../CompareModal'
 import FieldControl from '../fields/FieldControl'
+import { ColumnWidths } from '../table/ResourceTable'
 import ReadOnlyFieldsView from './ReadOnlyFieldsView'
 import LinesAndCosts from './LinesAndCosts'
 import DuplicateResourceButton from './DuplicateResourceButton'
@@ -39,6 +40,7 @@ type Props = {
     color: 'inactive' | 'active' | 'success' | 'error'
     label: string
   }
+  specialColumnWidths?: ColumnWidths
 }
 
 export default function ResourceDetailPage({
@@ -53,6 +55,7 @@ export default function ResourceDetailPage({
   linkedResources,
   path,
   status,
+  specialColumnWidths,
 }: Props) {
   const tools = (fontSize: 'small' | 'medium' | 'large') => [
     ...customTools(fontSize),
@@ -102,7 +105,7 @@ export default function ResourceDetailPage({
                 <Box width={600}>
                   <FieldControl
                     value={nameValue}
-                    resourceId={resource.id}
+                    resource={resource}
                     inputId="nameField"
                     field={nameField}
                     inputProps={{
@@ -163,6 +166,7 @@ export default function ResourceDetailPage({
                   .with('Job', () => [fields.job])
                   .with('Purchase', () => [fields.purchase])
                   .otherwise(() => undefined)}
+                specialColumnWidths={specialColumnWidths}
                 isReadOnly={isReadOnly}
               />
             )}

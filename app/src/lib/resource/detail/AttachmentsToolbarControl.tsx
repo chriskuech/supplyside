@@ -11,14 +11,14 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material'
-import { ResourceType, SchemaField, Value } from '@supplyside/model'
+import { Resource, ResourceType, SchemaField, Value } from '@supplyside/model'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import LoadingButton from '@/lib/ux/LoadingButton'
 import { useAsyncCallback } from '@/hooks/useAsyncCallback'
 
 type AttachmentsToolbarControlProps = {
-  resourceId: string
+  resource: Resource
   resourceType: ResourceType
   field: SchemaField
   value: Value | undefined
@@ -28,7 +28,7 @@ type AttachmentsToolbarControlProps = {
 
 export default function AttachmentsToolbarControl({
   resourceType,
-  resourceId,
+  resource,
   field,
   value,
   onSync,
@@ -60,7 +60,7 @@ export default function AttachmentsToolbarControl({
           </DialogContentText>
           <FieldControl
             inputId={`rf-${field.fieldId}`}
-            resourceId={resourceId}
+            resource={resource}
             field={field}
             value={value}
           />

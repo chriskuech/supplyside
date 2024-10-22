@@ -94,7 +94,7 @@ export default function ResourceForm({
                   </Typography>
                   <FieldControl
                     inputId={`rf-${singleField.fieldId}`}
-                    resourceId={resource.id}
+                    resource={resource}
                     field={
                       singleField ??
                       fail('Assumed a single field was asserted above')
@@ -170,7 +170,7 @@ export default function ResourceForm({
                             <Field
                               disabled={!!resource.templateId && !!f.templateId}
                               inputId={`rf-${f.fieldId}`}
-                              resourceId={resource.id}
+                              resource={resource}
                               field={f}
                               value={selectResourceFieldValue(resource, {
                                 fieldId: f.fieldId,
