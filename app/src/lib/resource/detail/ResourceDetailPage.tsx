@@ -105,7 +105,7 @@ export default function ResourceDetailPage({
                 <Box width={600}>
                   <FieldControl
                     value={nameValue}
-                    resourceId={resource.id}
+                    resource={resource}
                     inputId="nameField"
                     field={nameField}
                     inputProps={{

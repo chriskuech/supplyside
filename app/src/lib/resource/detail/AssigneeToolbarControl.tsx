@@ -12,13 +12,13 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material'
-import { ResourceType, SchemaField, Value } from '@supplyside/model'
+import { Resource, ResourceType, SchemaField, Value } from '@supplyside/model'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { getProfilePicPath } from '@/app/api/download/[filename]/util'
 
 type AssigneeControlProps = {
-  resourceId: string
+  resource: Resource
   resourceType: ResourceType
   field: SchemaField
   value: Value | undefined
@@ -27,7 +27,7 @@ type AssigneeControlProps = {
 
 export default function AssigneeToolbarControl({
   resourceType,
-  resourceId,
+  resource,
   field,
   value,
   fontSize,
@@ -67,7 +67,7 @@ export default function AssigneeToolbarControl({
           </DialogContentText>
           <FieldControl
             inputId={`rf-${field.fieldId}`}
-            resourceId={resourceId}
+            resource={resource}
             field={field}
             value={value}
           />

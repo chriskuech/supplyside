@@ -15,16 +15,19 @@ import { debounce } from 'remeda'
 import NextLink from 'next/link'
 import { P, match } from 'ts-pattern'
 import {
+  MCMASTER_CARR_NAME,
   ResourceType,
   ValueResource,
   fields,
   mapResourceToValueResource,
+  resources,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { useRouter } from 'next/navigation'
 import useSchema from '@/lib/schema/useSchema'
 import { copyFromResource, createResource } from '@/actions/resource'
 import { findResourcesByNameOrPoNumber } from '@/actions/resource'
+import { McMasterCarrLogo } from '@/lib/ux/McMasterCarrLogo'
 
 type Props = {
   resourceId: string
@@ -79,6 +82,10 @@ function ResourceField(
       open(resource.id)
     })
 
+  const isMcMasterCarr =
+    resource?.templateId === resources.mcMasterCarrVendor.templateId &&
+    resource?.name === MCMASTER_CARR_NAME
+
   if (resource) {
     return (
       <>
@@ -86,9 +93,17 @@ function ResourceField(
           <Link
             onClick={() => open(resource.id)}
             flexGrow={1}
-            sx={{ cursor: 'pointer' }}
+            sx={{
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              padding: 1,
+              '&:hover': {
+                backgroundColor: 'background.default',
+              },
+            }}
           >
-            {resource.name}
+            {isMcMasterCarr ? <McMasterCarrLogo /> : resource.name}
           </Link>
           <Tooltip title={`Sync data from ${resourceType}`}>
             <IconButton

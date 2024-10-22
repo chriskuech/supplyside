@@ -5,11 +5,13 @@ import { Check } from '@mui/icons-material'
 import { GridApplyQuickFilter } from '@mui/x-data-grid/models/colDef/gridColDef'
 import {
   FieldType,
+  MCMASTER_CARR_NAME,
   SchemaField,
   Value,
   emptyValue,
   findTemplateField,
   formatInlineAddress,
+  resources,
   selectResourceFieldValue,
 } from '@supplyside/model'
 import {
@@ -33,6 +35,7 @@ import AddressCard from '../fields/views/AddressCard'
 import FieldGridEditCell from './FieldGridEditCell'
 import { Cell, Column, Display, Row } from './types'
 import { formatDate, formatMoney } from '@/lib/format'
+import { McMasterCarrLogo } from '@/lib/ux/McMasterCarrLogo'
 
 const wrapFilterOperator = (
   operator: GridFilterOperator,
@@ -369,7 +372,7 @@ export const mapSchemaFieldToGridColDef = (
           ],
         },
 
-  renderCell: ({ value }) => {
+  renderCell: ({ value, row: resource }) => {
     const children = match<FieldType>(field.type)
       .with(
         'Address',
@@ -404,6 +407,15 @@ export const mapSchemaFieldToGridColDef = (
       )
       .with('Select', () => value?.option && <Chip label={value.option.name} />)
       .with('User', () => value?.user && <UserCard user={value.user} />)
+      .with('Text', () => {
+        const isMcMasterCarr =
+          resource?.templateId === resources.mcMasterCarrVendor.templateId &&
+          value?.string === MCMASTER_CARR_NAME
+        if (isMcMasterCarr) return <McMasterCarrLogo />
+
+        // if it's not McMaster-Carr, fallback to the default value
+        return undefined
+      })
       .otherwise(() => undefined)
 
     // Fallback to `valueFormatter`

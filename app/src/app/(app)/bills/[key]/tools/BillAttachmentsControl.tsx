@@ -23,7 +23,7 @@ export const BillAttachmentsControl: FC<Props> = ({
   fontSize,
 }) => (
   <AttachmentsToolbarControl
-    resourceId={resource.id}
+    resource={resource}
     resourceType="Bill"
     fontSize={fontSize}
     onSync={() => syncFromAttachments(resource.id)}
