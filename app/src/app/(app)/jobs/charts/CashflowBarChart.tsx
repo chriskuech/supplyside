@@ -2,7 +2,6 @@
 
 import {
   BarPlot,
-  BarSeriesType,
   ChartsReferenceLine,
   ChartsTooltip,
   ChartsXAxis,
@@ -146,6 +145,8 @@ export default function CashflowBarChart({ resources }: Props) {
           stack: 'by status',
           data: tc.totalsByWeek,
           label: tc.status,
+          valueFormatter: (value) =>
+            formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
         }))}
         xAxis={[{ data: weeks, scaleType: 'band' }]}
         yAxis={[
