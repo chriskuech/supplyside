@@ -68,10 +68,13 @@ export default function CashflowBarChart({ resources }: Props) {
     return weeks
   }, [resources, today])
 
-  const totalCosts = useMemo((): BarSeriesType['data'] => {
+  const totalCosts = useMemo((): {
+    status: string
+    totalsByWeek: number[]
+  }[] => {
     if (!resources) return []
 
-    const totalCostByWeek = pipe(
+    const totalCostByStatusAndWeeks = pipe(
       resources,
       map((resource) => {
         const paymentDueDate = selectResourceFieldValue(
@@ -80,13 +83,20 @@ export default function CashflowBarChart({ resources }: Props) {
         )?.date
         const totalCost =
           selectResourceFieldValue(resource, fields.totalCost)?.number ?? 0
+        const status =
+          selectResourceFieldValue(resource, fields.jobStatus)?.option?.name ??
+          ''
 
         if (!paymentDueDate) return null
 
-        return { paymentDueDate: dayjs(paymentDueDate).day(1), totalCost }
+        return {
+          paymentDueDate: dayjs(paymentDueDate).day(1),
+          totalCost,
+          status,
+        }
       }),
       filter(isTruthy),
-      map(({ paymentDueDate, totalCost }) => ({
+      map(({ paymentDueDate, totalCost, status }) => ({
         week: weeks.find((week, i) => {
           const weekDate = dayjs(week)
           if (!weeks[i + 1]) return true
@@ -94,12 +104,29 @@ export default function CashflowBarChart({ resources }: Props) {
           return paymentDueDate.isBetween(weekDate, nextWeekDate)
         }),
         totalCost,
+        status,
       })),
-      groupBy(({ week }) => week),
-      mapValues(sumBy(({ totalCost }) => totalCost)),
+      groupBy(({ status }) => status),
+      mapValues((dataByStatus) =>
+        pipe(
+          dataByStatus,
+          groupBy(({ week }) => week),
+          mapValues(sumBy(({ totalCost }) => totalCost)),
+        ),
+      ),
     )
 
-    return weeks.map((week) => totalCostByWeek[week] ?? 0)
+    const totalsByStatuses = Object.entries(totalCostByStatusAndWeeks).map(
+      ([key, value]) => ({
+        status: key,
+        totalsByWeek: weeks.map((week) => value[week] ?? 0),
+      }),
+    )
+
+    return totalsByStatuses.map(({ status, totalsByWeek }) => ({
+      status,
+      totalsByWeek,
+    }))
   }, [weeks, resources])
 
   const currentWeek = useMemo(
@@ -114,14 +141,12 @@ export default function CashflowBarChart({ resources }: Props) {
       <Typography variant="h6">Cashflow</Typography>
       <ResponsiveChartContainer
         sx={{ padding: 1, marginLeft: 2, overflow: 'visible' }}
-        series={[
-          {
-            data: totalCosts,
-            type: 'bar',
-            valueFormatter: (value) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
-          },
-        ]}
+        series={totalCosts.map((tc) => ({
+          type: 'bar',
+          stack: 'by status',
+          data: tc.totalsByWeek,
+          label: tc.status,
+        }))}
         xAxis={[{ data: weeks, scaleType: 'band' }]}
         yAxis={[
           {
