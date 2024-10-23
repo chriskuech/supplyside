@@ -21,6 +21,7 @@ export function formatMoney(
       v.toLocaleString('en-US', {
         style: 'currency',
         currency: 'USD',
+        useGrouping: true,
         ...options,
       }),
     )

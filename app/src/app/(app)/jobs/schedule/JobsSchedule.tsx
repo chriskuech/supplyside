@@ -16,6 +16,7 @@ import utc from 'dayjs/plugin/utc'
 import { DragBar } from './DragBar'
 import GanttChart from './GanttChart'
 import { GanttChartHeader } from './GanttChartHeader'
+import { formatMoney } from '@/lib/format'
 
 dayjs.extend(utc)
 
@@ -84,8 +85,10 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
                 job,
                 fields.customer,
               )?.resource?.name
-              const totalCost: number | null | undefined =
-                selectResourceFieldValue(job, fields.totalCost)?.number
+              const totalCost = selectResourceFieldValue(
+                job,
+                fields.totalCost,
+              )?.number
 
               return (
                 <Stack
@@ -135,7 +138,11 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
                     {isNumber(totalCost) && (
                       <Stack alignItems="center" direction="row">
                         <AttachMoney />
-                        {totalCost.toFixed(2)}
+                        {formatMoney(totalCost, {
+                          currency: undefined,
+                          style: undefined,
+                          maximumFractionDigits: 0,
+                        })}
                       </Stack>
                     )}
                   </Stack>
