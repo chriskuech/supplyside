@@ -3,6 +3,7 @@ import {
   Resource,
   Schema,
   fields,
+  jobStatusOptions,
   selectResourceFieldValue,
   selectSchemaField,
 } from '@supplyside/model'
@@ -258,12 +259,44 @@ const recalculateItemizedCosts =
     }
   }
 
+const setStartDate =
+  (context: Context) =>
+  (patch: Patch): Patch => {
+    const jobStatusField = selectSchemaField(context.schema, fields.jobStatus)
+    const startDateField = selectSchemaField(context.schema, fields.startDate)
+
+    if (
+      !jobStatusField ||
+      !startDateField ||
+      !patch.fields.some(
+        (f) =>
+          f.fieldId === jobStatusField.fieldId &&
+          f.valueInput.optionId === jobStatusOptions.inProcess.templateId,
+      )
+    )
+      return patch
+
+    return {
+      ...patch,
+      fields: [
+        ...patch.fields.filter((f) => f.fieldId !== startDateField.fieldId),
+        {
+          fieldId: startDateField.fieldId,
+          valueInput: {
+            date: new Date().toISOString(),
+          },
+        },
+      ],
+    }
+  }
+
 export const deriveFields = (
   { fields = [], costs = [] }: Partial<Patch>,
   context: Context,
 ): Patch => {
   return pipe(
     { fields, costs },
+    setStartDate(context),
     recalculatePaymentDueDateFromInvoiceDate(context),
     recalculatePaymentDueDateFromNeedDate(context),
     recalculateLineTotalCost(context),

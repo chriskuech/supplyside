@@ -393,6 +393,14 @@ const _fields = {
     type: 'Contact',
     description: 'Primary contact for orders',
   },
+  productionDays: {
+    templateId: '86a40299-a47f-4428-866b-0c116ef8aebd',
+    name: 'Production Days',
+    type: 'Number',
+    description: 'Number of days to produce the item',
+    defaultValue: { number: 1 },
+    isRequired: true,
+  },
   punchoutSessionUrl: {
     templateId: '51955a67-a243-4544-992a-3d15720e4a2d',
     name: 'Punchout Session URL',
@@ -494,6 +502,14 @@ const _fields = {
     name: 'Shipping Method',
     type: 'Select',
     description: 'Required form of shipping',
+  },
+  startDate: {
+    templateId: '4b523fd9-35ce-44d8-abc8-a1bd9b05097a',
+    name: 'Start Date',
+    type: 'Date',
+    isRequired: true,
+    defaultToToday: true,
+    description: 'Date the schedule starts',
   },
   subtotalCost: {
     templateId: '3234298a-d186-424e-a4b4-7678b4eec7d0',

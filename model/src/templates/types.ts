@@ -20,6 +20,7 @@ export type FieldTemplate = {
   options?: OptionTemplate[]
   defaultValue?: {
     boolean?: boolean
+    number?: number
     optionTemplateId?: string
   }
   isDerived?: boolean
