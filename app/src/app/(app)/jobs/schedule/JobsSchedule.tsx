@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Divider, Paper, Stack, Typography } from '@mui/material'
+import { Box, Divider, Paper, Stack, Tooltip, Typography } from '@mui/material'
 import {
   Resource,
   Schema,
@@ -9,7 +9,13 @@ import {
 } from '@supplyside/model'
 import { useMemo, useState } from 'react'
 import dayjs from 'dayjs'
-import { AttachMoney, Business, Link } from '@mui/icons-material'
+import {
+  AttachMoney,
+  Business,
+  Cancel,
+  CheckCircle,
+  Link,
+} from '@mui/icons-material'
 import NextLink from 'next/link'
 import { isNumber, sortBy } from 'remeda'
 import utc from 'dayjs/plugin/utc'
@@ -89,6 +95,10 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
                 job,
                 fields.totalCost,
               )?.number
+              const receivedAllPurchases = selectResourceFieldValue(
+                job,
+                fields.receivedAllPurchases,
+              )?.boolean
 
               return (
                 <Stack
@@ -130,21 +140,44 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
                   >
                     {jobName && <Box color="text.primary">{jobName}</Box>}
                     {customerName && (
-                      <Stack alignItems="center" direction="row">
-                        <Business sx={{ mr: 1 }} />
-                        {customerName}
-                      </Stack>
+                      <Tooltip
+                        title={`This Job was ordered by ${customerName}`}
+                      >
+                        <Stack alignItems="center" direction="row">
+                          <Business sx={{ mr: 1 }} />
+                          {customerName}
+                        </Stack>
+                      </Tooltip>
                     )}
                     {isNumber(totalCost) && (
-                      <Stack alignItems="center" direction="row">
-                        <AttachMoney />
-                        {formatMoney(totalCost, {
-                          currency: undefined,
-                          style: undefined,
-                          maximumFractionDigits: 0,
-                        })}
-                      </Stack>
+                      <Tooltip
+                        title={`This Job will gross ${formatMoney(totalCost)}`}
+                      >
+                        <Stack alignItems="center" direction="row">
+                          <AttachMoney />
+                          {formatMoney(totalCost, {
+                            currency: undefined,
+                            style: undefined,
+                            maximumFractionDigits: 0,
+                          })}
+                        </Stack>
+                      </Tooltip>
                     )}
+                    <Stack alignItems="center" direction="row">
+                      <Tooltip
+                        title={
+                          receivedAllPurchases
+                            ? 'All Purchases required for this Job have been received'
+                            : 'Some Purchases required for this Job have not been received'
+                        }
+                      >
+                        {receivedAllPurchases ? (
+                          <CheckCircle color="success" />
+                        ) : (
+                          <Cancel />
+                        )}
+                      </Tooltip>
+                    </Stack>
                   </Stack>
                   <Stack
                     position="absolute"

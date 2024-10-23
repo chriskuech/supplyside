@@ -5,9 +5,10 @@ import {
   jobStatusOptions,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import { Box, Container, Stack, Typography } from '@mui/material'
+import { Box, Container, Stack, Tooltip, Typography } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
+import { Cancel, CheckCircle } from '@mui/icons-material'
 import StatusTransitionButton from './cta/StatusTransitionButton'
 import JobStatusTracker from './JobStatusTracker'
 import EditControl from './tools/EditControl'
@@ -17,7 +18,7 @@ import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { readResources } from '@/actions/resource'
 
-export default async function JobsDetail({
+export default async function JobDetail({
   params: { key },
   searchParams,
 }: {
@@ -50,6 +51,11 @@ export default async function JobsDetail({
     .with(jobStatusOptions.paid.templateId, () => green[800])
     .with(jobStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
+
+  const receivedAllPurchases = selectResourceFieldValue(
+    resource,
+    fields.receivedAllPurchases,
+  )?.boolean
 
   return (
     <ResourceDetailPage
@@ -134,6 +140,24 @@ export default async function JobsDetail({
                 spacing={2}
                 mr={3}
               >
+                {[
+                  jobStatusOptions.ordered.templateId,
+                  jobStatusOptions.inProcess.templateId,
+                ].includes(status.templateId as string) && (
+                  <Tooltip
+                    title={
+                      receivedAllPurchases
+                        ? 'All Purchases required for this Job have been received'
+                        : 'Some Purchases required for this Job have not been received'
+                    }
+                  >
+                    {receivedAllPurchases ? (
+                      <CheckCircle color="success" fontSize="large" />
+                    ) : (
+                      <Cancel color="error" fontSize="large" />
+                    )}
+                  </Tooltip>
+                )}
                 {status.templateId === jobStatusOptions.draft.templateId && (
                   <StatusTransitionButton
                     isDisabled={hasInvalidFields || !jobHasLines}
