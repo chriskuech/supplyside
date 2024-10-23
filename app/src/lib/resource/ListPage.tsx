@@ -26,7 +26,7 @@ export default async function ListPage({
   resourceType,
   searchParams,
   callToActions = [],
-  filterItems,
+  filterItems = [],
   title,
   Charts,
 }: Props) {
@@ -47,9 +47,9 @@ export default async function ListPage({
   const initialGridFilterModel: GridFilterModel = {
     items: [
       ...(querySearchGridModel?.items.filter(
-        (item) => !filterItems?.find((fi) => fi.field === item.field),
+        (item) => !filterItems.find((fi) => fi.field === item.field),
       ) ?? []),
-      ...(filterItems ?? []),
+      ...filterItems,
     ],
   }
 
@@ -94,7 +94,7 @@ export default async function ListPage({
             schema={schema}
             resources={resources}
             initialGridFilterModel={initialGridFilterModel}
-            unFilterableFieldIds={filterItems?.map((item) => item.field)}
+            unFilterableFieldIds={filterItems.map((item) => item.field)}
             Charts={Charts}
           />
         </Stack>
