@@ -54,7 +54,10 @@ export class TemplateService {
             },
           },
           DefaultValue: {
-            create: { boolean: defaultValue?.boolean },
+            create: {
+              boolean: defaultValue?.boolean,
+              number: defaultValue?.number,
+            },
           },
           templateId,
           name,
@@ -74,6 +77,7 @@ export class TemplateService {
           DefaultValue: {
             update: {
               boolean: defaultValue?.boolean,
+              number: defaultValue?.number,
             },
           },
         },
