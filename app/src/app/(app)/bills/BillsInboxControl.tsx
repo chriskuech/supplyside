@@ -1,39 +1,20 @@
-'use client'
+import { Alert } from '@mui/material'
+import { readAccount } from '@/client/account'
+import CopyableTextInput from '@/lib/ux/CopyableTextInput'
+import { requireSession } from '@/session'
+import { config } from '@/config'
 
-import { TextField, Tooltip } from '@mui/material'
-import { enqueueSnackbar } from 'notistack'
+export const BillsInboxControl = async () => {
+  const { accountId } = await requireSession()
+  const account = await readAccount(accountId)
 
-type Props = {
-  address: string
-}
+  if (!account) return <Alert severity="error">Failed to load</Alert>
 
-export default function BillsInboxControl({ address }: Props) {
   return (
-    <Tooltip title="Click to copy to clipboard">
-      <TextField
-        key="inbox"
-        label="Bills Inbox"
-        value={address}
-        focused={false}
-        onClick={(e) => {
-          e.preventDefault()
-          navigator.clipboard.writeText(address)
-          enqueueSnackbar('Copied to clipboard', { variant: 'success' })
-        }}
-        slotProps={{
-          htmlInput: {
-            sx: {
-              cursor: 'pointer',
-            },
-          },
-          input: {
-            readOnly: true,
-            sx: {
-              width: 300,
-            },
-          },
-        }}
-      />
-    </Tooltip>
+    <CopyableTextInput
+      key={CopyableTextInput.name}
+      label="Bills Inbox"
+      content={`${account.key}@${config().BILLS_EMAIL_DOMAIN}`}
+    />
   )
 }
