@@ -44,7 +44,7 @@ export default function CashflowPieChart({ resources }: Props) {
     <>
       <Typography variant="h6">
         {dataHasValues
-          ? `${numberOfJobs} Jobs (${formatMoney(total, { minimumFractionDigits: 0 })})`
+          ? `${numberOfJobs} Jobs (${formatMoney(total, { maximumFractionDigits: 0 })})`
           : 'Jobs'}
       </Typography>
       <PieChart
