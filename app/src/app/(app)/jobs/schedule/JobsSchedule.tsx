@@ -93,16 +93,9 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
                   height={dim}
                   overflow="hidden"
                   sx={{
-                    // outline: '1px solid',
-                    // outlineColor: 'divider',
-                    // outlineOffset: '-0.5px',
                     textDecoration: 'none',
                     '& .LinkIcon': {
                       display: 'none',
-                      // color: 'text.secondary',
-                      // '&:hover': {
-                      //   color: 'text.primary',
-                      // },
                     },
                     '&:hover': {
                       backgroundColor: 'action.hover',

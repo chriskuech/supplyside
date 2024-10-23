@@ -32,7 +32,6 @@ export const DragBar: FC<Props> = ({ top, left, height, onChange }) => {
       justifyContent="center"
       alignItems="center"
       bgcolor="text.primary"
-      // bgcolor="lime"
       sx={{
         opacity: 0,
         '&:hover': { opacity: 1 },
