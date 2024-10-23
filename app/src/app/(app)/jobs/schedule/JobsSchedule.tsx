@@ -44,7 +44,7 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
     () =>
       sortBy(
         unsortedJobs,
-        (job) => selectResourceFieldValue(job, fields.startDate)?.date ?? '',
+        (job) => selectResourceFieldValue(job, fields.needDate)?.date ?? '',
       ),
     [unsortedJobs],
   )
@@ -78,7 +78,7 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
             my="-1px"
             width="100%"
           >
-            {jobs?.map((job) => {
+            {jobs.map((job) => {
               const jobName = selectResourceFieldValue(job, fields.name)?.string
               const customerName = selectResourceFieldValue(
                 job,
