@@ -1,8 +1,7 @@
-import { Alert, Button, Container, Stack, Typography } from '@mui/material'
-import { Add } from '@mui/icons-material'
+import { Alert, Container, Stack, Typography } from '@mui/material'
 import AccountsTable from './AccountsTable'
+import { CreateAccountButton } from './CreateAccountButton'
 import { readAccounts } from '@/client/account'
-import { createAccount } from '@/actions/account'
 import { requireSession } from '@/session'
 import { readSelf } from '@/client/user'
 
@@ -25,9 +24,7 @@ export default async function AdminPage() {
           justifyContent="space-between"
         >
           <Typography variant="h4">Accounts</Typography>
-          <Button startIcon={<Add />} onClick={createAccount}>
-            Account
-          </Button>
+          <CreateAccountButton />
         </Stack>
         {accounts ? (
           <AccountsTable accounts={accounts} />
