@@ -51,9 +51,12 @@ export default function CashflowBarChart({ resources }: Props) {
     const maxPaymentDueDate = paymentDueDates.at(-1)
     if (!minPaymentDueDate || !maxPaymentDueDate) return []
 
-    const startDate = minPaymentDueDate.isBefore(today, 'day')
+    const startDate = minPaymentDueDate.isSame(maxPaymentDueDate)
       ? minPaymentDueDate
-      : today
+      : minPaymentDueDate.isBefore(today, 'day')
+        ? minPaymentDueDate
+        : today
+
     const endDate = maxPaymentDueDate.isAfter(today, 'day')
       ? maxPaymentDueDate
       : today
