@@ -5,6 +5,7 @@ import {
   readBillPaymentSchema,
   readBillSchema,
   readCustomerSchema,
+  readInvoiceSchema,
   readVendorSchema,
   webhookBodySchema,
 } from './schemas'
@@ -14,6 +15,7 @@ export type Vendor = z.infer<typeof readVendorSchema>
 export type Customer = z.infer<typeof readCustomerSchema>
 export type Account = z.infer<typeof readAccountSchema>
 export type Bill = z.infer<typeof readBillSchema>
+export type Invoice = z.infer<typeof readInvoiceSchema>
 export type BillPayment = z.infer<typeof readBillPaymentSchema>
 export type WebhookBody = z.infer<typeof webhookBodySchema>
 

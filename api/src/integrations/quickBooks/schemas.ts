@@ -19,6 +19,10 @@ const addressSchema = z.object({
   Id: z.string(),
 })
 
+const emailSchema = z.object({
+  Address: z.string(),
+})
+
 const accountSchema = z.object({
   FullyQualifiedName: z.string(),
   domain: z.string(),
@@ -43,6 +47,7 @@ const lineSchema = z.object({
   ProjectRef: refSchema.optional(),
   Amount: z.number(),
   Id: z.string(),
+  //TODO: is this optional, do i have to add more types?
   AccountBasedExpenseLineDetail: z.object({
     TaxCodeRef: refSchema.optional(),
     AccountRef: refSchema,
@@ -76,8 +81,43 @@ const billSchema = z.object({
   MetaData: metadataSchema,
 })
 
-const emailSchema = z.object({
-  Address: z.string(),
+const invoiceSchema = z.object({
+  domain: z.string(),
+  PrintStatus: z.string().optional(),
+  SalesTermRef: refSchema.optional(),
+  TotalAmt: z.number().optional(),
+  Line: z.array(lineSchema).optional(),
+  DueDate: z.string().optional(),
+  ApplyTaxAfterDiscount: z.boolean().optional(),
+  DocNumber: z.string().optional(),
+  sparse: z.boolean(),
+  ProjectRef: refSchema.optional(),
+  Deposit: z.number().optional(),
+  Balance: z.number().optional(),
+  CustomerRef: refSchema.optional(),
+  TxnTaxDetail: z
+    .object({
+      TxnTaxCodeRef: refSchema.optional(),
+      TotalTax: z.number().optional(),
+      TaxLine: z.array(lineSchema).optional(),
+    })
+    .optional(),
+  SyncToken: z.string(),
+  LinkedTxn: z
+    .array(
+      z.object({
+        TxnId: z.string(),
+        TxnType: z.string(),
+      }),
+    )
+    .optional(),
+  BillEmail: emailSchema,
+  ShipAddr: addressSchema,
+  EmailStatus: z.string().optional(),
+  BillAddr: addressSchema,
+  CurrencyRef: refSchema.optional(),
+  Id: z.string(),
+  MetaData: metadataSchema,
 })
 
 const phoneSchema = z.object({
@@ -244,6 +284,10 @@ export const readCustomerSchema = z.object({
 
 export const readBillSchema = z.object({
   Bill: billSchema,
+})
+
+export const readInvoiceSchema = z.object({
+  Invoice: invoiceSchema,
 })
 
 export const readBillPaymentSchema = z.object({

@@ -74,6 +74,7 @@ export const schemas: SchemaTemplate[] = [
       fields.totalCost,
       fields.paymentDueDate,
       fields.receivedAllPurchases,
+      fields.quickBooksInvoiceId,
     ],
     sections: [
       {

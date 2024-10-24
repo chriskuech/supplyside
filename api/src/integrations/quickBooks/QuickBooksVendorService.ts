@@ -249,17 +249,22 @@ export class QuickBooksVendorService {
     const addressValue = selectResourceFieldValue(
       vendorResource,
       fields.primaryAddress,
-    )
+    )?.address
+
     return {
       Id: mapValue(vendorResource, fields.quickBooksVendorId),
       DisplayName: mapValue(vendorResource, fields.name),
-      BillAddr: {
-        City: addressValue?.address?.city,
-        Country: addressValue?.address?.country,
-        CountrySubDivisionCode: addressValue?.address?.state,
-        Line1: addressValue?.address?.streetAddress,
-        PostalCode: addressValue?.address?.zip,
-      },
+      ...(addressValue
+        ? {
+            BillAddr: {
+              City: addressValue.city,
+              Country: addressValue.country,
+              CountrySubDivisionCode: addressValue.state,
+              Line1: addressValue.streetAddress,
+              PostalCode: addressValue.zip,
+            },
+          }
+        : {}),
     }
   }
 
