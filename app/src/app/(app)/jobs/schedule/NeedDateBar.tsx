@@ -1,8 +1,11 @@
+'use client'
+
 import { Box, Tooltip } from '@mui/material'
 import { FC } from 'react'
 import { Close } from '@mui/icons-material'
 import { red } from '@mui/material/colors'
 import { useDrag } from '@/hooks/useDrag'
+import { useConfirmation } from '@/lib/confirmation'
 
 type Props = {
   dim: number
@@ -12,8 +15,16 @@ type Props = {
 }
 
 export const NeedDateBar: FC<Props> = ({ dim, xOffset, yOffset, onDrop }) => {
+  const confirm = useConfirmation()
   const { isDragging, delta, onMouseDown } = useDrag({
-    onDrag: ({ x }) => onDrop(xOffset + Math.round(x / dim)),
+    onDrag: async ({ x }) => {
+      const isConfirmed = await confirm({
+        title: 'Update Need Date?',
+        content: 'Are you sure you want to update the Need Date for the Job?',
+      })
+      if (!isConfirmed) return
+      onDrop(xOffset + Math.round(x / dim))
+    },
   })
 
   return (

@@ -40,7 +40,7 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                     resource.fields.find((rf) => rf.fieldId === field.fieldId),
                   )
                     .with({ fieldType: 'Address' }, ({ value }) =>
-                      value?.address ? (
+                      value.address ? (
                         <AddressCard address={value.address} />
                       ) : (
                         '-'
@@ -61,12 +61,12 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                       <FileField
                         resourceId={resource.id}
                         fieldId={field.fieldId}
-                        file={value?.file}
+                        file={value.file}
                         isReadOnly
                       />
                     ))
                     .with({ fieldType: 'Files' }, ({ value }) => (
-                      <FilesField files={value?.files} isReadOnly />
+                      <FilesField files={value.files} isReadOnly />
                     ))
                     .with({ fieldType: 'Money' }, ({ value: { number } }) =>
                       number?.toLocaleString('en-US', {
@@ -78,7 +78,7 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                       { fieldType: 'MultiSelect' },
                       ({ value: { options } }) =>
                         options
-                          ?.map((o) => <Chip key={o.id} label={o.name} />)
+                          .map((o) => <Chip key={o.id} label={o.name} />)
                           .join(' ') || '-',
                     )
                     .with(

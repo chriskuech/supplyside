@@ -71,8 +71,6 @@ export default function CashflowBarChart({ resources }: Props) {
     status: string
     totalsByWeek: number[]
   }[] => {
-    if (!resources) return []
-
     const totalCostByStatusAndWeeks = pipe(
       resources,
       map((resource) => {
@@ -133,11 +131,11 @@ export default function CashflowBarChart({ resources }: Props) {
     [today, weeks],
   )
 
-  const chartHasData = !!totalCosts?.length
+  const chartHasData = !!totalCosts.length
 
   return (
     <>
-      <Typography variant="h6">Cashflow</Typography>
+      <Typography variant="h6">Weekly Cashflow</Typography>
       <ResponsiveChartContainer
         sx={{ padding: 1, marginLeft: 2, overflow: 'visible' }}
         series={totalCosts.map((tc) => ({

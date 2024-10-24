@@ -27,7 +27,7 @@ export default function DefaultValueControl({
     .with('Checkbox', () => (
       <Checkbox
         id="default-field-defaultValue-control"
-        checked={defaultValue?.boolean ?? false}
+        checked={defaultValue.boolean ?? false}
         onChange={(e) => onChange({ ...emptyValue, boolean: e.target.checked })}
         disabled={isDisabled}
       />
@@ -35,7 +35,7 @@ export default function DefaultValueControl({
     .with('Select', () => (
       <Autocomplete
         id="default-field-defaultValue-control"
-        value={defaultValue?.option}
+        value={defaultValue.option}
         disabled={isDisabled}
         onChange={(e, value) =>
           onChange({
@@ -52,7 +52,7 @@ export default function DefaultValueControl({
       <TextField
         id="default-field-defaultValue-control"
         disabled={isDisabled}
-        value={defaultValue?.string ?? ''}
+        value={defaultValue.string ?? ''}
         onChange={(e) => onChange({ ...emptyValue, string: e.target.value })}
         multiline
         fullWidth
@@ -63,7 +63,7 @@ export default function DefaultValueControl({
       <TextField
         id="default-field-defaultValue-control"
         disabled={isDisabled}
-        value={defaultValue?.string ?? ''}
+        value={defaultValue.string ?? ''}
         onChange={(e) => onChange({ ...emptyValue, string: e.target.value })}
       />
     ))
@@ -71,7 +71,7 @@ export default function DefaultValueControl({
       <TextField
         id="default-field-defaultValue-control"
         disabled={isDisabled}
-        value={defaultValue?.number ?? ''}
+        value={defaultValue.number ?? ''}
         onChange={(e) =>
           onChange({ ...emptyValue, number: parseInt(e.target.value) })
         }
@@ -80,14 +80,14 @@ export default function DefaultValueControl({
     ))
     .with('Address', () => (
       <AddressField
-        address={defaultValue?.address}
+        address={defaultValue.address}
         onChange={(address) => onChange({ ...emptyValue, address })}
         disabled={isDisabled}
       />
     ))
     .with('Contact', () => (
       <ContactField
-        contact={defaultValue?.contact}
+        contact={defaultValue.contact}
         onChange={(contact) => onChange({ ...emptyValue, contact })}
         disabled={isDisabled}
       />
@@ -101,7 +101,7 @@ export default function DefaultValueControl({
             onClear: () => onChange({ ...emptyValue, date: null }),
           },
         }}
-        value={defaultValue?.date ? dayjs.utc(defaultValue.date) : null}
+        value={defaultValue.date ? dayjs.utc(defaultValue.date) : null}
         disabled={isDisabled}
         onChange={(value) =>
           onChange({ ...emptyValue, date: value?.toISOString() ?? null })

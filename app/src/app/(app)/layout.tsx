@@ -79,6 +79,15 @@ export default async function Layout({
     },
   })
 
+  const gettingInProcessJobs = readResources(accountId, 'Job', {
+    where: {
+      '==': [
+        { var: fields.jobStatus.name },
+        jobStatusOptionId(jobStatusOptions.inProcess),
+      ],
+    },
+  })
+
   const gettingOpenPurchases = readResources(accountId, 'Purchase', {
     where: {
       and: [
@@ -118,6 +127,7 @@ export default async function Layout({
   })
 
   const openJobCount = (await gettingOpenJobs)?.length ?? 0
+  const inProcessJobCount = (await gettingInProcessJobs)?.length ?? 0
   const openPurchaseCount = (await gettingOpenPurchases)?.length ?? 0
   const unpaidBillCount = (await gettingUnpaidBills)?.length ?? 0
 
@@ -140,14 +150,17 @@ export default async function Layout({
               href="/jobs/open"
               count={openJobCount}
             />
+            <ItemLink
+              title="In Process Jobs"
+              href="/jobs/in-process"
+              count={inProcessJobCount}
+            />
             <ItemLink title="Closed Jobs" href="/jobs/closed" />
-            {user?.isGlobalAdmin && (
-              <ItemLink
-                title="Jobs Schedule"
-                href="/jobs/schedule"
-                icon={<Schedule fontSize="small" />}
-              />
-            )}
+            <ItemLink
+              title="Jobs Schedule"
+              href="/jobs/schedule"
+              icon={<Schedule fontSize="small" />}
+            />
             <ItemLink
               title="Lines"
               href="/jobs/lines"

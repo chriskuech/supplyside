@@ -5,9 +5,10 @@ import {
   jobStatusOptions,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import { Box, Container, Stack } from '@mui/material'
+import { Box, Container, Stack, Tooltip } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
+import { Cancel, CheckCircle } from '@mui/icons-material'
 import JobStatusTracker from './JobStatusTracker'
 import EditControl from './tools/EditControl'
 import CancelControl from './tools/CancelControl'
@@ -19,7 +20,7 @@ import { readResources } from '@/actions/resource'
 import { getInvoiceUrl } from '@/lib/quickBooks/helpers'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
 
-export default async function JobsDetail({
+export default async function JobDetail({
   params: { key },
   searchParams,
 }: {
@@ -61,6 +62,11 @@ export default async function JobsDetail({
   const quickBooksInvoiceUrl = quickBooksInvoiceId
     ? getInvoiceUrl(quickBooksInvoiceId)
     : undefined
+
+  const receivedAllPurchases = selectResourceFieldValue(
+    resource,
+    fields.receivedAllPurchases,
+  )?.boolean
 
   return (
     <ResourceDetailPage
@@ -154,6 +160,24 @@ export default async function JobsDetail({
                 spacing={2}
                 mr={3}
               >
+                {[
+                  jobStatusOptions.ordered.templateId,
+                  jobStatusOptions.inProcess.templateId,
+                ].includes(status.templateId as string) && (
+                  <Tooltip
+                    title={
+                      receivedAllPurchases
+                        ? 'All Purchases required for this Job have been received'
+                        : 'Some Purchases required for this Job have not been received'
+                    }
+                  >
+                    {receivedAllPurchases ? (
+                      <CheckCircle color="success" fontSize="large" />
+                    ) : (
+                      <Cancel color="error" fontSize="large" />
+                    )}
+                  </Tooltip>
+                )}
                 <CallToAction
                   hasInvalidFields={hasInvalidFields}
                   jobHasLines={jobHasLines}

@@ -31,8 +31,7 @@ export default async function LinesAndCosts({
     { where: lineQuery },
   )
 
-  if (!lines || !lineSchema)
-    return <Alert severity="error">Failed to load</Alert>
+  if (!lines) return <Alert severity="error">Failed to load</Alert>
 
   const strippedSchema: Schema = {
     ...lineSchema,
@@ -75,7 +74,7 @@ export default async function LinesAndCosts({
         >
           <ResourceTable
             schema={strippedSchema}
-            resources={lines ?? []}
+            resources={lines}
             isEditable={!isReadOnly}
             sx={{ borderBottomRightRadius: 0 }}
             specialColumnWidths={specialColumnWidths}

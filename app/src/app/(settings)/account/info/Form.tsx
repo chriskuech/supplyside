@@ -57,7 +57,7 @@ export default function Form({ account, billsEmailDomain }: Props) {
           required
           margin="normal"
           name="name"
-          defaultValue={account?.name}
+          defaultValue={account.name}
           error={!!errors?.name}
           helperText={errors?.name}
         />
@@ -68,13 +68,13 @@ export default function Form({ account, billsEmailDomain }: Props) {
           required
           margin="normal"
           name="key"
-          defaultValue={account?.key}
+          defaultValue={account.key}
           error={!!errors?.key}
           helperText={
             <>
               Your Bills Inbox address is currently{' '}
               <strong>
-                {account?.key ?? <em>(Company ID)</em>}@{billsEmailDomain}
+                {account.key}@{billsEmailDomain}
               </strong>
               .{' '}
               <Typography color="error" textAlign="center">
@@ -93,7 +93,7 @@ export default function Form({ account, billsEmailDomain }: Props) {
           required
           margin="normal"
           name="address"
-          defaultValue={account?.address}
+          defaultValue={account.address}
           error={!!errors?.address}
           helperText={errors?.address}
         />

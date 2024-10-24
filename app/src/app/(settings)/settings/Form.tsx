@@ -48,7 +48,7 @@ export default function Form({ user }: Props) {
         <TextField
           label="First Name"
           name="firstName"
-          defaultValue={user?.firstName}
+          defaultValue={user.firstName}
           fullWidth
           error={!!errors?.firstName}
           helperText={errors?.firstName}
@@ -56,7 +56,7 @@ export default function Form({ user }: Props) {
         <TextField
           label="Last Name"
           name="lastName"
-          defaultValue={user?.lastName}
+          defaultValue={user.lastName}
           fullWidth
           error={!!errors?.lastName}
           helperText={errors?.lastName}

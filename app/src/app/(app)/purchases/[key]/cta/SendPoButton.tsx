@@ -17,7 +17,7 @@ export default function SendPoButton({ resourceId }: Props) {
   return (
     <LoadingButton
       onClick={async () => {
-        const isConfirmed = confirm({
+        const isConfirmed = await confirm({
           title: 'Send PO',
           content:
             'Are you sure you want to send the PO? An email will be sent to the PO recipient.',

@@ -1,21 +1,38 @@
 'use client'
 
-import { Box, Divider, Paper, Stack, Typography } from '@mui/material'
+import {
+  Box,
+  Chip,
+  Divider,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import {
   Resource,
   Schema,
   fields,
+  jobStatusOptions,
   selectResourceFieldValue,
 } from '@supplyside/model'
 import { useMemo, useState } from 'react'
 import dayjs from 'dayjs'
-import { AttachMoney, Business, Link } from '@mui/icons-material'
+import {
+  AttachMoney,
+  Business,
+  Cancel,
+  CheckCircle,
+  Link,
+} from '@mui/icons-material'
 import NextLink from 'next/link'
 import { isNumber, sortBy } from 'remeda'
 import utc from 'dayjs/plugin/utc'
+import { match } from 'ts-pattern'
 import { DragBar } from './DragBar'
 import GanttChart from './GanttChart'
 import { GanttChartHeader } from './GanttChartHeader'
+import { formatMoney } from '@/lib/format'
 
 dayjs.extend(utc)
 
@@ -44,7 +61,7 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
     () =>
       sortBy(
         unsortedJobs,
-        (job) => selectResourceFieldValue(job, fields.startDate)?.date ?? '',
+        (job) => selectResourceFieldValue(job, fields.needDate)?.date ?? '',
       ),
     [unsortedJobs],
   )
@@ -78,14 +95,24 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
             my="-1px"
             width="100%"
           >
-            {jobs?.map((job) => {
+            {jobs.map((job) => {
               const jobName = selectResourceFieldValue(job, fields.name)?.string
               const customerName = selectResourceFieldValue(
                 job,
                 fields.customer,
               )?.resource?.name
-              const totalCost: number | null | undefined =
-                selectResourceFieldValue(job, fields.totalCost)?.number
+              const totalCost = selectResourceFieldValue(
+                job,
+                fields.totalCost,
+              )?.number
+              const receivedAllPurchases = selectResourceFieldValue(
+                job,
+                fields.receivedAllPurchases,
+              )?.boolean
+              const jobStatus = selectResourceFieldValue(
+                job,
+                fields.jobStatus,
+              )?.option
 
               return (
                 <Stack
@@ -112,8 +139,22 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
                   href={`/jobs/${job.key}`}
                   position="relative"
                 >
-                  <Box p={1} fontWeight="bold" color="text.primary">
-                    {job.key}
+                  <Box p={1}>
+                    <Typography
+                      component="span"
+                      color="text.secondary"
+                      fontSize={12}
+                      sx={{ verticalAlign: 'top' }}
+                    >
+                      #
+                    </Typography>
+                    <Typography
+                      component="span"
+                      fontWeight="bold"
+                      color="text.primary"
+                    >
+                      {job.key}
+                    </Typography>
                   </Box>
                   <Stack
                     direction="row"
@@ -127,17 +168,64 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
                   >
                     {jobName && <Box color="text.primary">{jobName}</Box>}
                     {customerName && (
-                      <Stack alignItems="center" direction="row">
-                        <Business sx={{ mr: 1 }} />
-                        {customerName}
-                      </Stack>
+                      <Tooltip
+                        title={`This Job was ordered by ${customerName}`}
+                      >
+                        <Stack alignItems="center" direction="row">
+                          <Business sx={{ mr: 1 }} />
+                          {customerName}
+                        </Stack>
+                      </Tooltip>
                     )}
                     {isNumber(totalCost) && (
-                      <Stack alignItems="center" direction="row">
-                        <AttachMoney />
-                        {totalCost.toFixed(2)}
-                      </Stack>
+                      <Tooltip
+                        title={`This Job will gross ${formatMoney(totalCost)}`}
+                      >
+                        <Stack alignItems="center" direction="row">
+                          <AttachMoney />
+                          {formatMoney(totalCost, {
+                            currency: undefined,
+                            style: undefined,
+                            maximumFractionDigits: 0,
+                          })}
+                        </Stack>
+                      </Tooltip>
                     )}
+                    <Tooltip title="Job Status">
+                      <Chip
+                        label={jobStatus?.name}
+                        size="small"
+                        color={match(jobStatus?.templateId)
+                          .with(
+                            jobStatusOptions.paid.templateId,
+                            () => 'success' as const,
+                          )
+                          .with(
+                            jobStatusOptions.canceled.templateId,
+                            () => 'error' as const,
+                          )
+                          .with(
+                            jobStatusOptions.draft.templateId,
+                            () => 'default' as const,
+                          )
+                          .otherwise(() => 'warning' as const)}
+                      />
+                    </Tooltip>
+                    <Stack alignItems="center" direction="row">
+                      <Tooltip
+                        title={
+                          receivedAllPurchases
+                            ? 'All Purchases required for this Job have been received'
+                            : 'Some Purchases required for this Job have not been received'
+                        }
+                      >
+                        {receivedAllPurchases ? (
+                          <CheckCircle color="success" />
+                        ) : (
+                          <Cancel />
+                        )}
+                      </Tooltip>
+                    </Stack>
                   </Stack>
                   <Stack
                     position="absolute"

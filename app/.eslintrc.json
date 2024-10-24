@@ -46,8 +46,7 @@
       "error",
       { "allowShortCircuit": true, "allowTernary": true }
     ],
-    "@typescript-eslint/no-unnecessary-condition": "warn",
-    "@typescript-eslint/strict-boolean-expressions": "warn"
+    "@typescript-eslint/no-unnecessary-condition": "error"
     // "unused-imports/no-unused-imports": "error"
   }
 }
