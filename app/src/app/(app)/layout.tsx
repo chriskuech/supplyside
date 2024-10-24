@@ -156,13 +156,11 @@ export default async function Layout({
               count={inProcessJobCount}
             />
             <ItemLink title="Closed Jobs" href="/jobs/closed" />
-            {user?.isGlobalAdmin && (
-              <ItemLink
-                title="Jobs Schedule"
-                href="/jobs/schedule"
-                icon={<Schedule fontSize="small" />}
-              />
-            )}
+            <ItemLink
+              title="Jobs Schedule"
+              href="/jobs/schedule"
+              icon={<Schedule fontSize="small" />}
+            />
             <ItemLink
               title="Lines"
               href="/jobs/lines"
