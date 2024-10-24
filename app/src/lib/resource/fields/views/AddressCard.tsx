@@ -18,7 +18,7 @@ type Props = {
 }
 
 export default function AddressCard({ address, inline }: Props) {
-  if (!address || !Object.values(address).some(Boolean)) {
+  if (!Object.values(address).some(Boolean)) {
     return <Typography color="text.secondary">No address provided</Typography>
   }
 

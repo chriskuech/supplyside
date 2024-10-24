@@ -45,7 +45,7 @@ const UsersTable: FC<Props> = ({ currentUser, users }) => {
   }
 
   const editable: boolean =
-    currentUser?.isAdmin || currentUser?.accountId === systemAccountId
+    currentUser.isAdmin || currentUser.accountId === systemAccountId
 
   const columns: GridColDef<User>[] = [
     {

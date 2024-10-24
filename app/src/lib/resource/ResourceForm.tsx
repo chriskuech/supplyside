@@ -1,11 +1,10 @@
 'use client'
-import { fail } from 'assert'
+
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
-  CircularProgress,
   IconButton,
   Stack,
   Tooltip,
@@ -34,8 +33,6 @@ export default function ResourceForm({
   const { enqueueSnackbar } = useSnackbar()
 
   const columns = singleColumn ? 1 : 3
-
-  if (!schema || !resource) return <CircularProgress />
 
   return (
     <Box>
@@ -95,10 +92,7 @@ export default function ResourceForm({
                   <FieldControl
                     inputId={`rf-${singleField.fieldId}`}
                     resource={resource}
-                    field={
-                      singleField ??
-                      fail('Assumed a single field was asserted above')
-                    }
+                    field={singleField}
                     value={selectResourceFieldValue(resource, singleField)}
                     disabled={!!resource.templateId && !!singleField.templateId}
                   />

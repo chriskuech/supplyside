@@ -10,16 +10,14 @@ export const usePersistDatagridState = (storageKey: string | undefined) => {
   const saveStateToLocalstorage = useCallback(() => {
     if (!storageKey) return
 
-    if (apiRef?.current?.exportState && localStorage) {
-      const currentState = apiRef.current.exportState()
-      localStorage.setItem(storageKey, JSON.stringify(currentState))
-    }
+    const currentState = apiRef.current.exportState()
+    localStorage.setItem(storageKey, JSON.stringify(currentState))
   }, [apiRef, storageKey])
 
   useLayoutEffect(() => {
     if (!storageKey) return
 
-    const stateFromLocalStorage = localStorage?.getItem(storageKey)
+    const stateFromLocalStorage = localStorage.getItem(storageKey)
     setInitialState(
       stateFromLocalStorage ? JSON.parse(stateFromLocalStorage) : {},
     )

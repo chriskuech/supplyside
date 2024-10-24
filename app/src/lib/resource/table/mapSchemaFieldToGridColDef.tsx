@@ -286,7 +286,7 @@ export const mapSchemaFieldToGridColDef = (
       .with(
         'Files',
         () => (value) =>
-          value?.files?.some((file) =>
+          value?.files.some((file) =>
             file.name.toLowerCase().includes(query.toLowerCase()),
           ) ?? false,
       )
@@ -300,7 +300,7 @@ export const mapSchemaFieldToGridColDef = (
       .with(
         'MultiSelect',
         () => (value) =>
-          value?.options?.some((option) =>
+          value?.options.some((option) =>
             option.name.toLowerCase().includes(query.toLowerCase()),
           ) ?? false,
       )
@@ -395,7 +395,7 @@ export const mapSchemaFieldToGridColDef = (
       )
       .with('MultiSelect', () => (
         <Stack gap={1} direction="row">
-          {value?.options?.map((option) => (
+          {value?.options.map((option) => (
             <Chip key={option.id} label={option.name} />
           ))}
         </Stack>
@@ -409,7 +409,7 @@ export const mapSchemaFieldToGridColDef = (
       .with('User', () => value?.user && <UserCard user={value.user} />)
       .with('Text', () => {
         const isMcMasterCarr =
-          resource?.templateId === resources.mcMasterCarrVendor.templateId &&
+          resource.templateId === resources.mcMasterCarrVendor.templateId &&
           value?.string === MCMASTER_CARR_NAME
         if (isMcMasterCarr) return <McMasterCarrLogo />
 

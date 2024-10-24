@@ -186,7 +186,7 @@ const SortableChips: FC<{
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={({ active, over }) => {
-        if (!active || !over || active.id === over.id) return
+        if (!over || active.id === over.id) return
 
         const removed = values.filter((v) => v.id !== active.id)
         const i = values.findIndex((v) => v.id === over.id)

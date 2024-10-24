@@ -37,7 +37,7 @@ export default function ResourceFieldView({ resource }: Props) {
         },
       }}
     >
-      {isMcMasterCarr ? <McMasterCarrLogo /> : (resource.name ?? '-')}
+      {isMcMasterCarr ? <McMasterCarrLogo /> : resource.name || '-'}
     </Link>
   )
 }

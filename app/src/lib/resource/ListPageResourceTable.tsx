@@ -43,7 +43,6 @@ export const ListPageResourceTable: FC<Props> = ({
 
   const saveGridFilterModelDebounced = useMemo(
     () =>
-      saveGridFilterModel &&
       debounce(saveGridFilterModel, {
         timing: 'trailing',
         waitMs: 500,

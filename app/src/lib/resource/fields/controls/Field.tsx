@@ -197,12 +197,12 @@ function Field(
         renderInput={(props) => <TextField inputRef={ref} {...props} />}
         options={field.options.filter(
           (fieldOption) =>
-            !value?.options?.some(
+            !value?.options.some(
               (valueOption) => fieldOption.id === valueOption.id,
             ),
         )}
         defaultValue={field.options.filter((fieldOption) =>
-          value?.options?.some(
+          value?.options.some(
             (valueOption) => fieldOption.id === valueOption.id,
           ),
         )}

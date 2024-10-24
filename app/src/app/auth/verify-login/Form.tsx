@@ -16,7 +16,7 @@ const Form: FC<Props> = ({ email, token: defaultToken, returnTo }) => {
 
   const handleSubmit = useCallback(async () => {
     const result = await login({ email, token, returnTo })
-    if (result?.error) setErrorMessage(result.error)
+    if (result.error) setErrorMessage(result.error)
   }, [email, returnTo, token])
 
   useEffect(() => {
