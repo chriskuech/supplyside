@@ -36,7 +36,7 @@ export default function FilesField({ files, isReadOnly, onChange }: Props) {
       <Stack>
         {files.map((file) => (
           <Stack key={file.id} direction="row" alignItems="center">
-            <Typography flexGrow={1}>{file.name ?? '-'}</Typography>
+            <Typography flexGrow={1}>{file.name || '-'}</Typography>
             <Tooltip title="Compare File to Fields">
               <IconButton
                 onClick={() => push(`${pathname}?compareToFileId=${file.id}`)}

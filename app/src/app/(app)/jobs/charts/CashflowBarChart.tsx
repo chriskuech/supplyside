@@ -71,8 +71,6 @@ export default function CashflowBarChart({ resources }: Props) {
     status: string
     totalsByWeek: number[]
   }[] => {
-    if (!resources) return []
-
     const totalCostByStatusAndWeeks = pipe(
       resources,
       map((resource) => {

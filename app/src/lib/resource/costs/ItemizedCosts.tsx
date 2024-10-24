@@ -132,7 +132,7 @@ export default function ItemizedCosts({ resource, isReadOnly }: Props) {
                     </TableCell>
                     <TableCell align="right" sx={{ paddingX: '10px' }}>
                       {(row.isPercentage
-                        ? (row.value * (subtotalCost ?? 0)) / 100
+                        ? (row.value * subtotalCost) / 100
                         : row.value
                       ).toLocaleString('en-US', {
                         style: 'currency',

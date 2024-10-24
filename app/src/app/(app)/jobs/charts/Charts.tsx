@@ -19,12 +19,10 @@ export default function Charts({ gridApiRef }: Props) {
   const [resources, setResources] = useState<Resource[]>()
 
   useLayoutEffect(() => {
-    if (gridApiRef.current.instanceId) {
-      gridApiRef.current.subscribeEvent('rowsSet', () => {
-        const rows = gridFilteredSortedRowEntriesSelector(gridApiRef)
-        setResources(rows.map((row) => row.model as Resource))
-      })
-    }
+    gridApiRef.current.subscribeEvent('rowsSet', () => {
+      const rows = gridFilteredSortedRowEntriesSelector(gridApiRef)
+      setResources(rows.map((row) => row.model as Resource))
+    })
   }, [gridApiRef])
   return (
     <Stack direction="row" spacing={2} height={200}>

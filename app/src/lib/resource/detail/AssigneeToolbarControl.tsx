@@ -43,7 +43,7 @@ export default function AssigneeToolbarControl({
       <Tooltip
         title={
           assignee
-            ? `Assigned to ${assignee?.name ?? assignee?.email ?? '(No name)'}`
+            ? `Assigned to ${assignee.name || assignee.email || '(No name)'}`
             : `Assign the ${resourceType} to a user`
         }
       >

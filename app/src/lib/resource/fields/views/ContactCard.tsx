@@ -41,8 +41,8 @@ function FullContactCard({ contact }: ContactProp) {
             <Person />
           </ListItemIcon>
           <ListItemText
-            primary={contact?.name}
-            secondary={!contact?.name && 'Name'}
+            primary={contact.name}
+            secondary={!contact.name && 'Name'}
           />
         </ListItem>
         <ListItem>
@@ -50,12 +50,12 @@ function FullContactCard({ contact }: ContactProp) {
             <Badge />
           </ListItemIcon>
           <ListItemText
-            primary={contact?.title}
-            secondary={!contact?.title && 'Title'}
+            primary={contact.title}
+            secondary={!contact.title && 'Title'}
           />
         </ListItem>
         <ListItemButton
-          disabled={!contact?.email}
+          disabled={!contact.email}
           component="a"
           href={contact.email ? `mailto:${contact.email}` : undefined}
         >
@@ -63,12 +63,12 @@ function FullContactCard({ contact }: ContactProp) {
             <Email />
           </ListItemIcon>
           <ListItemText
-            primary={contact?.email}
-            secondary={!contact?.email && 'Email'}
+            primary={contact.email}
+            secondary={!contact.email && 'Email'}
           />
         </ListItemButton>
         <ListItemButton
-          disabled={!contact?.phone}
+          disabled={!contact.phone}
           component="a"
           href={contact.phone ? `tel:${contact.phone}` : undefined}
         >
@@ -76,8 +76,8 @@ function FullContactCard({ contact }: ContactProp) {
             <Phone />
           </ListItemIcon>
           <ListItemText
-            primary={contact?.phone}
-            secondary={!contact?.phone && 'Phone'}
+            primary={contact.phone}
+            secondary={!contact.phone && 'Phone'}
           />
         </ListItemButton>
       </List>

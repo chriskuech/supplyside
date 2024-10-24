@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowRight } from '@mui/icons-material'
-import { Button, CircularProgress, Tooltip, Typography } from '@mui/material'
+import { Button, Tooltip, Typography } from '@mui/material'
 import {
   Resource,
   Schema,
@@ -27,8 +27,6 @@ export default function CallToAction({ self, schema, resource }: Props) {
   const [{ isLoading }, approveBill] = useAsyncCallback(() =>
     approveBillAction(resource.id),
   )
-
-  if (!resource) return <CircularProgress />
 
   const billStatus = selectResourceFieldValue(
     resource,

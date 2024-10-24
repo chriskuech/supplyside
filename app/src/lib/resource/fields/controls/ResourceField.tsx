@@ -84,7 +84,7 @@ function ResourceField(
 
   const isMcMasterCarr =
     resource?.templateId === resources.mcMasterCarrVendor.templateId &&
-    resource?.name === MCMASTER_CARR_NAME
+    resource.name === MCMASTER_CARR_NAME
 
   if (resource) {
     return (
@@ -135,7 +135,7 @@ function ResourceField(
           )}
           {!isReadOnly && (
             <Tooltip title={`Clear the selected ${resourceType}`}>
-              <IconButton onClick={() => onChange?.(null)} size="small">
+              <IconButton onClick={() => onChange(null)} size="small">
                 <Clear fontSize="small" />
               </IconButton>
             </Tooltip>

@@ -117,11 +117,11 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         <OptionsControl
           options={options}
           onChange={setOptions}
-          isDisabled={!!template?.options && !template?.isOptionsEditable}
+          isDisabled={!!template?.options && !template.isOptionsEditable}
           templateOptionIds={template?.options
             ?.map(
               (to) =>
-                field.options?.find((o) => o.templateId === to.templateId)?.id,
+                field.options.find((o) => o.templateId === to.templateId)?.id,
             )
             .filter(isTruthy)}
         />
@@ -196,7 +196,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
               resourceType: field.resourceType,
               // id: field.fieldId,
               name,
-              description: description?.trim() || null,
+              description: description.trim() || null,
               options,
               defaultValue: mapValueToValueInput(field.type, defaultValue),
               defaultToToday,
