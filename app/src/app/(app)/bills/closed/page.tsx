@@ -6,6 +6,7 @@ import {
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { GridFilterItem } from '@mui/x-data-grid'
+import { BillsInboxControl } from '../BillsInboxControl'
 import ListPage from '@/lib/resource/ListPage'
 import { readSchema } from '@/actions/schema'
 
@@ -41,6 +42,7 @@ export default async function ClosedBills({
       searchParams={searchParams}
       filterItems={[closedBillsFilter]}
       title="Closed Bills"
+      callToActions={[<BillsInboxControl key={BillsInboxControl.name} />]}
     />
   )
 }
