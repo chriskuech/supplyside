@@ -38,6 +38,8 @@ export const PaymentControl: FC<Props> = ({ resource, size }) => {
     )),
   )
 
+  if (!paymentDueDate) return null
+
   return (
     <Tooltip title={info}>
       <Chip

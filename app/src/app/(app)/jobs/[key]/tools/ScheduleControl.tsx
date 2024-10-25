@@ -59,6 +59,8 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
 
   const isPastDue = endDate.isAfter(needDate)
 
+  if (!needDateString) return null
+
   return (
     <>
       <Tooltip
