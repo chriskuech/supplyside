@@ -185,6 +185,7 @@ function Field(
         slotProps={{
           input: {
             startAdornment: <InputAdornment position="start">$</InputAdornment>,
+            ...inputProps,
           },
         }}
       />
@@ -234,6 +235,7 @@ function Field(
                 {findTemplateField(field.templateId)?.suffix}
               </InputAdornment>
             ),
+            ...inputProps,
           },
         }}
       />
