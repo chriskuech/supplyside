@@ -69,33 +69,34 @@ export const schemas: SchemaTemplate[] = [
       fields.name,
       fields.jobStatus,
       fields.jobAttachments,
-      fields.jobDescription,
       fields.itemizedCosts,
       fields.subtotalCost,
       fields.totalCost,
       fields.paymentDueDate,
-      fields.paymentTerms,
       fields.receivedAllPurchases,
-
-      fields.customer,
-      fields.needDate,
-
-      fields.startDate,
-      fields.productionDays,
+    ],
+    sections: [
+      {
+        name: 'Job Info',
+        fields: [fields.customer, fields.needDate, fields.paymentTerms],
+      },
+      {
+        name: 'Schedule Info',
+        fields: [fields.startDate, fields.productionDays],
+      },
     ],
   },
   {
     resourceType: 'JobLine',
-    fields: [fields.job, fields.customer],
-    sections: [
-      {
-        name: 'Part Info',
-        fields: [fields.partName, fields.partNumber, fields.otherNotes],
-      },
-      {
-        name: 'Line Info',
-        fields: [fields.quantity, fields.unitCost, fields.totalCost],
-      },
+    fields: [
+      fields.job,
+      fields.partName,
+      fields.partNumber,
+      fields.quantity,
+      fields.unitCost,
+      fields.totalCost,
+      fields.otherNotes,
+      fields.customer,
     ],
   },
   {

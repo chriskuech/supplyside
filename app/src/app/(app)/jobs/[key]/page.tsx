@@ -6,15 +6,7 @@ import {
   selectResourceFieldValue,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
-import {
-  Alert,
-  Box,
-  Card,
-  CardContent,
-  Container,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Alert, Box, Container, Stack, Typography } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
 import StatusTransitionButton from './cta/StatusTransitionButton'
@@ -24,8 +16,6 @@ import { JobLinesControl } from './JobLinesControl'
 import { ScheduleControl } from './tools/ScheduleControl'
 import { PaymentControl } from './tools/PaymentControl'
 import { TotalCostControl } from './tools/TotalCostControl'
-import { OrderedCta } from './cta/OrderedCta'
-import { InProcessCta } from './cta/InProcessCta'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { readResources } from '@/actions/resource'
@@ -225,94 +215,6 @@ export default async function JobDetail({
         </Stack>
       }
     >
-      {status.templateId === jobStatusOptions.draft.templateId && (
-        <Card
-          variant="elevation"
-          sx={{
-            border: '1px solid',
-            borderColor: 'secondary.main',
-            py: 5,
-            px: 8,
-          }}
-        >
-          <CardContent>
-            <Stack
-              direction="row"
-              justifyContent="space-evenly"
-              alignItems="start"
-            >
-              <Box width={400}>
-                <Typography variant="h6">
-                  Customer
-                  <Required />
-                </Typography>
-                <FieldControl
-                  resource={resource}
-                  value={selectResourceFieldValue(resource, fields.customer)}
-                  inputId="customer-field"
-                  field={selectSchemaFieldUnsafe(schema, fields.customer)}
-                />
-              </Box>
-              <Stack width={280} spacing={2}>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <Typography
-                    variant="subtitle2"
-                    flexGrow={1}
-                    width={100}
-                    lineHeight={1}
-                  >
-                    Need Date
-                    <Required />
-                  </Typography>
-                  <Box width={170}>
-                    <FieldControl
-                      resource={resource}
-                      value={selectResourceFieldValue(
-                        resource,
-                        fields.needDate,
-                      )}
-                      inputId="need-date-field"
-                      field={selectSchemaFieldUnsafe(schema, fields.needDate)}
-                      datePickerProps={{ slotProps: { field: {} } }}
-                    />
-                  </Box>
-                </Stack>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <Typography
-                    variant="subtitle2"
-                    flexGrow={1}
-                    width={100}
-                    lineHeight={1}
-                  >
-                    Payment Terms
-                    <Required />
-                  </Typography>
-                  <Box width={115}>
-                    <FieldControl
-                      resource={resource}
-                      value={selectResourceFieldValue(
-                        resource,
-                        fields.paymentTerms,
-                      )}
-                      inputId="payment-terms-field"
-                      field={selectSchemaFieldUnsafe(
-                        schema,
-                        fields.paymentTerms,
-                      )}
-                    />
-                  </Box>
-                </Stack>
-              </Stack>
-            </Stack>
-          </CardContent>
-        </Card>
-      )}
-      {status.templateId === jobStatusOptions.ordered.templateId && (
-        <OrderedCta schema={schema} resource={resource} />
-      )}
-      {status.templateId === jobStatusOptions.inProcess.templateId && (
-        <InProcessCta resource={resource} />
-      )}
       <JobLinesControl
         job={resource}
         jobLineSchema={lineSchema}
@@ -321,16 +223,3 @@ export default async function JobDetail({
     </ResourceDetailPage>
   )
 }
-
-const Required = () => (
-  <Typography
-    color="error"
-    display="inline"
-    fontWeight="bold"
-    ml={0.5}
-    lineHeight={1}
-    // sx={{ verticalAlign: 'super' }}
-  >
-    *
-  </Typography>
-)
