@@ -125,17 +125,15 @@ export default function ResourceDetailPage({
       <Stack>
         <HandleJustCloned />
         <Container sx={{ py: 5 }}>
-          <Stack spacing={1}>
-            {nameField && (
-              <Stack direction="row" alignItems="center">
-                <Typography variant="overline">
-                  {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
-                  {resource.key}
-                </Typography>
-                <Box flexGrow={1} />
-                {baseTools('small')}
-              </Stack>
-            )}
+          <Box>
+            <Stack direction="row" alignItems="center">
+              <Typography variant="overline">
+                {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
+                {resource.key}
+              </Typography>
+              <Box flexGrow={1} />
+              {baseTools('small')}
+            </Stack>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="h3">
                 {nameField ? (
@@ -172,11 +170,11 @@ export default function ResourceDetailPage({
               ))}
             </Stack>
             {header && (
-              <Stack direction="row" alignItems="start" spacing={1}>
+              <Stack mt={1} direction="row" alignItems="start" spacing={1}>
                 {header}
               </Stack>
             )}
-          </Stack>
+          </Box>
         </Container>
 
         {actions}
