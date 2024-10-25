@@ -29,6 +29,11 @@ export const TotalCostControl: FC<Props> = ({ resource, size }) => {
           style: undefined,
           maximumFractionDigits: 0,
         })}
+        sx={{
+          '.MuiChip-label': {
+            pl: 0.2,
+          },
+        }}
         size={size === 'small' ? 'small' : 'medium'}
       />
     </Tooltip>
