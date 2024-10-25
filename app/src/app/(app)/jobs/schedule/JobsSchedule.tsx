@@ -1,5 +1,6 @@
 'use client'
 
+import assert from 'assert'
 import {
   Box,
   Chip,
@@ -16,7 +17,7 @@ import {
   jobStatusOptions,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import { useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import {
   AttachMoney,
@@ -53,10 +54,13 @@ type Props = {
   jobs: Resource[]
 }
 
+const initialScrollOffset = dim
+
 export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
   const [numWeeks, setNumWeeks] = useState(12)
   const [drawerWidth, setDrawerWidth] = useState(initialDrawerWidth)
-  const [scrollOffset, setScrollOffset] = useState(0)
+  const [scrollOffset, setScrollOffset] = useState(initialScrollOffset)
+  const [minDate, setMinDate] = useState(dayjs().utc().day(0).startOf('day'))
   const jobs = useMemo(
     () =>
       sortBy(
@@ -66,7 +70,13 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
     [unsortedJobs],
   )
 
-  const lastSunday = dayjs().utc().day(0).startOf('day')
+  const frameRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    assert(frameRef.current)
+
+    frameRef.current.scrollLeft = scrollOffset
+  })
 
   return (
     <>
@@ -82,7 +92,6 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
           flexShrink={0}
           width={`${drawerWidth}px`}
           borderRadius={0}
-          elevation={scrollOffset === 0 ? 0 : 1}
         >
           <Box height={`${topDim}px`} py={2} px={4}>
             <Typography variant="h4">Jobs Schedule</Typography>
@@ -247,16 +256,24 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
           flexGrow={1}
           sx={{ overflowX: 'auto' }}
           position="relative"
+          ref={frameRef}
           onScroll={(e) => {
-            if (isScrolledToRight(e.currentTarget))
+            if (isScrolledToRight(e.currentTarget)) {
               setNumWeeks((weeks) => weeks + 1)
-            setScrollOffset(e.currentTarget.scrollLeft)
+              setScrollOffset(e.currentTarget.scrollLeft)
+            } else if (e.currentTarget.scrollLeft === 0) {
+              setNumWeeks((weeks) => weeks + 1)
+              setMinDate((minDate) => minDate.add(-1, 'week').startOf('day'))
+              setScrollOffset(dim * 7)
+            } else {
+              setScrollOffset(e.currentTarget.scrollLeft)
+            }
           }}
         >
           <GanttChartHeader
             height={topDim}
             dim={dim}
-            startDate={lastSunday}
+            startDate={minDate}
             numDays={numWeeks * 7}
           />
           <GanttChart
@@ -264,7 +281,7 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
             numDays={numWeeks * 7}
             dim={dim}
             jobs={jobs}
-            startDate={lastSunday}
+            startDate={minDate}
             scrollOffset={scrollOffset}
           />
         </Box>
