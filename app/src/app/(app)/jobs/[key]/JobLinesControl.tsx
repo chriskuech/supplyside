@@ -4,6 +4,7 @@ import {
   Box,
   Card,
   CardContent,
+  Divider,
   IconButton,
   Stack,
   Typography,
@@ -101,71 +102,84 @@ const JobLineView: FC<{
   jobLineSchema: Schema
   i: number
 }> = ({ jobLine, jobLineSchema }) => (
-  <Stack spacing={2}>
-    <Stack direction="row" alignItems="center" spacing={1}>
-      <Box flexGrow={2}>
-        <FieldControl
-          value={selectResourceFieldValue(jobLine, fields.partName)}
-          resource={jobLine}
-          inputId={`part-name-${jobLine.id}`}
-          field={selectSchemaFieldUnsafe(jobLineSchema, fields.partName)}
-          inputProps={{
-            placeholder: 'Part Name',
-          }}
-        />
-      </Box>
+  <Stack spacing={2} direction="row" alignItems="start">
+    <Stack spacing={1} flexGrow={1}>
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Box flexGrow={3}>
+          <FieldControl
+            value={selectResourceFieldValue(jobLine, fields.partName)}
+            resource={jobLine}
+            inputId={`part-name-${jobLine.id}`}
+            field={selectSchemaFieldUnsafe(jobLineSchema, fields.partName)}
+            inputProps={{
+              placeholder: 'Part Name',
+            }}
+          />
+        </Box>
+        <Box flexGrow={1}>
+          <FieldControl
+            value={selectResourceFieldValue(jobLine, fields.partNumber)}
+            resource={jobLine}
+            inputId={`part-number-${jobLine.id}`}
+            field={selectSchemaFieldUnsafe(jobLineSchema, fields.partNumber)}
+            inputProps={{
+              placeholder: 'Part Number',
+            }}
+          />
+        </Box>
+      </Stack>
       <Box>
         <FieldControl
-          value={selectResourceFieldValue(jobLine, fields.partNumber)}
+          value={selectResourceFieldValue(jobLine, fields.otherNotes)}
           resource={jobLine}
-          inputId={`part-number-${jobLine.id}`}
-          field={selectSchemaFieldUnsafe(jobLineSchema, fields.partNumber)}
+          inputId={`other-notes-${jobLine.id}`}
+          field={selectSchemaFieldUnsafe(jobLineSchema, fields.otherNotes)}
           inputProps={{
-            placeholder: 'Part Number',
+            placeholder: 'Other Notes',
           }}
         />
       </Box>
-      <Box flexGrow={1} />
-      <Box width={100}>
-        <FieldControl
-          value={selectResourceFieldValue(jobLine, fields.quantity)}
-          resource={jobLine}
-          inputId={`quantity-${jobLine.id}`}
-          field={selectSchemaFieldUnsafe(jobLineSchema, fields.quantity)}
-          inputProps={{
-            placeholder: 'Qty',
-          }}
-        />
-      </Box>
-      <Box>&times;</Box>
-      <Box width={140}>
-        <FieldControl
-          value={selectResourceFieldValue(jobLine, fields.unitCost)}
-          resource={jobLine}
-          inputId={`unit-cost-${jobLine.id}`}
-          field={selectSchemaFieldUnsafe(jobLineSchema, fields.unitCost)}
-          inputProps={{
-            placeholder: 'Unit Cost',
-          }}
-        />
-      </Box>
-      <Box>=</Box>
-      <Typography fontWeight="bold" fontSize="1.2em">
-        {formatMoney(
-          selectResourceFieldValue(jobLine, fields.totalCost)?.number,
-        )}
-      </Typography>
     </Stack>
-    <Box width={800}>
-      <FieldControl
-        value={selectResourceFieldValue(jobLine, fields.otherNotes)}
-        resource={jobLine}
-        inputId={`other-notes-${jobLine.id}`}
-        field={selectSchemaFieldUnsafe(jobLineSchema, fields.otherNotes)}
-        inputProps={{
-          placeholder: 'Other Notes',
-        }}
-      />
-    </Box>
+    <Divider orientation="vertical" flexItem />
+    <Stack spacing={1}>
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Box width={100}>
+          <FieldControl
+            value={selectResourceFieldValue(jobLine, fields.quantity)}
+            resource={jobLine}
+            inputId={`quantity-${jobLine.id}`}
+            field={selectSchemaFieldUnsafe(jobLineSchema, fields.quantity)}
+            inputProps={{
+              placeholder: 'Qty',
+            }}
+          />
+        </Box>
+        <Box>&times;</Box>
+        <Box width={140}>
+          <FieldControl
+            value={selectResourceFieldValue(jobLine, fields.unitCost)}
+            resource={jobLine}
+            inputId={`unit-cost-${jobLine.id}`}
+            field={selectSchemaFieldUnsafe(jobLineSchema, fields.unitCost)}
+            inputProps={{
+              placeholder: 'Unit Cost',
+            }}
+          />
+        </Box>
+      </Stack>
+      <Stack
+        direction="row"
+        justifyContent="end"
+        alignItems="center"
+        spacing={1}
+      >
+        <Box>=</Box>
+        <Typography fontWeight="bold" fontSize="1.7em">
+          {formatMoney(
+            selectResourceFieldValue(jobLine, fields.totalCost)?.number,
+          )}
+        </Typography>
+      </Stack>
+    </Stack>
   </Stack>
 )
