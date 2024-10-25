@@ -67,9 +67,9 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
             <Box width="100%">
               {pipe(
                 {
-                  'Start Date': formatDate(startDateString),
+                  'Start Date': formatDate(startDateString) ?? '-',
                   'Production Days': productionDays,
-                  'Need Date': formatDate(needDateString),
+                  'Need Date': formatDate(needDateString) ?? '-',
                 },
                 entries(),
                 map(([key, value]) => (
@@ -96,22 +96,7 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
           size={size === 'small' ? 'small' : 'medium'}
           icon={<Schedule />}
           color={isPastDue ? 'error' : undefined}
-          label={
-            <Typography
-              textAlign="right"
-              fontSize={10}
-              sx={{ lineHeight: 1.2 }}
-            >
-              <div style={{ fontSize: '1.3em' }}>
-                {formatDate(startDateString, { dateStyle: 'short' })} +{' '}
-                {productionDays} day
-                {productionDays === 1 ? '' : 's'}
-              </div>
-              <div>
-                Due <strong>{formatDate(needDateString)}</strong>
-              </div>
-            </Typography>
-          }
+          label={formatDate(needDateString)}
           onClick={open}
           sx={{ minHeight: 'fit-content' }}
         />

@@ -4,7 +4,7 @@ import { CurrencyExchange } from '@mui/icons-material'
 import { Box, Chip, Stack, Tooltip } from '@mui/material'
 import { Resource, fields, selectResourceFieldValue } from '@supplyside/model'
 import { FC } from 'react'
-import { entries, map, pipe } from 'remeda'
+import { entries, isNullish, map, pipe } from 'remeda'
 import { formatDate } from '@/lib/format'
 
 type Props = {
@@ -25,9 +25,9 @@ export const PaymentControl: FC<Props> = ({ resource, size }) => {
 
   const info = pipe(
     {
-      'Need Date': formatDate(needDate),
-      'Payment Terms': `NET ${paymentTerms}`,
-      'Payment Due Date': formatDate(paymentDueDate),
+      'Need Date': formatDate(needDate) ?? '-',
+      'Payment Terms': !isNullish(paymentTerms) ? `NET ${paymentTerms}` : '-',
+      'Payment Due Date': formatDate(paymentDueDate) ?? '-',
     },
     entries(),
     map(([key, value]) => (
@@ -42,16 +42,7 @@ export const PaymentControl: FC<Props> = ({ resource, size }) => {
     <Tooltip title={info}>
       <Chip
         icon={<CurrencyExchange />}
-        label={
-          <>
-            <Box sx={{ fontSize: 9, lineHeight: 1.2 }}>
-              {formatDate(needDate)} + NET {paymentTerms}
-            </Box>
-            <Box sx={{ fontSize: 13, textAlign: 'center', lineHeight: 1.2 }}>
-              = <strong>{formatDate(paymentDueDate)}</strong>
-            </Box>
-          </>
-        }
+        label={formatDate(paymentDueDate)}
         size={size === 'small' ? 'small' : 'medium'}
         sx={{ minHeight: 'fit-content' }}
       />
