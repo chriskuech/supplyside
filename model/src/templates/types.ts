@@ -28,6 +28,7 @@ export type FieldTemplate = {
   isOptionsEditable?: boolean
   defaultToToday?: boolean
   prefix?: string
+  suffix?: string
 }
 
 export type OptionTemplate = {

@@ -4,19 +4,33 @@ import {
   isMissingRequiredFields,
   jobStatusOptions,
   selectResourceFieldValue,
+  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
-import { Box, Container, Stack, Tooltip, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  Container,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
-import { Cancel, CheckCircle } from '@mui/icons-material'
 import StatusTransitionButton from './cta/StatusTransitionButton'
 import JobStatusTracker from './JobStatusTracker'
-import EditControl from './tools/EditControl'
-import CancelControl from './tools/CancelControl'
 import { JobAttachmentsControl } from './tools/JobAttachmentsControl'
+import { JobLinesControl } from './JobLinesControl'
+import { ScheduleControl } from './tools/ScheduleControl'
+import { PaymentControl } from './tools/PaymentControl'
+import { TotalCostControl } from './tools/TotalCostControl'
+import { CustomerControl } from './tools/CustomerControl'
+import { OrderedCta } from './cta/OrderedCta'
+import { InProcessCta } from './cta/InProcessCta'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { readResources } from '@/actions/resource'
+import FieldControl from '@/lib/resource/fields/FieldControl'
 
 export default async function JobDetail({
   params: { key },
@@ -52,14 +66,15 @@ export default async function JobDetail({
     .with(jobStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
 
-  const receivedAllPurchases = selectResourceFieldValue(
-    resource,
-    fields.receivedAllPurchases,
-  )?.boolean
+  if (!lineSchema || !jobLines)
+    return <Alert severity="error">Failed to load job</Alert>
 
   return (
     <ResourceDetailPage
       status={{
+        cancelStatusOptionTemplate: jobStatusOptions.canceled,
+        draftStatusOptionTemplate: jobStatusOptions.draft,
+        statusFieldTemplate: fields.jobStatus,
         label: status.name,
         color: match(status.templateId)
           .with(jobStatusOptions.draft.templateId, () => 'inactive' as const)
@@ -77,7 +92,6 @@ export default async function JobDetail({
           href: `/jobs/${resource.key}`,
         },
       ]}
-      lineSchema={lineSchema ?? undefined}
       linkedResources={[
         {
           resourceType: 'Purchase',
@@ -89,32 +103,51 @@ export default async function JobDetail({
       searchParams={searchParams}
       isReadOnly={!isDraft}
       tools={(fontSize) => [
+        <CustomerControl
+          key={CustomerControl.name}
+          schema={schema}
+          resource={resource}
+          size={fontSize}
+        />,
+        <TotalCostControl
+          key={TotalCostControl.name}
+          schema={schema}
+          resource={resource}
+          size={fontSize}
+        />,
+        <ScheduleControl
+          key={ScheduleControl.name}
+          schema={schema}
+          resource={resource}
+          size={fontSize}
+        />,
+        <PaymentControl
+          key={PaymentControl.name}
+          resource={resource}
+          size={fontSize}
+        />,
         <JobAttachmentsControl
           key={JobAttachmentsControl.name}
           schema={schema}
           resource={resource}
           fontSize={fontSize}
         />,
-        ...(!isDraft
-          ? [
-              <EditControl
-                key={EditControl.name}
-                resourceId={resource.id}
-                fontSize={fontSize}
-              />,
-            ]
-          : []),
-        <CancelControl
-          key={CancelControl.name}
-          resourceId={resource.id}
-          fontSize={fontSize}
-        />,
       ]}
-      linesBacklinkField={fields.job}
-      specialColumnWidths={{
-        [fields.partName.name]: 320,
-        [fields.partNumber.name]: 320,
-      }}
+      header={
+        <Box fontSize={13} width={500}>
+          <FieldControl
+            resource={resource}
+            value={selectResourceFieldValue(resource, fields.jobDescription)}
+            inputId="job-description"
+            field={selectSchemaFieldUnsafe(schema, fields.jobDescription)}
+            inputProps={{
+              size: 'small',
+              sx: { fontSize: 12 },
+              placeholder: 'Job Description',
+            }}
+          />
+        </Box>
+      }
       actions={
         <Stack direction="row" height={100} alignItems="center">
           <Box
@@ -140,24 +173,6 @@ export default async function JobDetail({
                 spacing={2}
                 mr={3}
               >
-                {[
-                  jobStatusOptions.ordered.templateId,
-                  jobStatusOptions.inProcess.templateId,
-                ].includes(status.templateId as string) && (
-                  <Tooltip
-                    title={
-                      receivedAllPurchases
-                        ? 'All Purchases required for this Job have been received'
-                        : 'Some Purchases required for this Job have not been received'
-                    }
-                  >
-                    {receivedAllPurchases ? (
-                      <CheckCircle color="success" fontSize="large" />
-                    ) : (
-                      <Cancel color="error" fontSize="large" />
-                    )}
-                  </Tooltip>
-                )}
                 {status.templateId === jobStatusOptions.draft.templateId && (
                   <StatusTransitionButton
                     isDisabled={hasInvalidFields || !jobHasLines}
@@ -213,6 +228,113 @@ export default async function JobDetail({
           <Box flexGrow={1} bgcolor="transparent" />
         </Stack>
       }
-    />
+    >
+      {status.templateId === jobStatusOptions.draft.templateId && (
+        <Card
+          variant="elevation"
+          sx={{
+            border: '1px solid',
+            borderColor: 'secondary.main',
+            py: 5,
+            px: 8,
+          }}
+        >
+          <CardContent>
+            <Stack
+              direction="row"
+              justifyContent="space-evenly"
+              alignItems="start"
+            >
+              <Box width={400}>
+                <Typography variant="h6">
+                  Customer
+                  <Required />
+                </Typography>
+                <FieldControl
+                  resource={resource}
+                  value={selectResourceFieldValue(resource, fields.customer)}
+                  inputId="customer-field"
+                  field={selectSchemaFieldUnsafe(schema, fields.customer)}
+                />
+              </Box>
+              <Stack width={280} spacing={2}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography
+                    variant="subtitle2"
+                    flexGrow={1}
+                    width={100}
+                    lineHeight={1}
+                  >
+                    Need Date
+                    <Required />
+                  </Typography>
+                  <Box width={170}>
+                    <FieldControl
+                      resource={resource}
+                      value={selectResourceFieldValue(
+                        resource,
+                        fields.needDate,
+                      )}
+                      inputId="need-date-field"
+                      field={selectSchemaFieldUnsafe(schema, fields.needDate)}
+                      datePickerProps={{ slotProps: { field: {} } }}
+                    />
+                  </Box>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography
+                    variant="subtitle2"
+                    flexGrow={1}
+                    width={100}
+                    lineHeight={1}
+                  >
+                    Payment Terms
+                    <Required />
+                  </Typography>
+                  <Box width={115}>
+                    <FieldControl
+                      resource={resource}
+                      value={selectResourceFieldValue(
+                        resource,
+                        fields.paymentTerms,
+                      )}
+                      inputId="payment-terms-field"
+                      field={selectSchemaFieldUnsafe(
+                        schema,
+                        fields.paymentTerms,
+                      )}
+                    />
+                  </Box>
+                </Stack>
+              </Stack>
+            </Stack>
+          </CardContent>
+        </Card>
+      )}
+      {status.templateId === jobStatusOptions.ordered.templateId && (
+        <OrderedCta schema={schema} resource={resource} />
+      )}
+      {status.templateId === jobStatusOptions.inProcess.templateId && (
+        <InProcessCta resource={resource} />
+      )}
+      <JobLinesControl
+        job={resource}
+        jobLineSchema={lineSchema}
+        jobLines={jobLines}
+      />
+    </ResourceDetailPage>
   )
 }
+
+const Required = () => (
+  <Typography
+    color="error"
+    display="inline"
+    fontWeight="bold"
+    ml={0.5}
+    lineHeight={1}
+    // sx={{ verticalAlign: 'super' }}
+  >
+    *
+  </Typography>
+)

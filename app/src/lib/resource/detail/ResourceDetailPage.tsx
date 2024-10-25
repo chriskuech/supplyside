@@ -1,8 +1,9 @@
-import { Box, Container, Stack, Typography } from '@mui/material'
-import { ReactNode } from 'react'
+import { Box, Container, Divider, Stack, Typography } from '@mui/material'
+import { PropsWithChildren, ReactNode } from 'react'
 import { match } from 'ts-pattern'
 import {
   FieldTemplate,
+  OptionTemplate,
   Resource,
   Schema,
   fields,
@@ -24,6 +25,8 @@ import LinkedResourceTable, {
   LinkedResourceTableProps,
 } from './LinkedResourceTable'
 import BreadcrumbFrame from './Breadcrumb'
+import CancelResourceButton from './CancelResourceButton'
+import EditResourceControl from './EditResourceButton'
 
 type Props = {
   schema: Schema
@@ -37,10 +40,14 @@ type Props = {
   linkedResources?: Omit<LinkedResourceTableProps, 'resourceId'>[]
   path: { label: string; href: string }[]
   status?: {
+    statusFieldTemplate: FieldTemplate
+    draftStatusOptionTemplate: OptionTemplate
+    cancelStatusOptionTemplate: OptionTemplate
     color: 'inactive' | 'active' | 'success' | 'error'
     label: string
   }
   specialColumnWidths?: ColumnWidths
+  header?: ReactNode
 }
 
 export default function ResourceDetailPage({
@@ -56,26 +63,53 @@ export default function ResourceDetailPage({
   path,
   status,
   specialColumnWidths,
-}: Props) {
-  const tools = (fontSize: 'small' | 'medium' | 'large') => [
-    ...customTools(fontSize),
-    resource.type !== 'Vendor' && (
-      <DuplicateResourceButton
-        key={DuplicateResourceButton.name}
-        resourceId={resource.id}
-        resourceType={resource.type}
-        fontSize={fontSize}
-      />
-    ),
-    !resource.templateId && (
-      <DeleteResourceButton
-        key={DeleteResourceButton.name}
-        resourceType={resource.type}
-        resourceId={resource.id}
-        size={fontSize}
-      />
-    ),
-  ]
+  children,
+  header,
+}: PropsWithChildren<Props>) {
+  const baseTools = (fontSize: 'small' | 'medium' | 'large') => (
+    <>
+      {resource.type !== 'Vendor' && (
+        <DuplicateResourceButton
+          key={DuplicateResourceButton.name}
+          resourceId={resource.id}
+          resourceType={resource.type}
+          fontSize={fontSize}
+        />
+      )}
+      {status && (
+        <>
+          <EditResourceControl
+            fontSize={fontSize}
+            draftStatusOptionTemplate={status.draftStatusOptionTemplate}
+            statusFieldTemplate={status.statusFieldTemplate}
+            resourceId={resource.id}
+          />
+          <CancelResourceButton
+            resourceId={resource.id}
+            fontSize={fontSize}
+            statusFieldTemplate={status.statusFieldTemplate}
+            cancelStatusOptionTemplate={status.cancelStatusOptionTemplate}
+          />
+        </>
+      )}
+      {!resource.templateId && (
+        <DeleteResourceButton
+          key={DeleteResourceButton.name}
+          resourceType={resource.type}
+          resourceId={resource.id}
+          size={fontSize}
+        />
+      )}
+    </>
+  )
+
+  const tools = (fontSize: 'small' | 'medium' | 'large') => (
+    <>
+      {customTools(fontSize)}
+      <Divider key={Divider.name} orientation="vertical" flexItem />
+      {baseTools(fontSize)}
+    </>
+  )
 
   const nameField = selectSchemaField(schema, fields.name)
   const nameValue = selectResourceFieldValue(resource, fields.name)
@@ -91,48 +125,57 @@ export default function ResourceDetailPage({
       <Stack>
         <HandleJustCloned />
         <Container sx={{ py: 5 }}>
-          {nameField && (
-            <Stack direction="row" alignItems="center">
-              <Typography variant="overline">
-                {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
-                {resource.key}
+          <Stack spacing={1}>
+            {nameField && (
+              <Stack direction="row" alignItems="center">
+                <Typography variant="overline">
+                  {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
+                  {resource.key}
+                </Typography>
+                <Box flexGrow={1} />
+                {baseTools('small')}
+              </Stack>
+            )}
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="h3">
+                {nameField ? (
+                  <Box width={600}>
+                    <FieldControl
+                      value={nameValue}
+                      resource={resource}
+                      inputId="nameField"
+                      field={nameField}
+                      inputProps={{
+                        placeholder:
+                          resource.type.replace(/([a-z])([A-Z])/g, '$1 $2') +
+                          ' Name',
+                        sx: { fontSize: '0.7em' },
+                      }}
+                    />
+                  </Box>
+                ) : (
+                  <>
+                    <span style={{ opacity: 0.5 }}>
+                      {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
+                    </span>
+                    <span>{resource.key}</span>
+                  </>
+                )}
               </Typography>
-            </Stack>
-          )}
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="h3">
-              {nameField ? (
-                <Box width={600}>
-                  <FieldControl
-                    value={nameValue}
-                    resource={resource}
-                    inputId="nameField"
-                    field={nameField}
-                    inputProps={{
-                      placeholder:
-                        resource.type.replace(/([a-z])([A-Z])/g, '$1 $2') +
-                        ' Name',
-                      sx: { fontSize: '0.7em' },
-                    }}
-                  />
+
+              <Box flexGrow={1} />
+
+              {customTools('large').map((tool, i) => (
+                <Box height="min-content" key={i}>
+                  {tool}
                 </Box>
-              ) : (
-                <>
-                  <span style={{ opacity: 0.5 }}>
-                    {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
-                  </span>
-                  <span>{resource.key}</span>
-                </>
-              )}
-            </Typography>
-
-            <Box flexGrow={1} />
-
-            {tools('large').map((tool, i) => (
-              <Box height="min-content" key={i}>
-                {tool}
-              </Box>
-            ))}
+              ))}
+            </Stack>
+            {header && (
+              <Stack direction="row" alignItems="start" spacing={1}>
+                {header}
+              </Stack>
+            )}
           </Stack>
         </Container>
 
@@ -145,6 +188,7 @@ export default function ResourceDetailPage({
             ) : (
               <ResourceForm schema={schema} resource={resource} />
             )}
+            {children}
             {linesBacklinkField && lineSchema && (
               <LinesAndCosts
                 lineSchema={lineSchema}

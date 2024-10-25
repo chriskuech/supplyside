@@ -11,8 +11,8 @@ import {
   TextField,
 } from '@mui/material'
 import { match } from 'ts-pattern'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import dayjs from 'dayjs'
+import { DatePicker, DatePickerProps } from '@mui/x-date-pickers/DatePicker'
+import dayjs, { Dayjs } from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import {
   ElementType,
@@ -58,6 +58,7 @@ export type Props = {
   withoutDebounce?: boolean
   disabled?: boolean
   inputProps?: InputProps | undefined
+  datePickerProps?: DatePickerProps<Dayjs, false> | undefined
 }
 
 function Field(
@@ -71,6 +72,7 @@ function Field(
     withoutDebounce,
     disabled,
     inputProps,
+    datePickerProps,
   }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
@@ -150,6 +152,7 @@ function Field(
         onChange={(value) =>
           handleChange({ ...emptyValue, date: value?.toISOString() ?? null })
         }
+        {...datePickerProps}
       />
     ))
     .with('File', () => (
@@ -226,6 +229,11 @@ function Field(
                 {findTemplateField(field.templateId)?.prefix}
               </InputAdornment>
             ),
+            endAdornment: findTemplateField(field.templateId)?.suffix && (
+              <InputAdornment position="end">
+                {findTemplateField(field.templateId)?.suffix}
+              </InputAdornment>
+            ),
           },
         }}
       />
@@ -300,6 +308,9 @@ function Field(
         onChange={(e) =>
           handleChange({ ...emptyValue, string: e.target.value })
         }
+        slotProps={{
+          input: inputProps,
+        }}
       />
     ))
     .with('User', () => (

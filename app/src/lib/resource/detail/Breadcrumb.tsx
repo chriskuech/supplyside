@@ -17,7 +17,7 @@ import { ReactNode } from 'react'
 import { useScrollContext } from '@/lib/ux/ScrollContext'
 
 type Props = {
-  tools: readonly ReactNode[]
+  tools?: ReactNode
   path: { label: string; href: string }[]
   status?: {
     color: 'inactive' | 'active' | 'success' | 'error'
@@ -104,11 +104,7 @@ export default function Breadcrumb({ path, tools, status, name }: Props) {
 
             <Box flexGrow={1} />
 
-            {tools.map((tool, i) => (
-              <Box height="min-content" key={i}>
-                {tool}
-              </Box>
-            ))}
+            {tools}
           </Stack>
         </Container>
       </Collapse>

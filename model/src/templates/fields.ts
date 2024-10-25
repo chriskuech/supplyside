@@ -400,6 +400,7 @@ const _fields = {
     description: 'Number of days to produce the item',
     defaultValue: { number: 1 },
     isRequired: true,
+    suffix: 'Days',
   },
   punchoutSessionUrl: {
     templateId: '51955a67-a243-4544-992a-3d15720e4a2d',
