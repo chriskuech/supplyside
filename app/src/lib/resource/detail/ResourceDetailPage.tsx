@@ -48,6 +48,7 @@ type Props = {
   }
   specialColumnWidths?: ColumnWidths
   header?: ReactNode
+  customerName?: string
 }
 
 export default function ResourceDetailPage({
@@ -65,6 +66,7 @@ export default function ResourceDetailPage({
   specialColumnWidths,
   children,
   header,
+  customerName,
 }: PropsWithChildren<Props>) {
   const baseTools = (fontSize: 'small' | 'medium' | 'large') => (
     <>
@@ -121,6 +123,7 @@ export default function ResourceDetailPage({
         tools={tools('small')}
         status={status}
         name={nameValue?.string ?? undefined}
+        customerName={customerName}
       />
       <Stack>
         <HandleJustCloned />
@@ -130,6 +133,15 @@ export default function ResourceDetailPage({
               <Typography variant="overline">
                 {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
                 {resource.key}
+                {customerName && (
+                  <>
+                    {' '}
+                    <Typography fontSize={17} color="divider" display="inline">
+                      •
+                    </Typography>
+                    {customerName}
+                  </>
+                )}
               </Typography>
               <Box flexGrow={1} />
               {baseTools('small')}

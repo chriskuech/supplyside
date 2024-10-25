@@ -24,9 +24,16 @@ type Props = {
     label: string
   }
   name?: string
+  customerName?: string
 }
 
-export default function Breadcrumb({ path, tools, status, name }: Props) {
+export default function Breadcrumb({
+  path,
+  tools,
+  status,
+  name,
+  customerName,
+}: Props) {
   const offset = useScrollContext()
 
   return (
@@ -83,6 +90,21 @@ export default function Breadcrumb({ path, tools, status, name }: Props) {
                   color="text.secondary"
                 >
                   {name}
+                </Typography>
+              </>
+            )}
+
+            {customerName && (
+              <>
+                <Typography fontSize={17} color="divider">
+                  •
+                </Typography>
+                <Typography
+                  variant="overline"
+                  textTransform="none"
+                  color="text.secondary"
+                >
+                  {customerName}
                 </Typography>
               </>
             )}

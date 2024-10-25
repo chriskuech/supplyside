@@ -24,7 +24,6 @@ import { JobLinesControl } from './JobLinesControl'
 import { ScheduleControl } from './tools/ScheduleControl'
 import { PaymentControl } from './tools/PaymentControl'
 import { TotalCostControl } from './tools/TotalCostControl'
-import { CustomerControl } from './tools/CustomerControl'
 import { OrderedCta } from './cta/OrderedCta'
 import { InProcessCta } from './cta/InProcessCta'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
@@ -71,6 +70,9 @@ export default async function JobDetail({
 
   return (
     <ResourceDetailPage
+      customerName={
+        selectResourceFieldValue(resource, fields.customer)?.resource?.name
+      }
       status={{
         cancelStatusOptionTemplate: jobStatusOptions.canceled,
         draftStatusOptionTemplate: jobStatusOptions.draft,
@@ -103,12 +105,6 @@ export default async function JobDetail({
       searchParams={searchParams}
       isReadOnly={!isDraft}
       tools={(fontSize) => [
-        <CustomerControl
-          key={CustomerControl.name}
-          schema={schema}
-          resource={resource}
-          size={fontSize}
-        />,
         <TotalCostControl
           key={TotalCostControl.name}
           schema={schema}
