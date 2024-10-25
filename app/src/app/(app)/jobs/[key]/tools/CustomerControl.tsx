@@ -9,6 +9,7 @@ import {
   selectResourceFieldValue,
 } from '@supplyside/model'
 import { FC } from 'react'
+import NextLink from 'next/link'
 
 type Props = {
   schema: Schema
@@ -19,17 +20,15 @@ type Props = {
 export const CustomerControl: FC<Props> = ({ resource, size }) => {
   const customer = selectResourceFieldValue(resource, fields.customer)?.resource
 
+  if (!customer) return null
+
   return (
-    <Tooltip
-      title={
-        customer
-          ? `This Job was ordered by ${customer.name}`
-          : 'Select a Customer'
-      }
-    >
+    <Tooltip title={`This Job was ordered by ${customer.name}`}>
       <Chip
         icon={<Business />}
-        label={customer ? customer.name : 'Select a Customer'}
+        component={NextLink}
+        href={`/customers/${customer.key}`}
+        label={customer.name}
         size={size === 'small' ? 'small' : 'medium'}
       />
     </Tooltip>
