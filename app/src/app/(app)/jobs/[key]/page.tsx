@@ -4,7 +4,6 @@ import {
   isMissingRequiredFields,
   jobStatusOptions,
   selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { Alert, Box, Container, Stack, Typography } from '@mui/material'
 import { match } from 'ts-pattern'
@@ -19,7 +18,6 @@ import { TotalCostControl } from './tools/TotalCostControl'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { readResources } from '@/actions/resource'
-import FieldControl from '@/lib/resource/fields/FieldControl'
 
 export default async function JobDetail({
   params: { key },
@@ -119,21 +117,6 @@ export default async function JobDetail({
           fontSize={fontSize}
         />,
       ]}
-      header={
-        <Box fontSize={13} width={500}>
-          <FieldControl
-            resource={resource}
-            value={selectResourceFieldValue(resource, fields.jobDescription)}
-            inputId="job-description"
-            field={selectSchemaFieldUnsafe(schema, fields.jobDescription)}
-            inputProps={{
-              size: 'small',
-              sx: { fontSize: 12 },
-              placeholder: 'Job Description',
-            }}
-          />
-        </Box>
-      }
       actions={
         <Stack direction="row" height={100} alignItems="center">
           <Box

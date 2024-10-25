@@ -293,12 +293,6 @@ const _fields = {
     name: 'Job Attachments',
     type: 'Files',
   },
-  jobDescription: {
-    templateId: '4522e8be-d0c4-428f-9f54-7ddbfec39687',
-    name: 'Job Description',
-    type: 'Textarea',
-    description: 'Brief, identifiable description of the job',
-  },
   jobStatus: {
     templateId: '70912291-2b48-4e1f-9300-b7dbca8ce5ab',
     name: 'Job Status',
