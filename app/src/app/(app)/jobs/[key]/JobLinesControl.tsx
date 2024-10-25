@@ -36,7 +36,7 @@ export const JobLinesControl: FC<Props> = ({
             p={1}
           >
             <Typography variant="overline" sx={{ opacity: 0.5 }}>
-              Part #{i}
+              Part #{i + 1}
             </Typography>
             <IconButton onClick={() => deleteResource(jobLine.id)} size="small">
               <Close fontSize="small" />
