@@ -28,6 +28,7 @@ import {
 } from '@mui/x-data-grid'
 import { MutableRefObject } from 'react'
 import { GridApiCommunity } from '@mui/x-data-grid/internals'
+import Linkify from 'linkify-react'
 import ContactCard from '../fields/views/ContactCard'
 import UserCard from '../fields/views/UserCard'
 import ResourceFieldView from '../fields/views/ResourceFieldView'
@@ -421,9 +422,11 @@ export const mapSchemaFieldToGridColDef = (
           value?.string === MCMASTER_CARR_NAME
         if (isMcMasterCarr) return <McMasterCarrLogo />
 
-        // if it's not McMaster-Carr, fallback to the default value
-        return undefined
+        return <Linkify options={{ target: '_blank' }}>{value?.string}</Linkify>
       })
+      .with('Textarea', () => (
+        <Linkify options={{ target: '_blank' }}>{value?.string}</Linkify>
+      ))
       .otherwise(() => undefined)
 
     // Fallback to `valueFormatter`
