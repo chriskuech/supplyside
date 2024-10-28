@@ -274,7 +274,7 @@ export class QuickBooksInvoiceService {
 
         const quickBooksItemName = [partName, partNumber]
           .filter((value) => isTruthy(value))
-          .reduce((acum, value) => `${acum} ${value}`, '')
+          .join(' ')
           .trim()
 
         assert(
