@@ -8,7 +8,7 @@ import {
   selectSchemaField,
 } from '@supplyside/model'
 import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
+import utc from 'dayjs/plugin/utc.js'
 import { pipe } from 'remeda'
 import { ResourceFieldInput } from './ResourceService'
 
