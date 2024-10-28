@@ -72,8 +72,8 @@ export const JobLinesControl: FC<Props> = ({
     )}
     <Stack direction="row" justifyContent="end">
       <CreateJobLineButton
+        job={job}
         label={jobLines.length <= 1 ? 'Additional Parts' : 'Part'}
-        jobId={job.id}
         jobLineSchema={jobLineSchema}
       />
     </Stack>
@@ -82,16 +82,23 @@ export const JobLinesControl: FC<Props> = ({
 
 const CreateJobLineButton: FC<{
   jobLineSchema: Schema
-  jobId: string
+  job: Resource
   label: string
-}> = ({ jobLineSchema, jobId, label }) => (
+}> = ({ job, jobLineSchema, label }) => (
   <CreateResourceButton
     label={label}
     resourceType="JobLine"
     fields={[
       {
         fieldId: selectSchemaFieldUnsafe(jobLineSchema, fields.job).fieldId,
-        valueInput: { resourceId: jobId },
+        valueInput: { resourceId: job.id },
+      },
+      {
+        fieldId: selectSchemaFieldUnsafe(jobLineSchema, fields.needDate)
+          .fieldId,
+        valueInput: {
+          date: selectResourceFieldValue(job, fields.needDate)?.date,
+        },
       },
     ]}
   />
