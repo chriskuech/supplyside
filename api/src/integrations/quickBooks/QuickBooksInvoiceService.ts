@@ -277,7 +277,10 @@ export class QuickBooksInvoiceService {
           .reduce((acum, value) => `${acum} ${value}`, '')
           .trim()
 
-        assert(quickBooksItemName, 'Job line does not have a part name')
+        assert(
+          quickBooksItemName,
+          'Job line does not have a part name or part number',
+        )
 
         const item = await this.quickBooksItemService.syncItem(
           accountId,
