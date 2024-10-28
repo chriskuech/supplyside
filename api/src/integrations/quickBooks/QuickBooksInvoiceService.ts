@@ -200,7 +200,7 @@ export class QuickBooksInvoiceService {
 
     const quickBooksAccountName = selectResourceFieldValue(
       job,
-      fields.quickBooksAccount,
+      fields.quickBooksIncomeAccount,
     )?.option?.name
 
     assert(quickBooksAccountName, 'QuickBooks account not set')

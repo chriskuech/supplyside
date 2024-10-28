@@ -88,7 +88,7 @@ export const schemas: SchemaTemplate[] = [
       },
       {
         name: 'Accounting Info',
-        fields: [fields.quickBooksAccount],
+        fields: [fields.quickBooksIncomeAccount],
       },
       {
         name: 'Schedule Info',
