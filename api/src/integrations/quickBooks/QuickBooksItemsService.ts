@@ -34,7 +34,7 @@ export class QuickBooksItemsService {
 
     // create item if it does not exist
     const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
-    const body = this.mapItem(itemName, quickBooksAccountId)
+    const body = QuickBooksItemsService.mapItem(itemName, quickBooksAccountId)
 
     return this.quickBooksApiService
       .makeApiCall(accountId, client, {
