@@ -1,7 +1,7 @@
 import assert from 'assert'
 import { P, match } from 'ts-pattern'
 import { Box, Chip, Stack } from '@mui/material'
-import { Check } from '@mui/icons-material'
+import { Check, Close } from '@mui/icons-material'
 import { GridApplyQuickFilter } from '@mui/x-data-grid/models/colDef/gridColDef'
 import {
   FieldType,
@@ -384,14 +384,19 @@ export const mapSchemaFieldToGridColDef = (
             </Box>
           ),
       )
-      .with(
-        'Checkbox',
-        () =>
-          value?.boolean && (
+      .with('Checkbox', () =>
+        match(value?.boolean)
+          .with(true, () => (
             <Box display="flex" justifyContent="flex-end" width="100%">
               <Check />
             </Box>
-          ),
+          ))
+          .with(false, () => (
+            <Box display="flex" justifyContent="flex-end" width="100%">
+              <Close />
+            </Box>
+          ))
+          .otherwise(() => null),
       )
       .with(
         'Contact',
