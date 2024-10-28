@@ -14,6 +14,7 @@ import { amber } from '@mui/material/colors'
 import { JobBar } from './JobBar'
 import { NeedDateBar } from './NeedDateBar'
 import { GanttChartGrid } from './GanttChartGrid'
+import { PaymentDueDateBar } from './PaymentDueDateBar'
 import { updateResourceField } from '@/actions/resource'
 
 dayjs.extend(utc)
@@ -124,6 +125,43 @@ export default function GanttChart({
                 updateResourceField(job.id, {
                   fieldId: selectSchemaFieldUnsafe(jobSchema, fields.needDate)
                     .fieldId,
+                  valueInput: {
+                    date: startDate.add(xOffset, 'day').toISOString(),
+                  },
+                })
+              }
+            />
+          )
+        }
+      })}
+      {/* Payment Due Date */}
+      {jobs.map((job, i) => {
+        const paymentDueDateString = selectResourceFieldValue(
+          job,
+          fields.paymentDueDate,
+        )?.date
+
+        if (paymentDueDateString) {
+          const jobPaymentDueDate = dayjs(paymentDueDateString)
+            .utc()
+            .startOf('day')
+          const jobPaymentDueDateOffset = jobPaymentDueDate.diff(
+            startDate,
+            'days',
+          )
+
+          return (
+            <PaymentDueDateBar
+              key={'paymentdue-' + job.id}
+              dim={dim}
+              xOffset={jobPaymentDueDateOffset}
+              yOffset={i}
+              onDrop={(xOffset) =>
+                updateResourceField(job.id, {
+                  fieldId: selectSchemaFieldUnsafe(
+                    jobSchema,
+                    fields.paymentDueDate,
+                  ).fieldId,
                   valueInput: {
                     date: startDate.add(xOffset, 'day').toISOString(),
                   },
