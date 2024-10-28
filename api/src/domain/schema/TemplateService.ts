@@ -76,8 +76,8 @@ export class TemplateService {
           defaultToToday,
           DefaultValue: {
             update: {
-              boolean: defaultValue?.boolean,
-              number: defaultValue?.number,
+              boolean: defaultValue?.boolean ?? null,
+              number: defaultValue?.number ?? null,
             },
           },
         },
