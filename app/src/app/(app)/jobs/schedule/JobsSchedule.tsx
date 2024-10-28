@@ -2,6 +2,8 @@
 
 import assert from 'assert'
 import {
+  Badge,
+  BadgeProps,
   Box,
   Chip,
   Divider,
@@ -17,7 +19,7 @@ import {
   jobStatusOptions,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { FC, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import {
   AttachMoney,
@@ -223,24 +225,37 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
                       />
                     </Tooltip>
                     <Stack alignItems="center" direction="row">
-                      <ShoppingBag />
-                      {match(receivedAllPurchases)
-                        .with(true, () => (
-                          <Tooltip title="All Purchases required for this Job have been received">
-                            <Check />
-                          </Tooltip>
-                        ))
-                        .with(false, () => (
-                          <Tooltip title="Some Purchases required for this Job have not been received">
-                            <Close />
-                          </Tooltip>
-                        ))
-                        .with(P.nullish, () => (
-                          <Tooltip title="No Purchases have been added for this Job">
-                            <Remove />
-                          </Tooltip>
-                        ))
-                        .exhaustive()}
+                      <Tooltip
+                        title={match(receivedAllPurchases)
+                          .with(
+                            true,
+                            () =>
+                              'All Purchases required for this Job have been received',
+                          )
+                          .with(
+                            false,
+                            () =>
+                              'Some Purchases required for this Job have not been received',
+                          )
+                          .with(
+                            P.nullish,
+                            () => 'No Purchases have been added for this Job',
+                          )
+                          .exhaustive()}
+                      >
+                        <Box>
+                          <InlineBadge
+                            color="default" // this does not work
+                            badgeContent={match(receivedAllPurchases)
+                              .with(true, () => <Check color="success" />)
+                              .with(false, () => <Close color="error" />)
+                              .with(P.nullish, () => <Remove color="warning" />)
+                              .exhaustive()}
+                          >
+                            <ShoppingBag />
+                          </InlineBadge>
+                        </Box>
+                      </Tooltip>
                     </Stack>
                   </Stack>
                   <Stack
@@ -302,3 +317,16 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
     </>
   )
 }
+
+export const InlineBadge: FC<BadgeProps> = (props) => (
+  <Badge
+    {...props}
+    sx={{
+      '& .MuiBadge-badge': {
+        right: 0,
+        top: '50%',
+        bottom: '50%',
+      },
+    }}
+  />
+)
