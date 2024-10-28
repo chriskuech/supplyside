@@ -17,16 +17,23 @@ import { ReactNode } from 'react'
 import { useScrollContext } from '@/lib/ux/ScrollContext'
 
 type Props = {
-  tools: readonly ReactNode[]
+  tools?: ReactNode
   path: { label: string; href: string }[]
   status?: {
     color: 'inactive' | 'active' | 'success' | 'error'
     label: string
   }
   name?: string
+  customerName?: string
 }
 
-export default function Breadcrumb({ path, tools, status, name }: Props) {
+export default function Breadcrumb({
+  path,
+  tools,
+  status,
+  name,
+  customerName,
+}: Props) {
   const offset = useScrollContext()
 
   return (
@@ -87,6 +94,21 @@ export default function Breadcrumb({ path, tools, status, name }: Props) {
               </>
             )}
 
+            {customerName && (
+              <>
+                <Typography fontSize={17} color="divider">
+                  •
+                </Typography>
+                <Typography
+                  variant="overline"
+                  textTransform="none"
+                  color="text.secondary"
+                >
+                  {customerName}
+                </Typography>
+              </>
+            )}
+
             {status && (
               <Box pl={1}>
                 <Chip
@@ -104,11 +126,7 @@ export default function Breadcrumb({ path, tools, status, name }: Props) {
 
             <Box flexGrow={1} />
 
-            {tools.map((tool, i) => (
-              <Box height="min-content" key={i}>
-                {tool}
-              </Box>
-            ))}
+            {tools}
           </Stack>
         </Container>
       </Collapse>

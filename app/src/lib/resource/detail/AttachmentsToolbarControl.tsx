@@ -42,7 +42,7 @@ export default function AttachmentsToolbarControl({
   return (
     <>
       <Tooltip title="View/Edit attachments">
-        <IconButton onClick={open} size={fontSize}>
+        <IconButton onClick={open} size="small">
           <Badge
             badgeContent={value?.files.length || undefined}
             color="primary"

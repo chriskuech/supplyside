@@ -1,12 +1,15 @@
 import { match, P } from 'ts-pattern'
 
 export function formatDate(
-  date: Date | null | undefined,
+  date: Date | string | null | undefined,
+  options?: Intl.DateTimeFormatOptions,
 ): string | null | undefined {
   return match(date)
-    .with(P.instanceOf(Date), (v) =>
-      v.toLocaleDateString('en-US', {
+    .with(P.string, (s) => formatDate(new Date(s)))
+    .with(P.instanceOf(Date), (d) =>
+      d.toLocaleDateString('en-US', {
         timeZone: 'UTC',
+        ...options,
       }),
     )
     .otherwise((v) => v)

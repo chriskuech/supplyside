@@ -16,8 +16,6 @@ import SkipButton from './cta/SkipButton'
 import StatusTransitionButton from './cta/StatusTransitionButton'
 import SendPoButton from './cta/SendPoButton'
 import TrackingControl from './tools/TrackingControl'
-import CancelControl from './tools/CancelControl'
-import EditControl from './tools/EditControl'
 import PreviewPoControl from './tools/PreviewPoControl'
 import DownloadPoControl from './tools/DownloadPoControl'
 import { PurchaseAttachmentsControl } from './tools/PurchaseAttachmentsControl'
@@ -92,6 +90,9 @@ export default async function PurchaseDetail({
   return (
     <ResourceDetailPage
       status={{
+        draftStatusOptionTemplate: purchaseStatusOptions.draft,
+        cancelStatusOptionTemplate: purchaseStatusOptions.canceled,
+        statusFieldTemplate: fields.purchaseStatus,
         label: status.name,
         color: match(status.templateId)
           .with(
@@ -186,20 +187,6 @@ export default async function PurchaseDetail({
             fail('Field not found')
           }
           value={selectResourceFieldValue(resource, fields.assignee)}
-          fontSize={fontSize}
-        />,
-        ...(!isDraft
-          ? [
-              <EditControl
-                key={EditControl.name}
-                resourceId={resource.id}
-                fontSize={fontSize}
-              />,
-            ]
-          : []),
-        <CancelControl
-          key={CancelControl.name}
-          resourceId={resource.id}
           fontSize={fontSize}
         />,
       ]}

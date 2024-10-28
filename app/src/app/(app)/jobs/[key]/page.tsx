@@ -5,15 +5,16 @@ import {
   jobStatusOptions,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import { Box, Container, Stack, Tooltip } from '@mui/material'
+import { Alert, Box, Container, Stack } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
-import { Cancel, CheckCircle } from '@mui/icons-material'
 import JobStatusTracker from './JobStatusTracker'
-import EditControl from './tools/EditControl'
-import CancelControl from './tools/CancelControl'
 import { JobAttachmentsControl } from './tools/JobAttachmentsControl'
 import CallToAction from './cta/CallToAction'
+import { JobLinesControl } from './JobLinesControl'
+import { ScheduleControl } from './tools/ScheduleControl'
+import { PaymentControl } from './tools/PaymentControl'
+import { TotalCostControl } from './tools/TotalCostControl'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { readResources } from '@/actions/resource'
@@ -63,14 +64,18 @@ export default async function JobDetail({
     ? getInvoiceUrl(quickBooksInvoiceId)
     : undefined
 
-  const receivedAllPurchases = selectResourceFieldValue(
-    resource,
-    fields.receivedAllPurchases,
-  )?.boolean
+  if (!lineSchema || !jobLines)
+    return <Alert severity="error">Failed to load job</Alert>
 
   return (
     <ResourceDetailPage
+      customerName={
+        selectResourceFieldValue(resource, fields.customer)?.resource?.name
+      }
       status={{
+        cancelStatusOptionTemplate: jobStatusOptions.canceled,
+        draftStatusOptionTemplate: jobStatusOptions.draft,
+        statusFieldTemplate: fields.jobStatus,
         label: status.name,
         color: match(status.templateId)
           .with(jobStatusOptions.draft.templateId, () => 'inactive' as const)
@@ -88,7 +93,6 @@ export default async function JobDetail({
           href: `/jobs/${resource.key}`,
         },
       ]}
-      lineSchema={lineSchema ?? undefined}
       linkedResources={[
         {
           resourceType: 'Purchase',
@@ -109,32 +113,30 @@ export default async function JobDetail({
               />,
             ]
           : []),
+        <TotalCostControl
+          key={TotalCostControl.name}
+          schema={schema}
+          resource={resource}
+          size={fontSize}
+        />,
+        <ScheduleControl
+          key={ScheduleControl.name}
+          schema={schema}
+          resource={resource}
+          size={fontSize}
+        />,
+        <PaymentControl
+          key={PaymentControl.name}
+          resource={resource}
+          size={fontSize}
+        />,
         <JobAttachmentsControl
           key={JobAttachmentsControl.name}
           schema={schema}
           resource={resource}
           fontSize={fontSize}
         />,
-        ...(!isDraft
-          ? [
-              <EditControl
-                key={EditControl.name}
-                resourceId={resource.id}
-                fontSize={fontSize}
-              />,
-            ]
-          : []),
-        <CancelControl
-          key={CancelControl.name}
-          resourceId={resource.id}
-          fontSize={fontSize}
-        />,
       ]}
-      linesBacklinkField={fields.job}
-      specialColumnWidths={{
-        [fields.partName.name]: 320,
-        [fields.partNumber.name]: 320,
-      }}
       actions={
         <Stack direction="row" height={100} alignItems="center">
           <Box
@@ -160,24 +162,6 @@ export default async function JobDetail({
                 spacing={2}
                 mr={3}
               >
-                {[
-                  jobStatusOptions.ordered.templateId,
-                  jobStatusOptions.inProcess.templateId,
-                ].includes(status.templateId as string) && (
-                  <Tooltip
-                    title={
-                      receivedAllPurchases
-                        ? 'All Purchases required for this Job have been received'
-                        : 'Some Purchases required for this Job have not been received'
-                    }
-                  >
-                    {receivedAllPurchases ? (
-                      <CheckCircle color="success" fontSize="large" />
-                    ) : (
-                      <Cancel color="error" fontSize="large" />
-                    )}
-                  </Tooltip>
-                )}
                 <CallToAction
                   hasInvalidFields={hasInvalidFields}
                   jobHasLines={jobHasLines}
@@ -190,6 +174,12 @@ export default async function JobDetail({
           <Box flexGrow={1} bgcolor="transparent" />
         </Stack>
       }
-    />
+    >
+      <JobLinesControl
+        job={resource}
+        jobLineSchema={lineSchema}
+        jobLines={jobLines}
+      />
+    </ResourceDetailPage>
   )
 }

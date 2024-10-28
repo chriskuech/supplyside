@@ -3,6 +3,7 @@ import { Stack, Typography, Tooltip, Box, Chip } from '@mui/material'
 import { match } from 'ts-pattern'
 import { Resource, Schema, findTemplateField } from '@supplyside/model'
 import { Masonry } from '@mui/lab'
+import Linkify from 'linkify-react'
 import FileField from '../fields/controls/FileField'
 import FilesField from '../fields/controls/FilesField'
 import ReadonlyTextarea from '../fields/views/ReadonlyTextarea'
@@ -10,6 +11,7 @@ import ResourceFieldView from '../fields/views/ResourceFieldView'
 import UserCard from '../fields/views/UserCard'
 import ContactCard from '../fields/views/ContactCard'
 import AddressCard from '../fields/views/AddressCard'
+import { formatDate } from '@/lib/format'
 
 type Props = {
   schema: Schema
@@ -55,7 +57,7 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                       contact ? <ContactCard contact={contact} /> : '-',
                     )
                     .with({ fieldType: 'Date' }, ({ value: { date } }) =>
-                      date ? new Date(date).toLocaleDateString() : '-',
+                      date ? formatDate(date) : '-',
                     )
                     .with({ fieldType: 'File' }, ({ value }) => (
                       <FileField
@@ -91,10 +93,9 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                         return prefix ? `${prefix} ${number}` : number
                       },
                     )
-                    .with(
-                      { fieldType: 'Text' },
-                      ({ value: { string } }) => string || '-',
-                    )
+                    .with({ fieldType: 'Text' }, ({ value: { string } }) => (
+                      <Linkify>{string || '-'}</Linkify>
+                    ))
                     .with({ fieldType: 'Textarea' }, ({ value: { string } }) =>
                       string ? <ReadonlyTextarea value={string} /> : '-',
                     )

@@ -383,7 +383,15 @@ export const mapSchemaFieldToGridColDef = (
             </Box>
           ),
       )
-      .with('Checkbox', () => value?.boolean && <Check />)
+      .with(
+        'Checkbox',
+        () =>
+          value?.boolean && (
+            <Box display="flex" justifyContent="flex-end" width="100%">
+              <Check />
+            </Box>
+          ),
+      )
       .with(
         'Contact',
         () =>

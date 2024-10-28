@@ -1,6 +1,7 @@
 'use client'
 import { ExpandMore } from '@mui/icons-material'
 import { Box, Link, Typography } from '@mui/material'
+import Linkify from 'linkify-react'
 import { useDisclosure } from '@/hooks/useDisclosure'
 
 const maxLength = 200
@@ -13,7 +14,9 @@ export default function ReadonlyTextarea({ value }: { value: string }) {
 
   return (
     <Typography whiteSpace="pre-wrap">
-      {isExpanded ? value : value.slice(0, 250)}
+      <Linkify options={{ target: '_blank' }}>
+        {isExpanded ? value : value.slice(0, 250)}
+      </Linkify>
       {isTruncated && '...'}
       {'  '}
       {isPreviewTruncated && (

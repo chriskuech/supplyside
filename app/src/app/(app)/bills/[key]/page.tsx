@@ -10,8 +10,6 @@ import {
 } from '@supplyside/model'
 import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
-import CancelControl from './tools/CancelControl'
-import EditControl from './tools/EditControl'
 import { BillAttachmentsControl } from './tools/BillAttachmentsControl'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
@@ -65,6 +63,9 @@ export default async function BillsDetail({
   return (
     <ResourceDetailPage
       status={{
+        cancelStatusOptionTemplate: billStatusOptions.canceled,
+        draftStatusOptionTemplate: billStatusOptions.draft,
+        statusFieldTemplate: fields.billStatus,
         color: match(status.templateId)
           .with(billStatusOptions.draft.templateId, () => 'inactive' as const)
           .with(billStatusOptions.paid.templateId, () => 'success' as const)
@@ -122,20 +123,6 @@ export default async function BillsDetail({
             fail('Field not found')
           }
           value={selectResourceFieldValue(resource, fields.assignee)}
-          fontSize={fontSize}
-        />,
-        ...(!isDraft
-          ? [
-              <EditControl
-                key={EditControl.name}
-                resourceId={resource.id}
-                fontSize={fontSize}
-              />,
-            ]
-          : []),
-        <CancelControl
-          key={CancelControl.name}
-          resourceId={resource.id}
           fontSize={fontSize}
         />,
       ]}
