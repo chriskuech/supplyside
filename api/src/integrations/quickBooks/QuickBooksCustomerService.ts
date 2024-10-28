@@ -243,8 +243,6 @@ export class QuickBooksCustomerService {
     client: OAuthClient,
     customer: Resource,
   ): Promise<Customer> {
-    console.log('update customer')
-
     const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
     const quickBooksCustomerId = selectResourceFieldValue(

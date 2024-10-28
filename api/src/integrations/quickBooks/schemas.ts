@@ -45,15 +45,34 @@ const lineSchema = z.object({
   Description: z.string().optional(),
   DetailType: z.string(),
   ProjectRef: refSchema.optional(),
-  Amount: z.number(),
+  Amount: z.number().optional(),
+  Id: z.string().optional(),
+  AccountBasedExpenseLineDetail: z
+    .object({
+      TaxCodeRef: refSchema.optional(),
+      AccountRef: refSchema,
+      BillableStatus: z.string().optional(),
+      CustomerRef: refSchema.optional(),
+    })
+    .optional(),
+  SalesItemLineDetail: z
+    .object({
+      ItemRef: refSchema,
+      Qty: z.number().optional(),
+      UnitPrice: z.number().optional(),
+    })
+    .optional(),
+})
+
+const itemSchema = z.object({
   Id: z.string(),
-  //TODO: is this optional, do i have to add more types?
-  AccountBasedExpenseLineDetail: z.object({
-    TaxCodeRef: refSchema.optional(),
-    AccountRef: refSchema,
-    BillableStatus: z.string().optional(),
-    CustomerRef: refSchema.optional(),
-  }),
+  Name: z.string(),
+  QtyOnHand: z.number().optional(),
+  IncomeAccountRef: refSchema.optional(),
+  AssetAccountRef: refSchema.optional(),
+  InvStartDate: z.string().optional(),
+  Type: z.string(),
+  ExpenseAccountRef: refSchema.optional(),
 })
 
 const billSchema = z.object({
@@ -111,10 +130,10 @@ const invoiceSchema = z.object({
       }),
     )
     .optional(),
-  BillEmail: emailSchema,
-  ShipAddr: addressSchema,
+  BillEmail: emailSchema.optional(),
+  ShipAddr: addressSchema.optional(),
   EmailStatus: z.string().optional(),
-  BillAddr: addressSchema,
+  BillAddr: addressSchema.optional(),
   CurrencyRef: refSchema.optional(),
   Id: z.string(),
   MetaData: metadataSchema,
@@ -310,4 +329,14 @@ export const webhookBodySchema = z.object({
       }),
     }),
   ),
+})
+
+export const readItemSchema = z.object({
+  Item: itemSchema,
+})
+
+export const queryItemSchema = z.object({
+  QueryResponse: z.object({
+    Item: z.array(itemSchema).optional(),
+  }),
 })

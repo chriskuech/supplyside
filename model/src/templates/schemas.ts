@@ -87,6 +87,10 @@ export const schemas: SchemaTemplate[] = [
         ],
       },
       {
+        name: 'Accounting Info',
+        fields: [fields.quickBooksAccount],
+      },
+      {
         name: 'Schedule Info',
         fields: [fields.startDate, fields.productionDays],
       },

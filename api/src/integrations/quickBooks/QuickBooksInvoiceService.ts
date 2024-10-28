@@ -10,30 +10,23 @@ import {
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
+import { BadRequestError } from '../fastify/BadRequestError'
 import { QuickBooksApiService } from './QuickBooksApiService'
 import { QuickBooksCustomerService } from './QuickBooksCustomerService'
-import { ACCOUNT_BASED_EXPENSE } from './constants'
+import { QuickBooksItemsService } from './QuickBooksItemsService'
+import { SALES_ITEM_LINE } from './constants'
 import { mapValue } from './mapValue'
-import { readInvoiceSchema } from './schemas'
-import { Invoice } from './types'
+import { accountQuerySchema, readInvoiceSchema } from './schemas'
+import { Invoice, InvoiceLine } from './types'
 
-//TODO: change
 const fieldsMap = [
   {
     field: fields.quickBooksInvoiceId,
     key: 'Id',
   },
   {
-    field: fields.invoiceDate,
-    key: 'TxnDate',
-  },
-  {
     field: fields.paymentDueDate,
     key: 'DueDate',
-  },
-  {
-    field: fields.invoiceNumber,
-    key: 'DocNumber',
   },
 ]
 
@@ -45,6 +38,8 @@ export class QuickBooksInvoiceService {
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(QuickBooksCustomerService)
     private readonly quickBooksCustomerService: QuickBooksCustomerService,
+    @inject(QuickBooksItemsService)
+    private readonly quickBooksItemService: QuickBooksItemsService,
     @inject(ResourceService) private readonly resourceService: ResourceService,
     @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
@@ -69,10 +64,11 @@ export class QuickBooksInvoiceService {
     accountId: string,
     job: Resource,
     quickBooksCustomerId: string,
+    invoiceLines: InvoiceLine[],
   ): Promise<Invoice> {
     const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
-    const body = this.mapJob(job, quickBooksCustomerId)
+    const body = this.mapJob(job, quickBooksCustomerId, invoiceLines)
 
     const quickBooksInvoice = await this.quickBooksApiService
       .makeApiCall(accountId, client, {
@@ -83,16 +79,15 @@ export class QuickBooksInvoiceService {
         },
         body: JSON.stringify(body),
       })
-      //TODO: change
       .then((data) => readInvoiceSchema.parse(data.json))
 
-    const vendorSchema = await this.schemaService.readMergedSchema(
+    const jobSchema = await this.schemaService.readMergedSchema(
       accountId,
       'Job',
     )
 
     const quickBooksInvoiceIdField = selectSchemaField(
-      vendorSchema,
+      jobSchema,
       fields.quickBooksInvoiceId,
     )?.fieldId
 
@@ -111,6 +106,7 @@ export class QuickBooksInvoiceService {
     client: OAuthClient,
     job: Resource,
     quickBooksCustomerId: string,
+    invoiceLines: InvoiceLine[],
   ): Promise<Invoice> {
     const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
@@ -127,7 +123,7 @@ export class QuickBooksInvoiceService {
       quickBooksInvoiceId,
     )
 
-    const invoiceBody = this.mapJob(job, quickBooksCustomerId)
+    const invoiceBody = this.mapJob(job, quickBooksCustomerId, invoiceLines)
 
     const body = {
       ...quickBooksInvoice.Invoice,
@@ -151,6 +147,7 @@ export class QuickBooksInvoiceService {
     accountId: string,
     job: Resource,
     quickBooksCustomerId: string,
+    invoiceLines: InvoiceLine[],
   ): Promise<Invoice> {
     const quickBooksInvoiceId = selectResourceFieldValue(
       job,
@@ -163,6 +160,7 @@ export class QuickBooksInvoiceService {
         client,
         job,
         quickBooksCustomerId,
+        invoiceLines,
       )
     } else {
       return this.createInvoiceOnQuickBooks(
@@ -170,6 +168,7 @@ export class QuickBooksInvoiceService {
         accountId,
         job,
         quickBooksCustomerId,
+        invoiceLines,
       )
     }
   }
@@ -199,15 +198,103 @@ export class QuickBooksInvoiceService {
 
     const quickBooksCustomerId = quickBooksCustomer.Customer.Id
 
+    const quickBooksAccountName = selectResourceFieldValue(
+      job,
+      fields.quickBooksAccount,
+    )?.option?.name
+
+    assert(quickBooksAccountName, 'QuickBooks account not set')
+
+    const quickBooksAccountQuery = await this.quickBooksApiService.query(
+      accountId,
+      client,
+      {
+        entity: 'Account',
+        where: `FullyQualifiedName = '${quickBooksAccountName}'`,
+      },
+      accountQuerySchema,
+    )
+
+    assert(
+      quickBooksAccountQuery.QueryResponse?.Account?.[0]?.Id,
+      new BadRequestError(
+        'Accounting category does not exist or is not active in QuickBooks',
+      ),
+    )
+
+    const quickBooksAccountId =
+      quickBooksAccountQuery.QueryResponse.Account[0].Id
+
+    const jobLines = await this.resourceService.list(accountId, 'JobLine', {
+      where: {
+        '==': [{ var: fields.job.name }, jobResourceId],
+      },
+    })
+
+    const subtotalCost =
+      selectResourceFieldValue(job, fields.subtotalCost)?.number ?? 0
+
+    const costLines = await Promise.all(
+      job.costs.map(async (cost) => {
+        const item = await this.quickBooksItemService.syncItem(
+          accountId,
+          client,
+          cost.name,
+          quickBooksAccountId,
+        )
+
+        return {
+          itemId: item.Item.Id,
+          quantity: 1,
+          unitCost: cost.isPercentage
+            ? (subtotalCost * cost.value) / 100
+            : cost.value,
+        }
+      }),
+    )
+
+    const invoiceLines = await Promise.all(
+      jobLines.map(async (jobLine) => {
+        const partName = selectResourceFieldValue(
+          jobLine,
+          fields.partName,
+        )?.string
+        const quantity =
+          selectResourceFieldValue(jobLine, fields.quantity)?.number ?? 0
+        const unitCost =
+          selectResourceFieldValue(jobLine, fields.unitCost)?.number ?? 0
+
+        assert(partName, 'Job line does not have a part name')
+
+        const item = await this.quickBooksItemService.syncItem(
+          accountId,
+          client,
+          partName,
+          quickBooksAccountId,
+        )
+
+        return {
+          itemId: item.Item.Id,
+          quantity,
+          unitCost,
+        }
+      }),
+    )
+
     await this.upsertInvoiceOnQuickBooks(
       client,
       accountId,
       job,
       quickBooksCustomerId,
+      [...invoiceLines, ...costLines],
     )
   }
 
-  mapJob(jobResource: Resource, quickBooksCustomerId: string) {
+  mapJob(
+    jobResource: Resource,
+    quickBooksCustomerId: string,
+    invoiceLines: InvoiceLine[],
+  ) {
     const quickBooksInvoice = fieldsMap.reduce(
       (job, fieldMap) => ({
         ...job,
@@ -219,17 +306,20 @@ export class QuickBooksInvoiceService {
     return {
       ...quickBooksInvoice,
       PrivateNote: `${this.configService.config.APP_BASE_URL}/jobs/${jobResource.key}`,
-      //TODO: change
       CustomerRef: {
         value: quickBooksCustomerId,
       },
-      Line: [
-        {
-          Description: mapValue(jobResource, fields.purchaseDescription),
-          DetailType: ACCOUNT_BASED_EXPENSE,
-          Amount: mapValue(jobResource, fields.totalCost) ?? 0,
+      Line: invoiceLines.map((line) => ({
+        DetailType: SALES_ITEM_LINE,
+        SalesItemLineDetail: {
+          ItemRef: {
+            value: line.itemId,
+          },
+          Qty: line.quantity,
+          UnitPrice: line.unitCost,
         },
-      ],
+        Amount: line.quantity * line.unitCost,
+      })),
     }
   }
 }
