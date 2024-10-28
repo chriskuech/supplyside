@@ -12,8 +12,6 @@ import utc from 'dayjs/plugin/utc'
 import { pipe } from 'remeda'
 import { ResourceFieldInput } from './ResourceService'
 
-dayjs.extend(utc)
-
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 
 type Context = {
@@ -56,6 +54,8 @@ const recalculateJobPaymentTermsFromPaymentDueDate =
         selectResourceFieldValue(context.resource, needDateField)?.date)
 
     if (!paymentDueDateString || !needDateString) return patch
+
+    dayjs.extend(utc)
 
     const paymentDueDate = dayjs(paymentDueDateString).utc().startOf('day')
     const needDate = dayjs(needDateString).utc().startOf('day')
