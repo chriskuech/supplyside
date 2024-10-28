@@ -14,7 +14,6 @@ import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { parse } from 'qs'
 import { pick } from 'remeda'
-import { match } from 'ts-pattern'
 import { z } from 'zod'
 import { mountCosts } from './costs'
 
@@ -124,29 +123,18 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           userId,
         )
 
-        const result = match(resource.type)
-          .with('Purchase', () => ({
-            ref: fields.purchase,
-            type: 'PurchaseLine' as const,
-          }))
-          .with('Job', () => ({
-            ref: fields.job,
-            type: 'JobLine' as const,
-          }))
-          .otherwise(() => null)
-
-        if (result) {
+        if (resource.type === 'Job') {
           const schema = await schemaService.readMergedSchema(
             accountId,
-            result.type,
+            'JobLine',
           )
           await service.create(
             accountId,
-            result.type,
+            'JobLine',
             {
               fields: [
                 {
-                  fieldId: selectSchemaFieldUnsafe(schema, result.ref).fieldId,
+                  fieldId: selectSchemaFieldUnsafe(schema, fields.job).fieldId,
                   valueInput: { resourceId: resource.id },
                 },
               ],
