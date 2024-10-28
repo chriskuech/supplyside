@@ -205,7 +205,6 @@ export class QuickBooksCustomerService {
     accountId: string,
     customer: Resource,
   ): Promise<Customer> => {
-    console.log('create customer')
     const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
 
     const quickBooksCustomer = await this.quickBooksApiService
