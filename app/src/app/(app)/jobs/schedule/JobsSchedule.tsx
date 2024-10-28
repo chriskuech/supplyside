@@ -227,7 +227,7 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
                       {match(receivedAllPurchases)
                         .with(true, () => (
                           <Tooltip title="All Purchases required for this Job have been received">
-                            <Check color="success" />
+                            <Check />
                           </Tooltip>
                         ))
                         .with(false, () => (
