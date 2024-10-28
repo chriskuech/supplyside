@@ -48,7 +48,7 @@ export class QuickBooksItemsService {
       .then((data) => readItemSchema.parse(data.json))
   }
 
-  mapItem(itemName: string, quickBooksAccountId: string) {
+  private static mapItem(itemName: string, quickBooksAccountId: string) {
     return {
       Name: itemName,
       Type: SERVICE_ITEM_TYPE,
