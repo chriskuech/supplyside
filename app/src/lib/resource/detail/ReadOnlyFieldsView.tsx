@@ -94,7 +94,9 @@ export default function ReadOnlyFieldsView({ schema, resource }: Props) {
                       },
                     )
                     .with({ fieldType: 'Text' }, ({ value: { string } }) => (
-                      <Linkify>{string || '-'}</Linkify>
+                      <Linkify options={{ target: '_blank' }}>
+                        {string || '-'}
+                      </Linkify>
                     ))
                     .with({ fieldType: 'Textarea' }, ({ value: { string } }) =>
                       string ? <ReadonlyTextarea value={string} /> : '-',
