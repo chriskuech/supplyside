@@ -42,11 +42,6 @@ export class PoService {
       fields.issuedDate,
     ).fieldId
 
-    await this.resourceService.updateResourceField(accountId, resourceId, {
-      fieldId: issuedDateFieldId,
-      valueInput: { date: new Date().toISOString() },
-    })
-
     const buffer = await this.poRenderingService.renderPo(accountId, resourceId)
 
     const [blob, resource] = await Promise.all([
@@ -56,6 +51,18 @@ export class PoService {
       }),
       this.resourceService.read(accountId, resourceId),
     ])
+
+    const existingIssuedDate = selectResourceFieldValue(
+      resource,
+      fields.issuedDate,
+    )?.date
+
+    if (!existingIssuedDate) {
+      await this.resourceService.updateResourceField(accountId, resourceId, {
+        fieldId: issuedDateFieldId,
+        valueInput: { date: new Date().toISOString() },
+      })
+    }
 
     const vendorName = selectResourceFieldValue(resource, fields.vendor)
       ?.resource?.name
