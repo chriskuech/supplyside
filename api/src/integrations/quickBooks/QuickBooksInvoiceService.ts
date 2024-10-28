@@ -10,6 +10,7 @@ import {
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
+import { isTruthy } from 'remeda'
 import { BadRequestError } from '../fastify/BadRequestError'
 import { QuickBooksApiService } from './QuickBooksApiService'
 import { QuickBooksCustomerService } from './QuickBooksCustomerService'
@@ -259,17 +260,31 @@ export class QuickBooksInvoiceService {
           jobLine,
           fields.partName,
         )?.string
+
+        const partNumber = selectResourceFieldValue(
+          jobLine,
+          fields.partNumber,
+        )?.string
+
         const quantity =
           selectResourceFieldValue(jobLine, fields.quantity)?.number ?? 0
+
         const unitCost =
           selectResourceFieldValue(jobLine, fields.unitCost)?.number ?? 0
 
-        assert(partName, 'Job line does not have a part name')
+        const quickBooksItemName = [partName, partNumber]
+          .filter((value) => isTruthy(value))
+          .join(' ')
+
+        assert(
+          quickBooksItemName,
+          'Job line does not have a part name or part number',
+        )
 
         const item = await this.quickBooksItemService.syncItem(
           accountId,
           client,
-          partName,
+          quickBooksItemName,
           quickBooksAccountId,
         )
 
