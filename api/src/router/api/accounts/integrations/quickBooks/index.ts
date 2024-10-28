@@ -78,6 +78,31 @@ export const mountQuickBooks = async <App extends FastifyInstance>(app: App) =>
       },
     })
     .route({
+      method: 'PUT',
+      url: '/invoices/:jobResourceId/',
+      schema: {
+        params: z.object({
+          accountId: z.string().uuid(),
+          jobResourceId: z.string().uuid(),
+        }),
+        response: {
+          200: z.object({
+            success: z.boolean(),
+          }),
+        },
+      },
+      handler: async (req) => {
+        const service = container.resolve(QuickBooksService)
+
+        await service.pushInvoice(
+          req.params.accountId,
+          req.params.jobResourceId,
+        )
+
+        return { success: true }
+      },
+    })
+    .route({
       method: 'POST',
       url: '/connect/',
       schema: {

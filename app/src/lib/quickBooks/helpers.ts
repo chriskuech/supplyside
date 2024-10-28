@@ -8,3 +8,6 @@ export const getVendorUrl = (quickBooksVendorId: string) =>
 
 export const getCustomerUrl = (quickBooksCustomerId: string) =>
   `${config().QUICKBOOKS_BASE_URL}/app/customerdetail?nameId=${quickBooksCustomerId}`
+
+export const getInvoiceUrl = (quickBooksInvoiceId: string) =>
+  `${config().QUICKBOOKS_BASE_URL}/app/invoice?txnId=${quickBooksInvoiceId}`

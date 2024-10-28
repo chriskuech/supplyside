@@ -469,6 +469,17 @@ const _fields = {
     name: 'QuickBooks Customer ID',
     type: 'Text',
   },
+  quickBooksInvoiceId: {
+    templateId: '426dfe29-3309-49c5-9eb9-6d3b9098af77',
+    name: 'QuickBooks Invoice ID',
+    type: 'Text',
+  },
+  quickBooksIncomeAccount: {
+    templateId: 'fb45b99b-9052-4df8-961a-8046149ea873',
+    name: 'QuickBooks Income Account',
+    type: 'Select',
+    isRequired: true,
+  },
   receivedAllPurchases: {
     templateId: '5fec4a3c-6221-4319-88d4-762713a1db4e',
     name: 'Received All Purchases?',

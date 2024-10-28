@@ -17,6 +17,7 @@ import { QuickBooksClientService } from './QuickBooksClientService'
 import { QuickBooksCompanyInfoService } from './QuickBooksCompanyInfoService'
 import { QuickBooksConfigService } from './QuickBooksConfigService'
 import { QuickBooksCustomerService } from './QuickBooksCustomerService'
+import { QuickBooksInvoiceService } from './QuickBooksInvoiceService'
 import { QuickBooksTokenService } from './QuickBooksTokenService'
 import { QuickBooksVendorService } from './QuickBooksVendorService'
 import { Bill, BillPayment, CompanyInfo, WebhookBody } from './types'
@@ -43,6 +44,8 @@ export class QuickBooksService {
     private readonly quickBooksAccountService: QuickBooksAccountService,
     @inject(QuickBooksBillService)
     private readonly quickBooksBillService: QuickBooksBillService,
+    @inject(QuickBooksInvoiceService)
+    private readonly quickBooksInvoiceService: QuickBooksInvoiceService,
     @inject(QuickBooksVendorService)
     private readonly quickBooksVendorService: QuickBooksVendorService,
     @inject(QuickBooksCustomerService)
@@ -134,6 +137,19 @@ export class QuickBooksService {
     const client = this.quickBooksClientService.getClient(token)
 
     return this.quickBooksBillService.syncBill(client, accountId, resourceId)
+  }
+
+  async pushInvoice(accountId: string, jobResourceId: string): Promise<void> {
+    const token = await this.quickBooksTokenService.getToken(accountId)
+    assert(token, 'No token found')
+
+    const client = this.quickBooksClientService.getClient(token)
+
+    return this.quickBooksInvoiceService.syncInvoice(
+      client,
+      accountId,
+      jobResourceId,
+    )
   }
 
   async findAccountIdByRealmId(realmId: string) {

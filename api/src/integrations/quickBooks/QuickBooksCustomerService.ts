@@ -5,14 +5,19 @@ import {
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
   fields,
+  Resource,
   selectResourceFieldValue,
+  selectSchemaField,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
+import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
 import { difference, range } from 'remeda'
 import { QuickBooksApiService } from './QuickBooksApiService'
 import { MAX_ENTITIES_PER_PAGE } from './constants'
+import { handleNotFoundError } from './errors'
+import { mapValue } from './mapValue'
 import {
   countQuerySchema,
   customerQuerySchema,
@@ -193,5 +198,124 @@ export class QuickBooksCustomerService {
         },
       },
     ]
+  }
+
+  createCustomerOnQuickBooks = async (
+    client: OAuthClient,
+    accountId: string,
+    customer: Resource,
+  ): Promise<Customer> => {
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
+
+    const quickBooksCustomer = await this.quickBooksApiService
+      .makeApiCall(accountId, client, {
+        url: `${baseUrl}/customer`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(QuickBooksCustomerService.mapCustomer(customer)),
+      })
+      .then((data) => readCustomerSchema.parse(data.json))
+
+    const customerSchema = await this.schemaService.readMergedSchema(
+      accountId,
+      'Customer',
+    )
+    const quickBooksCustomerIdFieldId = selectSchemaField(
+      customerSchema,
+      fields.quickBooksCustomerId,
+    )?.fieldId
+
+    assert(quickBooksCustomerIdFieldId, 'quickBooksCustomerId field not found')
+
+    await this.resourceService.updateResourceField(accountId, customer.id, {
+      fieldId: quickBooksCustomerIdFieldId,
+      valueInput: { string: quickBooksCustomer.Customer.Id },
+    })
+
+    return quickBooksCustomer
+  }
+
+  async updateCustomerOnQuickBooks(
+    accountId: string,
+    client: OAuthClient,
+    customer: Resource,
+  ): Promise<Customer> {
+    const baseUrl = this.quickBooksApiService.getBaseUrl(client.token.realmId)
+
+    const quickBooksCustomerId = selectResourceFieldValue(
+      customer,
+      fields.quickBooksCustomerId,
+    )?.string
+
+    assert(quickBooksCustomerId, 'Customer has no quickBooksCustomerId')
+
+    const quickBooksCustomer = await this.readCustomer(
+      accountId,
+      client,
+      quickBooksCustomerId,
+    ).catch((e) =>
+      handleNotFoundError(
+        e,
+        'Customer does not exist or is not active in QuickBooks',
+      ),
+    )
+
+    const body = {
+      ...quickBooksCustomer.Customer,
+      ...QuickBooksCustomerService.mapCustomer(customer),
+    }
+
+    return this.quickBooksApiService
+      .makeApiCall(accountId, client, {
+        url: `${baseUrl}/customer`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      })
+      .then((data) => readCustomerSchema.parse(data.json))
+  }
+
+  async upsertCustomerOnQuickBooks(
+    client: OAuthClient,
+    accountId: string,
+    customer: Resource,
+  ): Promise<Customer> {
+    const quickBooksCustomerId = selectResourceFieldValue(
+      customer,
+      fields.quickBooksCustomerId,
+    )?.string
+
+    if (quickBooksCustomerId) {
+      return this.updateCustomerOnQuickBooks(accountId, client, customer)
+    } else {
+      return this.createCustomerOnQuickBooks(client, accountId, customer)
+    }
+  }
+
+  private static mapCustomer(customerResource: Resource) {
+    const addressValue = selectResourceFieldValue(
+      customerResource,
+      fields.primaryAddress,
+    )?.address
+
+    return {
+      Id: mapValue(customerResource, fields.quickBooksCustomerId),
+      DisplayName: mapValue(customerResource, fields.name),
+      ...(addressValue
+        ? {
+            BillAddr: {
+              City: addressValue.city,
+              Country: addressValue.country,
+              CountrySubDivisionCode: addressValue.state,
+              Line1: addressValue.streetAddress,
+              PostalCode: addressValue.zip,
+            },
+          }
+        : {}),
+    }
   }
 }

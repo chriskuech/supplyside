@@ -19,6 +19,10 @@ const addressSchema = z.object({
   Id: z.string(),
 })
 
+const emailSchema = z.object({
+  Address: z.string(),
+})
+
 const accountSchema = z.object({
   FullyQualifiedName: z.string(),
   domain: z.string(),
@@ -41,14 +45,34 @@ const lineSchema = z.object({
   Description: z.string().optional(),
   DetailType: z.string(),
   ProjectRef: refSchema.optional(),
-  Amount: z.number(),
+  Amount: z.number().optional(),
+  Id: z.string().optional(),
+  AccountBasedExpenseLineDetail: z
+    .object({
+      TaxCodeRef: refSchema.optional(),
+      AccountRef: refSchema,
+      BillableStatus: z.string().optional(),
+      CustomerRef: refSchema.optional(),
+    })
+    .optional(),
+  SalesItemLineDetail: z
+    .object({
+      ItemRef: refSchema,
+      Qty: z.number().optional(),
+      UnitPrice: z.number().optional(),
+    })
+    .optional(),
+})
+
+const itemSchema = z.object({
   Id: z.string(),
-  AccountBasedExpenseLineDetail: z.object({
-    TaxCodeRef: refSchema.optional(),
-    AccountRef: refSchema,
-    BillableStatus: z.string().optional(),
-    CustomerRef: refSchema.optional(),
-  }),
+  Name: z.string(),
+  QtyOnHand: z.number().optional(),
+  IncomeAccountRef: refSchema.optional(),
+  AssetAccountRef: refSchema.optional(),
+  InvStartDate: z.string().optional(),
+  Type: z.string(),
+  ExpenseAccountRef: refSchema.optional(),
 })
 
 const billSchema = z.object({
@@ -76,8 +100,43 @@ const billSchema = z.object({
   MetaData: metadataSchema,
 })
 
-const emailSchema = z.object({
-  Address: z.string(),
+const invoiceSchema = z.object({
+  domain: z.string(),
+  PrintStatus: z.string().optional(),
+  SalesTermRef: refSchema.optional(),
+  TotalAmt: z.number().optional(),
+  Line: z.array(lineSchema).optional(),
+  DueDate: z.string().optional(),
+  ApplyTaxAfterDiscount: z.boolean().optional(),
+  DocNumber: z.string().optional(),
+  sparse: z.boolean(),
+  ProjectRef: refSchema.optional(),
+  Deposit: z.number().optional(),
+  Balance: z.number().optional(),
+  CustomerRef: refSchema.optional(),
+  TxnTaxDetail: z
+    .object({
+      TxnTaxCodeRef: refSchema.optional(),
+      TotalTax: z.number().optional(),
+      TaxLine: z.array(lineSchema).optional(),
+    })
+    .optional(),
+  SyncToken: z.string(),
+  LinkedTxn: z
+    .array(
+      z.object({
+        TxnId: z.string(),
+        TxnType: z.string(),
+      }),
+    )
+    .optional(),
+  BillEmail: emailSchema.optional(),
+  ShipAddr: addressSchema.optional(),
+  EmailStatus: z.string().optional(),
+  BillAddr: addressSchema.optional(),
+  CurrencyRef: refSchema.optional(),
+  Id: z.string(),
+  MetaData: metadataSchema,
 })
 
 const phoneSchema = z.object({
@@ -246,6 +305,10 @@ export const readBillSchema = z.object({
   Bill: billSchema,
 })
 
+export const readInvoiceSchema = z.object({
+  Invoice: invoiceSchema,
+})
+
 export const readBillPaymentSchema = z.object({
   BillPayment: billPaymentSchema,
 })
@@ -266,4 +329,14 @@ export const webhookBodySchema = z.object({
       }),
     }),
   ),
+})
+
+export const readItemSchema = z.object({
+  Item: itemSchema,
+})
+
+export const queryItemSchema = z.object({
+  QueryResponse: z.object({
+    Item: z.array(itemSchema).optional(),
+  }),
 })

@@ -5,12 +5,12 @@ import {
   jobStatusOptions,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import { Alert, Box, Container, Stack, Typography } from '@mui/material'
+import { Alert, Box, Container, Stack } from '@mui/material'
 import { match } from 'ts-pattern'
 import { green, red, yellow } from '@mui/material/colors'
-import StatusTransitionButton from './cta/StatusTransitionButton'
 import JobStatusTracker from './JobStatusTracker'
 import { JobAttachmentsControl } from './tools/JobAttachmentsControl'
+import CallToAction from './cta/CallToAction'
 import { JobLinesControl } from './JobLinesControl'
 import { ScheduleControl } from './tools/ScheduleControl'
 import { PaymentControl } from './tools/PaymentControl'
@@ -18,6 +18,8 @@ import { TotalCostControl } from './tools/TotalCostControl'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { readResources } from '@/actions/resource'
+import { getInvoiceUrl } from '@/lib/quickBooks/helpers'
+import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
 
 export default async function JobDetail({
   params: { key },
@@ -52,6 +54,15 @@ export default async function JobDetail({
     .with(jobStatusOptions.paid.templateId, () => green[800])
     .with(jobStatusOptions.canceled.templateId, () => red[800])
     .otherwise(() => yellow[800])
+
+  const quickBooksInvoiceId = selectResourceFieldValue(
+    resource,
+    fields.quickBooksInvoiceId,
+  )?.string
+
+  const quickBooksInvoiceUrl = quickBooksInvoiceId
+    ? getInvoiceUrl(quickBooksInvoiceId)
+    : undefined
 
   if (!lineSchema || !jobLines)
     return <Alert severity="error">Failed to load job</Alert>
@@ -93,6 +104,15 @@ export default async function JobDetail({
       searchParams={searchParams}
       isReadOnly={!isDraft}
       tools={(fontSize) => [
+        ...(quickBooksInvoiceUrl
+          ? [
+              <QuickBooksLink
+                key={QuickBooksLink.name}
+                quickBooksAppUrl={quickBooksInvoiceUrl}
+                fontSize={fontSize}
+              />,
+            ]
+          : []),
         <TotalCostControl
           key={TotalCostControl.name}
           schema={schema}
@@ -142,55 +162,12 @@ export default async function JobDetail({
                 spacing={2}
                 mr={3}
               >
-                {status.templateId === jobStatusOptions.draft.templateId && (
-                  <StatusTransitionButton
-                    isDisabled={hasInvalidFields || !jobHasLines}
-                    resourceId={resource.id}
-                    statusOption={jobStatusOptions.ordered}
-                    label="Ordered"
-                    tooltip={
-                      hasInvalidFields || !jobHasLines
-                        ? 'Please fill in all required fields and add at least one Line before submitting'
-                        : undefined
-                    }
-                  />
-                )}
-                {status.templateId === jobStatusOptions.ordered.templateId && (
-                  <StatusTransitionButton
-                    resourceId={resource.id}
-                    statusOption={jobStatusOptions.inProcess}
-                    label="In Process"
-                  />
-                )}
-                {status.templateId ===
-                  jobStatusOptions.inProcess.templateId && (
-                  <StatusTransitionButton
-                    resourceId={resource.id}
-                    statusOption={jobStatusOptions.shipped}
-                    label="Shipped"
-                  />
-                )}
-                {status.templateId === jobStatusOptions.shipped.templateId && (
-                  <StatusTransitionButton
-                    resourceId={resource.id}
-                    statusOption={jobStatusOptions.invoiced}
-                    label="Invoiced"
-                  />
-                )}
-                {status.templateId === jobStatusOptions.invoiced.templateId && (
-                  <StatusTransitionButton
-                    resourceId={resource.id}
-                    statusOption={jobStatusOptions.paid}
-                    label="Paid"
-                  />
-                )}
-                {(status.templateId === jobStatusOptions.paid.templateId ||
-                  status.templateId ===
-                    jobStatusOptions.canceled.templateId) && (
-                  <Typography sx={{ opacity: 0.5 }}>
-                    No further action required
-                  </Typography>
-                )}
+                <CallToAction
+                  hasInvalidFields={hasInvalidFields}
+                  jobHasLines={jobHasLines}
+                  resource={resource}
+                  status={status}
+                />
               </Stack>
             </Stack>
           </Container>

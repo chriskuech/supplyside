@@ -57,6 +57,19 @@ export const pushBill = async (accountId: string, billResourceId: string) => {
   return data
 }
 
+export const pushInvoice = async (accountId: string, jobResourceId: string) => {
+  const { data } = await client().PUT(
+    '/api/accounts/{accountId}/integrations/quickbooks/invoices/{jobResourceId}/',
+    {
+      params: {
+        path: { accountId, jobResourceId },
+      },
+    },
+  )
+
+  return data
+}
+
 export const pullData = async (accountId: string) => {
   await client().POST(
     '/api/accounts/{accountId}/integrations/quickbooks/pull-data/',
