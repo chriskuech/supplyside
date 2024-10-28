@@ -473,7 +473,6 @@ const _fields = {
     templateId: '5fec4a3c-6221-4319-88d4-762713a1db4e',
     name: 'Received All Purchases?',
     type: 'Checkbox',
-    defaultValue: { boolean: true },
   },
   running: {
     templateId: '6bbdd656-8698-4436-a5de-ede24d8f413c',
