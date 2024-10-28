@@ -22,14 +22,16 @@ import dayjs from 'dayjs'
 import {
   AttachMoney,
   Business,
-  Cancel,
-  CheckCircle,
+  Check,
+  Close,
   Link,
+  Remove,
+  ShoppingBag,
 } from '@mui/icons-material'
 import NextLink from 'next/link'
 import { isNumber, sortBy } from 'remeda'
 import utc from 'dayjs/plugin/utc'
-import { match } from 'ts-pattern'
+import { match, P } from 'ts-pattern'
 import { DragBar } from './DragBar'
 import GanttChart from './GanttChart'
 import { GanttChartHeader } from './GanttChartHeader'
@@ -221,19 +223,24 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
                       />
                     </Tooltip>
                     <Stack alignItems="center" direction="row">
-                      <Tooltip
-                        title={
-                          receivedAllPurchases
-                            ? 'All Purchases required for this Job have been received'
-                            : 'Some Purchases required for this Job have not been received'
-                        }
-                      >
-                        {receivedAllPurchases ? (
-                          <CheckCircle color="success" />
-                        ) : (
-                          <Cancel />
-                        )}
-                      </Tooltip>
+                      <ShoppingBag />
+                      {match(receivedAllPurchases)
+                        .with(true, () => (
+                          <Tooltip title="All Purchases required for this Job have been received">
+                            <Check />
+                          </Tooltip>
+                        ))
+                        .with(false, () => (
+                          <Tooltip title="Some Purchases required for this Job have not been received">
+                            <Close />
+                          </Tooltip>
+                        ))
+                        .with(P.nullish, () => (
+                          <Tooltip title="No Purchases have been added for this Job">
+                            <Remove />
+                          </Tooltip>
+                        ))
+                        .exhaustive()}
                     </Stack>
                   </Stack>
                   <Stack
