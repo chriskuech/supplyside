@@ -7,8 +7,12 @@ import {
   selectResourceFieldValue,
   selectSchemaField,
 } from '@supplyside/model'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import { pipe } from 'remeda'
 import { ResourceFieldInput } from './ResourceService'
+
+dayjs.extend(utc)
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 
@@ -21,6 +25,56 @@ type Patch = {
   fields: ResourceFieldInput[]
   costs: Cost[]
 }
+
+const recalculateJobPaymentTermsFromPaymentDueDate =
+  (context: Context) =>
+  (patch: Patch): Patch => {
+    if (context.schema.resourceType !== 'Job') return patch
+
+    const needDateField = selectSchemaField(context.schema, fields.needDate)
+    const paymentDueDateField = selectSchemaField(
+      context.schema,
+      fields.paymentDueDate,
+    )
+    const paymentTermsField = selectSchemaField(
+      context.schema,
+      fields.paymentTerms,
+    )
+
+    if (!needDateField || !paymentDueDateField || !paymentTermsField)
+      return patch
+
+    const paymentDueDateString =
+      patch.fields.find((f) => f.fieldId === paymentDueDateField.fieldId)
+        ?.valueInput.date ??
+      (context.resource &&
+        selectResourceFieldValue(context.resource, paymentDueDateField)?.date)
+    const needDateString =
+      patch.fields.find((f) => f.fieldId === needDateField.fieldId)?.valueInput
+        .date ??
+      (context.resource &&
+        selectResourceFieldValue(context.resource, needDateField)?.date)
+
+    if (!paymentDueDateString || !needDateString) return patch
+
+    const paymentDueDate = dayjs(paymentDueDateString).utc().startOf('day')
+    const needDate = dayjs(needDateString).utc().startOf('day')
+
+    const paymentTerms = paymentDueDate.diff(needDate, 'days')
+
+    return {
+      ...patch,
+      fields: [
+        ...patch.fields.filter((f) => f.fieldId !== paymentTermsField.fieldId),
+        {
+          fieldId: paymentTermsField.fieldId,
+          valueInput: {
+            number: paymentTerms,
+          },
+        },
+      ],
+    }
+  }
 
 const recalculatePaymentDueDateFromNeedDate =
   (context: Context) =>
@@ -297,6 +351,7 @@ export const deriveFields = (
   return pipe(
     { fields, costs },
     setStartDate(context),
+    recalculateJobPaymentTermsFromPaymentDueDate(context),
     recalculatePaymentDueDateFromInvoiceDate(context),
     recalculatePaymentDueDateFromNeedDate(context),
     recalculateLineTotalCost(context),
