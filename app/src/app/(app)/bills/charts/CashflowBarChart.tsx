@@ -84,7 +84,7 @@ export default function CashflowBarChart({ resources }: Props) {
         const totalCost =
           selectResourceFieldValue(resource, fields.totalCost)?.number ?? 0
         const status =
-          selectResourceFieldValue(resource, fields.jobStatus)?.option?.name ??
+          selectResourceFieldValue(resource, fields.billStatus)?.option?.name ??
           ''
 
         if (!paymentDueDate) return null

@@ -18,7 +18,7 @@ export default function CashflowPieChart({ resources }: Props) {
         resources,
         groupBy(
           (resource) =>
-            selectResourceFieldValue(resource, fields.jobStatus)?.option?.name,
+            selectResourceFieldValue(resource, fields.billStatus)?.option?.name,
         ),
         entries(),
         map(([status, resources], index) => ({
@@ -39,15 +39,15 @@ export default function CashflowPieChart({ resources }: Props) {
     [data],
   )
 
-  const numberOfJobs = resources.length
+  const numberOfResources = resources.length
   const total = useMemo(() => sumBy(data, (item) => item.value), [data])
 
   return (
     <>
       <Typography variant="h6">
         {dataHasValues
-          ? `${numberOfJobs} Jobs (${formatMoney(total, { maximumFractionDigits: 0 })})`
-          : 'Jobs'}
+          ? `${numberOfResources} Bills (${formatMoney(total, { maximumFractionDigits: 0 })})`
+          : 'Bills'}
       </Typography>
       <PieChart
         height={200}
