@@ -7,6 +7,7 @@ import {
 } from '@supplyside/model'
 import { GridFilterItem } from '@mui/x-data-grid'
 import { BillsInboxControl } from '../BillsInboxControl'
+import GridApiCharts from '../charts/GridApiCharts'
 import ListPage from '@/lib/resource/ListPage'
 import { readSchema } from '@/actions/schema'
 
@@ -50,6 +51,7 @@ export default async function UnpaidBills({
       filterItems={[unpaidBillsFilter]}
       title="Unpaid Bills"
       callToActions={[<BillsInboxControl key={BillsInboxControl.name} />]}
+      Charts={GridApiCharts}
     />
   )
 }
