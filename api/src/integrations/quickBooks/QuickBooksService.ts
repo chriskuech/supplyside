@@ -253,10 +253,10 @@ export class QuickBooksService {
               )
 
               await match(entityType)
-                .with('BillPayment', async () =>
+                .with('BillPayment', () =>
                   this.processBillPaymentsWebhook(accountId, entityIds),
                 )
-                .with('Payment', async () =>
+                .with('Payment', () =>
                   this.processPaymentsWebhook(accountId, entityIds),
                 )
                 .exhaustive()
