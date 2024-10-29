@@ -96,7 +96,6 @@ export const schemas: SchemaTemplate[] = [
     fields: [
       fields.job,
       fields.partName,
-      fields.partNumber,
       fields.quantity,
       fields.unitCost,
       fields.totalCost,

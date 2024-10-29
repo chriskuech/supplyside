@@ -336,12 +336,6 @@ const _fields = {
     type: 'Text',
     description: 'The name of the part',
   },
-  partNumber: {
-    templateId: 'f84c023e-a3a6-484b-ace2-abb4aa1fb425',
-    name: 'Part Number',
-    type: 'Text',
-    description: 'Unique identifier for a part',
-  },
   poNumber: {
     templateId: 'c056ca91-7f40-45d2-ae01-cd4bc66c09f2',
     name: 'PO Number',
