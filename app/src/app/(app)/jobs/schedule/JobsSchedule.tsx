@@ -5,7 +5,9 @@ import {
   Badge,
   BadgeProps,
   Box,
+  Button,
   Chip,
+  Collapse,
   Divider,
   Paper,
   Stack,
@@ -23,10 +25,14 @@ import { FC, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import {
   AttachMoney,
+  BarChart,
   Business,
   Check,
   Close,
+  ExpandLess,
+  ExpandMore,
   Link,
+  PieChart,
   Remove,
   ShoppingBag,
 } from '@mui/icons-material'
@@ -34,6 +40,7 @@ import NextLink from 'next/link'
 import { isNumber, sortBy } from 'remeda'
 import utc from 'dayjs/plugin/utc'
 import { match, P } from 'ts-pattern'
+import Charts, { CHART_HEIGHT } from '../charts/Charts'
 import { DragBar } from './DragBar'
 import GanttChart from './GanttChart'
 import { GanttChartHeader } from './GanttChartHeader'
@@ -61,6 +68,7 @@ type Props = {
 const initialScrollOffset = dim
 
 export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
+  const [showCharts, setShowCharts] = useState(true)
   const [numWeeks, setNumWeeks] = useState(12)
   const [drawerWidth, setDrawerWidth] = useState(initialDrawerWidth)
   const [scrollOffset, setScrollOffset] = useState(initialScrollOffset)
@@ -97,9 +105,45 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
           width={`${drawerWidth}px`}
           borderRadius={0}
         >
-          <Box height={`${topDim}px`} py={2} px={4}>
+          <Stack
+            direction="row"
+            height={`${topDim}px`}
+            py={2}
+            px={4}
+            justifyContent="space-between"
+          >
             <Typography variant="h4">Jobs Schedule</Typography>
-          </Box>
+            <Box>
+              <Button
+                size="small"
+                variant="text"
+                onClick={() => setShowCharts((c) => !c)}
+                startIcon={
+                  <Stack direction="row" alignItems="center">
+                    <PieChart fontSize="small" />
+                    <BarChart fontSize="small" />
+                  </Stack>
+                }
+                endIcon={showCharts ? <ExpandLess /> : <ExpandMore />}
+                sx={{
+                  '.ChartsButtonText': {
+                    width: 0,
+                    overflow: 'hidden',
+                  },
+                  '&:hover .ChartsButtonText': {
+                    width: 'unset',
+                  },
+                }}
+              >
+                <span className="ChartsButtonText">Charts</span>
+              </Button>
+            </Box>
+          </Stack>
+
+          <Collapse in={showCharts}>
+            <Box height={CHART_HEIGHT} />
+          </Collapse>
+
           <Stack
             divider={<Divider sx={{ p: 0, my: '-0.5px' }} />}
             borderTop={1}
@@ -292,6 +336,18 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
             }
           }}
         >
+          <Collapse in={showCharts} unmountOnExit>
+            <Box
+              position="absolute"
+              top={0}
+              left={scrollOffset}
+              width="100%"
+              p={2}
+            >
+              <Charts resources={jobs} />
+            </Box>
+            <Box height={CHART_HEIGHT} />
+          </Collapse>
           <GanttChartHeader
             height={topDim}
             dim={dim}
@@ -309,7 +365,7 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
         </Box>
         <DragBar
           height={jobs.length * dim}
-          top={topDim}
+          top={(showCharts ? CHART_HEIGHT : 0) + topDim}
           left={drawerWidth}
           onChange={(width) => setDrawerWidth(clampDrawerWidth(width))}
         />

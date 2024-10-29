@@ -35,7 +35,7 @@ export const DragBar: FC<Props> = ({ top, left, height, onChange }) => {
       sx={{
         opacity: 0,
         '&:hover': { opacity: 1 },
-        transition: 'opacity 0.2s',
+        transition: 'all 0.2s',
         cursor: 'col-resize',
         width: '6px',
         '::selection': { backgroundColor: 'transparent' },
