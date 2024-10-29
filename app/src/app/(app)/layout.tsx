@@ -9,6 +9,7 @@ import {
   Receipt,
   Schedule,
   ShoppingBag,
+  Speed,
   Storefront,
 } from '@mui/icons-material'
 import {
@@ -135,6 +136,13 @@ export default async function Layout({
     <Stack direction="row" height="100vh" width="100vw">
       <Stack width="min-content" m={2} spacing={2}>
         <NavLogo />
+        <Box>
+          <ItemLink
+            icon={<Speed fontSize="small" />}
+            title="Dashboard"
+            href="/dashboard"
+          />
+        </Box>
         <Box>
           <Typography variant="overline" color="text.secondary">
             Jobs
