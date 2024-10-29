@@ -261,6 +261,10 @@ export class McMasterService {
     const currentDateTime = new Date().toISOString()
 
     const renderedPunchoutSetupRequest = renderTemplate({
+      deploymentMode:
+        this.configService.config.SS_ENV === 'production'
+          ? 'production'
+          : 'test',
       payloadId: `${currentDateTime}@mcmaster.com`,
       punchOutCustomerDomain: mcMasterCarrPassword,
       punchOutCustomerName: mcMasterCarrUsername,
