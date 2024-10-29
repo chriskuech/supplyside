@@ -123,10 +123,7 @@ export default function CashflowBarChart({ resources }: Props) {
       }),
     )
 
-    return totalsByStatuses.map(({ status, totalsByWeek }) => ({
-      status,
-      totalsByWeek,
-    }))
+    return totalsByStatuses
   }, [weeks, resources])
 
   const currentWeek = useMemo(
