@@ -100,6 +100,7 @@ export const schemas: SchemaTemplate[] = [
       fields.quantity,
       fields.unitCost,
       fields.totalCost,
+      fields.needDate,
       fields.otherNotes,
       fields.customer,
     ],
