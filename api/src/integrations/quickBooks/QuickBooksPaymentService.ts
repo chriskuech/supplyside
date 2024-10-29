@@ -11,7 +11,7 @@ export class QuickBooksPaymentService {
     private readonly quickBooksApiService: QuickBooksApiService,
   ) {}
 
-  async readBillPayment(
+  readBillPayment(
     accountId: string,
     client: OAuthClient,
     id: string,
@@ -26,7 +26,7 @@ export class QuickBooksPaymentService {
       .then((data) => readBillPaymentSchema.parse(data.json))
   }
 
-  async readPayment(
+  readPayment(
     accountId: string,
     client: OAuthClient,
     id: string,

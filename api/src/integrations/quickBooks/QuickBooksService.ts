@@ -9,7 +9,7 @@ import {
 } from '@supplyside/model'
 import assert from 'assert'
 import { inject, injectable } from 'inversify'
-import { groupBy } from 'remeda'
+import { entries, groupBy, map, pipe, unique } from 'remeda'
 import { match } from 'ts-pattern'
 import { PrismaService } from '../PrismaService'
 import { QuickBooksAccountService } from './QuickBooksAccountService'
@@ -29,7 +29,6 @@ import {
   Invoice,
   Payment,
   WebhookBody,
-  webhookEntityName,
 } from './types'
 import { isRequestError } from './utils'
 
@@ -241,25 +240,29 @@ export class QuickBooksService {
         )
         if (!accountId) return
 
-        const entities = groupBy(
-          notification.dataChangeEvent.entities,
-          (entity) => entity.name,
+        await Promise.all(
+          pipe(
+            notification.dataChangeEvent.entities,
+            groupBy((entity) => entity.name),
+            entries(),
+            map(async ([entityType, data]) => {
+              const entityIds = pipe(
+                data,
+                map((entity) => entity.id),
+                unique(),
+              )
+
+              await match(entityType)
+                .with('BillPayment', async () =>
+                  this.processBillPaymentsWebhook(accountId, entityIds),
+                )
+                .with('Payment', async () =>
+                  this.processPaymentsWebhook(accountId, entityIds),
+                )
+                .exhaustive()
+            }),
+          ),
         )
-
-        Object.entries(entities).map(([entityType, data]) => {
-          const entitiesGroupedById = groupBy(data, (entity) => entity.id)
-          const entityIds = Object.keys(entitiesGroupedById)
-
-          // casting because Object.entries removes the type
-          match(entityType as webhookEntityName)
-            .with('BillPayment', async () => {
-              await this.processBillPaymentsWebhook(accountId, entityIds)
-            })
-            .with('Payment', async () => {
-              await this.processPaymentsWebhook(accountId, entityIds)
-            })
-            .exhaustive()
-        })
       }),
     )
   }
@@ -268,105 +271,122 @@ export class QuickBooksService {
     accountId: string,
     billPaymentIds: string[],
   ): Promise<void> {
-    billPaymentIds.map(async (billPaymentId) => {
-      const billPayment = await this.getBillPayment(accountId, billPaymentId)
-      const billIds = billPayment.BillPayment.Line.flatMap((line) =>
-        line.LinkedTxn.filter((txn) => txn.TxnType === 'Bill').map(
-          (txn) => txn.TxnId,
-        ),
-      )
+    await Promise.all(
+      billPaymentIds.map(async (billPaymentId) => {
+        const billPayment = await this.getBillPayment(accountId, billPaymentId)
+        const billIds = billPayment.BillPayment.Line.flatMap((line) =>
+          line.LinkedTxn.filter((txn) => txn.TxnType === 'Bill').map(
+            (txn) => txn.TxnId,
+          ),
+        )
 
-      return Promise.all(
-        billIds.map(async (billId) => {
-          const bill = await this.resourceService.findResourceByUniqueValue(
-            accountId,
-            'Bill',
-            fields.quickBooksBillId,
-            { string: billId },
-          )
-
-          if (!bill) return
-
-          const quickBooksBill = await this.getBill(accountId, billId)
-
-          //TODO: we are missing updating the previously related bills status when a billPayment is deleted or updated
-          if (quickBooksBill.Bill.Balance === 0) {
-            const billSchema = await this.schemaService.readMergedSchema(
+        await Promise.all(
+          billIds.map(async (billId) => {
+            const bill = await this.resourceService.findResourceByUniqueValue(
               accountId,
               'Bill',
+              fields.quickBooksBillId,
+              { string: billId },
             )
 
-            const billStatusFieldId = selectSchemaFieldUnsafe(
-              billSchema,
-              fields.billStatus,
-            ).fieldId
+            if (!bill) return
 
-            const paidOptionId = selectSchemaFieldOptionUnsafe(
-              billSchema,
-              fields.billStatus,
-              billStatusOptions.paid,
-            ).id
+            const quickBooksBill = await this.getBill(accountId, billId)
 
-            await this.resourceService.updateResourceField(accountId, bill.id, {
-              fieldId: billStatusFieldId,
-              valueInput: { optionId: paidOptionId },
-            })
-          }
-        }),
-      )
-    })
+            //TODO: we are missing updating the previously related bills status when a billPayment is deleted or updated
+            if (quickBooksBill.Bill.Balance === 0) {
+              const billSchema = await this.schemaService.readMergedSchema(
+                accountId,
+                'Bill',
+              )
+
+              const billStatusFieldId = selectSchemaFieldUnsafe(
+                billSchema,
+                fields.billStatus,
+              ).fieldId
+
+              const paidOptionId = selectSchemaFieldOptionUnsafe(
+                billSchema,
+                fields.billStatus,
+                billStatusOptions.paid,
+              ).id
+
+              await this.resourceService.updateResourceField(
+                accountId,
+                bill.id,
+                {
+                  fieldId: billStatusFieldId,
+                  valueInput: { optionId: paidOptionId },
+                },
+              )
+            }
+          }),
+        )
+      }),
+    )
   }
 
   private async processPaymentsWebhook(
     accountId: string,
     paymentIds: string[],
   ): Promise<void> {
-    paymentIds.map(async (paymentId) => {
-      const payment = await this.getPayment(accountId, paymentId)
-      const invoiceIds = payment.Payment.Line.flatMap((line) =>
-        line.LinkedTxn.filter((txn) => txn.TxnType === 'Invoice').map(
-          (txn) => txn.TxnId,
-        ),
-      )
+    await Promise.all(
+      paymentIds.map(async (paymentId) => {
+        const payment = await this.getPayment(accountId, paymentId)
+        const invoiceIds = payment.Payment.Line.flatMap((line) =>
+          line.LinkedTxn.filter((txn) => txn.TxnType === 'Invoice').map(
+            (txn) => txn.TxnId,
+          ),
+        )
 
-      return Promise.all(
-        invoiceIds.map(async (invoiceId) => {
-          const job = await this.resourceService.findResourceByUniqueValue(
-            accountId,
-            'Job',
-            fields.quickBooksInvoiceId,
-            { string: invoiceId },
-          )
+        await new Promise((r) => setTimeout(r, 500))
 
-          if (!job) return
-
-          const quickBooksInvoice = await this.getInvoice(accountId, invoiceId)
-
-          //TODO: we are missing updating the previously related jobs status when a payment is deleted or updated
-          if (quickBooksInvoice.Invoice.Balance === 0) {
-            const jobSchema = await this.schemaService.readMergedSchema(
+        await Promise.all(
+          invoiceIds.map(async (invoiceId) => {
+            const job = await this.resourceService.findResourceByUniqueValue(
               accountId,
               'Job',
+              fields.quickBooksInvoiceId,
+              { string: invoiceId },
             )
 
-            const jobStatusFieldId = selectSchemaFieldUnsafe(
-              jobSchema,
-              fields.jobStatus,
-            ).fieldId
+            if (!job) return
 
-            const paidOptionId = selectSchemaFieldOptionUnsafe(
-              jobSchema,
-              fields.jobStatus,
-              jobStatusOptions.paid,
-            ).id
+            const quickBooksInvoice = await this.getInvoice(
+              accountId,
+              invoiceId,
+            )
 
-            await this.resourceService.updateResourceField(accountId, job.id, {
-              fieldId: jobStatusFieldId,
-              valueInput: { optionId: paidOptionId },
-            })
-          }
-        }),
-      )
-    })
+            //TODO: we are missing updating the previously related jobs status when a payment is deleted or updated
+            if (quickBooksInvoice.Invoice.Balance === 0) {
+              const jobSchema = await this.schemaService.readMergedSchema(
+                accountId,
+                'Job',
+              )
+
+              const jobStatusFieldId = selectSchemaFieldUnsafe(
+                jobSchema,
+                fields.jobStatus,
+              ).fieldId
+
+              const paidOptionId = selectSchemaFieldOptionUnsafe(
+                jobSchema,
+                fields.jobStatus,
+                jobStatusOptions.paid,
+              ).id
+
+              await this.resourceService.updateResourceField(
+                accountId,
+                job.id,
+                {
+                  fieldId: jobStatusFieldId,
+                  valueInput: { optionId: paidOptionId },
+                },
+              )
+            }
+          }),
+        )
+      }),
+    )
   }
 }
