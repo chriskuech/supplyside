@@ -119,8 +119,6 @@ export const schemas: SchemaTemplate[] = [
       fields.purchaseAttachments,
       fields.punchoutSessionUrl,
       fields.job,
-      fields.paymentDueDate,
-      fields.workCenter,
     ],
     sections: [
       {
