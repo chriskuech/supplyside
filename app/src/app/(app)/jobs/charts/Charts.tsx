@@ -1,36 +1,23 @@
-'use client'
-
 import { Box, Stack } from '@mui/material'
-import { MutableRefObject, useLayoutEffect } from 'react'
-import {
-  GridApiPro,
-  gridFilteredSortedRowEntriesSelector,
-} from '@mui/x-data-grid-pro'
 import { Resource } from '@supplyside/model'
-import React, { useState } from 'react'
+import React from 'react'
 import CashflowBarChart from './CashflowBarChart'
 import CashflowPieChart from './CashflowPieChart'
 
+export const CHART_HEIGHT = 200
+
 type Props = {
-  gridApiRef: MutableRefObject<GridApiPro>
+  resources: Resource[]
 }
 
-export default function Charts({ gridApiRef }: Props) {
-  const [resources, setResources] = useState<Resource[]>()
-
-  useLayoutEffect(() => {
-    gridApiRef.current.subscribeEvent('rowsSet', () => {
-      const rows = gridFilteredSortedRowEntriesSelector(gridApiRef)
-      setResources(rows.map((row) => row.model as Resource))
-    })
-  }, [gridApiRef])
+export default function Charts({ resources }: Props) {
   return (
-    <Stack direction="row" spacing={2} height={200}>
+    <Stack direction="row" spacing={2} height={CHART_HEIGHT}>
       <Box flexGrow={1}>
-        <CashflowPieChart resources={resources ?? []} />
+        <CashflowPieChart resources={resources} />
       </Box>
       <Box flexGrow={3}>
-        <CashflowBarChart resources={resources ?? []} />
+        <CashflowBarChart resources={resources} />
       </Box>
     </Stack>
   )
