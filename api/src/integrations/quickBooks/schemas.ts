@@ -289,6 +289,31 @@ export const billPaymentSchema = z.object({
   ),
 })
 
+export const PaymentSchema = z.object({
+  SyncToken: z.string(),
+  domain: z.string(),
+  DepositToAccountRef: refSchema.optional(),
+  UnappliedAmt: z.number(),
+  TxnDate: z.string().optional(),
+  TotalAmt: z.number(),
+  ProjectRef: refSchema.optional(),
+  ProcessPayment: z.boolean().optional(),
+  sparse: z.boolean(),
+  Line: z.array(
+    z.object({
+      Amount: z.number(),
+      LinkedTxn: z.array(
+        z.object({
+          TxnId: z.string(),
+          TxnType: z.string(),
+        }),
+      ),
+    }),
+  ),
+  CustomerRef: refSchema.optional(),
+  Id: z.string(),
+})
+
 export const readAccountSchema = z.object({
   Account: accountSchema,
 })
@@ -313,19 +338,25 @@ export const readBillPaymentSchema = z.object({
   BillPayment: billPaymentSchema,
 })
 
+export const readPaymentSchema = z.object({
+  Payment: PaymentSchema,
+})
+
+export const webhookEntitiesNameSchema = z.enum(['BillPayment', 'Payment'])
+
+export const webhookEntitiySchema = z.object({
+  id: z.string(),
+  operation: z.enum(['Create', 'Update', 'Merge', 'Delete', 'Void']),
+  name: webhookEntitiesNameSchema,
+  lastUpdated: z.string(),
+})
+
 export const webhookBodySchema = z.object({
   eventNotifications: z.array(
     z.object({
       realmId: z.string(),
       dataChangeEvent: z.object({
-        entities: z.array(
-          z.object({
-            id: z.string(),
-            operation: z.enum(['Create', 'Update', 'Merge', 'Delete', 'Void']),
-            name: z.enum(['BillPayment']),
-            lastUpdated: z.string(),
-          }),
-        ),
+        entities: z.array(webhookEntitiySchema),
       }),
     }),
   ),

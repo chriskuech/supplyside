@@ -8,6 +8,7 @@ import {
   readCustomerSchema,
   readInvoiceSchema,
   readItemSchema,
+  readPaymentSchema,
   readVendorSchema,
   webhookBodySchema,
 } from './schemas'
@@ -21,6 +22,7 @@ export type Bill = z.infer<typeof readBillSchema>
 export type Item = z.infer<typeof readItemSchema>
 export type Invoice = z.infer<typeof readInvoiceSchema>
 export type BillPayment = z.infer<typeof readBillPaymentSchema>
+export type Payment = z.infer<typeof readPaymentSchema>
 export type WebhookBody = z.infer<typeof webhookBodySchema>
 
 type Entity = 'Vendor' | 'Account' | 'Customer' | 'Item'
