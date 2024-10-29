@@ -365,8 +365,7 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
         </Box>
         <DragBar
           height={jobs.length * dim}
-          showCharts={showCharts}
-          top={topDim}
+          top={(showCharts ? CHART_HEIGHT : 0) + topDim}
           left={drawerWidth}
           onChange={(width) => setDrawerWidth(clampDrawerWidth(width))}
         />

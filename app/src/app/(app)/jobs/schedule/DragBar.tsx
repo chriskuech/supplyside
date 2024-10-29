@@ -1,23 +1,15 @@
 import { Paper, Stack } from '@mui/material'
 import { FC, useCallback, useState } from 'react'
-import { CHART_HEIGHT } from '../charts/Charts'
 import { useEventListener } from '@/hooks/useEventListener'
 
 type Props = {
   top: number
   left: number
   height: number
-  showCharts: boolean
   onChange: (dx: number) => void
 }
 
-export const DragBar: FC<Props> = ({
-  top,
-  left,
-  height,
-  showCharts,
-  onChange,
-}) => {
+export const DragBar: FC<Props> = ({ top, left, height, onChange }) => {
   const [dragStartX, setDragStartX] = useState<number | null>(null)
 
   const onMouseMove = useCallback(
@@ -52,7 +44,7 @@ export const DragBar: FC<Props> = ({
       height={height}
       onMouseDown={(e) => setDragStartX(e.clientX)}
       position="absolute"
-      top={(showCharts ? CHART_HEIGHT : 0) + top}
+      top={top}
       left={left - 3}
       zIndex={1}
     >
