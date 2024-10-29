@@ -26,6 +26,7 @@ export const posrResponseSchema = z.object({
 })
 
 export type RenderPOSRTemplateParams = {
+  deploymentMode: 'production' | 'test'
   payloadId: string
   punchOutCustomerDomain: string
   punchOutCustomerName: string

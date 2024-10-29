@@ -23,8 +23,7 @@
             <UserAgent>SupplySide</UserAgent>
         </Sender>
     </Header>
-    {{!-- TODO: should we change this on prod? --}}
-    <Request deploymentMode="test">
+    <Request deploymentMode="{{deploymentMode}}">
         <PunchOutSetupRequest operation="create">
             <BuyerCookie>{{buyerCookie}}</BuyerCookie> 
             <BrowserFormPost>
