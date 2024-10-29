@@ -112,7 +112,7 @@ const JobLineView: FC<{
   <Stack spacing={2} direction="row" alignItems="start">
     <Stack spacing={1} flexGrow={1}>
       <Stack direction="row" alignItems="center" spacing={1}>
-        <Box flexGrow={3}>
+        <Box flexGrow={1}>
           <FieldControl
             value={selectResourceFieldValue(jobLine, fields.partName)}
             resource={jobLine}
@@ -123,14 +123,14 @@ const JobLineView: FC<{
             }}
           />
         </Box>
-        <Box flexGrow={1}>
+        <Box>
           <FieldControl
-            value={selectResourceFieldValue(jobLine, fields.partNumber)}
+            value={selectResourceFieldValue(jobLine, fields.needDate)}
             resource={jobLine}
-            inputId={`part-number-${jobLine.id}`}
-            field={selectSchemaFieldUnsafe(jobLineSchema, fields.partNumber)}
+            inputId={`need-date-${jobLine.id}`}
+            field={selectSchemaFieldUnsafe(jobLineSchema, fields.needDate)}
             inputProps={{
-              placeholder: 'Part Number',
+              placeholder: 'Need Date',
             }}
           />
         </Box>
