@@ -37,13 +37,15 @@ import {
   ShoppingBag,
 } from '@mui/icons-material'
 import NextLink from 'next/link'
-import { isNumber, sortBy } from 'remeda'
+import { isNumber, sortBy, filter, pipe } from 'remeda'
 import utc from 'dayjs/plugin/utc'
 import { match, P } from 'ts-pattern'
 import Charts, { CHART_HEIGHT } from '../charts/Charts'
 import { DragBar } from './DragBar'
 import GanttChart from './GanttChart'
 import { GanttChartHeader } from './GanttChartHeader'
+import FiltersControl from './FiltersControl'
+import { Filters } from './types'
 import { formatMoney } from '@/lib/format'
 
 dayjs.extend(utc)
@@ -73,13 +75,26 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
   const [drawerWidth, setDrawerWidth] = useState(initialDrawerWidth)
   const [scrollOffset, setScrollOffset] = useState(initialScrollOffset)
   const [minDate, setMinDate] = useState(dayjs().utc().day(0).startOf('day'))
+  const [filters, setFilters] = useState<Filters>({ jobStatus: [] })
+
   const jobs = useMemo(
     () =>
-      sortBy(
+      pipe(
         unsortedJobs,
-        (job) => selectResourceFieldValue(job, fields.needDate)?.date ?? '',
+        sortBy(
+          (job) => selectResourceFieldValue(job, fields.needDate)?.date ?? '',
+        ),
+        filter(
+          (job) =>
+            !filters.jobStatus.length ||
+            filters.jobStatus.some(
+              (jobStatus) =>
+                jobStatus.value ===
+                selectResourceFieldValue(job, fields.jobStatus)?.option?.id,
+            ),
+        ),
       ),
-    [unsortedJobs],
+    [unsortedJobs, filters],
   )
 
   const frameRef = useRef<HTMLDivElement>(null)
@@ -113,7 +128,7 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
             justifyContent="space-between"
           >
             <Typography variant="h4">Jobs Schedule</Typography>
-            <Box>
+            <Stack gap={1}>
               <Button
                 size="small"
                 variant="text"
@@ -137,7 +152,17 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
               >
                 <span className="ChartsButtonText">Charts</span>
               </Button>
-            </Box>
+              <FiltersControl
+                jobSchema={jobSchema}
+                filters={filters}
+                onJobStatusChange={(statuses) =>
+                  setFilters((filters) => ({
+                    ...filters,
+                    jobStatus: statuses,
+                  }))
+                }
+              />
+            </Stack>
           </Stack>
 
           <Collapse in={showCharts}>
