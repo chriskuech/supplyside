@@ -40,11 +40,15 @@ export class QuickBooksAccountService {
     client: OAuthClient,
     accountId: string,
   ): Promise<void> {
-    const allQuickBooksAccounts = await this.quickBooksApiService.query(
+    const accountResponses = await this.quickBooksApiService.queryAllPages(
       accountId,
       client,
       { entity: 'Account' },
       accountQuerySchema,
+    )
+
+    const quickBooksAccounts = accountResponses.flatMap(
+      (accountResponse) => accountResponse.QueryResponse.Account ?? [],
     )
 
     const accountFields = await this.schemaFieldService.list(accountId)
@@ -53,12 +57,12 @@ export class QuickBooksAccountService {
       this.syncQuickBooksAccountField(
         accountId,
         accountFields,
-        allQuickBooksAccounts,
+        quickBooksAccounts,
       ),
       this.syncQuickBooksIncomeAccountField(
         accountId,
         accountFields,
-        allQuickBooksAccounts,
+        quickBooksAccounts,
       ),
     ])
   }
@@ -66,12 +70,11 @@ export class QuickBooksAccountService {
   async syncQuickBooksAccountField(
     accountId: string,
     accountFields: SchemaField[],
-    allQuickBooksAccounts: AccountQuery,
+    allQuickBooksAccounts: Account['Account'][],
   ): Promise<void> {
-    const quickBooksAccounts =
-      allQuickBooksAccounts.QueryResponse.Account?.filter(
-        (a) => a.AccountType !== PAYABLE_ACCOUNTS_TYPE,
-      )
+    const quickBooksAccounts = allQuickBooksAccounts?.filter(
+      (a) => a.AccountType !== PAYABLE_ACCOUNTS_TYPE,
+    )
     const quickBooksAccountField = accountFields.find(
       (field) => field.templateId === fields.quickBooksAccount.templateId,
     )
@@ -88,12 +91,11 @@ export class QuickBooksAccountService {
   async syncQuickBooksIncomeAccountField(
     accountId: string,
     accountFields: SchemaField[],
-    allQuickBooksAccounts: AccountQuery,
+    allQuickBooksAccounts: Account['Account'][],
   ): Promise<void> {
-    const quickBooksAccounts =
-      allQuickBooksAccounts.QueryResponse.Account?.filter(
-        (a) => a.AccountType === INCOME_ACCOUNTS_TYPE,
-      )
+    const quickBooksAccounts = allQuickBooksAccounts?.filter(
+      (a) => a.AccountType === INCOME_ACCOUNTS_TYPE,
+    )
 
     const quickBooksIncomeAccountField = accountFields.find(
       (field) => field.templateId === fields.quickBooksIncomeAccount.templateId,
