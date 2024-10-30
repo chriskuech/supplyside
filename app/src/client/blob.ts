@@ -8,7 +8,9 @@ export const createBlob = async (accountId: string, file: File) => {
     '/api/accounts/{accountId}/blobs/',
     {
       headers: {
-        'Content-Type': file.type,
+        'Content-Type': /\.(step|stp)$/i.test(file.name)
+          ? 'model/step'
+          : file.type,
       },
       params: {
         path: { accountId },
