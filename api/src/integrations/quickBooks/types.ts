@@ -35,6 +35,11 @@ export type QueryOptions = {
   maxResults?: number
 }
 
+export type QueryAllPagesOptions = {
+  entity: Entity
+  where?: string
+}
+
 export type InvoiceLine = {
   itemId: string
   quantity: number

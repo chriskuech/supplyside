@@ -13,16 +13,11 @@ import {
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
-import { difference, range } from 'remeda'
+import { difference } from 'remeda'
 import { QuickBooksApiService } from './QuickBooksApiService'
-import { MAX_ENTITIES_PER_PAGE } from './constants'
 import { handleNotFoundError } from './errors'
 import { mapValue } from './mapValue'
-import {
-  countQuerySchema,
-  readVendorSchema,
-  vendorQuerySchema,
-} from './schemas'
+import { readVendorSchema, vendorQuerySchema } from './schemas'
 import { Vendor } from './types'
 
 @injectable()
@@ -53,31 +48,11 @@ export class QuickBooksVendorService {
     client: OAuthClient,
     accountId: string,
   ): Promise<void> {
-    const quickBooksVendorsCount = await this.quickBooksApiService.query(
+    const vendorResponses = await this.quickBooksApiService.queryAllPages(
       accountId,
       client,
-      { entity: 'Vendor', getCount: true },
-      countQuerySchema,
-    )
-    const totalQuickBooksVendors =
-      quickBooksVendorsCount.QueryResponse.totalCount
-    const numberOfRequests = Math.ceil(
-      totalQuickBooksVendors / MAX_ENTITIES_PER_PAGE,
-    )
-
-    const vendorResponses = await Promise.all(
-      range(0, numberOfRequests).map((i) =>
-        this.quickBooksApiService.query(
-          accountId,
-          client,
-          {
-            entity: 'Vendor',
-            startPosition: i * MAX_ENTITIES_PER_PAGE + 1,
-            maxResults: MAX_ENTITIES_PER_PAGE,
-          },
-          vendorQuerySchema,
-        ),
-      ),
+      { entity: 'Vendor' },
+      vendorQuerySchema,
     )
 
     const quickBooksVendors = vendorResponses.flatMap(
