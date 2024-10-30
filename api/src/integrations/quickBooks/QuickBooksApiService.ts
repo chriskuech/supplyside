@@ -1,6 +1,7 @@
 import OAuthClient, { MakeApiCallParams } from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
 import { z } from 'zod'
+import { MAX_ENTITIES_PER_PAGE } from './constants'
 import { QuickBooksConfigService } from './QuickBooksConfigService'
 import { QuickBooksTokenService } from './QuickBooksTokenService'
 import { QueryOptions } from './types'
@@ -32,7 +33,13 @@ export class QuickBooksApiService {
   async query<T>(
     accountId: string,
     client: OAuthClient,
-    { entity, getCount, maxResults, startPosition, where }: QueryOptions,
+    {
+      entity,
+      getCount,
+      maxResults = MAX_ENTITIES_PER_PAGE,
+      startPosition,
+      where,
+    }: QueryOptions,
     schema: z.ZodType<T>,
   ): Promise<T> {
     const mappedWhere = where && encodeURIComponent(where)
