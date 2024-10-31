@@ -1,16 +1,11 @@
 import { ConfigService } from '@supplyside/api/ConfigService'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import SmtpService from '@supplyside/api/integrations/SmtpService'
-import {
-  fields,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, selectResourceFieldValue } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 import { AccountService } from '../account/AccountService'
 import { BlobService } from '../blob/BlobService'
 import { ResourceService } from '../resource/ResourceService'
-import { SchemaService } from '../schema/SchemaService'
 import { PoRenderingService } from './PoRenderingService'
 
 @injectable()
@@ -22,26 +17,11 @@ export class PoService {
     private readonly poRenderingService: PoRenderingService,
     @inject(PrismaService) private readonly prisma: PrismaService,
     @inject(ResourceService) private readonly resourceService: ResourceService,
-    @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(SmtpService) private readonly smtpService: SmtpService,
     @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
   async createPo(accountId: string, resourceId: string) {
-    const schema = await this.schemaService.readMergedSchema(
-      accountId,
-      'Purchase',
-    )
-
-    const documentFieldId = selectSchemaFieldUnsafe(
-      schema,
-      fields.document,
-    ).fieldId
-    const issuedDateFieldId = selectSchemaFieldUnsafe(
-      schema,
-      fields.issuedDate,
-    ).fieldId
-
     const buffer = await this.poRenderingService.renderPo(accountId, resourceId)
 
     const [blob, resource] = await Promise.all([
@@ -58,10 +38,13 @@ export class PoService {
     )?.date
 
     if (!existingIssuedDate) {
-      await this.resourceService.updateResourceField(accountId, resourceId, {
-        fieldId: issuedDateFieldId,
-        valueInput: { date: new Date().toISOString() },
-      })
+      await this.resourceService.updateResourceField(
+        accountId,
+        'Purchase',
+        resourceId,
+        fields.issuedDate,
+        { date: new Date().toISOString() },
+      )
     }
 
     const vendorName = selectResourceFieldValue(resource, fields.vendor)
@@ -82,10 +65,13 @@ export class PoService {
       },
     })
 
-    await this.resourceService.updateResourceField(accountId, resourceId, {
-      fieldId: documentFieldId,
-      valueInput: { fileId },
-    })
+    await this.resourceService.updateResourceField(
+      accountId,
+      'Purchase',
+      resourceId,
+      fields.document,
+      { fileId },
+    )
   }
 
   async sendPo(accountId: string, resourceId: string) {

@@ -204,10 +204,13 @@ export class QuickBooksCustomerService {
 
     assert(quickBooksCustomerIdFieldId, 'quickBooksCustomerId field not found')
 
-    await this.resourceService.updateResourceField(accountId, customer.id, {
-      fieldId: quickBooksCustomerIdFieldId,
-      valueInput: { string: quickBooksCustomer.Customer.Id },
-    })
+    await this.resourceService.updateResourceField(
+      accountId,
+      'Customer',
+      customer.id,
+      fields.quickBooksCustomerId,
+      { string: quickBooksCustomer.Customer.Id },
+    )
 
     return quickBooksCustomer
   }

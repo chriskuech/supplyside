@@ -3,11 +3,10 @@ import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { ConflictError } from '@supplyside/api/integrations/fastify/ConflictError'
 import {
   Cost,
-  FieldReference,
+  FieldTemplate,
   Resource,
   ResourceType,
   ResourceTypeSchema,
-  Schema,
   SchemaField,
   Value,
   ValueInput,
@@ -222,16 +221,15 @@ export class ResourceService {
 
     const entity = mapResourceModelToEntity(model)
 
-    await this.handleResourceUpdate({
+    await this.handleResourceUpdate(
       accountId,
-      resource: entity,
-      schema,
-      updatedFields: resourceFields.map((field) => ({
+      entity,
+      resourceFields.map((field) => ({
         field: selectSchemaFieldUnsafe(schema, field),
         valueInput:
           selectResourceFieldValue(entity, field) ?? fail('Value not found'),
       })),
-    })
+    )
 
     return entity
   }
@@ -355,16 +353,15 @@ export class ResourceService {
 
     const entity = await this.read(accountId, resourceId)
 
-    await this.handleResourceUpdate({
+    await this.handleResourceUpdate(
       accountId,
-      schema,
-      resource: entity,
-      updatedFields: fields.map((field) => ({
+      entity,
+      fields.map((field) => ({
         field: selectSchemaFieldUnsafe(schema, field),
         valueInput:
           selectResourceFieldValue(entity, field) ?? fail('Value not found'),
       })),
-    })
+    )
 
     return entity
   }
@@ -392,14 +389,23 @@ export class ResourceService {
 
   async updateResourceField(
     accountId: string,
+    resourceType: ResourceType,
     resourceId: string,
-    data: {
-      fieldId: string
-      valueInput: ValueInput
-    },
+    fieldTemplate: FieldTemplate,
+    valueInput: ValueInput,
   ) {
+    const schema = await this.schemaService.readMergedSchema(
+      accountId,
+      resourceType,
+    )
+
     return await this.update(accountId, resourceId, {
-      fields: [data],
+      fields: [
+        {
+          fieldId: selectSchemaFieldUnsafe(schema, fieldTemplate).fieldId,
+          valueInput,
+        },
+      ],
     })
   }
 
@@ -501,19 +507,22 @@ export class ResourceService {
       .parse(results)
   }
 
-  async recalculateItemizedCosts(accountId: string, resourceId: string) {
+  async recalculateItemizedCosts(
+    accountId: string,
+    resourceType: ResourceType,
+    resourceId: string,
+  ) {
     const resource = await this.read(accountId, resourceId)
-    const schema = await this.schemaService.readMergedSchema(
-      accountId,
-      resource.type,
-    )
 
     const subtotal =
       selectResourceFieldValue(resource, fields.subtotalCost)?.number ?? 0
 
-    await this.updateResourceField(accountId, resourceId, {
-      fieldId: selectSchemaFieldUnsafe(schema, fields.itemizedCosts).fieldId,
-      valueInput: {
+    await this.updateResourceField(
+      accountId,
+      resourceType,
+      resourceId,
+      fields.itemizedCosts,
+      {
         number: pipe(
           resource.costs,
           map((cost) =>
@@ -522,7 +531,7 @@ export class ResourceService {
           sum(),
         ),
       },
-    })
+    )
   }
 
   async recalculateSubtotalCost(
@@ -530,12 +539,6 @@ export class ResourceService {
     resourceType: ResourceType,
     resourceId: string,
   ) {
-    const schema = await this.schemaService.readMergedSchema(
-      accountId,
-      resourceType,
-      true,
-    )
-
     const lines = await this.list(
       accountId,
       resourceType === 'Job' ? 'JobLine' : 'PurchaseLine',
@@ -554,135 +557,137 @@ export class ResourceService {
       sum(),
     )
 
-    await this.updateResourceField(accountId, resourceId, {
-      fieldId: selectSchemaFieldUnsafe(schema, fields.subtotalCost)?.fieldId,
-      valueInput: {
-        number: Number(subTotal), // TODO: this is ignoring that subTotal is bigint
-      },
-    })
+    await this.updateResourceField(
+      accountId,
+      resourceType,
+      resourceId,
+      fields.subtotalCost,
+      { number: Number(subTotal) }, // TODO: this is ignoring that subTotal is bigint
+    )
   }
 
-  private async handleResourceUpdate({
-    accountId,
-    resource,
-    updatedFields,
-  }: {
-    accountId: string
-    schema: Schema
-    resource: Resource
-    updatedFields: FieldUpdate[]
-  }) {
-    if (
-      resource.type === 'Job' &&
+  private async handleResourceUpdate(
+    accountId: string,
+    resource: Resource,
+    updatedFields: FieldUpdate[],
+  ) {
+    const isUpdated = (fieldTemplate: FieldTemplate) =>
       updatedFields.some(
-        (rf) => rf.field.templateId === fields.customer.templateId,
+        (rf) => rf.field.templateId === fieldTemplate.templateId,
       )
-    ) {
-      const jobLines = await this.list(accountId, 'JobLine', {
-        where: {
-          '==': [{ var: fields.job.name }, resource.id],
-        },
-      })
 
-      await this.updateJobLinesCustomerName(
-        accountId,
-        resource,
-        jobLines.map((line) => line.id),
-      )
-    }
-
-    if (
-      resource.type === 'Purchase' &&
-      updatedFields.some(
-        (rf) => rf.field.templateId === fields.vendor.templateId,
-      )
-    ) {
-      const purchaseLines = await this.list(accountId, 'PurchaseLine', {
-        where: {
-          '==': [{ var: fields.purchase.name }, resource.id],
-        },
-      })
-
-      await this.updatePurchaseLinesVendorName(
-        accountId,
-        resource,
-        purchaseLines.map((line) => line.id),
-      )
-    }
-
-    if (
-      resource.type === 'PurchaseLine' &&
-      updatedFields.some(
-        (rf) => rf.field.templateId === fields.totalCost.templateId,
-      )
-    ) {
-      const purchaseId = selectResourceFieldValue(resource, fields.purchase)
-        ?.resource?.id
-
-      if (purchaseId) {
-        await this.recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
+    if (resource.type === 'Job') {
+      if (isUpdated(fields.customer)) {
+        await this.updateChildren(accountId, resource.id, {
+          childResourceType: 'JobLine',
+          backlinkFieldTemplate: fields.job,
+          field: fields.customer,
+          valueInput: {
+            resourceId:
+              selectResourceFieldValue(resource, fields.customer)?.resource
+                ?.id ?? null,
+          },
+        })
       }
-
-      const billId = selectResourceFieldValue(resource, fields.bill)?.resource
-        ?.id
-      if (billId) {
-        await this.recalculateSubtotalCost(accountId, 'Bill', billId)
+      if (isUpdated(fields.needDate)) {
+        await this.updateChildren(accountId, resource.id, {
+          childResourceType: 'JobLine',
+          backlinkFieldTemplate: fields.job,
+          field: fields.needDate,
+          valueInput: {
+            date:
+              selectResourceFieldValue(resource, fields.needDate)?.date ?? null,
+          },
+        })
       }
     }
 
-    if (
-      resource.type === 'PurchaseLine' &&
-      updatedFields.some(
-        (rf) => rf.field.templateId === fields.purchase.templateId,
-      )
-    ) {
+    if (resource.type === 'JobLine') {
+      const jobId = selectResourceFieldValue(resource, fields.job)?.resource?.id
+      if (jobId) {
+        if (isUpdated(fields.totalCost)) {
+          await this.recalculateSubtotalCost(accountId, 'Job', jobId)
+        }
+
+        if (isUpdated(fields.job)) {
+          const job = await this.read(accountId, jobId)
+
+          await this.updateChildren(accountId, jobId, {
+            childResourceType: 'JobLine',
+            backlinkFieldTemplate: fields.job,
+            field: fields.customer,
+            valueInput: {
+              resourceId:
+                selectResourceFieldValue(job, fields.customer)?.resource?.id ??
+                null,
+            },
+          })
+
+          await this.updateChildren(accountId, jobId, {
+            childResourceType: 'JobLine',
+            backlinkFieldTemplate: fields.job,
+            field: fields.needDate,
+            valueInput: {
+              date:
+                selectResourceFieldValue(job, fields.needDate)?.date ?? null,
+            },
+          })
+        }
+      }
+    }
+
+    if (resource.type === 'Purchase') {
+      if (isUpdated(fields.vendor)) {
+        await this.updateChildren(accountId, resource.id, {
+          childResourceType: 'PurchaseLine',
+          backlinkFieldTemplate: fields.purchase,
+          field: fields.vendor,
+          valueInput: {
+            resourceId:
+              selectResourceFieldValue(resource, fields.vendor)?.resource?.id ??
+              null,
+          },
+        })
+      }
+
+      if (isUpdated(fields.job) || isUpdated(fields.purchaseStatus)) {
+        const jobId = selectResourceFieldValue(resource, fields.job)?.resource
+          ?.id
+        if (jobId) {
+          await this.recalculateReceivedAllPurchases(accountId, jobId)
+        }
+      }
+    }
+
+    if (resource.type === 'PurchaseLine') {
       const purchaseId = selectResourceFieldValue(resource, fields.purchase)
         ?.resource?.id
 
-      if (purchaseId) {
+      if (isUpdated(fields.totalCost)) {
+        if (purchaseId) {
+          await this.recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
+        }
+
+        const billId = selectResourceFieldValue(resource, fields.bill)?.resource
+          ?.id
+        if (billId) {
+          await this.recalculateSubtotalCost(accountId, 'Bill', billId)
+        }
+      }
+
+      if (isUpdated(fields.purchase) && purchaseId) {
         const purchase = await this.read(accountId, purchaseId)
-        await this.updatePurchaseLinesVendorName(accountId, purchase, [
+        await this.updateResourceField(
+          accountId,
+          'PurchaseLine',
           resource.id,
-        ])
-      }
-    }
-
-    if (
-      resource.type === 'JobLine' &&
-      updatedFields.some(
-        (rf) => rf.field.templateId === fields.totalCost.templateId,
-      )
-    ) {
-      const jobId = selectResourceFieldValue(resource, fields.job)?.resource?.id
-
-      if (jobId) {
-        await this.recalculateSubtotalCost(accountId, 'Job', jobId)
-      }
-    }
-
-    if (
-      resource.type === 'JobLine' &&
-      updatedFields.some((rf) => rf.field.templateId === fields.job.templateId)
-    ) {
-      const jobId = selectResourceFieldValue(resource, fields.job)?.resource?.id
-
-      if (jobId) {
-        const job = await this.read(accountId, jobId)
-        await this.updateJobLinesCustomerName(accountId, job, [resource.id])
-      }
-    }
-
-    if (
-      resource.type === 'Purchase' &&
-      updatedFields.some((rf) =>
-        [fields.job.templateId, fields.purchaseStatus.templateId].includes(
-          rf.field.templateId as string,
-        ),
-      )
-    ) {
-      const jobId = selectResourceFieldValue(resource, fields.job)?.resource?.id
-      if (jobId) {
-        await this.recalculateReceivedAllPurchases(accountId, jobId)
+          fields.vendor,
+          {
+            resourceId:
+              selectResourceFieldValue(purchase, fields.vendor)?.resource?.id ??
+              null,
+          },
+        )
       }
     }
   }
@@ -879,7 +884,7 @@ export class ResourceService {
     backLinkFieldRef,
     resourceType,
   }: ResourceCopyParams & {
-    backLinkFieldRef: FieldReference
+    backLinkFieldRef: FieldTemplate
     resourceType: ResourceType
   }) {
     const lineResourceType = resourceType === 'Job' ? 'JobLine' : 'PurchaseLine'
@@ -955,7 +960,7 @@ export class ResourceService {
   async findResourceByUniqueValue(
     accountId: string,
     resourceType: ResourceType,
-    fieldTemplate: FieldReference,
+    fieldTemplate: FieldTemplate,
     valueInput: ValueInput,
   ) {
     const resourceSchema = await this.schemaService.readMergedSchema(
@@ -986,9 +991,8 @@ export class ResourceService {
     accountId: string,
     resourceId: string,
   ) {
-    const [job, jobSchema, purchases] = await Promise.all([
+    const [job, purchases] = await Promise.all([
       this.read(accountId, resourceId),
-      this.schemaService.readMergedSchema(accountId, 'Job'),
       this.list(accountId, 'Purchase', {
         where: {
           '==': [{ var: fields.job.name }, resourceId],
@@ -996,10 +1000,12 @@ export class ResourceService {
       }),
     ])
 
-    await this.updateResourceField(accountId, job.id, {
-      fieldId: selectSchemaFieldUnsafe(jobSchema, fields.receivedAllPurchases)
-        .fieldId,
-      valueInput: {
+    await this.updateResourceField(
+      accountId,
+      'Job',
+      job.id,
+      fields.receivedAllPurchases,
+      {
         boolean: purchases.every((purchase) =>
           [
             purchaseStatusOptions.received.templateId,
@@ -1010,89 +1016,40 @@ export class ResourceService {
           ),
         ),
       },
+    )
+  }
+
+  private async updateChildren(
+    accountId: string,
+    resourceId: string,
+    {
+      childResourceType,
+      backlinkFieldTemplate,
+      field,
+      valueInput,
+    }: {
+      childResourceType: ResourceType
+      backlinkFieldTemplate: FieldTemplate
+      field: FieldTemplate
+      valueInput: ValueInput
+    },
+  ) {
+    const children = await this.list(accountId, childResourceType, {
+      where: {
+        '==': [{ var: backlinkFieldTemplate.name }, resourceId],
+      },
     })
-  }
-
-  private async updateJobLinesCustomerName(
-    accountId: string,
-    job: Resource,
-    jobLineIds: string[],
-  ) {
-    const jobLineSchema = await this.schemaService.readMergedSchema(
-      accountId,
-      'JobLine',
-    )
-    const customerFieldId = selectSchemaFieldUnsafe(
-      jobLineSchema,
-      fields.customer,
-    ).fieldId
-
-    const jobSchema = await this.schemaService.readMergedSchema(
-      accountId,
-      'Job',
-    )
-    const jobCustomerFieldId = selectSchemaFieldUnsafe(
-      jobSchema,
-      fields.customer,
-    ).fieldId
-
-    const customerResourceId = selectResourceFieldValue(job, {
-      fieldId: jobCustomerFieldId,
-    })?.resource?.id
-
-    return Promise.all(
-      jobLineIds.map(async (jobLineId) => {
-        await this.update(accountId, jobLineId, {
-          fields: [
-            {
-              fieldId: customerFieldId,
-              valueInput: { resourceId: customerResourceId ?? null },
-            },
-          ],
-        })
-      }),
-    )
-  }
-
-  private async updatePurchaseLinesVendorName(
-    accountId: string,
-    purchase: Resource,
-    purchaseLineIds: string[],
-  ) {
-    const purchaseLineSchema = await this.schemaService.readMergedSchema(
-      accountId,
-      'PurchaseLine',
-    )
-    const vendorFieldId = selectSchemaFieldUnsafe(
-      purchaseLineSchema,
-      fields.vendor,
-    ).fieldId
-
-    const purchaseSchema = await this.schemaService.readMergedSchema(
-      accountId,
-      'Purchase',
-    )
-
-    const jobVendorFieldId = selectSchemaFieldUnsafe(
-      purchaseSchema,
-      fields.vendor,
-    ).fieldId
-
-    const vendorResourceId = selectResourceFieldValue(purchase, {
-      fieldId: jobVendorFieldId,
-    })?.resource?.id
 
     await Promise.all(
-      purchaseLineIds.map((purchaseLineId) => {
-        return this.update(accountId, purchaseLineId, {
-          fields: [
-            {
-              fieldId: vendorFieldId,
-              valueInput: { resourceId: vendorResourceId ?? null },
-            },
-          ],
-        })
-      }),
+      children.map((child) =>
+        this.updateResourceField(
+          accountId,
+          childResourceType,
+          child.id,
+          field,
+          valueInput,
+        ),
+      ),
     )
   }
 }
