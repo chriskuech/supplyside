@@ -17,6 +17,7 @@ import {
   sumBy,
   mapValues,
   range,
+  sortBy,
 } from 'remeda'
 import {
   billStatusOptions,
@@ -31,7 +32,7 @@ import { useMemo } from 'react'
 import { ChartsNoDataOverlay } from '@mui/x-charts/ChartsOverlay'
 import { Typography } from '@mui/material'
 import { formatMoney } from '@/lib/format'
-import { billStatusColors } from '@/lib/constants/status'
+import { billStatusColors, billStatusOrder } from '@/lib/constants/status'
 
 dayjs.extend(weekOfYear)
 dayjs.extend(isBetween)
@@ -122,11 +123,13 @@ export default function CashflowBarChart({ resources }: Props) {
       ),
     )
 
-    const totalsByStatuses = Object.entries(totalCostByStatusAndWeeks).map(
-      ([key, value]) => ({
+    const totalsByStatuses = pipe(
+      Object.entries(totalCostByStatusAndWeeks),
+      map(([key, value]) => ({
         statusTemplateId: key,
         totalsByWeek: weeks.map((week) => value[week] ?? 0),
-      }),
+      })),
+      sortBy(({ statusTemplateId }) => billStatusOrder[statusTemplateId] ?? 0),
     )
 
     return totalsByStatuses
