@@ -156,7 +156,7 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
             </Stack>
             <FiltersControl
               jobSchema={jobSchema}
-              filters={filters}
+              jobStatuses={filters.jobStatuses}
               onJobStatusChange={(statuses) =>
                 setFilters((filters) => ({
                   ...filters,

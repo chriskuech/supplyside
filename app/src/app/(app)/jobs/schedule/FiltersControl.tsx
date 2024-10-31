@@ -13,15 +13,13 @@ import {
 type Props = {
   jobSchema: Schema
   onJobStatusChange: (statuses: Option[]) => void
-  filters: {
-    jobStatuses: Option[] | null
-  }
+  jobStatuses: Option[] | null
 }
 
-export default function FiltersControl({
+export default function JobStatusFilterControl({
   jobSchema,
   onJobStatusChange,
-  filters,
+  jobStatuses,
 }: Props) {
   const allJobStatusOptions = useMemo(
     () => selectSchemaField(jobSchema, fields.jobStatus)?.options ?? [],
@@ -32,11 +30,9 @@ export default function FiltersControl({
     () =>
       allJobStatusOptions.filter(
         (option) =>
-          !filters.jobStatuses?.some(
-            (value) => value.templateId === option.templateId,
-          ),
+          !jobStatuses?.some((value) => value.templateId === option.templateId),
       ),
-    [allJobStatusOptions, filters],
+    [allJobStatusOptions, jobStatuses],
   )
 
   const defaultJobStatusOptions = useMemo(
@@ -58,7 +54,7 @@ export default function FiltersControl({
     <FormControl>
       <FormLabel>Job Status</FormLabel>
       <Autocomplete
-        value={filters.jobStatuses ?? defaultJobStatusOptions}
+        value={jobStatuses ?? defaultJobStatusOptions}
         onChange={(e, value) => onJobStatusChange(value)}
         getOptionLabel={(option) => option.name}
         multiple
