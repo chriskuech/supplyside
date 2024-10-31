@@ -1,12 +1,7 @@
 import { ConfigService } from '@supplyside/api/ConfigService'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import {
-  Resource,
-  fields,
-  selectResourceFieldValue,
-  selectSchemaField,
-} from '@supplyside/model'
+import { Resource, fields, selectResourceFieldValue } from '@supplyside/model'
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
@@ -81,22 +76,13 @@ export class QuickBooksInvoiceService {
       })
       .then((data) => readInvoiceSchema.parse(data.json))
 
-    const jobSchema = await this.schemaService.readMergedSchema(
+    await this.resourceService.updateResourceField(
       accountId,
       'Job',
-    )
-
-    const quickBooksInvoiceIdField = selectSchemaField(
-      jobSchema,
+      job.id,
       fields.quickBooksInvoiceId,
-    )?.fieldId
-
-    assert(quickBooksInvoiceIdField, 'quickBooksInvoiceId field not found')
-
-    await this.resourceService.updateResourceField(accountId, job.id, {
-      fieldId: quickBooksInvoiceIdField,
-      valueInput: { string: quickBooksInvoice.Invoice.Id },
-    })
+      { string: quickBooksInvoice.Invoice.Id },
+    )
 
     return quickBooksInvoice
   }

@@ -7,7 +7,6 @@ import {
   fields,
   Resource,
   selectResourceFieldValue,
-  selectSchemaField,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import assert from 'assert'
@@ -193,21 +192,13 @@ export class QuickBooksCustomerService {
       })
       .then((data) => readCustomerSchema.parse(data.json))
 
-    const customerSchema = await this.schemaService.readMergedSchema(
+    await this.resourceService.updateResourceField(
       accountId,
       'Customer',
-    )
-    const quickBooksCustomerIdFieldId = selectSchemaField(
-      customerSchema,
+      customer.id,
       fields.quickBooksCustomerId,
-    )?.fieldId
-
-    assert(quickBooksCustomerIdFieldId, 'quickBooksCustomerId field not found')
-
-    await this.resourceService.updateResourceField(accountId, customer.id, {
-      fieldId: quickBooksCustomerIdFieldId,
-      valueInput: { string: quickBooksCustomer.Customer.Id },
-    })
+      { string: quickBooksCustomer.Customer.Id },
+    )
 
     return quickBooksCustomer
   }

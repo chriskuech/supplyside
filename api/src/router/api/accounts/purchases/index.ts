@@ -8,7 +8,6 @@ import {
   fields,
   purchaseStatusOptions,
   selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -51,7 +50,6 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
           'Purchase',
         )
 
-        const field = selectSchemaFieldUnsafe(schema, fields.purchaseStatus)
         const option = selectSchemaFieldOptionUnsafe(
           schema,
           fields.purchaseStatus,
@@ -61,11 +59,10 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
         await poService.sendPo(req.params.accountId, req.params.resourceId)
         await resourceService.updateResourceField(
           req.params.accountId,
+          'Purchase',
           req.params.resourceId,
-          {
-            fieldId: field.fieldId,
-            valueInput: { optionId: option.id },
-          },
+          fields.purchaseStatus,
+          { optionId: option.id },
         )
       },
     })

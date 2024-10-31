@@ -5,7 +5,6 @@ import {
   fields,
   jobStatusOptions,
   selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import assert from 'assert'
 import { inject, injectable } from 'inversify'
@@ -300,11 +299,6 @@ export class QuickBooksService {
                 'Bill',
               )
 
-              const billStatusFieldId = selectSchemaFieldUnsafe(
-                billSchema,
-                fields.billStatus,
-              ).fieldId
-
               const paidOptionId = selectSchemaFieldOptionUnsafe(
                 billSchema,
                 fields.billStatus,
@@ -313,11 +307,10 @@ export class QuickBooksService {
 
               await this.resourceService.updateResourceField(
                 accountId,
+                'Bill',
                 bill.id,
-                {
-                  fieldId: billStatusFieldId,
-                  valueInput: { optionId: paidOptionId },
-                },
+                fields.billStatus,
+                { optionId: paidOptionId },
               )
             }
           }),
@@ -364,11 +357,6 @@ export class QuickBooksService {
                 'Job',
               )
 
-              const jobStatusFieldId = selectSchemaFieldUnsafe(
-                jobSchema,
-                fields.jobStatus,
-              ).fieldId
-
               const paidOptionId = selectSchemaFieldOptionUnsafe(
                 jobSchema,
                 fields.jobStatus,
@@ -377,11 +365,10 @@ export class QuickBooksService {
 
               await this.resourceService.updateResourceField(
                 accountId,
+                'Job',
                 job.id,
-                {
-                  fieldId: jobStatusFieldId,
-                  valueInput: { optionId: paidOptionId },
-                },
+                fields.jobStatus,
+                { optionId: paidOptionId },
               )
             }
           }),

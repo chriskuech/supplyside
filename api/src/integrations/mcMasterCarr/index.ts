@@ -166,18 +166,13 @@ export class McMasterService {
       throw new Error('punchout session url not found')
     }
 
-    const purchaseSchema = await this.schemaService.readMergedSchema(
+    await this.resourceService.updateResourceField(
       accountId,
       'Purchase',
-    )
-    const fieldId = selectSchemaFieldUnsafe(
-      purchaseSchema,
+      resourceId,
       fields.punchoutSessionUrl,
-    ).fieldId
-    await this.resourceService.updateResourceField(accountId, resourceId, {
-      fieldId,
-      valueInput: { string: punchoutSessionUrl },
-    })
+      { string: punchoutSessionUrl },
+    )
 
     return punchoutSessionUrl
   }
@@ -300,21 +295,13 @@ export class McMasterService {
 
     this.authenticatePoom(sender.domain, sender.identity, sender.sharedSecret)
 
-    const purchaseSchema = await this.schemaService.readMergedSchema(
+    await this.resourceService.updateResourceField(
       accountId,
       'Purchase',
-    )
-
-    const issuedDateFieldId = selectSchemaFieldUnsafe(
-      purchaseSchema,
+      orderId,
       fields.issuedDate,
-    ).fieldId
-    await this.resourceService.updateResourceField(accountId, orderId, {
-      fieldId: issuedDateFieldId,
-      valueInput: {
-        date: orderDate.toISOString(),
-      },
-    })
+      { date: orderDate.toISOString() },
+    )
 
     for (const line of lines) {
       const {
