@@ -612,26 +612,28 @@ export class ResourceService {
         if (isUpdated(fields.job)) {
           const job = await this.read(accountId, jobId)
 
-          await this.updateChildren(accountId, jobId, {
-            childResourceType: 'JobLine',
-            backlinkFieldTemplate: fields.job,
-            field: fields.customer,
-            valueInput: {
+          await this.updateResourceField(
+            accountId,
+            'JobLine',
+            resource.id,
+            fields.customer,
+            {
               resourceId:
                 selectResourceFieldValue(job, fields.customer)?.resource?.id ??
                 null,
             },
-          })
+          )
 
-          await this.updateChildren(accountId, jobId, {
-            childResourceType: 'JobLine',
-            backlinkFieldTemplate: fields.job,
-            field: fields.needDate,
-            valueInput: {
+          await this.updateResourceField(
+            accountId,
+            'JobLine',
+            resource.id,
+            fields.needDate,
+            {
               date:
                 selectResourceFieldValue(job, fields.needDate)?.date ?? null,
             },
-          })
+          )
         }
       }
     }
@@ -662,20 +664,18 @@ export class ResourceService {
     if (resource.type === 'PurchaseLine') {
       const purchaseId = selectResourceFieldValue(resource, fields.purchase)
         ?.resource?.id
+      const billId = selectResourceFieldValue(resource, fields.bill)?.resource
+        ?.id
 
-      if (isUpdated(fields.totalCost)) {
-        if (purchaseId) {
-          await this.recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
-        }
-
-        const billId = selectResourceFieldValue(resource, fields.bill)?.resource
-          ?.id
-        if (billId) {
-          await this.recalculateSubtotalCost(accountId, 'Bill', billId)
-        }
+      if (purchaseId && isUpdated(fields.totalCost)) {
+        await this.recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
       }
 
-      if (isUpdated(fields.purchase) && purchaseId) {
+      if (billId && isUpdated(fields.totalCost)) {
+        await this.recalculateSubtotalCost(accountId, 'Bill', billId)
+      }
+
+      if (purchaseId && isUpdated(fields.purchase)) {
         const purchase = await this.read(accountId, purchaseId)
         await this.updateResourceField(
           accountId,
