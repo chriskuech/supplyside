@@ -1,11 +1,17 @@
 'use client'
 
 import { PieChart, PieSeriesType } from '@mui/x-charts'
-import { groupBy, sumBy, pipe, entries, map } from 'remeda'
-import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
+import { groupBy, sumBy, pipe, entries, map, sortBy } from 'remeda'
+import {
+  fields,
+  jobStatusOptions,
+  Resource,
+  selectResourceFieldValue,
+} from '@supplyside/model'
 import { useMemo } from 'react'
 import { Typography } from '@mui/material'
 import { formatMoney } from '@/lib/format'
+import { jobStatusColors, jobStatusOrder } from '@/lib/constants/status'
 
 type Props = {
   resources: Resource[]
@@ -18,17 +24,22 @@ export default function CashflowPieChart({ resources }: Props) {
         resources,
         groupBy(
           (resource) =>
-            selectResourceFieldValue(resource, fields.jobStatus)?.option?.name,
+            selectResourceFieldValue(resource, fields.jobStatus)?.option
+              ?.templateId ?? '',
         ),
         entries(),
-        map(([status, resources], index) => ({
+        sortBy(([statusTemplateId]) => jobStatusOrder[statusTemplateId] ?? 0),
+        map(([statusTemplateId, resources], index) => ({
           id: index,
           value: sumBy(
             resources,
             (resource) =>
               selectResourceFieldValue(resource, fields.totalCost)?.number ?? 0,
           ),
-          label: status,
+          label: Object.values(jobStatusOptions).find(
+            (option) => option.templateId === statusTemplateId,
+          )?.name,
+          color: jobStatusColors[statusTemplateId],
         })),
       ),
     [resources],
