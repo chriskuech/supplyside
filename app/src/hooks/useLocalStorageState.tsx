@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 
 export default function useLocalStorageState<T>(
-  key: string,
+  key: string | undefined,
   defaultValue: T,
 ): [T, Dispatch<SetStateAction<T>>] {
   // Using ref to prevent defaultValue to be stored on local storage
@@ -9,9 +9,11 @@ export default function useLocalStorageState<T>(
   const [value, setValue] = useState<T>(defaultValue)
 
   useEffect(() => {
-    const item = window.localStorage.getItem(key)
-    if (item) {
-      setValue(JSON.parse(item))
+    if (key) {
+      const item = window.localStorage.getItem(key)
+      if (item) {
+        setValue(JSON.parse(item))
+      }
     }
 
     return () => {
@@ -21,7 +23,9 @@ export default function useLocalStorageState<T>(
 
   useEffect(() => {
     if (isMounted.current) {
-      window.localStorage.setItem(key, JSON.stringify(value))
+      if (key) {
+        window.localStorage.setItem(key, JSON.stringify(value))
+      }
     } else {
       isMounted.current = true
     }

@@ -29,6 +29,7 @@ const ThemePreferenceContext = createContext<
 const DynamicThemeProvider: FC<PropsWithChildren> = ({ children }) => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
 
+  //TODO: use useLocalStorageState, for some reason the component keeps unmounting and the hook can't store any value
   const [themePreference, setThemePreference] = useState<ThemePreference>(
     () =>
       z

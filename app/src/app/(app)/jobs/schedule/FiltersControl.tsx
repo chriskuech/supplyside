@@ -5,15 +5,17 @@ import { useMemo } from 'react'
 import {
   fields,
   jobStatusOptions,
+  Option,
   Schema,
   selectSchemaField,
 } from '@supplyside/model'
-import { Filters } from './types'
 
 type Props = {
   jobSchema: Schema
-  onJobStatusChange: (statuses: { label: string; value: string }[]) => void
-  filters: Filters
+  onJobStatusChange: (statuses: Option[]) => void
+  filters: {
+    jobStatuses: Option[] | null
+  }
 }
 
 export default function FiltersControl({
@@ -22,12 +24,7 @@ export default function FiltersControl({
   filters,
 }: Props) {
   const allJobStatusOptions = useMemo(
-    () =>
-      selectSchemaField(jobSchema, fields.jobStatus)?.options.map((option) => ({
-        label: option.name,
-        value: option.id,
-        templateId: option.templateId,
-      })) ?? [],
+    () => selectSchemaField(jobSchema, fields.jobStatus)?.options ?? [],
     [jobSchema],
   )
 
@@ -35,7 +32,9 @@ export default function FiltersControl({
     () =>
       allJobStatusOptions.filter(
         (option) =>
-          !filters.jobStatus?.some((value) => value.value === option.value),
+          !filters.jobStatuses?.some(
+            (value) => value.templateId === option.templateId,
+          ),
       ),
     [allJobStatusOptions, filters],
   )
@@ -59,8 +58,9 @@ export default function FiltersControl({
     <FormControl>
       <FormLabel>Job Status</FormLabel>
       <Autocomplete
-        value={filters.jobStatus ?? defaultJobStatusOptions}
+        value={filters.jobStatuses ?? defaultJobStatusOptions}
         onChange={(e, value) => onJobStatusChange(value)}
+        getOptionLabel={(option) => option.name}
         multiple
         options={jobStatusCurrentOptions}
         renderInput={(params) => <TextField {...params} />}

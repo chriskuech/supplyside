@@ -15,6 +15,7 @@ import {
   Typography,
 } from '@mui/material'
 import {
+  Option,
   Resource,
   Schema,
   fields,
@@ -45,7 +46,6 @@ import { DragBar } from './DragBar'
 import GanttChart from './GanttChart'
 import { GanttChartHeader } from './GanttChartHeader'
 import FiltersControl from './FiltersControl'
-import { Filters } from './types'
 import { formatMoney } from '@/lib/format'
 import useLocalStorageState from '@/hooks/useLocalStorageState'
 
@@ -55,6 +55,7 @@ const isScrolledToRight = (element: HTMLElement): boolean =>
   element.scrollLeft + element.clientWidth >= element.scrollWidth
 
 const dim = 30
+const topDim = 180
 
 const minDrawerWidth = 450
 const initialDrawerWidth = 500
@@ -75,13 +76,11 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
   const [drawerWidth, setDrawerWidth] = useState(initialDrawerWidth)
   const [scrollOffset, setScrollOffset] = useState(initialScrollOffset)
   const [minDate, setMinDate] = useState(dayjs().utc().day(0).startOf('day'))
-  const [filters, setFilters] = useLocalStorageState<Filters>(
-    'job-schedule-list',
-    {
-      jobStatus: null,
-    },
-  )
-  const topDim = showCharts ? 150 : 180
+  const [filters, setFilters] = useLocalStorageState<{
+    jobStatuses: Option[] | null
+  }>('job-schedule-list', {
+    jobStatuses: null,
+  })
 
   const jobs = useMemo(
     () =>
@@ -92,10 +91,10 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
         ),
         filter(
           (job) =>
-            !filters.jobStatus?.length ||
-            filters.jobStatus.some(
+            !filters.jobStatuses?.length ||
+            filters.jobStatuses.some(
               (jobStatus) =>
-                jobStatus.value ===
+                jobStatus.id ===
                 selectResourceFieldValue(job, fields.jobStatus)?.option?.id,
             ),
         ),
@@ -161,7 +160,7 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
               onJobStatusChange={(statuses) =>
                 setFilters((filters) => ({
                   ...filters,
-                  jobStatus: statuses,
+                  jobStatuses: statuses,
                 }))
               }
             />
