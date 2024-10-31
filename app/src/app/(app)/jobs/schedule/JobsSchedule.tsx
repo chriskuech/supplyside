@@ -47,6 +47,7 @@ import { GanttChartHeader } from './GanttChartHeader'
 import FiltersControl from './FiltersControl'
 import { Filters } from './types'
 import { formatMoney } from '@/lib/format'
+import useLocalStorageState from '@/hooks/useLocalStorageState'
 
 dayjs.extend(utc)
 
@@ -54,9 +55,8 @@ const isScrolledToRight = (element: HTMLElement): boolean =>
   element.scrollLeft + element.clientWidth >= element.scrollWidth
 
 const dim = 30
-const topDim = 150
 
-const minDrawerWidth = 300
+const minDrawerWidth = 450
 const initialDrawerWidth = 500
 const maxDrawerWidth = 800
 const clampDrawerWidth = (width: number) =>
@@ -75,7 +75,13 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
   const [drawerWidth, setDrawerWidth] = useState(initialDrawerWidth)
   const [scrollOffset, setScrollOffset] = useState(initialScrollOffset)
   const [minDate, setMinDate] = useState(dayjs().utc().day(0).startOf('day'))
-  const [filters, setFilters] = useState<Filters>({ jobStatus: [] })
+  const [filters, setFilters] = useLocalStorageState<Filters>(
+    'job-schedule-list',
+    {
+      jobStatus: null,
+    },
+  )
+  const topDim = showCharts ? 150 : 180
 
   const jobs = useMemo(
     () =>
@@ -86,7 +92,7 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
         ),
         filter(
           (job) =>
-            !filters.jobStatus.length ||
+            !filters.jobStatus?.length ||
             filters.jobStatus.some(
               (jobStatus) =>
                 jobStatus.value ===
@@ -120,49 +126,45 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
           width={`${drawerWidth}px`}
           borderRadius={0}
         >
-          <Stack
-            direction="row"
-            height={`${topDim}px`}
-            py={2}
-            px={4}
-            justifyContent="space-between"
-          >
-            <Typography variant="h4">Jobs Schedule</Typography>
-            <Stack gap={1}>
-              <Button
-                size="small"
-                variant="text"
-                onClick={() => setShowCharts((c) => !c)}
-                startIcon={
-                  <Stack direction="row" alignItems="center">
-                    <PieChart fontSize="small" />
-                    <BarChart fontSize="small" />
-                  </Stack>
-                }
-                endIcon={showCharts ? <ExpandLess /> : <ExpandMore />}
-                sx={{
-                  '.ChartsButtonText': {
-                    width: 0,
-                    overflow: 'hidden',
-                  },
-                  '&:hover .ChartsButtonText': {
-                    width: 'unset',
-                  },
-                }}
-              >
-                <span className="ChartsButtonText">Charts</span>
-              </Button>
-              <FiltersControl
-                jobSchema={jobSchema}
-                filters={filters}
-                onJobStatusChange={(statuses) =>
-                  setFilters((filters) => ({
-                    ...filters,
-                    jobStatus: statuses,
-                  }))
-                }
-              />
+          <Stack height={`${topDim}px`} py={2} px={4} gap={2}>
+            <Stack direction="row" justifyContent="space-between">
+              <Typography variant="h4">Jobs Schedule</Typography>
+              <Stack gap={1}>
+                <Button
+                  size="small"
+                  variant="text"
+                  onClick={() => setShowCharts((c) => !c)}
+                  startIcon={
+                    <Stack direction="row" alignItems="center">
+                      <PieChart fontSize="small" />
+                      <BarChart fontSize="small" />
+                    </Stack>
+                  }
+                  endIcon={showCharts ? <ExpandLess /> : <ExpandMore />}
+                  sx={{
+                    '.ChartsButtonText': {
+                      width: 0,
+                      overflow: 'hidden',
+                    },
+                    '&:hover .ChartsButtonText': {
+                      width: 'unset',
+                    },
+                  }}
+                >
+                  <span className="ChartsButtonText">Charts</span>
+                </Button>
+              </Stack>
             </Stack>
+            <FiltersControl
+              jobSchema={jobSchema}
+              filters={filters}
+              onJobStatusChange={(statuses) =>
+                setFilters((filters) => ({
+                  ...filters,
+                  jobStatus: statuses,
+                }))
+              }
+            />
           </Stack>
 
           <Collapse in={showCharts}>
