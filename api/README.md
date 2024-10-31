@@ -5,6 +5,7 @@
 - Docker
   - Enable `Host network mode` in Docker Desktop [see more](https://docs.docker.com/network/drivers/host/)
 - Poppler (`brew install poppler`)
+- VTK (`brew install vtk`)
 - WeasyPrint (`brew install weasyprint`)
 
 ## Commands

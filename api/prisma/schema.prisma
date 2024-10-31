@@ -50,18 +50,19 @@ model Account {
 }
 
 model Blob {
-  id        String @id @default(uuid()) @db.Uuid
-  accountId String @db.Uuid
-  name      String
-  mimeType  String
+  id          String @id @default(uuid()) @db.Uuid
+  accountId   String @db.Uuid
+  name        String
+  contentType String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  OwnedBy Account  @relation(name: "owner", fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  LogoFor Account? @relation(name: "logo")
-  User    User?
-  File    File[]
+  OwnedBy        Account  @relation(name: "owner", fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  LogoFor        Account? @relation(name: "logo")
+  User           User?
+  FileAsBlob     File?    @relation(name: "thumbnail")
+  FileAsThubnail File?    @relation(name: "blob")
 }
 
 model User {
@@ -193,15 +194,17 @@ model Option {
 }
 
 model File {
-  id        String @id @default(uuid()) @db.Uuid
-  accountId String @db.Uuid
-  name      String
-  blobId    String @unique @db.Uuid
+  id              String  @id @default(uuid()) @db.Uuid
+  accountId       String  @db.Uuid
+  name            String
+  blobId          String  @unique @db.Uuid
+  thumbnailBlobId String? @unique @db.Uuid
 
-  Blob      Blob        @relation(fields: [blobId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Account   Account     @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Value     Value[]
-  ValueFile ValueFile[]
+  Blob          Blob        @relation(name: "blob", fields: [blobId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ThumbnailBlob Blob?       @relation(name: "thumbnail", fields: [thumbnailBlobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  Account       Account     @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Value         Value[]
+  ValueFile     ValueFile[]
 }
 
 model Address {

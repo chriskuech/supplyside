@@ -31,7 +31,12 @@ export const PaymentControl: FC<Props> = ({ resource, size }) => {
     },
     entries(),
     map(([key, value]) => (
-      <Stack direction="row" justifyContent="space-between" spacing={1}>
+      <Stack
+        key={key}
+        direction="row"
+        justifyContent="space-between"
+        spacing={1}
+      >
         <Box>{key}</Box>
         <Box fontWeight="bold">{value}</Box>
       </Stack>

@@ -1,9 +1,14 @@
 import { exec as execCallback } from 'child_process'
 import { mkdir } from 'fs/promises'
 import { inject, injectable } from 'inversify'
+import { dirname } from 'path'
+import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 import { v4 as uuid } from 'uuid'
 import { ConfigService } from './ConfigService'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 const exec = promisify(execCallback)
 
@@ -13,8 +18,31 @@ export class OsService {
     @inject(ConfigService) private readonly configService: ConfigService,
   ) {}
 
-  async exec(command: string) {
-    return await exec(command)
+  static async exec(command: string, timeout: number = 60_000) {
+    const execing = exec(command)
+
+    if (timeout) {
+      setTimeout(() => {
+        if (execing.child.exitCode === null) {
+          const isKilled = execing.child.kill()
+          if (!isKilled) {
+            throw new Error('Failed to kill process')
+          }
+        }
+      }, timeout)
+    }
+
+    const { stdout, stderr } = await execing
+
+    if (execing.child.killed || stderr) {
+      throw new Error(stderr)
+    }
+
+    return stdout
+  }
+
+  static get dataPath() {
+    return `${__dirname}/data`
   }
 
   async withTempDir<T>(fn: (path: string) => Promise<T>): Promise<T> {
@@ -25,7 +53,7 @@ export class OsService {
 
       return await fn(path)
     } finally {
-      await exec(`rm -rf ${path}`)
+      // await exec(`rm -rf ${path}`)
     }
   }
 }

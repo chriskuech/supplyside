@@ -22,7 +22,7 @@ import { mountWebhooks } from './webhooks'
 export const createServer = async (isDev?: boolean) => {
   const app = fastify({
     logger: {
-      level: isDev ? 'debug' : 'warn',
+      level: isDev ? 'warn' : 'warn',
       transport: {
         target: 'pino-pretty',
         options: {

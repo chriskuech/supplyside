@@ -90,7 +90,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
           throw new NotFoundError('Blob not found')
         }
 
-        res.header('Content-Type', blob.mimeType)
+        res.header('Content-Type', blob.contentType)
         return blob.buffer
       },
     })

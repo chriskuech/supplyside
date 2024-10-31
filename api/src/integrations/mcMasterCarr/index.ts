@@ -2,6 +2,7 @@ import { ConfigService } from '@supplyside/api/ConfigService'
 import { accountInclude } from '@supplyside/api/domain/account/model'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
+import { OsService } from '@supplyside/api/os'
 import {
   Cxml,
   fields,
@@ -14,16 +15,11 @@ import assert, { fail } from 'assert'
 import { readFileSync } from 'fs'
 import handlebars from 'handlebars'
 import { inject, injectable } from 'inversify'
-import { dirname } from 'path'
 import { match } from 'ts-pattern'
-import { fileURLToPath } from 'url'
 import { parseStringPromise } from 'xml2js'
 import { PrismaService } from '../PrismaService'
 import { BadRequestError } from '../fastify/BadRequestError'
 import { RenderPOSRTemplateParams, posrResponseSchema } from './types'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 
 @injectable()
 export class McMasterService {
@@ -427,7 +423,7 @@ export class McMasterService {
 
 function renderTemplate(data: RenderPOSRTemplateParams): string {
   const templateFile = readFileSync(
-    `${__dirname}/data/mcmaster_posr_template.xml.hbs`,
+    `${OsService.dataPath}/mcmaster_posr_template.xml.hbs`,
     { encoding: 'utf-8' },
   )
   const template = handlebars.compile(templateFile)

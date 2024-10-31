@@ -1,10 +1,9 @@
-import { ConfigService } from '@supplyside/api/ConfigService'
 import { BlobService } from '@supplyside/api/domain/blob/BlobService'
 import { createDataUrl } from '@supplyside/api/domain/blob/util'
+import { OsService } from '@supplyside/api/os'
 import { File } from '@supplyside/model'
 import assert from 'assert'
-import { exec as execCallback } from 'child_process'
-import { mkdir, readFile, readdir, rm, writeFile } from 'fs/promises'
+import { readFile, readdir, writeFile } from 'fs/promises'
 import { inject, injectable } from 'inversify'
 import {
   ChatCompletionContentPart,
@@ -12,15 +11,12 @@ import {
   ChatCompletionContentPartText,
 } from 'openai/resources/index.mjs'
 import { P, match } from 'ts-pattern'
-import { promisify } from 'util'
-
-const exec = promisify(execCallback)
 
 @injectable()
 export class CompletionPartsService {
   constructor(
     @inject(BlobService) private readonly blobService: BlobService,
-    @inject(ConfigService) private readonly configService: ConfigService,
+    @inject(OsService) private readonly osService: OsService,
   ) {}
 
   mapFileToCompletionParts(file: File): Promise<ChatCompletionContentPart[]> {
@@ -62,7 +58,10 @@ export class CompletionPartsService {
     return {
       type: 'image_url',
       image_url: {
-        url: createDataUrl({ mimeType: file.contentType, buffer: blob.buffer }),
+        url: createDataUrl({
+          contentType: file.contentType,
+          buffer: blob.buffer,
+        }),
         detail: 'auto',
       },
     }
@@ -76,16 +75,13 @@ export class CompletionPartsService {
       file.blobId,
     )
 
-    const containerPath = `${this.configService.config.TEMP_PATH}/${file.id}`
-    await mkdir(containerPath, { recursive: true })
-
-    try {
+    return await this.osService.withTempDir(async (containerPath) => {
       const inputPath = `${containerPath}/in.pdf`
       await writeFile(inputPath, blob.buffer)
 
       const outputFileNamePrefix = 'out'
       const outputPath = `${containerPath}/${outputFileNamePrefix}`
-      await exec(`pdftoppm -png "${inputPath}" "${outputPath}"`)
+      await OsService.exec(`pdftoppm -png "${inputPath}" "${outputPath}"`)
       const containerFileNames = await readdir(containerPath)
       const base64s = await Promise.all(
         containerFileNames
@@ -102,8 +98,6 @@ export class CompletionPartsService {
           detail: 'auto',
         },
       }))
-    } finally {
-      await rm(containerPath, { recursive: true, force: true })
-    }
+    })
   }
 }

@@ -41,7 +41,7 @@ export async function GET(
   const data = await readBlobData(accountId, blobId)
   if (!data) return notFound()
 
-  const contentType = blob.mimeType
+  const contentType = blob.contentType
   const encoding = contentType.startsWith('text/') ? 'utf-8' : undefined
 
   return new NextResponse(data, {

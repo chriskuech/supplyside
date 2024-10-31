@@ -1,5 +1,5 @@
 export const createDataUrl = (params: {
-  mimeType: string
+  contentType: string
   buffer: Buffer
 }): string =>
-  `data:${params.mimeType};base64,${params.buffer.toString('base64')}`
+  `data:${params.contentType};base64,${params.buffer.toString('base64')}`

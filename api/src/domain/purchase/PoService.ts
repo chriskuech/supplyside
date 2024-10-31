@@ -123,7 +123,7 @@ export class PoService {
       templateModel: {
         // layout
         buyer_logo_base64: logoBlob?.buffer.toString('base64'),
-        buyer_logo_contenttype: logoBlob?.mimeType,
+        buyer_logo_contenttype: logoBlob?.contentType,
         buyer_company_name: account.name,
         product_url: this.configService.config.APP_BASE_URL,
 

@@ -41,7 +41,7 @@ export class BlobService {
     const blob = await this.prisma.blob.create({
       data: {
         accountId,
-        mimeType: contentType,
+        contentType: contentType,
         name: blobName,
       },
     })
@@ -63,12 +63,16 @@ export class BlobService {
       where: { accountId, id: blobId },
     })
 
-    const buffer = await this.client
-      .getContainerClient(containerName)
-      .getBlockBlobClient(blob.name)
-      .downloadToBuffer()
+    const buffer = await this.readBlobData(blob.name)
 
     return { ...blob, buffer }
+  }
+
+  private readBlobData(blobName: string): Promise<Buffer> {
+    return this.client
+      .getContainerClient(containerName)
+      .getBlockBlobClient(blobName)
+      .downloadToBuffer()
   }
 
   async deleteBlob({

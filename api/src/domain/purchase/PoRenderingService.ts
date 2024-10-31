@@ -13,10 +13,8 @@ import fs from 'fs'
 import { readFile, writeFile } from 'fs/promises'
 import Handlebars from 'handlebars'
 import { inject, injectable } from 'inversify'
-import { dirname } from 'path'
 import { isTruthy } from 'remeda'
 import { P, match } from 'ts-pattern'
-import { fileURLToPath } from 'url'
 import { AccountService } from '../account/AccountService'
 import { BlobService } from '../blob/BlobService'
 import { ResourceService } from '../resource/ResourceService'
@@ -26,9 +24,6 @@ import {
   LineViewModel,
   PurchaseViewModel,
 } from './PurchaseViewModel'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 
 @injectable()
 export class PoRenderingService {
@@ -58,7 +53,7 @@ export class PoRenderingService {
         )
 
         // Read the Handlebars template
-        const templatePath = `${__dirname}/data/PoDocument.hbs`
+        const templatePath = `${OsService.dataPath}/PoDocument.hbs`
         if (!fs.existsSync(templatePath)) {
           throw new Error(`Template file not found at ${templatePath}`)
         }
@@ -76,7 +71,7 @@ export class PoRenderingService {
 
         // Convert the HTML file to a PDF file
         const pdfPath = `${tempDir}/out.pdf`
-        await this.osService.exec(
+        await OsService.exec(
           `weasyprint '${htmlPath}' '${pdfPath}' --pdf-variant=pdf/ua-1`,
         )
         if (!fs.existsSync(pdfPath)) {
@@ -131,7 +126,7 @@ export class PoRenderingService {
 
     return {
       logoBlobDataUrl: account?.logoBlobId
-        ? `data:${blob?.mimeType};base64,${blob?.buffer.toString('base64')}`
+        ? `data:${blob?.contentType};base64,${blob?.buffer.toString('base64')}`
         : null,
       lines: await Promise.all(
         lines.map(async (line) => {
