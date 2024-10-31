@@ -10,13 +10,13 @@ import {
 import { billStatusOptions, jobStatusOptions } from '@supplyside/model'
 
 export const jobStatusColors = {
-  [jobStatusOptions.draft.templateId]: grey[400],
-  [jobStatusOptions.ordered.templateId]: purple[400],
-  [jobStatusOptions.inProcess.templateId]: lightBlue[400],
-  [jobStatusOptions.shipped.templateId]: blue[600],
-  [jobStatusOptions.invoiced.templateId]: lightGreen[400],
-  [jobStatusOptions.paid.templateId]: green[600],
-  [jobStatusOptions.canceled.templateId]: red[400],
+  [jobStatusOptions.draft.templateId]: grey[300],
+  [jobStatusOptions.ordered.templateId]: purple[300],
+  [jobStatusOptions.inProcess.templateId]: lightBlue[300],
+  [jobStatusOptions.shipped.templateId]: blue[500],
+  [jobStatusOptions.invoiced.templateId]: lightGreen[300],
+  [jobStatusOptions.paid.templateId]: green[500],
+  [jobStatusOptions.canceled.templateId]: red[300],
 }
 
 export const jobStatusOrder = {
@@ -30,11 +30,11 @@ export const jobStatusOrder = {
 }
 
 export const billStatusColors = {
-  [billStatusOptions.draft.templateId]: grey[400],
-  [billStatusOptions.submitted.templateId]: purple[400],
-  [billStatusOptions.approved.templateId]: blue[600],
-  [billStatusOptions.paid.templateId]: green[600],
-  [billStatusOptions.canceled.templateId]: red[400],
+  [billStatusOptions.draft.templateId]: grey[300],
+  [billStatusOptions.submitted.templateId]: purple[300],
+  [billStatusOptions.approved.templateId]: blue[500],
+  [billStatusOptions.paid.templateId]: green[500],
+  [billStatusOptions.canceled.templateId]: red[300],
 }
 
 export const billStatusOrder = {
