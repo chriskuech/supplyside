@@ -8,7 +8,7 @@ export const usePersistDatagridState = (storageKey: string | undefined) => {
 
   const [initialState, setInitialState] = useLocalStorageState<
     GridInitialState | undefined
-  >(storageKey, undefined)
+  >(storageKey, {})
 
   const saveStateToLocalstorage = useCallback(() => {
     if (!storageKey) return

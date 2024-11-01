@@ -6,20 +6,10 @@ export default function useLocalStorageState<T>(
 ): [T, Dispatch<SetStateAction<T>>] {
   // Using ref to prevent defaultValue to be stored on local storage
   const isMounted = useRef(false)
-  const [value, setValue] = useState<T>(defaultValue)
-
-  useEffect(() => {
-    if (key) {
-      const item = window.localStorage.getItem(key)
-      if (item) {
-        setValue(JSON.parse(item))
-      }
-    }
-
-    return () => {
-      isMounted.current = false
-    }
-  }, [key])
+  const [value, setValue] = useState<T>(() => {
+    const item = key && window.localStorage.getItem(key)
+    return item ? JSON.parse(item) : defaultValue
+  })
 
   useEffect(() => {
     if (isMounted.current) {
