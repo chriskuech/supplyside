@@ -33,6 +33,8 @@ const extractVarsFromWhere = (where: JsonLogic): string[] =>
     )
     .with({ '==': P.any }, ({ '==': [{ var: var_ }] }) => [var_])
     .with({ '!=': P.any }, ({ '!=': [{ var: var_ }] }) => [var_])
+    .with({ '<': P.any }, ({ '<': [{ var: var_ }] }) => [var_])
+    .with({ '>': P.any }, ({ '>': [{ var: var_ }] }) => [var_])
     .exhaustive()
 
 const extractVarsFromOrderBy = (orderBy: OrderBy[]): string[] =>
