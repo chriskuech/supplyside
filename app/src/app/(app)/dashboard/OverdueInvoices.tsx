@@ -9,6 +9,7 @@ import {
 } from '@supplyside/model'
 import dayjs from 'dayjs'
 import { sortBy } from 'remeda'
+import { Description } from '@mui/icons-material'
 import { readSchema } from '@/actions/schema'
 import { readResources } from '@/actions/resource'
 import ResourceListItem from '@/lib/resource/ResourceListItem'
@@ -50,9 +51,16 @@ export default async function OverdueInvoices() {
 
   return (
     <Card variant="outlined">
-      <Typography variant="h5" textAlign="center" pt={2}>
-        Overdue Invoices
-      </Typography>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="center"
+        gap={1}
+        pt={2}
+      >
+        <Description />
+        <Typography variant="h5">Overdue Invoices</Typography>
+      </Stack>
       <List>
         {!!orderedResources.length &&
           orderedResources.map((resource) => (
