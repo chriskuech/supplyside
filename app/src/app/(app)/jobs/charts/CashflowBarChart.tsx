@@ -68,7 +68,7 @@ export default function CashflowBarChart({ resources }: Props) {
       ? maxPaymentDueDate
       : today
 
-    const numberOfWeeks = endDate.diff(startDate, 'w')
+    const numberOfWeeks = Math.ceil(endDate.diff(startDate, 'w', true))
 
     const weeks = range(0, numberOfWeeks || 1).map((number) =>
       startDate.week(startDate.week() + number).format('MM/DD/YYYY'),
