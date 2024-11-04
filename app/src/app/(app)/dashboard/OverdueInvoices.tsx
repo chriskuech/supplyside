@@ -50,18 +50,18 @@ export default async function OverdueInvoices() {
   )
 
   return (
-    <Card variant="outlined">
+    <Card variant="outlined" sx={{ flex: 1 }}>
       <Stack
         direction="row"
         alignItems="center"
         justifyContent="center"
         gap={1}
-        pt={2}
+        py={2}
       >
         <Description />
         <Typography variant="h5">Overdue Invoices</Typography>
       </Stack>
-      <List>
+      <List sx={{ overflow: 'auto', height: '100%' }}>
         {!!orderedResources.length &&
           orderedResources.map((resource) => (
             <ResourceListItem

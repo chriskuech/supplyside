@@ -1,4 +1,4 @@
-import { Box, Container, Stack, Typography } from '@mui/material'
+import { Container, Stack, Typography } from '@mui/material'
 import OverdueJobs from './OverdueJobs'
 import OverduePurchases from './OverduePurchases'
 import OverdueBills from './OverdueBills'
@@ -16,18 +16,10 @@ export default async function Dashboard() {
           </Stack>
         </Stack>
         <Stack direction="row" gap={1} height="100%">
-          <Box flex={1} height="100%" overflow="auto">
-            <OverdueJobs />
-          </Box>
-          <Box flex={1} height="100%" overflow="auto">
-            <OverduePurchases />
-          </Box>
-          <Box flex={1} height="100%" overflow="auto">
-            <OverdueBills />
-          </Box>
-          <Box flex={1} height="100%" overflow="auto">
-            <OverdueInvoices />
-          </Box>
+          <OverdueJobs />
+          <OverduePurchases />
+          <OverdueBills />
+          <OverdueInvoices />
         </Stack>
       </Stack>
     </Container>
