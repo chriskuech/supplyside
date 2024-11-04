@@ -7,7 +7,7 @@ import OverdueInvoices from './OverdueInvoices'
 export default async function Dashboard() {
   return (
     <Container maxWidth="xl">
-      <Stack height="100vh" sx={{ py: 2 }}>
+      <Stack height="90vh" sx={{ py: 2 }}>
         <Stack spacing={4} mb={4}>
           <Stack direction="row" alignItems="center" gap={1}>
             <Typography variant="h4" flexGrow={1}>
