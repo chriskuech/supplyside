@@ -76,14 +76,14 @@ export default async function OverduePurchases() {
               secondaryText={
                 <Stack>
                   <Typography variant="caption">
-                    Total Cost:{' '}
+                    <b>Total Cost: </b>
                     {formatMoney(
                       selectResourceFieldValue(resource, fields.totalCost)
                         ?.number,
                     )}
                   </Typography>
                   <Typography variant="caption">
-                    Days Overdue:{' '}
+                    <b>Days Overdue: </b>
                     {dayjs().diff(
                       dayjs(
                         selectResourceFieldValue(resource, fields.needDate)
