@@ -70,7 +70,7 @@ export default function CashflowBarChart({ resources }: Props) {
 
     const numberOfWeeks = endDate.diff(startDate, 'w')
 
-    const weeks = range(0, numberOfWeeks + 1).map((number) =>
+    const weeks = range(0, numberOfWeeks || 1).map((number) =>
       startDate.week(startDate.week() + number).format('MM/DD/YYYY'),
     )
 

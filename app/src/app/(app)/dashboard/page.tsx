@@ -15,7 +15,7 @@ export default async function Dashboard() {
             </Typography>
           </Stack>
         </Stack>
-        <Stack direction="row" gap={1} height="100%">
+        <Stack direction="row" gap={1} height="100%" maxHeight="max-content">
           <OverdueJobs />
           <OverduePurchases />
           <OverdueBills />
