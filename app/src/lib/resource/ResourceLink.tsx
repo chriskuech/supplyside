@@ -8,7 +8,7 @@ type Props = {
   href: string
   label: string
   resourceKey: number
-  fontSize: 'small' | 'medium' | 'large'
+  fontSize?: 'small' | 'medium' | 'large'
 }
 
 export default function ResourceLink({

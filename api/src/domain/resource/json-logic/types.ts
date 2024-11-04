@@ -20,6 +20,12 @@ export const JsonLogicOperationSchema = z.union([
   z.object({
     '!=': z.tuple([JsonLogicVariableSchema, JsonLogicValueSchema]),
   }),
+  z.object({
+    '>': z.tuple([JsonLogicVariableSchema, JsonLogicValueSchema]),
+  }),
+  z.object({
+    '<': z.tuple([JsonLogicVariableSchema, JsonLogicValueSchema]),
+  }),
 ])
 
 export type JsonLogicOperation = z.infer<typeof JsonLogicOperationSchema>
