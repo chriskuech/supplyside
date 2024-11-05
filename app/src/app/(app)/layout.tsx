@@ -7,10 +7,10 @@ import {
   List,
   PrecisionManufacturing,
   Receipt,
-  Schedule,
   ShoppingBag,
   Speed,
   Storefront,
+  ViewTimelineOutlined,
 } from '@mui/icons-material'
 import {
   OptionTemplate,
@@ -167,7 +167,7 @@ export default async function Layout({
             <ItemLink
               title="Jobs Schedule"
               href="/jobs/schedule"
-              icon={<Schedule fontSize="small" />}
+              icon={<ViewTimelineOutlined fontSize="small" />}
             />
             <ItemLink
               title="Lines"
