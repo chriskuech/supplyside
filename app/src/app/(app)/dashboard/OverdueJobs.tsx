@@ -42,7 +42,7 @@ export default async function OverdueJobs() {
           ],
         },
         {
-          '<': [{ var: fields.paymentDueDate.name }, new Date().toISOString()],
+          '<': [{ var: fields.needDate.name }, new Date().toISOString()],
         },
       ],
     },
@@ -51,8 +51,8 @@ export default async function OverdueJobs() {
   const orderedResources = sortBy(
     resources ?? [],
     (resource) =>
-      selectResourceFieldValue(resource, fields.paymentDueDate)?.date ??
-      fail('No payment due date'),
+      selectResourceFieldValue(resource, fields.needDate)?.date ??
+      fail('No need date'),
   )
 
   return (
@@ -95,10 +95,8 @@ export default async function OverdueJobs() {
                     <b>Days Overdue: </b>
                     {dayjs().diff(
                       dayjs(
-                        selectResourceFieldValue(
-                          resource,
-                          fields.paymentDueDate,
-                        )?.date ?? fail('No payment due date'),
+                        selectResourceFieldValue(resource, fields.needDate)
+                          ?.date ?? fail('No need date'),
                       ),
                       'days',
                     )}

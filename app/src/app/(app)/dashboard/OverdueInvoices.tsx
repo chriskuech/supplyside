@@ -24,15 +24,9 @@ export default async function OverdueInvoices() {
     where: {
       and: [
         {
-          '!=': [
+          '==': [
             { var: fields.jobStatus.name },
-            getStatusOptionId(jobStatusOptions.paid),
-          ],
-        },
-        {
-          '!=': [
-            { var: fields.jobStatus.name },
-            getStatusOptionId(jobStatusOptions.canceled),
+            getStatusOptionId(jobStatusOptions.invoiced),
           ],
         },
         {
