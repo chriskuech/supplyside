@@ -1,6 +1,6 @@
 import assert from 'assert'
 import { P, match } from 'ts-pattern'
-import { Box, Chip, Stack } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import { Check, Close } from '@mui/icons-material'
 import { GridApplyQuickFilter } from '@mui/x-data-grid/models/colDef/gridColDef'
 import {
@@ -33,6 +33,7 @@ import ContactCard from '../fields/views/ContactCard'
 import UserCard from '../fields/views/UserCard'
 import ResourceFieldView from '../fields/views/ResourceFieldView'
 import AddressCard from '../fields/views/AddressCard'
+import OptionChip from '../fields/views/OptionChip'
 import FieldGridEditCell from './FieldGridEditCell'
 import { Cell, Column, Display, Row } from './types'
 import { formatDate, formatMoney } from '@/lib/format'
@@ -410,7 +411,7 @@ export const mapSchemaFieldToGridColDef = (
       .with('MultiSelect', () => (
         <Stack gap={1} direction="row">
           {value?.options.map((option) => (
-            <Chip key={option.id} label={option.name} />
+            <OptionChip key={option.id} option={option} />
           ))}
         </Stack>
       ))
@@ -419,7 +420,10 @@ export const mapSchemaFieldToGridColDef = (
         () =>
           value?.resource && <ResourceFieldView resource={value.resource} />,
       )
-      .with('Select', () => value?.option && <Chip label={value.option.name} />)
+      .with(
+        'Select',
+        () => value?.option && <OptionChip option={value.option} />,
+      )
       .with('User', () => value?.user && <UserCard user={value.user} />)
       .with('Text', () => {
         const isMcMasterCarr =

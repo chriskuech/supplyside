@@ -1,23 +1,4 @@
-import {
-  blue,
-  green,
-  grey,
-  lightBlue,
-  lightGreen,
-  purple,
-  red,
-} from '@mui/material/colors'
 import { billStatusOptions, jobStatusOptions } from '@supplyside/model'
-
-export const jobStatusColors = {
-  [jobStatusOptions.draft.templateId]: grey[300],
-  [jobStatusOptions.ordered.templateId]: purple[300],
-  [jobStatusOptions.inProcess.templateId]: lightBlue[300],
-  [jobStatusOptions.shipped.templateId]: blue[500],
-  [jobStatusOptions.invoiced.templateId]: lightGreen[300],
-  [jobStatusOptions.paid.templateId]: green[500],
-  [jobStatusOptions.canceled.templateId]: red[300],
-}
 
 export const jobStatusOrder = {
   [jobStatusOptions.draft.templateId]: 1,
@@ -27,14 +8,6 @@ export const jobStatusOrder = {
   [jobStatusOptions.invoiced.templateId]: 5,
   [jobStatusOptions.paid.templateId]: 6,
   [jobStatusOptions.canceled.templateId]: 7,
-}
-
-export const billStatusColors = {
-  [billStatusOptions.draft.templateId]: grey[300],
-  [billStatusOptions.submitted.templateId]: purple[300],
-  [billStatusOptions.approved.templateId]: blue[500],
-  [billStatusOptions.paid.templateId]: green[500],
-  [billStatusOptions.canceled.templateId]: red[300],
 }
 
 export const billStatusOrder = {

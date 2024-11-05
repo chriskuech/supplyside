@@ -11,9 +11,9 @@ import { match } from 'ts-pattern'
 const height = 62
 
 const shadow = (color: string = fail('color')) =>
-  Color(color).darken(0.5).rgb().string()
+  Color(color).darken(0.3).rgb().string()
 const highlight = (color: string = fail('color')) =>
-  Color(color).lighten(0.2).rgb().string()
+  Color(color).lighten(0.05).rgb().string()
 
 type StatusTrackerSlabProps = {
   statuses: OptionTemplate[]

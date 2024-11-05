@@ -32,7 +32,7 @@ import { useMemo } from 'react'
 import { ChartsNoDataOverlay } from '@mui/x-charts/ChartsOverlay'
 import { Typography } from '@mui/material'
 import { formatMoney } from '@/lib/format'
-import { billStatusColors, billStatusOrder } from '@/lib/constants/status'
+import { billStatusOrder } from '@/lib/constants/status'
 
 dayjs.extend(weekOfYear)
 dayjs.extend(isBetween)
@@ -151,7 +151,9 @@ export default function CashflowBarChart({ resources }: Props) {
           type: 'bar',
           stack: 'by status',
           data: tc.totalsByWeek,
-          color: billStatusColors[tc.statusTemplateId],
+          color: Object.values(billStatusOptions).find(
+            (option) => option.templateId === tc.statusTemplateId,
+          )?.color,
           label: Object.values(billStatusOptions).find(
             (option) => option.templateId === tc.statusTemplateId,
           )?.name,
