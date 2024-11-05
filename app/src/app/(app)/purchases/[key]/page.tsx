@@ -211,7 +211,7 @@ export default async function PurchaseDetail({
           )}
           {status.templateId === purchaseStatusOptions.approved.templateId && (
             <>
-              <SendPoButton resourceId={resource.id} />
+              <SendPoButton resource={resource} />
               <SkipButton resourceId={resource.id} />
             </>
           )}
