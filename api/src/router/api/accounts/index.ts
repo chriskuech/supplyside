@@ -10,6 +10,7 @@ import { mountBlobs } from './blobs'
 import { mountFields } from './fields'
 import { mountFiles } from './files'
 import { mountIntegrations } from './integrations'
+import { mountJobs } from './jobs'
 import { mountPurchases } from './purchases'
 import { mountResources } from './resources'
 import { mountSchemas } from './schemas'
@@ -23,6 +24,7 @@ export const mountAccounts = async <App extends FastifyInstance>(app: App) =>
     .register(mountFields, { prefix: '/:accountId/fields' })
     .register(mountFiles, { prefix: '/:accountId/files' })
     .register(mountIntegrations, { prefix: '/:accountId/integrations' })
+    .register(mountJobs, { prefix: '/:accountId/jobs' })
     .register(mountPurchases, { prefix: '/:accountId/purchases' })
     .register(mountResources, { prefix: '/:accountId/resources' })
     .register(mountSchemas, { prefix: '/:accountId/schemas' })
