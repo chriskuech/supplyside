@@ -9,6 +9,7 @@ import {
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
+import { syncFromAttachments } from '@/actions/job'
 
 type Props = {
   schema: Schema
@@ -24,6 +25,7 @@ export const JobAttachmentsControl: FC<Props> = ({
   <AttachmentsToolbarControl
     resource={resource}
     resourceType="Job"
+    onSync={() => syncFromAttachments(resource.id)}
     field={selectSchemaFieldUnsafe(schema, fields.jobAttachments)}
     value={selectResourceFieldValue(resource, fields.jobAttachments)}
     fontSize={fontSize}

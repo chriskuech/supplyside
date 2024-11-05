@@ -1,6 +1,6 @@
 'use server'
 
-import * as client from '@/client/fields'
+import * as client from '@/client/field'
 import { withAccountId } from '@/authz'
 
 export const createField = withAccountId(client.createField)

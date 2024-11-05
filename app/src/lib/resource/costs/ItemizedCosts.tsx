@@ -20,7 +20,7 @@ import {
 import { Add, Clear } from '@mui/icons-material'
 import { match } from 'ts-pattern'
 import { Resource, fields, selectResourceFieldValue } from '@supplyside/model'
-import { createCost, deleteCost, updateCost } from '@/actions/resource-costs'
+import { createCost, deleteCost, updateCost } from '@/actions/resource-cost'
 
 type Props = {
   resource: Resource

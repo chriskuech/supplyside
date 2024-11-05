@@ -2,7 +2,7 @@ import { Alert, Box, Container, Stack, Typography } from '@mui/material'
 import SchemasControl from './schemas/SchemasControl'
 import AddFieldButton from './fields/AddFieldButton'
 import FieldsTable from './fields/FieldsTable'
-import { readFields } from '@/client/fields'
+import { readFields } from '@/client/field'
 import { requireSession } from '@/session'
 import { readCustomSchemas } from '@/client/schema'
 

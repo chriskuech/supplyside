@@ -3,7 +3,7 @@ import { Close, Download, UploadFile, Visibility } from '@mui/icons-material'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useRef } from 'react'
 import { File } from '@supplyside/model'
-import { uploadFile } from '@/actions/files'
+import { uploadFile } from '@/actions/file'
 import { download, preview } from '@/app/api/download/[filename]/util'
 
 type Props = {
