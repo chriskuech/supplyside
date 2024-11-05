@@ -42,7 +42,7 @@ export default async function OverdueJobs() {
           ],
         },
         {
-          '<': [{ var: fields.paymentDueDate.name }, new Date().toISOString()],
+          '<': [{ var: fields.needDate.name }, new Date().toISOString()],
         },
       ],
     },
@@ -51,12 +51,15 @@ export default async function OverdueJobs() {
   const orderedResources = sortBy(
     resources ?? [],
     (resource) =>
-      selectResourceFieldValue(resource, fields.paymentDueDate)?.date ??
-      fail('No payment due date'),
+      selectResourceFieldValue(resource, fields.needDate)?.date ??
+      fail('No need date'),
   )
 
   return (
-    <Card variant="outlined" sx={{ flex: 1 }}>
+    <Card
+      variant="outlined"
+      sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+    >
       <Stack
         direction="row"
         alignItems="center"
@@ -67,7 +70,7 @@ export default async function OverdueJobs() {
         <Build />
         <Typography variant="h5">Overdue Jobs</Typography>
       </Stack>
-      <List sx={{ overflow: 'auto', height: '100%' }}>
+      <List sx={{ overflow: 'auto', flex: 1 }}>
         {!!orderedResources.length &&
           orderedResources.map((resource) => (
             <ResourceListItem
@@ -95,10 +98,8 @@ export default async function OverdueJobs() {
                     <b>Days Overdue: </b>
                     {dayjs().diff(
                       dayjs(
-                        selectResourceFieldValue(
-                          resource,
-                          fields.paymentDueDate,
-                        )?.date ?? fail('No payment due date'),
+                        selectResourceFieldValue(resource, fields.needDate)
+                          ?.date ?? fail('No need date'),
                       ),
                       'days',
                     )}

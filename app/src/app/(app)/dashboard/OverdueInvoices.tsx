@@ -24,15 +24,9 @@ export default async function OverdueInvoices() {
     where: {
       and: [
         {
-          '!=': [
+          '==': [
             { var: fields.jobStatus.name },
-            getStatusOptionId(jobStatusOptions.paid),
-          ],
-        },
-        {
-          '!=': [
-            { var: fields.jobStatus.name },
-            getStatusOptionId(jobStatusOptions.canceled),
+            getStatusOptionId(jobStatusOptions.invoiced),
           ],
         },
         {
@@ -50,7 +44,10 @@ export default async function OverdueInvoices() {
   )
 
   return (
-    <Card variant="outlined" sx={{ flex: 1 }}>
+    <Card
+      variant="outlined"
+      sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+    >
       <Stack
         direction="row"
         alignItems="center"
@@ -61,7 +58,7 @@ export default async function OverdueInvoices() {
         <Description />
         <Typography variant="h5">Overdue Invoices</Typography>
       </Stack>
-      <List sx={{ overflow: 'auto', height: '100%' }}>
+      <List sx={{ overflow: 'auto', flex: 1 }}>
         {!!orderedResources.length &&
           orderedResources.map((resource) => (
             <ResourceListItem
