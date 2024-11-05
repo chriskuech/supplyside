@@ -1,3 +1,7 @@
+import {
+  coerceDateStringToISO8601,
+  dataExtractionPrompt,
+} from '@supplyside/api/extraction'
 import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
 import {
   fields,
@@ -5,7 +9,6 @@ import {
   selectSchemaField,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
-import dayjs from 'dayjs'
 import { FastifyBaseLogger } from 'fastify'
 import { inject, injectable } from 'inversify'
 import { z } from 'zod'
@@ -17,9 +20,7 @@ const prompt = ({
 }: {
   incotermsOptionNames: string[]
 }) => `
-You are a tool for extracting relevant information from uploaded files within a supply chain procurement application.
-Most often, these files will come from an email and the files will contain the text or HTML content of the email, along with the email attachments. Sometimes the information will be in the email, attachments, or both.
-You will need to do your best to extract the information from the files and return it in a JSON object that matches the output schema.
+${dataExtractionPrompt}
 
 # Supported scenarios
 
@@ -357,11 +358,3 @@ export class PurchaseExtractionService {
     }
   }
 }
-
-// use dayjs (if needed) to coerce the date string to ISO 8601 format
-const coerceDateStringToISO8601 = (
-  dateString: string | undefined,
-): string | undefined =>
-  dateString && dayjs(dateString).isValid()
-    ? dayjs(dateString).toISOString()
-    : undefined

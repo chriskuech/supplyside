@@ -12,7 +12,7 @@ import {
 import { useState } from 'react'
 import { FieldType, ResourceType, fieldTypes } from '@supplyside/model'
 import ResourceTypeSelect from './ResourceTypeSelect'
-import { CreateFieldData } from '@/client/fields'
+import { CreateFieldData } from '@/client/field'
 
 type Props = {
   onSubmit: (params: CreateFieldData) => void

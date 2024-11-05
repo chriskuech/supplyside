@@ -2,7 +2,7 @@ import { RedirectType, redirect } from 'next/navigation'
 import { z } from 'zod'
 import { Resource, Schema } from '@supplyside/model'
 import { CompareModalView } from './CompareModalView'
-import { readFile } from '@/client/files'
+import { readFile } from '@/client/file'
 
 type Props = {
   resource: Resource

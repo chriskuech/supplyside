@@ -5,7 +5,7 @@ import { readBlob, readBlobData } from '@/client/blob'
 import { requireSession } from '@/session'
 import { readSelf } from '@/client/user'
 import { readAccount } from '@/client/account'
-import { readFile } from '@/client/files'
+import { readFile } from '@/client/file'
 
 export async function GET(
   req: NextRequest,

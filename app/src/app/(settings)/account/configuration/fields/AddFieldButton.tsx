@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 import { Add } from '@mui/icons-material'
 import CreateFieldForm from './CreateFieldForm'
 import { useDisclosure } from '@/hooks/useDisclosure'
-import { createField } from '@/actions/fields'
+import { createField } from '@/actions/field'
 
 export default function AddFieldButton(): ReactNode {
   const { isOpen, close, open } = useDisclosure()
