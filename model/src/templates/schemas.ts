@@ -173,20 +173,6 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
-    resourceType: 'PurchaseSchedule',
-    fields: [fields.name, fields.running, fields.workCenter],
-    sections: [
-      {
-        name: 'Summary',
-        fields: [
-          fields.executionInterval,
-          fields.executionIntervalUnits,
-          fields.templatePurchase,
-        ],
-      },
-    ],
-  },
-  {
     resourceType: 'Vendor',
     fields: [fields.quickBooksVendorId],
     sections: [
