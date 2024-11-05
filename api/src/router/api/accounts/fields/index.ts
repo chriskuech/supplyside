@@ -3,6 +3,7 @@ import { SchemaFieldService } from '@supplyside/api/domain/schema/SchemaFieldSer
 import {
   FieldTypeSchema,
   ResourceTypeSchema,
+  SchemaField,
   SchemaFieldSchema,
   ValueInputSchema,
 } from '@supplyside/model'
@@ -86,18 +87,26 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
           fieldId: z.string().uuid(),
         }),
         body: z.object({
-          name: z.string(),
-          description: z.string().nullable(),
-          options: z.array(OptionPatchSchema),
-          resourceType: ResourceTypeSchema.nullable(),
-          isRequired: z.boolean(),
+          name: z.string().optional(),
+          description: z.string().nullable().optional(),
+          options: z.array(OptionPatchSchema).optional(),
+          resourceType: ResourceTypeSchema.nullable().optional(),
+          isRequired: z.boolean().optional(),
           defaultValue: ValueInputSchema.optional(),
           defaultToToday: z.boolean().optional(),
         }),
+        response: {
+          200: SchemaFieldSchema,
+        },
       },
-      handler: async (req) => {
+      handler: async ({
+        params: { accountId, fieldId },
+        body,
+      }): Promise<SchemaField> => {
         const service = container.resolve(SchemaFieldService)
-        await service.update(req.params.accountId, req.params.fieldId, req.body)
+        const field = await service.update(accountId, fieldId, body)
+
+        return field
       },
     })
     .route({

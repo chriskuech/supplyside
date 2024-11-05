@@ -23,8 +23,11 @@ export const createField = async (
   return data
 }
 
-export type UpdateFieldData =
-  paths['/api/accounts/{accountId}/fields/{fieldId}/']['patch']['requestBody']['content']['application/json']
+type UpdateFieldBody = NonNullable<
+  paths['/api/accounts/{accountId}/fields/{fieldId}/']['patch']['requestBody']
+>
+
+export type UpdateFieldData = UpdateFieldBody['content']['application/json']
 
 export const updateField = async (
   accountId: string,
@@ -32,12 +35,18 @@ export const updateField = async (
   dto: UpdateFieldData,
 ) => {
   revalidateTag('Fields')
-  await client().PATCH('/api/accounts/{accountId}/fields/{fieldId}/', {
-    params: {
-      path: { accountId, fieldId },
+
+  const { data } = await client().PATCH(
+    '/api/accounts/{accountId}/fields/{fieldId}/',
+    {
+      params: {
+        path: { accountId, fieldId },
+      },
+      body: dto,
     },
-    body: dto,
-  })
+  )
+
+  return data
 }
 
 export const readFields = async (
