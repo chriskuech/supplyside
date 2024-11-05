@@ -11,7 +11,7 @@ import {
 import { useMemo } from 'react'
 import { Typography } from '@mui/material'
 import { formatMoney } from '@/lib/format'
-import { jobStatusColors, jobStatusOrder } from '@/lib/constants/status'
+import { jobStatusOrder } from '@/lib/constants/status'
 
 type Props = {
   resources: Resource[]
@@ -39,7 +39,9 @@ export default function CashflowPieChart({ resources }: Props) {
           label: Object.values(jobStatusOptions).find(
             (option) => option.templateId === statusTemplateId,
           )?.name,
-          color: jobStatusColors[statusTemplateId],
+          color: Object.values(jobStatusOptions).find(
+            (option) => option.templateId === statusTemplateId,
+          )?.color,
         })),
       ),
     [resources],
