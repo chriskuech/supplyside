@@ -6,7 +6,6 @@ import {
   BadgeProps,
   Box,
   Button,
-  Chip,
   Collapse,
   Divider,
   Paper,
@@ -19,7 +18,6 @@ import {
   Resource,
   Schema,
   fields,
-  jobStatusOptions,
   selectResourceFieldValue,
 } from '@supplyside/model'
 import { FC, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -48,6 +46,7 @@ import { GanttChartHeader } from './GanttChartHeader'
 import FiltersControl from './FiltersControl'
 import { formatMoney } from '@/lib/format'
 import useLocalStorageState from '@/hooks/useLocalStorageState'
+import OptionChip from '@/lib/resource/fields/views/OptionChip'
 
 dayjs.extend(utc)
 
@@ -274,26 +273,11 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
                         </Stack>
                       </Tooltip>
                     )}
-                    <Tooltip title="Job Status">
-                      <Chip
-                        label={jobStatus?.name}
-                        size="small"
-                        color={match(jobStatus?.templateId)
-                          .with(
-                            jobStatusOptions.paid.templateId,
-                            () => 'success' as const,
-                          )
-                          .with(
-                            jobStatusOptions.canceled.templateId,
-                            () => 'error' as const,
-                          )
-                          .with(
-                            jobStatusOptions.draft.templateId,
-                            () => 'default' as const,
-                          )
-                          .otherwise(() => 'warning' as const)}
-                      />
-                    </Tooltip>
+                    {jobStatus && (
+                      <Tooltip title="Job Status">
+                        <OptionChip option={jobStatus} size="small" />
+                      </Tooltip>
+                    )}
                     <Stack alignItems="center" direction="row">
                       <Tooltip
                         title={match(receivedAllPurchases)

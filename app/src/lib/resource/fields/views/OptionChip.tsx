@@ -1,12 +1,12 @@
-import { Chip } from '@mui/material'
+import { Chip, ChipProps } from '@mui/material'
 import { fields, Option } from '@supplyside/model'
 import { isTruthy } from 'remeda'
 
 type Props = {
   option: Option
-}
+} & ChipProps
 
-export default function OptionChip({ option }: Props) {
+export default function OptionChip({ option, ...other }: Props) {
   const color = Object.values(fields)
     .filter((field) => ['Select', 'MultiSelect'].includes(field.type))
     .flatMap((field) => field.options)
@@ -18,6 +18,7 @@ export default function OptionChip({ option }: Props) {
 
   return (
     <Chip
+      {...other}
       label={option.name}
       sx={{ backgroundColor: color, color: color ? 'black' : undefined }}
     />
