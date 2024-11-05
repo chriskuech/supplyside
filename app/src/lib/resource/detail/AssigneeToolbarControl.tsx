@@ -69,7 +69,6 @@ export default function AssigneeToolbarControl({
             inputId={`rf-${field.fieldId}`}
             resource={resource}
             field={field}
-            value={value}
           />
         </DialogContent>
         <DialogActions>

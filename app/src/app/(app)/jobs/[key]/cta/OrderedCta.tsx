@@ -104,7 +104,6 @@ export const OrderedCta: FC<Props> = ({ schema, resource }) => {
               <Box width={170}>
                 <FieldControl
                   resource={resource}
-                  value={selectResourceFieldValue(resource, fields.startDate)}
                   inputId="start-date-field"
                   field={selectSchemaFieldUnsafe(schema, fields.startDate)}
                   datePickerProps={{ slotProps: { field: {} } }}
@@ -124,10 +123,6 @@ export const OrderedCta: FC<Props> = ({ schema, resource }) => {
               <Box width={115}>
                 <FieldControl
                   resource={resource}
-                  value={selectResourceFieldValue(
-                    resource,
-                    fields.productionDays,
-                  )}
                   inputId="production-days-field"
                   field={selectSchemaFieldUnsafe(schema, fields.productionDays)}
                 />

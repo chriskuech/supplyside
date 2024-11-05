@@ -1,14 +1,23 @@
 'use client'
-import { useCallback } from 'react'
-import { Value, mapValueToValueInput } from '@supplyside/model'
+import { useCallback, useId } from 'react'
+import {
+  Value,
+  mapValueToValueInput,
+  selectResourceFieldValue,
+} from '@supplyside/model'
 import Field, { Props as FieldProps } from './controls/Field'
 import { updateResourceField } from '@/actions/resource'
 
 export default function FieldControl({
   resource,
   field,
+  inputId,
   ...fieldProps
-}: Omit<FieldProps, 'onChange'>) {
+}: Omit<FieldProps, 'onChange' | 'value' | 'inputId'> & {
+  inputId?: string | undefined
+}) {
+  const id = useId()
+
   const handleChange = useCallback(
     (value: Value) =>
       updateResourceField(resource.id, {
@@ -22,6 +31,8 @@ export default function FieldControl({
     <Field
       resource={resource}
       field={field}
+      value={selectResourceFieldValue(resource, field)}
+      inputId={inputId ?? id}
       {...fieldProps}
       onChange={handleChange}
     />

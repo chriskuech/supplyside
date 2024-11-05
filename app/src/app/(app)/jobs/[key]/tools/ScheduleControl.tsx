@@ -115,7 +115,6 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
                 </FormLabel>
                 <Box>
                   <FieldControl
-                    value={selectResourceFieldValue(resource, fields.startDate)}
                     resource={resource}
                     field={selectSchemaFieldUnsafe(schema, fields.startDate)}
                     inputId="start-date"
@@ -133,10 +132,6 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
                 </FormLabel>
                 <Box>
                   <FieldControl
-                    value={selectResourceFieldValue(
-                      resource,
-                      fields.productionDays,
-                    )}
                     resource={resource}
                     field={selectSchemaFieldUnsafe(
                       schema,
@@ -164,7 +159,6 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
               </FormLabel>
               <Box>
                 <FieldControl
-                  value={selectResourceFieldValue(resource, fields.needDate)}
                   resource={resource}
                   field={selectSchemaFieldUnsafe(schema, fields.needDate)}
                   inputId="need-date"

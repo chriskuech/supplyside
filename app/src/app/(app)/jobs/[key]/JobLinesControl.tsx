@@ -114,7 +114,6 @@ const JobLineView: FC<{
       <Stack direction="row" alignItems="center" spacing={1}>
         <Box flexGrow={1}>
           <FieldControl
-            value={selectResourceFieldValue(jobLine, fields.partName)}
             resource={jobLine}
             inputId={`part-name-${jobLine.id}`}
             field={selectSchemaFieldUnsafe(jobLineSchema, fields.partName)}
@@ -125,7 +124,6 @@ const JobLineView: FC<{
         </Box>
         <Box>
           <FieldControl
-            value={selectResourceFieldValue(jobLine, fields.needDate)}
             resource={jobLine}
             inputId={`need-date-${jobLine.id}`}
             field={selectSchemaFieldUnsafe(jobLineSchema, fields.needDate)}
@@ -137,7 +135,6 @@ const JobLineView: FC<{
       </Stack>
       <Box>
         <FieldControl
-          value={selectResourceFieldValue(jobLine, fields.otherNotes)}
           resource={jobLine}
           inputId={`other-notes-${jobLine.id}`}
           field={selectSchemaFieldUnsafe(jobLineSchema, fields.otherNotes)}
@@ -152,7 +149,6 @@ const JobLineView: FC<{
       <Stack direction="row" alignItems="center" spacing={1}>
         <Box width={100}>
           <FieldControl
-            value={selectResourceFieldValue(jobLine, fields.quantity)}
             resource={jobLine}
             inputId={`quantity-${jobLine.id}`}
             field={selectSchemaFieldUnsafe(jobLineSchema, fields.quantity)}
@@ -164,7 +160,6 @@ const JobLineView: FC<{
         <Box>&times;</Box>
         <Box width={140}>
           <FieldControl
-            value={selectResourceFieldValue(jobLine, fields.unitCost)}
             resource={jobLine}
             inputId={`unit-cost-${jobLine.id}`}
             field={selectSchemaFieldUnsafe(jobLineSchema, fields.unitCost)}
