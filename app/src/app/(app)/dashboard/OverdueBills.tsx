@@ -1,5 +1,4 @@
 import { fail } from 'assert'
-import { Card, List, Stack, Typography } from '@mui/material'
 import {
   billStatusOptions,
   fields,
@@ -10,10 +9,13 @@ import {
 import dayjs from 'dayjs'
 import { sortBy } from 'remeda'
 import { Receipt } from '@mui/icons-material'
+import { Stack, Tooltip } from '@mui/material'
+import LateItem from './LateItem'
+import { LateList } from './LateList'
+import { TotalCostControl } from '@/lib/resource/TotalCostControl'
 import { readSchema } from '@/actions/schema'
 import { readResources } from '@/actions/resource'
-import ResourceListItem from '@/lib/resource/ResourceListItem'
-import { formatMoney } from '@/lib/format'
+import OptionChip from '@/lib/resource/fields/views/OptionChip'
 
 export default async function OverdueBills() {
   const billSchema = (await readSchema('Bill')) ?? fail('Bill schema not found')
@@ -50,64 +52,47 @@ export default async function OverdueBills() {
   )
 
   return (
-    <Card
-      variant="outlined"
-      sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+    <LateList
+      icon={<Receipt />}
+      title="Overdue Bills"
+      count={orderedResources.length}
     >
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="center"
-        gap={1}
-        py={2}
-      >
-        <Receipt />
-        <Typography variant="h5">Overdue Bills</Typography>
-      </Stack>
-      <List sx={{ overflow: 'auto', flex: 1 }}>
-        {!!orderedResources.length &&
-          orderedResources.map((resource) => (
-            <ResourceListItem
-              key={resource.id}
-              href={`/bills/${resource.key}`}
-              primaryText={
-                <Typography>
-                  <b>
-                    {selectResourceFieldValue(resource, fields.vendor)?.resource
-                      ?.name ?? '-'}
-                  </b>
-                  {` #${resource.key} `}
-                </Typography>
-              }
-              secondaryText={
-                <Stack>
-                  <Typography variant="caption">
-                    <b>Total Cost: </b>
-                    {formatMoney(
-                      selectResourceFieldValue(resource, fields.totalCost)
-                        ?.number,
-                    )}
-                  </Typography>
-                  <Typography variant="caption">
-                    <b>Days Overdue: </b>
-                    {dayjs().diff(
-                      dayjs(
-                        selectResourceFieldValue(
-                          resource,
-                          fields.paymentDueDate,
-                        )?.date ?? fail('No need date'),
-                      ),
-                      'days',
-                    )}
-                  </Typography>
-                </Stack>
-              }
-            />
-          ))}
-        {!orderedResources.length && (
-          <Typography textAlign="center">Nothing overdue</Typography>
-        )}
-      </List>
-    </Card>
+      {orderedResources.map((resource) => (
+        <LateItem
+          key={resource.id}
+          resourceType="Bill"
+          number={resource.key}
+          daysLate={dayjs().diff(
+            dayjs(
+              selectResourceFieldValue(resource, fields.paymentDueDate)?.date ??
+                fail('No need date'),
+            ),
+            'days',
+          )}
+          primaryText={
+            selectResourceFieldValue(resource, fields.vendor)?.resource?.name ??
+            null
+          }
+          secondaryText={
+            <Stack direction="row" gap={1}>
+              <Tooltip title="Bill Status">
+                <OptionChip
+                  option={
+                    selectResourceFieldValue(resource, fields.billStatus)
+                      ?.option ?? fail('Bill status is missing')
+                  }
+                  size="small"
+                />
+              </Tooltip>
+              <TotalCostControl
+                resource={resource}
+                schema={billSchema}
+                size="small"
+              />
+            </Stack>
+          }
+        />
+      ))}
+    </LateList>
   )
 }

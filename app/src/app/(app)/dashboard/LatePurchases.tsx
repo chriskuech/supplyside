@@ -1,14 +1,14 @@
 import { fail } from 'assert'
 import {
   fields,
-  jobStatusOptions,
   OptionTemplate,
+  purchaseStatusOptions,
   selectResourceFieldValue,
   selectSchemaFieldOptionUnsafe,
 } from '@supplyside/model'
 import dayjs from 'dayjs'
 import { sortBy } from 'remeda'
-import { Description } from '@mui/icons-material'
+import { ShoppingBag } from '@mui/icons-material'
 import { Stack, Tooltip } from '@mui/material'
 import LateItem from './LateItem'
 import { LateList } from './LateList'
@@ -17,22 +17,33 @@ import { readSchema } from '@/actions/schema'
 import { readResources } from '@/actions/resource'
 import OptionChip from '@/lib/resource/fields/views/OptionChip'
 
-export default async function OverdueInvoices() {
-  const jobSchema = (await readSchema('Job')) ?? fail('Job schema not found')
+export default async function LatePurchases() {
+  const purchaseSchema =
+    (await readSchema('Purchase')) ?? fail('Purchase schema not found')
   const getStatusOptionId = (optionRef: OptionTemplate) =>
-    selectSchemaFieldOptionUnsafe(jobSchema, fields.jobStatus, optionRef).id
+    selectSchemaFieldOptionUnsafe(
+      purchaseSchema,
+      fields.purchaseStatus,
+      optionRef,
+    ).id
 
-  const resources = await readResources('Job', {
+  const resources = await readResources('Purchase', {
     where: {
       and: [
         {
-          '==': [
-            { var: fields.jobStatus.name },
-            getStatusOptionId(jobStatusOptions.invoiced),
+          '!=': [
+            { var: fields.purchaseStatus.name },
+            getStatusOptionId(purchaseStatusOptions.received),
           ],
         },
         {
-          '<': [{ var: fields.paymentDueDate.name }, new Date().toISOString()],
+          '!=': [
+            { var: fields.purchaseStatus.name },
+            getStatusOptionId(purchaseStatusOptions.canceled),
+          ],
+        },
+        {
+          '<': [{ var: fields.needDate.name }, new Date().toISOString()],
         },
       ],
     },
@@ -41,46 +52,47 @@ export default async function OverdueInvoices() {
   const orderedResources = sortBy(
     resources ?? [],
     (resource) =>
-      selectResourceFieldValue(resource, fields.paymentDueDate)?.date ??
-      fail('No payment need date'),
+      selectResourceFieldValue(resource, fields.needDate)?.date ??
+      fail('No need date'),
   )
 
   return (
     <LateList
-      title="Overdue Invoices"
-      icon={<Description />}
+      title="Late Purchases"
+      icon={<ShoppingBag />}
       count={orderedResources.length}
     >
       {orderedResources.map((resource) => (
         <LateItem
           key={resource.id}
+          resourceType="Purchase"
           number={resource.key}
-          resourceType="Job"
           daysLate={dayjs().diff(
             dayjs(
-              selectResourceFieldValue(resource, fields.paymentDueDate)?.date ??
+              selectResourceFieldValue(resource, fields.needDate)?.date ??
                 fail('No need date'),
             ),
             'days',
           )}
           primaryText={
-            selectResourceFieldValue(resource, fields.customer)?.resource
-              ?.name ?? null
+            selectResourceFieldValue(resource, fields.vendor)?.resource?.name ??
+            null
           }
           secondaryText={
             <Stack direction="row" gap={1}>
-              <Tooltip title="Job Status">
+              <Tooltip title="Purchase Status">
                 <OptionChip
                   option={
-                    selectResourceFieldValue(resource, fields.jobStatus)
-                      ?.option ?? fail('Job status is missing')
+                    selectResourceFieldValue(resource, fields.purchaseStatus)
+                      ?.option ?? fail('Purchase status is missing')
                   }
                   size="small"
                 />
               </Tooltip>
+
               <TotalCostControl
-                schema={jobSchema}
                 resource={resource}
+                schema={purchaseSchema}
                 size="small"
               />
             </Stack>
