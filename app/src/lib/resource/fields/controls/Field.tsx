@@ -42,7 +42,7 @@ import UserField from './UserField'
 import ResourceField from './ResourceField'
 import FilesField from './FilesField'
 import { McMasterCarrLogo } from '@/lib/ux/McMasterCarrLogo'
-import { updateField } from '@/actions/fields'
+import { updateField } from '@/actions/field'
 
 type InputProps = SlotProps<
   ElementType<FilledInputProps, keyof JSX.IntrinsicElements>,
