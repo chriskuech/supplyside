@@ -437,13 +437,6 @@ const _fields = {
     type: 'Textarea',
     description: 'Purchase notes included in the purchase order header',
   },
-  purchaseSchedule: {
-    templateId: 'b0cab848-a8e7-4cb7-a274-cad780868a73',
-    name: 'Purchase Schedule',
-    type: 'Resource',
-    resourceType: 'PurchaseSchedule',
-    description: 'The schedule that created this purchase',
-  },
   purchaseStatus: {
     templateId: 'd51e1004-c999-4ac1-8692-ff3d966c5dc3',
     name: 'Purchase Status',

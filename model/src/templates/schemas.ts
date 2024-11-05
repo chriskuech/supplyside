@@ -107,7 +107,6 @@ export const schemas: SchemaTemplate[] = [
   {
     resourceType: 'Purchase',
     fields: [
-      fields.purchaseSchedule,
       fields.purchaseStatus,
       fields.poNumber,
       fields.assignee,
