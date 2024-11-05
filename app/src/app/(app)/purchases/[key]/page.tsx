@@ -49,11 +49,6 @@ export default async function PurchaseDetail({
         '==': [{ var: fields.purchase.name }, resource.id],
       },
     }),
-    readResources('PurchaseSchedule', {
-      where: {
-        '==': [{ var: fields.purchaseSchedule.name }, resource.id],
-      },
-    }),
   ])
 
   const purchaseHasLines = !!purchaseLines?.length

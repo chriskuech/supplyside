@@ -65,7 +65,7 @@ function ResourceField(
           schema ?? fail('Schema not found'),
           match(resourceType)
             .with(
-              P.union('Customer', 'PurchaseSchedule', 'Vendor', 'WorkCenter'),
+              P.union('Customer', 'Vendor', 'WorkCenter'),
               () => fields.name,
             )
             .with('Purchase', () => fields.poNumber)

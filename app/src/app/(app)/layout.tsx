@@ -3,7 +3,6 @@ import { Box, Card, Divider, Stack, Typography } from '@mui/material'
 import {
   Build,
   Business,
-  EventRepeat,
   List,
   PrecisionManufacturing,
   Receipt,
@@ -192,13 +191,6 @@ export default async function Layout({
               count={openPurchaseCount}
             />
             <ItemLink title="Closed Purchases" href="/purchases/closed" />
-            {user?.isGlobalAdmin && (
-              <ItemLink
-                title="Purchase Schedules"
-                href="/purchases/schedules"
-                icon={<EventRepeat fontSize="small" />}
-              />
-            )}
             <ItemLink
               title="Lines"
               href="/purchases/lines"
