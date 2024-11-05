@@ -9,22 +9,32 @@ export const billStatusOptions = {
   draft: {
     templateId: 'abababbb-3f5e-4d2d-8f0f-3e8f2c4c4b5c',
     name: 'Draft',
+    color: '#ffeb3b',
+    shadowColor: '#fdd835',
   },
   submitted: {
     templateId: '45b2ab63-6c20-4548-aafa-027286d03759',
     name: 'Submitted',
+    color: '#ffeb3b',
+    shadowColor: '#fdd835',
   },
   approved: {
     templateId: 'd4c4b6f7-4e1e-4e1e-8f7b-4e0f7e1e7e5d',
     name: 'Approved',
+    color: '#ffeb3b',
+    shadowColor: '#fdd835',
   },
   paid: {
     templateId: 'd4c4b6f7-4e2e-4e1e-8f7a-ae0f7e1e7e5d',
     name: 'Paid',
+    color: '#00e676',
+    shadowColor: '#00c853',
   },
   canceled: {
     templateId: 'e8b7c2c8-0b7b-4e9a-8e8d-7b2fffff6f4e',
     name: 'Canceled',
+    color: '#c62828',
+    shadowColor: '#b71c1c',
   },
 }
 
@@ -32,30 +42,44 @@ export const jobStatusOptions = {
   draft: {
     templateId: '6280f9fb-5d27-4d0c-8d7e-12ceb064dc5e',
     name: 'Draft',
+    color: '#ffeb3b',
+    shadowColor: '#fdd835',
   },
   ordered: {
     templateId: '1a18eb92-20c3-418d-aff2-723520d21207',
     name: 'Ordered',
+    color: '#ffeb3b',
+    shadowColor: '#fdd835',
   },
   inProcess: {
     templateId: '254645f8-c9ab-4af2-b86b-6eb77354d4d4',
     name: 'In Process',
+    color: '#ffeb3b',
+    shadowColor: '#fdd835',
   },
   shipped: {
     templateId: '71921302-1e57-41bf-8c22-ef2b6f268ba3',
     name: 'Shipped',
+    color: '#ffeb3b',
+    shadowColor: '#fdd835',
   },
   invoiced: {
     templateId: 'deeba092-2e81-4476-8962-4b6a7d1e8f29',
     name: 'Invoiced',
+    color: '#ffeb3b',
+    shadowColor: '#fdd835',
   },
   paid: {
     templateId: 'fd87e2ab-13e5-4f3f-9e5c-ab96684f9e4e',
     name: 'Paid',
+    color: '#00e676',
+    shadowColor: '#00c853',
   },
   canceled: {
     templateId: '70912291-2b48-4e1f-9300-b7dbca8ce5ab',
     name: 'Canceled',
+    color: '#c62828',
+    shadowColor: '#b71c1c',
   },
 }
 
@@ -63,26 +87,38 @@ export const purchaseStatusOptions = {
   draft: {
     templateId: '84c65f46-b8dd-43bf-9bbe-537b816fdeb5',
     name: 'Draft',
+    color: '#ffeb3b',
+    shadowColor: '#fdd835',
   },
   submitted: {
     templateId: '45b2ab63-6c20-4548-8427-027286d03759',
     name: 'Submitted',
+    color: '#ffeb3b',
+    shadowColor: '#fdd835',
   },
   approved: {
     templateId: '9946f309-a3e4-4fdf-991a-cc9d3df80ec0',
     name: 'Approved',
+    color: '#ffeb3b',
+    shadowColor: '#fdd835',
   },
   purchased: {
     templateId: '37551c24-8610-4952-abcb-a9e54c086272',
     name: 'Purchased',
+    color: '#ffeb3b',
+    shadowColor: '#fdd835',
   },
   received: {
     templateId: 'f3f9b5a6-6b0e-4d4d-8d4e-2f7f3b1b7a3a',
     name: 'Received',
+    color: '#00e676',
+    shadowColor: '#00c853',
   },
   canceled: {
     templateId: 'e8b7c2c8-0b7b-4e9a-8e8d-7b2f5e1f6f4e',
     name: 'Canceled',
+    color: '#c62828',
+    shadowColor: '#b71c1c',
   },
 }
 

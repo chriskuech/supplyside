@@ -1,14 +1,11 @@
 import { fail } from 'assert'
-import { Box, Container, Stack } from '@mui/material'
 import { match } from 'ts-pattern'
-import { green, red, yellow } from '@mui/material/colors'
 import {
   billStatusOptions,
   fields,
   selectResourceFieldValue,
   selectSchemaField,
 } from '@supplyside/model'
-import BillStatusTracker from './BillStatusTracker'
 import CallToAction from './CallToAction'
 import { BillAttachmentsControl } from './tools/BillAttachmentsControl'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
@@ -18,6 +15,7 @@ import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarC
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
 import { getBillUrl } from '@/lib/quickBooks/helpers'
 import ResourceLink from '@/lib/resource/ResourceLink'
+import { StatusTrackerSlab } from '@/lib/ux/StatusTrackerSlab'
 
 export default async function BillsDetail({
   params: { key },
@@ -36,18 +34,6 @@ export default async function BillsDetail({
     fail('Status not found')
 
   const isDraft = status.templateId === billStatusOptions.draft.templateId
-
-  const statusColorStart = match(status.templateId)
-    .with(billStatusOptions.draft.templateId, () => yellow[600])
-    .with(billStatusOptions.paid.templateId, () => green[900])
-    .with(billStatusOptions.canceled.templateId, () => red[900])
-    .otherwise(() => yellow[900])
-
-  const statusColorEnd = match(status.templateId)
-    .with(billStatusOptions.draft.templateId, () => yellow[500])
-    .with(billStatusOptions.paid.templateId, () => green[800])
-    .with(billStatusOptions.canceled.templateId, () => red[800])
-    .otherwise(() => yellow[800])
 
   const purchase = selectResourceFieldValue(resource, fields.purchase)?.resource
 
@@ -129,45 +115,21 @@ export default async function BillsDetail({
       linesBacklinkField={fields.bill}
       isReadOnly={!isDraft}
       actions={
-        <Stack direction="row" height={100}>
-          <Box
-            flexGrow={1}
-            height={70}
-            my="15px"
-            sx={{
-              background: `linear-gradient(90deg, ${statusColorStart} 0%, ${statusColorEnd} 100%)`,
-            }}
+        <StatusTrackerSlab
+          statuses={Object.values(billStatusOptions)}
+          currentStatus={status}
+          successStatus={billStatusOptions.paid}
+          failStatus={billStatusOptions.canceled}
+        >
+          <CallToAction
+            key={
+              selectResourceFieldValue(resource, fields.billStatus)?.option?.id
+            }
+            schema={schema}
+            self={user}
+            resource={resource}
           />
-          <Container sx={{ flexShrink: 0 }} disableGutters>
-            <Stack
-              direction="row"
-              sx={{ overflowX: 'hidden', height: 100 }}
-              alignItems="center"
-            >
-              <Box sx={{ borderRadius: 10, flexGrow: 1 }}>
-                <BillStatusTracker resource={resource} />
-              </Box>
-              <Stack
-                direction="row"
-                justifyContent="end"
-                alignItems="center"
-                spacing={2}
-                mr={3}
-              >
-                <CallToAction
-                  key={
-                    selectResourceFieldValue(resource, fields.billStatus)
-                      ?.option?.id
-                  }
-                  schema={schema}
-                  self={user}
-                  resource={resource}
-                />
-              </Stack>
-            </Stack>
-          </Container>
-          <Box flexGrow={1} bgcolor="transparent" />
-        </Stack>
+        </StatusTrackerSlab>
       }
     />
   )
