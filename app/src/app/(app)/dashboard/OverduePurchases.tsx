@@ -55,7 +55,10 @@ export default async function OverduePurchases() {
   )
 
   return (
-    <Card variant="outlined" sx={{ flex: 1 }}>
+    <Card
+      variant="outlined"
+      sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+    >
       <Stack
         direction="row"
         alignItems="center"
@@ -66,7 +69,7 @@ export default async function OverduePurchases() {
         <ShoppingBag />
         <Typography variant="h5">Overdue Purchases</Typography>
       </Stack>
-      <List sx={{ overflow: 'auto', height: '100%' }}>
+      <List sx={{ overflow: 'auto', flex: 1 }}>
         {!!orderedResources.length &&
           orderedResources.map((resource) => (
             <ResourceListItem

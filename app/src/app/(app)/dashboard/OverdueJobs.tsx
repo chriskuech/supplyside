@@ -56,7 +56,10 @@ export default async function OverdueJobs() {
   )
 
   return (
-    <Card variant="outlined" sx={{ flex: 1 }}>
+    <Card
+      variant="outlined"
+      sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+    >
       <Stack
         direction="row"
         alignItems="center"
@@ -67,7 +70,7 @@ export default async function OverdueJobs() {
         <Build />
         <Typography variant="h5">Overdue Jobs</Typography>
       </Stack>
-      <List sx={{ overflow: 'auto', height: '100%' }}>
+      <List sx={{ overflow: 'auto', flex: 1 }}>
         {!!orderedResources.length &&
           orderedResources.map((resource) => (
             <ResourceListItem
