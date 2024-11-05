@@ -8,7 +8,7 @@ import { zip } from 'remeda'
 import Color from 'color'
 import { match } from 'ts-pattern'
 
-const height = 60
+const height = 62
 
 const shadow = (color: string = fail('color')) =>
   Color(color).darken(0.5).rgb().string()
