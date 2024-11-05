@@ -118,7 +118,7 @@ export class SchemaFieldService {
         ),
       )
 
-    await this.prisma.field.update({
+    const field = await this.prisma.field.update({
       where: { id: fieldId, accountId },
       data: {
         name: dto.name,
@@ -130,7 +130,10 @@ export class SchemaFieldService {
           update: mapValueInputToPrismaValueUpdate(dto.defaultValue),
         },
       },
+      include: fieldIncludes,
     })
+
+    return mapFieldModelToEntity(field)
   }
 
   async delete(accountId: string, fieldId: string) {

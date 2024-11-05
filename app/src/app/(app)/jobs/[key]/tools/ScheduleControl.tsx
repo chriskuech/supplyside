@@ -76,6 +76,7 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
                 entries(),
                 map(([key, value]) => (
                   <Stack
+                    key={key}
                     direction="row"
                     justifyContent="space-between"
                     spacing={1}

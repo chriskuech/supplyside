@@ -5,10 +5,8 @@ import {
   jobStatusOptions,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import { Alert, Box, Container, Stack } from '@mui/material'
+import { Alert } from '@mui/material'
 import { match } from 'ts-pattern'
-import { green, red, yellow } from '@mui/material/colors'
-import JobStatusTracker from './JobStatusTracker'
 import { JobAttachmentsControl } from './tools/JobAttachmentsControl'
 import CallToAction from './cta/CallToAction'
 import { JobLinesControl } from './JobLinesControl'
@@ -20,6 +18,7 @@ import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import { readResources } from '@/actions/resource'
 import { getInvoiceUrl } from '@/lib/quickBooks/helpers'
 import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
+import { StatusTrackerSlab } from '@/lib/ux/StatusTrackerSlab'
 
 export default async function JobDetail({
   params: { key },
@@ -42,18 +41,6 @@ export default async function JobDetail({
     },
   })
   const jobHasLines = !!jobLines?.length
-
-  const statusColorStart = match(status.templateId)
-    .with(jobStatusOptions.draft.templateId, () => yellow[600])
-    .with(jobStatusOptions.paid.templateId, () => green[900])
-    .with(jobStatusOptions.canceled.templateId, () => red[900])
-    .otherwise(() => yellow[900])
-
-  const statusColorEnd = match(status.templateId)
-    .with(jobStatusOptions.draft.templateId, () => yellow[500])
-    .with(jobStatusOptions.paid.templateId, () => green[800])
-    .with(jobStatusOptions.canceled.templateId, () => red[800])
-    .otherwise(() => yellow[800])
 
   const quickBooksInvoiceId = selectResourceFieldValue(
     resource,
@@ -138,41 +125,19 @@ export default async function JobDetail({
         />,
       ]}
       actions={
-        <Stack direction="row" height={100} alignItems="center">
-          <Box
-            flexGrow={1}
-            height={70}
-            my="15px"
-            sx={{
-              background: `linear-gradient(90deg, ${statusColorStart} 0%, ${statusColorEnd} 100%)`,
-            }}
+        <StatusTrackerSlab
+          statuses={Object.values(jobStatusOptions)}
+          currentStatus={status}
+          successStatus={jobStatusOptions.paid}
+          failStatus={jobStatusOptions.canceled}
+        >
+          <CallToAction
+            hasInvalidFields={hasInvalidFields}
+            jobHasLines={jobHasLines}
+            resource={resource}
+            status={status}
           />
-          <Container disableGutters>
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <JobStatusTracker resource={resource} />
-              <Stack
-                flexShrink={0}
-                direction="row"
-                justifyContent="end"
-                alignItems="center"
-                spacing={2}
-                mr={3}
-              >
-                <CallToAction
-                  hasInvalidFields={hasInvalidFields}
-                  jobHasLines={jobHasLines}
-                  resource={resource}
-                  status={status}
-                />
-              </Stack>
-            </Stack>
-          </Container>
-          <Box flexGrow={1} bgcolor="transparent" />
-        </Stack>
+        </StatusTrackerSlab>
       }
     >
       <JobLinesControl

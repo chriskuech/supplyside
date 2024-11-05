@@ -1,6 +1,5 @@
-import { ChevronLeft } from '@mui/icons-material'
-import { Box, Button, Container } from '@mui/material'
-import NextLink from 'next/link'
+import { Box, Container } from '@mui/material'
+import BackButton from './BackButton'
 
 export default function SettingsLayout({
   children,
@@ -9,16 +8,7 @@ export default function SettingsLayout({
 }) {
   return (
     <Container>
-      <Button
-        variant="text"
-        startIcon={<ChevronLeft fontSize="large" />}
-        size="large"
-        sx={{ my: 5, fontSize: '1.7em' }}
-        component={NextLink}
-        href="/"
-      >
-        Back
-      </Button>
+      <BackButton />
       <Box>{children}</Box>
     </Container>
   )

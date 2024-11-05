@@ -40,6 +40,8 @@ export const PaymentControl: FC<Props> = ({ resource, size }) => {
 
   if (!paymentDueDate) return null
 
+  const isPastDue = paymentDueDate < new Date().toISOString()
+
   return (
     <Tooltip title={info}>
       <Chip
@@ -47,6 +49,7 @@ export const PaymentControl: FC<Props> = ({ resource, size }) => {
         label={formatDate(paymentDueDate)}
         size={size === 'small' ? 'small' : 'medium'}
         sx={{ minHeight: 'fit-content' }}
+        color={isPastDue ? 'error' : undefined}
       />
     </Tooltip>
   )
