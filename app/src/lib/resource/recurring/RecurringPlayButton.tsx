@@ -1,4 +1,4 @@
-import { PlayArrow, Stop } from '@mui/icons-material'
+import { PlayCircle, StopCircle } from '@mui/icons-material'
 import { IconButton } from '@mui/material'
 import {
   fields,
@@ -44,7 +44,7 @@ export default function RecurringPlayButton({
       color="secondary"
       disabled={isDisabled}
     >
-      {isRunning && !isDisabled ? <Stop /> : <PlayArrow />}
+      {isRunning && !isDisabled ? <StopCircle /> : <PlayCircle />}
     </IconButton>
   )
 }
