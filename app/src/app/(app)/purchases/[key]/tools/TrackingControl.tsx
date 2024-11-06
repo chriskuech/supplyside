@@ -55,7 +55,6 @@ export default function TrackingControl({
             inputId={`rf-${field.fieldId}`}
             resource={resource}
             field={field}
-            value={value}
           />
         </DialogContent>
         <DialogContent>

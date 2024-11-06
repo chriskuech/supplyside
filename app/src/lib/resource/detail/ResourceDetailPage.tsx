@@ -151,7 +151,6 @@ export default function ResourceDetailPage({
                 {nameField ? (
                   <Box width={600}>
                     <FieldControl
-                      value={nameValue}
                       resource={resource}
                       inputId="nameField"
                       field={nameField}

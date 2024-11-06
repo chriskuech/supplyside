@@ -155,6 +155,15 @@ export const unitOfMeasureOptions = {
   },
 }
 
+export const intervalUnits = {
+  days: { templateId: '0aede79d-24d8-408c-a769-46a01a3f50c7', name: 'Day' },
+  weeks: { templateId: '005724e4-32a6-41b6-b861-754d9a1d7763', name: 'Week' },
+  months: {
+    templateId: 'fcd4cead-9ce0-4631-8fdc-3c4f16b78524',
+    name: 'Month',
+  },
+}
+
 const _fields = {
   assignee: {
     templateId: '726e01bc-66cb-4114-b900-10102f9c081c',
@@ -231,22 +240,32 @@ const _fields = {
     name: 'Document',
     type: 'File',
   },
-  executionInterval: {
-    templateId: '15694652-1b69-4f0f-8cc5-784ae10570cb',
-    name: 'Execution Interval',
-    type: 'Number',
-    isRequired: true,
+  recurring: {
+    templateId: '22fe79c3-b72d-46bb-b166-e2836e66f153',
+    name: 'Recurring',
+    type: 'Checkbox',
+    defaultValue: { boolean: false },
   },
-  executionIntervalUnits: {
+  recurrenceInterval: {
+    templateId: '15694652-1b69-4f0f-8cc5-784ae10570cb',
+    name: 'Recurrence Interval',
+    type: 'Number',
+  },
+  recurrenceIntervalUnits: {
     templateId: '7c001a12-5ea2-4dc1-bc6d-2facc40de9b9',
-    name: 'Execution Interval Units',
+    name: 'Recurrence Interval Units',
     type: 'Select',
-    options: [
-      { templateId: '0aede79d-24d8-408c-a769-46a01a3f50c7', name: 'Days' },
-      { templateId: '005724e4-32a6-41b6-b861-754d9a1d7763', name: 'Weeks' },
-      { templateId: 'fcd4cead-9ce0-4631-8fdc-3c4f16b78524', name: 'Months' },
-    ],
-    isRequired: true,
+    options: Object.values(intervalUnits),
+  },
+  recurrenceIntervalOffsetInDays: {
+    templateId: '3633b0cf-0a41-47cd-b4dd-bb08d5693fd4',
+    name: 'Recurrence Interval Offset In Days',
+    type: 'Number',
+  },
+  recurrenceRunning: {
+    templateId: '717f9809-5ae5-4221-8980-be34a6230d9d',
+    name: 'Recurrence Running?',
+    type: 'Checkbox',
   },
   incoterms: {
     templateId: '9f1af7c6-c04c-45cc-a97b-188c3a16aaad',
@@ -490,11 +509,6 @@ const _fields = {
     name: 'Received All Purchases?',
     type: 'Checkbox',
   },
-  running: {
-    templateId: '6bbdd656-8698-4436-a5de-ede24d8f413c',
-    name: 'Running?',
-    type: 'Checkbox',
-  },
   shippingAccountNumber: {
     templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
     name: 'Shipping Account Number',
@@ -533,14 +547,6 @@ const _fields = {
     name: 'Taxable',
     type: 'Checkbox',
     description: 'Indicate if the order is taxable',
-  },
-  templatePurchase: {
-    templateId: 'e9f4dd40-2de0-407f-bf39-cc0e5ae99c6d',
-    name: 'Template Purchase',
-    type: 'Resource',
-    resourceType: 'Purchase',
-    description: 'The Purchase to clone when the schedule triggers',
-    isRequired: true,
   },
   termsAndConditions: {
     templateId: '156bdd18-42d2-427b-bcfe-97b7214c401e',

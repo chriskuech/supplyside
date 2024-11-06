@@ -96,7 +96,6 @@ export default function ResourceForm({
                       inputId={`rf-${singleField.fieldId}`}
                       resource={resource}
                       field={singleField}
-                      value={selectResourceFieldValue(resource, singleField)}
                       disabled={
                         !!resource.templateId && !!singleField.templateId
                       }

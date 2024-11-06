@@ -13,6 +13,11 @@ export const schemas: SchemaTemplate[] = [
       fields.assignee,
       fields.billAttachments,
       fields.quickBooksBillId,
+      fields.recurring,
+      fields.recurrenceInterval,
+      fields.recurrenceIntervalUnits,
+      fields.recurrenceIntervalOffsetInDays,
+      fields.recurrenceRunning,
     ],
     sections: [
       {

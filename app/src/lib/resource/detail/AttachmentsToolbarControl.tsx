@@ -62,7 +62,6 @@ export default function AttachmentsToolbarControl({
             inputId={`rf-${field.fieldId}`}
             resource={resource}
             field={field}
-            value={value}
           />
         </DialogContent>
         <DialogActions>

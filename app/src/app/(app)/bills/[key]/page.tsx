@@ -5,6 +5,8 @@ import {
   selectResourceFieldValue,
   selectSchemaField,
 } from '@supplyside/model'
+import { Box, Container, Stack } from '@mui/material'
+import { EventRepeat } from '@mui/icons-material'
 import CallToAction from './CallToAction'
 import { BillAttachmentsControl } from './tools/BillAttachmentsControl'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
@@ -15,6 +17,7 @@ import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
 import { getBillUrl } from '@/lib/quickBooks/helpers'
 import ResourceLink from '@/lib/resource/ResourceLink'
 import { StatusTrackerSlab } from '@/lib/ux/StatusTrackerSlab'
+import RecurringControl from '@/lib/resource/RecurringControl'
 
 export default async function BillsDetail({
   params: { key },
@@ -44,6 +47,11 @@ export default async function BillsDetail({
   const quickBooksAppUrl = quickBooksBillId
     ? getBillUrl(quickBooksBillId)
     : undefined
+
+  const isRecurring = selectResourceFieldValue(
+    resource,
+    fields.recurring,
+  )?.boolean
 
   return (
     <ResourceDetailPage
@@ -88,6 +96,16 @@ export default async function BillsDetail({
               />,
             ]
           : []),
+        ...(isDraft
+          ? [
+              <RecurringControl
+                key={RecurringControl.name}
+                schema={schema}
+                resource={resource}
+                fontSize={fontSize}
+              />,
+            ]
+          : []),
         <BillAttachmentsControl
           key={AttachmentsToolbarControl.name}
           schema={schema}
@@ -109,21 +127,41 @@ export default async function BillsDetail({
       linesBacklinkField={fields.bill}
       isReadOnly={!isDraft}
       actions={
-        <StatusTrackerSlab
-          statuses={Object.values(billStatusOptions)}
-          currentStatus={status}
-          successStatus={billStatusOptions.paid}
-          failStatus={billStatusOptions.canceled}
-        >
-          <CallToAction
-            key={
-              selectResourceFieldValue(resource, fields.billStatus)?.option?.id
-            }
-            schema={schema}
-            self={user}
-            resource={resource}
-          />
-        </StatusTrackerSlab>
+        <>
+          {!isRecurring ? (
+            <StatusTrackerSlab
+              statuses={Object.values(billStatusOptions)}
+              currentStatus={status}
+              successStatus={billStatusOptions.paid}
+              failStatus={billStatusOptions.canceled}
+            >
+              <CallToAction
+                key={
+                  selectResourceFieldValue(resource, fields.billStatus)?.option
+                    ?.id
+                }
+                schema={schema}
+                self={user}
+                resource={resource}
+              />
+            </StatusTrackerSlab>
+          ) : (
+            <Container>
+              <Stack
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
+                py={5}
+                sx={{ opacity: 0.5 }}
+              >
+                <Box p={1}>
+                  <EventRepeat />
+                </Box>
+                This is the template for a recurring Bill.
+              </Stack>
+            </Container>
+          )}
+        </>
       }
     />
   )
