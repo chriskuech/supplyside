@@ -8,7 +8,6 @@ import {
   ListItem,
   Stack,
   TextField,
-  Typography,
 } from '@mui/material'
 import { CSS } from '@dnd-kit/utilities'
 import { Clear } from '@mui/icons-material'
