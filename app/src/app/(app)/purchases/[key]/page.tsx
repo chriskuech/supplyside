@@ -1,6 +1,5 @@
 import { fail } from 'assert'
 import { Typography } from '@mui/material'
-import { match } from 'ts-pattern'
 import {
   fields,
   isMissingRequiredFields,
@@ -75,21 +74,7 @@ export default async function PurchaseDetail({
         draftStatusOptionTemplate: purchaseStatusOptions.draft,
         cancelStatusOptionTemplate: purchaseStatusOptions.canceled,
         statusFieldTemplate: fields.purchaseStatus,
-        label: status.name,
-        color: match(status.templateId)
-          .with(
-            purchaseStatusOptions.draft.templateId,
-            () => 'inactive' as const,
-          )
-          .with(
-            purchaseStatusOptions.purchased.templateId,
-            () => 'success' as const,
-          )
-          .with(
-            purchaseStatusOptions.canceled.templateId,
-            () => 'error' as const,
-          )
-          .otherwise(() => 'active' as const),
+        currentStatus: status,
       }}
       path={[
         {
