@@ -3,6 +3,7 @@ import { PropsWithChildren, ReactNode } from 'react'
 import { match } from 'ts-pattern'
 import {
   FieldTemplate,
+  Option,
   OptionTemplate,
   Resource,
   Schema,
@@ -43,8 +44,7 @@ type Props = {
     statusFieldTemplate: FieldTemplate
     draftStatusOptionTemplate: OptionTemplate
     cancelStatusOptionTemplate: OptionTemplate
-    color: 'inactive' | 'active' | 'success' | 'error'
-    label: string
+    currentStatus: Option
   }
   specialColumnWidths?: ColumnWidths
   header?: ReactNode
@@ -121,7 +121,7 @@ export default function ResourceDetailPage({
       <BreadcrumbFrame
         path={path}
         tools={tools('small')}
-        status={status}
+        status={status?.currentStatus}
         name={nameValue?.string ?? undefined}
         customerName={customerName}
       />

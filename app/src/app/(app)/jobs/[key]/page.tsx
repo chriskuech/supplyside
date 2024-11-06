@@ -6,7 +6,6 @@ import {
   selectResourceFieldValue,
 } from '@supplyside/model'
 import { Alert } from '@mui/material'
-import { match } from 'ts-pattern'
 import { JobAttachmentsControl } from './tools/JobAttachmentsControl'
 import CallToAction from './cta/CallToAction'
 import { JobLinesControl } from './JobLinesControl'
@@ -63,12 +62,7 @@ export default async function JobDetail({
         cancelStatusOptionTemplate: jobStatusOptions.canceled,
         draftStatusOptionTemplate: jobStatusOptions.draft,
         statusFieldTemplate: fields.jobStatus,
-        label: status.name,
-        color: match(status.templateId)
-          .with(jobStatusOptions.draft.templateId, () => 'inactive' as const)
-          .with(jobStatusOptions.paid.templateId, () => 'success' as const)
-          .with(jobStatusOptions.canceled.templateId, () => 'error' as const)
-          .otherwise(() => 'active' as const),
+        currentStatus: status,
       }}
       path={[
         {
