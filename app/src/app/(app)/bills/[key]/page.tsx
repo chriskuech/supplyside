@@ -1,5 +1,4 @@
 import { fail } from 'assert'
-import { match } from 'ts-pattern'
 import {
   billStatusOptions,
   fields,
@@ -52,12 +51,7 @@ export default async function BillsDetail({
         cancelStatusOptionTemplate: billStatusOptions.canceled,
         draftStatusOptionTemplate: billStatusOptions.draft,
         statusFieldTemplate: fields.billStatus,
-        color: match(status.templateId)
-          .with(billStatusOptions.draft.templateId, () => 'inactive' as const)
-          .with(billStatusOptions.paid.templateId, () => 'success' as const)
-          .with(billStatusOptions.canceled.templateId, () => 'error' as const)
-          .otherwise(() => 'active' as const),
-        label: status.name,
+        currentStatus: status,
       }}
       path={[
         {

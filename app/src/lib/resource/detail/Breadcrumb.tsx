@@ -1,10 +1,8 @@
 'use client'
 
-import { match } from 'ts-pattern'
 import {
   Box,
   Breadcrumbs,
-  Chip,
   Collapse,
   Container,
   Link,
@@ -14,15 +12,14 @@ import {
 } from '@mui/material'
 import NextLink from 'next/link'
 import { ReactNode } from 'react'
+import { Option } from '@supplyside/model'
+import OptionChip from '../fields/views/OptionChip'
 import { useScrollContext } from '@/lib/ux/ScrollContext'
 
 type Props = {
   tools?: ReactNode
   path: { label: string; href: string }[]
-  status?: {
-    color: 'inactive' | 'active' | 'success' | 'error'
-    label: string
-  }
+  status?: Option
   name?: string
   customerName?: string
 }
@@ -111,16 +108,7 @@ export default function Breadcrumb({
 
             {status && (
               <Box pl={1}>
-                <Chip
-                  size="small"
-                  color={match(status.color)
-                    .with('inactive', () => 'default' as const)
-                    .with('active', () => 'warning' as const)
-                    .with('success', () => 'success' as const)
-                    .with('error', () => 'error' as const)
-                    .exhaustive()}
-                  label={status.label}
-                />
+                <OptionChip option={status} size="small" />
               </Box>
             )}
 
