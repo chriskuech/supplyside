@@ -6,7 +6,8 @@ import {
   IconButton,
   List,
   ListItem,
-  Typography,
+  Stack,
+  TextField,
 } from '@mui/material'
 import { CSS } from '@dnd-kit/utilities'
 import { Clear } from '@mui/icons-material'
@@ -127,16 +128,31 @@ const SortableRow: FC<{
         </IconButton>
       }
     >
-      <Box flexGrow={1}>
-        <Typography>{section.name}</Typography>
-      </Box>
-      <SectionFieldsControl
-        section={section}
-        fields={fields}
-        onChange={(fieldIds) => {
-          updateSection(resourceType, section.id, { fieldIds })
-        }}
-      />
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        width="100%"
+        gap={2}
+      >
+        <Box>
+          <TextField
+            defaultValue={section.name}
+            onChange={(e) =>
+              updateSection(resourceType, section.id, {
+                name: e.target.value,
+                fieldIds: section.fields.map((f) => f.fieldId),
+              })
+            }
+          />
+        </Box>
+        <SectionFieldsControl
+          section={section}
+          fields={fields}
+          onChange={(fieldIds) => {
+            updateSection(resourceType, section.id, { fieldIds })
+          }}
+        />
+      </Stack>
     </ListItem>
   )
 }
