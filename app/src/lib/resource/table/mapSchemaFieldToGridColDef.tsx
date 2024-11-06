@@ -62,7 +62,7 @@ const wrapFilterOperator = (
         )
         .with('Checkbox', () => value.boolean)
         .with('Contact', () => value.contact?.name)
-        .with('Date', () => value.date)
+        .with('Date', () => value.date && new Date(value.date))
         .with('File', () => value.file?.name)
         .with('User', () => value.user?.name)
         .with('Resource', () => value.resource?.name)
