@@ -8,7 +8,7 @@ import {
 } from '@supplyside/model'
 import dayjs from 'dayjs'
 import { sortBy } from 'remeda'
-import { Description } from '@mui/icons-material'
+import { Build } from '@mui/icons-material'
 import { Stack, Tooltip } from '@mui/material'
 import LateItem from './LateItem'
 import { LateList } from './LateList'
@@ -17,7 +17,7 @@ import { readSchema } from '@/actions/schema'
 import { readResources } from '@/actions/resource'
 import OptionChip from '@/lib/resource/fields/views/OptionChip'
 
-export default async function OverdueInvoices() {
+export default async function LateJobs() {
   const jobSchema = (await readSchema('Job')) ?? fail('Job schema not found')
   const getStatusOptionId = (optionRef: OptionTemplate) =>
     selectSchemaFieldOptionUnsafe(jobSchema, fields.jobStatus, optionRef).id
@@ -26,13 +26,25 @@ export default async function OverdueInvoices() {
     where: {
       and: [
         {
-          '==': [
+          '!=': [
+            { var: fields.jobStatus.name },
+            getStatusOptionId(jobStatusOptions.paid),
+          ],
+        },
+        {
+          '!=': [
             { var: fields.jobStatus.name },
             getStatusOptionId(jobStatusOptions.invoiced),
           ],
         },
         {
-          '<': [{ var: fields.paymentDueDate.name }, new Date().toISOString()],
+          '!=': [
+            { var: fields.jobStatus.name },
+            getStatusOptionId(jobStatusOptions.canceled),
+          ],
+        },
+        {
+          '<': [{ var: fields.needDate.name }, new Date().toISOString()],
         },
       ],
     },
@@ -41,24 +53,24 @@ export default async function OverdueInvoices() {
   const orderedResources = sortBy(
     resources ?? [],
     (resource) =>
-      selectResourceFieldValue(resource, fields.paymentDueDate)?.date ??
-      fail('No payment need date'),
+      selectResourceFieldValue(resource, fields.needDate)?.date ??
+      fail('No need date'),
   )
 
   return (
     <LateList
-      title="Overdue Invoices"
-      icon={<Description />}
+      title="Late Jobs"
+      icon={<Build />}
       count={orderedResources.length}
     >
       {orderedResources.map((resource) => (
         <LateItem
           key={resource.id}
-          number={resource.key}
           resourceType="Job"
+          number={resource.key}
           daysLate={dayjs().diff(
             dayjs(
-              selectResourceFieldValue(resource, fields.paymentDueDate)?.date ??
+              selectResourceFieldValue(resource, fields.needDate)?.date ??
                 fail('No need date'),
             ),
             'days',
