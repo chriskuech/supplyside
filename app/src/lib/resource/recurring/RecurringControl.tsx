@@ -1,7 +1,7 @@
 'use client'
 
 import { EventRepeat } from '@mui/icons-material'
-import { IconButton } from '@mui/material'
+import { IconButton, Tooltip } from '@mui/material'
 import {
   fields,
   Resource,
@@ -61,12 +61,18 @@ export default function RecurringControl({
   }, [confirm, isRecurring, resource.id, resourceTypeDisplay, schema])
 
   return (
-    <IconButton
-      size="small"
-      color={isRecurring ? 'secondary' : undefined}
-      onClick={toggleRecurring}
+    <Tooltip
+      title={
+        isRecurring ? 'Cancel recurring schedule' : 'Create recurring schedule'
+      }
     >
-      <EventRepeat fontSize={fontSize} />
-    </IconButton>
+      <IconButton
+        size="small"
+        color={isRecurring ? 'secondary' : undefined}
+        onClick={toggleRecurring}
+      >
+        <EventRepeat fontSize={fontSize} />
+      </IconButton>
+    </Tooltip>
   )
 }
