@@ -5,8 +5,7 @@ import {
   selectResourceFieldValue,
   selectSchemaField,
 } from '@supplyside/model'
-import { Box, Container, Stack } from '@mui/material'
-import { EventRepeat } from '@mui/icons-material'
+import { Container } from '@mui/material'
 import CallToAction from './CallToAction'
 import { BillAttachmentsControl } from './tools/BillAttachmentsControl'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
@@ -17,7 +16,8 @@ import QuickBooksLink from '@/lib/quickBooks/QuickBooksLink'
 import { getBillUrl } from '@/lib/quickBooks/helpers'
 import ResourceLink from '@/lib/resource/ResourceLink'
 import { StatusTrackerSlab } from '@/lib/ux/StatusTrackerSlab'
-import RecurringControl from '@/lib/resource/RecurringControl'
+import RecurringControl from '@/lib/resource/recurring/RecurringControl'
+import RecurringCard from '@/lib/resource/recurring/RecurringCard'
 
 export default async function BillsDetail({
   params: { key },
@@ -147,18 +147,7 @@ export default async function BillsDetail({
             </StatusTrackerSlab>
           ) : (
             <Container>
-              <Stack
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-                py={5}
-                sx={{ opacity: 0.5 }}
-              >
-                <Box p={1}>
-                  <EventRepeat />
-                </Box>
-                This is the template for a recurring Bill.
-              </Stack>
+              <RecurringCard schema={schema} resource={resource} />
             </Container>
           )}
         </>
