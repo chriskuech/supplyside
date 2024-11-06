@@ -2,7 +2,6 @@ import {
   Box,
   ListItem,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
   Typography,
 } from '@mui/material'
@@ -39,11 +38,21 @@ export default async function LateItem({
         LinkComponent={Link}
         href={`/${resourceType.toLowerCase()}s/${number}`}
       >
-        <ListItemIcon>
-          <Typography variant="overline">#</Typography>
-          <Typography variant="h6">{number}</Typography>
-        </ListItemIcon>
-        <ListItemText primary={primaryText ?? '-'} secondary={secondaryText} />
+        <ListItemText
+          primary={
+            <>
+              {primaryText ?? '-'}{' '}
+              <Typography
+                fontSize="small"
+                sx={{ opacity: 0.5 }}
+                display="inline"
+              >
+                #{number}
+              </Typography>
+            </>
+          }
+          secondary={secondaryText}
+        />
       </ListItemButton>
     </ListItem>
   )
