@@ -1,3 +1,4 @@
+import fastifyCors from '@fastify/cors'
 import fastifySwagger from '@fastify/swagger'
 import * as Sentry from '@sentry/node'
 import { nodeProfilingIntegration } from '@sentry/profiling-node'
@@ -34,6 +35,7 @@ export const createServer = async (isDev?: boolean) => {
   })
     .setValidatorCompiler(validatorCompiler)
     .setSerializerCompiler(serializerCompiler)
+    .register(fastifyCors, { origin: '*' })
     .register(fastifySwagger, {
       openapi: {
         info: {

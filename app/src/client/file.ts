@@ -35,3 +35,17 @@ export const createFile = async (
 
   return file
 }
+
+export const createFileToken = async (
+  accountId: string,
+  fileId: string,
+): Promise<{ token: string } | undefined> => {
+  const { data: token } = await client().POST(
+    '/api/accounts/{accountId}/files/{fileId}/token/',
+    {
+      params: { path: { accountId, fileId } },
+    },
+  )
+
+  return token
+}
