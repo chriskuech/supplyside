@@ -1,16 +1,21 @@
-import { Alert, Container, Stack, Typography } from '@mui/material'
+import { Container, Stack, Typography } from '@mui/material'
+import LateJobs from './LateJobs'
+import LatePurchases from './LatePurchases'
+import OverdueBills from './OverdueBills'
+import OverdueInvoices from './OverdueInvoices'
 
-export default function Dashboard() {
+export default async function Dashboard() {
   return (
     <Container maxWidth="xl" sx={{ py: 2 }}>
-      <Stack spacing={4}>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <Typography variant="h4" flexGrow={1}>
-            Dashboard
-          </Typography>
-        </Stack>
+      <Typography variant="h4" gutterBottom>
+        Dashboard
+      </Typography>
+      <Stack direction="row" spacing={1}>
+        <OverdueBills />
+        <OverdueInvoices />
+        <LateJobs />
+        <LatePurchases />
       </Stack>
-      <Alert severity="warning">Coming soon.</Alert>
     </Container>
   )
 }

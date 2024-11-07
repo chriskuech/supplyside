@@ -1,6 +1,6 @@
 'use server'
 
-import * as client from '@/client/resource-costs'
+import * as client from '@/client/resource-cost'
 import { withAccountId } from '@/authz'
 
 export const createCost = withAccountId(client.createCost)

@@ -5,7 +5,19 @@ import { z } from 'zod'
 import { File as FileModel } from '@supplyside/model'
 import { withAccountId } from '@/authz'
 import { createBlob } from '@/client/blob'
-import { createFile } from '@/client/files'
+import { createFile } from '@/client/file'
+
+const handleFileUpload = async (accountId: string, jsFile: File) => {
+  const blob = await createBlob(accountId, jsFile)
+  if (!blob) return
+
+  const file = await createFile(accountId, {
+    name: jsFile.name,
+    blobId: blob.id,
+  })
+
+  return file
+}
 
 const handleFileUpload = async (accountId: string, jsFile: File) => {
   const blob = await createBlob(accountId, jsFile)

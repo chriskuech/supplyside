@@ -9,22 +9,27 @@ export const billStatusOptions = {
   draft: {
     templateId: 'abababbb-3f5e-4d2d-8f0f-3e8f2c4c4b5c',
     name: 'Draft',
+    color: '#e0e0e0',
   },
   submitted: {
     templateId: '45b2ab63-6c20-4548-aafa-027286d03759',
     name: 'Submitted',
+    color: '#ba68c8',
   },
   approved: {
     templateId: 'd4c4b6f7-4e1e-4e1e-8f7b-4e0f7e1e7e5d',
     name: 'Approved',
+    color: '#2196f3',
   },
   paid: {
     templateId: 'd4c4b6f7-4e2e-4e1e-8f7a-ae0f7e1e7e5d',
     name: 'Paid',
+    color: '#4caf50',
   },
   canceled: {
     templateId: 'e8b7c2c8-0b7b-4e9a-8e8d-7b2fffff6f4e',
     name: 'Canceled',
+    color: '#e57373',
   },
 }
 
@@ -32,30 +37,37 @@ export const jobStatusOptions = {
   draft: {
     templateId: '6280f9fb-5d27-4d0c-8d7e-12ceb064dc5e',
     name: 'Draft',
+    color: '#e0e0e0',
   },
   ordered: {
     templateId: '1a18eb92-20c3-418d-aff2-723520d21207',
     name: 'Ordered',
+    color: '#ba68c8',
   },
   inProcess: {
     templateId: '254645f8-c9ab-4af2-b86b-6eb77354d4d4',
     name: 'In Process',
+    color: '#4fc3f7',
   },
   shipped: {
     templateId: '71921302-1e57-41bf-8c22-ef2b6f268ba3',
     name: 'Shipped',
+    color: '#2196f3',
   },
   invoiced: {
     templateId: 'deeba092-2e81-4476-8962-4b6a7d1e8f29',
     name: 'Invoiced',
+    color: '#aed581',
   },
   paid: {
     templateId: 'fd87e2ab-13e5-4f3f-9e5c-ab96684f9e4e',
     name: 'Paid',
+    color: '#4caf50',
   },
   canceled: {
     templateId: '70912291-2b48-4e1f-9300-b7dbca8ce5ab',
     name: 'Canceled',
+    color: '#e57373',
   },
 }
 
@@ -63,26 +75,32 @@ export const purchaseStatusOptions = {
   draft: {
     templateId: '84c65f46-b8dd-43bf-9bbe-537b816fdeb5',
     name: 'Draft',
+    color: '#e0e0e0',
   },
   submitted: {
     templateId: '45b2ab63-6c20-4548-8427-027286d03759',
     name: 'Submitted',
+    color: '#ba68c8',
   },
   approved: {
     templateId: '9946f309-a3e4-4fdf-991a-cc9d3df80ec0',
     name: 'Approved',
+    color: '#2196f3',
   },
   purchased: {
     templateId: '37551c24-8610-4952-abcb-a9e54c086272',
     name: 'Purchased',
+    color: '#aed581',
   },
   received: {
     templateId: 'f3f9b5a6-6b0e-4d4d-8d4e-2f7f3b1b7a3a',
     name: 'Received',
+    color: '#4caf50',
   },
   canceled: {
     templateId: 'e8b7c2c8-0b7b-4e9a-8e8d-7b2f5e1f6f4e',
     name: 'Canceled',
+    color: '#e57373',
   },
 }
 
@@ -134,6 +152,15 @@ export const unitOfMeasureOptions = {
   squareFoot: {
     templateId: '1e7be07c-c121-4a6f-8af2-239e5da18a4e',
     name: 'square foot',
+  },
+}
+
+export const intervalUnits = {
+  days: { templateId: '0aede79d-24d8-408c-a769-46a01a3f50c7', name: 'Day' },
+  weeks: { templateId: '005724e4-32a6-41b6-b861-754d9a1d7763', name: 'Week' },
+  months: {
+    templateId: 'fcd4cead-9ce0-4631-8fdc-3c4f16b78524',
+    name: 'Month',
   },
 }
 
@@ -213,22 +240,32 @@ const _fields = {
     name: 'Document',
     type: 'File',
   },
-  executionInterval: {
-    templateId: '15694652-1b69-4f0f-8cc5-784ae10570cb',
-    name: 'Execution Interval',
-    type: 'Number',
-    isRequired: true,
+  recurring: {
+    templateId: '22fe79c3-b72d-46bb-b166-e2836e66f153',
+    name: 'Recurring',
+    type: 'Checkbox',
+    defaultValue: { boolean: false },
   },
-  executionIntervalUnits: {
+  recurrenceInterval: {
+    templateId: '15694652-1b69-4f0f-8cc5-784ae10570cb',
+    name: 'Recurrence Interval',
+    type: 'Number',
+  },
+  recurrenceIntervalUnits: {
     templateId: '7c001a12-5ea2-4dc1-bc6d-2facc40de9b9',
-    name: 'Execution Interval Units',
+    name: 'Recurrence Interval Units',
     type: 'Select',
-    options: [
-      { templateId: '0aede79d-24d8-408c-a769-46a01a3f50c7', name: 'Days' },
-      { templateId: '005724e4-32a6-41b6-b861-754d9a1d7763', name: 'Weeks' },
-      { templateId: 'fcd4cead-9ce0-4631-8fdc-3c4f16b78524', name: 'Months' },
-    ],
-    isRequired: true,
+    options: Object.values(intervalUnits),
+  },
+  recurrenceIntervalOffsetInDays: {
+    templateId: '3633b0cf-0a41-47cd-b4dd-bb08d5693fd4',
+    name: 'Recurrence Interval Offset In Days',
+    type: 'Number',
+  },
+  recurrenceRunning: {
+    templateId: '717f9809-5ae5-4221-8980-be34a6230d9d',
+    name: 'Recurrence Running?',
+    type: 'Checkbox',
   },
   incoterms: {
     templateId: '9f1af7c6-c04c-45cc-a97b-188c3a16aaad',
@@ -419,13 +456,6 @@ const _fields = {
     type: 'Textarea',
     description: 'Purchase notes included in the purchase order header',
   },
-  purchaseSchedule: {
-    templateId: 'b0cab848-a8e7-4cb7-a274-cad780868a73',
-    name: 'Purchase Schedule',
-    type: 'Resource',
-    resourceType: 'PurchaseSchedule',
-    description: 'The schedule that created this purchase',
-  },
   purchaseStatus: {
     templateId: 'd51e1004-c999-4ac1-8692-ff3d966c5dc3',
     name: 'Purchase Status',
@@ -479,11 +509,6 @@ const _fields = {
     name: 'Received All Purchases?',
     type: 'Checkbox',
   },
-  running: {
-    templateId: '6bbdd656-8698-4436-a5de-ede24d8f413c',
-    name: 'Running?',
-    type: 'Checkbox',
-  },
   shippingAccountNumber: {
     templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
     name: 'Shipping Account Number',
@@ -522,14 +547,6 @@ const _fields = {
     name: 'Taxable',
     type: 'Checkbox',
     description: 'Indicate if the order is taxable',
-  },
-  templatePurchase: {
-    templateId: 'e9f4dd40-2de0-407f-bf39-cc0e5ae99c6d',
-    name: 'Template Purchase',
-    type: 'Resource',
-    resourceType: 'Purchase',
-    description: 'The Purchase to clone when the schedule triggers',
-    isRequired: true,
   },
   termsAndConditions: {
     templateId: '156bdd18-42d2-427b-bcfe-97b7214c401e',

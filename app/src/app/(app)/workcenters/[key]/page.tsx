@@ -26,10 +26,6 @@ export default async function WorkCenterDetail({
       tools={() => []}
       linkedResources={[
         {
-          resourceType: 'PurchaseSchedule',
-          backlinkField: fields.workCenter,
-        },
-        {
           resourceType: 'Purchase',
           backlinkField: fields.workCenter,
         },

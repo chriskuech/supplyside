@@ -1,7 +1,5 @@
 import { fail } from 'assert'
-import { Box, Container, Stack, Typography } from '@mui/material'
-import { match } from 'ts-pattern'
-import { green, red, yellow } from '@mui/material/colors'
+import { Typography } from '@mui/material'
 import {
   fields,
   isMissingRequiredFields,
@@ -10,7 +8,6 @@ import {
   selectResourceFieldValue,
   selectSchemaField,
 } from '@supplyside/model'
-import PurchaseStatusTracker from './PurchaseStatusTracker'
 import ApproveButton from './cta/ApproveButton'
 import SkipButton from './cta/SkipButton'
 import StatusTransitionButton from './cta/StatusTransitionButton'
@@ -26,6 +23,7 @@ import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
 import { readResources } from '@/actions/resource'
 import ResourceLink from '@/lib/resource/ResourceLink'
+import { StatusTrackerSlab } from '@/lib/ux/StatusTrackerSlab'
 
 export default async function PurchaseDetail({
   params: { key },
@@ -50,11 +48,6 @@ export default async function PurchaseDetail({
         '==': [{ var: fields.purchase.name }, resource.id],
       },
     }),
-    readResources('PurchaseSchedule', {
-      where: {
-        '==': [{ var: fields.purchaseSchedule.name }, resource.id],
-      },
-    }),
   ])
 
   const purchaseHasLines = !!purchaseLines?.length
@@ -66,18 +59,6 @@ export default async function PurchaseDetail({
     fail('Status not found')
 
   const isDraft = status.templateId === purchaseStatusOptions.draft.templateId
-
-  const statusColorStart = match(status.templateId)
-    .with(purchaseStatusOptions.draft.templateId, () => yellow[600])
-    .with(purchaseStatusOptions.received.templateId, () => green[900])
-    .with(purchaseStatusOptions.canceled.templateId, () => red[900])
-    .otherwise(() => yellow[900])
-
-  const statusColorEnd = match(status.templateId)
-    .with(purchaseStatusOptions.draft.templateId, () => yellow[500])
-    .with(purchaseStatusOptions.received.templateId, () => green[800])
-    .with(purchaseStatusOptions.canceled.templateId, () => red[800])
-    .otherwise(() => yellow[800])
 
   const hasInvalidFields = isMissingRequiredFields(schema, resource)
   const poFile = selectResourceFieldValue(resource, fields.document)?.file
@@ -93,21 +74,7 @@ export default async function PurchaseDetail({
         draftStatusOptionTemplate: purchaseStatusOptions.draft,
         cancelStatusOptionTemplate: purchaseStatusOptions.canceled,
         statusFieldTemplate: fields.purchaseStatus,
-        label: status.name,
-        color: match(status.templateId)
-          .with(
-            purchaseStatusOptions.draft.templateId,
-            () => 'inactive' as const,
-          )
-          .with(
-            purchaseStatusOptions.purchased.templateId,
-            () => 'success' as const,
-          )
-          .with(
-            purchaseStatusOptions.canceled.templateId,
-            () => 'error' as const,
-          )
-          .otherwise(() => 'active' as const),
+        currentStatus: status,
       }}
       path={[
         {
@@ -193,90 +160,61 @@ export default async function PurchaseDetail({
       linesBacklinkField={fields.purchase}
       isReadOnly={!isDraft}
       actions={
-        <Stack direction="row" height={100}>
-          <Box
-            flexGrow={1}
-            height={70}
-            my="15px"
-            sx={{
-              background: `linear-gradient(90deg, ${statusColorStart} 0%, ${statusColorEnd} 100%)`,
-            }}
-          />
-          <Container sx={{ flexShrink: 0 }} disableGutters>
-            <Stack
-              direction="row"
-              sx={{ overflowX: 'hidden', height: 100 }}
-              alignItems="center"
-            >
-              <Box sx={{ borderRadius: 10, flexGrow: 1 }}>
-                <PurchaseStatusTracker resource={resource} />
-              </Box>
-              <Stack
-                width={400}
-                flexShrink={0}
-                direction="row"
-                justifyContent="end"
-                alignItems="center"
-                spacing={2}
-                mr={3}
-              >
-                {isDraft &&
-                  (isVendorMcMasterCarr && !purchaseHasLines ? (
-                    <PunchoutButton resource={resource} />
-                  ) : (
-                    <>
-                      <PreviewDraftPoButton resourceId={resource.id} />
-                      <StatusTransitionButton
-                        isDisabled={hasInvalidFields}
-                        tooltip={
-                          hasInvalidFields
-                            ? 'Please fill in all required fields before submitting'
-                            : undefined
-                        }
-                        resourceId={resource.id}
-                        statusOption={purchaseStatusOptions.submitted}
-                        label="Submit"
-                      />
-                    </>
-                  ))}
-                {status.templateId ===
-                  purchaseStatusOptions.submitted.templateId && (
-                  <>
-                    <PreviewDraftPoButton resourceId={resource.id} />
-                    <ApproveButton
-                      resourceId={resource.id}
-                      isDisabled={!user.isApprover && !user.isGlobalAdmin}
-                    />
-                  </>
-                )}
-                {status.templateId ===
-                  purchaseStatusOptions.approved.templateId && (
-                  <>
-                    <SendPoButton resourceId={resource.id} />
-                    <SkipButton resourceId={resource.id} />
-                  </>
-                )}
-                {status.templateId ===
-                  purchaseStatusOptions.purchased.templateId && (
-                  <StatusTransitionButton
-                    resourceId={resource.id}
-                    statusOption={purchaseStatusOptions.received}
-                    label="Confirm Receipt"
-                  />
-                )}
-                {(status.templateId ===
-                  purchaseStatusOptions.received.templateId ||
-                  status.templateId ===
-                    purchaseStatusOptions.canceled.templateId) && (
-                  <Typography sx={{ opacity: 0.5 }}>
-                    No further action required
-                  </Typography>
-                )}
-              </Stack>
-            </Stack>
-          </Container>
-          <Box flexGrow={1} bgcolor="transparent" />
-        </Stack>
+        <StatusTrackerSlab
+          statuses={Object.values(purchaseStatusOptions)}
+          currentStatus={status}
+          successStatus={purchaseStatusOptions.received}
+          failStatus={purchaseStatusOptions.canceled}
+        >
+          {isDraft &&
+            (isVendorMcMasterCarr && !purchaseHasLines ? (
+              <PunchoutButton resource={resource} />
+            ) : (
+              <>
+                <PreviewDraftPoButton resourceId={resource.id} />
+                <StatusTransitionButton
+                  isDisabled={hasInvalidFields}
+                  tooltip={
+                    hasInvalidFields
+                      ? 'Please fill in all required fields before submitting'
+                      : undefined
+                  }
+                  resourceId={resource.id}
+                  statusOption={purchaseStatusOptions.submitted}
+                  label="Submit"
+                />
+              </>
+            ))}
+          {status.templateId === purchaseStatusOptions.submitted.templateId && (
+            <>
+              <PreviewDraftPoButton resourceId={resource.id} />
+              <ApproveButton
+                resourceId={resource.id}
+                isDisabled={!user.isApprover && !user.isGlobalAdmin}
+              />
+            </>
+          )}
+          {status.templateId === purchaseStatusOptions.approved.templateId && (
+            <>
+              <SendPoButton resource={resource} />
+              <SkipButton resourceId={resource.id} />
+            </>
+          )}
+          {status.templateId === purchaseStatusOptions.purchased.templateId && (
+            <StatusTransitionButton
+              resourceId={resource.id}
+              statusOption={purchaseStatusOptions.received}
+              label="Confirm Receipt"
+            />
+          )}
+          {(status.templateId === purchaseStatusOptions.received.templateId ||
+            status.templateId ===
+              purchaseStatusOptions.canceled.templateId) && (
+            <Typography sx={{ opacity: 0.5 }}>
+              No further action required
+            </Typography>
+          )}
+        </StatusTrackerSlab>
       }
     />
   )

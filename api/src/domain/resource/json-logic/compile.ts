@@ -56,6 +56,16 @@ const createWhere = (where: JsonLogic, schema: Schema): string =>
       ({ '!=': [{ var: var_ }, val] }) =>
         `${resolveFieldNameToColumn(schema, var_)} <> ${sanitizeValue(val)}`,
     )
+    .with(
+      { '<': P.any },
+      ({ '<': [{ var: var_ }, val] }) =>
+        `${resolveFieldNameToColumn(schema, var_)} < ${sanitizeValue(val)}`,
+    )
+    .with(
+      { '>': P.any },
+      ({ '>': [{ var: var_ }, val] }) =>
+        `${resolveFieldNameToColumn(schema, var_)} > ${sanitizeValue(val)}`,
+    )
     .exhaustive()
 
 const createOrderBy = (orderBy: OrderBy[]) =>

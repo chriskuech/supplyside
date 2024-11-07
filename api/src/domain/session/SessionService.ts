@@ -13,6 +13,7 @@ import { mapSessionModelToEntity } from './mappers'
 const SESSION_LIFESPAN_IN_DAYS = 7
 const verifyLoginPath = '/auth/verify-login'
 const lifespanInSeconds = 1000 * 60 * 24 * SESSION_LIFESPAN_IN_DAYS
+const normalizeEmail = (email: string) => email.toLowerCase()
 
 export type StartEmailVerificationInput = {
   email: string
@@ -29,7 +30,7 @@ export class SessionService {
 
   async create(email: string, tat: string): Promise<Session> {
     const user = await this.prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizeEmail(email) },
     })
 
     if (!user) {
@@ -134,7 +135,7 @@ export class SessionService {
 
     try {
       await this.prisma.user.update({
-        where: { email },
+        where: { email: normalizeEmail(email) },
         data: { tat, tatExpiresAt },
       })
     } catch (error) {

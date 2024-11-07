@@ -6,7 +6,6 @@ import {
   BadgeProps,
   Box,
   Button,
-  Chip,
   Collapse,
   Divider,
   Paper,
@@ -15,10 +14,10 @@ import {
   Typography,
 } from '@mui/material'
 import {
+  Option,
   Resource,
   Schema,
   fields,
-  jobStatusOptions,
   selectResourceFieldValue,
 } from '@supplyside/model'
 import { FC, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -37,14 +36,17 @@ import {
   ShoppingBag,
 } from '@mui/icons-material'
 import NextLink from 'next/link'
-import { isNumber, sortBy } from 'remeda'
+import { isNumber, sortBy, filter, pipe } from 'remeda'
 import utc from 'dayjs/plugin/utc'
 import { match, P } from 'ts-pattern'
 import Charts, { CHART_HEIGHT } from '../charts/Charts'
 import { DragBar } from './DragBar'
 import GanttChart from './GanttChart'
 import { GanttChartHeader } from './GanttChartHeader'
+import FiltersControl from './FiltersControl'
 import { formatMoney } from '@/lib/format'
+import useLocalStorageState from '@/hooks/useLocalStorageState'
+import OptionChip from '@/lib/resource/fields/views/OptionChip'
 
 dayjs.extend(utc)
 
@@ -52,9 +54,9 @@ const isScrolledToRight = (element: HTMLElement): boolean =>
   element.scrollLeft + element.clientWidth >= element.scrollWidth
 
 const dim = 30
-const topDim = 150
+const topDim = 180
 
-const minDrawerWidth = 300
+const minDrawerWidth = 450
 const initialDrawerWidth = 500
 const maxDrawerWidth = 800
 const clampDrawerWidth = (width: number) =>
@@ -73,13 +75,30 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
   const [drawerWidth, setDrawerWidth] = useState(initialDrawerWidth)
   const [scrollOffset, setScrollOffset] = useState(initialScrollOffset)
   const [minDate, setMinDate] = useState(dayjs().utc().day(0).startOf('day'))
+  const [filters, setFilters] = useLocalStorageState<{
+    jobStatuses: Option[] | null
+  }>('job-schedule-list', {
+    jobStatuses: null,
+  })
+
   const jobs = useMemo(
     () =>
-      sortBy(
+      pipe(
         unsortedJobs,
-        (job) => selectResourceFieldValue(job, fields.needDate)?.date ?? '',
+        sortBy(
+          (job) => selectResourceFieldValue(job, fields.needDate)?.date ?? '',
+        ),
+        filter(
+          (job) =>
+            !filters.jobStatuses?.length ||
+            filters.jobStatuses.some(
+              (jobStatus) =>
+                jobStatus.id ===
+                selectResourceFieldValue(job, fields.jobStatus)?.option?.id,
+            ),
+        ),
       ),
-    [unsortedJobs],
+    [unsortedJobs, filters],
   )
 
   const frameRef = useRef<HTMLDivElement>(null)
@@ -105,39 +124,45 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
           width={`${drawerWidth}px`}
           borderRadius={0}
         >
-          <Stack
-            direction="row"
-            height={`${topDim}px`}
-            py={2}
-            px={4}
-            justifyContent="space-between"
-          >
-            <Typography variant="h4">Jobs Schedule</Typography>
-            <Box>
-              <Button
-                size="small"
-                variant="text"
-                onClick={() => setShowCharts((c) => !c)}
-                startIcon={
-                  <Stack direction="row" alignItems="center">
-                    <PieChart fontSize="small" />
-                    <BarChart fontSize="small" />
-                  </Stack>
-                }
-                endIcon={showCharts ? <ExpandLess /> : <ExpandMore />}
-                sx={{
-                  '.ChartsButtonText': {
-                    width: 0,
-                    overflow: 'hidden',
-                  },
-                  '&:hover .ChartsButtonText': {
-                    width: 'unset',
-                  },
-                }}
-              >
-                <span className="ChartsButtonText">Charts</span>
-              </Button>
-            </Box>
+          <Stack height={`${topDim}px`} py={2} px={4} gap={2}>
+            <Stack direction="row" justifyContent="space-between">
+              <Typography variant="h4">Jobs Schedule</Typography>
+              <Stack gap={1}>
+                <Button
+                  size="small"
+                  variant="text"
+                  onClick={() => setShowCharts((c) => !c)}
+                  startIcon={
+                    <Stack direction="row" alignItems="center">
+                      <PieChart fontSize="small" />
+                      <BarChart fontSize="small" />
+                    </Stack>
+                  }
+                  endIcon={showCharts ? <ExpandLess /> : <ExpandMore />}
+                  sx={{
+                    '.ChartsButtonText': {
+                      width: 0,
+                      overflow: 'hidden',
+                    },
+                    '&:hover .ChartsButtonText': {
+                      width: 'unset',
+                    },
+                  }}
+                >
+                  <span className="ChartsButtonText">Charts</span>
+                </Button>
+              </Stack>
+            </Stack>
+            <FiltersControl
+              jobSchema={jobSchema}
+              jobStatuses={filters.jobStatuses}
+              onJobStatusChange={(statuses) =>
+                setFilters((filters) => ({
+                  ...filters,
+                  jobStatuses: statuses,
+                }))
+              }
+            />
           </Stack>
 
           <Collapse in={showCharts}>
@@ -248,26 +273,11 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
                         </Stack>
                       </Tooltip>
                     )}
-                    <Tooltip title="Job Status">
-                      <Chip
-                        label={jobStatus?.name}
-                        size="small"
-                        color={match(jobStatus?.templateId)
-                          .with(
-                            jobStatusOptions.paid.templateId,
-                            () => 'success' as const,
-                          )
-                          .with(
-                            jobStatusOptions.canceled.templateId,
-                            () => 'error' as const,
-                          )
-                          .with(
-                            jobStatusOptions.draft.templateId,
-                            () => 'default' as const,
-                          )
-                          .otherwise(() => 'warning' as const)}
-                      />
-                    </Tooltip>
+                    {jobStatus && (
+                      <Tooltip title="Job Status">
+                        <OptionChip option={jobStatus} size="small" />
+                      </Tooltip>
+                    )}
                     <Stack alignItems="center" direction="row">
                       <Tooltip
                         title={match(receivedAllPurchases)

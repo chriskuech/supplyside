@@ -13,6 +13,11 @@ export const schemas: SchemaTemplate[] = [
       fields.assignee,
       fields.billAttachments,
       fields.quickBooksBillId,
+      fields.recurring,
+      fields.recurrenceInterval,
+      fields.recurrenceIntervalUnits,
+      fields.recurrenceIntervalOffsetInDays,
+      fields.recurrenceRunning,
     ],
     sections: [
       {
@@ -107,7 +112,6 @@ export const schemas: SchemaTemplate[] = [
   {
     resourceType: 'Purchase',
     fields: [
-      fields.purchaseSchedule,
       fields.purchaseStatus,
       fields.poNumber,
       fields.assignee,
@@ -171,20 +175,6 @@ export const schemas: SchemaTemplate[] = [
       fields.purchase,
       fields.bill,
       fields.vendor,
-    ],
-  },
-  {
-    resourceType: 'PurchaseSchedule',
-    fields: [fields.name, fields.running, fields.workCenter],
-    sections: [
-      {
-        name: 'Summary',
-        fields: [
-          fields.executionInterval,
-          fields.executionIntervalUnits,
-          fields.templatePurchase,
-        ],
-      },
     ],
   },
   {

@@ -34,6 +34,7 @@ export type FieldTemplate = {
 export type OptionTemplate = {
   templateId: string
   name: string
+  color?: string
 }
 
 export type FieldTemplateReference = { templateId: string }

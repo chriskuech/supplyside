@@ -26,7 +26,7 @@ export const PaymentDueDateBar: FC<Props> = ({
       const isConfirmed = await confirm({
         title: 'Update Payment Due Date?',
         content:
-          'Are you sure you want to update the Payment Due Date for the Job? The Payment Terms will be automatically updated.',
+          'Are you sure you want to update the Payment Due Date for the Job?',
       })
       if (!isConfirmed) return
       onDrop(xOffset + Math.round(x / dim))

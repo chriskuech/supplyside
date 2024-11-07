@@ -24,7 +24,7 @@ import {
 import OptionsControl from './OptionsControl'
 import ResourceTypeSelect from './ResourceTypeSelect'
 import DefaultValueControl from './DefaultValueControl'
-import { UpdateFieldData } from '@/client/fields'
+import { UpdateFieldData } from '@/client/field'
 
 // TODO: consolidate
 export type OptionPatch = {

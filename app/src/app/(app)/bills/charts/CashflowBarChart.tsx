@@ -17,8 +17,14 @@ import {
   sumBy,
   mapValues,
   range,
+  sortBy,
 } from 'remeda'
-import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
+import {
+  billStatusOptions,
+  fields,
+  Resource,
+  selectResourceFieldValue,
+} from '@supplyside/model'
 import dayjs from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import isBetween from 'dayjs/plugin/isBetween'
@@ -26,6 +32,7 @@ import { useMemo } from 'react'
 import { ChartsNoDataOverlay } from '@mui/x-charts/ChartsOverlay'
 import { Typography } from '@mui/material'
 import { formatMoney } from '@/lib/format'
+import { billStatusOrder } from '@/lib/constants/status'
 
 dayjs.extend(weekOfYear)
 dayjs.extend(isBetween)
@@ -61,7 +68,7 @@ export default function CashflowBarChart({ resources }: Props) {
       ? maxPaymentDueDate
       : today
 
-    const numberOfWeeks = endDate.diff(startDate, 'w')
+    const numberOfWeeks = Math.ceil(endDate.diff(startDate, 'w', true))
 
     const weeks = range(0, numberOfWeeks || 1).map((number) =>
       startDate.week(startDate.week() + number).format('MM/DD/YYYY'),
@@ -71,7 +78,7 @@ export default function CashflowBarChart({ resources }: Props) {
   }, [resources, today])
 
   const totalCosts = useMemo((): {
-    status: string
+    statusTemplateId: string
     totalsByWeek: number[]
   }[] => {
     const totalCostByStatusAndWeeks = pipe(
@@ -83,20 +90,20 @@ export default function CashflowBarChart({ resources }: Props) {
         )?.date
         const totalCost =
           selectResourceFieldValue(resource, fields.totalCost)?.number ?? 0
-        const status =
-          selectResourceFieldValue(resource, fields.billStatus)?.option?.name ??
-          ''
+        const statusTemplateId =
+          selectResourceFieldValue(resource, fields.billStatus)?.option
+            ?.templateId ?? ''
 
         if (!paymentDueDate) return null
 
         return {
           paymentDueDate: dayjs(paymentDueDate).day(1),
           totalCost,
-          status,
+          statusTemplateId,
         }
       }),
       filter(isTruthy),
-      map(({ paymentDueDate, totalCost, status }) => ({
+      map(({ paymentDueDate, totalCost, statusTemplateId }) => ({
         week: weeks.find((week, i) => {
           const weekDate = dayjs(week)
           if (!weeks[i + 1]) return true
@@ -104,9 +111,9 @@ export default function CashflowBarChart({ resources }: Props) {
           return paymentDueDate.isBetween(weekDate, nextWeekDate)
         }),
         totalCost,
-        status,
+        statusTemplateId,
       })),
-      groupBy(({ status }) => status),
+      groupBy(({ statusTemplateId }) => statusTemplateId),
       mapValues((dataByStatus) =>
         pipe(
           dataByStatus,
@@ -116,11 +123,13 @@ export default function CashflowBarChart({ resources }: Props) {
       ),
     )
 
-    const totalsByStatuses = Object.entries(totalCostByStatusAndWeeks).map(
-      ([key, value]) => ({
-        status: key,
+    const totalsByStatuses = pipe(
+      Object.entries(totalCostByStatusAndWeeks),
+      map(([key, value]) => ({
+        statusTemplateId: key,
         totalsByWeek: weeks.map((week) => value[week] ?? 0),
-      }),
+      })),
+      sortBy(({ statusTemplateId }) => billStatusOrder[statusTemplateId] ?? 0),
     )
 
     return totalsByStatuses
@@ -142,7 +151,12 @@ export default function CashflowBarChart({ resources }: Props) {
           type: 'bar',
           stack: 'by status',
           data: tc.totalsByWeek,
-          label: tc.status,
+          color: Object.values(billStatusOptions).find(
+            (option) => option.templateId === tc.statusTemplateId,
+          )?.color,
+          label: Object.values(billStatusOptions).find(
+            (option) => option.templateId === tc.statusTemplateId,
+          )?.name,
           valueFormatter: (value) =>
             formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
         }))}

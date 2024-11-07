@@ -10,7 +10,7 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
-import { match } from 'ts-pattern'
+import { match, P } from 'ts-pattern'
 import { DatePicker, DatePickerProps } from '@mui/x-date-pickers/DatePicker'
 import dayjs, { Dayjs } from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -34,6 +34,7 @@ import {
   resources,
 } from '@supplyside/model'
 import { Option } from '@supplyside/model'
+import { faker } from '@faker-js/faker'
 import AddressField from './AddressField'
 import ContactField from './ContactField'
 import FileField from './FileField'
@@ -41,6 +42,7 @@ import UserField from './UserField'
 import ResourceField from './ResourceField'
 import FilesField from './FilesField'
 import { McMasterCarrLogo } from '@/lib/ux/McMasterCarrLogo'
+import { updateField } from '@/actions/field'
 
 type InputProps = SlotProps<
   ElementType<FilledInputProps, keyof JSX.IntrinsicElements>,
@@ -108,6 +110,10 @@ function Field(
   }, [incomingValue, value])
 
   dayjs.extend(utc)
+
+  const templateField = findTemplateField(field.templateId)
+  const canEditOptions =
+    !templateField?.options || templateField.isOptionsEditable
 
   return match(field.type)
     .with('Address', () => (
@@ -253,20 +259,64 @@ function Field(
       />
     ))
     .with('Select', () => (
-      <Autocomplete<Option>
+      <Autocomplete<Option | { inputValue: string; name: string }>
         disabled={disabled}
+        key={value?.option?.id}
         options={field.options}
+        selectOnFocus
+        clearOnBlur
+        handleHomeEndKeys
+        filterSelectedOptions
+        filterOptions={(options, { inputValue }) => [
+          ...options.filter((o) =>
+            o.name.toLowerCase().includes(inputValue.toLowerCase()),
+          ),
+          ...(canEditOptions &&
+          inputValue &&
+          options.every((o) => o.name !== inputValue)
+            ? [{ inputValue, name: `Add "${inputValue}"` }]
+            : []),
+        ]}
         id={inputId}
         fullWidth
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={(option) =>
+          match(option)
+            .with({ inputValue: P.string }, ({ inputValue }) => inputValue)
+            .otherwise((option) => option.name)
+        }
         value={value?.option}
         onChange={(e, option) => {
-          handleChange({ ...emptyValue, option })
+          e.stopPropagation()
+          match(option)
+            .with({ inputValue: P.string }, ({ inputValue }) => {
+              updateField(field.fieldId, {
+                options: [
+                  {
+                    id: faker.string.uuid(),
+                    name: inputValue,
+                    op: 'add',
+                  },
+                ],
+              }).then((field) =>
+                handleChange({
+                  ...emptyValue,
+                  option:
+                    field?.options.find((o) => o.name === inputValue) ??
+                    fail(`Option should have just been created.`),
+                }),
+              )
+            })
+            .otherwise((option) => handleChange({ ...emptyValue, option }))
         }}
         renderInput={(params) => (
           <Stack direction="row" alignItems="center">
             <TextField inputRef={ref} {...params} />
           </Stack>
+        )}
+        renderOption={({ key, ...props }, option) => (
+          <li key={key} {...props}>
+            {option.name}
+          </li>
         )}
       />
     ))

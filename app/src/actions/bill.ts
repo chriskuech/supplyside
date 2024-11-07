@@ -2,7 +2,7 @@
 
 import { fields, selectSchemaFieldUnsafe } from '@supplyside/model'
 import { withAccountId } from '@/authz'
-import * as client from '@/client/bills'
+import * as client from '@/client/bill'
 import { updateResource } from '@/client/resource'
 import { readSchema } from '@/client/schema'
 

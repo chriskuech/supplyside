@@ -1,13 +1,9 @@
 import { ConfigService } from '@supplyside/api/ConfigService'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import {
-  Resource,
-  fields,
-  selectResourceFieldValue,
-  selectSchemaField,
-} from '@supplyside/model'
+import { Resource, fields, selectResourceFieldValue } from '@supplyside/model'
 import assert from 'assert'
+import dayjs from 'dayjs'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
 import { BadRequestError } from '../fastify/BadRequestError'
@@ -18,17 +14,6 @@ import { SALES_ITEM_LINE } from './constants'
 import { mapValue } from './mapValue'
 import { accountQuerySchema, readInvoiceSchema } from './schemas'
 import { Invoice, InvoiceLine } from './types'
-
-const fieldsMap = [
-  {
-    field: fields.quickBooksInvoiceId,
-    key: 'Id',
-  },
-  {
-    field: fields.paymentDueDate,
-    key: 'DueDate',
-  },
-]
 
 @injectable()
 export class QuickBooksInvoiceService {
@@ -81,22 +66,13 @@ export class QuickBooksInvoiceService {
       })
       .then((data) => readInvoiceSchema.parse(data.json))
 
-    const jobSchema = await this.schemaService.readMergedSchema(
+    await this.resourceService.updateResourceField(
       accountId,
       'Job',
-    )
-
-    const quickBooksInvoiceIdField = selectSchemaField(
-      jobSchema,
+      job.id,
       fields.quickBooksInvoiceId,
-    )?.fieldId
-
-    assert(quickBooksInvoiceIdField, 'quickBooksInvoiceId field not found')
-
-    await this.resourceService.updateResourceField(accountId, job.id, {
-      fieldId: quickBooksInvoiceIdField,
-      valueInput: { string: quickBooksInvoice.Invoice.Id },
-    })
+      { string: quickBooksInvoice.Invoice.Id },
+    )
 
     return quickBooksInvoice
   }
@@ -297,16 +273,16 @@ export class QuickBooksInvoiceService {
     quickBooksCustomerId: string,
     invoiceLines: InvoiceLine[],
   ) {
-    const quickBooksInvoice = fieldsMap.reduce(
-      (job, fieldMap) => ({
-        ...job,
-        [fieldMap.key]: mapValue(jobResource, fieldMap.field),
-      }),
-      {},
-    )
+    const paymentTerms = selectResourceFieldValue(
+      jobResource,
+      fields.paymentTerms,
+    )?.number
 
     return {
-      ...quickBooksInvoice,
+      Id: mapValue(jobResource, fields.quickBooksInvoiceId),
+      DueDate: dayjs(new Date())
+        .add(paymentTerms ?? 0, 'days')
+        .format('YYYY-MM-DDZ'),
       PrivateNote: `${this.configService.config.APP_BASE_URL}/jobs/${jobResource.key}`,
       CustomerRef: {
         value: quickBooksCustomerId,

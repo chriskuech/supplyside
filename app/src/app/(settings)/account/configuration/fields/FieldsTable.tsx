@@ -9,8 +9,8 @@ import { FC, useState } from 'react'
 import { SchemaField } from '@supplyside/model'
 import UpdateFieldForm from './UpdateFieldForm'
 import { useConfirmation } from '@/lib/confirmation'
-import { deleteField, updateField } from '@/actions/fields'
-import { UpdateFieldData } from '@/client/fields'
+import { deleteField, updateField } from '@/actions/field'
+import { UpdateFieldData } from '@/client/field'
 
 type Props = {
   fields: SchemaField[]

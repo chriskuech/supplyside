@@ -5,15 +5,17 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
+  Button,
   IconButton,
   Stack,
   Tooltip,
   Typography,
 } from '@mui/material'
-import { ExpandMore, Sync } from '@mui/icons-material'
+import { ExpandMore, Settings, Sync } from '@mui/icons-material'
 import { useSnackbar } from 'notistack'
 import { Resource, mapValueToValueInput, Schema } from '@supplyside/model'
 import { selectResourceFieldValue } from '@supplyside/model'
+import Link from 'next/link'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
 import Field from './fields/controls/Field'
@@ -36,169 +38,186 @@ export default function ResourceForm({
 
   return (
     <Box>
-      {schema.sections.map((s, i) => {
-        const singleField =
-          s.fields.length === 1 && s.fields.at(0)?.type === 'Textarea'
-            ? s.fields.at(0)
-            : null
+      <Box>
+        {schema.sections.map((s, i) => {
+          const singleField =
+            s.fields.length === 1 && s.fields.at(0)?.type === 'Textarea'
+              ? s.fields.at(0)
+              : null
 
-        const sectionHasRequiredFields = s.fields.some((f) => f.isRequired)
+          const sectionHasRequiredFields = s.fields.some((f) => f.isRequired)
 
-        return (
-          <Accordion
-            key={s.id}
-            defaultExpanded={i === 0 || sectionHasRequiredFields}
-            variant="outlined"
-          >
-            <AccordionSummary expandIcon={<ExpandMore />}>
-              <Typography variant="h6" fontWeight="bold">
-                {s.name}
-                {sectionHasRequiredFields && (
-                  <Typography
-                    color="error"
-                    display="inline"
-                    variant="overline"
-                    fontWeight="bold"
-                    ml={0.5}
-                    sx={{ verticalAlign: 'super' }}
-                  >
-                    *
-                  </Typography>
-                )}
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              {singleField ? (
-                <Box>
-                  {singleField.name !== s.name && (
-                    <Typography variant="overline" gutterBottom>
-                      {singleField.name}
-                      {s.fields.at(0)?.isRequired && (
-                        <Typography
-                          color="error"
-                          display="inline"
-                          fontWeight="bold"
-                          ml={0.5}
-                          sx={{ verticalAlign: 'super' }}
-                        >
-                          *
-                        </Typography>
-                      )}
+          return (
+            <Accordion
+              key={s.id}
+              defaultExpanded={i === 0 || sectionHasRequiredFields}
+              variant="outlined"
+            >
+              <AccordionSummary expandIcon={<ExpandMore />}>
+                <Typography variant="h6" fontWeight="bold">
+                  {s.name}
+                  {sectionHasRequiredFields && (
+                    <Typography
+                      color="error"
+                      display="inline"
+                      variant="overline"
+                      fontWeight="bold"
+                      ml={0.5}
+                      sx={{ verticalAlign: 'super' }}
+                    >
+                      *
                     </Typography>
                   )}
-                  <Typography variant="caption">
-                    {singleField.description}
-                  </Typography>
-                  <FieldControl
-                    inputId={`rf-${singleField.fieldId}`}
-                    resource={resource}
-                    field={singleField}
-                    value={selectResourceFieldValue(resource, singleField)}
-                    disabled={!!resource.templateId && !!singleField.templateId}
-                  />
-                </Box>
-              ) : (
-                <Stack spacing={3} direction="row">
-                  {chunkByN(s.fields, columns).map((fs, i) => (
-                    <Stack key={i} spacing={3} flex={1}>
-                      {fs.map((f) => (
-                        <Stack key={f.fieldId}>
-                          <Stack direction="row" alignItems="center">
-                            <Typography
-                              variant="overline"
-                              fontSize={14}
-                              lineHeight="unset"
-                              flexGrow={1}
-                            >
-                              {f.name}
-                              {f.isRequired && (
-                                <Typography
-                                  color="error"
-                                  display="inline"
-                                  variant="overline"
-                                  fontWeight="bold"
-                                  ml={0.5}
-                                  sx={{ verticalAlign: 'super' }}
-                                >
-                                  *
-                                </Typography>
-                              )}
-                            </Typography>
-                            {f.type === 'Resource' && (
-                              <Tooltip title={`Sync data from ${f.name}`}>
-                                <IconButton
-                                  color="secondary"
-                                  disabled={
-                                    !selectResourceFieldValue(resource, f)
-                                      ?.resource
-                                  }
-                                  onClick={async () => {
-                                    const resourceId = selectResourceFieldValue(
-                                      resource,
-                                      f,
-                                    )?.resource?.id
-
-                                    if (!resourceId) return
-
-                                    try {
-                                      await copyFromResource(resource.id, {
-                                        resourceId,
-                                      })
-                                    } catch {
-                                      enqueueSnackbar(
-                                        `Failed to extract data from ${f.name}`,
-                                        { variant: 'error' },
-                                      )
-                                    }
-                                  }}
-                                >
-                                  <Sync fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                          </Stack>
-                          <Typography variant="caption" gutterBottom>
-                            {f.description}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                {singleField ? (
+                  <Box>
+                    {singleField.name !== s.name && (
+                      <Typography variant="overline" gutterBottom>
+                        {singleField.name}
+                        {s.fields.at(0)?.isRequired && (
+                          <Typography
+                            color="error"
+                            display="inline"
+                            fontWeight="bold"
+                            ml={0.5}
+                            sx={{ verticalAlign: 'super' }}
+                          >
+                            *
                           </Typography>
-                          <Box>
-                            <Field
-                              disabled={!!resource.templateId && !!f.templateId}
-                              inputId={`rf-${f.fieldId}`}
-                              resource={resource}
-                              field={f}
-                              value={selectResourceFieldValue(resource, {
-                                fieldId: f.fieldId,
-                              })}
-                              onChange={async (value) => {
-                                const result = await updateResourceField(
-                                  resource.id,
-                                  {
-                                    fieldId: f.fieldId,
-                                    valueInput: mapValueToValueInput(
-                                      f.type,
-                                      value,
-                                    ),
-                                  },
-                                )
+                        )}
+                      </Typography>
+                    )}
+                    <Typography variant="caption">
+                      {singleField.description}
+                    </Typography>
+                    <FieldControl
+                      inputId={`rf-${singleField.fieldId}`}
+                      resource={resource}
+                      field={singleField}
+                      disabled={
+                        !!resource.templateId && !!singleField.templateId
+                      }
+                    />
+                  </Box>
+                ) : (
+                  <Stack spacing={3} direction="row">
+                    {chunkByN(s.fields, columns).map((fs, i) => (
+                      <Stack key={i} spacing={3} flex={1}>
+                        {fs.map((f) => (
+                          <Stack key={f.fieldId}>
+                            <Stack direction="row" alignItems="center">
+                              <Typography
+                                variant="overline"
+                                fontSize={14}
+                                lineHeight="unset"
+                                flexGrow={1}
+                              >
+                                {f.name}
+                                {f.isRequired && (
+                                  <Typography
+                                    color="error"
+                                    display="inline"
+                                    variant="overline"
+                                    fontWeight="bold"
+                                    ml={0.5}
+                                    sx={{ verticalAlign: 'super' }}
+                                  >
+                                    *
+                                  </Typography>
+                                )}
+                              </Typography>
+                              {f.type === 'Resource' && (
+                                <Tooltip title={`Sync data from ${f.name}`}>
+                                  <IconButton
+                                    color="secondary"
+                                    disabled={
+                                      !selectResourceFieldValue(resource, f)
+                                        ?.resource
+                                    }
+                                    onClick={async () => {
+                                      const resourceId =
+                                        selectResourceFieldValue(resource, f)
+                                          ?.resource?.id
 
-                                if (!result) {
-                                  enqueueSnackbar('Failed to update field', {
-                                    variant: 'error',
-                                  })
+                                      if (!resourceId) return
+
+                                      try {
+                                        await copyFromResource(resource.id, {
+                                          resourceId,
+                                        })
+                                      } catch {
+                                        enqueueSnackbar(
+                                          `Failed to extract data from ${f.name}`,
+                                          { variant: 'error' },
+                                        )
+                                      }
+                                    }}
+                                  >
+                                    <Sync fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                            </Stack>
+                            <Typography variant="caption" gutterBottom>
+                              {f.description}
+                            </Typography>
+                            <Box>
+                              <Field
+                                disabled={
+                                  !!resource.templateId && !!f.templateId
                                 }
-                              }}
-                            />
-                          </Box>
-                        </Stack>
-                      ))}
-                    </Stack>
-                  ))}
-                </Stack>
-              )}
-            </AccordionDetails>
-          </Accordion>
-        )
-      })}
+                                inputId={`rf-${f.fieldId}`}
+                                resource={resource}
+                                field={f}
+                                value={selectResourceFieldValue(resource, {
+                                  fieldId: f.fieldId,
+                                })}
+                                onChange={async (value) => {
+                                  const result = await updateResourceField(
+                                    resource.id,
+                                    {
+                                      fieldId: f.fieldId,
+                                      valueInput: mapValueToValueInput(
+                                        f.type,
+                                        value,
+                                      ),
+                                    },
+                                  )
+
+                                  if (!result) {
+                                    enqueueSnackbar('Failed to update field', {
+                                      variant: 'error',
+                                    })
+                                  }
+                                }}
+                              />
+                            </Box>
+                          </Stack>
+                        ))}
+                      </Stack>
+                    ))}
+                  </Stack>
+                )}
+              </AccordionDetails>
+            </Accordion>
+          )
+        })}
+      </Box>
+      <Stack direction="row" justifyContent="flex-end">
+        <Tooltip title="Manage which fields are displayed or required">
+          <Button
+            variant="text"
+            endIcon={<Settings />}
+            size="small"
+            LinkComponent={Link}
+            href="/account/configuration"
+          >
+            Configure
+          </Button>
+        </Tooltip>
+      </Stack>
     </Box>
   )
 }
