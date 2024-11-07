@@ -240,6 +240,7 @@ export const customerSchema = z.object({
   BalanceWithJobs: z.number().optional(),
   PreferredDeliveryMethod: z.string().optional(),
   Taxable: z.boolean().optional(),
+  ParentRef: refSchema.optional(),
 })
 
 export const vendorQuerySchema = z.object({
