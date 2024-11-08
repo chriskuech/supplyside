@@ -1,6 +1,7 @@
 import { container } from '@supplyside/api/di'
 import { FileService } from '@supplyside/api/domain/file/FileService'
 import { NotFoundError } from '@supplyside/api/integrations/fastify/NotFoundError'
+import { TokenService } from '@supplyside/api/TokenService'
 import { FileSchema } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -55,5 +56,27 @@ export const mountFiles = async <App extends FastifyInstance>(app: App) =>
         }
 
         return file
+      },
+    })
+    .route({
+      method: 'POST',
+      url: '/:fileId/token/',
+      schema: {
+        params: z.object({
+          accountId: z.string().uuid(),
+          fileId: z.string().uuid(),
+        }),
+        response: {
+          200: z.object({
+            token: z.string(),
+          }),
+        },
+      },
+      handler: async ({ params: { accountId, fileId } }) => {
+        const service = container.resolve(TokenService)
+
+        const token = service.create({ accountId, fileId })
+
+        return { token }
       },
     })

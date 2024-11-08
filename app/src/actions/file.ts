@@ -1,11 +1,13 @@
 'use server'
 
+import { fail } from 'assert'
 import { isTruthy } from 'remeda'
 import { z } from 'zod'
 import { File as FileModel } from '@supplyside/model'
 import { withAccountId } from '@/authz'
 import { createBlob } from '@/client/blob'
-import { createFile } from '@/client/file'
+import { createFile, createFileToken, readFile } from '@/client/file'
+import { config } from '@/config'
 
 const handleFileUpload = async (accountId: string, jsFile: File) => {
   const blob = await createBlob(accountId, jsFile)
@@ -36,5 +38,20 @@ export const uploadFiles = withAccountId(
     )
 
     return files.filter(isTruthy)
+  },
+)
+
+export const getCadPreviewUrl = withAccountId(
+  async (accountId: string, fileId: string) => {
+    const [file, { token }] = await Promise.all([
+      readFile(accountId, fileId).then((e) => e ?? fail('File not found')),
+      createFileToken(accountId, fileId).then(
+        (e) => e ?? fail('Token not found'),
+      ),
+    ])
+
+    const tokenDownloadUrl = `${config().API_BASE_URL}/integrations/files/download/${file.name}?token=${token}`
+
+    return `https://3dviewer.net/#model=${tokenDownloadUrl}`
   },
 )

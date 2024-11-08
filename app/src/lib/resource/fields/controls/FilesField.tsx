@@ -17,10 +17,15 @@ import {
 import { useRef } from 'react'
 import { File } from '@supplyside/model'
 import { useRouter, usePathname } from 'next/navigation'
-import { uploadFiles } from '@/actions/file'
+import { getCadPreviewUrl, uploadFiles } from '@/actions/file'
 import { download, preview } from '@/app/api/download/[filename]/util'
 
 const canPreview = (contentType: string) =>
+  contentType === 'application/pdf' ||
+  contentType.startsWith('image/') ||
+  contentType.startsWith('model/')
+
+const canCompare = (contentType: string) =>
   contentType === 'application/pdf' || contentType.startsWith('image/')
 
 type Props = {
@@ -40,7 +45,7 @@ export default function FilesField({ files, isReadOnly, onChange }: Props) {
         {files.map((file) => (
           <Stack key={file.id} direction="row" alignItems="center">
             <Typography flexGrow={1}>{file.name || '-'}</Typography>
-            {canPreview(file.contentType) && (
+            {canCompare(file.contentType) && (
               <Tooltip title="Compare File to Fields">
                 <IconButton
                   onClick={() => push(`${pathname}?compareToFileId=${file.id}`)}
@@ -51,7 +56,13 @@ export default function FilesField({ files, isReadOnly, onChange }: Props) {
             )}
             {canPreview(file.contentType) && (
               <Tooltip title="View File">
-                <IconButton onClick={() => preview(file)}>
+                <IconButton
+                  onClick={() => {
+                    file.contentType.startsWith('model/')
+                      ? getCadPreviewUrl(file.id).then(window.open)
+                      : preview(file)
+                  }}
+                >
                   <Visibility />
                 </IconButton>
               </Tooltip>
