@@ -290,7 +290,7 @@ export const billPaymentSchema = z.object({
   ),
 })
 
-export const PaymentSchema = z.object({
+export const paymentSchema = z.object({
   SyncToken: z.string(),
   domain: z.string(),
   DepositToAccountRef: refSchema.optional(),
@@ -340,14 +340,18 @@ export const readBillPaymentSchema = z.object({
 })
 
 export const readPaymentSchema = z.object({
-  Payment: PaymentSchema,
+  Payment: paymentSchema,
 })
 
-export const webhookEntitiesNameSchema = z.enum(['BillPayment', 'Payment'])
+export const webhookEntitiesNameSchema = z.enum([
+  'BillPayment',
+  'Payment',
+  'Invoice',
+])
 
 export const webhookEntitiySchema = z.object({
   id: z.string(),
-  operation: z.enum(['Create', 'Update', 'Merge', 'Delete', 'Void']),
+  operation: z.enum(['Create', 'Update', 'Merge', 'Delete', 'Void', 'Emailed']),
   name: webhookEntitiesNameSchema,
   lastUpdated: z.string(),
 })
