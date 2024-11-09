@@ -93,6 +93,7 @@ enum ResourceType {
   JobLine
   Purchase
   PurchaseLine
+  Step
   Vendor
   WorkCenter
 }
