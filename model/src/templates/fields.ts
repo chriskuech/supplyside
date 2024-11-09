@@ -210,6 +210,11 @@ const _fields = {
     name: 'Billing Contact',
     type: 'Contact',
   },
+  completed: {
+    templateId: 'eae730a6-0f61-40d0-b185-9fced487186c',
+    name: 'Completed?',
+    type: 'Checkbox',
+  },
   currency: {
     templateId: '52b10289-99a0-4dfe-bb6b-6afca34e8501',
     name: 'Currency',
@@ -235,37 +240,21 @@ const _fields = {
     name: 'Customer Reference Number',
     type: 'Text',
   },
+  deliveryDate: {
+    templateId: '92c3cc4e-a915-4606-bcea-67f352280d3d',
+    name: 'Delivery Date',
+    type: 'Date',
+  },
   document: {
     templateId: 'cb4a0c88-df20-485d-9881-e2c3b1b2b180',
     name: 'Document',
     type: 'File',
   },
-  recurring: {
-    templateId: '22fe79c3-b72d-46bb-b166-e2836e66f153',
-    name: 'Recurring',
-    type: 'Checkbox',
-    defaultValue: { boolean: false },
-  },
-  recurrenceInterval: {
-    templateId: '15694652-1b69-4f0f-8cc5-784ae10570cb',
-    name: 'Recurrence Interval',
+  hours: {
+    templateId: '1d235f99-62d0-4691-b991-44d6db3381aa',
+    name: 'Hours',
     type: 'Number',
-  },
-  recurrenceIntervalUnits: {
-    templateId: '7c001a12-5ea2-4dc1-bc6d-2facc40de9b9',
-    name: 'Recurrence Interval Units',
-    type: 'Select',
-    options: Object.values(intervalUnits),
-  },
-  recurrenceIntervalOffsetInDays: {
-    templateId: '3633b0cf-0a41-47cd-b4dd-bb08d5693fd4',
-    name: 'Recurrence Interval Offset In Days',
-    type: 'Number',
-  },
-  recurrenceRunning: {
-    templateId: '717f9809-5ae5-4221-8980-be34a6230d9d',
-    name: 'Recurrence Running?',
-    type: 'Checkbox',
+    suffix: 'Hours',
   },
   incoterms: {
     templateId: '9f1af7c6-c04c-45cc-a97b-188c3a16aaad',
@@ -330,6 +319,13 @@ const _fields = {
     name: 'Job Attachments',
     type: 'Files',
   },
+  jobLine: {
+    templateId: '6c2ab471-9d95-42e0-8bf0-1372a19c1e1c',
+    name: 'Job Line',
+    type: 'Resource',
+    resourceType: 'JobLine',
+    description: 'Contains all info related to a specific line item',
+  },
   jobStatus: {
     templateId: '70912291-2b48-4e1f-9300-b7dbca8ce5ab',
     name: 'Job Status',
@@ -340,13 +336,6 @@ const _fields = {
       optionTemplateId: jobStatusOptions.draft.templateId,
     },
     isRequired: true,
-  },
-  line: {
-    templateId: '30fba00b-ca2f-48d1-a795-77e5843880ce',
-    name: 'Line',
-    type: 'Resource',
-    description: 'Contains all info related to a specific line item',
-    resourceType: 'PurchaseLine',
   },
   name: {
     templateId: 'aebb8b9f-d49a-4d5b-b6cf-453bfad847b4',
@@ -507,6 +496,33 @@ const _fields = {
   receivedAllPurchases: {
     templateId: '5fec4a3c-6221-4319-88d4-762713a1db4e',
     name: 'Received All Purchases?',
+    type: 'Checkbox',
+  },
+  recurring: {
+    templateId: '22fe79c3-b72d-46bb-b166-e2836e66f153',
+    name: 'Recurring',
+    type: 'Checkbox',
+    defaultValue: { boolean: false },
+  },
+  recurrenceInterval: {
+    templateId: '15694652-1b69-4f0f-8cc5-784ae10570cb',
+    name: 'Recurrence Interval',
+    type: 'Number',
+  },
+  recurrenceIntervalUnits: {
+    templateId: '7c001a12-5ea2-4dc1-bc6d-2facc40de9b9',
+    name: 'Recurrence Interval Units',
+    type: 'Select',
+    options: Object.values(intervalUnits),
+  },
+  recurrenceIntervalOffsetInDays: {
+    templateId: '3633b0cf-0a41-47cd-b4dd-bb08d5693fd4',
+    name: 'Recurrence Interval Offset In Days',
+    type: 'Number',
+  },
+  recurrenceRunning: {
+    templateId: '717f9809-5ae5-4221-8980-be34a6230d9d',
+    name: 'Recurrence Running?',
     type: 'Checkbox',
   },
   shippingAccountNumber: {

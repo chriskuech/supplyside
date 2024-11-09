@@ -1,6 +1,9 @@
 import { container } from '@supplyside/api/di'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
-import { JsonLogicSchema } from '@supplyside/api/domain/resource/json-logic/types'
+import {
+  JsonLogicSchema,
+  OrderBySchema,
+} from '@supplyside/api/domain/resource/json-logic/types'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
   ResourceSchema,
@@ -28,12 +31,12 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         params: z.object({
           accountId: z.string().uuid(),
         }),
-        // TODO: there must be a cleaner way to parse deep objects
         querystring: z.preprocess(
           (a) => parse(a as string),
           z.object({
             resourceType: ResourceTypeSchema,
             where: JsonLogicSchema.optional(),
+            orderBy: z.array(OrderBySchema).optional(),
           }),
         ),
         response: {

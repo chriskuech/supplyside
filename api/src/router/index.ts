@@ -11,7 +11,10 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from 'fastify-type-provider-zod'
-import { JsonLogicSchema } from '../domain/resource/json-logic/types'
+import {
+  JsonLogicSchema,
+  OrderBySchema,
+} from '../domain/resource/json-logic/types'
 import { NotFoundError } from '../integrations/fastify/NotFoundError'
 import { mountApi } from './api'
 import { mountSelf } from './api/self'
@@ -47,8 +50,9 @@ export const createServer = async (isDev?: boolean) => {
       transformObject: createJsonSchemaTransformObject({
         schemas: {
           Account: AccountSchema,
-          Session: SessionSchema,
           JsonLogic: JsonLogicSchema,
+          OrderBy: OrderBySchema,
+          Session: SessionSchema,
         },
       }),
     })

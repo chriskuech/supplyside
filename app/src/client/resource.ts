@@ -6,6 +6,8 @@ import { revalidateTag } from 'next/cache'
 import { client } from '.'
 import { Session } from '@/session'
 
+export type OrderBy = components['schemas']['OrderBy']
+
 export type JsonLogic = components['schemas']['JsonLogic']
 
 export const createResource = async (
@@ -67,7 +69,7 @@ export const readResource = async (accountId: string, resourceId: string) => {
 export const readResources = async (
   accountId: string,
   resourceType: ResourceType,
-  { where }: { where?: JsonLogic } = {},
+  { where, orderBy }: { where?: JsonLogic; orderBy?: OrderBy[] } = {},
 ): Promise<Resource[] | undefined> => {
   const { data: resources } = await client().GET(
     '/api/accounts/{accountId}/resources/',
@@ -77,6 +79,7 @@ export const readResources = async (
         query: {
           resourceType,
           where,
+          orderBy,
         },
       },
       querySerializer(queryParams) {

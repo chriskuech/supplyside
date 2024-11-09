@@ -50,7 +50,11 @@ export const JsonLogicExpressionSchema = z.lazy<ZodType<JsonLogicExpression>>(
 
 export type JsonLogicVariable = z.infer<typeof JsonLogicVariableSchema>
 
-export type OrderBy = JsonLogicVariable & { dir: 'asc' | 'desc' }
+export const OrderBySchema = JsonLogicVariableSchema.extend({
+  dir: z.enum(['asc', 'desc']).optional(),
+})
+
+export type OrderBy = z.infer<typeof OrderBySchema>
 
 export const JsonLogicSchema = JsonLogicExpressionSchema
 

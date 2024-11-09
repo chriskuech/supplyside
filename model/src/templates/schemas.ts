@@ -178,6 +178,20 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
+    resourceType: 'Step',
+    fields: [
+      fields.jobLine,
+      fields.completed,
+      fields.workCenter,
+      fields.purchase,
+      fields.otherNotes,
+      fields.startDate,
+      fields.hours,
+      fields.productionDays,
+      fields.deliveryDate,
+    ],
+  },
+  {
     resourceType: 'Vendor',
     fields: [fields.quickBooksVendorId],
     sections: [
@@ -202,6 +216,11 @@ export const schemas: SchemaTemplate[] = [
   },
   {
     resourceType: 'WorkCenter',
-    fields: [fields.name],
+    sections: [
+      {
+        name: 'Summary',
+        fields: [fields.name],
+      },
+    ],
   },
 ]

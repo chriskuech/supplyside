@@ -26,7 +26,7 @@ export default async function JobDetail({
   params: { key: string }
   searchParams: Record<string, unknown>
 }) {
-  const { resource, schema, lineSchema } = await readDetailPageModel('Job', key)
+  const { resource, schema } = await readDetailPageModel('Job', key)
 
   const status =
     selectResourceFieldValue(resource, fields.jobStatus)?.option ??
@@ -39,7 +39,6 @@ export default async function JobDetail({
       '==': [{ var: fields.job.name }, resource.id],
     },
   })
-  const jobHasLines = !!jobLines?.length
 
   const quickBooksInvoiceId = selectResourceFieldValue(
     resource,
@@ -50,8 +49,7 @@ export default async function JobDetail({
     ? getInvoiceUrl(quickBooksInvoiceId)
     : undefined
 
-  if (!lineSchema || !jobLines)
-    return <Alert severity="error">Failed to load job</Alert>
+  if (!jobLines) return <Alert severity="error">Failed to load job</Alert>
 
   return (
     <ResourceDetailPage
@@ -127,18 +125,14 @@ export default async function JobDetail({
         >
           <CallToAction
             hasInvalidFields={hasInvalidFields}
-            jobHasLines={jobHasLines}
+            jobHasLines={!!jobLines.length}
             resource={resource}
             status={status}
           />
         </StatusTrackerSlab>
       }
     >
-      <JobLinesControl
-        job={resource}
-        jobLineSchema={lineSchema}
-        jobLines={jobLines}
-      />
+      <JobLinesControl job={resource} />
     </ResourceDetailPage>
   )
 }
