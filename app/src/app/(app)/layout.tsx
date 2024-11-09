@@ -3,6 +3,7 @@ import { Box, Card, Divider, Stack, Typography } from '@mui/material'
 import {
   Build,
   Business,
+  DataUsage,
   List,
   PrecisionManufacturing,
   Receipt,
@@ -165,8 +166,13 @@ export default async function Layout({
             <ItemLink title="Closed Jobs" href="/jobs/closed" />
             <ItemLink
               title="Jobs Schedule"
-              href="/jobs/schedule"
+              href="/job-schedule"
               icon={<ViewTimelineOutlined fontSize="small" />}
+            />
+            <ItemLink
+              title="Work Center Schedule"
+              href="/workcenter-schedule"
+              icon={<DataUsage fontSize="small" />}
             />
             <ItemLink
               title="Lines"
@@ -235,13 +241,11 @@ export default async function Layout({
             title="Vendors"
             href="/vendors"
           />
-          {user?.isGlobalAdmin && (
-            <ItemLink
-              icon={<PrecisionManufacturing fontSize="small" />}
-              title="Work Centers"
-              href="/workcenters"
-            />
-          )}
+          <ItemLink
+            icon={<PrecisionManufacturing fontSize="small" />}
+            title="Work Centers"
+            href="/workcenters"
+          />
         </Box>
 
         <Divider />
