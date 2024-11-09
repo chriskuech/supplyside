@@ -25,9 +25,9 @@ import {
 } from '@mui/material'
 import {
   Add,
-  Cancel,
   Checklist,
   ChevronRight,
+  Close,
   Info,
   PrecisionManufacturing,
   ShoppingBag,
@@ -226,7 +226,7 @@ const StepView: FC<StepViewProps> = ({ stepSchema, step, index }) => {
 
       <Box py={0.5}>
         <IconButton onClick={() => deleteResource(step.id)} size="small">
-          <Cancel />
+          <Close />
         </IconButton>
       </Box>
     </Stack>
