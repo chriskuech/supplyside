@@ -162,7 +162,7 @@ export default function ResourceTable({
                 scroll: false,
               }),
             )
-            .with(P.union('JobLine', 'PurchaseLine'), () => null)
+            .with(P.union('JobLine', 'PurchaseLine', 'Step'), () => null)
             .exhaustive()
         }
         initialState={{
