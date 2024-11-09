@@ -241,9 +241,6 @@ const StepLink: FC<StepLinkProps> = ({ linkedResource }) => {
   if (!linkedResource) return null
 
   return (
-    // const resource = useResource(linkedResource.id)
-    // if (resource === undefined) return <CircularProgress />
-    // if (resource === null) return '-'
     <Button
       variant="text"
       sx={{
