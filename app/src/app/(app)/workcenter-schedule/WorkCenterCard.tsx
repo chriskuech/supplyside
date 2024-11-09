@@ -1,10 +1,13 @@
 import { Alert, Card, CardHeader, Typography } from '@mui/material'
 import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
 import { FC, PropsWithChildren } from 'react'
-import { DataGrid } from '@mui/x-data-grid'
 import { isTruthy, sum } from 'remeda'
 import { PrecisionManufacturing } from '@mui/icons-material'
+import { StepsTable } from './StepsTable'
 import { readResource, readResources } from '@/client/resource'
+
+const coerceDate = (value: string | null | undefined): Date | null =>
+  value ? new Date(value) : null
 
 type Props = {
   workCenter: Resource
@@ -33,17 +36,56 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
       const jobLine = await readResource(workCenter.accountId, jobLineRef.id)
       if (!jobLine) return null
 
-      return { step, jobLine }
+      const jobLineSteps = await readResources(workCenter.accountId, 'Step', {
+        where: {
+          '==': [{ var: fields.jobLine.name }, jobLine.id],
+        },
+      })
+      if (!jobLineSteps) return null
+
+      return { step, jobLine, jobLineSteps }
     }),
   )
 
-  const rows = stepsWithJobLines.filter(isTruthy).map(({ step, jobLine }) => ({
-    id: step.id,
-    partName: selectResourceFieldValue(jobLine, fields.partName)?.string,
-    needDate: selectResourceFieldValue(jobLine, fields.needDate)?.date,
-    hours: selectResourceFieldValue(step, fields.hours)?.number,
-    completed: selectResourceFieldValue(step, fields.completed)?.boolean,
-  }))
+  const rows = stepsWithJobLines
+    .filter(isTruthy)
+    .map(({ step, jobLine, jobLineSteps }) => ({
+      id: step.id,
+      ready: jobLineSteps
+        .map((jobLineStep) => ({
+          stepStartDate: selectResourceFieldValue(step, fields.startDate)?.date,
+          jobLineStepStartDate: selectResourceFieldValue(
+            jobLineStep,
+            fields.startDate,
+          )?.date,
+          jobLineStepCompleted: selectResourceFieldValue(
+            jobLineStep,
+            fields.completed,
+          )?.boolean,
+        }))
+        .every(
+          ({ stepStartDate, jobLineStepStartDate, jobLineStepCompleted }) =>
+            !stepStartDate ||
+            !jobLineStepStartDate ||
+            jobLineStepStartDate > stepStartDate ||
+            jobLineStepCompleted,
+        ),
+      completed:
+        selectResourceFieldValue(step, fields.completed)?.boolean ?? null,
+      partName:
+        selectResourceFieldValue(jobLine, fields.partName)?.string ?? null,
+      hours: selectResourceFieldValue(step, fields.hours)?.number ?? null,
+      startDate:
+        coerceDate(selectResourceFieldValue(step, fields.startDate)?.date) ??
+        null,
+      deliveryDate:
+        coerceDate(selectResourceFieldValue(step, fields.deliveryDate)?.date) ??
+        null,
+      needDate:
+        coerceDate(selectResourceFieldValue(jobLine, fields.needDate)?.date) ??
+        null,
+      job: selectResourceFieldValue(jobLine, fields.job)?.resource ?? null,
+    }))
 
   return (
     <Card
@@ -66,29 +108,7 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
           </Typography>
         }
       />
-
-      <DataGrid
-        columns={[
-          {
-            field: 'partName',
-            headerName: 'Part Name',
-            flex: 1,
-          },
-          {
-            field: 'needDate',
-            headerName: 'Need Date',
-          },
-          {
-            field: 'hours',
-            headerName: 'Hours',
-          },
-          {
-            field: 'completed',
-            headerName: 'Completed?',
-          },
-        ]}
-        rows={rows}
-      />
+      <StepsTable rows={rows} />
     </Card>
   )
 }
