@@ -11,14 +11,22 @@ const coerceDate = (value: string | null | undefined): Date | null =>
 
 type Props = {
   workCenter: Resource
+  startDate: Date
+  endDate: Date
 }
 
 export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
   workCenter,
+  startDate,
+  endDate,
 }) => {
   const steps = await readResources(workCenter.accountId, 'Step', {
     where: {
-      '==': [{ var: fields.workCenter.name }, workCenter.id],
+      and: [
+        { '==': [{ var: fields.workCenter.name }, workCenter.id] },
+        { '>=': [{ var: fields.startDate.name }, startDate] },
+        { '<': [{ var: fields.startDate.name }, endDate] },
+      ],
     },
     orderBy: [{ var: fields.startDate.name }],
   })
