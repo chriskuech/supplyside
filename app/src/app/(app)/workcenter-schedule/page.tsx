@@ -1,4 +1,4 @@
-import { Alert, Stack, Typography } from '@mui/material'
+import { Alert, Box, Stack, Typography } from '@mui/material'
 import { redirect } from 'next/navigation'
 import { WorkCenterCard } from './WorkCenterCard'
 import { WeekControl } from './WeekControl'
@@ -41,16 +41,17 @@ export default async function Page({
           onChange={onUpdateWeek}
         />
       </Stack>
-      <Alert severity="warning">This page is under construction.</Alert>
 
-      {workCenters.map((workCenter) => (
-        <WorkCenterCard
-          key={workCenter.id}
-          workCenter={workCenter}
-          startDate={startDate}
-          endDate={endDate}
-        />
-      ))}
+      <Box>
+        {workCenters.map((workCenter) => (
+          <WorkCenterCard
+            key={workCenter.id}
+            workCenter={workCenter}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        ))}
+      </Box>
     </Stack>
   )
 }

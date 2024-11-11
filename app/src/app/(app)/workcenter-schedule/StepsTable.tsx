@@ -57,11 +57,6 @@ export const StepsTable = ({ rows }: Props) => {
           headerName: 'Delivery Date',
           type: 'date',
         },
-        {
-          field: 'needDate',
-          headerName: 'Need Date',
-          type: 'date',
-        },
       ]}
       rows={rows}
       onRowClick={({ row }) => router.push(`/jobs/${row.job?.key}`)}
