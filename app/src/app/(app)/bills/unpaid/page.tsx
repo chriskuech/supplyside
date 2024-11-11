@@ -42,13 +42,23 @@ export default async function UnpaidBills({
       )
       .map((option) => option.id),
   }
+  const billRecurringField = selectSchemaFieldUnsafe(
+    billSchema,
+    fields.recurring,
+  )
+
+  const recurringBillsFilter: GridFilterItem = {
+    field: billRecurringField.fieldId,
+    operator: 'is',
+    value: 'false',
+  }
 
   return (
     <ListPage
       tableKey="billsList"
       resourceType="Bill"
       searchParams={searchParams}
-      filterItems={[unpaidBillsFilter]}
+      filterItems={[unpaidBillsFilter, recurringBillsFilter]}
       title="Unpaid Bills"
       callToActions={[<BillsInboxControl key={BillsInboxControl.name} />]}
       Charts={GridApiCharts}

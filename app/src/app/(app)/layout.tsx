@@ -4,6 +4,7 @@ import {
   Build,
   Business,
   DataUsage,
+  EventRepeat,
   List,
   PrecisionManufacturing,
   Receipt,
@@ -220,6 +221,11 @@ export default async function Layout({
               count={unpaidBillCount}
             />
             <ItemLink title="Closed Bills" href="/bills/closed" />
+            <ItemLink
+              title="Recurring Bills"
+              href="/bills/recurring"
+              icon={<EventRepeat fontSize="small" />}
+            />
             <ItemLink
               title="Lines"
               href="/bills/lines"

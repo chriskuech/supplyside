@@ -35,12 +35,23 @@ export default async function ClosedBills({
     value: [billStatusPaidOptionId, billStatusCanceledOptionId],
   }
 
+  const billRecurringField = selectSchemaFieldUnsafe(
+    billSchema,
+    fields.recurring,
+  )
+
+  const recurringBillsFilter: GridFilterItem = {
+    field: billRecurringField.fieldId,
+    operator: 'is',
+    value: 'false',
+  }
+
   return (
     <ListPage
       tableKey="billsList"
       resourceType="Bill"
       searchParams={searchParams}
-      filterItems={[closedBillsFilter]}
+      filterItems={[closedBillsFilter, recurringBillsFilter]}
       title="Closed Bills"
       callToActions={[<BillsInboxControl key={BillsInboxControl.name} />]}
     />
