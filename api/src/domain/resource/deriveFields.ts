@@ -290,6 +290,42 @@ const setStartDate =
     }
   }
 
+const recalculateProductionDays =
+  (context: Context) =>
+  (patch: Patch): Patch => {
+    const hoursField = selectSchemaField(context.schema, fields.hours)
+    const productionDaysField = selectSchemaField(
+      context.schema,
+      fields.productionDays,
+    )
+
+    if (!hoursField || !productionDaysField) return patch
+
+    const hours =
+      patch.fields.find((f) => f.fieldId === hoursField.fieldId)?.valueInput
+        .number ??
+      (context.resource &&
+        selectResourceFieldValue(context.resource, hoursField)?.number) ??
+      0
+
+    const productionDays = Math.ceil(hours / 8)
+
+    return {
+      ...patch,
+      fields: [
+        ...patch.fields.filter(
+          (f) => f.fieldId !== productionDaysField.fieldId,
+        ),
+        {
+          fieldId: productionDaysField.fieldId,
+          valueInput: {
+            number: productionDays,
+          },
+        },
+      ],
+    }
+  }
+
 export const deriveFields = (
   { fields = [], costs = [] }: Partial<Patch>,
   context: Context,
@@ -302,5 +338,6 @@ export const deriveFields = (
     recalculateLineTotalCost(context),
     recalculateItemizedCosts(context),
     recalculateDocumentTotalCost(context),
+    recalculateProductionDays(context),
   )
 }
