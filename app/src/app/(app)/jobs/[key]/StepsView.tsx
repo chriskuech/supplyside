@@ -266,7 +266,11 @@ const StepLink: FC<StepLinkProps> = ({ linkedResource }) => {
       }
       endIcon={<ChevronRight className="end-icon" />}
     >
-      <Box flexGrow={1}>{linkedResource.name}</Box>
+      <Box flexGrow={1}>
+        {linkedResource.type === 'WorkCenter'
+          ? linkedResource.name
+          : `Purchase Order #${linkedResource.key}`}
+      </Box>
     </Button>
   )
 }
