@@ -1,14 +1,14 @@
 import ListPage from '@/lib/resource/ListPage'
 
-export default async function JobLines({
+export default async function Parts({
   searchParams,
 }: {
   searchParams: Record<string, unknown>
 }) {
   return (
     <ListPage
-      tableKey="jobLinesList"
-      resourceType="JobLine"
+      tableKey="partsList"
+      resourceType="Part"
       searchParams={searchParams}
     />
   )

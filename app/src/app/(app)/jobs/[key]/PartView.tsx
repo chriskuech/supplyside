@@ -12,20 +12,20 @@ import { FC, ReactNode } from 'react'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { formatMoney } from '@/lib/format'
 
-export const JobLineView: FC<{
-  jobLine: Resource
-  jobLineSchema: Schema
+export const PartView: FC<{
+  part: Resource
+  partSchema: Schema
   i: number
   stepsControl: ReactNode
-}> = ({ jobLine, jobLineSchema, stepsControl }) => (
+}> = ({ part, partSchema, stepsControl }) => (
   <Stack spacing={2} direction="row" alignItems="start">
     <Stack spacing={1} flexGrow={1}>
       <Stack direction="row" alignItems="center" spacing={1}>
         <Box flexGrow={1}>
           <FieldControl
-            resource={jobLine}
-            inputId={`part-name-${jobLine.id}`}
-            field={selectSchemaFieldUnsafe(jobLineSchema, fields.partName)}
+            resource={part}
+            inputId={`part-name-${part.id}`}
+            field={selectSchemaFieldUnsafe(partSchema, fields.partName)}
             inputProps={{
               placeholder: 'Part Name',
             }}
@@ -33,9 +33,9 @@ export const JobLineView: FC<{
         </Box>
         <Box>
           <FieldControl
-            resource={jobLine}
-            inputId={`need-date-${jobLine.id}`}
-            field={selectSchemaFieldUnsafe(jobLineSchema, fields.needDate)}
+            resource={part}
+            inputId={`need-date-${part.id}`}
+            field={selectSchemaFieldUnsafe(partSchema, fields.needDate)}
             inputProps={{
               placeholder: 'Need Date',
             }}
@@ -44,9 +44,9 @@ export const JobLineView: FC<{
       </Stack>
       <Box>
         <FieldControl
-          resource={jobLine}
-          inputId={`other-notes-${jobLine.id}`}
-          field={selectSchemaFieldUnsafe(jobLineSchema, fields.otherNotes)}
+          resource={part}
+          inputId={`other-notes-${part.id}`}
+          field={selectSchemaFieldUnsafe(partSchema, fields.otherNotes)}
           inputProps={{
             placeholder: 'Other Notes',
           }}
@@ -59,9 +59,9 @@ export const JobLineView: FC<{
       <Stack direction="row" alignItems="center" spacing={1}>
         <Box width={100}>
           <FieldControl
-            resource={jobLine}
-            inputId={`quantity-${jobLine.id}`}
-            field={selectSchemaFieldUnsafe(jobLineSchema, fields.quantity)}
+            resource={part}
+            inputId={`quantity-${part.id}`}
+            field={selectSchemaFieldUnsafe(partSchema, fields.quantity)}
             inputProps={{
               placeholder: 'Qty',
             }}
@@ -70,9 +70,9 @@ export const JobLineView: FC<{
         <Box>&times;</Box>
         <Box width={140}>
           <FieldControl
-            resource={jobLine}
-            inputId={`unit-cost-${jobLine.id}`}
-            field={selectSchemaFieldUnsafe(jobLineSchema, fields.unitCost)}
+            resource={part}
+            inputId={`unit-cost-${part.id}`}
+            field={selectSchemaFieldUnsafe(partSchema, fields.unitCost)}
             inputProps={{
               placeholder: 'Unit Cost',
             }}
@@ -88,7 +88,7 @@ export const JobLineView: FC<{
         <Box>=</Box>
         <Typography fontWeight="bold" fontSize="1.7em">
           {formatMoney(
-            selectResourceFieldValue(jobLine, fields.totalCost)?.number,
+            selectResourceFieldValue(part, fields.totalCost)?.number,
           )}
         </Typography>
       </Stack>

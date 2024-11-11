@@ -4,7 +4,7 @@ export const resourceTypes = [
   'Bill',
   'Customer',
   'Job',
-  'JobLine',
+  'Part',
   'Purchase',
   'PurchaseLine',
   'Step',

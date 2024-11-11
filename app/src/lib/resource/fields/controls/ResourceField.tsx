@@ -69,9 +69,8 @@ function ResourceField(
               () => fields.name,
             )
             .with('Purchase', () => fields.poNumber)
-            .with(
-              P.union('Bill', 'PurchaseLine', 'Job', 'JobLine', 'Step'),
-              () => fail('Not implemented'),
+            .with(P.union('Bill', 'PurchaseLine', 'Job', 'Part', 'Step'), () =>
+              fail('Not implemented'),
             )
             .exhaustive(),
         ).fieldId,

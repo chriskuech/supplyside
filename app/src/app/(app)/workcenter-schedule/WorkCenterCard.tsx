@@ -33,55 +33,51 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
 
   if (!steps) return <Alert severity="error">Failed to load</Alert>
 
-  const stepsWithJobLines = await Promise.all(
+  const stepsWithParts = await Promise.all(
     steps.map(async (step) => {
-      const jobLineRef = selectResourceFieldValue(
-        step,
-        fields.jobLine,
-      )?.resource
-      if (!jobLineRef) return null
+      const partRef = selectResourceFieldValue(step, fields.part)?.resource
+      if (!partRef) return null
 
-      const jobLine = await readResource(workCenter.accountId, jobLineRef.id)
-      if (!jobLine) return null
+      const part = await readResource(workCenter.accountId, partRef.id)
+      if (!part) return null
 
-      const jobLineSteps = await readResources(workCenter.accountId, 'Step', {
+      const partSteps = await readResources(workCenter.accountId, 'Step', {
         where: {
-          '==': [{ var: fields.jobLine.name }, jobLine.id],
+          '==': [{ var: fields.part.name }, part.id],
         },
       })
-      if (!jobLineSteps) return null
+      if (!partSteps) return null
 
-      return { step, jobLine, jobLineSteps }
+      return { step, part, partSteps }
     }),
   )
 
-  const rows = stepsWithJobLines
+  const rows = stepsWithParts
     .filter(isTruthy)
-    .map(({ step, jobLine, jobLineSteps }) => ({
+    .map(({ step, part, partSteps }) => ({
       id: step.id,
-      ready: jobLineSteps
-        .map((jobLineStep) => ({
+      ready: partSteps
+        .map((partStep) => ({
           stepStartDate: selectResourceFieldValue(step, fields.startDate)?.date,
-          jobLineStepStartDate: selectResourceFieldValue(
-            jobLineStep,
+          partStepStartDate: selectResourceFieldValue(
+            partStep,
             fields.startDate,
           )?.date,
-          jobLineStepCompleted: selectResourceFieldValue(
-            jobLineStep,
+          partStepCompleted: selectResourceFieldValue(
+            partStep,
             fields.completed,
           )?.boolean,
         }))
         .every(
-          ({ stepStartDate, jobLineStepStartDate, jobLineStepCompleted }) =>
+          ({ stepStartDate, partStepStartDate, partStepCompleted }) =>
             !stepStartDate ||
-            !jobLineStepStartDate ||
-            jobLineStepStartDate > stepStartDate ||
-            jobLineStepCompleted,
+            !partStepStartDate ||
+            partStepStartDate > stepStartDate ||
+            partStepCompleted,
         ),
       completed:
         selectResourceFieldValue(step, fields.completed)?.boolean ?? null,
-      partName:
-        selectResourceFieldValue(jobLine, fields.partName)?.string ?? null,
+      partName: selectResourceFieldValue(part, fields.partName)?.string ?? null,
       hours: selectResourceFieldValue(step, fields.hours)?.number ?? null,
       startDate:
         coerceDate(selectResourceFieldValue(step, fields.startDate)?.date) ??
@@ -90,9 +86,9 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
         coerceDate(selectResourceFieldValue(step, fields.deliveryDate)?.date) ??
         null,
       needDate:
-        coerceDate(selectResourceFieldValue(jobLine, fields.needDate)?.date) ??
+        coerceDate(selectResourceFieldValue(part, fields.needDate)?.date) ??
         null,
-      job: selectResourceFieldValue(jobLine, fields.job)?.resource ?? null,
+      job: selectResourceFieldValue(part, fields.job)?.resource ?? null,
     }))
 
   return (

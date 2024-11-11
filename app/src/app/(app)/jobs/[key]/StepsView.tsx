@@ -40,23 +40,23 @@ import FieldControl from '@/lib/resource/fields/FieldControl'
 type Props = {
   stepSchema: Schema
   steps: Resource[]
-  jobLine: Resource
+  part: Resource
 }
 
-export default function StepsView({ stepSchema, steps, jobLine }: Props) {
+export default function StepsView({ stepSchema, steps, part }: Props) {
   const [editStepId, setEditStepId] = useState<string | null>(null)
 
   const addWorkCenterStep = useCallback(async () => {
     const step = await createResource('Step', [
       {
-        fieldId: selectSchemaFieldUnsafe(stepSchema, fields.jobLine).fieldId,
-        valueInput: { resourceId: jobLine.id },
+        fieldId: selectSchemaFieldUnsafe(stepSchema, fields.part).fieldId,
+        valueInput: { resourceId: part.id },
       },
     ])
     if (!step) return
 
     setEditStepId(step.id)
-  }, [jobLine.id, stepSchema])
+  }, [part.id, stepSchema])
 
   const addPurchaseStep = useCallback(async () => {
     const purchase = await createResource('Purchase', [])
@@ -65,15 +65,15 @@ export default function StepsView({ stepSchema, steps, jobLine }: Props) {
 
     await createResource('Step', [
       {
-        fieldId: selectSchemaFieldUnsafe(stepSchema, fields.jobLine).fieldId,
-        valueInput: { resourceId: jobLine.id },
+        fieldId: selectSchemaFieldUnsafe(stepSchema, fields.part).fieldId,
+        valueInput: { resourceId: part.id },
       },
       {
         fieldId: selectSchemaFieldUnsafe(stepSchema, fields.purchase).fieldId,
         valueInput: { resourceId: purchase.id },
       },
     ])
-  }, [jobLine.id, stepSchema])
+  }, [part.id, stepSchema])
 
   const step = steps.find((s) => s.id === editStepId)
 

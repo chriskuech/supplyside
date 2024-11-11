@@ -201,7 +201,7 @@ export class QuickBooksInvoiceService {
     const quickBooksAccountId =
       quickBooksAccountQuery.QueryResponse.Account[0].Id
 
-    const jobLines = await this.resourceService.list(accountId, 'JobLine', {
+    const parts = await this.resourceService.list(accountId, 'Part', {
       where: {
         '==': [{ var: fields.job.name }, jobResourceId],
       },
@@ -230,17 +230,17 @@ export class QuickBooksInvoiceService {
     )
 
     const invoiceLines = await Promise.all(
-      jobLines.map(async (jobLine) => {
+      parts.map(async (part) => {
         const partName = selectResourceFieldValue(
-          jobLine,
+          part,
           fields.partName,
         )?.string?.trim()
 
         const quantity =
-          selectResourceFieldValue(jobLine, fields.quantity)?.number ?? 0
+          selectResourceFieldValue(part, fields.quantity)?.number ?? 0
 
         const unitCost =
-          selectResourceFieldValue(jobLine, fields.unitCost)?.number ?? 0
+          selectResourceFieldValue(part, fields.unitCost)?.number ?? 0
 
         assert(partName, 'Job line does not have a part name or part number')
 

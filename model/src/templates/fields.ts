@@ -319,11 +319,11 @@ const _fields = {
     name: 'Job Attachments',
     type: 'Files',
   },
-  jobLine: {
+  part: {
     templateId: '6c2ab471-9d95-42e0-8bf0-1372a19c1e1c',
-    name: 'Job Line',
+    name: 'Part',
     type: 'Resource',
-    resourceType: 'JobLine',
+    resourceType: 'Part',
     description: 'Contains all info related to a specific line item',
   },
   jobStatus: {

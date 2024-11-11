@@ -90,7 +90,7 @@ enum ResourceType {
   Bill
   Customer
   Job
-  JobLine
+  Part
   Purchase
   PurchaseLine
   Step
