@@ -5,11 +5,10 @@ import { useEventListener } from '@/hooks/useEventListener'
 type Props = {
   top: number
   left: number
-  height: number
   onChange: (dx: number) => void
 }
 
-export const DragBar: FC<Props> = ({ top, left, height, onChange }) => {
+export const DragBar: FC<Props> = ({ top, left, onChange }) => {
   const [dragStartX, setDragStartX] = useState<number | null>(null)
 
   const onMouseMove = useCallback(
@@ -41,7 +40,7 @@ export const DragBar: FC<Props> = ({ top, left, height, onChange }) => {
         '::selection': { backgroundColor: 'transparent' },
         color: 'Background',
       }}
-      height={height}
+      height="100%"
       onMouseDown={(e) => setDragStartX(e.clientX)}
       position="absolute"
       top={top}

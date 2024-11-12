@@ -110,277 +110,266 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
   })
 
   return (
-    <>
-      <Stack
-        direction="row"
-        height="100%"
-        width="100%"
-        sx={{ overflowY: 'auto' }}
-        position="relative"
+    <Stack direction="row" minHeight="100%" width="100%" position="relative">
+      <Box
+        component={Paper}
+        flexShrink={0}
+        width={`${drawerWidth}px`}
+        borderRadius={0}
       >
-        <Box
-          component={Paper}
-          flexShrink={0}
-          width={`${drawerWidth}px`}
-          borderRadius={0}
-        >
-          <Stack height={`${topDim}px`} py={2} px={4} gap={2}>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography variant="h4">Jobs Schedule</Typography>
-              <Stack gap={1}>
-                <Button
-                  size="small"
-                  variant="text"
-                  onClick={() => setShowCharts((c) => !c)}
-                  startIcon={
-                    <Stack direction="row" alignItems="center">
-                      <PieChart fontSize="small" />
-                      <BarChart fontSize="small" />
-                    </Stack>
-                  }
-                  endIcon={showCharts ? <ExpandLess /> : <ExpandMore />}
-                  sx={{
-                    '.ChartsButtonText': {
-                      width: 0,
-                      overflow: 'hidden',
-                    },
-                    '&:hover .ChartsButtonText': {
-                      width: 'unset',
-                    },
-                  }}
-                >
-                  <span className="ChartsButtonText">Charts</span>
-                </Button>
-              </Stack>
-            </Stack>
-            <FiltersControl
-              jobSchema={jobSchema}
-              jobStatuses={filters.jobStatuses}
-              onJobStatusChange={(statuses) =>
-                setFilters((filters) => ({
-                  ...filters,
-                  jobStatuses: statuses,
-                }))
-              }
-            />
-          </Stack>
-
-          <Collapse in={showCharts}>
-            <Box height={CHART_HEIGHT} />
-          </Collapse>
-
-          <Stack
-            divider={<Divider sx={{ p: 0, my: '-0.5px' }} />}
-            borderTop={1}
-            borderBottom={1}
-            borderColor="divider"
-            my="-1px"
-            width="100%"
-          >
-            {jobs.map((job) => {
-              const jobName = selectResourceFieldValue(job, fields.name)?.string
-              const customerName = selectResourceFieldValue(
-                job,
-                fields.customer,
-              )?.resource?.name
-              const totalCost = selectResourceFieldValue(
-                job,
-                fields.totalCost,
-              )?.number
-              const receivedAllPurchases = selectResourceFieldValue(
-                job,
-                fields.receivedAllPurchases,
-              )?.boolean
-              const jobStatus = selectResourceFieldValue(
-                job,
-                fields.jobStatus,
-              )?.option
-
-              return (
-                <Stack
-                  key={job.id}
-                  height={dim}
-                  overflow="hidden"
-                  sx={{
-                    textDecoration: 'none',
-                    '& .LinkIcon': {
-                      display: 'none',
-                    },
-                    '&:hover': {
-                      backgroundColor: 'action.hover',
-                    },
-                    '&:hover .LinkIcon': {
-                      display: 'inherit',
-                    },
-                  }}
-                  justifyContent="start"
-                  alignItems="center"
-                  component={NextLink}
-                  flexGrow={1}
-                  direction="row"
-                  href={`/jobs/${job.key}`}
-                  position="relative"
-                >
-                  <Box p={1}>
-                    <Typography
-                      component="span"
-                      color="text.secondary"
-                      fontSize={12}
-                      sx={{ verticalAlign: 'top' }}
-                    >
-                      #
-                    </Typography>
-                    <Typography
-                      component="span"
-                      fontWeight="bold"
-                      color="text.primary"
-                    >
-                      {job.key}
-                    </Typography>
-                  </Box>
-                  <Stack
-                    direction="row"
-                    p={1}
-                    spacing={2}
-                    flexGrow={1}
-                    textOverflow="ellipsis"
-                    overflow="hidden"
-                    whiteSpace="nowrap"
-                    color="text.secondary"
-                  >
-                    {jobName && <Box color="text.primary">{jobName}</Box>}
-                    {customerName && (
-                      <Tooltip
-                        title={`This Job was ordered by ${customerName}`}
-                      >
-                        <Stack alignItems="center" direction="row">
-                          <Business sx={{ mr: 1 }} />
-                          {customerName}
-                        </Stack>
-                      </Tooltip>
-                    )}
-                    {isNumber(totalCost) && (
-                      <Tooltip
-                        title={`This Job will gross ${formatMoney(totalCost)}`}
-                      >
-                        <Stack alignItems="center" direction="row">
-                          <AttachMoney />
-                          {formatMoney(totalCost, {
-                            currency: undefined,
-                            style: undefined,
-                            maximumFractionDigits: 0,
-                          })}
-                        </Stack>
-                      </Tooltip>
-                    )}
-                    {jobStatus && (
-                      <Tooltip title="Job Status">
-                        <OptionChip option={jobStatus} size="small" />
-                      </Tooltip>
-                    )}
-                    <Stack alignItems="center" direction="row">
-                      <Tooltip
-                        title={match(receivedAllPurchases)
-                          .with(
-                            true,
-                            () =>
-                              'All Purchases required for this Job have been received',
-                          )
-                          .with(
-                            false,
-                            () =>
-                              'Some Purchases required for this Job have not been received',
-                          )
-                          .with(
-                            P.nullish,
-                            () => 'No Purchases have been added for this Job',
-                          )
-                          .exhaustive()}
-                      >
-                        <Box>
-                          <InlineBadge
-                            color="default" // this does not work
-                            badgeContent={match(receivedAllPurchases)
-                              .with(true, () => <Check color="success" />)
-                              .with(false, () => <Close color="error" />)
-                              .with(P.nullish, () => <Remove color="warning" />)
-                              .exhaustive()}
-                          >
-                            <ShoppingBag />
-                          </InlineBadge>
-                        </Box>
-                      </Tooltip>
-                    </Stack>
+        <Stack height={`${topDim}px`} py={2} px={4} gap={2}>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography variant="h4">Jobs Schedule</Typography>
+            <Stack gap={1}>
+              <Button
+                size="small"
+                variant="text"
+                onClick={() => setShowCharts((c) => !c)}
+                startIcon={
+                  <Stack direction="row" alignItems="center">
+                    <PieChart fontSize="small" />
+                    <BarChart fontSize="small" />
                   </Stack>
-                  <Stack
-                    position="absolute"
-                    right={0}
-                    className="LinkIcon"
-                    p={1}
-                    justifyContent="center"
-                    alignItems="center"
-                    color="divider"
+                }
+                endIcon={showCharts ? <ExpandLess /> : <ExpandMore />}
+                sx={{
+                  '.ChartsButtonText': {
+                    width: 0,
+                    overflow: 'hidden',
+                  },
+                  '&:hover .ChartsButtonText': {
+                    width: 'unset',
+                  },
+                }}
+              >
+                <span className="ChartsButtonText">Charts</span>
+              </Button>
+            </Stack>
+          </Stack>
+          <FiltersControl
+            jobSchema={jobSchema}
+            jobStatuses={filters.jobStatuses}
+            onJobStatusChange={(statuses) =>
+              setFilters((filters) => ({
+                ...filters,
+                jobStatuses: statuses,
+              }))
+            }
+          />
+        </Stack>
+
+        <Collapse in={showCharts}>
+          <Box height={CHART_HEIGHT} />
+        </Collapse>
+
+        <Stack
+          divider={<Divider sx={{ p: 0, my: '-0.5px' }} />}
+          borderTop={1}
+          borderBottom={1}
+          borderColor="divider"
+          my="-1px"
+          width="100%"
+        >
+          {jobs.map((job) => {
+            const jobName = selectResourceFieldValue(job, fields.name)?.string
+            const customerName = selectResourceFieldValue(job, fields.customer)
+              ?.resource?.name
+            const totalCost = selectResourceFieldValue(
+              job,
+              fields.totalCost,
+            )?.number
+            const receivedAllPurchases = selectResourceFieldValue(
+              job,
+              fields.receivedAllPurchases,
+            )?.boolean
+            const jobStatus = selectResourceFieldValue(
+              job,
+              fields.jobStatus,
+            )?.option
+
+            return (
+              <Stack
+                key={job.id}
+                height={dim}
+                overflow="hidden"
+                sx={{
+                  textDecoration: 'none',
+                  '& .LinkIcon': {
+                    display: 'none',
+                  },
+                  '&:hover': {
+                    backgroundColor: 'action.hover',
+                  },
+                  '&:hover .LinkIcon': {
+                    display: 'inherit',
+                  },
+                }}
+                justifyContent="start"
+                alignItems="center"
+                component={NextLink}
+                flexGrow={1}
+                direction="row"
+                href={`/jobs/${job.key}`}
+                position="relative"
+              >
+                <Box p={1}>
+                  <Typography
+                    component="span"
+                    color="text.secondary"
+                    fontSize={12}
+                    sx={{ verticalAlign: 'top' }}
                   >
-                    <Link />
+                    #
+                  </Typography>
+                  <Typography
+                    component="span"
+                    fontWeight="bold"
+                    color="text.primary"
+                  >
+                    {job.key}
+                  </Typography>
+                </Box>
+                <Stack
+                  direction="row"
+                  p={1}
+                  spacing={2}
+                  flexGrow={1}
+                  textOverflow="ellipsis"
+                  overflow="hidden"
+                  whiteSpace="nowrap"
+                  color="text.secondary"
+                >
+                  {jobName && <Box color="text.primary">{jobName}</Box>}
+                  {customerName && (
+                    <Tooltip title={`This Job was ordered by ${customerName}`}>
+                      <Stack alignItems="center" direction="row">
+                        <Business sx={{ mr: 1 }} />
+                        {customerName}
+                      </Stack>
+                    </Tooltip>
+                  )}
+                  {isNumber(totalCost) && (
+                    <Tooltip
+                      title={`This Job will gross ${formatMoney(totalCost)}`}
+                    >
+                      <Stack alignItems="center" direction="row">
+                        <AttachMoney />
+                        {formatMoney(totalCost, {
+                          currency: undefined,
+                          style: undefined,
+                          maximumFractionDigits: 0,
+                        })}
+                      </Stack>
+                    </Tooltip>
+                  )}
+                  {jobStatus && (
+                    <Tooltip title="Job Status">
+                      <OptionChip option={jobStatus} size="small" />
+                    </Tooltip>
+                  )}
+                  <Stack alignItems="center" direction="row">
+                    <Tooltip
+                      title={match(receivedAllPurchases)
+                        .with(
+                          true,
+                          () =>
+                            'All Purchases required for this Job have been received',
+                        )
+                        .with(
+                          false,
+                          () =>
+                            'Some Purchases required for this Job have not been received',
+                        )
+                        .with(
+                          P.nullish,
+                          () => 'No Purchases have been added for this Job',
+                        )
+                        .exhaustive()}
+                    >
+                      <Box>
+                        <InlineBadge
+                          color="default" // this does not work
+                          badgeContent={match(receivedAllPurchases)
+                            .with(true, () => <Check color="success" />)
+                            .with(false, () => <Close color="error" />)
+                            .with(P.nullish, () => <Remove color="warning" />)
+                            .exhaustive()}
+                        >
+                          <ShoppingBag />
+                        </InlineBadge>
+                      </Box>
+                    </Tooltip>
                   </Stack>
                 </Stack>
-              )
-            })}
-          </Stack>
-        </Box>
-        <Box
-          flexGrow={1}
-          sx={{ overflowX: 'auto' }}
-          position="relative"
-          ref={frameRef}
-          onScroll={(e) => {
-            if (isScrolledToRight(e.currentTarget)) {
-              setNumWeeks((weeks) => weeks + 1)
-              setScrollOffset(e.currentTarget.scrollLeft)
-            } else if (e.currentTarget.scrollLeft === 0) {
-              setNumWeeks((weeks) => weeks + 1)
-              setMinDate((minDate) => minDate.add(-1, 'week').startOf('day'))
-              setScrollOffset(dim * 7)
-            } else {
-              setScrollOffset(e.currentTarget.scrollLeft)
-            }
-          }}
-        >
-          <Collapse in={showCharts} unmountOnExit>
-            <Box
-              position="absolute"
-              top={0}
-              left={scrollOffset}
-              width="100%"
-              p={2}
-            >
-              <Charts resources={jobs} />
-            </Box>
-            <Box height={CHART_HEIGHT} />
-          </Collapse>
-          <GanttChartHeader
-            height={topDim}
-            dim={dim}
-            startDate={minDate}
-            numDays={numWeeks * 7}
-          />
-          <GanttChart
-            jobSchema={jobSchema}
-            numDays={numWeeks * 7}
-            dim={dim}
-            jobs={jobs}
-            startDate={minDate}
-            scrollOffset={scrollOffset}
-          />
-        </Box>
-        <DragBar
-          height={jobs.length * dim}
-          top={(showCharts ? CHART_HEIGHT : 0) + topDim}
-          left={drawerWidth}
-          onChange={(width) => setDrawerWidth(clampDrawerWidth(width))}
+                <Stack
+                  position="absolute"
+                  right={0}
+                  className="LinkIcon"
+                  p={1}
+                  justifyContent="center"
+                  alignItems="center"
+                  color="divider"
+                >
+                  <Link />
+                </Stack>
+              </Stack>
+            )
+          })}
+        </Stack>
+      </Box>
+      <Box
+        flexGrow={1}
+        sx={{ overflowX: 'auto', overflowY: 'hidden' }}
+        position="relative"
+        ref={frameRef}
+        onScroll={(e) => {
+          if (isScrolledToRight(e.currentTarget)) {
+            setNumWeeks((weeks) => weeks + 1)
+            setScrollOffset(e.currentTarget.scrollLeft)
+          } else if (e.currentTarget.scrollLeft === 0) {
+            setNumWeeks((weeks) => weeks + 1)
+            setMinDate((minDate) => minDate.add(-1, 'week').startOf('day'))
+            setScrollOffset(dim * 7)
+          } else {
+            setScrollOffset(e.currentTarget.scrollLeft)
+          }
+        }}
+      >
+        <Collapse in={showCharts}>
+          <Box height={CHART_HEIGHT} />
+        </Collapse>
+        <GanttChartHeader
+          height={topDim}
+          dim={dim}
+          startDate={minDate}
+          numDays={numWeeks * 7}
         />
-      </Stack>
-    </>
+        <GanttChart
+          jobSchema={jobSchema}
+          numDays={numWeeks * 7}
+          dim={dim}
+          jobs={jobs}
+          startDate={minDate}
+          scrollOffset={scrollOffset}
+        />
+      </Box>
+      <DragBar
+        top={0}
+        left={drawerWidth}
+        onChange={(width) => setDrawerWidth(clampDrawerWidth(width))}
+      />
+      <Box
+        position="absolute"
+        top={0}
+        left={drawerWidth}
+        width={frameRef.current?.clientWidth}
+        p={2}
+      >
+        <Collapse in={showCharts} unmountOnExit>
+          <Charts resources={jobs} />
+        </Collapse>
+      </Box>
+    </Stack>
   )
 }
 
