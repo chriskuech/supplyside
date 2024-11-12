@@ -1,3 +1,4 @@
+export * from './TypedResource'
 export * from './formatInlineAddress'
 export * from './reference'
 export * from './resource'

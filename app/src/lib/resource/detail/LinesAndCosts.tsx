@@ -1,16 +1,17 @@
 import { Stack, Typography, Box, Alert, Card } from '@mui/material'
-import { FieldTemplate, Resource, Schema, ValueInput } from '@supplyside/model'
+import { FieldTemplate, Resource, Schema } from '@supplyside/model'
 import { ResourceTable } from '../table'
 import ItemizedCosts from '../costs/ItemizedCosts'
 import { ColumnWidths } from '../table/ResourceTable'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { JsonLogic, readResources } from '@/client/resource'
+import { FieldData } from '@/actions/types'
 
 type Props = {
   resource: Resource
   lineSchema: Schema
   lineQuery: JsonLogic
-  newLineInitialData: { fieldId: string; valueInput: ValueInput }[]
+  newLineInitialData: FieldData[]
   hideColumns?: FieldTemplate[]
   isReadOnly?: boolean
   specialColumnWidths?: ColumnWidths

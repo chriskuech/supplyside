@@ -15,7 +15,6 @@ import {
   Resource,
   Schema,
   selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import FieldControl from '../fields/FieldControl'
 import RecurringPlayButton from './RecurringPlayButton'
@@ -66,11 +65,7 @@ export default function RecurringCard({ schema, resource }: Props) {
         title={<Typography fontSize="1.3em">Recurring Schedule</Typography>}
         avatar={<EventRepeat />}
         action={
-          <RecurringPlayButton
-            schema={schema}
-            resource={resource}
-            isDisabled={!isValid}
-          />
+          <RecurringPlayButton resource={resource} isDisabled={!isValid} />
         }
         sx={{ pb: 0 }}
       />
@@ -98,22 +93,18 @@ export default function RecurringCard({ schema, resource }: Props) {
 
             <Box width={70}>
               <FieldControl
+                schema={schema}
                 resource={resource}
-                field={selectSchemaFieldUnsafe(
-                  schema,
-                  fields.recurrenceInterval,
-                )}
+                field={fields.recurrenceInterval}
                 disabled={!isRecurring}
               />
             </Box>
 
             <Box width={150}>
               <FieldControl
+                schema={schema}
                 resource={resource}
-                field={selectSchemaFieldUnsafe(
-                  schema,
-                  fields.recurrenceIntervalUnits,
-                )}
+                field={fields.recurrenceIntervalUnits}
                 disabled={!isRecurring}
               />
             </Box>
@@ -125,11 +116,9 @@ export default function RecurringCard({ schema, resource }: Props) {
             <Box width={70}>
               <FieldControl
                 inputId="recurrence-interval-offset-in-days"
+                schema={schema}
                 resource={resource}
-                field={selectSchemaFieldUnsafe(
-                  schema,
-                  fields.recurrenceIntervalOffsetInDays,
-                )}
+                field={fields.recurrenceIntervalOffsetInDays}
                 disabled={!isRecurring}
               />
             </Box>

@@ -1,10 +1,5 @@
 import { Alert, Card, CardContent, Stack, Typography } from '@mui/material'
-import {
-  Resource,
-  fields,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { Resource, fields, selectResourceFieldValue } from '@supplyside/model'
 import { FC } from 'react'
 import { PartView } from './PartView'
 import { StepsControl } from './StepsControl'
@@ -77,12 +72,11 @@ export const PartsControl: FC<Props> = async ({ job }) => {
           resourceType="Part"
           fields={[
             {
-              fieldId: selectSchemaFieldUnsafe(partSchema, fields.job).fieldId,
+              field: fields.job,
               valueInput: { resourceId: job.id },
             },
             {
-              fieldId: selectSchemaFieldUnsafe(partSchema, fields.needDate)
-                .fieldId,
+              field: fields.needDate,
               valueInput: {
                 date: selectResourceFieldValue(job, fields.needDate)?.date,
               },

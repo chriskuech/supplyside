@@ -11,26 +11,29 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material'
-import { Resource, ResourceType, SchemaField, Value } from '@supplyside/model'
+import {
+  FieldTemplate,
+  Resource,
+  Schema,
+  selectResourceFieldValue,
+} from '@supplyside/model'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import LoadingButton from '@/lib/ux/LoadingButton'
 import { useAsyncCallback } from '@/hooks/useAsyncCallback'
 
 type AttachmentsToolbarControlProps = {
+  schema: Schema
   resource: Resource
-  resourceType: ResourceType
-  field: SchemaField
-  value: Value | undefined
+  field: FieldTemplate
   onSync?: () => Promise<void>
   fontSize: 'small' | 'medium' | 'large'
 }
 
 export default function AttachmentsToolbarControl({
-  resourceType,
+  schema,
   resource,
   field,
-  value,
   onSync,
   fontSize,
 }: AttachmentsToolbarControlProps) {
@@ -39,14 +42,13 @@ export default function AttachmentsToolbarControl({
     onSync?.().then(close),
   )
 
+  const files = selectResourceFieldValue(resource, field)?.files
+
   return (
     <>
       <Tooltip title="View/Edit attachments">
         <IconButton onClick={open} size="small">
-          <Badge
-            badgeContent={value?.files.length || undefined}
-            color="primary"
-          >
+          <Badge badgeContent={files?.length || undefined} color="primary">
             <AttachFile fontSize={fontSize} />
           </Badge>
         </IconButton>
@@ -56,10 +58,11 @@ export default function AttachmentsToolbarControl({
         <DialogTitle>Attachments</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Add, view, or remove attachments for this {resourceType}.
+            Add, view, or remove attachments for this {schema.resourceType}.
           </DialogContentText>
           <FieldControl
-            inputId={`rf-${field.fieldId}`}
+            inputId={`${AttachmentsToolbarControl.name}-${field.templateId}`}
+            schema={schema}
             resource={resource}
             field={field}
           />

@@ -1,13 +1,7 @@
 'use client'
 
 import { Box } from '@mui/material'
-import {
-  Resource,
-  Schema,
-  fields,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { Resource, fields, selectResourceFieldValue } from '@supplyside/model'
 import dayjs, { Dayjs } from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { amber } from '@mui/material/colors'
@@ -15,12 +9,11 @@ import { JobBar } from './JobBar'
 import { NeedDateBar } from './NeedDateBar'
 import { GanttChartGrid } from './GanttChartGrid'
 import { PaymentDueDateBar } from './PaymentDueDateBar'
-import { updateResourceField } from '@/actions/resource'
+import { updateResource } from '@/actions/resource'
 
 dayjs.extend(utc)
 
 type Props = {
-  jobSchema: Schema
   startDate: Dayjs
   numDays: number
   jobs: Resource[]
@@ -28,13 +21,7 @@ type Props = {
   scrollOffset: number
 }
 
-export default function GanttChart({
-  jobSchema,
-  startDate,
-  numDays,
-  jobs,
-  dim,
-}: Props) {
+export default function GanttChart({ startDate, numDays, jobs, dim }: Props) {
   return (
     <Box
       position="relative"
@@ -81,24 +68,24 @@ export default function GanttChart({
               xOffset={jobStartDateOffset}
               yOffset={i}
               onMove={(dx) =>
-                updateResourceField(job.id, {
-                  fieldId: selectSchemaFieldUnsafe(jobSchema, fields.startDate)
-                    .fieldId,
-                  valueInput: {
-                    date: startDate.add(dx, 'day').toISOString(),
+                updateResource(job.id, [
+                  {
+                    field: fields.startDate,
+                    valueInput: {
+                      date: startDate.add(dx, 'day').toISOString(),
+                    },
                   },
-                })
+                ])
               }
               onResize={(width) =>
-                updateResourceField(job.id, {
-                  fieldId: selectSchemaFieldUnsafe(
-                    jobSchema,
-                    fields.productionDays,
-                  ).fieldId,
-                  valueInput: {
-                    number: width,
+                updateResource(job.id, [
+                  {
+                    field: fields.productionDays,
+                    valueInput: {
+                      number: width,
+                    },
                   },
-                })
+                ])
               }
             />
           )
@@ -122,13 +109,14 @@ export default function GanttChart({
               xOffset={jobNeedOffset}
               yOffset={i}
               onDrop={(xOffset) =>
-                updateResourceField(job.id, {
-                  fieldId: selectSchemaFieldUnsafe(jobSchema, fields.needDate)
-                    .fieldId,
-                  valueInput: {
-                    date: startDate.add(xOffset, 'day').toISOString(),
+                updateResource(job.id, [
+                  {
+                    field: fields.needDate,
+                    valueInput: {
+                      date: startDate.add(xOffset, 'day').toISOString(),
+                    },
                   },
-                })
+                ])
               }
             />
           )
@@ -157,15 +145,14 @@ export default function GanttChart({
               xOffset={jobPaymentDueDateOffset}
               yOffset={i}
               onDrop={(xOffset) =>
-                updateResourceField(job.id, {
-                  fieldId: selectSchemaFieldUnsafe(
-                    jobSchema,
-                    fields.paymentDueDate,
-                  ).fieldId,
-                  valueInput: {
-                    date: startDate.add(xOffset, 'day').toISOString(),
+                updateResource(job.id, [
+                  {
+                    field: fields.paymentDueDate,
+                    valueInput: {
+                      date: startDate.add(xOffset, 'day').toISOString(),
+                    },
                   },
-                })
+                ])
               }
             />
           )

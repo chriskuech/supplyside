@@ -1,6 +1,6 @@
 'use server'
 
-import { fields, selectSchemaFieldUnsafe } from '@supplyside/model'
+import { fields } from '@supplyside/model'
 import { withAccountId } from '@/authz'
 import * as client from '@/client/bill'
 import { updateResource } from '@/client/resource'
@@ -17,7 +17,7 @@ export const linkPurchase = withAccountId(
 
     await updateResource(accountId, resourceId, [
       {
-        fieldId: selectSchemaFieldUnsafe(schema, fields.purchase).fieldId,
+        field: fields.purchase,
         valueInput: { resourceId: purchaseId },
       },
     ])

@@ -21,10 +21,8 @@ import {
   fields,
   mapResourceToValueResource,
   resources,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { useRouter } from 'next/navigation'
-import useSchema from '@/lib/schema/useSchema'
 import { copyFromResource, createResource } from '@/actions/resource'
 import { findResourcesByNameOrPoNumber } from '@/actions/resource'
 import { McMasterCarrLogo } from '@/lib/ux/McMasterCarrLogo'
@@ -51,7 +49,6 @@ function ResourceField(
   ref: ForwardedRef<HTMLInputElement>,
 ) {
   const router = useRouter()
-  const schema = useSchema(resourceType)
 
   const open = (resourceId: string) =>
     router.push(window.location.pathname + `?drawerResourceId=${resourceId}`, {
@@ -61,19 +58,13 @@ function ResourceField(
   const handleCreate = (nameOrNumber: string) =>
     createResource(resourceType, [
       {
-        fieldId: selectSchemaFieldUnsafe(
-          schema ?? fail('Schema not found'),
-          match(resourceType)
-            .with(
-              P.union('Customer', 'Vendor', 'WorkCenter'),
-              () => fields.name,
-            )
-            .with('Purchase', () => fields.poNumber)
-            .with(P.union('Bill', 'PurchaseLine', 'Job', 'Part', 'Step'), () =>
-              fail('Not implemented'),
-            )
-            .exhaustive(),
-        ).fieldId,
+        field: match(resourceType)
+          .with(P.union('Customer', 'Vendor', 'WorkCenter'), () => fields.name)
+          .with('Purchase', () => fields.poNumber)
+          .with(P.union('Bill', 'PurchaseLine', 'Job', 'Part', 'Step'), () =>
+            fail('Not implemented'),
+          )
+          .exhaustive(),
         valueInput: { string: nameOrNumber },
       },
     ]).then((resource) => {

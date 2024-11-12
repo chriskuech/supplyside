@@ -12,29 +12,30 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material'
-import { Resource, ResourceType, SchemaField, Value } from '@supplyside/model'
+import {
+  Resource,
+  Schema,
+  fields,
+  selectResourceFieldValue,
+} from '@supplyside/model'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { getProfilePicPath } from '@/app/api/download/[filename]/util'
 
 type AssigneeControlProps = {
+  schema: Schema
   resource: Resource
-  resourceType: ResourceType
-  field: SchemaField
-  value: Value | undefined
   fontSize: 'small' | 'medium' | 'large'
 }
 
 export default function AssigneeToolbarControl({
-  resourceType,
+  schema,
   resource,
-  field,
-  value,
   fontSize,
 }: AssigneeControlProps) {
   const { isOpen, open, close } = useDisclosure()
 
-  const assignee = value?.user
+  const assignee = selectResourceFieldValue(resource, fields.assignee)?.user
 
   const avatarSize = fontSize === 'small' ? 24 : 40
 
@@ -44,7 +45,7 @@ export default function AssigneeToolbarControl({
         title={
           assignee
             ? `Assigned to ${assignee.name || assignee.email || '(No name)'}`
-            : `Assign the ${resourceType} to a user`
+            : `Assign the ${schema.resourceType} to a user`
         }
       >
         <IconButton onClick={open} size={fontSize}>
@@ -62,13 +63,14 @@ export default function AssigneeToolbarControl({
         <DialogTitle>Assignee</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Set the assignee for this {resourceType}, responsible for its
+            Set the assignee for this {schema.resourceType}, responsible for its
             completion.
           </DialogContentText>
           <FieldControl
-            inputId={`rf-${field.fieldId}`}
+            inputId={`rf-${AssigneeToolbarControl.name}`}
+            schema={schema}
             resource={resource}
-            field={field}
+            field={fields.assignee}
           />
         </DialogContent>
         <DialogActions>

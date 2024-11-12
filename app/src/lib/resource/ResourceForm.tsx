@@ -19,7 +19,7 @@ import Link from 'next/link'
 import FieldControl from './fields/FieldControl'
 import { chunkByN } from './chunkByN'
 import Field from './fields/controls/Field'
-import { updateResourceField, copyFromResource } from '@/actions/resource'
+import { copyFromResource, updateResource } from '@/actions/resource'
 
 type Props = {
   schema: Schema
@@ -94,6 +94,7 @@ export default function ResourceForm({
                     </Typography>
                     <FieldControl
                       inputId={`rf-${singleField.fieldId}`}
+                      schema={schema}
                       resource={resource}
                       field={singleField}
                       disabled={
@@ -175,15 +176,17 @@ export default function ResourceForm({
                                   fieldId: f.fieldId,
                                 })}
                                 onChange={async (value) => {
-                                  const result = await updateResourceField(
+                                  const result = await updateResource(
                                     resource.id,
-                                    {
-                                      fieldId: f.fieldId,
-                                      valueInput: mapValueToValueInput(
-                                        f.type,
-                                        value,
-                                      ),
-                                    },
+                                    [
+                                      {
+                                        field: f,
+                                        valueInput: mapValueToValueInput(
+                                          f.type,
+                                          value,
+                                        ),
+                                      },
+                                    ],
                                   )
 
                                   if (!result) {

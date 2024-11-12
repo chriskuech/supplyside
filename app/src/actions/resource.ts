@@ -4,8 +4,7 @@ import { fail } from 'assert'
 import {
   FieldTemplate,
   OptionTemplate,
-  ValueInput,
-  selectSchemaField,
+  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { requireSession } from '@/session'
 import { withAccountId, withSession } from '@/authz'
@@ -22,11 +21,6 @@ export const findResourcesByNameOrPoNumber = withAccountId(
 )
 export const copyFromResource = withAccountId(client.copyFromResource)
 
-export const updateResourceField = (
-  resourceId: string,
-  field: { fieldId: string; valueInput: ValueInput },
-) => updateResource(resourceId, [field])
-
 export const transitionStatus = async (
   resourceId: string,
   fieldTemplate: FieldTemplate,
@@ -38,14 +32,12 @@ export const transitionStatus = async (
     (await client.readResource(accountId, resourceId)) ??
     fail('Resource not found')
   const schema = (await readSchema(accountId, type)) ?? fail('Schema not found')
-  const { fieldId, options } =
-    selectSchemaField(schema, fieldTemplate) ?? fail('Field not found')
+  const field = selectSchemaFieldUnsafe(schema, fieldTemplate)
   const option =
-    options.find((o) => o.templateId === statusTemplate.templateId) ??
+    field.options.find((o) => o.templateId === statusTemplate.templateId) ??
     fail('Option not found')
 
-  await updateResourceField(resourceId, {
-    fieldId,
-    valueInput: { optionId: option.id },
-  })
+  await updateResource(resourceId, [
+    { field, valueInput: { optionId: option.id } },
+  ])
 }

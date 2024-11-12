@@ -12,7 +12,6 @@ import {
   Schema,
   fields,
   selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { FC } from 'react'
 import dayjs from 'dayjs'
@@ -103,9 +102,10 @@ export const OrderedCta: FC<Props> = ({ schema, resource }) => {
               </Typography>
               <Box width={170}>
                 <FieldControl
+                  schema={schema}
                   resource={resource}
                   inputId="start-date-field"
-                  field={selectSchemaFieldUnsafe(schema, fields.startDate)}
+                  field={fields.startDate}
                   datePickerProps={{ slotProps: { field: {} } }}
                 />
               </Box>
@@ -122,9 +122,10 @@ export const OrderedCta: FC<Props> = ({ schema, resource }) => {
               </Typography>
               <Box width={115}>
                 <FieldControl
+                  schema={schema}
                   resource={resource}
                   inputId="production-days-field"
-                  field={selectSchemaFieldUnsafe(schema, fields.productionDays)}
+                  field={fields.productionDays}
                 />
               </Box>
             </Stack>

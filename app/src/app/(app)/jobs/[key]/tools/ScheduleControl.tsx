@@ -18,7 +18,6 @@ import {
   Schema,
   fields,
   selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { FC } from 'react'
 import dayjs from 'dayjs'
@@ -115,8 +114,9 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
                 </FormLabel>
                 <Box>
                   <FieldControl
+                    schema={schema}
                     resource={resource}
-                    field={selectSchemaFieldUnsafe(schema, fields.startDate)}
+                    field={fields.startDate}
                     inputId="start-date"
                     datePickerProps={{
                       slotProps: {
@@ -132,11 +132,9 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
                 </FormLabel>
                 <Box>
                   <FieldControl
+                    schema={schema}
                     resource={resource}
-                    field={selectSchemaFieldUnsafe(
-                      schema,
-                      fields.productionDays,
-                    )}
+                    field={fields.productionDays}
                     inputId="production-days"
                   />
                 </Box>
@@ -159,8 +157,9 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
               </FormLabel>
               <Box>
                 <FieldControl
+                  schema={schema}
                   resource={resource}
-                  field={selectSchemaFieldUnsafe(schema, fields.needDate)}
+                  field={fields.needDate}
                   inputId="need-date"
                   datePickerProps={{
                     slotProps: {

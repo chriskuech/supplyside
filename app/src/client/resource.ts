@@ -1,21 +1,54 @@
 import 'server-only'
-import { Resource, ResourceType, ValueInput } from '@supplyside/model'
+import {
+  Resource,
+  ResourceType,
+  ValueInput,
+  selectSchemaFieldUnsafe,
+} from '@supplyside/model'
 import { components } from '@supplyside/api'
 import { stringify } from 'qs'
 import { revalidateTag } from 'next/cache'
+import { readSchema } from './schema'
 import { client } from '.'
 import { Session } from '@/session'
+import { FieldData } from '@/actions/types'
 
 export type OrderBy = components['schemas']['OrderBy']
 
 export type JsonLogic = components['schemas']['JsonLogic']
 
+type FlatFieldData = {
+  fieldId?: string | undefined
+  templateId?: string | undefined
+  valueInput: ValueInput
+}
+
 export const createResource = async (
   { userId, accountId }: Session,
   resourceType: ResourceType,
-  fields: { fieldId: string; valueInput: ValueInput }[],
+  fields: FieldData[],
 ) => {
   revalidateTag('Resources')
+
+  const schema = await readSchema(accountId, resourceType)
+  if (!schema) return
+
+  const resolvedFields = fields.map(
+    ({ fieldId, templateId, valueInput }: FlatFieldData) => {
+      if (fieldId) {
+        return { fieldId, valueInput }
+      }
+
+      if (!templateId) {
+        throw new Error('FieldData must have fieldId or templateId')
+      }
+
+      return {
+        fieldId: selectSchemaFieldUnsafe(schema, { templateId }).fieldId,
+        valueInput,
+      }
+    },
+  )
 
   const { data: resource } = await client().POST(
     '/api/accounts/{accountId}/resources/',
@@ -23,7 +56,7 @@ export const createResource = async (
       params: {
         path: { accountId: accountId },
       },
-      body: { resourceType, fields, userId },
+      body: { resourceType, fields: resolvedFields, userId },
     },
   )
 
@@ -82,9 +115,7 @@ export const readResources = async (
           orderBy,
         },
       },
-      querySerializer(queryParams) {
-        return stringify(queryParams)
-      },
+      querySerializer: stringify,
       next: { tags: ['Resources'] },
     },
   )
@@ -95,8 +126,29 @@ export const readResources = async (
 export const updateResource = async (
   accountId: string,
   resourceId: string,
-  fields: { fieldId: string; valueInput: ValueInput }[],
+  fields: FieldData[],
 ) => {
+  const current = await readResource(accountId, resourceId)
+  if (!current) return
+
+  const schema = await readSchema(accountId, current.type)
+  if (!schema) return
+
+  const resolvedFields = fields.map(
+    ({ fieldId, templateId, valueInput }: FlatFieldData) => {
+      if (fieldId) {
+        return { fieldId, valueInput }
+      }
+
+      if (!templateId) {
+        throw new Error('FieldData must have fieldId or templateId')
+      }
+
+      const field = selectSchemaFieldUnsafe(schema, { templateId })
+      return { fieldId: field.fieldId, valueInput }
+    },
+  )
+
   revalidateTag('Resources')
 
   const { data: resource } = await client().PATCH(
@@ -105,7 +157,7 @@ export const updateResource = async (
       params: {
         path: { accountId, resourceId },
       },
-      body: fields,
+      body: resolvedFields,
     },
   )
 

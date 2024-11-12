@@ -48,7 +48,7 @@ export default function CallToAction({ self, schema, resource }: Props) {
     <>
       {isDraft && (
         <>
-          <MatchControl schema={schema} resource={resource} />
+          <MatchControl resource={resource} />
           <Tooltip
             title={
               hasInvalidFields

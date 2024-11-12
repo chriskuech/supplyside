@@ -9,6 +9,7 @@ export const SectionSchema = z.object({
 })
 
 export const SchemaSchema = z.object({
+  accountId: z.string(),
   resourceType: ResourceTypeSchema,
   sections: z.array(SectionSchema),
   fields: z.array(SchemaFieldSchema),

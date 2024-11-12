@@ -2,26 +2,18 @@
 
 import { EventRepeat } from '@mui/icons-material'
 import { IconButton, Tooltip } from '@mui/material'
-import {
-  fields,
-  Resource,
-  Schema,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
 import { useCallback } from 'react'
 import { useConfirmation } from '../../confirmation'
-import { updateResourceField } from '@/actions/resource'
+import { updateResource } from '@/actions/resource'
 
 type Props = {
-  schema: Schema
   resource: Resource
   fontSize?: 'small' | 'medium' | 'large'
 }
 
 export default function RecurringControl({
   fontSize = 'small',
-  schema,
   resource,
 }: Props) {
   const confirm = useConfirmation()
@@ -32,8 +24,6 @@ export default function RecurringControl({
   const resourceTypeDisplay = resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')
 
   const toggleRecurring = useCallback(async () => {
-    const { fieldId } = selectSchemaFieldUnsafe(schema, fields.recurring)
-
     const confirmed = await confirm(
       !isRecurring
         ? {
@@ -54,11 +44,15 @@ export default function RecurringControl({
 
     if (!confirmed) return
 
-    await updateResourceField(resource.id, {
-      fieldId,
-      valueInput: { boolean: !isRecurring },
-    })
-  }, [confirm, isRecurring, resource.id, resourceTypeDisplay, schema])
+    await updateResource(resource.id, [
+      {
+        field: fields.recurring,
+        valueInput: {
+          boolean: !isRecurring,
+        },
+      },
+    ])
+  }, [confirm, isRecurring, resource.id, resourceTypeDisplay])
 
   return (
     <Tooltip
