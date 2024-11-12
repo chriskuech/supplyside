@@ -97,7 +97,7 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
-    resourceType: 'JobLine',
+    resourceType: 'Part',
     fields: [
       fields.job,
       fields.partName,
@@ -180,7 +180,7 @@ export const schemas: SchemaTemplate[] = [
   {
     resourceType: 'Step',
     fields: [
-      fields.jobLine,
+      fields.part,
       fields.completed,
       fields.workCenter,
       fields.purchase,

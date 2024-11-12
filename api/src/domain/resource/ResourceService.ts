@@ -541,7 +541,7 @@ export class ResourceService {
   ) {
     const lines = await this.list(
       accountId,
-      resourceType === 'Job' ? 'JobLine' : 'PurchaseLine',
+      resourceType === 'Job' ? 'Part' : 'PurchaseLine',
       {
         where: {
           '==': [{ var: resourceType }, resourceId],
@@ -579,7 +579,7 @@ export class ResourceService {
     if (resource.type === 'Job') {
       if (isUpdated(fields.customer)) {
         await this.updateChildren(accountId, resource.id, {
-          childResourceType: 'JobLine',
+          childResourceType: 'Part',
           backlinkFieldTemplate: fields.job,
           field: fields.customer,
           valueInput: {
@@ -591,7 +591,7 @@ export class ResourceService {
       }
       if (isUpdated(fields.needDate)) {
         await this.updateChildren(accountId, resource.id, {
-          childResourceType: 'JobLine',
+          childResourceType: 'Part',
           backlinkFieldTemplate: fields.job,
           field: fields.needDate,
           valueInput: {
@@ -602,7 +602,7 @@ export class ResourceService {
       }
     }
 
-    if (resource.type === 'JobLine') {
+    if (resource.type === 'Part') {
       const jobId = selectResourceFieldValue(resource, fields.job)?.resource?.id
       if (jobId) {
         if (isUpdated(fields.totalCost)) {
@@ -614,7 +614,7 @@ export class ResourceService {
 
           await this.updateResourceField(
             accountId,
-            'JobLine',
+            'Part',
             resource.id,
             fields.customer,
             {
@@ -626,7 +626,7 @@ export class ResourceService {
 
           await this.updateResourceField(
             accountId,
-            'JobLine',
+            'Part',
             resource.id,
             fields.needDate,
             {
@@ -887,7 +887,7 @@ export class ResourceService {
     backLinkFieldRef: FieldTemplate
     resourceType: ResourceType
   }) {
-    const lineResourceType = resourceType === 'Job' ? 'JobLine' : 'PurchaseLine'
+    const lineResourceType = resourceType === 'Job' ? 'Part' : 'PurchaseLine'
     const lineSchema = await this.schemaService.readMergedSchema(
       accountId,
       lineResourceType,

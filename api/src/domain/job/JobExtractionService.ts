@@ -139,7 +139,7 @@ export class JobExtractionService {
     const [schema, resource, lineSchema] = await Promise.all([
       this.schemaService.readMergedSchema(accountId, 'Job'),
       this.resourceService.read(accountId, resourceId),
-      this.schemaService.readMergedSchema(accountId, 'JobLine'),
+      this.schemaService.readMergedSchema(accountId, 'Part'),
     ])
 
     const { files } =
@@ -200,7 +200,7 @@ export class JobExtractionService {
     for (const lineItem of data.lineItems ?? []) {
       const needDate = coerceDateStringToISO8601(lineItem.needDate)
 
-      await this.resourceService.create(accountId, 'JobLine', {
+      await this.resourceService.create(accountId, 'Part', {
         fields: [
           ...(resourceId
             ? [

@@ -43,7 +43,7 @@ export const readDetailPageModel = async (
     resourceType,
   )
     .with('Bill', () => 'PurchaseLine')
-    .with('Job', () => 'JobLine')
+    .with('Job', () => 'Part')
     .with('Purchase', () => 'PurchaseLine')
     .otherwise(() => null)
 

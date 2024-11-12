@@ -71,7 +71,7 @@ export default async function ListPage({
             </Typography>
             {[
               ...callToActions,
-              ...(!['JobLine', 'PurchaseLine'].includes(resourceType)
+              ...(!['Part', 'PurchaseLine'].includes(resourceType)
                 ? [
                     <CreateResourceButton
                       key={CreateResourceButton.name}

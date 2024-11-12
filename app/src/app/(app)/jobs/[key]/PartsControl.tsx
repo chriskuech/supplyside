@@ -6,9 +6,9 @@ import {
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { FC } from 'react'
-import { JobLineView } from './JobLineView'
+import { PartView } from './PartView'
 import { StepsControl } from './StepsControl'
-import { DeleteJobLineButton } from './DeleteJobLineButton'
+import { DeletePartButton } from './DeletePartButton'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { readSchema } from '@/client/schema'
 import { readResources } from '@/client/resource'
@@ -17,25 +17,25 @@ type Props = {
   job: Resource
 }
 
-export const JobLinesControl: FC<Props> = async ({ job }) => {
-  const [jobLineSchema, stepSchema, jobLines] = await Promise.all([
-    readSchema(job.accountId, 'JobLine'),
+export const PartsControl: FC<Props> = async ({ job }) => {
+  const [partSchema, stepSchema, parts] = await Promise.all([
+    readSchema(job.accountId, 'Part'),
     readSchema(job.accountId, 'Step'),
-    readResources(job.accountId, 'JobLine', {
+    readResources(job.accountId, 'Part', {
       where: {
         '==': [{ var: fields.job.name }, job.id],
       },
     }),
   ])
 
-  if (!jobLineSchema || !stepSchema || !jobLines)
-    return <Alert severity="error">Failed to load Job Lines</Alert>
+  if (!partSchema || !stepSchema || !parts)
+    return <Alert severity="error">Failed to load Parts</Alert>
 
   return (
     <Stack spacing={2}>
-      {jobLines.map((jobLine, i) =>
-        jobLines.length > 1 ? (
-          <Card key={jobLine.id} variant="outlined">
+      {parts.map((part, i) =>
+        parts.length > 1 ? (
+          <Card key={part.id} variant="outlined">
             <Stack
               direction="row"
               justifyContent="space-between"
@@ -46,43 +46,42 @@ export const JobLinesControl: FC<Props> = async ({ job }) => {
               <Typography variant="overline" sx={{ opacity: 0.5 }}>
                 Part #{i + 1}
               </Typography>
-              <DeleteJobLineButton jobLineId={jobLine.id} />
+              <DeletePartButton partId={part.id} />
             </Stack>
             <CardContent>
-              <Stack key={jobLine.id} spacing={2}>
-                <JobLineView
-                  jobLine={jobLine}
-                  jobLineSchema={jobLineSchema}
+              <Stack key={part.id} spacing={2}>
+                <PartView
+                  part={part}
+                  partSchema={partSchema}
                   i={i}
-                  stepsControl={<StepsControl jobLine={jobLine} />}
+                  stepsControl={<StepsControl part={part} />}
                 />
               </Stack>
             </CardContent>
           </Card>
         ) : (
-          <Stack key={jobLine.id} spacing={2}>
-            <JobLineView
-              key={jobLine.id}
-              jobLine={jobLine}
-              jobLineSchema={jobLineSchema}
+          <Stack key={part.id} spacing={2}>
+            <PartView
+              key={part.id}
+              part={part}
+              partSchema={partSchema}
               i={i}
-              stepsControl={<StepsControl jobLine={jobLine} />}
+              stepsControl={<StepsControl part={part} />}
             />
           </Stack>
         ),
       )}
       <Stack direction="row" justifyContent="end">
         <CreateResourceButton
-          label={jobLines.length <= 1 ? 'Additional Parts' : 'Part'}
-          resourceType="JobLine"
+          label={parts.length <= 1 ? 'Additional Parts' : 'Part'}
+          resourceType="Part"
           fields={[
             {
-              fieldId: selectSchemaFieldUnsafe(jobLineSchema, fields.job)
-                .fieldId,
+              fieldId: selectSchemaFieldUnsafe(partSchema, fields.job).fieldId,
               valueInput: { resourceId: job.id },
             },
             {
-              fieldId: selectSchemaFieldUnsafe(jobLineSchema, fields.needDate)
+              fieldId: selectSchemaFieldUnsafe(partSchema, fields.needDate)
                 .fieldId,
               valueInput: {
                 date: selectResourceFieldValue(job, fields.needDate)?.date,

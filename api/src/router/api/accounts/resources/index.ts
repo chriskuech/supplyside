@@ -127,13 +127,10 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         )
 
         if (resource.type === 'Job') {
-          const schema = await schemaService.readMergedSchema(
-            accountId,
-            'JobLine',
-          )
+          const schema = await schemaService.readMergedSchema(accountId, 'Part')
           await service.create(
             accountId,
-            'JobLine',
+            'Part',
             {
               fields: [
                 {

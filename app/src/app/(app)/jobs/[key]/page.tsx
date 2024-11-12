@@ -8,7 +8,7 @@ import {
 import { Alert } from '@mui/material'
 import { JobAttachmentsControl } from './tools/JobAttachmentsControl'
 import CallToAction from './cta/CallToAction'
-import { JobLinesControl } from './JobLinesControl'
+import { PartsControl } from './PartsControl'
 import { ScheduleControl } from './tools/ScheduleControl'
 import { PaymentControl } from './tools/PaymentControl'
 import { TotalCostControl } from '@/lib/resource/TotalCostControl'
@@ -34,7 +34,7 @@ export default async function JobDetail({
   const isDraft = status.templateId === jobStatusOptions.draft.templateId
   const hasInvalidFields = isMissingRequiredFields(schema, resource)
 
-  const jobLines = await readResources('JobLine', {
+  const parts = await readResources('Part', {
     where: {
       '==': [{ var: fields.job.name }, resource.id],
     },
@@ -49,7 +49,7 @@ export default async function JobDetail({
     ? getInvoiceUrl(quickBooksInvoiceId)
     : undefined
 
-  if (!jobLines) return <Alert severity="error">Failed to load job</Alert>
+  if (!parts) return <Alert severity="error">Failed to load job</Alert>
 
   return (
     <ResourceDetailPage
@@ -125,14 +125,14 @@ export default async function JobDetail({
         >
           <CallToAction
             hasInvalidFields={hasInvalidFields}
-            jobHasLines={!!jobLines.length}
+            jobHasLines={!!parts.length}
             resource={resource}
             status={status}
           />
         </StatusTrackerSlab>
       }
     >
-      <JobLinesControl job={resource} />
+      <PartsControl job={resource} />
     </ResourceDetailPage>
   )
 }

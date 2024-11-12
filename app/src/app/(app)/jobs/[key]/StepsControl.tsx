@@ -5,15 +5,15 @@ import { readSchema } from '@/client/schema'
 import { readResources } from '@/client/resource'
 
 type Props = {
-  jobLine: Resource
+  part: Resource
 }
 
-export const StepsControl = async ({ jobLine }: Props) => {
+export const StepsControl = async ({ part }: Props) => {
   const [stepSchema, steps] = await Promise.all([
-    readSchema(jobLine.accountId, 'Step'),
-    readResources(jobLine.accountId, 'Step', {
+    readSchema(part.accountId, 'Step'),
+    readResources(part.accountId, 'Step', {
       where: {
-        '==': [{ var: fields.jobLine.name }, jobLine.id],
+        '==': [{ var: fields.part.name }, part.id],
       },
       orderBy: [{ var: fields.startDate.name }],
     }),
@@ -22,5 +22,5 @@ export const StepsControl = async ({ jobLine }: Props) => {
   if (!stepSchema || !steps)
     return <Alert severity="error">Failed to load steps</Alert>
 
-  return <StepsView stepSchema={stepSchema} steps={steps} jobLine={jobLine} />
+  return <StepsView stepSchema={stepSchema} steps={steps} part={part} />
 }
