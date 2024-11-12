@@ -12,10 +12,6 @@ import {
   Box,
   Button,
   Card,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
   FormLabel,
   IconButton,
@@ -32,7 +28,7 @@ import {
   PrecisionManufacturing,
   ShoppingBag,
 } from '@mui/icons-material'
-import { FC, useCallback, useState } from 'react'
+import { FC, useCallback } from 'react'
 import NextLink from 'next/link'
 import { createResource, deleteResource } from '@/actions/resource'
 import FieldControl from '@/lib/resource/fields/FieldControl'
@@ -44,20 +40,6 @@ type Props = {
 }
 
 export default function StepsView({ stepSchema, steps, part }: Props) {
-  const [editStepId, setEditStepId] = useState<string | null>(null)
-
-  const addWorkCenterStep = useCallback(async () => {
-    const step = await createResource('Step', [
-      {
-        fieldId: selectSchemaFieldUnsafe(stepSchema, fields.part).fieldId,
-        valueInput: { resourceId: part.id },
-      },
-    ])
-    if (!step) return
-
-    setEditStepId(step.id)
-  }, [part.id, stepSchema])
-
   const addPurchaseStep = useCallback(async () => {
     const purchase = await createResource('Purchase', [])
 
@@ -75,63 +57,57 @@ export default function StepsView({ stepSchema, steps, part }: Props) {
     ])
   }, [part.id, stepSchema])
 
-  const step = steps.find((s) => s.id === editStepId)
-
   return (
-    <>
-      {step && (
-        <WorkCenterModal
-          stepSchema={stepSchema}
-          step={step}
-          onAdd={() => setEditStepId(null)}
-          onCancel={() =>
-            deleteResource(step.id).then(() => setEditStepId(null))
+    <Card variant="outlined">
+      <Stack
+        direction="row"
+        spacing={1}
+        p={1}
+        justifyContent="flex-end"
+        alignItems="center"
+      >
+        <Checklist color="disabled" />
+        <Typography variant="h6" gutterBottom flexGrow={1}>
+          Steps
+        </Typography>
+        <Button
+          startIcon={<Add />}
+          size="small"
+          onClick={() =>
+            createResource('Step', [
+              {
+                fieldId: selectSchemaFieldUnsafe(stepSchema, fields.part)
+                  .fieldId,
+                valueInput: { resourceId: part.id },
+              },
+            ])
           }
-        />
-      )}
-      <Card variant="outlined">
-        <Stack
-          direction="row"
-          spacing={1}
-          p={1}
-          justifyContent="flex-end"
-          alignItems="center"
+          sx={{ height: 'min-content' }}
+          variant="text"
         >
-          <Checklist color="disabled" />
-          <Typography variant="h6" gutterBottom flexGrow={1}>
-            Steps
-          </Typography>
-          <Button
-            startIcon={<Add />}
-            size="small"
-            onClick={addWorkCenterStep}
-            sx={{ height: 'min-content' }}
-            variant="text"
-          >
-            Work Center
-          </Button>
-          <Button
-            startIcon={<Add />}
-            size="small"
-            onClick={addPurchaseStep}
-            sx={{ height: 'min-content' }}
-            variant="text"
-          >
-            Purchase
-          </Button>
-        </Stack>
-        <Stack divider={<Divider />}>
-          {steps.map((step, i) => (
-            <StepView
-              key={step.id}
-              stepSchema={stepSchema}
-              step={step}
-              index={i + 1}
-            />
-          ))}
-        </Stack>
-      </Card>
-    </>
+          Work Center
+        </Button>
+        <Button
+          startIcon={<Add />}
+          size="small"
+          onClick={addPurchaseStep}
+          sx={{ height: 'min-content' }}
+          variant="text"
+        >
+          Purchase
+        </Button>
+      </Stack>
+      <Stack divider={<Divider />}>
+        {steps.map((step, i) => (
+          <StepView
+            key={step.id}
+            stepSchema={stepSchema}
+            step={step}
+            index={i + 1}
+          />
+        ))}
+      </Stack>
+    </Card>
   )
 }
 
@@ -142,10 +118,7 @@ type StepViewProps = {
 }
 
 const StepView: FC<StepViewProps> = ({ stepSchema, step, index }) => {
-  const stepResourceType =
-    selectResourceFieldValue(step, fields.workCenter)?.resource?.type ??
-    selectResourceFieldValue(step, fields.purchase)?.resource?.type ??
-    null
+  const purchase = selectResourceFieldValue(step, fields.purchase)?.resource
 
   return (
     <Stack direction="row" spacing={1} p={2}>
@@ -171,16 +144,19 @@ const StepView: FC<StepViewProps> = ({ stepSchema, step, index }) => {
       </Box>
 
       <Stack direction="column" spacing={1} flexGrow={1}>
-        <Stack direction="row" spacing={4}>
-          <StepLink
-            linkedResource={
-              selectResourceFieldValue(step, fields.workCenter)?.resource ??
-              selectResourceFieldValue(step, fields.purchase)?.resource ??
-              null
-            }
-          />
+        <Stack direction="row" spacing={2}>
+          {purchase && <StepLink linkedResource={purchase} />}
 
-          {stepResourceType === 'WorkCenter' && (
+          {!purchase && (
+            <Box flexGrow={1}>
+              <FieldControl
+                resource={step}
+                field={selectSchemaFieldUnsafe(stepSchema, fields.workCenter)}
+              />
+            </Box>
+          )}
+
+          {!purchase && (
             <Stack direction="row" spacing={1} alignItems="center">
               <Tooltip title="The number of hours required to complete the step, for Work Center scheduling.">
                 <FormLabel sx={{ fontSize: '0.7em', height: 'fit-content' }}>
@@ -197,6 +173,7 @@ const StepView: FC<StepViewProps> = ({ stepSchema, step, index }) => {
               </Box>
             </Stack>
           )}
+
           <Stack direction="row" spacing={1} alignItems="center">
             <Tooltip title="The number of days required to complete the step, for Job scheduling.">
               <FormLabel sx={{ fontSize: '0.7em', height: 'fit-content' }}>
@@ -272,40 +249,5 @@ const StepLink: FC<StepLinkProps> = ({ linkedResource }) => {
           : `Purchase Order #${linkedResource.key}`}
       </Box>
     </Button>
-  )
-}
-
-type WorkCenterModalProps = {
-  stepSchema: Schema
-  step: Resource
-
-  onCancel: () => void
-  onAdd: () => void
-}
-
-const WorkCenterModal: FC<WorkCenterModalProps> = ({
-  stepSchema,
-  step,
-  onAdd,
-  onCancel,
-}) => {
-  const workCenter = selectResourceFieldValue(step, fields.workCenter)?.resource
-
-  return (
-    <Dialog open={true} onClose={onCancel}>
-      <DialogTitle>Select a Work Center</DialogTitle>
-      <DialogContent>
-        <FieldControl
-          resource={step}
-          field={selectSchemaFieldUnsafe(stepSchema, fields.workCenter)}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onCancel}>Cancel</Button>
-        <Button onClick={onAdd} disabled={!workCenter}>
-          Add
-        </Button>
-      </DialogActions>
-    </Dialog>
   )
 }
