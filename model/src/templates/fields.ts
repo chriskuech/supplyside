@@ -255,6 +255,9 @@ const _fields = {
     name: 'Hours',
     type: 'Number',
     suffix: 'Hours',
+    defaultValue: {
+      number: 1,
+    },
   },
   incoterms: {
     templateId: '9f1af7c6-c04c-45cc-a97b-188c3a16aaad',
