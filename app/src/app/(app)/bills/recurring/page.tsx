@@ -25,7 +25,7 @@ export default async function RecurringBills({
 
   return (
     <ListPage
-      tableKey="billsList"
+      tableKey="recurringBillsList"
       resourceType="Bill"
       searchParams={searchParams}
       filterItems={[recurringBillsFilter]}
