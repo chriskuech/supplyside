@@ -176,8 +176,8 @@ export default async function Layout({
               icon={<DataUsage fontSize="small" />}
             />
             <ItemLink
-              title="Lines"
-              href="/jobs/lines"
+              title="Parts"
+              href="/jobs/parts"
               icon={<List fontSize="small" />}
             />
           </Box>
