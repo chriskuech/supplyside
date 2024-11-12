@@ -2,7 +2,6 @@ import 'server-only'
 import {
   Resource,
   ResourceType,
-  ValueInput,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { components } from '@supplyside/api'
@@ -17,12 +16,6 @@ export type OrderBy = components['schemas']['OrderBy']
 
 export type JsonLogic = components['schemas']['JsonLogic']
 
-type FlatFieldData = {
-  fieldId?: string | undefined
-  templateId?: string | undefined
-  valueInput: ValueInput
-}
-
 export const createResource = async (
   { userId, accountId }: Session,
   resourceType: ResourceType,
@@ -33,22 +26,21 @@ export const createResource = async (
   const schema = await readSchema(accountId, resourceType)
   if (!schema) return
 
-  const resolvedFields = fields.map(
-    ({ fieldId, templateId, valueInput }: FlatFieldData) => {
-      if (fieldId) {
-        return { fieldId, valueInput }
-      }
+  const resolvedFields = fields.map(({ field, valueInput }) => {
+    if ('fieldId' in field) {
+      return { fieldId: field.fieldId, valueInput }
+    }
 
-      if (!templateId) {
-        throw new Error('FieldData must have fieldId or templateId')
-      }
+    if (!('templateId' in field)) {
+      throw new Error('FieldData must have fieldId or templateId')
+    }
 
-      return {
-        fieldId: selectSchemaFieldUnsafe(schema, { templateId }).fieldId,
-        valueInput,
-      }
-    },
-  )
+    return {
+      fieldId: selectSchemaFieldUnsafe(schema, { templateId: field.templateId })
+        .fieldId,
+      valueInput,
+    }
+  })
 
   const { data: resource } = await client().POST(
     '/api/accounts/{accountId}/resources/',
@@ -134,20 +126,23 @@ export const updateResource = async (
   const schema = await readSchema(accountId, current.type)
   if (!schema) return
 
-  const resolvedFields = fields.map(
-    ({ fieldId, templateId, valueInput }: FlatFieldData) => {
-      if (fieldId) {
-        return { fieldId, valueInput }
-      }
-
-      if (!templateId) {
-        throw new Error('FieldData must have fieldId or templateId')
-      }
-
-      const field = selectSchemaFieldUnsafe(schema, { templateId })
+  const resolvedFields = fields.map(({ field, valueInput }) => {
+    if ('fieldId' in field) {
       return { fieldId: field.fieldId, valueInput }
-    },
-  )
+    }
+
+    if (!('templateId' in field)) {
+      throw new Error(
+        'FieldData must have fieldId or templateId. FieldData: ' +
+          JSON.stringify(fields, null, 2),
+      )
+    }
+
+    const { fieldId } = selectSchemaFieldUnsafe(schema, {
+      templateId: field.templateId,
+    })
+    return { fieldId, valueInput }
+  })
 
   revalidateTag('Resources')
 
