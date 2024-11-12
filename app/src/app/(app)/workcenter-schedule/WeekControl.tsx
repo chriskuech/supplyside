@@ -10,29 +10,43 @@ type Props = {
 }
 
 export const WeekControl = ({ startDate, week, onChange }: Props) => (
-  <Box>
-    <Stack direction="row" alignItems="flex-end" spacing={1}>
+  <Box textAlign="center">
+    <Typography variant="caption">Week of</Typography>
+    <Stack direction="row" spacing={1}>
       <IconButton
         size="small"
         color="primary"
         onClick={() => onChange(week - 1)}
-        sx={{ visibility: week === 0 ? 'hidden' : 'visible' }}
+        sx={{ visibility: week === 0 ? 'hidden' : 'visible', h: 'fit-content' }}
       >
         <ChevronLeft />
       </IconButton>
-      <Box textAlign="center">
-        <Typography variant="caption">Week of</Typography>
-        <Typography variant="h6" lineHeight={1}>
+
+      <Stack
+        border="1px solid"
+        borderColor="divider"
+        justifyContent="center"
+        p={1}
+        gap={0.5}
+        borderRadius={0}
+      >
+        <Typography variant="overline" lineHeight="1em">
           {startDate.toLocaleDateString('en-US', {
             month: 'short',
+          })}
+        </Typography>
+        <Typography variant="h5" lineHeight="1em">
+          {startDate.toLocaleDateString('en-US', {
             day: 'numeric',
           })}
         </Typography>
-      </Box>
+      </Stack>
+
       <IconButton
         size="small"
         color="primary"
         onClick={() => onChange(week + 1)}
+        sx={{ h: 'fit-content' }}
       >
         <ChevronRight />
       </IconButton>
