@@ -1,9 +1,18 @@
-import { Alert, Card, CardHeader, Typography } from '@mui/material'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
+  Box,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
 import { FC, PropsWithChildren } from 'react'
 import { isTruthy, sum } from 'remeda'
-import { PrecisionManufacturing } from '@mui/icons-material'
+import { ExpandMore } from '@mui/icons-material'
 import { StepsTable } from './StepsTable'
+import { WorkCenterLink } from './WorkCenterLink'
 import { readResource, readResources } from '@/client/resource'
 
 const coerceDate = (value: string | null | undefined): Date | null =>
@@ -95,28 +104,36 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
       job: selectResourceFieldValue(jobLine, fields.job)?.resource ?? null,
     }))
 
+  const numParts = rows.length
+  const totalHours = sum(rows.map((row) => row.hours ?? 0))
+
   return (
-    <Card
+    <Accordion
       variant="elevation"
       sx={{ borderColor: 'divider', borderWidth: 1, borderStyle: 'solid' }}
+      defaultExpanded={!!numParts}
     >
-      <CardHeader
-        avatar={<PrecisionManufacturing />}
-        titleTypographyProps={{ fontSize: '1.3em' }}
-        title={
-          <>
-            {selectResourceFieldValue(workCenter, fields.name)?.string ?? '-'}{' '}
-            <span style={{ opacity: 0.5 }}>#{workCenter.key}</span>
-          </>
-        }
-        action={
+      <AccordionSummary expandIcon={<ExpandMore />}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={2}
+          width="100%"
+          pr={2}
+        >
+          <WorkCenterLink workCenter={workCenter} />
+          <Box flexGrow={1} />
           <Typography>
-            <strong>{sum(rows.map((row) => row.hours ?? 0))}</strong> Total
-            Hours
+            <strong>{numParts}</strong> Parts
           </Typography>
-        }
-      />
-      <StepsTable rows={rows} />
-    </Card>
+          <Typography>
+            <strong>{totalHours}</strong> Total Hours
+          </Typography>
+        </Stack>
+      </AccordionSummary>
+      <AccordionDetails sx={{ px: 0 }}>
+        <StepsTable rows={rows} />
+      </AccordionDetails>
+    </Accordion>
   )
 }
