@@ -15,7 +15,7 @@ export const WorkCenterLink = ({ workCenter }: Props) => (
     startIcon={<PrecisionManufacturing />}
     endIcon={<Link />}
     component={NextLink}
-    href={'/workcenters/' + workCenter.key}
+    href={'?drawerResourceId=' + workCenter.id}
     sx={{
       fontSize: '1.3em',
       '.MuiButton-endIcon': { visibility: 'hidden' },

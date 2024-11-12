@@ -4,6 +4,7 @@ import { WorkCenterCard } from './WorkCenterCard'
 import { WeekControl } from './WeekControl'
 import { readResources } from '@/client/resource'
 import { requireSession } from '@/session'
+import { ResourceDrawer } from '@/lib/resource/ResourceDrawer'
 
 const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000
 
@@ -32,26 +33,29 @@ export default async function Page({
   const endDate = new Date(startDate.getTime() + millisecondsPerWeek)
 
   return (
-    <Stack py={2} px={4} spacing={2}>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography variant="h4">Work Center Schedule</Typography>
-        <WeekControl
-          startDate={startDate}
-          week={week}
-          onChange={onUpdateWeek}
-        />
-      </Stack>
-
-      <Box>
-        {workCenters.map((workCenter) => (
-          <WorkCenterCard
-            key={workCenter.id}
-            workCenter={workCenter}
+    <>
+      <ResourceDrawer searchParams={searchParams} />
+      <Stack py={2} px={4} spacing={2}>
+        <Stack direction="row" justifyContent="space-between">
+          <Typography variant="h4">Work Center Schedule</Typography>
+          <WeekControl
             startDate={startDate}
-            endDate={endDate}
+            week={week}
+            onChange={onUpdateWeek}
           />
-        ))}
-      </Box>
-    </Stack>
+        </Stack>
+
+        <Box>
+          {workCenters.map((workCenter) => (
+            <WorkCenterCard
+              key={workCenter.id}
+              workCenter={workCenter}
+              startDate={startDate}
+              endDate={endDate}
+            />
+          ))}
+        </Box>
+      </Stack>
+    </>
   )
 }
