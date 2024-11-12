@@ -25,8 +25,8 @@ export const handleProcessRowUpdate = async (
   try {
     const resource = await updateResource(
       newRow.id,
-      updatedFields.map(({ fieldId, fieldType, value }) => ({
-        fieldId,
+      updatedFields.map(({ fieldType, value, ...field }) => ({
+        field,
         valueInput: mapValueToValueInput(fieldType, value),
       })),
     )

@@ -12,28 +12,21 @@ import {
 } from '@mui/material'
 import { AddLink, Link } from '@mui/icons-material'
 import { isTruthy } from 'remeda'
-import {
-  Resource,
-  Schema,
-  fields,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { Resource, fields, selectResourceFieldValue } from '@supplyside/model'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import { ResourceTable } from '@/lib/resource/table'
 import { useResources } from '@/lib/resource/useResources'
 import useSchema from '@/lib/schema/useSchema'
 import { useConfirmation } from '@/lib/confirmation'
 import { useAsyncCallback } from '@/hooks/useAsyncCallback'
-import { updateResourceField } from '@/actions/resource'
 import { linkPurchase } from '@/actions/bill'
+import { updateResource } from '@/actions/resource'
 
 type Props = {
-  schema: Schema
   resource: Resource
 }
 
-export default function MatchControl({ schema, resource }: Props) {
+export default function MatchControl({ resource }: Props) {
   const { open, isOpen, close } = useDisclosure()
   const [{ isLoading }, callback] = useAsyncCallback((purchaseId: string) =>
     linkPurchase(resource.id, { purchaseId }).then(close),
@@ -65,11 +58,12 @@ export default function MatchControl({ schema, resource }: Props) {
 
                 if (!isConfirmed) return
 
-                await updateResourceField(resource.id, {
-                  fieldId: selectSchemaFieldUnsafe(schema, fields.purchase)
-                    .fieldId,
-                  valueInput: { resourceId: null },
-                })
+                await updateResource(resource.id, [
+                  {
+                    field: fields.purchase,
+                    valueInput: { resourceId: null },
+                  },
+                ])
               }
             : open
         }

@@ -345,7 +345,6 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
           numDays={numWeeks * 7}
         />
         <GanttChart
-          jobSchema={jobSchema}
           numDays={numWeeks * 7}
           dim={dim}
           jobs={jobs}

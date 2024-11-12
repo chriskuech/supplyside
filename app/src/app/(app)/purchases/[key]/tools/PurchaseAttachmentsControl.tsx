@@ -1,13 +1,7 @@
 'use client'
 
 import { FC } from 'react'
-import {
-  Schema,
-  fields,
-  selectResourceFieldValue,
-  Resource,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { Schema, fields, Resource } from '@supplyside/model'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import { syncFromAttachments } from '@/actions/purchase'
 
@@ -23,11 +17,10 @@ export const PurchaseAttachmentsControl: FC<Props> = ({
   fontSize,
 }) => (
   <AttachmentsToolbarControl
+    schema={schema}
     resource={resource}
-    resourceType="Purchase"
     onSync={() => syncFromAttachments(resource.id)}
-    field={selectSchemaFieldUnsafe(schema, fields.purchaseAttachments)}
-    value={selectResourceFieldValue(resource, fields.purchaseAttachments)}
+    field={fields.purchaseAttachments}
     fontSize={fontSize}
   />
 )

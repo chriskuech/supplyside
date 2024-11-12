@@ -2,15 +2,16 @@
 
 import { Add } from '@mui/icons-material'
 import { Button, ButtonProps } from '@mui/material'
-import { ResourceType, ValueInput } from '@supplyside/model'
+import { ResourceType } from '@supplyside/model'
 import { useRouter } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
 import { createResource } from '@/actions/resource'
+import { FieldData } from '@/actions/types'
 
 type Props = {
   label?: string
   resourceType: ResourceType
-  fields?: { fieldId: string; valueInput: ValueInput }[]
+  fields?: FieldData[]
   buttonProps?: ButtonProps
 }
 

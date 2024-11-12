@@ -1,10 +1,6 @@
 import { fail } from 'assert'
 import { Card, Stack, Typography } from '@mui/material'
-import {
-  FieldTemplate,
-  ResourceType,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { FieldTemplate, ResourceType } from '@supplyside/model'
 import { ResourceTable } from '../table'
 import CreateResourceButton from '../CreateResourceButton'
 import { readResources } from '@/actions/resource'
@@ -34,11 +30,6 @@ export default async function LinkedResourceTable({
     (await readSchema(resourceType)) ??
     fail(`Cannot read ${resourceType} schema`)
 
-  const backlinkFieldId = selectSchemaFieldUnsafe(
-    linkedResourceSchema,
-    backlinkField,
-  ).fieldId
-
   return (
     <Stack spacing={2}>
       <Stack direction="row" alignItems="end">
@@ -49,7 +40,12 @@ export default async function LinkedResourceTable({
         {!disableCreate && (
           <CreateResourceButton
             resourceType={resourceType}
-            fields={[{ fieldId: backlinkFieldId, valueInput: { resourceId } }]}
+            fields={[
+              {
+                field: backlinkField,
+                valueInput: { resourceId },
+              },
+            ]}
           />
         )}
       </Stack>

@@ -1,9 +1,9 @@
 'use client'
 
 import { DataGridPro } from '@mui/x-data-grid-pro'
-import { ValueResource } from '@supplyside/model'
+import { ValueResource, fields } from '@supplyside/model'
 import { useRouter } from 'next/navigation'
-import { updateResourceField } from '@/actions/resource'
+import { updateResource } from '@/actions/resource'
 
 type Row = {
   id: string
@@ -19,10 +19,9 @@ type Row = {
 
 type Props = {
   rows: Row[]
-  completedFieldId: string
 }
 
-export const StepsTable = ({ completedFieldId, rows }: Props) => {
+export const StepsTable = ({ rows }: Props) => {
   const router = useRouter()
 
   return (
@@ -70,12 +69,14 @@ export const StepsTable = ({ completedFieldId, rows }: Props) => {
       disableRowSelectionOnClick
       editMode="cell"
       processRowUpdate={(row) =>
-        updateResourceField(row.id, {
-          fieldId: completedFieldId,
-          valueInput: {
-            boolean: !!row.completed,
+        updateResource(row.id, [
+          {
+            field: fields.completed,
+            valueInput: {
+              boolean: !!row.completed,
+            },
           },
-        }).then(() => row)
+        ]).then(() => row)
       }
     />
   )

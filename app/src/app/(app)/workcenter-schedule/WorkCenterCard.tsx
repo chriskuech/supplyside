@@ -7,12 +7,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import {
-  fields,
-  Resource,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
 import { FC, PropsWithChildren } from 'react'
 import { isTruthy, sum } from 'remeda'
 import { ExpandMore } from '@mui/icons-material'
@@ -138,12 +133,7 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
         </Stack>
       </AccordionSummary>
       <AccordionDetails sx={{ px: 0 }}>
-        <StepsTable
-          completedFieldId={
-            selectSchemaFieldUnsafe(stepSchema, fields.completed).fieldId
-          }
-          rows={rows}
-        />
+        <StepsTable rows={rows} />
       </AccordionDetails>
     </Accordion>
   )

@@ -5,7 +5,6 @@ import {
   Resource,
   Schema,
   selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import {
   Box,
@@ -61,8 +60,7 @@ export default function StepsView({ stepSchema, steps, part }: Props) {
           onClick={() =>
             createResource('Step', [
               {
-                fieldId: selectSchemaFieldUnsafe(stepSchema, fields.part)
-                  .fieldId,
+                field: fields.part,
                 valueInput: { resourceId: part.id },
               },
             ])
@@ -81,15 +79,11 @@ export default function StepsView({ stepSchema, steps, part }: Props) {
                 purchase &&
                 createResource('Step', [
                   {
-                    fieldId: selectSchemaFieldUnsafe(stepSchema, fields.part)
-                      .fieldId,
+                    field: fields.part,
                     valueInput: { resourceId: part.id },
                   },
                   {
-                    fieldId: selectSchemaFieldUnsafe(
-                      stepSchema,
-                      fields.purchase,
-                    ).fieldId,
+                    field: fields.purchase,
                     valueInput: { resourceId: purchase.id },
                   },
                 ]),
@@ -153,8 +147,9 @@ const StepView: FC<StepViewProps> = ({ stepSchema, step, purchase, index }) => {
 
       <Box>
         <FieldControl
-          field={selectSchemaFieldUnsafe(stepSchema, fields.completed)}
+          schema={stepSchema}
           resource={step}
+          field={fields.completed}
         />
       </Box>
 
@@ -222,8 +217,9 @@ const StepView: FC<StepViewProps> = ({ stepSchema, step, purchase, index }) => {
             <Stack direction="row" spacing={2}>
               <Box flexGrow={1}>
                 <FieldControl
+                  schema={stepSchema}
                   resource={step}
-                  field={selectSchemaFieldUnsafe(stepSchema, fields.workCenter)}
+                  field={fields.workCenter}
                 />
               </Box>
 
@@ -237,8 +233,9 @@ const StepView: FC<StepViewProps> = ({ stepSchema, step, purchase, index }) => {
                 </Tooltip>
                 <Box width={120}>
                   <FieldControl
-                    field={selectSchemaFieldUnsafe(stepSchema, fields.hours)}
+                    schema={stepSchema}
                     resource={step}
+                    field={fields.hours}
                   />
                 </Box>
               </Stack>
@@ -252,19 +249,18 @@ const StepView: FC<StepViewProps> = ({ stepSchema, step, purchase, index }) => {
                 </Tooltip>
                 <Box width={120}>
                   <FieldControl
-                    field={selectSchemaFieldUnsafe(
-                      stepSchema,
-                      fields.productionDays,
-                    )}
+                    schema={stepSchema}
                     resource={step}
+                    field={fields.productionDays}
                   />
                 </Box>
               </Stack>
             </Stack>
 
             <FieldControl
-              field={selectSchemaFieldUnsafe(stepSchema, fields.otherNotes)}
+              schema={stepSchema}
               resource={step}
+              field={fields.otherNotes}
               inputProps={{ placeholder: 'Notes' }}
             />
           </>

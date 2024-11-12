@@ -6,7 +6,6 @@ import {
   purchaseStatusOptions,
   resources,
   selectResourceFieldValue,
-  selectSchemaField,
 } from '@supplyside/model'
 import ApproveButton from './cta/ApproveButton'
 import SkipButton from './cta/SkipButton'
@@ -113,12 +112,8 @@ export default async function PurchaseDetail({
           : []),
         <TrackingControl
           key={TrackingControl.name}
+          schema={schema}
           resource={resource}
-          field={
-            selectSchemaField(schema, fields.trackingNumber) ??
-            fail('Field not found')
-          }
-          value={selectResourceFieldValue(resource, fields.trackingNumber)}
           fontSize={fontSize}
         />,
         ...(poFile
@@ -147,13 +142,8 @@ export default async function PurchaseDetail({
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
+          schema={schema}
           resource={resource}
-          resourceType="Purchase"
-          field={
-            selectSchemaField(schema, fields.assignee) ??
-            fail('Field not found')
-          }
-          value={selectResourceFieldValue(resource, fields.assignee)}
           fontSize={fontSize}
         />,
       ]}

@@ -10,7 +10,6 @@ import {
   fields,
   selectResourceFieldValue,
   selectSchemaField,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import ResourceForm from '../ResourceForm'
 import { ResourceDrawer } from '../ResourceDrawer'
@@ -151,9 +150,10 @@ export default function ResourceDetailPage({
                 {nameField ? (
                   <Box width={600}>
                     <FieldControl
-                      resource={resource}
                       inputId="nameField"
-                      field={nameField}
+                      schema={schema}
+                      resource={resource}
+                      field={fields.name}
                       inputProps={{
                         placeholder:
                           resource.type.replace(/([a-z])([A-Z])/g, '$1 $2') +
@@ -207,10 +207,7 @@ export default function ResourceDetailPage({
                 }}
                 newLineInitialData={[
                   {
-                    fieldId: selectSchemaFieldUnsafe(
-                      lineSchema,
-                      linesBacklinkField,
-                    ).fieldId,
+                    field: linesBacklinkField,
                     valueInput: { resourceId: resource.id },
                   },
                 ]}

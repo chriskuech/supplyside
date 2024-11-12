@@ -11,26 +11,32 @@ import {
   Button,
   DialogActions,
 } from '@mui/material'
-import { Resource, SchemaField, Value } from '@supplyside/model'
+import {
+  Resource,
+  Schema,
+  fields,
+  selectResourceFieldValue,
+} from '@supplyside/model'
 import { useDisclosure } from '@/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 
 type TrackingControlProps = {
+  schema: Schema
   resource: Resource
-  field: SchemaField
-  value: Value | undefined
   fontSize: 'small' | 'medium' | 'large'
 }
 
 export default function TrackingControl({
+  schema,
   resource,
-  field,
-  value,
   fontSize,
 }: TrackingControlProps) {
   const { isOpen, open, close } = useDisclosure()
 
-  const trackingNumber = value?.string
+  const trackingNumber = selectResourceFieldValue(
+    resource,
+    fields.trackingNumber,
+  )?.string
 
   return (
     <>
@@ -52,9 +58,10 @@ export default function TrackingControl({
             Set the tracking number for this order.
           </DialogContentText>
           <FieldControl
-            inputId={`rf-${field.fieldId}`}
+            inputId={`${TrackingControl.name}-trackingNumber`}
+            schema={schema}
             resource={resource}
-            field={field}
+            field={fields.trackingNumber}
           />
         </DialogContent>
         <DialogContent>

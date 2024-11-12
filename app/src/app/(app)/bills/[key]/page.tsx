@@ -3,7 +3,6 @@ import {
   billStatusOptions,
   fields,
   selectResourceFieldValue,
-  selectSchemaField,
 } from '@supplyside/model'
 import { Container } from '@mui/material'
 import CallToAction from './CallToAction'
@@ -100,7 +99,6 @@ export default async function BillsDetail({
           ? [
               <RecurringControl
                 key={RecurringControl.name}
-                schema={schema}
                 resource={resource}
                 fontSize={fontSize}
               />,
@@ -114,13 +112,8 @@ export default async function BillsDetail({
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
+          schema={schema}
           resource={resource}
-          resourceType="Bill"
-          field={
-            selectSchemaField(schema, fields.assignee) ??
-            fail('Field not found')
-          }
-          value={selectResourceFieldValue(resource, fields.assignee)}
           fontSize={fontSize}
         />,
       ]}

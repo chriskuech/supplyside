@@ -5,7 +5,6 @@ import {
   Resource,
   Schema,
   selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import { FC, ReactNode } from 'react'
@@ -23,9 +22,10 @@ export const PartView: FC<{
       <Stack direction="row" alignItems="center" spacing={1}>
         <Box flexGrow={1}>
           <FieldControl
+            schema={partSchema}
             resource={part}
             inputId={`part-name-${part.id}`}
-            field={selectSchemaFieldUnsafe(partSchema, fields.partName)}
+            field={fields.partName}
             inputProps={{
               placeholder: 'Part Name',
             }}
@@ -33,9 +33,10 @@ export const PartView: FC<{
         </Box>
         <Box>
           <FieldControl
+            schema={partSchema}
             resource={part}
             inputId={`need-date-${part.id}`}
-            field={selectSchemaFieldUnsafe(partSchema, fields.needDate)}
+            field={fields.needDate}
             inputProps={{
               placeholder: 'Need Date',
             }}
@@ -44,9 +45,10 @@ export const PartView: FC<{
       </Stack>
       <Box>
         <FieldControl
+          schema={partSchema}
           resource={part}
           inputId={`other-notes-${part.id}`}
-          field={selectSchemaFieldUnsafe(partSchema, fields.otherNotes)}
+          field={fields.otherNotes}
           inputProps={{
             placeholder: 'Other Notes',
           }}
@@ -59,9 +61,10 @@ export const PartView: FC<{
       <Stack direction="row" alignItems="center" spacing={1}>
         <Box width={100}>
           <FieldControl
+            schema={partSchema}
             resource={part}
             inputId={`quantity-${part.id}`}
-            field={selectSchemaFieldUnsafe(partSchema, fields.quantity)}
+            field={fields.quantity}
             inputProps={{
               placeholder: 'Qty',
             }}
@@ -70,9 +73,10 @@ export const PartView: FC<{
         <Box>&times;</Box>
         <Box width={140}>
           <FieldControl
+            schema={partSchema}
             resource={part}
             inputId={`unit-cost-${part.id}`}
-            field={selectSchemaFieldUnsafe(partSchema, fields.unitCost)}
+            field={fields.unitCost}
             inputProps={{
               placeholder: 'Unit Cost',
             }}
