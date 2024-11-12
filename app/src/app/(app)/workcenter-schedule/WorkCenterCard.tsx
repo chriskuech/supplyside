@@ -7,13 +7,19 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
+import {
+  fields,
+  Resource,
+  selectResourceFieldValue,
+  selectSchemaFieldUnsafe,
+} from '@supplyside/model'
 import { FC, PropsWithChildren } from 'react'
 import { isTruthy, sum } from 'remeda'
 import { ExpandMore } from '@mui/icons-material'
 import { StepsTable } from './StepsTable'
 import { WorkCenterLink } from './WorkCenterLink'
 import { readResource, readResources } from '@/client/resource'
+import { readSchema } from '@/client/schema'
 
 const coerceDate = (value: string | null | undefined): Date | null =>
   value ? new Date(value) : null
@@ -29,18 +35,22 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
   startDate,
   endDate,
 }) => {
-  const steps = await readResources(workCenter.accountId, 'Step', {
-    where: {
-      and: [
-        { '==': [{ var: fields.workCenter.name }, workCenter.id] },
-        { '>=': [{ var: fields.startDate.name }, startDate] },
-        { '<': [{ var: fields.startDate.name }, endDate] },
-      ],
-    },
-    orderBy: [{ var: fields.startDate.name }],
-  })
+  const [steps, stepSchema] = await Promise.all([
+    readResources(workCenter.accountId, 'Step', {
+      where: {
+        and: [
+          { '==': [{ var: fields.workCenter.name }, workCenter.id] },
+          { '>=': [{ var: fields.startDate.name }, startDate] },
+          { '<': [{ var: fields.startDate.name }, endDate] },
+        ],
+      },
+      orderBy: [{ var: fields.startDate.name }],
+    }),
+    readSchema(workCenter.accountId, 'Step'),
+  ])
 
-  if (!steps) return <Alert severity="error">Failed to load</Alert>
+  if (!steps || !stepSchema)
+    return <Alert severity="error">Failed to load</Alert>
 
   const stepsWithParts = await Promise.all(
     steps.map(async (step) => {
@@ -128,7 +138,12 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
         </Stack>
       </AccordionSummary>
       <AccordionDetails sx={{ px: 0 }}>
-        <StepsTable rows={rows} />
+        <StepsTable
+          completedFieldId={
+            selectSchemaFieldUnsafe(stepSchema, fields.completed).fieldId
+          }
+          rows={rows}
+        />
       </AccordionDetails>
     </Accordion>
   )

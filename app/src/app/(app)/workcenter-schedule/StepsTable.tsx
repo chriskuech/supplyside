@@ -3,8 +3,10 @@
 import { DataGridPro } from '@mui/x-data-grid-pro'
 import { ValueResource } from '@supplyside/model'
 import { useRouter } from 'next/navigation'
+import { updateResourceField } from '@/actions/resource'
 
 type Row = {
+  id: string
   ready: boolean | null
   completed: boolean | null
   partName: string | null
@@ -17,9 +19,10 @@ type Row = {
 
 type Props = {
   rows: Row[]
+  completedFieldId: string
 }
 
-export const StepsTable = ({ rows }: Props) => {
+export const StepsTable = ({ completedFieldId, rows }: Props) => {
   const router = useRouter()
 
   return (
@@ -35,6 +38,7 @@ export const StepsTable = ({ rows }: Props) => {
           field: 'completed',
           headerName: 'Completed?',
           type: 'boolean',
+          editable: true,
         },
         {
           field: 'partName',
@@ -59,8 +63,20 @@ export const StepsTable = ({ rows }: Props) => {
         },
       ]}
       rows={rows}
-      onRowClick={({ row }) => router.push(`/jobs/${row.job?.key}`)}
+      onCellClick={({ isEditable, row }) => {
+        !isEditable && router.push(`/jobs/${row.job?.key}`)
+      }}
       rowSelection={false}
+      disableRowSelectionOnClick
+      editMode="cell"
+      processRowUpdate={(row) =>
+        updateResourceField(row.id, {
+          fieldId: completedFieldId,
+          valueInput: {
+            boolean: !!row.completed,
+          },
+        }).then(() => row)
+      }
     />
   )
 }
