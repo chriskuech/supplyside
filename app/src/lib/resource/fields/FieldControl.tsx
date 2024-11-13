@@ -33,7 +33,9 @@ export default function FieldControl({
       inputId={inputId ?? id}
       {...fieldProps}
       onChange={(value) =>
-        updateResource(resource.id, [{ field, valueInput: mapValueToValueInput(field.type,value) }])
+        updateResource(resource.id, [
+          { field, valueInput: mapValueToValueInput(field.type, value) },
+        ])
       }
     />
   )
