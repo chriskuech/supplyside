@@ -320,7 +320,7 @@ export class ResourceService {
             Value: {
               upsert: {
                 create: mapValueInputToPrismaValueCreate(valueInput, sf),
-                update: mapValueInputToPrismaValueUpdate(valueInput),
+                update: mapValueInputToPrismaValueUpdate(valueInput, sf.type),
               },
             },
           },
