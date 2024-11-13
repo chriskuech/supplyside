@@ -124,14 +124,25 @@ export default async function Layout({
             billStatusOptionId(billStatusOptions.canceled),
           ],
         },
+        {
+          '==': [{ var: fields.recurring.name }, false],
+        },
       ],
     },
   })
 
-  const openJobCount = (await gettingOpenJobs)?.length ?? 0
-  const inProcessJobCount = (await gettingInProcessJobs)?.length ?? 0
-  const openPurchaseCount = (await gettingOpenPurchases)?.length ?? 0
-  const unpaidBillCount = (await gettingUnpaidBills)?.length ?? 0
+  const [inProcessJobs, openJobs, openPurchases, unpaidBills] =
+    await Promise.all([
+      gettingInProcessJobs,
+      gettingOpenJobs,
+      gettingOpenPurchases,
+      gettingUnpaidBills,
+    ])
+
+  const openJobCount = openJobs?.length ?? 0
+  const inProcessJobCount = inProcessJobs?.length ?? 0
+  const openPurchaseCount = openPurchases?.length ?? 0
+  const unpaidBillCount = unpaidBills?.length ?? 0
 
   return (
     <Stack direction="row" height="100vh" width="100vw">
