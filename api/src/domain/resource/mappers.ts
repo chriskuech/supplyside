@@ -99,74 +99,75 @@ export const mapValueResourceModelToEntity = (
 
 export const mapValueInputToPrismaValueUpdate = (
   value: ValueInput,
+  fieldType: FieldType,
 ): Prisma.ValueUpdateWithoutResourceFieldValueInput =>
-  match<ValueInput, Prisma.ValueUpdateWithoutResourceFieldValueInput>(value)
-    .with({ address: P.not(undefined) }, ({ address }) =>
-      address
+  match<FieldType, Prisma.ValueUpdateWithoutResourceFieldValueInput>(fieldType)
+    .with('Address', () =>
+      value.address
         ? {
             Address: {
               upsert: {
-                create: address,
-                update: address,
+                create: value.address,
+                update: value.address,
               },
             },
           }
         : { Address: { disconnect: true } },
     )
-    .with({ boolean: P.not(undefined) }, ({ boolean }) => ({ boolean }))
-    .with({ contact: P.not(undefined) }, ({ contact }) =>
-      contact
+    .with('Checkbox', () => ({ boolean: value.boolean }))
+    .with('Contact', () =>
+      value.contact
         ? {
             Contact: {
               upsert: {
-                create: contact,
-                update: contact,
+                create: value.contact,
+                update: value.contact,
               },
             },
           }
         : { Contact: { disconnect: true } },
     )
-    .with({ date: P.not(undefined) }, ({ date }) => ({ date }))
-    .with({ number: P.not(undefined) }, ({ number }) => ({ number }))
-    .with({ optionId: P.not(undefined) }, ({ optionId }) =>
-      optionId
-        ? { Option: { connect: { id: optionId } } }
+    .with('Date', () => ({ date: value.date }))
+    .with(P.union('Money', 'Number'), () => ({ number: value.number }))
+    .with('Select', () =>
+      value.optionId
+        ? { Option: { connect: { id: value.optionId } } }
         : { Option: { disconnect: true } },
     )
-    .with({ string: P.not(undefined) }, ({ string }) => ({ string }))
-    .with({ userId: P.not(undefined) }, ({ userId }) =>
-      userId
-        ? { User: { connect: { id: userId } } }
+    .with(P.union('Textarea', 'Text'), () => ({ string: value.string }))
+    .with('User', () =>
+      value.userId
+        ? { User: { connect: { id: value.userId } } }
         : { User: { disconnect: true } },
     )
-    .with({ fileId: P.not(undefined) }, ({ fileId }) =>
-      fileId
-        ? { File: { connect: { id: fileId } } }
+    .with('File', () =>
+      value.fileId
+        ? { File: { connect: { id: value.fileId } } }
         : { File: { disconnect: true } },
     )
-    .with({ resourceId: P.not(undefined) }, ({ resourceId }) =>
-      resourceId
-        ? { Resource: { connect: { id: resourceId } } }
+    .with('Resource', () =>
+      value.resourceId
+        ? { Resource: { connect: { id: value.resourceId } } }
         : { Resource: { disconnect: true } },
     )
-    .with({ fileIds: P.not(undefined) }, ({ fileIds }) => ({
+    .with('Files', () => ({
       Files: {
         createMany: {
-          data: fileIds.map((fileId) => ({ fileId })),
+          data: value.fileIds?.map((fileId) => ({ fileId })) || [],
           skipDuplicates: true,
         },
-        deleteMany: {
-          fileId: { notIn: fileIds },
+        deleteMany: value.fileIds && {
+          fileId: { notIn: value.fileIds || [] },
         },
       },
     }))
-    .with({ optionIds: P.not(undefined) }, ({ optionIds }) => ({
+    .with('MultiSelect', () => ({
       ValueOption: {
         createMany: {
-          data: optionIds.map((optionId) => ({ optionId })),
+          data: value.optionIds?.map((optionId) => ({ optionId })) || [],
           skipDuplicates: true,
         },
-        deleteMany: { optionId: { notIn: optionIds } },
+        deleteMany: { optionId: { notIn: value.optionIds || [] } },
       },
     }))
     .exhaustive()

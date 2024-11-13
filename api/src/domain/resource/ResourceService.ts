@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { ConflictError } from '@supplyside/api/integrations/fastify/ConflictError'
+import { logger } from '@supplyside/api/integrations/fastify/logger'
 import {
   Cost,
   FieldTemplate,
@@ -276,9 +277,7 @@ export class ResourceService {
       resource.type,
     )
 
-    if (input.fields) {
-      throw new Error('Fields: ' + JSON.stringify(input.fields, null, 2))
-    }
+    logger().debug({ input }, 'Before transform')
 
     const { fields, costs } = deriveFields(input, { schema, resource })
 
@@ -324,7 +323,7 @@ export class ResourceService {
             Value: {
               upsert: {
                 create: mapValueInputToPrismaValueCreate(valueInput, sf),
-                update: mapValueInputToPrismaValueUpdate(valueInput),
+                update: mapValueInputToPrismaValueUpdate(valueInput, sf.type),
               },
             },
           },

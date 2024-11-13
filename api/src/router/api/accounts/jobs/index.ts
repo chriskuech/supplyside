@@ -17,10 +17,6 @@ export const mountJobs = async <App extends FastifyInstance>(app: App) =>
     handler: async (req) => {
       const service = container.resolve(JobExtractionService)
 
-      await service.extractContent(
-        req.params.accountId,
-        req.params.resourceId,
-        app.log,
-      )
+      await service.extractContent(req.params.accountId, req.params.resourceId)
     },
   })

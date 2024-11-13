@@ -2,6 +2,7 @@
 import { useId } from 'react'
 import {
   FieldReference,
+  mapValueToValueInput,
   Schema,
   selectResourceFieldValue,
   selectSchemaFieldUnsafe,
@@ -12,7 +13,7 @@ import { updateResource } from '@/actions/resource'
 export default function FieldControl({
   schema,
   resource,
-  field,
+  field: fieldReference,
   inputId,
   ...fieldProps
 }: Omit<FieldProps, 'field' | 'onChange' | 'value' | 'inputId'> & {
@@ -22,15 +23,19 @@ export default function FieldControl({
 }) {
   const id = useId()
 
+  const field = selectSchemaFieldUnsafe(schema, fieldReference)
+
   return (
     <Field
       resource={resource}
-      field={selectSchemaFieldUnsafe(schema, field)}
+      field={field}
       value={selectResourceFieldValue(resource, field)}
       inputId={inputId ?? id}
       {...fieldProps}
-      onChange={(valueInput) =>
-        updateResource(resource.id, [{ field, valueInput }])
+      onChange={(value) =>
+        updateResource(resource.id, [
+          { field, valueInput: mapValueToValueInput(field.type, value) },
+        ])
       }
     />
   )
