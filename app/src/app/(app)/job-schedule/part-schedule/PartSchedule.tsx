@@ -1,8 +1,8 @@
 import { getParts } from './actions'
-import { PartScheduleGanttChart } from './PartScheduleGanttChart'
+import { PartScheduleView } from './PartScheduleView'
 
 export default async function PartSchedule() {
   const parts = await getParts()
 
-  return <PartScheduleGanttChart parts={parts} />
+  return <PartScheduleView parts={parts} />
 }

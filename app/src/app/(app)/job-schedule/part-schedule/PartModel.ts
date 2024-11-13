@@ -1,5 +1,6 @@
-
 export type PartModel = {
+  id: string
+  jobKey: number
   name: string | null
   steps: {
     id: string

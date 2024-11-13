@@ -1,40 +1,39 @@
-"use client";
+'use client'
 
-import assert from "assert";
-import { Box, Divider, Paper, Stack } from "@mui/material";
-import { useLayoutEffect, useRef, useState } from "react";
-import dayjs  from "dayjs";
-import utc from "dayjs/plugin/utc";
-import { DragBar } from "./DragBar";
-import { GanttChartGridHeader } from "./GanttChartGridHeader";
-import { GanttChartGrid } from "./GanttChartGrid";
-import GanttChartToday from "./GanttChartToday";
-import { GanttChartBlock } from "./GanttChartBlock";
-import { GanttChartItem } from "./GanttChartItem";
+import assert from 'assert'
+import { Box, Divider, Paper, Stack } from '@mui/material'
+import { useLayoutEffect, useRef, useState } from 'react'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import { DragBar } from './DragBar'
+import { GanttChartGridHeader } from './GanttChartGridHeader'
+import { GanttChartGrid } from './GanttChartGrid'
+import GanttChartToday from './GanttChartToday'
+import { GanttChartBlock } from './GanttChartBlock'
+import { GanttChartItem } from './GanttChartItem'
 
-dayjs.extend(utc);
+dayjs.extend(utc)
 
 const isScrolledToRight = (element: HTMLElement): boolean =>
-  element.scrollLeft + element.clientWidth >= element.scrollWidth;
+  element.scrollLeft + element.clientWidth >= element.scrollWidth
 
-const dim = 30;
-const topDim = 180;
+const dim = 30
+const topDim = 180
 
-const minDrawerWidth = 450;
-const initialDrawerWidth = 500;
-const maxDrawerWidth = 800;
+const minDrawerWidth = 450
+const initialDrawerWidth = 500
+const maxDrawerWidth = 800
 const clampDrawerWidth = (width: number) =>
-  Math.min(Math.max(width, minDrawerWidth), maxDrawerWidth);
-
+  Math.min(Math.max(width, minDrawerWidth), maxDrawerWidth)
 
 export type GanttChartProps = {
-  drawerHeader: React.ReactNode;
-  stageHeader: React.ReactNode;
-  headerHeight: number;
-  items: GanttChartItem[];
-};
+  drawerHeader: React.ReactNode
+  stageHeader: React.ReactNode
+  headerHeight: number
+  items: GanttChartItem[]
+}
 
-const initialScrollOffset = dim;
+const initialScrollOffset = dim
 
 export default function GanttChart({
   headerHeight,
@@ -42,18 +41,18 @@ export default function GanttChart({
   stageHeader,
   items,
 }: GanttChartProps) {
-  const [drawerWidth, setDrawerWidth] = useState(initialDrawerWidth);
-  const [scrollOffset, setScrollOffset] = useState(initialScrollOffset);
-  const [minDate, setMinDate] = useState(dayjs().utc().day(0).startOf("day"));
-  const [numWeeks, setNumWeeks] = useState(12);
+  const [drawerWidth, setDrawerWidth] = useState(initialDrawerWidth)
+  const [scrollOffset, setScrollOffset] = useState(initialScrollOffset)
+  const [minDate, setMinDate] = useState(dayjs().utc().day(0).startOf('day'))
+  const [numWeeks, setNumWeeks] = useState(12)
 
-  const frameRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
-    assert(frameRef.current);
+    assert(frameRef.current)
 
-    frameRef.current.scrollLeft = scrollOffset;
-  });
+    frameRef.current.scrollLeft = scrollOffset
+  })
 
   return (
     <Stack direction="row" minHeight="100%" width="100%" position="relative">
@@ -68,31 +67,35 @@ export default function GanttChart({
         </Stack>
 
         <Stack
-          divider={<Divider sx={{ p: 0, my: "-0.5px" }} />}
+          divider={<Divider sx={{ p: 0, my: '-0.5px' }} />}
           borderTop={1}
           borderBottom={1}
           borderColor="divider"
           my="-1px"
           width="100%"
         >
-          {items.map(({ label }) => <Box height={dim} width={"100%"}>{label}</Box>)}
+          {items.map(({ id, label }) => (
+            <Box key={id} height={dim} width="100%">
+              {label}
+            </Box>
+          ))}
         </Stack>
       </Box>
       <Box
         flexGrow={1}
-        sx={{ overflowX: "auto", overflowY: "hidden" }}
+        sx={{ overflowX: 'auto', overflowY: 'hidden' }}
         position="relative"
         ref={frameRef}
         onScroll={(e) => {
           if (isScrolledToRight(e.currentTarget)) {
-            setNumWeeks((weeks) => weeks + 1);
-            setScrollOffset(e.currentTarget.scrollLeft);
+            setNumWeeks((weeks) => weeks + 1)
+            setScrollOffset(e.currentTarget.scrollLeft)
           } else if (e.currentTarget.scrollLeft === 0) {
-            setNumWeeks((weeks) => weeks + 1);
-            setMinDate((minDate) => minDate.add(-1, "week").startOf("day"));
-            setScrollOffset(dim * 7);
+            setNumWeeks((weeks) => weeks + 1)
+            setMinDate((minDate) => minDate.add(-1, 'week').startOf('day'))
+            setScrollOffset(dim * 7)
           } else {
-            setScrollOffset(e.currentTarget.scrollLeft);
+            setScrollOffset(e.currentTarget.scrollLeft)
           }
         }}
       >
@@ -109,11 +112,15 @@ export default function GanttChart({
           position="relative"
           width={`${numWeeks * 7 * dim}px`}
           height={`${items.length * dim}px`}
-          sx={{ outline: "1px solid divider" }}
+          sx={{ outline: '1px solid divider' }}
           top={0}
           left={0}
         >
-          <GanttChartGrid dim={dim} numRows={items.length} numCols={numWeeks * 7} />
+          <GanttChartGrid
+            dim={dim}
+            numRows={items.length}
+            numCols={numWeeks * 7}
+          />
           <GanttChartToday columnWidth={dim} startDate={minDate} />
           {items.flatMap((item) =>
             item.events.map((e) => (
@@ -124,7 +131,7 @@ export default function GanttChart({
               >
                 {e.children}
               </GanttChartBlock>
-            ))
+            )),
           )}
         </Box>
       </Box>
@@ -143,5 +150,5 @@ export default function GanttChart({
         {stageHeader}
       </Box>
     </Stack>
-  );
+  )
 }

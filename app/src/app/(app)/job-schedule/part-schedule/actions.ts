@@ -1,5 +1,6 @@
 'use server'
 
+import { fail } from 'assert'
 import { fields, selectResourceFieldValue } from '@supplyside/model'
 import { PartModel } from './PartModel'
 import { readResources, updateResource } from '@/client/resource'
@@ -22,6 +23,10 @@ export async function getParts(): Promise<PartModel[]> {
         })) ?? []
 
       return {
+        id: part.id,
+        jobKey:
+          selectResourceFieldValue(part, fields.job)?.resource?.key ??
+          fail('Part does not have a Job'),
         name: selectResourceFieldValue(part, fields.partName)?.string ?? null,
         needBy: coerce(selectResourceFieldValue(part, fields.needDate)?.date),
         paymentDue: coerce(

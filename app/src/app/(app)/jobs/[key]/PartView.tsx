@@ -1,4 +1,3 @@
-
 import {
   fields,
   Resource,

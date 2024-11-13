@@ -8,7 +8,6 @@ type Props = {
 }
 
 export default function GanttChartToday({ columnWidth, startDate }: Props) {
-
   return (
     <Box
       position="absolute"
