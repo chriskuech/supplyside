@@ -118,6 +118,10 @@ export class SchemaFieldService {
         ),
       )
 
+    const { type } = await this.prisma.field.findUniqueOrThrow({
+      where: { id: fieldId, accountId },
+    })
+
     const field = await this.prisma.field.update({
       where: { id: fieldId, accountId },
       data: {
@@ -127,7 +131,7 @@ export class SchemaFieldService {
         isRequired: dto.isRequired,
         defaultToToday: dto.defaultToToday,
         DefaultValue: dto.defaultValue && {
-          update: mapValueInputToPrismaValueUpdate(dto.defaultValue),
+          update: mapValueInputToPrismaValueUpdate(dto.defaultValue, type),
         },
       },
       include: fieldIncludes,
