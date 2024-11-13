@@ -3,7 +3,7 @@
 import { fail } from 'assert'
 import { Stack, Box, Container, useTheme } from '@mui/material'
 import { OptionTemplate, Option } from '@supplyside/model'
-import { FC, PropsWithChildren } from 'react'
+import { FC, Fragment, PropsWithChildren } from 'react'
 import { zip } from 'remeda'
 import Color from 'color'
 import { match } from 'ts-pattern'
@@ -144,7 +144,7 @@ const StatusTrackerView: FC<StatusTrackerViewProps> = ({
             : shadow(currentStatus.color)
 
         return (
-          <>
+          <Fragment key={current.templateId}>
             <Stack
               justifyContent="center"
               sx={{
@@ -209,7 +209,7 @@ const StatusTrackerView: FC<StatusTrackerViewProps> = ({
                 }}
               />
             )}
-          </>
+          </Fragment>
         )
       })}
     </Stack>

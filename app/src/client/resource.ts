@@ -138,9 +138,7 @@ export const updateResource = async (
       )
     }
 
-    const { fieldId } = selectSchemaFieldUnsafe(schema, {
-      templateId: field.templateId,
-    })
+    const { fieldId } = selectSchemaFieldUnsafe(schema, field)
     return { fieldId, valueInput }
   })
 

@@ -44,11 +44,10 @@ export const PartsControl: FC<Props> = async ({ job }) => {
               <DeletePartButton partId={part.id} />
             </Stack>
             <CardContent>
-              <Stack key={part.id} spacing={2}>
+              <Stack spacing={2}>
                 <PartView
                   part={part}
                   partSchema={partSchema}
-                  i={i}
                   stepsControl={<StepsControl part={part} />}
                 />
               </Stack>
@@ -57,10 +56,8 @@ export const PartsControl: FC<Props> = async ({ job }) => {
         ) : (
           <Stack key={part.id} spacing={2}>
             <PartView
-              key={part.id}
               part={part}
               partSchema={partSchema}
-              i={i}
               stepsControl={<StepsControl part={part} />}
             />
           </Stack>

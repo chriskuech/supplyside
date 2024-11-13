@@ -276,6 +276,10 @@ export class ResourceService {
       resource.type,
     )
 
+    if (input.fields) {
+      throw new Error('Fields: ' + JSON.stringify(input.fields, null, 2))
+    }
+
     const { fields, costs } = deriveFields(input, { schema, resource })
 
     await Promise.all(

@@ -11,13 +11,13 @@ type Props = {
   numDays: number
 }
 
-export const GanttChartHeader: FC<Props> = ({
+export const GanttChartGridHeader: FC<Props> = ({
   height,
   dim,
   startDate,
   numDays,
 }) => (
-  <Box height={height} position="relative">
+  <Box height={`${height}px`} marginTop={`${-height}px`} position="relative">
     {/* Headers */}
     {range(0, numDays).map((i) => (
       <Box
@@ -32,7 +32,7 @@ export const GanttChartHeader: FC<Props> = ({
           transformOrigin: 'left center',
         }}
       >
-        {startDate.add(i, 'day').format('M/DD/YYYY')}
+        {dayjs(startDate).add(i, 'day').format('M/DD/YYYY')}
       </Box>
     ))}
     <Box

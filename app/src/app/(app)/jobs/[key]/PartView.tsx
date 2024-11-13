@@ -1,4 +1,3 @@
-'use client'
 
 import {
   fields,
@@ -14,7 +13,6 @@ import { formatMoney } from '@/lib/format'
 export const PartView: FC<{
   part: Resource
   partSchema: Schema
-  i: number
   stepsControl: ReactNode
 }> = ({ part, partSchema, stepsControl }) => (
   <Stack spacing={2} direction="row" alignItems="start">
