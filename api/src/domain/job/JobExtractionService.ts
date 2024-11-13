@@ -201,7 +201,7 @@ export class JobExtractionService {
           ...(resourceId
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase)
+                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.job)
                     .fieldId,
                   valueInput: { resourceId },
                 },
