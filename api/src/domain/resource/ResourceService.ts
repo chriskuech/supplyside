@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { ConflictError } from '@supplyside/api/integrations/fastify/ConflictError'
+import { logger } from '@supplyside/api/integrations/fastify/logger'
 import {
   Cost,
   FieldTemplate,
@@ -275,6 +276,8 @@ export class ResourceService {
       accountId,
       resource.type,
     )
+
+    logger().debug({ input }, 'Before transform')
 
     const { fields, costs } = deriveFields(input, { schema, resource })
 

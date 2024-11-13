@@ -156,7 +156,7 @@ export const mapValueInputToPrismaValueUpdate = (
           data: value.fileIds?.map((fileId) => ({ fileId })) || [],
           skipDuplicates: true,
         },
-        deleteMany: {
+        deleteMany: value.fileIds && {
           fileId: { notIn: value.fileIds || [] },
         },
       },

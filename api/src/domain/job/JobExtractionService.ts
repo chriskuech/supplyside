@@ -2,13 +2,13 @@ import {
   coerceDateStringToISO8601,
   dataExtractionPrompt,
 } from '@supplyside/api/extraction'
+import { logger } from '@supplyside/api/integrations/fastify/logger'
 import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
 import {
   fields,
   selectResourceFieldValue,
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
-import { FastifyBaseLogger } from 'fastify'
 import { inject, injectable } from 'inversify'
 import { z } from 'zod'
 import { ResourceService } from '../resource/ResourceService'
@@ -131,11 +131,7 @@ export class JobExtractionService {
     private readonly resourceService: ResourceService,
   ) {}
 
-  async extractContent(
-    accountId: string,
-    resourceId: string,
-    logger: FastifyBaseLogger,
-  ) {
+  async extractContent(accountId: string, resourceId: string) {
     const [schema, resource, lineSchema] = await Promise.all([
       this.schemaService.readMergedSchema(accountId, 'Job'),
       this.resourceService.read(accountId, resourceId),
@@ -143,7 +139,7 @@ export class JobExtractionService {
     ])
 
     const { files } =
-      selectResourceFieldValue(resource, fields.purchaseAttachments) ?? {}
+      selectResourceFieldValue(resource, fields.jobAttachments) ?? {}
 
     if (!files?.length) return
 
@@ -153,7 +149,7 @@ export class JobExtractionService {
       files,
     })
 
-    logger.info({ accountId, resourceId, data }, 'Extracted Job Data')
+    logger().info({ accountId, resourceId, data }, 'Extracted Job Data')
 
     if (!data) return
 
