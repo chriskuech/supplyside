@@ -268,7 +268,11 @@ export class ResourceService {
   async update(
     accountId: string,
     resourceId: string,
-    input: { fields?: ResourceFieldInput[]; costs?: Cost[] },
+    input: {
+      templateId?: string | null
+      fields?: ResourceFieldInput[]
+      costs?: Cost[]
+    },
   ) {
     const resource = await this.read(accountId, resourceId)
     const schema = await this.schemaService.readMergedSchema(
@@ -277,6 +281,13 @@ export class ResourceService {
     )
 
     const { fields, costs } = deriveFields(input, { schema, resource })
+
+    if (input.templateId !== undefined) {
+      await this.prisma.resource.update({
+        where: { id: resourceId, accountId },
+        data: { templateId: input.templateId },
+      })
+    }
 
     await Promise.all(
       fields.map(async ({ fieldId, valueInput }) => {
@@ -409,91 +420,34 @@ export class ResourceService {
     })
   }
 
-  async updateTemplateId(
-    accountId: string,
-    resourceId: string,
-    { templateId }: { templateId: string | null },
-  ) {
-    await this.prisma.resource.update({
-      where: { id: resourceId, accountId },
-      data: { templateId },
-    })
-  }
-
-  private async assertNoDuplicateNamedResource(
-    sf: SchemaField,
-    accountId: string,
-    type: ResourceType,
-    valueInput: ValueInput,
-    resourceId: string | null,
-  ) {
-    if (sf.templateId === fields.name.templateId) {
-      const resourceExists = await this.prisma.resource.findFirst({
-        where: {
-          accountId,
-          type,
-          ResourceField: {
-            some: {
-              Field: {
-                name: sf.name,
-              },
-              Value: mapValueInputToPrismaValueWhere(valueInput),
-            },
-          },
-          ...(resourceId
-            ? {
-                NOT: {
-                  id: resourceId,
-                },
-              }
-            : {}),
-        },
-      })
-
-      if (resourceExists) {
-        throw new ConflictError(
-          `A Resource already exists with ${sf.name} = ${Object.values(valueInput)[0]?.toString()}`,
-        )
-      }
-    }
-  }
-
   async findResourcesByNameOrPoNumber(
     accountId: string,
     resourceType: ResourceType,
-    {
-      input,
-      exact,
-      take = 15,
-    }: { input: string; exact?: boolean; take?: number },
+    { input, take = 15 }: { input: string; take?: number },
   ): Promise<ValueResource[]> {
     const results = await this.prisma.$queryRaw`
-    WITH "View" AS (
-      SELECT
-        "Resource".*,
-        "Value"."string" AS "name"
-      FROM "Resource"
-      LEFT JOIN "ResourceField" ON "Resource".id = "ResourceField"."resourceId"
-      LEFT JOIN "Field" ON "ResourceField"."fieldId" = "Field".id
-      LEFT JOIN "Value" ON "ResourceField"."valueId" = "Value".id
-      WHERE "Resource"."type" = ${resourceType}::"ResourceType"
-        AND "Resource"."accountId" = ${accountId}::"uuid"
-        AND "Field"."templateId" IN (${fields.name.templateId}::uuid, ${
-          fields.poNumber.templateId
-        }::uuid)
-        AND "Value"."string" <> ''
-        AND "Value"."string" IS NOT NULL
-    )
-    SELECT "id", "type", "key", "name", "templateId"
-    FROM "View"
-    ${
-      exact
-        ? Prisma.sql`WHERE "name" = ${input}`
-        : Prisma.sql`WHERE "name" ILIKE '%' || ${input} || '%' OR "name" % ${input} -- % operator uses pg_trgm for similarity matching`
-    }
-    ORDER BY similarity("name", ${input}) DESC
-    LIMIT ${take}
-  `
+      WITH "View" AS (
+        SELECT
+          "Resource".*,
+          "Value"."string" AS "name"
+        FROM "Resource"
+        LEFT JOIN "ResourceField" ON "Resource".id = "ResourceField"."resourceId"
+        LEFT JOIN "Field" ON "ResourceField"."fieldId" = "Field".id
+        LEFT JOIN "Value" ON "ResourceField"."valueId" = "Value".id
+        WHERE "Resource"."type" = ${resourceType}::"ResourceType"
+          AND "Resource"."accountId" = ${accountId}::"uuid"
+          AND "Field"."templateId" IN (${fields.name.templateId}::uuid, ${
+            fields.poNumber.templateId
+          }::uuid)
+          AND "Value"."string" <> ''
+          AND "Value"."string" IS NOT NULL
+      )
+      SELECT "id", "type", "key", "name", "templateId"
+      FROM "View"
+      ${Prisma.sql`WHERE "name" ILIKE '%' || ${input} || '%' OR "name" % ${input} -- % operator uses pg_trgm for similarity matching`}
+      ORDER BY similarity("name", ${input}) DESC
+      LIMIT ${take}
+    `
 
     return z
       .object({
@@ -564,132 +518,6 @@ export class ResourceService {
       fields.subtotalCost,
       { number: Number(subTotal) }, // TODO: this is ignoring that subTotal is bigint
     )
-  }
-
-  private async handleResourceUpdate(
-    accountId: string,
-    resource: Resource,
-    updatedFields: FieldUpdate[],
-  ) {
-    const isUpdated = (fieldTemplate: FieldTemplate) =>
-      updatedFields.some(
-        (rf) => rf.field.templateId === fieldTemplate.templateId,
-      )
-
-    if (resource.type === 'Job') {
-      if (isUpdated(fields.customer)) {
-        await this.updateChildren(accountId, resource.id, {
-          childResourceType: 'Part',
-          backlinkFieldTemplate: fields.job,
-          field: fields.customer,
-          valueInput: {
-            resourceId:
-              selectResourceFieldValue(resource, fields.customer)?.resource
-                ?.id ?? null,
-          },
-        })
-      }
-      if (isUpdated(fields.needDate)) {
-        await this.updateChildren(accountId, resource.id, {
-          childResourceType: 'Part',
-          backlinkFieldTemplate: fields.job,
-          field: fields.needDate,
-          valueInput: {
-            date:
-              selectResourceFieldValue(resource, fields.needDate)?.date ?? null,
-          },
-        })
-      }
-    }
-
-    if (resource.type === 'Part') {
-      const jobId = selectResourceFieldValue(resource, fields.job)?.resource?.id
-      if (jobId) {
-        if (isUpdated(fields.totalCost)) {
-          await this.recalculateSubtotalCost(accountId, 'Job', jobId)
-        }
-
-        if (isUpdated(fields.job)) {
-          const job = await this.read(accountId, jobId)
-
-          await this.updateResourceField(
-            accountId,
-            'Part',
-            resource.id,
-            fields.customer,
-            {
-              resourceId:
-                selectResourceFieldValue(job, fields.customer)?.resource?.id ??
-                null,
-            },
-          )
-
-          await this.updateResourceField(
-            accountId,
-            'Part',
-            resource.id,
-            fields.needDate,
-            {
-              date:
-                selectResourceFieldValue(job, fields.needDate)?.date ?? null,
-            },
-          )
-        }
-      }
-    }
-
-    if (resource.type === 'Purchase') {
-      if (isUpdated(fields.vendor)) {
-        await this.updateChildren(accountId, resource.id, {
-          childResourceType: 'PurchaseLine',
-          backlinkFieldTemplate: fields.purchase,
-          field: fields.vendor,
-          valueInput: {
-            resourceId:
-              selectResourceFieldValue(resource, fields.vendor)?.resource?.id ??
-              null,
-          },
-        })
-      }
-
-      if (isUpdated(fields.job) || isUpdated(fields.purchaseStatus)) {
-        const jobId = selectResourceFieldValue(resource, fields.job)?.resource
-          ?.id
-        if (jobId) {
-          await this.recalculateReceivedAllPurchases(accountId, jobId)
-        }
-      }
-    }
-
-    if (resource.type === 'PurchaseLine') {
-      const purchaseId = selectResourceFieldValue(resource, fields.purchase)
-        ?.resource?.id
-      const billId = selectResourceFieldValue(resource, fields.bill)?.resource
-        ?.id
-
-      if (purchaseId && isUpdated(fields.totalCost)) {
-        await this.recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
-      }
-
-      if (billId && isUpdated(fields.totalCost)) {
-        await this.recalculateSubtotalCost(accountId, 'Bill', billId)
-      }
-
-      if (purchaseId && isUpdated(fields.purchase)) {
-        const purchase = await this.read(accountId, purchaseId)
-        await this.updateResourceField(
-          accountId,
-          'PurchaseLine',
-          resource.id,
-          fields.vendor,
-          {
-            resourceId:
-              selectResourceFieldValue(purchase, fields.vendor)?.resource?.id ??
-              null,
-          },
-        )
-      }
-    }
   }
 
   async cloneResource(accountId: string, resourceId: string) {
@@ -877,49 +705,6 @@ export class ResourceService {
     })
   }
 
-  private async cloneLines({
-    accountId,
-    fromResourceId,
-    toResourceId,
-    backLinkFieldRef,
-    resourceType,
-  }: ResourceCopyParams & {
-    backLinkFieldRef: FieldTemplate
-    resourceType: ResourceType
-  }) {
-    const lineResourceType = resourceType === 'Job' ? 'Part' : 'PurchaseLine'
-    const lineSchema = await this.schemaService.readMergedSchema(
-      accountId,
-      lineResourceType,
-    )
-
-    const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
-
-    const lines = await this.list(accountId, lineResourceType, {
-      where: {
-        '==': [{ var: backLinkField.name }, fromResourceId],
-      },
-    })
-
-    // `createResource` is not (currently) parallelizable
-    for (const line of lines) {
-      await this.create(accountId, lineResourceType, {
-        fields: [
-          ...line.fields
-            .filter(({ fieldId }) => fieldId !== backLinkField.fieldId)
-            .map(({ fieldId, fieldType, value }) => ({
-              fieldId,
-              valueInput: mapValueToValueInput(fieldType, value),
-            })),
-          {
-            fieldId: backLinkField.fieldId,
-            valueInput: { resourceId: toResourceId },
-          },
-        ],
-      })
-    }
-  }
-
   async copyFields(
     accountId: string,
     resourceId: string,
@@ -987,6 +772,44 @@ export class ResourceService {
     return this.read(accountId, resourceField.resourceId)
   }
 
+  private async assertNoDuplicateNamedResource(
+    sf: SchemaField,
+    accountId: string,
+    type: ResourceType,
+    valueInput: ValueInput,
+    resourceId: string | null,
+  ) {
+    if (sf.templateId === fields.name.templateId) {
+      const resourceExists = await this.prisma.resource.findFirst({
+        where: {
+          accountId,
+          type,
+          ResourceField: {
+            some: {
+              Field: {
+                name: sf.name,
+              },
+              Value: mapValueInputToPrismaValueWhere(valueInput),
+            },
+          },
+          ...(resourceId
+            ? {
+                NOT: {
+                  id: resourceId,
+                },
+              }
+            : {}),
+        },
+      })
+
+      if (resourceExists) {
+        throw new ConflictError(
+          `A Resource already exists with ${sf.name} = ${Object.values(valueInput)[0]?.toString()}`,
+        )
+      }
+    }
+  }
+
   private async recalculateReceivedAllPurchases(
     accountId: string,
     resourceId: string,
@@ -1051,5 +874,174 @@ export class ResourceService {
         ),
       ),
     )
+  }
+
+  private async cloneLines({
+    accountId,
+    fromResourceId,
+    toResourceId,
+    backLinkFieldRef,
+    resourceType,
+  }: ResourceCopyParams & {
+    backLinkFieldRef: FieldTemplate
+    resourceType: ResourceType
+  }) {
+    const lineResourceType = resourceType === 'Job' ? 'Part' : 'PurchaseLine'
+    const lineSchema = await this.schemaService.readMergedSchema(
+      accountId,
+      lineResourceType,
+    )
+
+    const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
+
+    const lines = await this.list(accountId, lineResourceType, {
+      where: {
+        '==': [{ var: backLinkField.name }, fromResourceId],
+      },
+    })
+
+    // `createResource` is not (currently) parallelizable
+    for (const line of lines) {
+      await this.create(accountId, lineResourceType, {
+        fields: [
+          ...line.fields
+            .filter(({ fieldId }) => fieldId !== backLinkField.fieldId)
+            .map(({ fieldId, fieldType, value }) => ({
+              fieldId,
+              valueInput: mapValueToValueInput(fieldType, value),
+            })),
+          {
+            fieldId: backLinkField.fieldId,
+            valueInput: { resourceId: toResourceId },
+          },
+        ],
+      })
+    }
+  }
+
+  private async handleResourceUpdate(
+    accountId: string,
+    resource: Resource,
+    updatedFields: FieldUpdate[],
+  ) {
+    const isUpdated = (fieldTemplate: FieldTemplate) =>
+      updatedFields.some(
+        (rf) => rf.field.templateId === fieldTemplate.templateId,
+      )
+
+    if (resource.type === 'Job') {
+      if (isUpdated(fields.customer)) {
+        await this.updateChildren(accountId, resource.id, {
+          childResourceType: 'Part',
+          backlinkFieldTemplate: fields.job,
+          field: fields.customer,
+          valueInput: {
+            resourceId:
+              selectResourceFieldValue(resource, fields.customer)?.resource
+                ?.id ?? null,
+          },
+        })
+      }
+      if (isUpdated(fields.needDate)) {
+        await this.updateChildren(accountId, resource.id, {
+          childResourceType: 'Part',
+          backlinkFieldTemplate: fields.job,
+          field: fields.needDate,
+          valueInput: {
+            date:
+              selectResourceFieldValue(resource, fields.needDate)?.date ?? null,
+          },
+        })
+      }
+    }
+
+    if (resource.type === 'Part') {
+      const jobId = selectResourceFieldValue(resource, fields.job)?.resource?.id
+      if (jobId) {
+        if (isUpdated(fields.totalCost)) {
+          await this.recalculateSubtotalCost(accountId, 'Job', jobId)
+        }
+
+        if (isUpdated(fields.job)) {
+          const job = await this.read(accountId, jobId)
+
+          await this.updateResourceField(
+            accountId,
+            'Part',
+            resource.id,
+            fields.customer,
+            {
+              resourceId:
+                selectResourceFieldValue(job, fields.customer)?.resource?.id ??
+                null,
+            },
+          )
+
+          await this.updateResourceField(
+            accountId,
+            'Part',
+            resource.id,
+            fields.needDate,
+            {
+              date:
+                selectResourceFieldValue(job, fields.needDate)?.date ?? null,
+            },
+          )
+        }
+      }
+    }
+
+    if (resource.type === 'Purchase') {
+      if (isUpdated(fields.vendor)) {
+        await this.updateChildren(accountId, resource.id, {
+          childResourceType: 'PurchaseLine',
+          backlinkFieldTemplate: fields.purchase,
+          field: fields.vendor,
+          valueInput: {
+            resourceId:
+              selectResourceFieldValue(resource, fields.vendor)?.resource?.id ??
+              null,
+          },
+        })
+      }
+
+      if (isUpdated(fields.job) || isUpdated(fields.purchaseStatus)) {
+        const jobId = selectResourceFieldValue(resource, fields.job)?.resource
+          ?.id
+        if (jobId) {
+          await this.recalculateReceivedAllPurchases(accountId, jobId)
+        }
+      }
+    }
+
+    if (resource.type === 'PurchaseLine') {
+      const purchaseId = selectResourceFieldValue(resource, fields.purchase)
+        ?.resource?.id
+      const billId = selectResourceFieldValue(resource, fields.bill)?.resource
+        ?.id
+
+      if (purchaseId && isUpdated(fields.totalCost)) {
+        await this.recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
+      }
+
+      if (billId && isUpdated(fields.totalCost)) {
+        await this.recalculateSubtotalCost(accountId, 'Bill', billId)
+      }
+
+      if (purchaseId && isUpdated(fields.purchase)) {
+        const purchase = await this.read(accountId, purchaseId)
+        await this.updateResourceField(
+          accountId,
+          'PurchaseLine',
+          resource.id,
+          fields.vendor,
+          {
+            resourceId:
+              selectResourceFieldValue(purchase, fields.vendor)?.resource?.id ??
+              null,
+          },
+        )
+      }
+    }
   }
 }

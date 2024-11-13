@@ -91,13 +91,9 @@ export class McMasterService {
       })
 
       if (!mcMasterCarrVendor.templateId) {
-        await this.resourceService.updateTemplateId(
-          accountId,
-          mcMasterCarrVendor.id,
-          {
-            templateId: mcMasterCarrSystemResource.templateId,
-          },
-        )
+        await this.resourceService.update(accountId, mcMasterCarrVendor.id, {
+          templateId: mcMasterCarrSystemResource.templateId,
+        })
       }
     }
 
@@ -118,13 +114,9 @@ export class McMasterService {
     )
 
     if (mcMasterCarrVendor) {
-      await this.resourceService.updateTemplateId(
-        accountId,
-        mcMasterCarrVendor.id,
-        {
-          templateId: null,
-        },
-      )
+      await this.resourceService.update(accountId, mcMasterCarrVendor.id, {
+        templateId: null,
+      })
     }
 
     await this.prisma.account.update({
