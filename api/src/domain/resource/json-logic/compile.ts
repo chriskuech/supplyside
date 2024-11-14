@@ -1,5 +1,6 @@
 import { FieldType, Value } from '@prisma/client'
 import { Schema, SchemaField, selectSchemaFieldUnsafe } from '@supplyside/model'
+import { isNullish } from 'remeda'
 import { P, match } from 'ts-pattern'
 import { mapUuidToBase64, sanitizeValue } from './sanitize'
 import { JsonLogic, OrderBy } from './types'
@@ -49,12 +50,12 @@ const createWhere = (where: JsonLogic, schema: Schema): string =>
     .with(
       { '==': P.any },
       ({ '==': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} = ${sanitizeValue(val)}`,
+        `${resolveFieldNameToColumn(schema, var_)} ${isNullish(val) ? `= ${sanitizeValue(val)}` : `IS NULL`}`,
     )
     .with(
       { '!=': P.any },
       ({ '!=': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} <> ${sanitizeValue(val)}`,
+        `${resolveFieldNameToColumn(schema, var_)} ${isNullish(val) ? `<> ${sanitizeValue(val)}` : `IS NOT NULL`}`,
     )
     .with(
       { '<': P.any },

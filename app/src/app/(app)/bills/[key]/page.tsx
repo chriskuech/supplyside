@@ -17,6 +17,7 @@ import ResourceLink from '@/lib/resource/ResourceLink'
 import { StatusTrackerSlab } from '@/lib/ux/StatusTrackerSlab'
 import RecurringControl from '@/lib/resource/recurring/RecurringControl'
 import RecurringCard from '@/lib/resource/recurring/RecurringCard'
+import RecurrentResourceLink from '@/lib/resource/RecurrentResourceLink'
 
 export default async function BillsDetail({
   params: { key },
@@ -51,6 +52,16 @@ export default async function BillsDetail({
     resource,
     fields.recurring,
   )?.boolean
+
+  const parentRecurringBill = selectResourceFieldValue(
+    resource,
+    fields.parentRecurrentBill,
+  )?.resource
+
+  const parentClonedBill = selectResourceFieldValue(
+    resource,
+    fields.parentClonedBill,
+  )?.resource
 
   return (
     <ResourceDetailPage
@@ -95,7 +106,28 @@ export default async function BillsDetail({
               />,
             ]
           : []),
-        ...(isDraft
+        ...(parentClonedBill
+          ? [
+              <ResourceLink
+                key={parentClonedBill.id}
+                href={`/bills/${parentClonedBill.key}`}
+                label="Duplicated Bill"
+                resourceKey={parentClonedBill.key}
+                fontSize={fontSize}
+              />,
+            ]
+          : []),
+        ...(parentRecurringBill
+          ? [
+              <RecurrentResourceLink
+                key={parentRecurringBill.id}
+                href={`/bills/${parentRecurringBill.key}`}
+                label="Recurring Bill"
+                fontSize={fontSize}
+              />,
+            ]
+          : []),
+        ...(isDraft && !parentRecurringBill
           ? [
               <RecurringControl
                 key={RecurringControl.name}

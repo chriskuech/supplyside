@@ -523,10 +523,22 @@ const _fields = {
     name: 'Recurrence Interval Offset In Days',
     type: 'Number',
   },
-  recurrenceRunning: {
-    templateId: '717f9809-5ae5-4221-8980-be34a6230d9d',
-    name: 'Recurrence Running?',
-    type: 'Checkbox',
+  recurrenceStartedAt: {
+    templateId: '8a634364-cbce-45f0-a161-692f2a6b42c4',
+    name: 'Recurrence start date',
+    type: 'Date',
+  },
+  parentRecurrentBill: {
+    templateId: '66d9103f-46c6-4d10-ad76-1ace430c1d25',
+    name: 'Parent Recurring Bill',
+    type: 'Resource',
+    resourceType: 'Bill',
+  },
+  parentClonedBill: {
+    templateId: 'f6537337-13cf-43bb-aac4-245108c458f0',
+    name: 'Parent Cloned Bill',
+    type: 'Resource',
+    resourceType: 'Bill',
   },
   shippingAccountNumber: {
     templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
