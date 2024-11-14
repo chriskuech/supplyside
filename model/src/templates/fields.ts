@@ -534,6 +534,12 @@ const _fields = {
     type: 'Resource',
     resourceType: 'Bill',
   },
+  parentClonedBill: {
+    templateId: 'f6537337-13cf-43bb-aac4-245108c458f0',
+    name: 'Parent Cloned Bill',
+    type: 'Resource',
+    resourceType: 'Bill',
+  },
   shippingAccountNumber: {
     templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
     name: 'Shipping Account Number',

@@ -712,6 +712,16 @@ export class ResourceService {
           fields.billStatus,
         )
 
+        const parentRecurrentBillField = selectSchemaFieldUnsafe(
+          schema,
+          fields.parentRecurrentBill,
+        )
+
+        const parentClonedBillField = selectSchemaFieldUnsafe(
+          schema,
+          fields.parentClonedBill,
+        )
+
         const draftStatusOption =
           billStatusField.options.find(
             (o) => o.templateId === billStatusOptions.draft.templateId,
@@ -720,7 +730,14 @@ export class ResourceService {
         const destination = await this.create(accountId, source.type, {
           fields: [
             ...source.fields
-              .filter((rf) => rf.fieldId !== billStatusField.fieldId)
+              .filter(
+                (rf) =>
+                  ![
+                    parentClonedBillField.fieldId,
+                    parentRecurrentBillField.fieldId,
+                    billStatusField.fieldId,
+                  ].includes(rf.fieldId),
+              )
               .map(({ fieldId, fieldType, value }) => ({
                 fieldId,
                 valueInput: mapValueToValueInput(fieldType, value),
@@ -728,6 +745,10 @@ export class ResourceService {
             {
               fieldId: billStatusField.fieldId,
               valueInput: { optionId: draftStatusOption?.id ?? null },
+            },
+            {
+              fieldId: parentClonedBillField.fieldId,
+              valueInput: { resourceId: resourceId },
             },
           ],
         })
