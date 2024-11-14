@@ -25,7 +25,7 @@ import {
 } from '@supplyside/model'
 import { fail } from 'assert'
 import dayjs, { Dayjs } from 'dayjs'
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter.js'
 import { inject, injectable } from 'inversify'
 import { isNullish, map, pipe, sum } from 'remeda'
 import { match } from 'ts-pattern'
