@@ -15,6 +15,7 @@ import {
   emptyValue,
   fields,
   findTemplateField,
+  intervalUnits,
   jobStatusOptions,
   purchaseStatusOptions,
   selectResourceFieldValue,
@@ -23,8 +24,10 @@ import {
   selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { fail } from 'assert'
+import dayjs, { Dayjs } from 'dayjs'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import { inject, injectable } from 'inversify'
-import { map, pipe, sum } from 'remeda'
+import { isNullish, map, pipe, sum } from 'remeda'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 import { SchemaService } from '../schema/SchemaService'
@@ -39,6 +42,8 @@ import {
   mapValueToValueInput,
 } from './mappers'
 import { resourceInclude } from './model'
+
+dayjs.extend(isSameOrAfter)
 
 export type ResourceFieldInput = {
   fieldId: string
@@ -1051,5 +1056,191 @@ export class ResourceService {
         ),
       ),
     )
+  }
+
+  async createRecurringResources(accountId: string) {
+    const activeRecurringBills = await this.list(accountId, 'Bill', {
+      where: {
+        and: [
+          { '==': [{ var: fields.recurring.name }, true] },
+          { '!=': [{ var: fields.recurrenceStartedAt.name }, null] },
+        ],
+      },
+    })
+
+    if (!activeRecurringBills.length) return
+
+    const bills = await this.list(accountId, 'Bill', {
+      where: { '==': [{ var: fields.recurring.name }, false] },
+    })
+
+    const orderedBillsByLatest = bills.sort((bill1, bill2) =>
+      dayjs(bill1.createdAt).isAfter(dayjs(bill2.createdAt)) ? -1 : 1,
+    )
+
+    await Promise.all(
+      activeRecurringBills.map(async (recurringBill) => {
+        const recurrenceStartedAt = selectResourceFieldValue(
+          recurringBill,
+          fields.recurrenceStartedAt,
+        )?.date
+        const recurrenceInterval = selectResourceFieldValue(
+          recurringBill,
+          fields.recurrenceInterval,
+        )?.number
+        const recurrenceIntervalOffsetInDays = selectResourceFieldValue(
+          recurringBill,
+          fields.recurrenceIntervalOffsetInDays,
+        )?.number
+        const recurrenceIntervalUnitTemplateId = selectResourceFieldValue(
+          recurringBill,
+          fields.recurrenceIntervalUnits,
+        )?.option?.templateId
+
+        if (
+          isNullish(recurrenceInterval) ||
+          isNullish(recurrenceIntervalUnitTemplateId)
+        )
+          return
+
+        const lastCreatedResource = orderedBillsByLatest.find(
+          (bill) =>
+            selectResourceFieldValue(bill, fields.parentRecurrentBill)?.resource
+              ?.id === recurringBill.id,
+        )
+
+        const startDate =
+          lastCreatedResource &&
+          dayjs(lastCreatedResource.createdAt).isAfter(
+            dayjs(recurrenceStartedAt),
+          )
+            ? lastCreatedResource.createdAt
+            : recurrenceStartedAt
+
+        const getNextCreationDate = (date: Dayjs) => {
+          return match(recurrenceIntervalUnitTemplateId)
+            .with(intervalUnits.days.templateId, () =>
+              date.add(recurrenceInterval, 'day'),
+            )
+            .with(intervalUnits.weeks.templateId, () =>
+              date
+                .add(recurrenceInterval, 'week')
+                .set('day', recurrenceIntervalOffsetInDays ?? 0),
+            )
+            .with(intervalUnits.months.templateId, () =>
+              date
+                .add(recurrenceInterval, 'month')
+                .set('date', recurrenceIntervalOffsetInDays ?? 0),
+            )
+            .otherwise(() => fail('Interval unit option not supported'))
+        }
+
+        const newResourcesCreationDates = []
+
+        let nextCreationDate = getNextCreationDate(dayjs(startDate))
+
+        while (!nextCreationDate.isSameOrAfter(dayjs(), 'day')) {
+          newResourcesCreationDates.push(nextCreationDate)
+          nextCreationDate = getNextCreationDate(nextCreationDate)
+        }
+
+        for (const date of newResourcesCreationDates) {
+          await this.createRecurringResource(accountId, recurringBill.id, date)
+        }
+      }),
+    )
+  }
+
+  async createRecurringResource(
+    accountId: string,
+    recurringResourceId: string,
+    creationDate: Dayjs,
+  ) {
+    const source = await this.read(accountId, recurringResourceId)
+    const recurringFieldsTemplateIds = [
+      fields.recurring.templateId,
+      fields.recurrenceInterval.templateId,
+      fields.recurrenceIntervalOffsetInDays.templateId,
+      fields.recurrenceIntervalUnits.templateId,
+      fields.recurrenceStartedAt.templateId,
+    ]
+
+    const destination = await match(source.type)
+      .with('Bill', async () => {
+        const schema = await this.schemaService.readMergedSchema(
+          accountId,
+          'Bill',
+        )
+
+        const billStatusField = selectSchemaFieldUnsafe(
+          schema,
+          fields.billStatus,
+        )
+
+        const invoiceDateField = selectSchemaFieldUnsafe(
+          schema,
+          fields.invoiceDate,
+        )
+
+        const parentRecurrentBillField = selectSchemaFieldUnsafe(
+          schema,
+          fields.parentRecurrentBill,
+        )
+
+        const draftStatusOption =
+          billStatusField.options.find(
+            (o) => o.templateId === billStatusOptions.draft.templateId,
+          ) ?? fail('Draft status not found')
+
+        const destination = await this.create(accountId, source.type, {
+          fields: [
+            ...source.fields
+              .filter(
+                (rf) =>
+                  ![
+                    ...recurringFieldsTemplateIds,
+                    billStatusField.templateId,
+                    invoiceDateField.templateId,
+                  ].includes(rf.templateId),
+              )
+              .map(({ fieldId, fieldType, value }) => ({
+                fieldId,
+                valueInput: mapValueToValueInput(fieldType, value),
+              })),
+            {
+              fieldId: billStatusField.fieldId,
+              valueInput: { optionId: draftStatusOption?.id ?? null },
+            },
+            {
+              fieldId: invoiceDateField.fieldId,
+              valueInput: { date: creationDate.toISOString() },
+            },
+            {
+              fieldId: parentRecurrentBillField.fieldId,
+              valueInput: { resourceId: recurringResourceId },
+            },
+          ],
+        })
+
+        await Promise.all([
+          this.cloneLines({
+            resourceType: 'Bill',
+            accountId,
+            fromResourceId: source.id,
+            toResourceId: destination.id,
+            backLinkFieldRef: fields.bill,
+          }),
+          this.cloneCosts({
+            accountId,
+            fromResourceId: source.id,
+            toResourceId: destination.id,
+          }),
+        ])
+
+        return destination
+      })
+      .otherwise(() => fail('Recurring resource type not supported'))
+
+    return destination
   }
 }

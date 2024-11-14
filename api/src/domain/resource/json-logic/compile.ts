@@ -49,12 +49,12 @@ const createWhere = (where: JsonLogic, schema: Schema): string =>
     .with(
       { '==': P.any },
       ({ '==': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} = ${sanitizeValue(val)}`,
+        `${resolveFieldNameToColumn(schema, var_)} ${val ? `= ${sanitizeValue(val)}` : `IS NULL`}`,
     )
     .with(
       { '!=': P.any },
       ({ '!=': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} <> ${sanitizeValue(val)}`,
+        `${resolveFieldNameToColumn(schema, var_)} ${val ? `<> ${sanitizeValue(val)}` : `IS NOT NULL`}`,
     )
     .with(
       { '<': P.any },

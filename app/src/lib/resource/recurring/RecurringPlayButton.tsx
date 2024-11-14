@@ -9,18 +9,18 @@ type Props = {
 }
 
 export default function RecurringPlayButton({ resource, isDisabled }: Props) {
-  const isRunning = selectResourceFieldValue(
+  const isRunning = !!selectResourceFieldValue(
     resource,
-    fields.recurrenceRunning,
-  )?.boolean
+    fields.recurrenceStartedAt,
+  )?.date
 
   return (
     <IconButton
       onClick={() =>
         updateResource(resource.id, [
           {
-            field: fields.recurrenceRunning,
-            valueInput: { boolean: !isRunning },
+            field: fields.recurrenceStartedAt,
+            valueInput: { date: isRunning ? null : new Date().toISOString() },
           },
         ])
       }

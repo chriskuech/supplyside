@@ -17,6 +17,7 @@ import { ResourceModel, ValueModel, ValueResourceModel } from './model'
 
 export const mapResourceModelToEntity = (model: ResourceModel): Resource => ({
   id: model.id,
+  createdAt: model.createdAt.toISOString(),
   accountId: model.accountId,
   templateId: model.templateId,
   key: model.key,

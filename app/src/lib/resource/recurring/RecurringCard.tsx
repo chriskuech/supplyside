@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import {
   fields,
+  intervalUnits,
   Resource,
   Schema,
   selectResourceFieldValue,
@@ -41,9 +42,11 @@ export default function RecurringCard({ schema, resource }: Props) {
 
   const isValid =
     recurrenceInterval !== null && recurrenceIntervalUnits !== null
-  const isRunning =
-    selectResourceFieldValue(resource, fields.recurrenceRunning)?.boolean ??
-    false
+
+  const isRunning = !!selectResourceFieldValue(
+    resource,
+    fields.recurrenceStartedAt,
+  )?.date
 
   const validationMessage = !isValid
     ? 'This schedule is incomplete and cannot run. Fill in the missing fields to resolve this issue.'
@@ -109,29 +112,34 @@ export default function RecurringCard({ schema, resource }: Props) {
               />
             </Box>
 
-            <Box flexShrink={0} py={1} pr={1}>
-              s, on day
-            </Box>
+            {recurrenceIntervalUnits?.templateId !==
+              intervalUnits.days.templateId && (
+              <>
+                <Box flexShrink={0} py={1} pr={1}>
+                  s, on day
+                </Box>
 
-            <Box width={70}>
-              <FieldControl
-                inputId="recurrence-interval-offset-in-days"
-                schema={schema}
-                resource={resource}
-                field={fields.recurrenceIntervalOffsetInDays}
-                disabled={!isRecurring}
-              />
-            </Box>
+                <Box width={70}>
+                  <FieldControl
+                    inputId="recurrence-interval-offset-in-days"
+                    schema={schema}
+                    resource={resource}
+                    field={fields.recurrenceIntervalOffsetInDays}
+                    disabled={!isRecurring}
+                  />
+                </Box>
 
-            <Box flexShrink={0} py={1} pl={1}>
-              of the{' '}
-              {recurrenceIntervalUnits?.name ?? (
-                <span style={{ opacity: 0.5, fontStyle: 'italic' }}>
-                  interval
-                </span>
-              )}
-              .
-            </Box>
+                <Box flexShrink={0} py={1} pl={1}>
+                  of the{' '}
+                  {recurrenceIntervalUnits?.name ?? (
+                    <span style={{ opacity: 0.5, fontStyle: 'italic' }}>
+                      interval
+                    </span>
+                  )}
+                  .
+                </Box>
+              </>
+            )}
           </Stack>
         </Stack>
       </CardContent>

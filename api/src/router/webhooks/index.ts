@@ -3,6 +3,7 @@ import { container } from '@supplyside/api/di'
 import { AccountService } from '@supplyside/api/domain/account/AccountService'
 import { BillInboxService } from '@supplyside/api/domain/bill/BillInboxService'
 import { MigrationService } from '@supplyside/api/domain/migration/MigrationService'
+import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { TemplateService } from '@supplyside/api/domain/schema/TemplateService'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -43,6 +44,23 @@ export const mountWebhooks = async <App extends FastifyInstance>(app: App) =>
               await templateService.applyTemplate(account.id)
               await migrationService.migrate(account.id)
             }),
+        )
+      },
+    })
+    .route({
+      method: 'POST',
+      url: '/recurring-resources',
+      schema: {},
+      handler: async () => {
+        const resourceService = container.resolve(ResourceService)
+        const accountsService = container.resolve(AccountService)
+
+        const accounts = await accountsService.list()
+
+        await Promise.all(
+          accounts.map(async (account) => {
+            await resourceService.createRecurringResources(account.id)
+          }),
         )
       },
     })

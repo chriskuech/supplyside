@@ -17,7 +17,8 @@ export const schemas: SchemaTemplate[] = [
       fields.recurrenceInterval,
       fields.recurrenceIntervalUnits,
       fields.recurrenceIntervalOffsetInDays,
-      fields.recurrenceRunning,
+      fields.recurrenceStartedAt,
+      fields.parentRecurrentBill,
     ],
     sections: [
       {
