@@ -3,12 +3,7 @@ import {
   ResourceService,
 } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import {
-  fields,
-  Resource,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
@@ -133,22 +128,15 @@ export class QuickBooksCustomerService {
     accountId: string,
     quickBooksCustomer: Customer['Customer'],
   ): Promise<ResourceFieldInput[]> {
-    const customerSchema = await this.schemaService.readMergedSchema(
+    const customerSchema = await this.schemaService.readSchema(
       accountId,
       'Customer',
     )
-    const customerNameField = selectSchemaFieldUnsafe(
-      customerSchema,
-      fields.name,
-    )
-    const quickBooksCustomerIdField = selectSchemaFieldUnsafe(
-      customerSchema,
+    const customerNameField = customerSchema.getField(fields.name)
+    const quickBooksCustomerIdField = customerSchema.getField(
       fields.quickBooksCustomerId,
     )
-    const primaryAddressField = selectSchemaFieldUnsafe(
-      customerSchema,
-      fields.primaryAddress,
-    )
+    const primaryAddressField = customerSchema.getField(fields.primaryAddress)
 
     return [
       {

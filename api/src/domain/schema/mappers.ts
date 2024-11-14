@@ -1,7 +1,7 @@
 import {
   AddressSchema,
   ContactSchema,
-  Schema,
+  SchemaData,
   SchemaField,
 } from '@supplyside/model'
 import { isTruthy } from 'remeda'
@@ -10,7 +10,8 @@ import { ZodType, ZodTypeAny, z } from 'zod'
 import { mapValueModelToEntity } from '../resource/mappers'
 import { FieldModel, SchemaModel } from './model'
 
-export const mapSchemaModelToEntity = (model: SchemaModel): Schema => ({
+export const mapSchemaModelToEntity = (model: SchemaModel): SchemaData => ({
+  accountId: model.accountId,
   resourceType: model.resourceType,
   sections: model.Section.flatMap((s) => ({
     id: s.id,
@@ -105,7 +106,7 @@ const mapSchemaFieldToZodType = (
   return schema
 }
 
-export const mapSchemaEntityToZod = (schema: Schema): ZodType =>
+export const mapSchemaEntityToZod = (schema: SchemaData): ZodType =>
   schema.fields.reduce((acc, field) => {
     const fieldSchema = mapSchemaFieldToZodType(field)
 

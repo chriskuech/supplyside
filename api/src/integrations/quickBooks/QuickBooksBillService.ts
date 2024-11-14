@@ -1,12 +1,7 @@
 import { ConfigService } from '@supplyside/api/ConfigService'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import {
-  Resource,
-  fields,
-  selectResourceFieldValue,
-  selectSchemaField,
-} from '@supplyside/model'
+import { Resource, fields, selectResourceFieldValue } from '@supplyside/model'
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
@@ -86,13 +81,9 @@ export class QuickBooksBillService {
       })
       .then((data) => readBillSchema.parse(data.json))
 
-    const vendorSchema = await this.schemaService.readMergedSchema(
-      accountId,
-      'Bill',
-    )
+    const vendorSchema = await this.schemaService.readSchema(accountId, 'Bill')
 
-    const quickBooksBillIdField = selectSchemaField(
-      vendorSchema,
+    const quickBooksBillIdField = vendorSchema.getField(
       fields.quickBooksBillId,
     )?.fieldId
 

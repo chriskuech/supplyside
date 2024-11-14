@@ -131,7 +131,7 @@ export class SchemaFieldService {
         isRequired: dto.isRequired,
         defaultToToday: dto.defaultToToday,
         DefaultValue: dto.defaultValue && {
-          update: mapValueInputToPrismaValueUpdate(dto.defaultValue, type),
+          update: mapValueInputToPrismaValueUpdate(type, dto.defaultValue),
         },
       },
       include: fieldIncludes,

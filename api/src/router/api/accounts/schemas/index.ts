@@ -1,7 +1,7 @@
 import { container } from '@supplyside/api/di'
 import { SchemaSectionService } from '@supplyside/api/domain/schema/SchemaSectionService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import { ResourceTypeSchema, Schema, SchemaSchema } from '@supplyside/model'
+import { ResourceTypeSchema, SchemaDataSchema } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
@@ -18,13 +18,13 @@ export const mountSchemas = async <App extends FastifyInstance>(app: App) =>
           resourceType: ResourceTypeSchema,
         }),
         response: {
-          200: SchemaSchema,
+          200: SchemaDataSchema,
         },
       },
       handler: async (req) => {
         const service = container.resolve(SchemaService)
 
-        const schema: Schema = await service.readMergedSchema(
+        const { schema } = await service.readSchema(
           req.params.accountId,
           req.params.resourceType,
         )
@@ -40,7 +40,7 @@ export const mountSchemas = async <App extends FastifyInstance>(app: App) =>
           accountId: z.string().uuid(),
         }),
         response: {
-          200: z.array(SchemaSchema),
+          200: z.array(SchemaDataSchema),
         },
       },
       handler: async (req) => {
@@ -60,13 +60,13 @@ export const mountSchemas = async <App extends FastifyInstance>(app: App) =>
           resourceType: ResourceTypeSchema,
         }),
         response: {
-          200: SchemaSchema,
+          200: SchemaDataSchema,
         },
       },
       handler: async (req) => {
         const service = container.resolve(SchemaService)
 
-        const schema: Schema = await service.readMergedSchema(
+        const { schema } = await service.readSchema(
           req.params.accountId,
           req.params.resourceType,
           false,

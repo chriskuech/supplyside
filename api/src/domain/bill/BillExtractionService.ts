@@ -3,12 +3,7 @@ import {
   dataExtractionPrompt,
 } from '@supplyside/api/extraction'
 import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
-import {
-  fields,
-  selectResourceFieldValue,
-  selectSchemaField,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, selectResourceFieldValue } from '@supplyside/model'
 import { fail } from 'assert'
 import { inject, injectable } from 'inversify'
 import { z } from 'zod'
@@ -176,9 +171,9 @@ export class BillExtractionService {
 
   async extractContent(accountId: string, resourceId: string) {
     const [billSchema, billResource, lineSchema] = await Promise.all([
-      this.schemaService.readMergedSchema(accountId, 'Bill'),
+      this.schemaService.readSchema(accountId, 'Bill'),
       this.resourceService.read(accountId, resourceId),
-      this.schemaService.readMergedSchema(accountId, 'PurchaseLine'),
+      this.schemaService.readSchema(accountId, 'PurchaseLine'),
     ])
 
     const billFiles =
@@ -188,7 +183,7 @@ export class BillExtractionService {
     if (!billFiles.length) return
 
     const paymentMethodOptions =
-      selectSchemaField(billSchema, fields.paymentMethod)?.options ?? []
+      billSchema.getField(fields.paymentMethod)?.options ?? []
 
     const data = await this.openai.extractContent({
       systemPrompt: prompt({
@@ -229,8 +224,7 @@ export class BillExtractionService {
         ...(purchase
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(billSchema, fields.purchase)
-                  .fieldId,
+                fieldId: billSchema.getField(fields.purchase).fieldId,
                 valueInput: { resourceId: purchase.id },
               },
             ]
@@ -238,8 +232,7 @@ export class BillExtractionService {
         ...(data.poNumber
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(billSchema, fields.poNumber)
-                  .fieldId,
+                fieldId: billSchema.getField(fields.poNumber).fieldId,
                 valueInput: { string: data.poNumber },
               },
             ]
@@ -247,8 +240,7 @@ export class BillExtractionService {
         ...(vendor
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(billSchema, fields.vendor)
-                  .fieldId,
+                fieldId: billSchema.getField(fields.vendor).fieldId,
                 valueInput: { resourceId: vendor.id },
               },
             ]
@@ -256,10 +248,7 @@ export class BillExtractionService {
         ...(data.invoiceNumber
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(
-                  billSchema,
-                  fields.invoiceNumber,
-                ).fieldId,
+                fieldId: billSchema.getField(fields.invoiceNumber).fieldId,
                 valueInput: { string: data.invoiceNumber },
               },
             ]
@@ -267,10 +256,7 @@ export class BillExtractionService {
         ...(paymentMethodOptionId
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(
-                  billSchema,
-                  fields.paymentMethod,
-                ).fieldId,
+                fieldId: billSchema.getField(fields.paymentMethod).fieldId,
                 valueInput: { optionId: paymentMethodOptionId },
               },
             ]
@@ -278,8 +264,7 @@ export class BillExtractionService {
         ...(data.invoiceDate && !isNaN(new Date(data.invoiceDate).getTime())
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(billSchema, fields.invoiceDate)
-                  .fieldId,
+                fieldId: billSchema.getField(fields.invoiceDate).fieldId,
                 valueInput: { date: new Date(data.invoiceDate).toISOString() },
               },
             ]
@@ -287,10 +272,7 @@ export class BillExtractionService {
         ...(data.paymentTerms
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(
-                  billSchema,
-                  fields.paymentTerms,
-                ).fieldId,
+                fieldId: billSchema.getField(fields.paymentTerms).fieldId,
                 valueInput: { number: data.paymentTerms },
               },
             ]
@@ -307,8 +289,7 @@ export class BillExtractionService {
           ...(resourceId
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.bill)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.bill).fieldId,
                   valueInput: { resourceId },
                 },
               ]
@@ -316,8 +297,7 @@ export class BillExtractionService {
           ...(lineItem.itemName
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.itemName).fieldId,
                   valueInput: { string: lineItem.itemName },
                 },
               ]
@@ -325,8 +305,7 @@ export class BillExtractionService {
           ...(lineItem.quantity
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.quantity)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.quantity).fieldId,
                   valueInput: { number: lineItem.quantity },
                 },
               ]
@@ -334,8 +313,7 @@ export class BillExtractionService {
           ...(lineItem.unitCost
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitCost)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.unitCost).fieldId,
                   valueInput: { number: lineItem.unitCost },
                 },
               ]
@@ -343,8 +321,7 @@ export class BillExtractionService {
           ...(lineItem.totalCost
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.totalCost)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.totalCost).fieldId,
                   valueInput: { number: lineItem.totalCost },
                 },
               ]
@@ -352,8 +329,7 @@ export class BillExtractionService {
           ...(needDate
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.needDate).fieldId,
                   valueInput: { date: needDate },
                 },
               ]
@@ -361,10 +337,7 @@ export class BillExtractionService {
           ...(lineItem.itemNumber
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(
-                    lineSchema,
-                    fields.itemNumber,
-                  ).fieldId,
+                  fieldId: lineSchema.getField(fields.itemNumber).fieldId,
                   valueInput: { string: lineItem.itemNumber },
                 },
               ]

@@ -11,7 +11,6 @@ import {
   ValueInputSchema,
   ValueResourceSchema,
   fields,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -127,14 +126,14 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         )
 
         if (resource.type === 'Job') {
-          const schema = await schemaService.readMergedSchema(accountId, 'Part')
+          const schema = await schemaService.readSchema(accountId, 'Part')
           await service.create(
             accountId,
             'Part',
             {
               fields: [
                 {
-                  fieldId: selectSchemaFieldUnsafe(schema, fields.job).fieldId,
+                  fieldId: schema.getField(fields.job).fieldId,
                   valueInput: { resourceId: resource.id },
                 },
               ],

@@ -1,9 +1,6 @@
 import { FieldType, Prisma } from '@prisma/client'
 import {
-  Address,
-  Contact,
   Resource,
-  SchemaField,
   Value,
   ValueInput,
   ValueResource,
@@ -99,8 +96,8 @@ export const mapValueResourceModelToEntity = (
 })
 
 export const mapValueInputToPrismaValueUpdate = (
-  value: ValueInput,
   fieldType: FieldType,
+  value: ValueInput,
 ): Prisma.ValueUpdateWithoutResourceFieldValueInput =>
   match<FieldType, Prisma.ValueUpdateWithoutResourceFieldValueInput>(fieldType)
     .with('Address', () =>
@@ -174,95 +171,50 @@ export const mapValueInputToPrismaValueUpdate = (
     .exhaustive()
 
 export const mapValueInputToPrismaValueCreate = (
+  fieldType: FieldType,
   value: ValueInput,
-  { defaultToToday, defaultValue }: SchemaField,
 ): Prisma.ValueCreateWithoutResourceFieldValueInput =>
-  match<ValueInput, Prisma.ValueCreateWithoutResourceFieldValueInput>(value)
-    .with({ address: P.not(undefined) }, ({ address: value }) => {
-      const defaultAddress = defaultValue?.address
-      const defaultAdressValue: Address | null = defaultAddress
-        ? {
-            city: defaultAddress.city,
-            country: defaultAddress.country,
-            state: defaultAddress.state,
-            streetAddress: defaultAddress.streetAddress,
-            zip: defaultAddress.zip,
-          }
-        : null
-      const address = value ?? defaultAdressValue
-      return address ? { Address: { create: address } } : {}
-    })
-    .with({ boolean: P.not(undefined) }, ({ boolean: value }) => ({
-      boolean: value ?? defaultValue?.boolean ?? null,
-    }))
-    .with({ contact: P.not(undefined) }, ({ contact: value }) => {
-      const defaultContact = defaultValue?.contact
-      const defaultContactValue: Contact | null = defaultContact
-        ? {
-            email: defaultContact.email,
-            name: defaultContact.name,
-            phone: defaultContact.phone,
-            title: defaultContact.title,
-          }
-        : null
-      const contact = value ?? defaultContactValue
-      return contact ? { Contact: { create: contact } } : {}
-    })
-    .with({ date: P.not(undefined) }, ({ date: value }) => ({
-      date:
-        value ??
-        (defaultToToday ? new Date() : null) ??
-        defaultValue?.date ??
-        null,
-    }))
-    .with({ number: P.not(undefined) }, ({ number: value }) => ({
-      number: value ?? defaultValue?.number ?? null,
-    }))
-    .with({ optionId: P.not(undefined) }, ({ optionId: value }) => {
-      const optionId = value ?? defaultValue?.option?.id ?? null
-      return optionId ? { Option: { connect: { id: optionId } } } : {}
-    })
-    .with({ string: P.not(undefined) }, ({ string: value }) => ({
-      string: value ?? defaultValue?.string ?? null,
-    }))
-    .with({ userId: P.not(undefined) }, ({ userId: value }) => {
-      const userId = value ?? defaultValue?.user?.id ?? null
-      return userId ? { User: { connect: { id: userId } } } : {}
-    })
-    .with({ fileId: P.not(undefined) }, ({ fileId: value }) => {
-      const fileId = value ?? defaultValue?.file?.id ?? null
-      return fileId ? { File: { connect: { id: fileId } } } : {}
-    })
-    .with({ resourceId: P.not(undefined) }, ({ resourceId: value }) => {
-      const resourceId = value ?? defaultValue?.resource?.id ?? null
-      return resourceId ? { Resource: { connect: { id: resourceId } } } : {}
-    })
-    .with({ fileIds: P.not(undefined) }, ({ fileIds: value }) => {
-      const fileIds = value.length
-        ? value
-        : defaultValue?.files?.length
-          ? defaultValue.files.map((f) => f.id)
-          : []
-      return {
-        Files: {
-          create: fileIds.map((fileId) => ({
+  match<FieldType, Prisma.ValueCreateWithoutResourceFieldValueInput>(fieldType)
+    .with('Address', () =>
+      value.address ? { Address: { create: value.address } } : {},
+    )
+    .with('Checkbox', () => ({ boolean: value.boolean }))
+    .with('Contact', () =>
+      value.contact ? { Contact: { create: value.contact } } : {},
+    )
+    .with('Date', () => ({ date: value.date }))
+    .with(P.union('Money', 'Number'), () => ({ number: value.number }))
+    .with('Select', () =>
+      value.optionId ? { Option: { connect: { id: value.optionId } } } : {},
+    )
+    .with(P.union('Textarea', 'Text'), () => ({ string: value.string }))
+    .with('User', () =>
+      value.userId ? { User: { connect: { id: value.userId } } } : {},
+    )
+    .with('File', () =>
+      value.fileId ? { File: { connect: { id: value.fileId } } } : {},
+    )
+    .with('Resource', () =>
+      value.resourceId
+        ? { Resource: { connect: { id: value.resourceId } } }
+        : {},
+    )
+    .with('Files', () => ({
+      Files: {
+        create:
+          value.fileIds?.map((fileId) => ({
             File: { connect: { id: fileId } },
-          })),
-        },
-      }
-    })
-    .with({ optionIds: P.not(undefined) }, ({ optionIds: value }) => {
-      const optionIds = value.length
-        ? value
-        : defaultValue?.options.length
-          ? defaultValue.options.map((o) => o.id)
-          : []
-      return {
-        ValueOption: {
-          create: optionIds.map((id) => ({ Option: { connect: { id } } })),
-        },
-      }
-    })
+          })) || [],
+      },
+    }))
+    .with('MultiSelect', () => ({
+      ValueOption: {
+        create:
+          value.optionIds?.map((optionId) => ({
+            Option: { connect: { id: optionId } },
+          })) || [],
+      },
+    }))
     .exhaustive()
 
 export const mapValueInputToPrismaValueWhere = (

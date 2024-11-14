@@ -4,11 +4,7 @@ import {
 } from '@supplyside/api/extraction'
 import { logger } from '@supplyside/api/integrations/fastify/logger'
 import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
-import {
-  fields,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, selectResourceFieldValue } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 import { z } from 'zod'
 import { ResourceService } from '../resource/ResourceService'
@@ -133,9 +129,9 @@ export class JobExtractionService {
 
   async extractContent(accountId: string, resourceId: string) {
     const [schema, resource, lineSchema] = await Promise.all([
-      this.schemaService.readMergedSchema(accountId, 'Job'),
+      this.schemaService.readSchema(accountId, 'Job'),
       this.resourceService.read(accountId, resourceId),
-      this.schemaService.readMergedSchema(accountId, 'Part'),
+      this.schemaService.readSchema(accountId, 'Part'),
     ])
 
     const { files } =
@@ -166,8 +162,7 @@ export class JobExtractionService {
         ...(customer
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.customer)
-                  .fieldId,
+                fieldId: schema.getField(fields.customer).fieldId,
                 valueInput: { resourceId: customer.id },
               },
             ]
@@ -175,8 +170,7 @@ export class JobExtractionService {
         ...(data.needDate
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.needDate)
-                  .fieldId,
+                fieldId: schema.getField(fields.needDate).fieldId,
                 valueInput: { string: data.needDate },
               },
             ]
@@ -184,8 +178,7 @@ export class JobExtractionService {
         ...(data.paymentTerms
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.paymentTerms)
-                  .fieldId,
+                fieldId: schema.getField(fields.paymentTerms).fieldId,
                 valueInput: { number: data.paymentTerms },
               },
             ]
@@ -201,8 +194,7 @@ export class JobExtractionService {
           ...(resourceId
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.job)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.job).fieldId,
                   valueInput: { resourceId },
                 },
               ]
@@ -210,8 +202,7 @@ export class JobExtractionService {
           ...(lineItem.partName
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.partName)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.partName).fieldId,
                   valueInput: { string: lineItem.partName },
                 },
               ]
@@ -219,8 +210,7 @@ export class JobExtractionService {
           ...(lineItem.quantity
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.quantity)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.quantity).fieldId,
                   valueInput: { number: lineItem.quantity },
                 },
               ]
@@ -228,8 +218,7 @@ export class JobExtractionService {
           ...(lineItem.unitCost
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitCost)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.unitCost).fieldId,
                   valueInput: { number: lineItem.unitCost },
                 },
               ]
@@ -237,8 +226,7 @@ export class JobExtractionService {
           ...(needDate
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.needDate).fieldId,
                   valueInput: { date: needDate },
                 },
               ]
@@ -246,10 +234,7 @@ export class JobExtractionService {
           ...(lineItem.otherNotes
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(
-                    lineSchema,
-                    fields.otherNotes,
-                  ).fieldId,
+                  fieldId: lineSchema.getField(fields.otherNotes).fieldId,
                   valueInput: { string: lineItem.otherNotes },
                 },
               ]

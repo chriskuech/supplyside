@@ -3,7 +3,7 @@ import { P, match } from 'ts-pattern'
 import { fields } from '../templates/fields'
 import { FieldType, Value, ValueInput } from '../types'
 import { Resource, ResourceField } from '../types/resource'
-import { Schema } from '../types/schema'
+import { SchemaData } from '../types/schema-data'
 import { ValueResource } from '../types/value-resource'
 import { FieldReference } from './reference'
 
@@ -28,7 +28,10 @@ export const selectResourceFieldValue = (
   field: FieldReference,
 ) => selectResourceField(resource, field)?.value
 
-export const isMissingRequiredFields = (schema: Schema, resource: Resource) =>
+export const isMissingRequiredFields = (
+  schema: SchemaData,
+  resource: Resource,
+) =>
   schema.fields.some((field) => {
     if (!field.isRequired) return false
 

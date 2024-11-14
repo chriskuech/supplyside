@@ -8,11 +8,12 @@ export const SectionSchema = z.object({
   fields: z.array(SchemaFieldSchema),
 })
 
-export const SchemaSchema = z.object({
+export const SchemaDataSchema = z.object({
+  accountId: z.string(),
   resourceType: ResourceTypeSchema,
   sections: z.array(SectionSchema),
   fields: z.array(SchemaFieldSchema),
 })
 
-export type Schema = z.infer<typeof SchemaSchema>
+export type SchemaData = z.infer<typeof SchemaDataSchema>
 export type Section = z.infer<typeof SectionSchema>
