@@ -125,7 +125,7 @@ export default async function Layout({
           ],
         },
         {
-          '==': [{ var: fields.recurring.name }, false],
+          '!=': [{ var: fields.recurring.name }, true],
         },
       ],
     },
