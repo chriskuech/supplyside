@@ -1165,6 +1165,7 @@ export class ResourceService {
           nextCreationDate = getNextCreationDate(nextCreationDate)
         }
 
+        // `Resource.key` is (currently) created transactionally and thus not parallelizable
         for (const date of newResourcesCreationDates) {
           await this.createRecurringResource(accountId, recurringBill.id, date)
         }
