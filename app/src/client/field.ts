@@ -1,5 +1,5 @@
 import 'server-only'
-import { SchemaField } from '@supplyside/model'
+import { SchemaFieldData } from '@supplyside/model'
 import { paths } from '@supplyside/api'
 import { revalidateTag } from 'next/cache'
 import { client } from '.'
@@ -51,7 +51,7 @@ export const updateField = async (
 
 export const readFields = async (
   accountId: string,
-): Promise<SchemaField[] | undefined> => {
+): Promise<SchemaFieldData[] | undefined> => {
   const { data } = await client().GET('/api/accounts/{accountId}/fields/', {
     params: {
       path: { accountId },

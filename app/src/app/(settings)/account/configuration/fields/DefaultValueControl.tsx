@@ -4,12 +4,12 @@ import { match } from 'ts-pattern'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { SchemaField, Value, emptyValue } from '@supplyside/model'
+import { SchemaFieldData, Value, emptyValue } from '@supplyside/model'
 import AddressField from '@/lib/resource/fields/controls/AddressField'
 import ContactField from '@/lib/resource/fields/controls/ContactField'
 
 type Props = {
-  field: SchemaField
+  field: SchemaFieldData
   defaultValue: Value
   onChange: (dto: Value) => void
   isDisabled?: boolean

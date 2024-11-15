@@ -14,11 +14,11 @@ import {
 import { useEffect, useState } from 'react'
 import { isTruthy } from 'remeda'
 import {
-  SchemaField,
+  FieldTemplate,
+  SchemaFieldData,
   Value,
   emptyValue,
   fieldTypes,
-  findTemplateField,
   mapValueToValueInput,
 } from '@supplyside/model'
 import OptionsControl from './OptionsControl'
@@ -37,7 +37,7 @@ export type OptionPatch = {
 )
 
 type Props = {
-  field: SchemaField
+  field: SchemaFieldData & { template: FieldTemplate | null }
   onSubmit: (dto: UpdateFieldData) => void
   onCancel: () => void
 }
@@ -74,7 +74,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
   const isValid = !!name
   const isDisabled = !!field.templateId
 
-  const template = findTemplateField(field.templateId)
+  const template = field.template
 
   return (
     <Stack spacing={2} width="fit-content">
@@ -143,7 +143,7 @@ export default function UpdateFieldForm({ field, onSubmit, onCancel }: Props) {
         )}
       </Stack>
 
-      {!findTemplateField(field.templateId)?.defaultValue && (
+      {!field.template?.defaultValue && (
         <FormControl fullWidth>
           <FormLabel htmlFor="default-field-defaultValue-control">
             Default Value

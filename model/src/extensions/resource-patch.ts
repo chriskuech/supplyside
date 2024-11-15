@@ -123,7 +123,7 @@ export class ResourcePatch {
     this.setPatch(fieldRef, { string })
   }
 
-  setUserId(fieldRef: FieldReference, userId: string | null) {
+  setUserId(fieldRef: FieldReference, userId: string) {
     this.setPatch(fieldRef, { userId })
   }
 

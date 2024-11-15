@@ -5,12 +5,12 @@ import {
   Typography,
 } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
-import { SchemaData, SchemaField } from '@supplyside/model'
+import { SchemaData, SchemaFieldData } from '@supplyside/model'
 import AddSectionControl from './AddSectionControl'
 import SchemaSectionsControl from './SchemaSectionsControl'
 
 type Props = {
-  fields: SchemaField[]
+  fields: SchemaFieldData[]
   schemas: SchemaData[]
 }
 

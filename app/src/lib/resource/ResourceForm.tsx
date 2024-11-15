@@ -13,7 +13,12 @@ import {
 } from '@mui/material'
 import { ExpandMore, Settings, Sync } from '@mui/icons-material'
 import { useSnackbar } from 'notistack'
-import { Resource, mapValueToValueInput, SchemaData } from '@supplyside/model'
+import {
+  Resource,
+  mapValueToValueInput,
+  SchemaData,
+  Schema,
+} from '@supplyside/model'
 import { selectResourceFieldValue } from '@supplyside/model'
 import Link from 'next/link'
 import FieldControl from './fields/FieldControl'
@@ -33,6 +38,7 @@ export default function ResourceForm({
   singleColumn,
 }: Props) {
   const { enqueueSnackbar } = useSnackbar()
+  const schema = new Schema(schemaData)
 
   const columns = singleColumn ? 1 : 3
 
@@ -106,99 +112,104 @@ export default function ResourceForm({
                   <Stack spacing={3} direction="row">
                     {chunkByN(s.fields, columns).map((fs, i) => (
                       <Stack key={i} spacing={3} flex={1}>
-                        {fs.map((f) => (
-                          <Stack key={f.fieldId}>
-                            <Stack direction="row" alignItems="center">
-                              <Typography
-                                variant="overline"
-                                fontSize={14}
-                                lineHeight="unset"
-                                flexGrow={1}
-                              >
-                                {f.name}
-                                {f.isRequired && (
-                                  <Typography
-                                    color="error"
-                                    display="inline"
-                                    variant="overline"
-                                    fontWeight="bold"
-                                    ml={0.5}
-                                    sx={{ verticalAlign: 'super' }}
-                                  >
-                                    *
-                                  </Typography>
-                                )}
-                              </Typography>
-                              {f.type === 'Resource' && (
-                                <Tooltip title={`Sync data from ${f.name}`}>
-                                  <IconButton
-                                    color="secondary"
-                                    disabled={
-                                      !selectResourceFieldValue(resource, f)
-                                        ?.resource
-                                    }
-                                    onClick={async () => {
-                                      const resourceId =
-                                        selectResourceFieldValue(resource, f)
-                                          ?.resource?.id
-
-                                      if (!resourceId) return
-
-                                      try {
-                                        await copyFromResource(resource.id, {
-                                          resourceId,
-                                        })
-                                      } catch {
-                                        enqueueSnackbar(
-                                          `Failed to extract data from ${f.name}`,
-                                          { variant: 'error' },
-                                        )
+                        {fs
+                          .map((f) => schema.getField(f))
+                          .map((f) => (
+                            <Stack key={f.fieldId}>
+                              <Stack direction="row" alignItems="center">
+                                <Typography
+                                  variant="overline"
+                                  fontSize={14}
+                                  lineHeight="unset"
+                                  flexGrow={1}
+                                >
+                                  {f.name}
+                                  {f.isRequired && (
+                                    <Typography
+                                      color="error"
+                                      display="inline"
+                                      variant="overline"
+                                      fontWeight="bold"
+                                      ml={0.5}
+                                      sx={{ verticalAlign: 'super' }}
+                                    >
+                                      *
+                                    </Typography>
+                                  )}
+                                </Typography>
+                                {f.type === 'Resource' && (
+                                  <Tooltip title={`Sync data from ${f.name}`}>
+                                    <IconButton
+                                      color="secondary"
+                                      disabled={
+                                        !selectResourceFieldValue(resource, f)
+                                          ?.resource
                                       }
-                                    }}
-                                  >
-                                    <Sync fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                              )}
-                            </Stack>
-                            <Typography variant="caption" gutterBottom>
-                              {f.description}
-                            </Typography>
-                            <Box>
-                              <Field
-                                disabled={
-                                  !!resource.templateId && !!f.templateId
-                                }
-                                inputId={`rf-${f.fieldId}`}
-                                resource={resource}
-                                field={f}
-                                value={selectResourceFieldValue(resource, {
-                                  fieldId: f.fieldId,
-                                })}
-                                onChange={async (value) => {
-                                  const result = await updateResource(
-                                    resource.id,
-                                    [
-                                      {
-                                        field: f,
-                                        valueInput: mapValueToValueInput(
-                                          f.type,
-                                          value,
-                                        ),
-                                      },
-                                    ],
-                                  )
+                                      onClick={async () => {
+                                        const resourceId =
+                                          selectResourceFieldValue(resource, f)
+                                            ?.resource?.id
 
-                                  if (!result) {
-                                    enqueueSnackbar('Failed to update field', {
-                                      variant: 'error',
-                                    })
+                                        if (!resourceId) return
+
+                                        try {
+                                          await copyFromResource(resource.id, {
+                                            resourceId,
+                                          })
+                                        } catch {
+                                          enqueueSnackbar(
+                                            `Failed to extract data from ${f.name}`,
+                                            { variant: 'error' },
+                                          )
+                                        }
+                                      }}
+                                    >
+                                      <Sync fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                              </Stack>
+                              <Typography variant="caption" gutterBottom>
+                                {f.description}
+                              </Typography>
+                              <Box>
+                                <Field
+                                  disabled={
+                                    !!resource.templateId && !!f.templateId
                                   }
-                                }}
-                              />
-                            </Box>
-                          </Stack>
-                        ))}
+                                  inputId={`rf-${f.fieldId}`}
+                                  resource={resource}
+                                  field={f}
+                                  value={selectResourceFieldValue(resource, {
+                                    fieldId: f.fieldId,
+                                  })}
+                                  onChange={async (value) => {
+                                    const result = await updateResource(
+                                      resource.id,
+                                      [
+                                        {
+                                          field: f,
+                                          valueInput: mapValueToValueInput(
+                                            f.type,
+                                            value,
+                                          ),
+                                        },
+                                      ],
+                                    )
+
+                                    if (!result) {
+                                      enqueueSnackbar(
+                                        'Failed to update field',
+                                        {
+                                          variant: 'error',
+                                        },
+                                      )
+                                    }
+                                  }}
+                                />
+                              </Box>
+                            </Stack>
+                          ))}
                       </Stack>
                     ))}
                   </Stack>

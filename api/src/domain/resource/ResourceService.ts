@@ -12,7 +12,6 @@ import {
   ValueResource,
   billStatusOptions,
   fields,
-  findTemplateField,
   intervalUnits,
   jobStatusOptions,
   purchaseStatusOptions,
@@ -97,7 +96,7 @@ export class ResourceService {
   async create(patch: ResourcePatch): Promise<Resource> {
     const { accountId, type } = patch.schema
 
-    if (patch.hasPatch(fields.name)) {
+    if (patch.schema.implements(fields.name) && patch.hasPatch(fields.name)) {
       const name = patch.getString(fields.name)
       if (name) {
         const matching = await this.findOne(accountId, type, {
@@ -127,14 +126,16 @@ export class ResourceService {
       patch.setPatch(fields.poNumber, { string: key.toString() })
     }
 
-    for (const { fieldId } of patch.schema.schema.fields) {
-      if (patch.hasPatch({ fieldId })) {
-        const field = patch.schema.getField({ fieldId })
-        if (field.defaultToToday) {
-          patch.setPatch({ fieldId }, { date: new Date().toISOString() })
-        } else if (field.defaultValue) {
-          patch.setPatch({ fieldId }, field.defaultValue)
-        }
+    for (const field of patch.schema.fields) {
+      if (patch.hasPatch(field)) {
+        continue
+      } else if (field.defaultToToday) {
+        patch.setDate(field, new Date().toISOString())
+      } else if (field.defaultValue) {
+        patch.setPatch(
+          field,
+          mapValueToValueInput(field.type, field.defaultValue),
+        )
       }
     }
 
@@ -220,7 +221,7 @@ export class ResourceService {
 
     deriveFields(patch)
 
-    if (patch.hasPatch(fields.name)) {
+    if (patch.schema.implements(fields.name) && patch.hasPatch(fields.name)) {
       const name = patch.getString(fields.name)
       if (name) {
         const matching = await this.findOne(
@@ -800,11 +801,12 @@ export class ResourceService {
       .map((rf) => ({
         rf,
         sf: fromSchema.getField(rf),
-        tf: findTemplateField(rf.templateId),
       }))
       .filter(({ sf }) => toSchema.implements(sf))
       .filter(
-        ({ tf }) => !tf?.isDerived && tf?.templateId !== fields.name.templateId,
+        ({ sf: { template } }) =>
+          !template?.isDerived &&
+          template?.templateId !== fields.name.templateId,
       )
 
     await this.withUpdatePatch(accountId, resourceId, (patch) => {

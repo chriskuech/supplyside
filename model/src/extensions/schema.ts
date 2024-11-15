@@ -1,6 +1,7 @@
 import { fail } from 'assert'
 import { match, P } from 'ts-pattern'
-import { Option, SchemaData, SchemaField } from '../types'
+import { fields } from '../templates'
+import { Option, SchemaData, SchemaField, SchemaFieldData } from '../types'
 import { FieldReference, OptionReference } from './reference'
 
 export class Schema {
@@ -14,11 +15,21 @@ export class Schema {
     return this.schema.accountId
   }
 
+  get fields() {
+    return this.schema.fields.map((field) => this.getField(field))
+  }
+
   getField(fieldRef: FieldReference): SchemaField {
-    return (
+    const field =
       this.schema.fields.find((f) => Schema.isMatchingField(fieldRef, f)) ??
       fail(`Field ${JSON.stringify(fieldRef)} does not exist`)
-    )
+
+    return {
+      ...field,
+      template: field.templateId
+        ? Schema.findTemplateField(field.templateId)
+        : null,
+    }
   }
 
   getFieldOption(fieldRef: FieldReference, optionRef: OptionReference): Option {
@@ -38,7 +49,10 @@ export class Schema {
     )
   }
 
-  private static isMatchingField(fieldRef: FieldReference, field: SchemaField) {
+  private static isMatchingField(
+    fieldRef: FieldReference,
+    field: SchemaFieldData,
+  ) {
     return match(fieldRef)
       .with(
         { templateId: P.string },
@@ -58,5 +72,12 @@ export class Schema {
       .with({ id: P.string }, ({ id }) => option.id === id)
       .with({ name: P.string }, ({ name }) => option.name === name)
       .exhaustive()
+  }
+
+  private static findTemplateField(templateId: string) {
+    return (
+      Object.values(fields).find((field) => field.templateId === templateId) ??
+      fail(`Template field ${templateId} does not exist`)
+    )
   }
 }

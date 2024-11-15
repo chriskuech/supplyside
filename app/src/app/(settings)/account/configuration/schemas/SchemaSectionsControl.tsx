@@ -31,14 +31,14 @@ import { z } from 'zod'
 import {
   ResourceType,
   SchemaData,
-  SchemaField,
+  SchemaFieldData,
   Section,
 } from '@supplyside/model'
 import SectionFieldsControl from './SectionFieldsControl'
 import { removeSection, updateSchema, updateSection } from '@/actions/schema'
 
 type Props = {
-  fields: SchemaField[]
+  fields: SchemaFieldData[]
   schemaData: SchemaData
 }
 
@@ -108,7 +108,7 @@ export default function SchemaSectionsControl({ fields, schemaData }: Props) {
 
 const SortableRow: FC<{
   resourceType: ResourceType
-  fields: SchemaField[]
+  fields: SchemaFieldData[]
   section: Section
 }> = ({ resourceType, fields, section }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
