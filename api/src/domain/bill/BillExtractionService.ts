@@ -170,10 +170,9 @@ export class BillExtractionService {
   ) {}
 
   async extractContent(accountId: string, resourceId: string) {
-    const [billSchema, billResource, lineSchema] = await Promise.all([
+    const [billSchema, billResource] = await Promise.all([
       this.schemaService.readSchema(accountId, 'Bill'),
       this.resourceService.read(accountId, resourceId),
-      this.schemaService.readSchema(accountId, 'PurchaseLine'),
     ])
 
     const billFiles =
@@ -215,135 +214,53 @@ export class BillExtractionService {
           })
         : []
 
-    const paymentMethodOptionId = paymentMethodOptions.find(
-      (o) => o.name === data.paymentMethod,
-    )?.id
+    await this.resourceService.withUpdatePatch(
+      accountId,
+      resourceId,
+      (patch) => {
+        const invoiceDate = coerceDateStringToISO8601(data.invoiceDate)
+        const paymentMethodOptionId = paymentMethodOptions.find(
+          (o) => o.name === data.paymentMethod,
+        )?.id
 
-    await this.resourceService.update(accountId, resourceId, {
-      fields: [
-        ...(purchase
-          ? [
-              {
-                fieldId: billSchema.getField(fields.purchase).fieldId,
-                valueInput: { resourceId: purchase.id },
-              },
-            ]
-          : []),
-        ...(data.poNumber
-          ? [
-              {
-                fieldId: billSchema.getField(fields.poNumber).fieldId,
-                valueInput: { string: data.poNumber },
-              },
-            ]
-          : []),
-        ...(vendor
-          ? [
-              {
-                fieldId: billSchema.getField(fields.vendor).fieldId,
-                valueInput: { resourceId: vendor.id },
-              },
-            ]
-          : []),
-        ...(data.invoiceNumber
-          ? [
-              {
-                fieldId: billSchema.getField(fields.invoiceNumber).fieldId,
-                valueInput: { string: data.invoiceNumber },
-              },
-            ]
-          : []),
-        ...(paymentMethodOptionId
-          ? [
-              {
-                fieldId: billSchema.getField(fields.paymentMethod).fieldId,
-                valueInput: { optionId: paymentMethodOptionId },
-              },
-            ]
-          : []),
-        ...(data.invoiceDate && !isNaN(new Date(data.invoiceDate).getTime())
-          ? [
-              {
-                fieldId: billSchema.getField(fields.invoiceDate).fieldId,
-                valueInput: { date: new Date(data.invoiceDate).toISOString() },
-              },
-            ]
-          : []),
-        ...(data.paymentTerms
-          ? [
-              {
-                fieldId: billSchema.getField(fields.paymentTerms).fieldId,
-                valueInput: { number: data.paymentTerms },
-              },
-            ]
-          : []),
-      ],
-      costs: data.itemizedCosts,
-    })
+        for (const cost of data.itemizedCosts ?? []) {
+          patch.addCost(cost)
+        }
+
+        if (purchase) patch.setResourceId(fields.purchase, purchase.id)
+        if (data.poNumber) patch.setString(fields.poNumber, data.poNumber)
+        if (vendor) patch.setResourceId(fields.vendor, vendor.id)
+        if (data.invoiceNumber)
+          patch.setString(fields.invoiceNumber, data.invoiceNumber)
+        if (paymentMethodOptionId)
+          patch.setOption(fields.paymentMethod, { id: paymentMethodOptionId })
+        if (invoiceDate) patch.setDate(fields.invoiceDate, invoiceDate)
+        if (data.paymentTerms)
+          patch.setNumber(fields.paymentTerms, data.paymentTerms)
+      },
+    )
 
     for (const lineItem of data.lineItems ?? []) {
       const needDate = coerceDateStringToISO8601(lineItem.needDate)
 
-      await this.resourceService.create(accountId, 'PurchaseLine', {
-        fields: [
-          ...(resourceId
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.bill).fieldId,
-                  valueInput: { resourceId },
-                },
-              ]
-            : []),
-          ...(lineItem.itemName
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.itemName).fieldId,
-                  valueInput: { string: lineItem.itemName },
-                },
-              ]
-            : []),
-          ...(lineItem.quantity
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.quantity).fieldId,
-                  valueInput: { number: lineItem.quantity },
-                },
-              ]
-            : []),
-          ...(lineItem.unitCost
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.unitCost).fieldId,
-                  valueInput: { number: lineItem.unitCost },
-                },
-              ]
-            : []),
-          ...(lineItem.totalCost
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.totalCost).fieldId,
-                  valueInput: { number: lineItem.totalCost },
-                },
-              ]
-            : []),
-          ...(needDate
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.needDate).fieldId,
-                  valueInput: { date: needDate },
-                },
-              ]
-            : []),
-          ...(lineItem.itemNumber
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.itemNumber).fieldId,
-                  valueInput: { string: lineItem.itemNumber },
-                },
-              ]
-            : []),
-        ],
-      })
+      await this.resourceService.withCreatePatch(
+        accountId,
+        'PurchaseLine',
+        (patch) => {
+          if (resourceId) patch.setResourceId(fields.bill, resourceId)
+          if (lineItem.itemName)
+            patch.setString(fields.itemName, lineItem.itemName)
+          if (lineItem.quantity)
+            patch.setNumber(fields.quantity, lineItem.quantity)
+          if (lineItem.unitCost)
+            patch.setNumber(fields.unitCost, lineItem.unitCost)
+          if (lineItem.totalCost)
+            patch.setNumber(fields.totalCost, lineItem.totalCost)
+          if (needDate) patch.setDate(fields.needDate, needDate)
+          if (lineItem.itemNumber)
+            patch.setString(fields.itemNumber, lineItem.itemNumber)
+        },
+      )
     }
   }
 }

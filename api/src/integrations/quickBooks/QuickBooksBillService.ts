@@ -89,12 +89,8 @@ export class QuickBooksBillService {
 
     assert(quickBooksBillIdField, 'quickBooksBillId field not found')
 
-    await this.resourceService.updateResourceField(
-      accountId,
-      'Bill',
-      bill.id,
-      fields.quickBooksBillId,
-      { string: quickBooksBill.Bill.Id },
+    await this.resourceService.withUpdatePatch(accountId, bill.id, (patch) =>
+      patch.setString(fields.quickBooksBillId, quickBooksBill.Bill.Id),
     )
 
     return quickBooksBill

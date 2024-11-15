@@ -11,6 +11,7 @@ export type CostPatch = Omit<Cost, 'id'> & { id?: string }
 export class ResourcePatch {
   private _costs: CostPatch[] = []
   private _patches: FieldPatch[] = []
+  private _templateId: string | null = null
 
   resource?: Resource | undefined
 
@@ -19,6 +20,14 @@ export class ResourcePatch {
     resource?: Resource | undefined,
   ) {
     this.resource = resource
+  }
+
+  get patchedTemplateId() {
+    return this._templateId
+  }
+
+  set patchedTemplateId(templateId: string | null) {
+    this._templateId = templateId
   }
 
   get costs(): CostPatch[] {
@@ -60,6 +69,10 @@ export class ResourcePatch {
     return this.getPatch(fieldRef)?.valueInput.optionId === option.id
   }
 
+  getBoolean(fieldRef: FieldReference) {
+    return this.getPatch(fieldRef)?.valueInput.boolean
+  }
+
   getDate(fieldRef: FieldReference) {
     return this.getPatch(fieldRef)?.valueInput.date
   }
@@ -76,12 +89,42 @@ export class ResourcePatch {
     return this.getPatch(fieldRef)?.valueInput.string
   }
 
-  setDate(fieldRef: FieldReference, date: string) {
+  setBoolean(fieldRef: FieldReference, boolean: boolean | null) {
+    this.setPatch(fieldRef, { boolean })
+  }
+
+  setDate(fieldRef: FieldReference, date: string | null) {
     this.setPatch(fieldRef, { date })
+  }
+
+  setFileId(fieldRef: FieldReference, fileId: string) {
+    this.setPatch(fieldRef, { fileId })
+  }
+
+  setFileIds(fieldRef: FieldReference, fileIds: string[]) {
+    this.setPatch(fieldRef, { fileIds })
   }
 
   setNumber(fieldRef: FieldReference, number: number) {
     this.setPatch(fieldRef, { number })
+  }
+
+  setOption(fieldRef: FieldReference, optionRef: OptionReference) {
+    const { id: optionId } = this.schema.getFieldOption(fieldRef, optionRef)
+
+    this.setPatch(fieldRef, { optionId })
+  }
+
+  setResourceId(fieldRef: FieldReference, resourceId: string | null) {
+    this.setPatch(fieldRef, { resourceId })
+  }
+
+  setString(fieldRef: FieldReference, string: string) {
+    this.setPatch(fieldRef, { string })
+  }
+
+  setUserId(fieldRef: FieldReference, userId: string | null) {
+    this.setPatch(fieldRef, { userId })
   }
 
   setPatch(fieldRef: FieldReference, valueInput: ValueInput) {

@@ -66,12 +66,8 @@ export class QuickBooksInvoiceService {
       })
       .then((data) => readInvoiceSchema.parse(data.json))
 
-    await this.resourceService.updateResourceField(
-      accountId,
-      'Job',
-      job.id,
-      fields.quickBooksInvoiceId,
-      { string: quickBooksInvoice.Invoice.Id },
+    await this.resourceService.withUpdatePatch(accountId, job.id, (patch) =>
+      patch.setString(fields.quickBooksInvoiceId, quickBooksInvoice.Invoice.Id),
     )
 
     return quickBooksInvoice

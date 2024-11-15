@@ -5,5 +5,5 @@ export type FieldReference =
 
 export type OptionReference =
   | { templateId: string }
-  | { optionId: string }
+  | { id: string } // TODO: change to optionId
   | { name: string }

@@ -90,8 +90,6 @@ export class BillInboxService {
           ]
         : []
 
-    const billSchema = await this.schemaService.readSchema(account.id, 'Bill')
-
     const fileIds = await Promise.all(
       [meta, ...emails, ...attachments].map(async (file) => {
         const { id: blobId } = await this.blobService.createBlob(account.id, {
@@ -108,14 +106,13 @@ export class BillInboxService {
       }),
     )
 
-    const bill = await this.resourceService.create(account.id, 'Bill', {
-      fields: [
-        {
-          fieldId: billSchema.getField(fields.billAttachments).fieldId,
-          valueInput: { fileIds },
-        },
-      ],
-    })
+    const bill = await this.resourceService.withCreatePatch(
+      account.id,
+      'Bill',
+      (patch) => {
+        patch.setFileIds(fields.billAttachments, fileIds)
+      },
+    )
 
     await this.billExtractionService.extractContent(account.id, bill.id)
   }

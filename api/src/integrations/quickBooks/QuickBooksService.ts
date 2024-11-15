@@ -291,22 +291,11 @@ export class QuickBooksService {
 
             //TODO: we are missing updating the previously related bills status when a billPayment is deleted or updated
             if (quickBooksBill.Bill.Balance === 0) {
-              const billSchema = await this.schemaService.readSchema(
+              await this.resourceService.withUpdatePatch(
                 accountId,
-                'Bill',
-              )
-
-              const paidOptionId = billSchema.getFieldOption(
-                fields.billStatus,
-                billStatusOptions.paid,
-              ).id
-
-              await this.resourceService.updateResourceField(
-                accountId,
-                'Bill',
                 bill.id,
-                fields.billStatus,
-                { optionId: paidOptionId },
+                (patch) =>
+                  patch.setOption(fields.billStatus, billStatusOptions.paid),
               )
             }
           }),
@@ -349,22 +338,10 @@ export class QuickBooksService {
         const quickBooksInvoice = await this.getInvoice(accountId, invoiceId)
 
         if (quickBooksInvoice.Invoice.Balance === 0) {
-          const jobSchema = await this.schemaService.readSchema(
+          await this.resourceService.withUpdatePatch(
             accountId,
-            'Job',
-          )
-
-          const paidOptionId = jobSchema.getFieldOption(
-            fields.jobStatus,
-            jobStatusOptions.paid,
-          ).id
-
-          await this.resourceService.updateResourceField(
-            accountId,
-            'Job',
             job.id,
-            fields.jobStatus,
-            { optionId: paidOptionId },
+            (patch) => patch.setOption(fields.jobStatus, jobStatusOptions.paid),
           )
         }
       }),

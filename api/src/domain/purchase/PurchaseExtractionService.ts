@@ -179,10 +179,9 @@ export class PurchaseExtractionService {
     resourceId: string,
     logger: FastifyBaseLogger,
   ) {
-    const [schema, resource, lineSchema] = await Promise.all([
+    const [schema, resource] = await Promise.all([
       this.schemaService.readSchema(accountId, 'Purchase'),
       this.resourceService.read(accountId, resourceId),
-      this.schemaService.readSchema(accountId, 'PurchaseLine'),
     ])
 
     const { files } =
@@ -216,123 +215,47 @@ export class PurchaseExtractionService {
       (o) => o.name === data.incoterms,
     )?.id
 
-    await this.resourceService.update(accountId, resourceId, {
-      fields: [
-        ...(data.poNumber
-          ? [
-              {
-                fieldId: schema.getField(fields.poNumber).fieldId,
-                valueInput: { string: data.poNumber },
-              },
-            ]
-          : []),
-        ...(vendor
-          ? [
-              {
-                fieldId: schema.getField(fields.vendor).fieldId,
-                valueInput: { resourceId: vendor.id },
-              },
-            ]
-          : []),
-        ...(data.purchaseDescription
-          ? [
-              {
-                fieldId: schema.getField(fields.purchaseDescription).fieldId,
-                valueInput: { string: data.purchaseDescription },
-              },
-            ]
-          : []),
-        ...(data.paymentTerms
-          ? [
-              {
-                fieldId: schema.getField(fields.paymentTerms).fieldId,
-                valueInput: { number: data.paymentTerms },
-              },
-            ]
-          : []),
-        ...(data.taxable
-          ? [
-              {
-                fieldId: schema.getField(fields.taxable).fieldId,
-                valueInput: { boolean: data.taxable },
-              },
-            ]
-          : []),
-        ...(incotermsOptionId
-          ? [
-              {
-                fieldId: schema.getField(fields.incoterms).fieldId,
-                valueInput: { optionId: incotermsOptionId },
-              },
-            ]
-          : []),
-      ],
-      costs: data.itemizedCosts,
-    })
+    await this.resourceService.withUpdatePatch(
+      accountId,
+      resourceId,
+      (patch) => {
+        for (const cost of data.itemizedCosts ?? []) {
+          patch.addCost(cost)
+        }
+
+        if (data.poNumber) patch.setString(fields.poNumber, data.poNumber)
+        if (vendor) patch.setResourceId(fields.vendor, vendor.id)
+        if (data.purchaseDescription)
+          patch.setString(fields.purchaseDescription, data.purchaseDescription)
+        if (data.paymentTerms)
+          patch.setNumber(fields.paymentTerms, data.paymentTerms)
+        if (data.taxable) patch.setBoolean(fields.taxable, data.taxable)
+        if (incotermsOptionId)
+          patch.setOption(fields.incoterms, { id: incotermsOptionId })
+      },
+    )
 
     for (const lineItem of data.lineItems ?? []) {
       const needDate = coerceDateStringToISO8601(lineItem.needDate)
 
-      await this.resourceService.create(accountId, 'PurchaseLine', {
-        fields: [
-          ...(resourceId
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.purchase).fieldId,
-                  valueInput: { resourceId },
-                },
-              ]
-            : []),
-          ...(lineItem.itemName
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.itemName).fieldId,
-                  valueInput: { string: lineItem.itemName },
-                },
-              ]
-            : []),
-          ...(lineItem.quantity
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.quantity).fieldId,
-                  valueInput: { number: lineItem.quantity },
-                },
-              ]
-            : []),
-          ...(lineItem.unitCost
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.unitCost).fieldId,
-                  valueInput: { number: lineItem.unitCost },
-                },
-              ]
-            : []),
-          ...(lineItem.totalCost
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.totalCost).fieldId,
-                  valueInput: { number: lineItem.totalCost },
-                },
-              ]
-            : []),
-          ...(needDate
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.needDate).fieldId,
-                  valueInput: { date: needDate },
-                },
-              ]
-            : []),
-          ...(lineItem.itemNumber
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.itemNumber).fieldId,
-                  valueInput: { string: lineItem.itemNumber },
-                },
-              ]
-            : []),
-        ],
-      })
+      await this.resourceService.withCreatePatch(
+        accountId,
+        'PurchaseLine',
+        (patch) => {
+          if (resourceId) patch.setResourceId(fields.purchase, resourceId)
+          if (lineItem.itemName)
+            patch.setString(fields.itemName, lineItem.itemName)
+          if (lineItem.quantity)
+            patch.setNumber(fields.quantity, lineItem.quantity)
+          if (lineItem.unitCost)
+            patch.setNumber(fields.unitCost, lineItem.unitCost)
+          if (lineItem.totalCost)
+            patch.setNumber(fields.totalCost, lineItem.totalCost)
+          if (needDate) patch.setDate(fields.needDate, needDate)
+          if (lineItem.itemNumber)
+            patch.setString(fields.itemNumber, lineItem.itemNumber)
+        },
+      )
     }
   }
 }

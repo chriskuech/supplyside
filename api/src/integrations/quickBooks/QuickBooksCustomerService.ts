@@ -84,12 +84,20 @@ export class QuickBooksCustomerService {
 
         if (!customer || !!customer.templateId) return
 
-        return this.resourceService.update(accountId, customer.id, {
-          fields: await this.mapQuickBooksCustomerToResourceFields(
-            accountId,
-            quickBooksCustomer,
-          ),
-        })
+        const patches = await this.mapQuickBooksCustomerToResourceFields(
+          accountId,
+          quickBooksCustomer,
+        )
+
+        return this.resourceService.withUpdatePatch(
+          accountId,
+          customer.id,
+          (patch) => {
+            for (const { fieldId, valueInput } of patches) {
+              patch.setPatch({ fieldId }, valueInput)
+            }
+          },
+        )
       }),
     )
 
@@ -107,19 +115,36 @@ export class QuickBooksCustomerService {
 
       if (customer) {
         if (customer.templateId) return
-        await this.resourceService.update(accountId, customer.id, {
-          fields: await this.mapQuickBooksCustomerToResourceFields(
-            accountId,
-            quickBooksCustomerToAdd,
-          ),
-        })
+
+        const patches = await this.mapQuickBooksCustomerToResourceFields(
+          accountId,
+          quickBooksCustomerToAdd,
+        )
+
+        await this.resourceService.withUpdatePatch(
+          accountId,
+          customer.id,
+          (patch) => {
+            for (const { fieldId, valueInput } of patches) {
+              patch.setPatch({ fieldId }, valueInput)
+            }
+          },
+        )
       } else {
-        await this.resourceService.create(accountId, 'Customer', {
-          fields: await this.mapQuickBooksCustomerToResourceFields(
-            accountId,
-            quickBooksCustomerToAdd,
-          ),
-        })
+        const patches = await this.mapQuickBooksCustomerToResourceFields(
+          accountId,
+          quickBooksCustomerToAdd,
+        )
+
+        await this.resourceService.withCreatePatch(
+          accountId,
+          'Customer',
+          (patch) => {
+            for (const { fieldId, valueInput } of patches) {
+              patch.setPatch({ fieldId }, valueInput)
+            }
+          },
+        )
       }
     }
   }
@@ -180,12 +205,14 @@ export class QuickBooksCustomerService {
       })
       .then((data) => readCustomerSchema.parse(data.json))
 
-    await this.resourceService.updateResourceField(
+    await this.resourceService.withUpdatePatch(
       accountId,
-      'Customer',
       customer.id,
-      fields.quickBooksCustomerId,
-      { string: quickBooksCustomer.Customer.Id },
+      (patch) =>
+        patch.setString(
+          fields.quickBooksCustomerId,
+          quickBooksCustomer.Customer.Id,
+        ),
     )
 
     return quickBooksCustomer
