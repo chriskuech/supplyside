@@ -1093,29 +1093,4 @@ export class ResourceService {
 
     return destination
   }
-
-  // async recalculateReceivedAllPurchases(accountId: string, resourceId: string) {
-  //   const resource = await this.read(accountId, resourceId)
-
-  //   if (resource.type !== 'Job') return
-
-  //   const purchaseLines = await this.list(accountId, 'PurchaseLine', {
-  //     where: { '==': [{ var: fields.job.name }, resourceId] },
-  //   })
-
-  //   const receivedAllPurchases = purchaseLines.every((purchaseLine) =>
-  //     [
-  //       purchaseStatusOptions.received.templateId,
-  //       purchaseStatusOptions.canceled.templateId,
-  //     ].includes(
-  //       selectResourceFieldValue(purchaseLine, fields.purchaseStatus)?.option
-  //         ?.templateId as string,
-  //     ),
-  //   )
-
-  //   await this.withUpdatePatch(accountId, resourceId, (patch) => {
-  //     patch.setBoolean(fields.receivedAllPurchases, receivedAllPurchases)
-  //   })
-
-  // }
 }
