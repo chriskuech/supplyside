@@ -14,18 +14,18 @@ import {
   fields,
   intervalUnits,
   Resource,
-  Schema,
+  SchemaData,
   selectResourceFieldValue,
 } from '@supplyside/model'
 import FieldControl from '../fields/FieldControl'
 import RecurringPlayButton from './RecurringPlayButton'
 
 type Props = {
-  schema: Schema
+  schemaData: SchemaData
   resource: Resource
 }
 
-export default function RecurringCard({ schema, resource }: Props) {
+export default function RecurringCard({ schemaData, resource }: Props) {
   const resourceTypeDisplay = resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')
 
   const isRecurring = selectResourceFieldValue(
@@ -96,7 +96,7 @@ export default function RecurringCard({ schema, resource }: Props) {
 
             <Box width={70}>
               <FieldControl
-                schema={schema}
+                schemaData={schemaData}
                 resource={resource}
                 field={fields.recurrenceInterval}
                 disabled={!isRecurring}
@@ -105,7 +105,7 @@ export default function RecurringCard({ schema, resource }: Props) {
 
             <Box width={150}>
               <FieldControl
-                schema={schema}
+                schemaData={schemaData}
                 resource={resource}
                 field={fields.recurrenceIntervalUnits}
                 disabled={!isRecurring}
@@ -122,7 +122,7 @@ export default function RecurringCard({ schema, resource }: Props) {
                 <Box width={70}>
                   <FieldControl
                     inputId="recurrence-interval-offset-in-days"
-                    schema={schema}
+                    schemaData={schemaData}
                     resource={resource}
                     field={fields.recurrenceIntervalOffsetInDays}
                     disabled={!isRecurring}

@@ -59,7 +59,7 @@ export default async function LinkedResourceTable({
       >
         <ResourceTable
           tableKey="job-purchases"
-          schema={linkedResourceSchema}
+          schemaData={linkedResourceSchema}
           resources={linkedResources ?? []}
           isEditable={false}
           sx={{

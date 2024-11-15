@@ -3,12 +3,7 @@ import {
   dataExtractionPrompt,
 } from '@supplyside/api/extraction'
 import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
-import {
-  fields,
-  selectResourceFieldValue,
-  selectSchemaField,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, selectResourceFieldValue } from '@supplyside/model'
 import { FastifyBaseLogger } from 'fastify'
 import { inject, injectable } from 'inversify'
 import { z } from 'zod'
@@ -185,9 +180,9 @@ export class PurchaseExtractionService {
     logger: FastifyBaseLogger,
   ) {
     const [schema, resource, lineSchema] = await Promise.all([
-      this.schemaService.readMergedSchema(accountId, 'Purchase'),
+      this.schemaService.readSchema(accountId, 'Purchase'),
       this.resourceService.read(accountId, resourceId),
-      this.schemaService.readMergedSchema(accountId, 'PurchaseLine'),
+      this.schemaService.readSchema(accountId, 'PurchaseLine'),
     ])
 
     const { files } =
@@ -195,8 +190,7 @@ export class PurchaseExtractionService {
 
     if (!files?.length) return
 
-    const incotermsOptions =
-      selectSchemaField(schema, fields.incoterms)?.options ?? []
+    const incotermsOptions = schema.getField(fields.incoterms)?.options ?? []
 
     const data = await this.openai.extractContent({
       systemPrompt: prompt({
@@ -227,8 +221,7 @@ export class PurchaseExtractionService {
         ...(data.poNumber
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.poNumber)
-                  .fieldId,
+                fieldId: schema.getField(fields.poNumber).fieldId,
                 valueInput: { string: data.poNumber },
               },
             ]
@@ -236,7 +229,7 @@ export class PurchaseExtractionService {
         ...(vendor
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.vendor).fieldId,
+                fieldId: schema.getField(fields.vendor).fieldId,
                 valueInput: { resourceId: vendor.id },
               },
             ]
@@ -244,10 +237,7 @@ export class PurchaseExtractionService {
         ...(data.purchaseDescription
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(
-                  schema,
-                  fields.purchaseDescription,
-                ).fieldId,
+                fieldId: schema.getField(fields.purchaseDescription).fieldId,
                 valueInput: { string: data.purchaseDescription },
               },
             ]
@@ -255,8 +245,7 @@ export class PurchaseExtractionService {
         ...(data.paymentTerms
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.paymentTerms)
-                  .fieldId,
+                fieldId: schema.getField(fields.paymentTerms).fieldId,
                 valueInput: { number: data.paymentTerms },
               },
             ]
@@ -264,8 +253,7 @@ export class PurchaseExtractionService {
         ...(data.taxable
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.taxable)
-                  .fieldId,
+                fieldId: schema.getField(fields.taxable).fieldId,
                 valueInput: { boolean: data.taxable },
               },
             ]
@@ -273,8 +261,7 @@ export class PurchaseExtractionService {
         ...(incotermsOptionId
           ? [
               {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.incoterms)
-                  .fieldId,
+                fieldId: schema.getField(fields.incoterms).fieldId,
                 valueInput: { optionId: incotermsOptionId },
               },
             ]
@@ -291,8 +278,7 @@ export class PurchaseExtractionService {
           ...(resourceId
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.purchase).fieldId,
                   valueInput: { resourceId },
                 },
               ]
@@ -300,8 +286,7 @@ export class PurchaseExtractionService {
           ...(lineItem.itemName
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.itemName).fieldId,
                   valueInput: { string: lineItem.itemName },
                 },
               ]
@@ -309,8 +294,7 @@ export class PurchaseExtractionService {
           ...(lineItem.quantity
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.quantity)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.quantity).fieldId,
                   valueInput: { number: lineItem.quantity },
                 },
               ]
@@ -318,8 +302,7 @@ export class PurchaseExtractionService {
           ...(lineItem.unitCost
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitCost)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.unitCost).fieldId,
                   valueInput: { number: lineItem.unitCost },
                 },
               ]
@@ -327,8 +310,7 @@ export class PurchaseExtractionService {
           ...(lineItem.totalCost
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.totalCost)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.totalCost).fieldId,
                   valueInput: { number: lineItem.totalCost },
                 },
               ]
@@ -336,8 +318,7 @@ export class PurchaseExtractionService {
           ...(needDate
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
-                    .fieldId,
+                  fieldId: lineSchema.getField(fields.needDate).fieldId,
                   valueInput: { date: needDate },
                 },
               ]
@@ -345,10 +326,7 @@ export class PurchaseExtractionService {
           ...(lineItem.itemNumber
             ? [
                 {
-                  fieldId: selectSchemaFieldUnsafe(
-                    lineSchema,
-                    fields.itemNumber,
-                  ).fieldId,
+                  fieldId: lineSchema.getField(fields.itemNumber).fieldId,
                   valueInput: { string: lineItem.itemNumber },
                 },
               ]

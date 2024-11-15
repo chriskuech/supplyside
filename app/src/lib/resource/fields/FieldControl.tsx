@@ -4,26 +4,26 @@ import {
   FieldReference,
   mapValueToValueInput,
   Schema,
+  SchemaData,
   selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import Field, { Props as FieldProps } from './controls/Field'
 import { updateResource } from '@/actions/resource'
 
 export default function FieldControl({
-  schema,
+  schemaData,
   resource,
   field: fieldReference,
   inputId,
   ...fieldProps
 }: Omit<FieldProps, 'field' | 'onChange' | 'value' | 'inputId'> & {
-  schema: Schema
+  schemaData: SchemaData
   field: FieldReference
   inputId?: string | undefined
 }) {
   const id = useId()
 
-  const field = selectSchemaFieldUnsafe(schema, fieldReference)
+  const field = new Schema(schemaData).getField(fieldReference)
 
   return (
     <Field

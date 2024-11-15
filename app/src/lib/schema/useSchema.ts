@@ -1,10 +1,12 @@
 import 'client-only'
 import { useEffect, useState } from 'react'
-import { ResourceType, Schema } from '@supplyside/model'
+import { ResourceType, SchemaData } from '@supplyside/model'
 import { readSchema } from '@/actions/schema'
 
-const useSchema = (resourceType: ResourceType): Schema | null | undefined => {
-  const [schema, setSchema] = useState<Schema | null>()
+const useSchema = (
+  resourceType: ResourceType,
+): SchemaData | null | undefined => {
+  const [schema, setSchema] = useState<SchemaData | null>()
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {

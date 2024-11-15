@@ -30,7 +30,7 @@ import {
 } from '@mui/icons-material'
 import { ComponentType, MutableRefObject, useMemo, useState } from 'react'
 import { z } from 'zod'
-import { fields, Resource, Schema } from '@supplyside/model'
+import { fields, Resource, SchemaData } from '@supplyside/model'
 import { P, match } from 'ts-pattern'
 import { useRouter } from 'next/navigation'
 import { mapSchemaFieldToGridColDef } from './mapSchemaFieldToGridColDef'
@@ -51,7 +51,7 @@ function isValidColumnWidth(
 
 type Props = {
   tableKey?: string
-  schema: Schema
+  schemaData: SchemaData
   resources: Resource[]
   isEditable?: boolean
   indexed?: boolean
@@ -65,7 +65,7 @@ type Props = {
 
 export default function ResourceTable({
   tableKey,
-  schema,
+  schemaData,
   resources,
   isEditable = false,
   indexed,
@@ -101,7 +101,7 @@ export default function ResourceTable({
             type: 'number',
             editable: false,
           },
-      ...schema.fields.map((field) =>
+      ...schemaData.fields.map((field) =>
         mapSchemaFieldToGridColDef(field, {
           isEditable,
           isFilterable: !unFilterableFieldIds.includes(field.fieldId),
@@ -129,7 +129,13 @@ export default function ResourceTable({
           ]
         : []),
     ],
-    [indexed, schema, isEditable, unFilterableFieldIds, specialColumnWidths],
+    [
+      indexed,
+      schemaData.fields,
+      isEditable,
+      unFilterableFieldIds,
+      specialColumnWidths,
+    ],
   )
 
   if (tableKey && !initialState) return <CircularProgress />

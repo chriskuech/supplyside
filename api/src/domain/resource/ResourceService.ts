@@ -1,28 +1,23 @@
 import { Prisma } from '@prisma/client'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
+import { BadRequestError } from '@supplyside/api/integrations/fastify/BadRequestError'
 import { ConflictError } from '@supplyside/api/integrations/fastify/ConflictError'
-import { logger } from '@supplyside/api/integrations/fastify/logger'
 import {
   Cost,
   FieldTemplate,
   Resource,
+  ResourcePatch,
   ResourceType,
   ResourceTypeSchema,
-  SchemaField,
-  Value,
   ValueInput,
   ValueResource,
   billStatusOptions,
-  emptyValue,
   fields,
   findTemplateField,
   intervalUnits,
   jobStatusOptions,
   purchaseStatusOptions,
   selectResourceFieldValue,
-  selectSchemaField,
-  selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { fail } from 'assert'
 import dayjs, { Dayjs } from 'dayjs'
@@ -39,7 +34,6 @@ import {
   mapResourceModelToEntity,
   mapValueInputToPrismaValueCreate,
   mapValueInputToPrismaValueUpdate,
-  mapValueInputToPrismaValueWhere,
   mapValueToValueInput,
 } from './mappers'
 import { resourceInclude } from './model'
@@ -49,11 +43,6 @@ dayjs.extend(isSameOrAfter)
 export type ResourceFieldInput = {
   fieldId: string
   valueInput: ValueInput
-}
-
-type FieldUpdate = {
-  field: SchemaField
-  valueInput: Value
 }
 
 type ResourceCopyParams = {
@@ -109,31 +98,41 @@ export class ResourceService {
   async create(
     accountId: string,
     type: ResourceType,
-    {
-      templateId,
-      fields: inputResourceFields = [],
-    }: {
+    input: {
       templateId?: string
       fields?: ResourceFieldInput[]
+      costs?: Cost[]
     },
     userId?: string,
   ): Promise<Resource> {
-    const schema = await this.schemaService.readMergedSchema(accountId, type)
+    const schema = await this.schemaService.readSchema(accountId, type)
 
-    await Promise.all(
-      inputResourceFields.map((field) => {
-        if (!field?.valueInput.string) return
-        const schemaField = selectSchemaFieldUnsafe(schema, field)
+    const patch = new ResourcePatch(schema)
 
-        return this.assertNoDuplicateNamedResource(
-          schemaField,
-          accountId,
-          type,
-          field.valueInput,
-          null,
-        )
-      }),
-    )
+    for (const { fieldId, valueInput } of input.fields ?? []) {
+      patch.setPatch({ fieldId }, valueInput)
+    }
+
+    for (const cost of input.costs ?? []) {
+      patch.addCost(cost)
+    }
+
+    if (patch.hasPatch(fields.name)) {
+      const name = patch.getString(fields.name)
+      if (name) {
+        const matching = await this.findOne(accountId, type, {
+          where: {
+            '==': [{ var: fields.name.name }, name],
+          },
+        })
+
+        if (matching) {
+          throw new ConflictError(
+            `A Resource already exists with ${fields.name.name} = ${name}`,
+          )
+        }
+      }
+    }
 
     const {
       _max: { key: latestKey },
@@ -144,82 +143,43 @@ export class ResourceService {
 
     const key = (latestKey ?? 0) + 1
 
-    const defaultFields = match<ResourceType, ResourceFieldInput[]>(type)
-      .with('Purchase', () => {
-        const poNumberFieldId = selectSchemaFieldUnsafe(
-          schema,
-          fields.poNumber,
-        ).fieldId
+    if (type === 'Purchase') {
+      patch.setPatch(fields.poNumber, { string: key.toString() })
+    }
 
-        const assigneeFieldId = selectSchemaFieldUnsafe(
-          schema,
-          fields.assignee,
-        ).fieldId
+    if (patch.schema.implements(fields.assignee)) {
+      patch.setPatch(fields.assignee, { userId })
+    }
 
-        return [
-          {
-            fieldId: poNumberFieldId,
-            valueInput: { string: key.toString() },
-          },
-          ...(userId
-            ? [
-                {
-                  fieldId: assigneeFieldId,
-                  valueInput: { userId },
-                },
-              ]
-            : []),
-        ]
-      })
-      .with('Bill', () => {
-        const asigneeFieldId = selectSchemaFieldUnsafe(
-          schema,
-          fields.assignee,
-        ).fieldId
+    for (const { fieldId } of schema.schema.fields) {
+      if (patch.hasPatch({ fieldId })) {
+        const field = schema.getField({ fieldId })
+        if (field.defaultToToday) {
+          patch.setPatch({ fieldId }, { date: new Date().toISOString() })
+        } else if (field.defaultValue) {
+          patch.setPatch({ fieldId }, field.defaultValue)
+        }
+      }
+    }
 
-        if (!userId) return []
-
-        return [
-          {
-            fieldId: asigneeFieldId,
-            valueInput: { userId },
-          },
-        ]
-      })
-      .otherwise(() => [])
-
-    const resourceFields: ResourceFieldInput[] = [
-      ...(inputResourceFields ?? []),
-      ...defaultFields,
-    ]
+    deriveFields(patch)
 
     const model = await this.prisma.resource.create({
       data: {
         accountId,
-        templateId,
+        templateId: input.templateId,
         type,
         key,
         ResourceField: {
-          create: schema.fields.map((schemaField) => {
-            const resourceField = resourceFields?.find(
-              (rf) => rf.fieldId === schemaField.fieldId,
-            )
-
-            return {
-              Field: {
-                connect: {
-                  id: schemaField.fieldId,
-                },
-              },
-              Value: {
-                create: mapValueInputToPrismaValueCreate(
-                  resourceField?.valueInput ??
-                    mapValueToValueInput(schemaField.type, emptyValue),
-                  schemaField,
-                ),
-              },
-            }
-          }),
+          create: patch.patchedFields.map(({ fieldId, valueInput }) => ({
+            Field: { connect: { id: fieldId } },
+            Value: {
+              create: mapValueInputToPrismaValueCreate(
+                schema.getField({ fieldId }).type,
+                valueInput,
+              ),
+            },
+          })),
         },
       },
       include: resourceInclude,
@@ -227,15 +187,9 @@ export class ResourceService {
 
     const entity = mapResourceModelToEntity(model)
 
-    await this.handleResourceUpdate(
-      accountId,
-      entity,
-      resourceFields.map((field) => ({
-        field: selectSchemaFieldUnsafe(schema, field),
-        valueInput:
-          selectResourceFieldValue(entity, field) ?? fail('Value not found'),
-      })),
-    )
+    patch.resource = entity
+
+    await this.handleResourceUpdate(patch)
 
     return entity
   }
@@ -243,15 +197,9 @@ export class ResourceService {
   async list(
     accountId: string,
     type: ResourceType,
-    {
-      where,
-      orderBy,
-    }: {
-      where?: JsonLogic
-      orderBy?: OrderBy[]
-    } = {},
+    { where, orderBy }: { where?: JsonLogic; orderBy?: OrderBy[] } = {},
   ): Promise<Resource[]> {
-    const schema = await this.schemaService.readMergedSchema(accountId, type)
+    const schema = await this.schemaService.readSchema(accountId, type)
     const sql = createSql({ accountId, schema, where, orderBy })
 
     const results: { _id: string }[] = await this.prisma.$queryRawUnsafe(sql)
@@ -271,40 +219,75 @@ export class ResourceService {
     return models.map(mapResourceModelToEntity)
   }
 
+  async findOne(
+    accountId: string,
+    type: ResourceType,
+    { where }: { where?: JsonLogic } = {},
+  ): Promise<Resource | undefined> {
+    const schema = await this.schemaService.readSchema(accountId, type)
+    const sql = createSql({ accountId, schema, where, take: 1 })
+
+    const [result, unexpectedResult]: { _id: string }[] =
+      await this.prisma.$queryRawUnsafe(sql)
+
+    if (unexpectedResult) {
+      throw new Error('Unexpected result')
+    }
+
+    if (!result) return undefined
+
+    return await this.read(accountId, result._id)
+  }
+
   async update(
     accountId: string,
     resourceId: string,
     input: { fields?: ResourceFieldInput[]; costs?: Cost[] },
   ) {
     const resource = await this.read(accountId, resourceId)
-    const schema = await this.schemaService.readMergedSchema(
-      accountId,
-      resource.type,
-    )
+    const schema = await this.schemaService.readSchema(accountId, resource.type)
 
-    logger().debug({ input }, 'Before transform')
+    const patch = new ResourcePatch(schema, resource)
 
-    const { fields, costs } = deriveFields(input, { schema, resource })
+    for (const { fieldId, valueInput } of input.fields ?? []) {
+      patch.setPatch({ fieldId }, valueInput)
+    }
+
+    for (const cost of input.costs ?? []) {
+      patch.addCost(cost)
+    }
+
+    deriveFields(patch)
+
+    if (patch.hasPatch(fields.name)) {
+      const name = patch.getString(fields.name)
+      if (name) {
+        const matching = await this.findOne(accountId, resource.type, {
+          where: {
+            '==': [{ var: fields.name.name }, name],
+          },
+        })
+
+        if (matching && matching.id !== resourceId) {
+          throw new ConflictError(
+            `A Resource already exists with ${fields.name.name} = ${name}`,
+          )
+        }
+      }
+    }
+
+    if (
+      resource.templateId &&
+      patch.patchedFields.some((f) => patch.schema.getField(f)?.templateId)
+    ) {
+      throw new BadRequestError(
+        "Can't update a system value on a system resource",
+      )
+    }
 
     await Promise.all(
-      fields.map(async ({ fieldId, valueInput }) => {
-        const sf =
-          schema.fields.find((f) => f.fieldId === fieldId) ??
-          fail('Field not found in schema')
-
-        const rf = resource.fields.find((rf) => rf.fieldId === fieldId)
-
-        if (resource.templateId && rf?.templateId) {
-          throw new Error("Can't update a system value on a system resource")
-        }
-
-        await this.assertNoDuplicateNamedResource(
-          sf,
-          accountId,
-          resource.type,
-          valueInput,
-          resourceId,
-        )
+      patch.patchedFields.map(async ({ fieldId, valueInput }) => {
+        const { type } = schema.getField({ fieldId })
 
         await this.prisma.resourceField.upsert({
           where: {
@@ -321,14 +304,14 @@ export class ResourceService {
               connect: { id: fieldId },
             },
             Value: {
-              create: mapValueInputToPrismaValueCreate(valueInput, sf),
+              create: mapValueInputToPrismaValueCreate(type, valueInput),
             },
           },
           update: {
             Value: {
               upsert: {
-                create: mapValueInputToPrismaValueCreate(valueInput, sf),
-                update: mapValueInputToPrismaValueUpdate(valueInput, sf.type),
+                create: mapValueInputToPrismaValueCreate(type, valueInput),
+                update: mapValueInputToPrismaValueUpdate(type, valueInput),
               },
             },
           },
@@ -337,7 +320,7 @@ export class ResourceService {
     )
 
     await Promise.all(
-      costs?.map((cost) =>
+      patch.costs?.map((cost) =>
         cost.id
           ? this.prisma.cost.update({
               where: { resourceId, id: cost.id },
@@ -361,15 +344,9 @@ export class ResourceService {
 
     const entity = await this.read(accountId, resourceId)
 
-    await this.handleResourceUpdate(
-      accountId,
-      entity,
-      fields.map((field) => ({
-        field: selectSchemaFieldUnsafe(schema, field),
-        valueInput:
-          selectResourceFieldValue(entity, field) ?? fail('Value not found'),
-      })),
-    )
+    patch.resource = entity
+
+    await this.handleResourceUpdate(patch)
 
     return entity
   }
@@ -402,15 +379,12 @@ export class ResourceService {
     fieldTemplate: FieldTemplate,
     valueInput: ValueInput,
   ) {
-    const schema = await this.schemaService.readMergedSchema(
-      accountId,
-      resourceType,
-    )
+    const schema = await this.schemaService.readSchema(accountId, resourceType)
 
     return await this.update(accountId, resourceId, {
       fields: [
         {
-          fieldId: selectSchemaFieldUnsafe(schema, fieldTemplate).fieldId,
+          fieldId: schema.getField(fieldTemplate).fieldId,
           valueInput,
         },
       ],
@@ -426,44 +400,6 @@ export class ResourceService {
       where: { id: resourceId, accountId },
       data: { templateId },
     })
-  }
-
-  private async assertNoDuplicateNamedResource(
-    sf: SchemaField,
-    accountId: string,
-    type: ResourceType,
-    valueInput: ValueInput,
-    resourceId: string | null,
-  ) {
-    if (sf.templateId === fields.name.templateId) {
-      const resourceExists = await this.prisma.resource.findFirst({
-        where: {
-          accountId,
-          type,
-          ResourceField: {
-            some: {
-              Field: {
-                name: sf.name,
-              },
-              Value: mapValueInputToPrismaValueWhere(valueInput),
-            },
-          },
-          ...(resourceId
-            ? {
-                NOT: {
-                  id: resourceId,
-                },
-              }
-            : {}),
-        },
-      })
-
-      if (resourceExists) {
-        throw new ConflictError(
-          `A Resource already exists with ${sf.name} = ${Object.values(valueInput)[0]?.toString()}`,
-        )
-      }
-    }
   }
 
   async findResourcesByNameOrPoNumber(
@@ -574,54 +510,44 @@ export class ResourceService {
     )
   }
 
-  private async handleResourceUpdate(
-    accountId: string,
-    resource: Resource,
-    updatedFields: FieldUpdate[],
-  ) {
-    const isUpdated = (fieldTemplate: FieldTemplate) =>
-      updatedFields.some(
-        (rf) => rf.field.templateId === fieldTemplate.templateId,
-      )
+  private async handleResourceUpdate(patch: ResourcePatch) {
+    const resource = patch.resource ?? fail('Resource is required')
 
-    if (resource.type === 'Job') {
-      if (isUpdated(fields.customer)) {
-        await this.updateChildren(accountId, resource.id, {
+    if (patch.schema.type === 'Job') {
+      if (patch.hasPatch(fields.customer)) {
+        await this.updateChildren(patch.schema.accountId, resource.id, {
           childResourceType: 'Part',
           backlinkFieldTemplate: fields.job,
           field: fields.customer,
           valueInput: {
-            resourceId:
-              selectResourceFieldValue(resource, fields.customer)?.resource
-                ?.id ?? null,
+            resourceId: patch.getResourceId(fields.customer),
           },
         })
       }
-      if (isUpdated(fields.needDate)) {
-        await this.updateChildren(accountId, resource.id, {
+      if (patch.hasPatch(fields.needDate)) {
+        await this.updateChildren(resource.accountId, resource.id, {
           childResourceType: 'Part',
           backlinkFieldTemplate: fields.job,
           field: fields.needDate,
           valueInput: {
-            date:
-              selectResourceFieldValue(resource, fields.needDate)?.date ?? null,
+            date: patch.getDate(fields.needDate) ?? null,
           },
         })
       }
     }
 
-    if (resource.type === 'Part') {
-      const jobId = selectResourceFieldValue(resource, fields.job)?.resource?.id
+    if (patch.schema.type === 'Part') {
+      const jobId = patch.getResourceId(fields.job)
       if (jobId) {
-        if (isUpdated(fields.totalCost)) {
-          await this.recalculateSubtotalCost(accountId, 'Job', jobId)
+        if (patch.hasPatch(fields.totalCost)) {
+          await this.recalculateSubtotalCost(resource.accountId, 'Job', jobId)
         }
 
-        if (isUpdated(fields.job)) {
-          const job = await this.read(accountId, jobId)
+        if (patch.hasPatch(fields.job)) {
+          const job = await this.read(resource.accountId, jobId)
 
           await this.updateResourceField(
-            accountId,
+            resource.accountId,
             'Part',
             resource.id,
             fields.customer,
@@ -633,7 +559,7 @@ export class ResourceService {
           )
 
           await this.updateResourceField(
-            accountId,
+            resource.accountId,
             'Part',
             resource.id,
             fields.needDate,
@@ -646,9 +572,9 @@ export class ResourceService {
       }
     }
 
-    if (resource.type === 'Purchase') {
-      if (isUpdated(fields.vendor)) {
-        await this.updateChildren(accountId, resource.id, {
+    if (patch.schema.type === 'Purchase') {
+      if (patch.hasPatch(fields.vendor)) {
+        await this.updateChildren(resource.accountId, resource.id, {
           childResourceType: 'PurchaseLine',
           backlinkFieldTemplate: fields.purchase,
           field: fields.vendor,
@@ -660,33 +586,37 @@ export class ResourceService {
         })
       }
 
-      if (isUpdated(fields.job) || isUpdated(fields.purchaseStatus)) {
+      if (patch.hasPatch(fields.job) || patch.hasPatch(fields.purchaseStatus)) {
         const jobId = selectResourceFieldValue(resource, fields.job)?.resource
           ?.id
         if (jobId) {
-          await this.recalculateReceivedAllPurchases(accountId, jobId)
+          await this.recalculateReceivedAllPurchases(resource.accountId, jobId)
         }
       }
     }
 
-    if (resource.type === 'PurchaseLine') {
+    if (patch.schema.type === 'PurchaseLine') {
       const purchaseId = selectResourceFieldValue(resource, fields.purchase)
         ?.resource?.id
       const billId = selectResourceFieldValue(resource, fields.bill)?.resource
         ?.id
 
-      if (purchaseId && isUpdated(fields.totalCost)) {
-        await this.recalculateSubtotalCost(accountId, 'Purchase', purchaseId)
+      if (purchaseId && patch.hasPatch(fields.totalCost)) {
+        await this.recalculateSubtotalCost(
+          resource.accountId,
+          'Purchase',
+          purchaseId,
+        )
       }
 
-      if (billId && isUpdated(fields.totalCost)) {
-        await this.recalculateSubtotalCost(accountId, 'Bill', billId)
+      if (billId && patch.hasPatch(fields.totalCost)) {
+        await this.recalculateSubtotalCost(resource.accountId, 'Bill', billId)
       }
 
-      if (purchaseId && isUpdated(fields.purchase)) {
-        const purchase = await this.read(accountId, purchaseId)
+      if (purchaseId && patch.hasPatch(fields.purchase)) {
+        const purchase = await this.read(resource.accountId, purchaseId)
         await this.updateResourceField(
-          accountId,
+          resource.accountId,
           'PurchaseLine',
           resource.id,
           fields.vendor,
@@ -705,25 +635,13 @@ export class ResourceService {
 
     const destination = await match(source.type)
       .with('Bill', async () => {
-        const schema = await this.schemaService.readMergedSchema(
-          accountId,
-          'Bill',
-        )
+        const schema = await this.schemaService.readSchema(accountId, 'Bill')
 
-        const billStatusField = selectSchemaFieldUnsafe(
-          schema,
-          fields.billStatus,
-        )
-
-        const parentRecurrentBillField = selectSchemaFieldUnsafe(
-          schema,
+        const billStatusField = schema.getField(fields.billStatus)
+        const parentRecurrentBillField = schema.getField(
           fields.parentRecurrentBill,
         )
-
-        const parentClonedBillField = selectSchemaFieldUnsafe(
-          schema,
-          fields.parentClonedBill,
-        )
+        const parentClonedBillField = schema.getField(fields.parentClonedBill)
 
         const draftStatusOption =
           billStatusField.options.find(
@@ -774,15 +692,12 @@ export class ResourceService {
         return destination
       })
       .with('Purchase', async () => {
-        const schema = await this.schemaService.readMergedSchema(
+        const schema = await this.schemaService.readSchema(
           accountId,
           'Purchase',
         )
 
-        const orderStatusField = selectSchemaFieldUnsafe(
-          schema,
-          fields.purchaseStatus,
-        )
+        const orderStatusField = schema.getField(fields.purchaseStatus)
 
         const draftStatusOption =
           orderStatusField.options.find(
@@ -822,15 +737,10 @@ export class ResourceService {
         return destination
       })
       .with('Job', async () => {
-        const schema = await this.schemaService.readMergedSchema(
-          accountId,
-          'Job',
-        )
+        const schema = await this.schemaService.readSchema(accountId, 'Job')
 
-        const jobStatusField = selectSchemaFieldUnsafe(schema, fields.jobStatus)
-
-        const draftStatusOption = selectSchemaFieldOptionUnsafe(
-          schema,
+        const jobStatusField = schema.getField(fields.jobStatus)
+        const draftStatusOption = schema.getFieldOption(
           jobStatusField,
           jobStatusOptions.draft,
         )
@@ -917,12 +827,12 @@ export class ResourceService {
     resourceType: ResourceType
   }) {
     const lineResourceType = resourceType === 'Job' ? 'Part' : 'PurchaseLine'
-    const lineSchema = await this.schemaService.readMergedSchema(
+    const lineSchema = await this.schemaService.readSchema(
       accountId,
       lineResourceType,
     )
 
-    const backLinkField = selectSchemaFieldUnsafe(lineSchema, backLinkFieldRef)
+    const backLinkField = lineSchema.getField(backLinkFieldRef)
 
     const lines = await this.list(accountId, lineResourceType, {
       where: {
@@ -962,18 +872,18 @@ export class ResourceService {
     ])
 
     const [fromSchema, toSchema] = await Promise.all([
-      this.schemaService.readMergedSchema(accountId, fromResource.type),
-      this.schemaService.readMergedSchema(accountId, toResource.type),
+      this.schemaService.readSchema(accountId, fromResource.type),
+      this.schemaService.readSchema(accountId, toResource.type),
     ])
 
     const fieldsToUpdate = fromResource.fields
-      .filter((rf) => selectSchemaField(fromSchema, rf))
+      .filter((rf) => fromSchema.implements(rf))
       .map((rf) => ({
         rf,
-        sf: selectSchemaFieldUnsafe(fromSchema, rf),
+        sf: fromSchema.getField(rf),
         tf: findTemplateField(rf.templateId),
       }))
-      .filter(({ sf }) => selectSchemaField(toSchema, sf))
+      .filter(({ sf }) => toSchema.implements(sf))
       .filter(
         ({ tf }) => !tf?.isDerived && tf?.templateId !== fields.name.templateId,
       )
@@ -984,36 +894,6 @@ export class ResourceService {
         valueInput: mapValueToValueInput(sf.type, rf.value),
       })),
     })
-  }
-
-  async findResourceByUniqueValue(
-    accountId: string,
-    resourceType: ResourceType,
-    fieldTemplate: FieldTemplate,
-    valueInput: ValueInput,
-  ) {
-    const resourceSchema = await this.schemaService.readMergedSchema(
-      accountId,
-      resourceType,
-    )
-    const fieldId = selectSchemaFieldUnsafe(
-      resourceSchema,
-      fieldTemplate,
-    ).fieldId
-
-    const value = mapValueInputToPrismaValueWhere(valueInput)
-
-    const resourceField = await this.prisma.resourceField.findFirst({
-      where: {
-        fieldId,
-        Value: value,
-        Resource: { accountId },
-      },
-    })
-
-    if (!resourceField) return null
-
-    return this.read(accountId, resourceField.resourceId)
   }
 
   private async recalculateReceivedAllPurchases(
@@ -1192,23 +1072,11 @@ export class ResourceService {
 
     const destination = await match(source.type)
       .with('Bill', async () => {
-        const schema = await this.schemaService.readMergedSchema(
-          accountId,
-          'Bill',
-        )
+        const schema = await this.schemaService.readSchema(accountId, 'Bill')
 
-        const billStatusField = selectSchemaFieldUnsafe(
-          schema,
-          fields.billStatus,
-        )
-
-        const invoiceDateField = selectSchemaFieldUnsafe(
-          schema,
-          fields.invoiceDate,
-        )
-
-        const parentRecurrentBillField = selectSchemaFieldUnsafe(
-          schema,
+        const billStatusField = schema.getField(fields.billStatus)
+        const invoiceDateField = schema.getField(fields.invoiceDate)
+        const parentRecurrentBillField = schema.getField(
           fields.parentRecurrentBill,
         )
 

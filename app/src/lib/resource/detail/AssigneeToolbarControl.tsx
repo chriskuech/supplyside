@@ -14,7 +14,7 @@ import {
 } from '@mui/material'
 import {
   Resource,
-  Schema,
+  SchemaData,
   fields,
   selectResourceFieldValue,
 } from '@supplyside/model'
@@ -23,13 +23,13 @@ import FieldControl from '@/lib/resource/fields/FieldControl'
 import { getProfilePicPath } from '@/app/api/download/[filename]/util'
 
 type AssigneeControlProps = {
-  schema: Schema
+  schemaData: SchemaData
   resource: Resource
   fontSize: 'small' | 'medium' | 'large'
 }
 
 export default function AssigneeToolbarControl({
-  schema,
+  schemaData,
   resource,
   fontSize,
 }: AssigneeControlProps) {
@@ -45,7 +45,7 @@ export default function AssigneeToolbarControl({
         title={
           assignee
             ? `Assigned to ${assignee.name || assignee.email || '(No name)'}`
-            : `Assign the ${schema.resourceType} to a user`
+            : `Assign the ${schemaData.resourceType} to a user`
         }
       >
         <IconButton onClick={open} size={fontSize}>
@@ -63,12 +63,12 @@ export default function AssigneeToolbarControl({
         <DialogTitle>Assignee</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Set the assignee for this {schema.resourceType}, responsible for its
-            completion.
+            Set the assignee for this {schemaData.resourceType}, responsible for
+            its completion.
           </DialogContentText>
           <FieldControl
             inputId={`rf-${AssigneeToolbarControl.name}`}
-            schema={schema}
+            schemaData={schemaData}
             resource={resource}
             field={fields.assignee}
           />

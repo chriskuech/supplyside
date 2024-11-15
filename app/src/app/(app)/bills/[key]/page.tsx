@@ -26,7 +26,7 @@ export default async function BillsDetail({
   params: { key: string }
   searchParams: Record<string, unknown>
 }) {
-  const { resource, schema, lineSchema, user } = await readDetailPageModel(
+  const { resource, schemaData, lineSchema, user } = await readDetailPageModel(
     'Bill',
     key,
   )
@@ -82,7 +82,7 @@ export default async function BillsDetail({
         },
       ]}
       lineSchema={lineSchema ?? undefined}
-      schema={schema}
+      schemaData={schemaData}
       resource={resource}
       searchParams={searchParams}
       tools={(fontSize) => [
@@ -138,13 +138,13 @@ export default async function BillsDetail({
           : []),
         <BillAttachmentsControl
           key={AttachmentsToolbarControl.name}
-          schema={schema}
+          schemaData={schemaData}
           resource={resource}
           fontSize={fontSize}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
-          schema={schema}
+          schemaData={schemaData}
           resource={resource}
           fontSize={fontSize}
         />,
@@ -165,14 +165,14 @@ export default async function BillsDetail({
                   selectResourceFieldValue(resource, fields.billStatus)?.option
                     ?.id
                 }
-                schema={schema}
+                schemaData={schemaData}
                 self={user}
                 resource={resource}
               />
             </StatusTrackerSlab>
           ) : (
             <Container>
-              <RecurringCard schema={schema} resource={resource} />
+              <RecurringCard schemaData={schemaData} resource={resource} />
             </Container>
           )}
         </>

@@ -13,7 +13,7 @@ type Props = {
 }
 
 export const PartsControl: FC<Props> = async ({ job }) => {
-  const [partSchema, stepSchema, parts] = await Promise.all([
+  const [partSchemaData, stepSchemaData, parts] = await Promise.all([
     readSchema(job.accountId, 'Part'),
     readSchema(job.accountId, 'Step'),
     readResources(job.accountId, 'Part', {
@@ -23,7 +23,7 @@ export const PartsControl: FC<Props> = async ({ job }) => {
     }),
   ])
 
-  if (!partSchema || !stepSchema || !parts)
+  if (!partSchemaData || !stepSchemaData || !parts)
     return <Alert severity="error">Failed to load Parts</Alert>
 
   return (
@@ -47,7 +47,7 @@ export const PartsControl: FC<Props> = async ({ job }) => {
               <Stack key={part.id} spacing={2}>
                 <PartView
                   part={part}
-                  partSchema={partSchema}
+                  partSchemaData={partSchemaData}
                   i={i}
                   stepsControl={<StepsControl part={part} />}
                 />
@@ -59,7 +59,7 @@ export const PartsControl: FC<Props> = async ({ job }) => {
             <PartView
               key={part.id}
               part={part}
-              partSchema={partSchema}
+              partSchemaData={partSchemaData}
               i={i}
               stepsControl={<StepsControl part={part} />}
             />

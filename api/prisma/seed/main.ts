@@ -7,7 +7,7 @@ import { ResourceService } from '@supplyside/api/domain/resource/ResourceService
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import { TemplateService } from '@supplyside/api/domain/schema/TemplateService'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import { fields, selectSchemaFieldUnsafe } from '@supplyside/model'
+import { fields } from '@supplyside/model'
 import { config as loadDotenv } from 'dotenv'
 import { expand as expandDotenv } from 'dotenv-expand'
 import { z } from 'zod'
@@ -85,7 +85,7 @@ async function main() {
     },
   })
 
-  const vendorSchema = await schemaService.readMergedSchema(
+  const vendorSchema = await schemaService.readSchema(
     customerAccount.id,
     ResourceType.Vendor,
   )
@@ -96,14 +96,14 @@ async function main() {
     {
       fields: [
         {
-          fieldId: selectSchemaFieldUnsafe(vendorSchema, fields.name).fieldId,
+          fieldId: vendorSchema.getField(fields.name).fieldId,
           valueInput: { string: 'ACME Supplies' },
         },
       ],
     },
   )
 
-  const purchaseSchema = await schemaService.readMergedSchema(
+  const purchaseSchema = await schemaService.readSchema(
     customerAccount.id,
     ResourceType.Purchase,
   )
@@ -114,25 +114,22 @@ async function main() {
     {
       fields: [
         {
-          fieldId: selectSchemaFieldUnsafe(purchaseSchema, fields.assignee)
-            .fieldId,
+          fieldId: purchaseSchema.getField(fields.assignee).fieldId,
           valueInput: { userId: systemUser.id },
         },
         {
-          fieldId: selectSchemaFieldUnsafe(purchaseSchema, fields.poNumber)
-            .fieldId,
+          fieldId: purchaseSchema.getField(fields.poNumber).fieldId,
           valueInput: { string: '42' },
         },
         {
-          fieldId: selectSchemaFieldUnsafe(purchaseSchema, fields.vendor)
-            .fieldId,
+          fieldId: purchaseSchema.getField(fields.vendor).fieldId,
           valueInput: { resourceId: vendor.id },
         },
       ],
     },
   )
 
-  const lineSchema = await schemaService.readMergedSchema(
+  const lineSchema = await schemaService.readSchema(
     customerAccount.id,
     'PurchaseLine',
   )
@@ -140,16 +137,15 @@ async function main() {
   await resourceService.create(customerAccount.id, 'PurchaseLine', {
     fields: [
       {
-        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase).fieldId,
+        fieldId: lineSchema.getField(fields.purchase).fieldId,
         valueInput: { resourceId: purchase.id },
       },
       {
-        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName).fieldId,
+        fieldId: lineSchema.getField(fields.itemName).fieldId,
         valueInput: { string: 'Item name 1' },
       },
       {
-        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitOfMeasure)
-          .fieldId,
+        fieldId: lineSchema.getField(fields.unitOfMeasure).fieldId,
         valueInput: { optionId: unitOfMeasureOption.id },
       },
     ],
@@ -158,16 +154,15 @@ async function main() {
   await resourceService.create(customerAccount.id, 'PurchaseLine', {
     fields: [
       {
-        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase).fieldId,
+        fieldId: lineSchema.getField(fields.purchase).fieldId,
         valueInput: { resourceId: purchase.id },
       },
       {
-        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName).fieldId,
+        fieldId: lineSchema.getField(fields.itemName).fieldId,
         valueInput: { string: 'Item name 2' },
       },
       {
-        fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitOfMeasure)
-          .fieldId,
+        fieldId: lineSchema.getField(fields.unitOfMeasure).fieldId,
         valueInput: { optionId: unitOfMeasureOption.id },
       },
     ],

@@ -103,7 +103,7 @@ export class PoRenderingService {
           '==': [{ var: 'Purchase' }, purchaseId],
         },
       }),
-      this.schemaService.readMergedSchema(accountId, 'PurchaseLine'),
+      this.schemaService.readSchema(accountId, 'PurchaseLine'),
       this.accountService.read(accountId),
     ])
 
@@ -118,7 +118,7 @@ export class PoRenderingService {
       ? await this.blobService.readBlobWithData(account.id, account.logoBlobId)
       : undefined
 
-    const lineAdditionalFields = lineSchema.fields.filter(
+    const lineAdditionalFields = lineSchema.schema.fields.filter(
       (field) =>
         ![
           fields.itemName.templateId,

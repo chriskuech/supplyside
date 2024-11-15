@@ -1,343 +1,132 @@
-import {
-  Cost,
-  Resource,
-  Schema,
-  fields,
-  jobStatusOptions,
-  selectResourceFieldValue,
-  selectSchemaField,
-} from '@supplyside/model'
-import { pipe } from 'remeda'
-import { ResourceFieldInput } from './ResourceService'
+import { ResourcePatch, fields, jobStatusOptions } from '@supplyside/model'
+import { isNumber } from 'remeda'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 
-type Context = {
-  schema: Schema
-  resource: Resource | undefined
-}
-
-type Patch = {
-  fields: ResourceFieldInput[]
-  costs: Cost[]
-}
-
-const recalculatePaymentDueDateFromNeedDate =
-  (context: Context) =>
-  (patch: Patch): Patch => {
-    const needDateField = selectSchemaField(context.schema, fields.needDate)
-    const paymentTermsField = selectSchemaField(
-      context.schema,
+const recalculatePaymentDueDateFromNeedDate = (patch: ResourcePatch) => {
+  if (
+    !patch.schema.implements(
+      fields.needDate,
       fields.paymentTerms,
-    )
-    const paymentDueDateField = selectSchemaField(
-      context.schema,
       fields.paymentDueDate,
-    )
-
-    if (!needDateField || !paymentTermsField || !paymentDueDateField)
-      return patch
-
-    if (
-      !patch.fields.some((f) => f.fieldId === needDateField.fieldId) &&
-      !patch.fields.some((f) => f.fieldId === paymentTermsField.fieldId)
-    )
-      return patch
-
-    const needDate =
-      patch.fields.find((f) => f.fieldId === needDateField.fieldId)?.valueInput
-        .date ??
-      (context.resource &&
-        selectResourceFieldValue(context.resource, needDateField)?.date)
-    const paymentTerms =
-      patch.fields.find((f) => f.fieldId === paymentTermsField.fieldId)
-        ?.valueInput.number ??
-      (context.resource &&
-        selectResourceFieldValue(context.resource, paymentTermsField)?.number)
-
-    if (!needDate || typeof paymentTerms !== 'number') return patch
-
-    return {
-      ...patch,
-      fields: [
-        ...patch.fields.filter(
-          (f) => f.fieldId !== paymentDueDateField.fieldId,
-        ),
-        {
-          fieldId: paymentDueDateField.fieldId,
-          valueInput: {
-            date: new Date(
-              new Date(needDate).getTime() + paymentTerms * millisecondsPerDay,
-            ).toISOString(),
-          },
-        },
-      ],
-    }
-  }
-
-const recalculatePaymentDueDateFromInvoiceDate =
-  (context: Context) =>
-  (patch: Patch): Patch => {
-    const invoiceDateField = selectSchemaField(
-      context.schema,
-      fields.invoiceDate,
-    )
-    const paymentTermsField = selectSchemaField(
-      context.schema,
-      fields.paymentTerms,
-    )
-    const paymentDueDateField = selectSchemaField(
-      context.schema,
-      fields.paymentDueDate,
-    )
-
-    if (!invoiceDateField || !paymentTermsField || !paymentDueDateField)
-      return patch
-
-    if (
-      !patch.fields.some((f) => f.fieldId === invoiceDateField.fieldId) &&
-      !patch.fields.some((f) => f.fieldId === paymentTermsField.fieldId)
-    )
-      return patch
-
-    const invoiceDate =
-      patch.fields.find((f) => f.fieldId === invoiceDateField.fieldId)
-        ?.valueInput.date ??
-      (context.resource &&
-        selectResourceFieldValue(context.resource, invoiceDateField)?.date)
-    const paymentTerms =
-      patch.fields.find((f) => f.fieldId === paymentTermsField.fieldId)
-        ?.valueInput.number ??
-      (context.resource &&
-        selectResourceFieldValue(context.resource, paymentTermsField)?.number)
-
-    if (!invoiceDate || typeof paymentTerms !== 'number') return patch
-
-    return {
-      ...patch,
-      fields: [
-        ...patch.fields.filter(
-          (f) => f.fieldId !== paymentDueDateField.fieldId,
-        ),
-        {
-          fieldId: paymentDueDateField.fieldId,
-          valueInput: {
-            date: new Date(
-              new Date(invoiceDate).getTime() +
-                paymentTerms * millisecondsPerDay,
-            ).toISOString(),
-          },
-        },
-      ],
-    }
-  }
-
-const recalculateDocumentTotalCost =
-  (context: Context) =>
-  (patch: Patch): Patch => {
-    const subtotalField = selectSchemaField(context.schema, fields.subtotalCost)
-    const itemizedCostsField = selectSchemaField(
-      context.schema,
-      fields.itemizedCosts,
-    )
-    const totalCostField = selectSchemaField(context.schema, fields.totalCost)
-
-    if (!subtotalField || !itemizedCostsField || !totalCostField) return patch
-
-    const subtotalCost =
-      patch.fields.find((f) => f.fieldId === subtotalField.fieldId)?.valueInput
-        .number ??
-      (context.resource &&
-        selectResourceFieldValue(context.resource, subtotalField)?.number) ??
-      0
-    const itemizedCosts =
-      patch.fields.find((f) => f.fieldId === itemizedCostsField.fieldId)
-        ?.valueInput.number ??
-      (context.resource &&
-        selectResourceFieldValue(context.resource, itemizedCostsField)
-          ?.number) ??
-      0
-
-    return {
-      ...patch,
-      fields: [
-        ...patch.fields.filter((f) => f.fieldId !== totalCostField.fieldId),
-        {
-          fieldId: totalCostField.fieldId,
-          valueInput: {
-            number: subtotalCost + itemizedCosts,
-          },
-        },
-      ],
-    }
-  }
-
-const recalculateLineTotalCost =
-  (context: Context) =>
-  (patch: Patch): Patch => {
-    const unitCostField = selectSchemaField(context.schema, fields.unitCost)
-    const quantityField = selectSchemaField(context.schema, fields.quantity)
-    const totalCostField = selectSchemaField(context.schema, fields.totalCost)
-
-    if (!unitCostField || !quantityField || !totalCostField) return patch
-
-    const unitCost =
-      patch.fields.find((f) => f.fieldId === unitCostField.fieldId)?.valueInput
-        .number ??
-      (context.resource &&
-        selectResourceFieldValue(context.resource, unitCostField)?.number) ??
-      0
-    const quantity =
-      patch.fields.find((f) => f.fieldId === quantityField.fieldId)?.valueInput
-        .number ??
-      (context.resource &&
-        selectResourceFieldValue(context.resource, quantityField)?.number) ??
-      0
-
-    return {
-      ...patch,
-      fields: [
-        ...patch.fields.filter((f) => f.fieldId !== totalCostField.fieldId),
-        {
-          fieldId: totalCostField.fieldId,
-          valueInput: {
-            number: unitCost * quantity,
-          },
-        },
-      ],
-    }
-  }
-
-const recalculateItemizedCosts =
-  (context: Context) =>
-  (patch: Patch): Patch => {
-    const subtotalCostField = selectSchemaField(
-      context.schema,
-      fields.subtotalCost,
-    )
-    const itemizedCostsField = selectSchemaField(
-      context.schema,
-      fields.itemizedCosts,
-    )
-
-    if (!subtotalCostField || !itemizedCostsField) return patch
-
-    if (
-      !patch.fields.some((f) => f.fieldId === subtotalCostField.fieldId) &&
-      !patch.costs.length
-    )
-      return patch
-
-    const subtotalCost =
-      patch.fields.find((f) => f.fieldId === subtotalCostField.fieldId)
-        ?.valueInput.number ??
-      (context.resource &&
-        selectResourceFieldValue(context.resource, subtotalCostField)
-          ?.number) ??
-      0
-
-    const itemizedCosts = [
-      ...(context.resource?.costs ?? []),
-      ...patch.costs,
-    ].reduce(
-      (acc, { isPercentage, value }) =>
-        acc + (isPercentage ? (value / 100) * subtotalCost : value),
-      0,
-    )
-
-    return {
-      ...patch,
-      fields: [
-        ...patch.fields.filter((f) => f.fieldId !== itemizedCostsField.fieldId),
-        {
-          fieldId: itemizedCostsField.fieldId,
-          valueInput: {
-            number: itemizedCosts,
-          },
-        },
-      ],
-    }
-  }
-
-const setStartDate =
-  (context: Context) =>
-  (patch: Patch): Patch => {
-    const jobStatusField = selectSchemaField(context.schema, fields.jobStatus)
-    const startDateField = selectSchemaField(context.schema, fields.startDate)
-
-    if (
-      !jobStatusField ||
-      !startDateField ||
-      !patch.fields.some(
-        (f) =>
-          f.fieldId === jobStatusField.fieldId &&
-          f.valueInput.optionId === jobStatusOptions.inProcess.templateId,
-      )
-    )
-      return patch
-
-    return {
-      ...patch,
-      fields: [
-        ...patch.fields.filter((f) => f.fieldId !== startDateField.fieldId),
-        {
-          fieldId: startDateField.fieldId,
-          valueInput: {
-            date: new Date().toISOString(),
-          },
-        },
-      ],
-    }
-  }
-
-const recalculateProductionDays =
-  (context: Context) =>
-  (patch: Patch): Patch => {
-    const hoursField = selectSchemaField(context.schema, fields.hours)
-    const productionDaysField = selectSchemaField(
-      context.schema,
-      fields.productionDays,
-    )
-
-    if (!hoursField || !productionDaysField) return patch
-
-    const hours =
-      patch.fields.find((f) => f.fieldId === hoursField.fieldId)?.valueInput
-        .number ??
-      (context.resource &&
-        selectResourceFieldValue(context.resource, hoursField)?.number) ??
-      0
-
-    const productionDays = Math.ceil(hours / 8)
-
-    return {
-      ...patch,
-      fields: [
-        ...patch.fields.filter(
-          (f) => f.fieldId !== productionDaysField.fieldId,
-        ),
-        {
-          fieldId: productionDaysField.fieldId,
-          valueInput: {
-            number: productionDays,
-          },
-        },
-      ],
-    }
-  }
-
-export const deriveFields = (
-  { fields = [], costs = [] }: Partial<Patch>,
-  context: Context,
-): Patch => {
-  return pipe(
-    { fields, costs },
-    setStartDate(context),
-    recalculatePaymentDueDateFromNeedDate(context),
-    recalculatePaymentDueDateFromInvoiceDate(context),
-    recalculateLineTotalCost(context),
-    recalculateItemizedCosts(context),
-    recalculateDocumentTotalCost(context),
-    recalculateProductionDays(context),
+    ) ||
+    !patch.hasAnyPatch(fields.needDate, fields.paymentTerms)
   )
+    return
+
+  const needDate = patch.getDate(fields.needDate)
+  const paymentTerms = patch.getNumber(fields.paymentTerms)
+
+  if (!needDate || !isNumber(paymentTerms)) return
+
+  patch.setDate(
+    fields.paymentDueDate,
+    new Date(
+      new Date(needDate).getTime() + paymentTerms * millisecondsPerDay,
+    ).toISOString(),
+  )
+}
+
+const recalculatePaymentDueDateFromInvoiceDate = (patch: ResourcePatch) => {
+  if (
+    !patch.schema.implements(
+      fields.invoiceDate,
+      fields.paymentTerms,
+      fields.paymentDueDate,
+    ) ||
+    !patch.hasAnyPatch(fields.invoiceDate, fields.paymentTerms)
+  )
+    return
+
+  const invoiceDate = patch.getDate(fields.invoiceDate)
+  const paymentTerms = patch.getNumber(fields.paymentTerms)
+
+  if (!invoiceDate || !isNumber(paymentTerms)) return
+
+  patch.setDate(
+    fields.paymentDueDate,
+    new Date(
+      new Date(invoiceDate).getTime() + paymentTerms * millisecondsPerDay,
+    ).toISOString(),
+  )
+}
+
+const recalculateDocumentTotalCost = (patch: ResourcePatch) => {
+  if (
+    !patch.schema.implements(
+      fields.subtotalCost,
+      fields.itemizedCosts,
+      fields.totalCost,
+    )
+  )
+    return
+
+  const subtotalCost = patch.getNumber(fields.subtotalCost) ?? 0
+  const itemizedCosts = patch.getNumber(fields.itemizedCosts) ?? 0
+
+  patch.setNumber(fields.totalCost, subtotalCost + itemizedCosts)
+}
+
+const recalculateLineTotalCost = (patch: ResourcePatch) => {
+  if (
+    !patch.schema.implements(fields.unitCost, fields.quantity, fields.totalCost)
+  )
+    return
+
+  const unitCost = patch.getNumber(fields.unitCost) ?? 0
+  const quantity = patch.getNumber(fields.quantity) ?? 0
+
+  patch.setNumber(fields.totalCost, unitCost * quantity)
+}
+
+const recalculateItemizedCosts = (patch: ResourcePatch) => {
+  if (
+    !patch.schema.implements(fields.subtotalCost, fields.itemizedCosts) ||
+    !patch.hasAnyPatch(fields.subtotalCost) ||
+    !patch.patchedCosts.length
+  )
+    return
+
+  const subtotalCost = patch.getNumber(fields.subtotalCost) ?? 0
+  const itemizedCosts = patch.costs.reduce(
+    (acc, { isPercentage, value }) =>
+      acc + (isPercentage ? (value / 100) * subtotalCost : value),
+    0,
+  )
+
+  patch.setNumber(fields.itemizedCosts, itemizedCosts)
+}
+
+const setStartDate = (patch: ResourcePatch) => {
+  if (
+    !patch.schema.implements(fields.jobStatus, fields.startDate) ||
+    !patch.hasPatch(fields.jobStatus) ||
+    !patch.hasOption(fields.jobStatus, jobStatusOptions.inProcess)
+  )
+    return
+
+  patch.setDate(fields.startDate, new Date().toISOString())
+}
+
+const recalculateProductionDays = (patch: ResourcePatch) => {
+  if (
+    !patch.schema.implements(fields.hours, fields.productionDays) ||
+    !patch.hasPatch(fields.hours) ||
+    patch.hasPatch(fields.productionDays)
+  )
+    return
+
+  const hours = patch.getNumber(fields.hours) ?? 0
+
+  patch.setNumber(fields.productionDays, Math.ceil(hours / 8))
+}
+
+export const deriveFields = (patch: ResourcePatch) => {
+  setStartDate(patch)
+  recalculatePaymentDueDateFromNeedDate(patch)
+  recalculatePaymentDueDateFromInvoiceDate(patch)
+  recalculateLineTotalCost(patch)
+  recalculateItemizedCosts(patch)
+  recalculateDocumentTotalCost(patch)
+  recalculateProductionDays(patch)
 }

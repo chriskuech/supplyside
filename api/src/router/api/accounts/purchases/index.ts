@@ -4,11 +4,7 @@ import { PoService } from '@supplyside/api/domain/purchase/PoService'
 import { PurchaseExtractionService } from '@supplyside/api/domain/purchase/PurchaseExtractionService'
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import {
-  fields,
-  purchaseStatusOptions,
-  selectSchemaFieldOptionUnsafe,
-} from '@supplyside/model'
+import { fields, purchaseStatusOptions } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
@@ -45,13 +41,12 @@ export const mountPurchases = async <App extends FastifyInstance>(app: App) =>
         const resourceService = container.resolve(ResourceService)
         const schemaService = container.resolve(SchemaService)
 
-        const schema = await schemaService.readMergedSchema(
+        const schema = await schemaService.readSchema(
           req.params.accountId,
           'Purchase',
         )
 
-        const option = selectSchemaFieldOptionUnsafe(
-          schema,
+        const option = schema.getFieldOption(
           fields.purchaseStatus,
           purchaseStatusOptions.purchased,
         )

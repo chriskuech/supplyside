@@ -3,7 +3,7 @@
 import {
   fields,
   Resource,
-  Schema,
+  SchemaData,
   selectResourceFieldValue,
 } from '@supplyside/model'
 import {
@@ -35,12 +35,12 @@ import ReadonlyTextarea from '@/lib/resource/fields/views/ReadonlyTextarea'
 import { formatDate } from '@/lib/format'
 
 type Props = {
-  stepSchema: Schema
+  stepSchemaData: SchemaData
   steps: { step: Resource; purchase: Resource | undefined }[]
   part: Resource
 }
 
-export default function StepsView({ stepSchema, steps, part }: Props) {
+export default function StepsView({ stepSchemaData, steps, part }: Props) {
   return (
     <Card variant="outlined">
       <Stack
@@ -99,7 +99,7 @@ export default function StepsView({ stepSchema, steps, part }: Props) {
         {steps.map(({ step, purchase }, i) => (
           <StepView
             key={step.id}
-            stepSchema={stepSchema}
+            stepSchemaData={stepSchemaData}
             step={step}
             purchase={purchase}
             index={i + 1}
@@ -111,13 +111,18 @@ export default function StepsView({ stepSchema, steps, part }: Props) {
 }
 
 type StepViewProps = {
-  stepSchema: Schema
+  stepSchemaData: SchemaData
   step: Resource
   purchase: Resource | undefined
   index: number
 }
 
-const StepView: FC<StepViewProps> = ({ stepSchema, step, purchase, index }) => {
+const StepView: FC<StepViewProps> = ({
+  stepSchemaData: stepSchema,
+  step,
+  purchase,
+  index,
+}) => {
   const needDate =
     purchase && selectResourceFieldValue(purchase, fields.needDate)?.date
   const status =
@@ -147,7 +152,7 @@ const StepView: FC<StepViewProps> = ({ stepSchema, step, purchase, index }) => {
 
       <Box>
         <FieldControl
-          schema={stepSchema}
+          schemaData={stepSchema}
           resource={step}
           field={fields.completed}
         />
@@ -217,7 +222,7 @@ const StepView: FC<StepViewProps> = ({ stepSchema, step, purchase, index }) => {
             <Stack direction="row" spacing={2}>
               <Box flexGrow={1}>
                 <FieldControl
-                  schema={stepSchema}
+                  schemaData={stepSchema}
                   resource={step}
                   field={fields.workCenter}
                 />
@@ -233,7 +238,7 @@ const StepView: FC<StepViewProps> = ({ stepSchema, step, purchase, index }) => {
                 </Tooltip>
                 <Box width={120}>
                   <FieldControl
-                    schema={stepSchema}
+                    schemaData={stepSchema}
                     resource={step}
                     field={fields.hours}
                   />
@@ -249,7 +254,7 @@ const StepView: FC<StepViewProps> = ({ stepSchema, step, purchase, index }) => {
                 </Tooltip>
                 <Box width={120}>
                   <FieldControl
-                    schema={stepSchema}
+                    schemaData={stepSchema}
                     resource={step}
                     field={fields.productionDays}
                   />
@@ -258,7 +263,7 @@ const StepView: FC<StepViewProps> = ({ stepSchema, step, purchase, index }) => {
             </Stack>
 
             <FieldControl
-              schema={stepSchema}
+              schemaData={stepSchema}
               resource={step}
               field={fields.otherNotes}
               inputProps={{ placeholder: 'Notes' }}

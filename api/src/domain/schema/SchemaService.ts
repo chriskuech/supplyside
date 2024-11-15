@@ -1,6 +1,6 @@
 import { Prisma, ResourceType as ResourceTypeModel } from '@prisma/client'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
-import { Schema, type ResourceType } from '@supplyside/model'
+import { Schema, SchemaData, type ResourceType } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 import { difference, map, pipe, uniqueBy } from 'remeda'
 import { mapFieldModelToEntity, mapSchemaModelToEntity } from './mappers'
@@ -10,7 +10,7 @@ import { fieldIncludes, schemaIncludes } from './model'
 export class SchemaService {
   constructor(@inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  async readMergedSchema(
+  async readSchema(
     accountId: string,
     resourceType: ResourceType,
     isSystem?: boolean,
@@ -27,7 +27,8 @@ export class SchemaService {
       },
     })
 
-    return {
+    return new Schema({
+      accountId,
       resourceType,
       sections: schemas
         .flatMap((s) => s.Section)
@@ -47,13 +48,13 @@ export class SchemaService {
         map(mapFieldModelToEntity),
         uniqueBy((field) => field.fieldId),
       ),
-    }
+    })
   }
 
   async readCustomSchema(
     accountId: string,
     resourceType: ResourceType,
-  ): Promise<Schema> {
+  ): Promise<SchemaData> {
     const schema = await this.prisma.schema.findUniqueOrThrow({
       where: {
         accountId_resourceType_isSystem: {
@@ -68,7 +69,7 @@ export class SchemaService {
     return mapSchemaModelToEntity(schema)
   }
 
-  async readCustomSchemas(accountId: string): Promise<Schema[]> {
+  async readCustomSchemas(accountId: string): Promise<SchemaData[]> {
     const existingSchemas = await this.prisma.schema.findMany({
       where: { accountId, isSystem: false },
       select: {
@@ -124,6 +125,7 @@ export class SchemaService {
     })
 
     return schemas.map((s) => ({
+      accountId,
       id: s.id,
       resourceType: s.resourceType,
       fields: [],

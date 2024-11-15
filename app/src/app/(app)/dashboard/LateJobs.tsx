@@ -3,8 +3,8 @@ import {
   fields,
   jobStatusOptions,
   OptionTemplate,
+  Schema,
   selectResourceFieldValue,
-  selectSchemaFieldOptionUnsafe,
 } from '@supplyside/model'
 import dayjs from 'dayjs'
 import { sortBy } from 'remeda'
@@ -18,9 +18,12 @@ import { readResources } from '@/actions/resource'
 import OptionChip from '@/lib/resource/fields/views/OptionChip'
 
 export default async function LateJobs() {
-  const jobSchema = (await readSchema('Job')) ?? fail('Job schema not found')
+  const jobSchemaData =
+    (await readSchema('Job')) ?? fail('Job schema not found')
+  const jobSchema = new Schema(jobSchemaData)
+
   const getStatusOptionId = (optionRef: OptionTemplate) =>
-    selectSchemaFieldOptionUnsafe(jobSchema, fields.jobStatus, optionRef).id
+    jobSchema.getFieldOption(fields.jobStatus, optionRef).id
 
   const resources = await readResources('Job', {
     where: {
@@ -90,11 +93,7 @@ export default async function LateJobs() {
                   size="small"
                 />
               </Tooltip>
-              <TotalCostControl
-                schema={jobSchema}
-                resource={resource}
-                size="small"
-              />
+              <TotalCostControl resource={resource} size="small" />
             </Stack>
           }
         />

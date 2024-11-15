@@ -6,8 +6,6 @@ import {
   Cxml,
   fields,
   resources,
-  selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe,
   unitOfMeasureOptions,
 } from '@supplyside/model'
 import assert, { fail } from 'assert'
@@ -68,7 +66,7 @@ export class McMasterService {
         },
       )
 
-    const vendorSchema = await this.schemaService.readMergedSchema(
+    const vendorSchema = await this.schemaService.readSchema(
       accountId,
       'Vendor',
     )
@@ -78,14 +76,14 @@ export class McMasterService {
       await this.resourceService.create(accountId, 'Vendor', {
         templateId: mcMasterCarrSystemResource.templateId,
         fields: mcMasterCarrSystemResource.fields.map((f) => ({
-          fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).fieldId,
+          fieldId: vendorSchema.getField(f.field).fieldId,
           valueInput: f.value,
         })),
       })
     } else {
       await this.resourceService.update(accountId, mcMasterCarrVendor.id, {
         fields: mcMasterCarrSystemResource.fields.map((f) => ({
-          fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).fieldId,
+          fieldId: vendorSchema.getField(f.field).fieldId,
           valueInput: f.value,
         })),
       })
@@ -315,40 +313,20 @@ export class McMasterService {
 
       assert(description && quantity && unitOfMeasure && unitPrice)
 
-      const lineSchema = await this.schemaService.readMergedSchema(
+      const lineSchema = await this.schemaService.readSchema(
         accountId,
         'PurchaseLine',
       )
-      const itemNameFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.itemName,
-      ).fieldId
-      const orderFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.purchase,
-      ).fieldId
-      const quantityFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.quantity,
-      ).fieldId
-      const unitPriceFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.unitCost,
-      ).fieldId
-      const itemNumberFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.itemNumber,
-      ).fieldId
-      const notesFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.otherNotes,
-      ).fieldId
-      const lineUnitofMesureFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
+      const itemNameFieldId = lineSchema.getField(fields.itemName).fieldId
+      const orderFieldId = lineSchema.getField(fields.purchase).fieldId
+      const quantityFieldId = lineSchema.getField(fields.quantity).fieldId
+      const unitPriceFieldId = lineSchema.getField(fields.unitCost).fieldId
+      const itemNumberFieldId = lineSchema.getField(fields.itemNumber).fieldId
+      const notesFieldId = lineSchema.getField(fields.otherNotes).fieldId
+      const lineUnitofMesureFieldId = lineSchema.getField(
         fields.unitOfMeasure,
       ).fieldId
-      const lineUnitOfMeasureOptionId = selectSchemaFieldOptionUnsafe(
-        lineSchema,
+      const lineUnitOfMeasureOptionId = lineSchema.getFieldOption(
         fields.unitOfMeasure,
         unitOfMeasure,
       ).id

@@ -13,12 +13,13 @@ export default async function Page({}: {
 
   if (!account) return <Alert severity="error">Failed to load</Alert>
 
-  const [jobs, jobSchema] = await Promise.all([
+  const [jobs, jobSchemaData] = await Promise.all([
     readResources(accountId, 'Job'),
     readSchema(accountId, 'Job'),
   ])
 
-  if (!jobs || !jobSchema) return <Alert severity="error">Failed to load</Alert>
+  if (!jobs || !jobSchemaData)
+    return <Alert severity="error">Failed to load</Alert>
 
-  return <JobsSchedule jobSchema={jobSchema} jobs={jobs} />
+  return <JobsSchedule jobSchemaData={jobSchemaData} jobs={jobs} />
 }

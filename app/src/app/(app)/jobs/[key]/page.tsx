@@ -26,13 +26,13 @@ export default async function JobDetail({
   params: { key: string }
   searchParams: Record<string, unknown>
 }) {
-  const { resource, schema } = await readDetailPageModel('Job', key)
+  const { resource, schemaData } = await readDetailPageModel('Job', key)
 
   const status =
     selectResourceFieldValue(resource, fields.jobStatus)?.option ??
     fail('Status not found')
   const isDraft = status.templateId === jobStatusOptions.draft.templateId
-  const hasInvalidFields = isMissingRequiredFields(schema, resource)
+  const hasInvalidFields = isMissingRequiredFields(schemaData, resource)
 
   const parts = await readResources('Part', {
     where: {
@@ -78,7 +78,7 @@ export default async function JobDetail({
           backlinkField: fields.job,
         },
       ]}
-      schema={schema}
+      schemaData={schemaData}
       resource={resource}
       searchParams={searchParams}
       isReadOnly={!isDraft}
@@ -94,13 +94,12 @@ export default async function JobDetail({
           : []),
         <TotalCostControl
           key={TotalCostControl.name}
-          schema={schema}
           resource={resource}
           size={fontSize}
         />,
         <ScheduleControl
           key={ScheduleControl.name}
-          schema={schema}
+          schemaData={schemaData}
           resource={resource}
           size={fontSize}
         />,
@@ -111,7 +110,7 @@ export default async function JobDetail({
         />,
         <JobAttachmentsControl
           key={JobAttachmentsControl.name}
-          schema={schema}
+          schemaData={schemaData}
           resource={resource}
           fontSize={fontSize}
         />,

@@ -28,16 +28,21 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { z } from 'zod'
-import { ResourceType, Schema, SchemaField, Section } from '@supplyside/model'
+import {
+  ResourceType,
+  SchemaData,
+  SchemaField,
+  Section,
+} from '@supplyside/model'
 import SectionFieldsControl from './SectionFieldsControl'
 import { removeSection, updateSchema, updateSection } from '@/actions/schema'
 
 type Props = {
   fields: SchemaField[]
-  schema: Schema
+  schemaData: SchemaData
 }
 
-export default function SchemaSectionsControl({ fields, schema }: Props) {
+export default function SchemaSectionsControl({ fields, schemaData }: Props) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -57,7 +62,7 @@ export default function SchemaSectionsControl({ fields, schema }: Props) {
     }),
   )
 
-  const sectionIds = schema.sections.map((s) => s.id)
+  const sectionIds = schemaData.sections.map((s) => s.id)
 
   return (
     <List>
@@ -73,20 +78,23 @@ export default function SchemaSectionsControl({ fields, schema }: Props) {
           )
           const i = sectionIds.findIndex((sectionId) => sectionId === over.id)
 
-          updateSchema(schema.resourceType, [
+          updateSchema(schemaData.resourceType, [
             ...removed.slice(0, i),
             activeId,
             ...removed.slice(i),
           ])
         }}
       >
-        <SortableContext items={schema.sections} strategy={rectSortingStrategy}>
-          {schema.sections.map((section) => (
+        <SortableContext
+          items={schemaData.sections}
+          strategy={rectSortingStrategy}
+        >
+          {schemaData.sections.map((section) => (
             <Fragment key={section.id}>
               <Divider variant="fullWidth" />
               <SortableRow
                 key={section.id}
-                resourceType={schema.resourceType}
+                resourceType={schemaData.resourceType}
                 fields={fields}
                 section={section}
               />

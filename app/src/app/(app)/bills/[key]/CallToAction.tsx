@@ -4,7 +4,7 @@ import { ArrowRight } from '@mui/icons-material'
 import { Button, Tooltip, Typography } from '@mui/material'
 import {
   Resource,
-  Schema,
+  SchemaData,
   User,
   billStatusOptions,
   fields,
@@ -19,11 +19,11 @@ import { transitionStatus } from '@/actions/resource'
 
 type Props = {
   self: User
-  schema: Schema
+  schemaData: SchemaData
   resource: Resource
 }
 
-export default function CallToAction({ self, schema, resource }: Props) {
+export default function CallToAction({ self, schemaData, resource }: Props) {
   const [{ isLoading }, approveBill] = useAsyncCallback(() =>
     approveBillAction(resource.id),
   )
@@ -42,7 +42,7 @@ export default function CallToAction({ self, schema, resource }: Props) {
     billStatus?.templateId === billStatusOptions.canceled.templateId
   const isPaid = billStatus?.templateId === billStatusOptions.paid.templateId
 
-  const hasInvalidFields = isMissingRequiredFields(schema, resource)
+  const hasInvalidFields = isMissingRequiredFields(schemaData, resource)
 
   return (
     <>

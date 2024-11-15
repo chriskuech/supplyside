@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import { ExpandMore, Settings, Sync } from '@mui/icons-material'
 import { useSnackbar } from 'notistack'
-import { Resource, mapValueToValueInput, Schema } from '@supplyside/model'
+import { Resource, mapValueToValueInput, SchemaData } from '@supplyside/model'
 import { selectResourceFieldValue } from '@supplyside/model'
 import Link from 'next/link'
 import FieldControl from './fields/FieldControl'
@@ -22,13 +22,13 @@ import Field from './fields/controls/Field'
 import { copyFromResource, updateResource } from '@/actions/resource'
 
 type Props = {
-  schema: Schema
+  schemaData: SchemaData
   resource: Resource
   singleColumn?: boolean
 }
 
 export default function ResourceForm({
-  schema,
+  schemaData,
   resource,
   singleColumn,
 }: Props) {
@@ -39,7 +39,7 @@ export default function ResourceForm({
   return (
     <Box>
       <Box>
-        {schema.sections.map((s, i) => {
+        {schemaData.sections.map((s, i) => {
           const singleField =
             s.fields.length === 1 && s.fields.at(0)?.type === 'Textarea'
               ? s.fields.at(0)
@@ -94,7 +94,7 @@ export default function ResourceForm({
                     </Typography>
                     <FieldControl
                       inputId={`rf-${singleField.fieldId}`}
-                      schema={schema}
+                      schemaData={schemaData}
                       resource={resource}
                       field={singleField}
                       disabled={
