@@ -112,7 +112,8 @@ export default function ResourceDetailPage({
     </>
   )
 
-  const nameField = new Schema(schemaData).getField(fields.name)
+  const schema = new Schema(schemaData)
+
   const nameValue = selectResourceFieldValue(resource, fields.name)
 
   return (
@@ -147,7 +148,7 @@ export default function ResourceDetailPage({
             </Stack>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="h3">
-                {nameField ? (
+                {schema.implements(fields.name) ? (
                   <Box width={600}>
                     <FieldControl
                       inputId="nameField"

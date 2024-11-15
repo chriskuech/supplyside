@@ -22,7 +22,7 @@ export default function JobStatusFilterControl({
   jobStatuses,
 }: Props) {
   const allJobStatusOptions = useMemo(
-    () => new Schema(jobSchemaData).getField(fields.jobStatus)?.options ?? [],
+    () => new Schema(jobSchemaData).getField(fields.jobStatus).options,
     [jobSchemaData],
   )
 
