@@ -1,11 +1,7 @@
 'use server'
 
 import { fail } from 'assert'
-import {
-  FieldTemplate,
-  OptionTemplate,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { FieldTemplate, OptionTemplate, Schema } from '@supplyside/model'
 import { requireSession } from '@/session'
 import { withAccountId, withSession } from '@/authz'
 import * as client from '@/client/resource'
@@ -32,7 +28,7 @@ export const transitionStatus = async (
     (await client.readResource(accountId, resourceId)) ??
     fail('Resource not found')
   const schema = (await readSchema(accountId, type)) ?? fail('Schema not found')
-  const field = selectSchemaFieldUnsafe(schema, fieldTemplate)
+  const field = new Schema(schema).getField(fieldTemplate)
   const option =
     field.options.find((o) => o.templateId === statusTemplate.templateId) ??
     fail('Option not found')

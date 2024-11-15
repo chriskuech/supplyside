@@ -7,23 +7,23 @@ import {
   jobStatusOptions,
   Option,
   Schema,
-  selectSchemaField,
+  SchemaData,
 } from '@supplyside/model'
 
 type Props = {
-  jobSchema: Schema
+  jobSchemaData: SchemaData
   onJobStatusChange: (statuses: Option[]) => void
   jobStatuses: Option[] | null
 }
 
 export default function JobStatusFilterControl({
-  jobSchema,
+  jobSchemaData,
   onJobStatusChange,
   jobStatuses,
 }: Props) {
   const allJobStatusOptions = useMemo(
-    () => selectSchemaField(jobSchema, fields.jobStatus)?.options ?? [],
-    [jobSchema],
+    () => new Schema(jobSchemaData).getField(fields.jobStatus)?.options ?? [],
+    [jobSchemaData],
   )
 
   const jobStatusCurrentOptions = useMemo(

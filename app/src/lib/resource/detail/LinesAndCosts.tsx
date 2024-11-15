@@ -1,5 +1,5 @@
 import { Stack, Typography, Box, Alert, Card } from '@mui/material'
-import { FieldTemplate, Resource, Schema } from '@supplyside/model'
+import { FieldTemplate, Resource, SchemaData } from '@supplyside/model'
 import { ResourceTable } from '../table'
 import ItemizedCosts from '../costs/ItemizedCosts'
 import { ColumnWidths } from '../table/ResourceTable'
@@ -9,7 +9,7 @@ import { FieldData } from '@/actions/types'
 
 type Props = {
   resource: Resource
-  lineSchema: Schema
+  lineSchemaData: SchemaData
   lineQuery: JsonLogic
   newLineInitialData: FieldData[]
   hideColumns?: FieldTemplate[]
@@ -19,7 +19,7 @@ type Props = {
 
 export default async function LinesAndCosts({
   resource,
-  lineSchema,
+  lineSchemaData,
   lineQuery,
   newLineInitialData,
   hideColumns,
@@ -28,15 +28,15 @@ export default async function LinesAndCosts({
 }: Props) {
   const lines = await readResources(
     resource.accountId,
-    lineSchema.resourceType,
+    lineSchemaData.resourceType,
     { where: lineQuery },
   )
 
   if (!lines) return <Alert severity="error">Failed to load</Alert>
 
-  const strippedSchema: Schema = {
-    ...lineSchema,
-    fields: lineSchema.fields.filter(
+  const strippedSchemaData: SchemaData = {
+    ...lineSchemaData,
+    fields: lineSchemaData.fields.filter(
       ({ templateId }) =>
         !templateId || !hideColumns?.some((ft) => ft.templateId === templateId),
     ),
@@ -59,7 +59,7 @@ export default async function LinesAndCosts({
         {!isReadOnly && (
           <CreateResourceButton
             label="Line"
-            resourceType={lineSchema.resourceType}
+            resourceType={lineSchemaData.resourceType}
             fields={newLineInitialData}
           />
         )}
@@ -74,7 +74,7 @@ export default async function LinesAndCosts({
           }}
         >
           <ResourceTable
-            schema={strippedSchema}
+            schemaData={strippedSchemaData}
             resources={lines}
             isEditable={!isReadOnly}
             sx={{ borderBottomRightRadius: 0 }}

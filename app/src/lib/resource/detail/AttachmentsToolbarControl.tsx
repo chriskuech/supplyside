@@ -14,7 +14,7 @@ import {
 import {
   FieldTemplate,
   Resource,
-  Schema,
+  SchemaData,
   selectResourceFieldValue,
 } from '@supplyside/model'
 import { useDisclosure } from '@/hooks/useDisclosure'
@@ -23,7 +23,7 @@ import LoadingButton from '@/lib/ux/LoadingButton'
 import { useAsyncCallback } from '@/hooks/useAsyncCallback'
 
 type AttachmentsToolbarControlProps = {
-  schema: Schema
+  schemaData: SchemaData
   resource: Resource
   field: FieldTemplate
   onSync?: () => Promise<void>
@@ -31,7 +31,7 @@ type AttachmentsToolbarControlProps = {
 }
 
 export default function AttachmentsToolbarControl({
-  schema,
+  schemaData,
   resource,
   field,
   onSync,
@@ -58,11 +58,11 @@ export default function AttachmentsToolbarControl({
         <DialogTitle>Attachments</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Add, view, or remove attachments for this {schema.resourceType}.
+            Add, view, or remove attachments for this {schemaData.resourceType}.
           </DialogContentText>
           <FieldControl
             inputId={`${AttachmentsToolbarControl.name}-${field.templateId}`}
-            schema={schema}
+            schemaData={schemaData}
             resource={resource}
             field={field}
           />

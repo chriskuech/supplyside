@@ -1,7 +1,7 @@
 'use server'
 
 import { fail } from 'assert'
-import { Resource, ResourceType, Schema, User } from '@supplyside/model'
+import { Resource, ResourceType, SchemaData, User } from '@supplyside/model'
 import { notFound, redirect } from 'next/navigation'
 import { match } from 'ts-pattern'
 import { Session, requireSession } from '@/session'
@@ -17,8 +17,8 @@ import { Account, readAccount } from '@/client/account'
 type DetailPageModel = {
   session: Session
   resource: Resource
-  schema: Schema
-  lineSchema: Schema | null
+  schemaData: SchemaData
+  lineSchema: SchemaData | null
   account: Account
   user: User
 }
@@ -47,7 +47,7 @@ export const readDetailPageModel = async (
     .with('Purchase', () => 'PurchaseLine')
     .otherwise(() => null)
 
-  const [resource, schema, lineSchema, account, user] = await Promise.all([
+  const [resource, schemaData, lineSchema, account, user] = await Promise.all([
     readResource(session.accountId, resourceId).then((e) => e ?? fail()),
     readSchema(session.accountId, resourceType).then((e) => e ?? fail()),
     lineResourceType &&
@@ -56,7 +56,7 @@ export const readDetailPageModel = async (
     readSelf(session.userId).then((e) => e ?? fail()),
   ])
 
-  return { session, resource, schema, lineSchema, account, user }
+  return { session, resource, schemaData, lineSchema, account, user }
 }
 
 export const cloneResource = async (resourceId: string) => {

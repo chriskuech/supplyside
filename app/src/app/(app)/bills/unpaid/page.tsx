@@ -1,10 +1,5 @@
 import { fail } from 'assert'
-import {
-  billStatusOptions,
-  fields,
-  selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { billStatusOptions, fields, Schema } from '@supplyside/model'
 import { GridFilterItem } from '@mui/x-data-grid'
 import { BillsInboxControl } from '../BillsInboxControl'
 import GridApiCharts from '../charts/GridApiCharts'
@@ -16,16 +11,16 @@ export default async function UnpaidBills({
 }: {
   searchParams: Record<string, unknown>
 }) {
-  const billSchema = (await readSchema('Bill')) ?? fail('Bill schema not found')
+  const billSchemaData =
+    (await readSchema('Bill')) ?? fail('Bill schema not found')
+  const billSchema = new Schema(billSchemaData)
 
-  const billStatusField = selectSchemaFieldUnsafe(billSchema, fields.billStatus)
-  const billStatusPaidOptionId = selectSchemaFieldOptionUnsafe(
-    billSchema,
+  const billStatusField = billSchema.getField(fields.billStatus)
+  const billStatusPaidOptionId = billSchema.getFieldOption(
     fields.billStatus,
     billStatusOptions.paid,
   ).id
-  const billStatusCanceledOptionId = selectSchemaFieldOptionUnsafe(
-    billSchema,
+  const billStatusCanceledOptionId = billSchema.getFieldOption(
     fields.billStatus,
     billStatusOptions.canceled,
   ).id
@@ -42,10 +37,7 @@ export default async function UnpaidBills({
       )
       .map((option) => option.id),
   }
-  const billRecurringField = selectSchemaFieldUnsafe(
-    billSchema,
-    fields.recurring,
-  )
+  const billRecurringField = billSchema.getField(fields.recurring)
 
   const recurringBillsFilter: GridFilterItem = {
     field: billRecurringField.fieldId,

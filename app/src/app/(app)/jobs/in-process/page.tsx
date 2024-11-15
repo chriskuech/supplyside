@@ -1,10 +1,5 @@
 import { fail } from 'assert'
-import {
-  fields,
-  jobStatusOptions,
-  selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, jobStatusOptions, Schema } from '@supplyside/model'
 import { GridFilterItem } from '@mui/x-data-grid'
 import GridApiCharts from '../charts/GridApiCharts'
 import ListPage from '@/lib/resource/ListPage'
@@ -15,11 +10,11 @@ export default async function InProcessJobs({
 }: {
   searchParams: Record<string, unknown>
 }) {
-  const jobSchema = (await readSchema('Job')) ?? fail('Job schema not found')
-
-  const jobStatusField = selectSchemaFieldUnsafe(jobSchema, fields.jobStatus)
-  const jobStatusInProcessOptionId = selectSchemaFieldOptionUnsafe(
-    jobSchema,
+  const jobSchemaData =
+    (await readSchema('Job')) ?? fail('Job schema not found')
+  const jobSchema = new Schema(jobSchemaData)
+  const jobStatusField = jobSchema.getField(fields.jobStatus)
+  const jobStatusInProcessOptionId = jobSchema.getFieldOption(
     fields.jobStatus,
     jobStatusOptions.inProcess,
   ).id

@@ -1,13 +1,13 @@
 'use client'
 
 import { Drawer, Stack, Typography } from '@mui/material'
-import { Resource, Schema } from '@supplyside/model'
+import { Resource, SchemaData } from '@supplyside/model'
 import { ReactNode } from 'react'
 import ResourceForm from './ResourceForm'
 import DeleteResourceButton from './DeleteResourceButton'
 
 type ResourceFieldDrawerProps = {
-  state: { schema: Schema; resource: Resource } | undefined
+  state: { schema: SchemaData; resource: Resource } | undefined
   tools: readonly ReactNode[]
   onClose: (path: string) => void
 }
@@ -38,7 +38,7 @@ export const ResourceDrawerView = ({
         </Stack>
         <ResourceForm
           resource={state.resource}
-          schema={state.schema}
+          schemaData={state.schema}
           singleColumn
         />
       </Stack>

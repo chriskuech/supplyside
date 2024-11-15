@@ -31,7 +31,7 @@ export default async function ListPage({
   Charts,
 }: Props) {
   const { accountId } = await requireSession()
-  const [schema, resources] = await Promise.all([
+  const [schemaData, resources] = await Promise.all([
     readSchema(accountId, resourceType),
     readResources(accountId, resourceType),
   ])
@@ -53,7 +53,7 @@ export default async function ListPage({
     ],
   }
 
-  if (!schema || !resources)
+  if (!schemaData || !resources)
     return (
       <Alert severity="error">
         Failed to load {resourceType}s. Please try again.
@@ -91,7 +91,7 @@ export default async function ListPage({
           </Stack>
           <ListPageResourceTable
             tableKey={tableKey}
-            schema={schema}
+            schemaData={schemaData}
             resources={resources}
             initialGridFilterModel={initialGridFilterModel}
             unFilterableFieldIds={filterItems.map((item) => item.field)}

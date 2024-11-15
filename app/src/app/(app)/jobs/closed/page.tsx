@@ -1,10 +1,5 @@
 import { fail } from 'assert'
-import {
-  fields,
-  jobStatusOptions,
-  selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, jobStatusOptions, Schema } from '@supplyside/model'
 import { GridFilterItem } from '@mui/x-data-grid'
 import ListPage from '@/lib/resource/ListPage'
 import { readSchema } from '@/actions/schema'
@@ -14,24 +9,17 @@ export default async function ClosedJobs({
 }: {
   searchParams: Record<string, unknown>
 }) {
-  const jobSchema = (await readSchema('Job')) ?? fail('Job schema not found')
-
-  const jobStatusField = selectSchemaFieldUnsafe(jobSchema, fields.jobStatus)
-  const jobStatusPaidOptionId = selectSchemaFieldOptionUnsafe(
-    jobSchema,
-    fields.jobStatus,
-    jobStatusOptions.paid,
-  ).id
-  const jobStatusCanceledOptionId = selectSchemaFieldOptionUnsafe(
-    jobSchema,
-    fields.jobStatus,
-    jobStatusOptions.canceled,
-  ).id
+  const jobSchemaData =
+    (await readSchema('Job')) ?? fail('Job schema not found')
+  const jobSchema = new Schema(jobSchemaData)
 
   const closedJobsFilter: GridFilterItem = {
-    field: jobStatusField.fieldId,
+    field: jobSchema.getField(fields.jobStatus).fieldId,
     operator: 'isAnyOf',
-    value: [jobStatusPaidOptionId, jobStatusCanceledOptionId],
+    value: [
+      jobSchema.getFieldOption(fields.jobStatus, jobStatusOptions.paid).id,
+      jobSchema.getFieldOption(fields.jobStatus, jobStatusOptions.canceled).id,
+    ],
   }
 
   return (

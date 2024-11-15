@@ -1,23 +1,23 @@
 'use client'
 
 import { FC } from 'react'
-import { Schema, fields, Resource } from '@supplyside/model'
+import { SchemaData, fields, Resource } from '@supplyside/model'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
 import { syncFromAttachments } from '@/actions/bill'
 
 type Props = {
-  schema: Schema
+  schemaData: SchemaData
   resource: Resource
   fontSize: 'small' | 'medium' | 'large'
 }
 
 export const BillAttachmentsControl: FC<Props> = ({
-  schema,
+  schemaData,
   resource,
   fontSize,
 }) => (
   <AttachmentsToolbarControl
-    schema={schema}
+    schemaData={schemaData}
     resource={resource}
     fontSize={fontSize}
     onSync={() => syncFromAttachments(resource.id)}

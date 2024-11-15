@@ -1,10 +1,5 @@
 import { fail } from 'assert'
-import {
-  billStatusOptions,
-  fields,
-  selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { billStatusOptions, fields, Schema } from '@supplyside/model'
 import { GridFilterItem } from '@mui/x-data-grid'
 import { BillsInboxControl } from '../BillsInboxControl'
 import ListPage from '@/lib/resource/ListPage'
@@ -15,33 +10,23 @@ export default async function ClosedBills({
 }: {
   searchParams: Record<string, unknown>
 }) {
-  const billSchema = (await readSchema('Bill')) ?? fail('Bill schema not found')
+  const billSchemaData =
+    (await readSchema('Bill')) ?? fail('Bill schema not found')
 
-  const billStatusField = selectSchemaFieldUnsafe(billSchema, fields.billStatus)
-  const billStatusPaidOptionId = selectSchemaFieldOptionUnsafe(
-    billSchema,
-    fields.billStatus,
-    billStatusOptions.paid,
-  ).id
-  const billStatusCanceledOptionId = selectSchemaFieldOptionUnsafe(
-    billSchema,
-    fields.billStatus,
-    billStatusOptions.canceled,
-  ).id
+  const billSchema = new Schema(billSchemaData)
 
   const closedBillsFilter: GridFilterItem = {
-    field: billStatusField.fieldId,
+    field: billSchema.getField(fields.billStatus).fieldId,
     operator: 'isAnyOf',
-    value: [billStatusPaidOptionId, billStatusCanceledOptionId],
+    value: [
+      billSchema.getFieldOption(fields.billStatus, billStatusOptions.paid).id,
+      billSchema.getFieldOption(fields.billStatus, billStatusOptions.canceled)
+        .id,
+    ],
   }
 
-  const billRecurringField = selectSchemaFieldUnsafe(
-    billSchema,
-    fields.recurring,
-  )
-
   const recurringBillsFilter: GridFilterItem = {
-    field: billRecurringField.fieldId,
+    field: billSchema.getField(fields.recurring).fieldId,
     operator: 'is',
     value: 'false',
   }

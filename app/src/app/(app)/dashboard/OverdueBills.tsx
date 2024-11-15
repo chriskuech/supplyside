@@ -3,8 +3,8 @@ import {
   billStatusOptions,
   fields,
   OptionTemplate,
+  Schema,
   selectResourceFieldValue,
-  selectSchemaFieldOptionUnsafe,
 } from '@supplyside/model'
 import dayjs from 'dayjs'
 import { sortBy } from 'remeda'
@@ -18,9 +18,11 @@ import { readResources } from '@/actions/resource'
 import OptionChip from '@/lib/resource/fields/views/OptionChip'
 
 export default async function OverdueBills() {
-  const billSchema = (await readSchema('Bill')) ?? fail('Bill schema not found')
+  const schemaData = (await readSchema('Bill')) ?? fail('Bill schema not found')
+  const schema = new Schema(schemaData)
+
   const getStatusOptionId = (optionRef: OptionTemplate) =>
-    selectSchemaFieldOptionUnsafe(billSchema, fields.billStatus, optionRef).id
+    schema.getFieldOption(fields.billStatus, optionRef).id
 
   const resources = await readResources('Bill', {
     where: {
@@ -84,11 +86,7 @@ export default async function OverdueBills() {
                   size="small"
                 />
               </Tooltip>
-              <TotalCostControl
-                resource={resource}
-                schema={billSchema}
-                size="small"
-              />
+              <TotalCostControl resource={resource} size="small" />
             </Stack>
           }
         />

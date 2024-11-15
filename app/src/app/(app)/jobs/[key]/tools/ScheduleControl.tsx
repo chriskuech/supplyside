@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import {
   Resource,
-  Schema,
+  SchemaData,
   fields,
   selectResourceFieldValue,
 } from '@supplyside/model'
@@ -31,12 +31,12 @@ import FieldControl from '@/lib/resource/fields/FieldControl'
 dayjs.extend(utc)
 
 type Props = {
-  schema: Schema
+  schemaData: SchemaData
   resource: Resource
   size: 'small' | 'medium' | 'large'
 }
 
-export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
+export const ScheduleControl: FC<Props> = ({ schemaData, resource, size }) => {
   const { isOpen, open, close } = useDisclosure()
 
   const startDateString = selectResourceFieldValue(
@@ -114,7 +114,7 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
                 </FormLabel>
                 <Box>
                   <FieldControl
-                    schema={schema}
+                    schemaData={schemaData}
                     resource={resource}
                     field={fields.startDate}
                     inputId="start-date"
@@ -132,7 +132,7 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
                 </FormLabel>
                 <Box>
                   <FieldControl
-                    schema={schema}
+                    schemaData={schemaData}
                     resource={resource}
                     field={fields.productionDays}
                     inputId="production-days"
@@ -157,7 +157,7 @@ export const ScheduleControl: FC<Props> = ({ schema, resource, size }) => {
               </FormLabel>
               <Box>
                 <FieldControl
-                  schema={schema}
+                  schemaData={schemaData}
                   resource={resource}
                   field={fields.needDate}
                   inputId="need-date"

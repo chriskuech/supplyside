@@ -9,7 +9,7 @@ import {
 } from '@mui/material'
 import {
   Resource,
-  Schema,
+  SchemaData,
   fields,
   selectResourceFieldValue,
 } from '@supplyside/model'
@@ -21,11 +21,11 @@ import FieldControl from '@/lib/resource/fields/FieldControl'
 dayjs.extend(utc)
 
 type Props = {
-  schema: Schema
+  schemaData: SchemaData
   resource: Resource
 }
 
-export const OrderedCta: FC<Props> = ({ schema, resource }) => {
+export const OrderedCta: FC<Props> = ({ schemaData, resource }) => {
   const receivedAllPurchases = selectResourceFieldValue(
     resource,
     fields.receivedAllPurchases,
@@ -102,7 +102,7 @@ export const OrderedCta: FC<Props> = ({ schema, resource }) => {
               </Typography>
               <Box width={170}>
                 <FieldControl
-                  schema={schema}
+                  schemaData={schemaData}
                   resource={resource}
                   inputId="start-date-field"
                   field={fields.startDate}
@@ -122,7 +122,7 @@ export const OrderedCta: FC<Props> = ({ schema, resource }) => {
               </Typography>
               <Box width={115}>
                 <FieldControl
-                  schema={schema}
+                  schemaData={schemaData}
                   resource={resource}
                   inputId="production-days-field"
                   field={fields.productionDays}

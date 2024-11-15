@@ -2,17 +2,11 @@
 
 import { AttachMoney } from '@mui/icons-material'
 import { Chip, Tooltip } from '@mui/material'
-import {
-  Resource,
-  Schema,
-  fields,
-  selectResourceFieldValue,
-} from '@supplyside/model'
+import { Resource, fields, selectResourceFieldValue } from '@supplyside/model'
 import { FC } from 'react'
 import { formatMoney } from '@/lib/format'
 
 type Props = {
-  schema: Schema
   resource: Resource
   size: 'small' | 'medium' | 'large'
 }

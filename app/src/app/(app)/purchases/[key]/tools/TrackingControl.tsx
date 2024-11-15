@@ -13,7 +13,7 @@ import {
 } from '@mui/material'
 import {
   Resource,
-  Schema,
+  SchemaData,
   fields,
   selectResourceFieldValue,
 } from '@supplyside/model'
@@ -21,13 +21,13 @@ import { useDisclosure } from '@/hooks/useDisclosure'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 
 type TrackingControlProps = {
-  schema: Schema
+  schemaData: SchemaData
   resource: Resource
   fontSize: 'small' | 'medium' | 'large'
 }
 
 export default function TrackingControl({
-  schema,
+  schemaData,
   resource,
   fontSize,
 }: TrackingControlProps) {
@@ -59,7 +59,7 @@ export default function TrackingControl({
           </DialogContentText>
           <FieldControl
             inputId={`${TrackingControl.name}-trackingNumber`}
-            schema={schema}
+            schemaData={schemaData}
             resource={resource}
             field={fields.trackingNumber}
           />
