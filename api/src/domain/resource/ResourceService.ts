@@ -3,7 +3,6 @@ import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { BadRequestError } from '@supplyside/api/integrations/fastify/BadRequestError'
 import { ConflictError } from '@supplyside/api/integrations/fastify/ConflictError'
 import {
-  Cost,
   FieldTemplate,
   Resource,
   ResourcePatch,
@@ -95,27 +94,8 @@ export class ResourceService {
     return mapResourceModelToEntity(resource)
   }
 
-  async create(
-    accountId: string,
-    type: ResourceType,
-    input: {
-      templateId?: string
-      fields?: ResourceFieldInput[]
-      costs?: Cost[]
-    },
-    userId?: string,
-  ): Promise<Resource> {
-    const schema = await this.schemaService.readSchema(accountId, type)
-
-    const patch = new ResourcePatch(schema)
-
-    for (const { fieldId, valueInput } of input.fields ?? []) {
-      patch.setPatch({ fieldId }, valueInput)
-    }
-
-    for (const cost of input.costs ?? []) {
-      patch.addCost(cost)
-    }
+  async create(patch: ResourcePatch): Promise<Resource> {
+    const { accountId, type } = patch.schema
 
     if (patch.hasPatch(fields.name)) {
       const name = patch.getString(fields.name)
@@ -147,13 +127,9 @@ export class ResourceService {
       patch.setPatch(fields.poNumber, { string: key.toString() })
     }
 
-    if (patch.schema.implements(fields.assignee)) {
-      patch.setPatch(fields.assignee, { userId })
-    }
-
-    for (const { fieldId } of schema.schema.fields) {
+    for (const { fieldId } of patch.schema.schema.fields) {
       if (patch.hasPatch({ fieldId })) {
-        const field = schema.getField({ fieldId })
+        const field = patch.schema.getField({ fieldId })
         if (field.defaultToToday) {
           patch.setPatch({ fieldId }, { date: new Date().toISOString() })
         } else if (field.defaultValue) {
@@ -167,7 +143,7 @@ export class ResourceService {
     const model = await this.prisma.resource.create({
       data: {
         accountId,
-        templateId: input.templateId,
+        templateId: patch.patchedTemplateId,
         type,
         key,
         ResourceField: {
@@ -175,7 +151,7 @@ export class ResourceService {
             Field: { connect: { id: fieldId } },
             Value: {
               create: mapValueInputToPrismaValueCreate(
-                schema.getField({ fieldId }).type,
+                patch.schema.getField({ fieldId }).type,
                 valueInput,
               ),
             },
@@ -371,9 +347,7 @@ export class ResourceService {
 
     await fn(patch)
 
-    return await this.create(accountId, resourceType, {
-      fields: patch.patchedFields,
-    })
+    return await this.create(patch)
   }
 
   async withUpdatePatch(
@@ -613,31 +587,30 @@ export class ResourceService {
             (o) => o.templateId === billStatusOptions.draft.templateId,
           ) ?? fail('Draft status not found')
 
-        const destination = await this.create(accountId, source.type, {
-          fields: [
-            ...source.fields
-              .filter(
-                (rf) =>
-                  ![
-                    parentClonedBillField.fieldId,
-                    parentRecurrentBillField.fieldId,
-                    billStatusField.fieldId,
-                  ].includes(rf.fieldId),
+        const destination = await this.withCreatePatch(
+          accountId,
+          source.type,
+          (patch) => {
+            for (const { fieldId, fieldType, value } of source.fields) {
+              if (
+                [
+                  parentClonedBillField.fieldId,
+                  parentRecurrentBillField.fieldId,
+                  billStatusField.fieldId,
+                ].includes(fieldId)
               )
-              .map(({ fieldId, fieldType, value }) => ({
-                fieldId,
-                valueInput: mapValueToValueInput(fieldType, value),
-              })),
-            {
-              fieldId: billStatusField.fieldId,
-              valueInput: { optionId: draftStatusOption?.id ?? null },
-            },
-            {
-              fieldId: parentClonedBillField.fieldId,
-              valueInput: { resourceId: resourceId },
-            },
-          ],
-        })
+                continue
+
+              patch.setPatch(
+                { fieldId },
+                mapValueToValueInput(fieldType, value),
+              )
+            }
+
+            patch.setOption(fields.billStatus, draftStatusOption)
+            patch.setResourceId(fields.parentClonedBill, resourceId)
+          },
+        )
 
         await Promise.all([
           this.cloneLines({
@@ -664,25 +637,22 @@ export class ResourceService {
 
         const orderStatusField = schema.getField(fields.purchaseStatus)
 
-        const draftStatusOption =
-          orderStatusField.options.find(
-            (o) => o.templateId === purchaseStatusOptions.draft.templateId,
-          ) ?? fail('Draft status not found')
+        const destination = await this.withCreatePatch(
+          accountId,
+          source.type,
+          (patch) => {
+            for (const { fieldId, fieldType, value } of source.fields) {
+              if (fieldId === orderStatusField.fieldId) continue
 
-        const destination = await this.create(accountId, source.type, {
-          fields: [
-            ...source.fields
-              .filter((rf) => rf.fieldId !== orderStatusField.fieldId)
-              .map(({ fieldId, fieldType, value }) => ({
-                fieldId,
-                valueInput: mapValueToValueInput(fieldType, value),
-              })),
-            {
-              fieldId: orderStatusField.fieldId,
-              valueInput: { optionId: draftStatusOption?.id ?? null },
-            },
-          ],
-        })
+              patch.setPatch(
+                { fieldId },
+                mapValueToValueInput(fieldType, value),
+              )
+            }
+
+            patch.setOption(fields.purchaseStatus, purchaseStatusOptions.draft)
+          },
+        )
 
         await Promise.all([
           this.cloneLines({
@@ -702,28 +672,27 @@ export class ResourceService {
         return destination
       })
       .with('Job', async () => {
-        const schema = await this.schemaService.readSchema(accountId, 'Job')
+        const destination = await this.withCreatePatch(
+          accountId,
+          source.type,
+          (patch) => {
+            const jobStatusField = patch.schema.getField(fields.jobStatus)
 
-        const jobStatusField = schema.getField(fields.jobStatus)
-        const draftStatusOption = schema.getFieldOption(
-          jobStatusField,
-          jobStatusOptions.draft,
+            for (const { fieldId, fieldType, value } of source.fields) {
+              if (fieldId === jobStatusField.fieldId) continue
+
+              patch.setPatch(
+                { fieldId },
+                mapValueToValueInput(fieldType, value),
+              )
+            }
+
+            patch.setOption(
+              { fieldId: jobStatusField.fieldId },
+              jobStatusOptions.draft,
+            )
+          },
         )
-
-        const destination = await this.create(accountId, source.type, {
-          fields: [
-            ...source.fields
-              .filter((rf) => rf.fieldId !== jobStatusField.fieldId)
-              .map(({ fieldId, fieldType, value }) => ({
-                fieldId,
-                valueInput: mapValueToValueInput(fieldType, value),
-              })),
-            {
-              fieldId: jobStatusField.fieldId,
-              valueInput: { optionId: draftStatusOption?.id ?? null },
-            },
-          ],
-        })
 
         await Promise.all([
           this.cloneLines({
@@ -744,11 +713,13 @@ export class ResourceService {
       })
       .otherwise(
         async () =>
-          await this.create(accountId, source.type, {
-            fields: source.fields.map(({ fieldId, fieldType, value }) => ({
-              fieldId,
-              valueInput: mapValueToValueInput(fieldType, value),
-            })),
+          await this.withCreatePatch(accountId, source.type, (patch) => {
+            for (const { fieldId, fieldType, value } of source.fields) {
+              patch.setPatch(
+                { fieldId },
+                mapValueToValueInput(fieldType, value),
+              )
+            }
           }),
       )
 
@@ -807,19 +778,13 @@ export class ResourceService {
 
     // `createResource` is not (currently) parallelizable
     for (const line of lines) {
-      await this.create(accountId, lineResourceType, {
-        fields: [
-          ...line.fields
-            .filter(({ fieldId }) => fieldId !== backLinkField.fieldId)
-            .map(({ fieldId, fieldType, value }) => ({
-              fieldId,
-              valueInput: mapValueToValueInput(fieldType, value),
-            })),
-          {
-            fieldId: backLinkField.fieldId,
-            valueInput: { resourceId: toResourceId },
-          },
-        ],
+      await this.withCreatePatch(accountId, lineResourceType, (patch) => {
+        for (const { fieldId, fieldType, value } of line.fields) {
+          if (backLinkField.fieldId === fieldId) continue
+
+          patch.setPatch({ fieldId }, mapValueToValueInput(fieldType, value))
+        }
+        patch.setResourceId(backLinkField, toResourceId)
       })
     }
   }
@@ -1029,48 +994,36 @@ export class ResourceService {
 
     const destination = await match(source.type)
       .with('Bill', async () => {
-        const schema = await this.schemaService.readSchema(accountId, 'Bill')
-
-        const billStatusField = schema.getField(fields.billStatus)
-        const invoiceDateField = schema.getField(fields.invoiceDate)
-        const parentRecurrentBillField = schema.getField(
-          fields.parentRecurrentBill,
-        )
-
-        const draftStatusOption =
-          billStatusField.options.find(
-            (o) => o.templateId === billStatusOptions.draft.templateId,
-          ) ?? fail('Draft status not found')
-
-        const destination = await this.create(accountId, source.type, {
-          fields: [
-            ...source.fields
-              .filter(
-                (rf) =>
-                  ![
-                    ...recurringFieldsTemplateIds,
-                    billStatusField.templateId,
-                    invoiceDateField.templateId,
-                  ].includes(rf.templateId),
+        const destination = await this.withCreatePatch(
+          accountId,
+          source.type,
+          (patch) => {
+            for (const {
+              fieldId,
+              fieldType,
+              templateId,
+              value,
+            } of source.fields) {
+              if (
+                [
+                  ...recurringFieldsTemplateIds,
+                  fields.billStatus.templateId,
+                  fields.invoiceDate.templateId,
+                ].includes(templateId as string)
               )
-              .map(({ fieldId, fieldType, value }) => ({
-                fieldId,
-                valueInput: mapValueToValueInput(fieldType, value),
-              })),
-            {
-              fieldId: billStatusField.fieldId,
-              valueInput: { optionId: draftStatusOption?.id ?? null },
-            },
-            {
-              fieldId: invoiceDateField.fieldId,
-              valueInput: { date: creationDate.toISOString() },
-            },
-            {
-              fieldId: parentRecurrentBillField.fieldId,
-              valueInput: { resourceId: recurringResourceId },
-            },
-          ],
-        })
+                return
+
+              patch.setPatch(
+                { fieldId },
+                mapValueToValueInput(fieldType, value),
+              )
+            }
+
+            patch.setOption(fields.billStatus, billStatusOptions.draft)
+            patch.setDate(fields.invoiceDate, creationDate.toISOString())
+            patch.setResourceId(fields.parentRecurrentBill, recurringResourceId)
+          },
+        )
 
         await Promise.all([
           this.cloneLines({

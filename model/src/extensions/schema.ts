@@ -55,7 +55,7 @@ export class Schema {
         { templateId: P.string },
         ({ templateId }) => option.templateId === templateId,
       )
-      .with({ optionId: P.string }, ({ optionId }) => option.id === optionId)
+      .with({ id: P.string }, ({ id }) => option.id === id)
       .with({ name: P.string }, ({ name }) => option.name === name)
       .exhaustive()
   }

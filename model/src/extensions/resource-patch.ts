@@ -101,6 +101,10 @@ export class ResourcePatch {
     this.setPatch(fieldRef, { fileId })
   }
 
+  setFileIds(fieldRef: FieldReference, fileIds: string[]) {
+    this.setPatch(fieldRef, { fileIds })
+  }
+
   setNumber(fieldRef: FieldReference, number: number) {
     this.setPatch(fieldRef, { number })
   }
@@ -117,6 +121,10 @@ export class ResourcePatch {
 
   setString(fieldRef: FieldReference, string: string) {
     this.setPatch(fieldRef, { string })
+  }
+
+  setUserId(fieldRef: FieldReference, userId: string | null) {
+    this.setPatch(fieldRef, { userId })
   }
 
   setPatch(fieldRef: FieldReference, valueInput: ValueInput) {

@@ -219,6 +219,10 @@ export class PurchaseExtractionService {
       accountId,
       resourceId,
       (patch) => {
+        for (const cost of data.itemizedCosts ?? []) {
+          patch.addCost(cost)
+        }
+
         if (data.poNumber) patch.setString(fields.poNumber, data.poNumber)
         if (vendor) patch.setResourceId(fields.vendor, vendor.id)
         if (data.purchaseDescription)
@@ -227,7 +231,7 @@ export class PurchaseExtractionService {
           patch.setNumber(fields.paymentTerms, data.paymentTerms)
         if (data.taxable) patch.setBoolean(fields.taxable, data.taxable)
         if (incotermsOptionId)
-          patch.setOption(fields.incoterms, { optionId: incotermsOptionId })
+          patch.setOption(fields.incoterms, { id: incotermsOptionId })
       },
     )
 

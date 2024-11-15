@@ -128,10 +128,7 @@ export class JobExtractionService {
   ) {}
 
   async extractContent(accountId: string, resourceId: string) {
-    const [resource, lineSchema] = await Promise.all([
-      this.resourceService.read(accountId, resourceId),
-      this.schemaService.readSchema(accountId, 'Part'),
-    ])
+    const resource = await this.resourceService.read(accountId, resourceId)
 
     const { files } =
       selectResourceFieldValue(resource, fields.jobAttachments) ?? {}
@@ -172,57 +169,17 @@ export class JobExtractionService {
     for (const lineItem of data.lineItems ?? []) {
       const needDate = coerceDateStringToISO8601(lineItem.needDate)
 
-      await this.resourceService.create(accountId, 'Part', {
-        fields: [
-          ...(resourceId
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.job).fieldId,
-                  valueInput: { resourceId },
-                },
-              ]
-            : []),
-          ...(lineItem.partName
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.partName).fieldId,
-                  valueInput: { string: lineItem.partName },
-                },
-              ]
-            : []),
-          ...(lineItem.quantity
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.quantity).fieldId,
-                  valueInput: { number: lineItem.quantity },
-                },
-              ]
-            : []),
-          ...(lineItem.unitCost
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.unitCost).fieldId,
-                  valueInput: { number: lineItem.unitCost },
-                },
-              ]
-            : []),
-          ...(needDate
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.needDate).fieldId,
-                  valueInput: { date: needDate },
-                },
-              ]
-            : []),
-          ...(lineItem.otherNotes
-            ? [
-                {
-                  fieldId: lineSchema.getField(fields.otherNotes).fieldId,
-                  valueInput: { string: lineItem.otherNotes },
-                },
-              ]
-            : []),
-        ],
+      await this.resourceService.withCreatePatch(accountId, 'Part', (patch) => {
+        if (resourceId) patch.setResourceId(fields.job, resourceId)
+        if (lineItem.partName)
+          patch.setString(fields.partName, lineItem.partName)
+        if (lineItem.quantity)
+          patch.setNumber(fields.quantity, lineItem.quantity)
+        if (lineItem.unitCost)
+          patch.setNumber(fields.unitCost, lineItem.unitCost)
+        if (needDate) patch.setDate(fields.needDate, needDate)
+        if (lineItem.otherNotes)
+          patch.setString(fields.otherNotes, lineItem.otherNotes)
       })
     }
   }

@@ -173,7 +173,6 @@ export class BillExtractionService {
     const [billSchema, billResource] = await Promise.all([
       this.schemaService.readSchema(accountId, 'Bill'),
       this.resourceService.read(accountId, resourceId),
-      this.schemaService.readSchema(accountId, 'PurchaseLine'),
     ])
 
     const billFiles =
@@ -215,15 +214,18 @@ export class BillExtractionService {
           })
         : []
 
-    const paymentMethodOptionId = paymentMethodOptions.find(
-      (o) => o.name === data.paymentMethod,
-    )?.id
-
     await this.resourceService.withUpdatePatch(
       accountId,
       resourceId,
       (patch) => {
         const invoiceDate = coerceDateStringToISO8601(data.invoiceDate)
+        const paymentMethodOptionId = paymentMethodOptions.find(
+          (o) => o.name === data.paymentMethod,
+        )?.id
+
+        for (const cost of data.itemizedCosts ?? []) {
+          patch.addCost(cost)
+        }
 
         if (purchase) patch.setResourceId(fields.purchase, purchase.id)
         if (data.poNumber) patch.setString(fields.poNumber, data.poNumber)
@@ -231,9 +233,7 @@ export class BillExtractionService {
         if (data.invoiceNumber)
           patch.setString(fields.invoiceNumber, data.invoiceNumber)
         if (paymentMethodOptionId)
-          patch.setOption(fields.paymentMethod, {
-            optionId: paymentMethodOptionId,
-          })
+          patch.setOption(fields.paymentMethod, { id: paymentMethodOptionId })
         if (invoiceDate) patch.setDate(fields.invoiceDate, invoiceDate)
         if (data.paymentTerms)
           patch.setNumber(fields.paymentTerms, data.paymentTerms)

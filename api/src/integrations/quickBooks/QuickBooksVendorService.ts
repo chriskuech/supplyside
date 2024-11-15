@@ -125,12 +125,19 @@ export class QuickBooksVendorService {
           },
         )
       } else {
-        await this.resourceService.create(accountId, 'Vendor', {
-          fields: await this.mapQuickBooksVendorToResourceFields(
-            accountId,
-            quickBooksVendorToAdd,
-          ),
-        })
+        const patches = await this.mapQuickBooksVendorToResourceFields(
+          accountId,
+          quickBooksVendorToAdd,
+        )
+        await this.resourceService.withCreatePatch(
+          accountId,
+          'Vendor',
+          (patch) => {
+            for (const { fieldId, valueInput } of patches) {
+              patch.setPatch({ fieldId }, valueInput)
+            }
+          },
+        )
       }
     }
   }
