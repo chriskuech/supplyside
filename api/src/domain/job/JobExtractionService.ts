@@ -128,8 +128,7 @@ export class JobExtractionService {
   ) {}
 
   async extractContent(accountId: string, resourceId: string) {
-    const [schema, resource, lineSchema] = await Promise.all([
-      this.schemaService.readSchema(accountId, 'Job'),
+    const [resource, lineSchema] = await Promise.all([
       this.resourceService.read(accountId, resourceId),
       this.schemaService.readSchema(accountId, 'Part'),
     ])
@@ -157,34 +156,18 @@ export class JobExtractionService {
         )
       : []
 
-    await this.resourceService.update(accountId, resourceId, {
-      fields: [
-        ...(customer
-          ? [
-              {
-                fieldId: schema.getField(fields.customer).fieldId,
-                valueInput: { resourceId: customer.id },
-              },
-            ]
-          : []),
-        ...(data.needDate
-          ? [
-              {
-                fieldId: schema.getField(fields.needDate).fieldId,
-                valueInput: { string: data.needDate },
-              },
-            ]
-          : []),
-        ...(data.paymentTerms
-          ? [
-              {
-                fieldId: schema.getField(fields.paymentTerms).fieldId,
-                valueInput: { number: data.paymentTerms },
-              },
-            ]
-          : []),
-      ],
-    })
+    await this.resourceService.withUpdatePatch(
+      accountId,
+      resourceId,
+      (patch) => {
+        const needDate = coerceDateStringToISO8601(data.needDate)
+
+        if (customer) patch.setResourceId(fields.customer, customer.id)
+        if (needDate) patch.setDate(fields.needDate, needDate)
+        if (data.paymentTerms)
+          patch.setNumber(fields.paymentTerms, data.paymentTerms)
+      },
+    )
 
     for (const lineItem of data.lineItems ?? []) {
       const needDate = coerceDateStringToISO8601(lineItem.needDate)

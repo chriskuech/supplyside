@@ -217,14 +217,16 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           200: ResourceSchema,
         },
       },
-      handler: async (req) => {
+      handler: async ({ params: { accountId, resourceId }, body }) => {
         const service = container.resolve(ResourceService)
 
-        const resource = await service.update(
-          req.params.accountId,
-          req.params.resourceId,
-          {
-            fields: req.body,
+        const resource = await service.withUpdatePatch(
+          accountId,
+          resourceId,
+          (patch) => {
+            for (const { fieldId, valueInput } of body) {
+              patch.setPatch({ fieldId }, valueInput)
+            }
           },
         )
 

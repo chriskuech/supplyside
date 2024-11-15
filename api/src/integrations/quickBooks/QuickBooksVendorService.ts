@@ -79,12 +79,20 @@ export class QuickBooksVendorService {
 
         if (!vendor || !!vendor.templateId) return
 
-        return this.resourceService.update(accountId, vendor.id, {
-          fields: await this.mapQuickBooksVendorToResourceFields(
-            accountId,
-            quickBooksVendor,
-          ),
-        })
+        const updateFields = await this.mapQuickBooksVendorToResourceFields(
+          accountId,
+          quickBooksVendor,
+        )
+
+        return this.resourceService.withUpdatePatch(
+          accountId,
+          vendor.id,
+          (patch) => {
+            for (const field of updateFields) {
+              patch.setPatch(field, field.valueInput)
+            }
+          },
+        )
       }),
     )
 
@@ -101,12 +109,21 @@ export class QuickBooksVendorService {
 
       if (vendor) {
         if (vendor.templateId) return
-        await this.resourceService.update(accountId, vendor.id, {
-          fields: await this.mapQuickBooksVendorToResourceFields(
-            accountId,
-            quickBooksVendorToAdd,
-          ),
-        })
+
+        const fields = await this.mapQuickBooksVendorToResourceFields(
+          accountId,
+          quickBooksVendorToAdd,
+        )
+
+        await this.resourceService.withUpdatePatch(
+          accountId,
+          vendor.id,
+          (patch) => {
+            for (const field of fields) {
+              patch.setPatch(field, field.valueInput)
+            }
+          },
+        )
       } else {
         await this.resourceService.create(accountId, 'Vendor', {
           fields: await this.mapQuickBooksVendorToResourceFields(
@@ -136,12 +153,8 @@ export class QuickBooksVendorService {
       })
       .then((data) => readVendorSchema.parse(data.json))
 
-    await this.resourceService.updateResourceField(
-      accountId,
-      'Vendor',
-      vendor.id,
-      fields.quickBooksVendorId,
-      { string: quickBooksVendor.Vendor.Id },
+    await this.resourceService.withUpdatePatch(accountId, vendor.id, (patch) =>
+      patch.setString(fields.quickBooksVendorId, quickBooksVendor.Vendor.Id),
     )
 
     return quickBooksVendor

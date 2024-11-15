@@ -32,7 +32,7 @@ export class CostService {
       value?: number
     },
   ) {
-    const cost = await this.prisma.cost.update({
+    await this.prisma.cost.update({
       where: {
         id: costId,
         Resource: {
@@ -45,20 +45,13 @@ export class CostService {
         isPercentage: data.isPercentage,
         value: data.value,
       },
-      include: {
-        Resource: true,
-      },
     })
 
-    await this.resourceService.recalculateItemizedCosts(
-      accountId,
-      cost.Resource.type,
-      resourceId,
-    )
+    await this.resourceService.recalculateItemizedCosts(accountId, resourceId)
   }
 
   async delete(accountId: string, resourceId: string, costId: string) {
-    const cost = await this.prisma.cost.delete({
+    await this.prisma.cost.delete({
       where: {
         id: costId,
         Resource: {
@@ -66,15 +59,8 @@ export class CostService {
           accountId,
         },
       },
-      include: {
-        Resource: true,
-      },
     })
 
-    await this.resourceService.recalculateItemizedCosts(
-      accountId,
-      cost.Resource.type,
-      resourceId,
-    )
+    await this.resourceService.recalculateItemizedCosts(accountId, resourceId)
   }
 }

@@ -31,13 +31,9 @@ export class BillService {
 
     await Promise.all(
       lines.map((line) =>
-        this.resourceService.updateResourceField(
-          accountId,
-          'PurchaseLine',
-          line.id,
-          fields.bill,
-          { resourceId },
-        ),
+        this.resourceService.withUpdatePatch(accountId, line.id, (patch) => {
+          patch.setResourceId(fields.bill, resourceId)
+        }),
       ),
     )
   }
