@@ -357,7 +357,6 @@ export class ResourceService {
   ) {
     const resource = await this.read(accountId, resourceId)
     const schema = await this.schemaService.readSchema(accountId, resource.type)
-
     const patch = new ResourcePatch(schema, resource)
 
     await fn(patch)
@@ -574,30 +573,22 @@ export class ResourceService {
 
     const destination = await match(source.type)
       .with('Bill', async () => {
-        const schema = await this.schemaService.readSchema(accountId, 'Bill')
-
-        const billStatusField = schema.getField(fields.billStatus)
-        const parentRecurrentBillField = schema.getField(
-          fields.parentRecurrentBill,
-        )
-        const parentClonedBillField = schema.getField(fields.parentClonedBill)
-
-        const draftStatusOption =
-          billStatusField.options.find(
-            (o) => o.templateId === billStatusOptions.draft.templateId,
-          ) ?? fail('Draft status not found')
-
         const destination = await this.withCreatePatch(
           accountId,
           source.type,
           (patch) => {
-            for (const { fieldId, fieldType, value } of source.fields) {
+            for (const {
+              fieldId,
+              templateId,
+              fieldType,
+              value,
+            } of source.fields) {
               if (
                 [
-                  parentClonedBillField.fieldId,
-                  parentRecurrentBillField.fieldId,
-                  billStatusField.fieldId,
-                ].includes(fieldId)
+                  fields.parentClonedBill.templateId,
+                  fields.parentRecurrentBill.templateId,
+                  fields.billStatus.templateId,
+                ].includes(templateId as string)
               )
                 continue
 
@@ -607,7 +598,7 @@ export class ResourceService {
               )
             }
 
-            patch.setOption(fields.billStatus, draftStatusOption)
+            patch.setOption(fields.billStatus, billStatusOptions.draft)
             patch.setResourceId(fields.parentClonedBill, resourceId)
           },
         )
@@ -630,19 +621,17 @@ export class ResourceService {
         return destination
       })
       .with('Purchase', async () => {
-        const schema = await this.schemaService.readSchema(
-          accountId,
-          'Purchase',
-        )
-
-        const orderStatusField = schema.getField(fields.purchaseStatus)
-
         const destination = await this.withCreatePatch(
           accountId,
           source.type,
           (patch) => {
-            for (const { fieldId, fieldType, value } of source.fields) {
-              if (fieldId === orderStatusField.fieldId) continue
+            for (const {
+              fieldId,
+              templateId,
+              fieldType,
+              value,
+            } of source.fields) {
+              if (templateId === fields.purchaseStatus.templateId) continue
 
               patch.setPatch(
                 { fieldId },
