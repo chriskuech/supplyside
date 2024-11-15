@@ -1,5 +1,4 @@
 import 'reflect-metadata'
-import './instrument'
 
 import { createServer as createRouter } from '@supplyside/api/router'
 import { writeFileSync } from 'fs'
