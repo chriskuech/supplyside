@@ -24,7 +24,6 @@
     "@mui/x-data-grid": "^7.15.0",
     "@mui/x-data-grid-pro": "^7.18.0",
     "@mui/x-date-pickers": "^7.18.0",
-    "@sentry/nextjs": "^8.33.1",
     "@types/color": "^4.2.0",
     "client-only": "^0.0.1",
     "color": "^4.2.3",

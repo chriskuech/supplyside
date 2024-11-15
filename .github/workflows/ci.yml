@@ -20,7 +20,6 @@ jobs:
         run: cd model && npm ci && npm run lint
 
   build-app:
-
     permissions:
       contents: read
       packages: write
@@ -70,7 +69,6 @@ jobs:
           cache-to: type=gha,mode=max
 
   build-api:
-
     permissions:
       contents: read
       packages: write
@@ -109,9 +107,6 @@ jobs:
           SHA: ${{ github.sha }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
 
-      - name: Create .sentryclirc
-        run: echo "[auth]\ntoken=${{ secrets.SENTRY_AUTH_TOKEN }}\n" > .sentryclirc
-
       - name: Build and push api container image to registry
         uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
         with:
@@ -147,7 +142,7 @@ jobs:
         uses: tailscale/github-action@main
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-      
+
       - name: Wait for Tailscale to be ready
         shell: pwsh
         run: |
