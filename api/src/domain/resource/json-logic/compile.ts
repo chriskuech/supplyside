@@ -1,8 +1,8 @@
 import { FieldType, Value } from '@prisma/client'
-import { Schema, SchemaFieldData } from '@supplyside/model'
+import { FieldReference, Schema, SchemaFieldData } from '@supplyside/model'
 import { isNullish } from 'remeda'
 import { P, match } from 'ts-pattern'
-import { mapUuidToBase64, sanitizeValue } from './sanitize'
+import { sanitizeValue } from './sanitize'
 import { JsonLogic, OrderBy } from './types'
 
 export type MapToSqlParams = {
@@ -19,17 +19,18 @@ export const createSql = ({
   where,
   orderBy,
   take,
-}: MapToSqlParams) => /* sql */ `
+}: MapToSqlParams) =>
+  /* sql */
+  `
     WITH "View" AS (
       SELECT
         ${[
           '"Resource"."id" AS "_id"',
-          ...schema.fields.map(
-            (f) =>
-              `(${createPropertySubquery(f)}) AS "${mapUuidToBase64(
-                f.fieldId,
-              )}"`,
-          ),
+          ...schema.fields.map((f) => {
+            const subquery = createPropertySubquery(f)
+            const columnName = resolveColumn(schema, f)
+            return `(${subquery}) AS ${columnName}`
+          }),
         ].join(', ')}
       FROM "Resource"
       WHERE "Resource"."accountId" = '${accountId}'
@@ -52,33 +53,33 @@ const createWhere = (where: JsonLogic, schema: Schema): string =>
     )
     .with(
       { '==': P.any },
-      ({ '==': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} ${isNullish(val) ? `= ${sanitizeValue(val)}` : `IS NULL`}`,
+      ({ '==': [{ var: name }, val] }) =>
+        `${resolveColumn(schema, { name })} ${!isNullish(val) ? `= ${sanitizeValue(val)}` : `IS NULL`}`,
     )
     .with(
       { '!=': P.any },
-      ({ '!=': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} ${isNullish(val) ? `<> ${sanitizeValue(val)}` : `IS NOT NULL`}`,
+      ({ '!=': [{ var: name }, val] }) =>
+        `${resolveColumn(schema, { name })} ${!isNullish(val) ? `<> ${sanitizeValue(val)}` : `IS NOT NULL`}`,
     )
     .with(
       { '<': P.any },
-      ({ '<': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} < ${sanitizeValue(val)}`,
+      ({ '<': [{ var: name }, val] }) =>
+        `${resolveColumn(schema, { name })} < ${sanitizeValue(val)}`,
     )
     .with(
       { '>=': P.any },
-      ({ '>=': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} >= ${sanitizeValue(val)}`,
+      ({ '>=': [{ var: name }, val] }) =>
+        `${resolveColumn(schema, { name })} >= ${sanitizeValue(val)}`,
     )
     .with(
       { '>': P.any },
-      ({ '>': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} > ${sanitizeValue(val)}`,
+      ({ '>': [{ var: name }, val] }) =>
+        `${resolveColumn(schema, { name })} > ${sanitizeValue(val)}`,
     )
     .with(
       { '<=': P.any },
-      ({ '<=': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} <= ${sanitizeValue(val)}`,
+      ({ '<=': [{ var: name }, val] }) =>
+        `${resolveColumn(schema, { name })} <= ${sanitizeValue(val)}`,
     )
     .exhaustive()
 
@@ -164,8 +165,8 @@ const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
     .with('Resource', () => 'resourceId')
     .exhaustive()
 
-const resolveFieldNameToColumn = (schema: Schema, fieldName: string) => {
-  const { fieldId } = schema.getField({ name: fieldName })
+const resolveColumn = (schema: Schema, field: FieldReference) => {
+  const { fieldId, name } = schema.getField(field)
 
-  return `"${mapUuidToBase64(fieldId)}"`
+  return `"${name.replace(/[^a-zA-Z0-9]/g, '-')}_${fieldId}"`
 }

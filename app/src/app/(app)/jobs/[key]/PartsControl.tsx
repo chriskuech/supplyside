@@ -48,7 +48,6 @@ export const PartsControl: FC<Props> = async ({ job }) => {
                 <PartView
                   part={part}
                   partSchemaData={partSchemaData}
-                  i={i}
                   stepsControl={<StepsControl part={part} />}
                 />
               </Stack>
@@ -60,7 +59,6 @@ export const PartsControl: FC<Props> = async ({ job }) => {
               key={part.id}
               part={part}
               partSchemaData={partSchemaData}
-              i={i}
               stepsControl={<StepsControl part={part} />}
             />
           </Stack>
