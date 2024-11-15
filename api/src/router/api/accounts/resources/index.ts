@@ -42,16 +42,13 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         },
         tags: ['Resources'],
       },
-      handler: async (req) => {
+      handler: async ({
+        params: { accountId },
+        query: { resourceType, where },
+      }) => {
         const service = container.resolve(ResourceService)
 
-        const resources = await service.list(
-          req.params.accountId,
-          req.query.resourceType,
-          {
-            where: req.query.where,
-          },
-        )
+        const resources = await service.list(accountId, resourceType, { where })
 
         return resources
       },
@@ -72,16 +69,16 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           200: z.array(ValueResourceSchema),
         },
       },
-      handler: async (req) => {
+      handler: async ({
+        params: { accountId },
+        query: { resourceType, input, exact },
+      }) => {
         const service = container.resolve(ResourceService)
 
         const resources = await service.findResourcesByNameOrPoNumber(
-          req.params.accountId,
-          req.query.resourceType,
-          {
-            input: req.query.input,
-            exact: req.query.exact,
-          },
+          accountId,
+          resourceType,
+          { input, exact },
         )
 
         return resources
@@ -157,13 +154,16 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           }),
         },
       },
-      handler: async (req) => {
+      handler: async ({
+        params: { accountId },
+        query: { resourceType, resourceKey },
+      }) => {
         const service = container.resolve(ResourceService)
 
         const resource = await service.readByKey(
-          req.params.accountId,
-          req.query.resourceType,
-          req.query.resourceKey,
+          accountId,
+          resourceType,
+          resourceKey,
         )
 
         return pick(resource, ['id', 'key', 'type'])
@@ -181,13 +181,10 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           200: ResourceSchema,
         },
       },
-      handler: async (req) => {
+      handler: async ({ params: { accountId, resourceId } }) => {
         const service = container.resolve(ResourceService)
 
-        const resource = await service.read(
-          req.params.accountId,
-          req.params.resourceId,
-        )
+        const resource = await service.read(accountId, resourceId)
 
         return resource
       },
@@ -235,10 +232,10 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           resourceId: z.string().uuid(),
         }),
       },
-      handler: async (req) => {
+      handler: async ({ params: { accountId, resourceId } }) => {
         const service = container.resolve(ResourceService)
 
-        await service.delete(req.params.accountId, req.params.resourceId)
+        await service.delete(accountId, resourceId)
       },
     })
     .route({
@@ -253,13 +250,10 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           200: ResourceSchema,
         },
       },
-      handler: async (req) => {
+      handler: async ({ params: { accountId, resourceId } }) => {
         const service = container.resolve(ResourceService)
 
-        const resource = await service.cloneResource(
-          req.params.accountId,
-          req.params.resourceId,
-        )
+        const resource = await service.cloneResource(accountId, resourceId)
 
         return resource
       },
@@ -276,11 +270,12 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           resourceId: z.string().uuid(),
         }),
       },
-      handler: async (req) => {
+      handler: async ({
+        params: { accountId, resourceId },
+        body: { resourceId: fromResourceId },
+      }) => {
         const service = container.resolve(ResourceService)
 
-        await service.copyFields(req.params.accountId, req.params.resourceId, {
-          fromResourceId: req.body.resourceId,
-        })
+        await service.copyFields(accountId, resourceId, { fromResourceId })
       },
     })

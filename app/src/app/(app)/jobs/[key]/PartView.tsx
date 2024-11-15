@@ -12,7 +12,6 @@ import { formatMoney } from '@/lib/format'
 export const PartView: FC<{
   part: Resource
   partSchemaData: SchemaData
-  i: number
   stepsControl: ReactNode
 }> = ({ part, partSchemaData, stepsControl }) => (
   <Stack spacing={2} direction="row" alignItems="start">
