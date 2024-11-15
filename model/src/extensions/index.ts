@@ -1,4 +1,5 @@
 export * from './formatInlineAddress'
 export * from './reference'
 export * from './resource'
+export * from './resource-patch'
 export * from './schema'

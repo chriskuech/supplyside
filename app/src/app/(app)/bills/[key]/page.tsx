@@ -17,6 +17,7 @@ import ResourceLink from '@/lib/resource/ResourceLink'
 import { StatusTrackerSlab } from '@/lib/ux/StatusTrackerSlab'
 import RecurringControl from '@/lib/resource/recurring/RecurringControl'
 import RecurringCard from '@/lib/resource/recurring/RecurringCard'
+import RecurrentResourceLink from '@/lib/resource/RecurrentResourceLink'
 
 export default async function BillsDetail({
   params: { key },
@@ -25,7 +26,7 @@ export default async function BillsDetail({
   params: { key: string }
   searchParams: Record<string, unknown>
 }) {
-  const { resource, schema, lineSchema, user } = await readDetailPageModel(
+  const { resource, schemaData, lineSchema, user } = await readDetailPageModel(
     'Bill',
     key,
   )
@@ -52,6 +53,16 @@ export default async function BillsDetail({
     fields.recurring,
   )?.boolean
 
+  const parentRecurringBill = selectResourceFieldValue(
+    resource,
+    fields.parentRecurrentBill,
+  )?.resource
+
+  const parentClonedBill = selectResourceFieldValue(
+    resource,
+    fields.parentClonedBill,
+  )?.resource
+
   return (
     <ResourceDetailPage
       status={{
@@ -71,7 +82,7 @@ export default async function BillsDetail({
         },
       ]}
       lineSchema={lineSchema ?? undefined}
-      schema={schema}
+      schemaData={schemaData}
       resource={resource}
       searchParams={searchParams}
       tools={(fontSize) => [
@@ -95,7 +106,28 @@ export default async function BillsDetail({
               />,
             ]
           : []),
-        ...(isDraft
+        ...(parentClonedBill
+          ? [
+              <ResourceLink
+                key={parentClonedBill.id}
+                href={`/bills/${parentClonedBill.key}`}
+                label="Duplicated Bill"
+                resourceKey={parentClonedBill.key}
+                fontSize={fontSize}
+              />,
+            ]
+          : []),
+        ...(parentRecurringBill
+          ? [
+              <RecurrentResourceLink
+                key={parentRecurringBill.id}
+                href={`/bills/${parentRecurringBill.key}`}
+                label="Recurring Bill"
+                fontSize={fontSize}
+              />,
+            ]
+          : []),
+        ...(isDraft && !parentRecurringBill
           ? [
               <RecurringControl
                 key={RecurringControl.name}
@@ -106,13 +138,13 @@ export default async function BillsDetail({
           : []),
         <BillAttachmentsControl
           key={AttachmentsToolbarControl.name}
-          schema={schema}
+          schemaData={schemaData}
           resource={resource}
           fontSize={fontSize}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
-          schema={schema}
+          schemaData={schemaData}
           resource={resource}
           fontSize={fontSize}
         />,
@@ -133,14 +165,14 @@ export default async function BillsDetail({
                   selectResourceFieldValue(resource, fields.billStatus)?.option
                     ?.id
                 }
-                schema={schema}
+                schemaData={schemaData}
                 self={user}
                 resource={resource}
               />
             </StatusTrackerSlab>
           ) : (
             <Container>
-              <RecurringCard schema={schema} resource={resource} />
+              <RecurringCard schemaData={schemaData} resource={resource} />
             </Container>
           )}
         </>

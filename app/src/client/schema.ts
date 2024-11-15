@@ -1,12 +1,12 @@
 import 'server-only'
-import { ResourceType, Schema } from '@supplyside/model'
+import { ResourceType, SchemaData } from '@supplyside/model'
 import { revalidateTag } from 'next/cache'
 import { client } from '.'
 
 export const readSchema = async (
   accountId: string,
   resourceType: ResourceType,
-): Promise<Schema | undefined> => {
+): Promise<SchemaData | undefined> => {
   const { data: schema } = await client().GET(
     '/api/accounts/{accountId}/schemas/{resourceType}/merged/',
     {

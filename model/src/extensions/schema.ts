@@ -1,48 +1,83 @@
 import { fail } from 'assert'
-import { Schema } from '../types/schema'
-import { FieldReference } from './reference'
-import { P, match } from 'ts-pattern'
-import { OptionTemplate } from '../templates/types'
+import { match, P } from 'ts-pattern'
+import { fields } from '../templates'
+import { Option, SchemaData, SchemaField, SchemaFieldData } from '../types'
+import { FieldReference, OptionReference } from './reference'
 
-export const selectSchemaField = (schema: Schema, fieldRef: FieldReference) =>
-  match(fieldRef)
-    .with({ templateId: P.string }, ({ templateId }) =>
-      schema.fields.find((f) => f.templateId === templateId),
+export class Schema {
+  constructor(readonly schema: SchemaData) {}
+
+  get type() {
+    return this.schema.resourceType
+  }
+
+  get accountId() {
+    return this.schema.accountId
+  }
+
+  get fields() {
+    return this.schema.fields.map((field) => this.getField(field))
+  }
+
+  getField(fieldRef: FieldReference): SchemaField {
+    const field =
+      this.schema.fields.find((f) => Schema.isMatchingField(fieldRef, f)) ??
+      fail(`Field ${JSON.stringify(fieldRef)} does not exist`)
+
+    return {
+      ...field,
+      template: field.templateId
+        ? Schema.findTemplateField(field.templateId)
+        : null,
+    }
+  }
+
+  getFieldOption(fieldRef: FieldReference, optionRef: OptionReference): Option {
+    const { options, name } = this.getField(fieldRef)
+
+    return (
+      options.find((o) => Schema.isMatchingOption(optionRef, o)) ??
+      fail(
+        `Option ${JSON.stringify(optionRef)} does not exist in ${this.type}[${name}]`,
+      )
     )
-    .with({ fieldId: P.string }, ({ fieldId }) =>
-      schema.fields.find((f) => f.fieldId === fieldId),
+  }
+
+  implements(...fieldRefs: FieldReference[]) {
+    return fieldRefs.every((fieldRef) =>
+      this.schema.fields.find((f) => Schema.isMatchingField(fieldRef, f)),
     )
-    .with({ name: P.string }, ({ name }) =>
-      schema.fields.find((f) => f.name === name),
+  }
+
+  private static isMatchingField(
+    fieldRef: FieldReference,
+    field: SchemaFieldData,
+  ) {
+    return match(fieldRef)
+      .with(
+        { templateId: P.string },
+        ({ templateId }) => field.templateId === templateId,
+      )
+      .with({ fieldId: P.string }, ({ fieldId }) => field.fieldId === fieldId)
+      .with({ name: P.string }, ({ name }) => field.name === name)
+      .exhaustive()
+  }
+
+  private static isMatchingOption(optionRef: OptionReference, option: Option) {
+    return match(optionRef)
+      .with(
+        { templateId: P.string },
+        ({ templateId }) => option.templateId === templateId,
+      )
+      .with({ id: P.string }, ({ id }) => option.id === id)
+      .with({ name: P.string }, ({ name }) => option.name === name)
+      .exhaustive()
+  }
+
+  private static findTemplateField(templateId: string) {
+    return (
+      Object.values(fields).find((field) => field.templateId === templateId) ??
+      fail(`Template field ${templateId} does not exist`)
     )
-    .exhaustive()
-
-export const selectSchemaFieldUnsafe = (
-  schema: Schema,
-  fieldRef: FieldReference,
-) =>
-  selectSchemaField(schema, fieldRef) ??
-  fail(`Field ${JSON.stringify(fieldRef, null, 2)} not found in schema`)
-
-export const selectSchemaFieldOptionUnsafe = (
-  schema: Schema,
-  fieldRef: FieldReference,
-  optionRef: OptionTemplate,
-) => {
-  const field = selectSchemaFieldUnsafe(schema, fieldRef)
-
-  const matchedOption = field.options.find(
-    (option) => option.templateId === optionRef.templateId,
-  )
-
-  if (!matchedOption)
-    fail(
-      `Option not found in schema field. \nResource Type: ${
-        schema.resourceType
-      }\nField Ref: ${JSON.stringify(fieldRef)}\nOption Ref: ${JSON.stringify(
-        optionRef,
-      )}`,
-    )
-
-  return matchedOption
+  }
 }

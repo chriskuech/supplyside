@@ -1,11 +1,6 @@
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import {
-  billStatusOptions,
-  fields,
-  jobStatusOptions,
-  selectSchemaFieldOptionUnsafe,
-} from '@supplyside/model'
+import { billStatusOptions, fields, jobStatusOptions } from '@supplyside/model'
 import assert from 'assert'
 import { inject, injectable } from 'inversify'
 import { entries, groupBy, map, pipe, unique } from 'remeda'
@@ -284,12 +279,11 @@ export class QuickBooksService {
 
         await Promise.all(
           billIds.map(async (billId) => {
-            const bill = await this.resourceService.findResourceByUniqueValue(
-              accountId,
-              'Bill',
-              fields.quickBooksBillId,
-              { string: billId },
-            )
+            const bill = await this.resourceService.findOne(accountId, 'Bill', {
+              where: {
+                '==': [{ var: fields.quickBooksBillId.name }, billId],
+              },
+            })
 
             if (!bill) return
 
@@ -297,23 +291,11 @@ export class QuickBooksService {
 
             //TODO: we are missing updating the previously related bills status when a billPayment is deleted or updated
             if (quickBooksBill.Bill.Balance === 0) {
-              const billSchema = await this.schemaService.readMergedSchema(
+              await this.resourceService.withUpdatePatch(
                 accountId,
-                'Bill',
-              )
-
-              const paidOptionId = selectSchemaFieldOptionUnsafe(
-                billSchema,
-                fields.billStatus,
-                billStatusOptions.paid,
-              ).id
-
-              await this.resourceService.updateResourceField(
-                accountId,
-                'Bill',
                 bill.id,
-                fields.billStatus,
-                { optionId: paidOptionId },
+                (patch) =>
+                  patch.setOption(fields.billStatus, billStatusOptions.paid),
               )
             }
           }),
@@ -345,35 +327,21 @@ export class QuickBooksService {
   ): Promise<void> {
     await Promise.all(
       invoiceIds.map(async (invoiceId) => {
-        const job = await this.resourceService.findResourceByUniqueValue(
-          accountId,
-          'Job',
-          fields.quickBooksInvoiceId,
-          { string: invoiceId },
-        )
+        const job = await this.resourceService.findOne(accountId, 'Job', {
+          where: {
+            '==': [{ var: fields.quickBooksInvoiceId.name }, invoiceId],
+          },
+        })
 
         if (!job) return
 
         const quickBooksInvoice = await this.getInvoice(accountId, invoiceId)
 
         if (quickBooksInvoice.Invoice.Balance === 0) {
-          const jobSchema = await this.schemaService.readMergedSchema(
+          await this.resourceService.withUpdatePatch(
             accountId,
-            'Job',
-          )
-
-          const paidOptionId = selectSchemaFieldOptionUnsafe(
-            jobSchema,
-            fields.jobStatus,
-            jobStatusOptions.paid,
-          ).id
-
-          await this.resourceService.updateResourceField(
-            accountId,
-            'Job',
             job.id,
-            fields.jobStatus,
-            { optionId: paidOptionId },
+            (patch) => patch.setOption(fields.jobStatus, jobStatusOptions.paid),
           )
         }
       }),

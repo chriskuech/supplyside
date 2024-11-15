@@ -16,7 +16,7 @@ import {
 import {
   Option,
   Resource,
-  Schema,
+  SchemaData,
   fields,
   selectResourceFieldValue,
 } from '@supplyside/model'
@@ -63,13 +63,16 @@ const clampDrawerWidth = (width: number) =>
   Math.min(Math.max(width, minDrawerWidth), maxDrawerWidth)
 
 type Props = {
-  jobSchema: Schema
+  jobSchemaData: SchemaData
   jobs: Resource[]
 }
 
 const initialScrollOffset = dim
 
-export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
+export default function JobsSchedule({
+  jobSchemaData,
+  jobs: unsortedJobs,
+}: Props) {
   const [showCharts, setShowCharts] = useState(true)
   const [numWeeks, setNumWeeks] = useState(12)
   const [drawerWidth, setDrawerWidth] = useState(initialDrawerWidth)
@@ -147,7 +150,7 @@ export default function JobsSchedule({ jobSchema, jobs: unsortedJobs }: Props) {
             </Stack>
           </Stack>
           <FiltersControl
-            jobSchema={jobSchema}
+            jobSchemaData={jobSchemaData}
             jobStatuses={filters.jobStatuses}
             onJobStatusChange={(statuses) =>
               setFilters((filters) => ({

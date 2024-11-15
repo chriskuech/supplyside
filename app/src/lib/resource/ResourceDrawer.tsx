@@ -72,7 +72,7 @@ export const ResourceDrawer = async ({
       {resource && schema && (
         <CompareModal
           resource={resource}
-          schema={schema}
+          schemaData={schema}
           searchParams={searchParams}
         />
       )}

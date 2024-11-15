@@ -3,7 +3,7 @@ import { OptionPatch } from '@supplyside/api/router/api/accounts/fields'
 import {
   FieldType,
   ResourceType,
-  SchemaField,
+  SchemaFieldData,
   ValueInput,
 } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
@@ -19,7 +19,7 @@ export class SchemaFieldService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async list(accountId: string): Promise<SchemaField[]> {
+  async list(accountId: string): Promise<SchemaFieldData[]> {
     const fields = await this.prisma.field.findMany({
       where: {
         accountId,
@@ -131,7 +131,7 @@ export class SchemaFieldService {
         isRequired: dto.isRequired,
         defaultToToday: dto.defaultToToday,
         DefaultValue: dto.defaultValue && {
-          update: mapValueInputToPrismaValueUpdate(dto.defaultValue, type),
+          update: mapValueInputToPrismaValueUpdate(type, dto.defaultValue),
         },
       },
       include: fieldIncludes,

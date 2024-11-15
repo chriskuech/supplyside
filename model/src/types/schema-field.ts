@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { FieldTemplate } from '../templates'
 import { FieldTypeSchema } from './field-type'
 import { OptionSchema } from './option'
 import { ResourceTypeSchema } from './resource-type'
@@ -17,4 +18,8 @@ export const SchemaFieldSchema = z.object({
   options: z.array(OptionSchema),
 })
 
-export type SchemaField = z.infer<typeof SchemaFieldSchema>
+export type SchemaFieldData = z.infer<typeof SchemaFieldSchema>
+
+export type SchemaField = SchemaFieldData & {
+  template: FieldTemplate | null
+}

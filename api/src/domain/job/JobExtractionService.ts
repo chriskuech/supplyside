@@ -4,11 +4,7 @@ import {
 } from '@supplyside/api/extraction'
 import { logger } from '@supplyside/api/integrations/fastify/logger'
 import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
-import {
-  fields,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, selectResourceFieldValue } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 import { z } from 'zod'
 import { ResourceService } from '../resource/ResourceService'
@@ -132,11 +128,7 @@ export class JobExtractionService {
   ) {}
 
   async extractContent(accountId: string, resourceId: string) {
-    const [schema, resource, lineSchema] = await Promise.all([
-      this.schemaService.readMergedSchema(accountId, 'Job'),
-      this.resourceService.read(accountId, resourceId),
-      this.schemaService.readMergedSchema(accountId, 'Part'),
-    ])
+    const resource = await this.resourceService.read(accountId, resourceId)
 
     const { files } =
       selectResourceFieldValue(resource, fields.jobAttachments) ?? {}
@@ -161,100 +153,33 @@ export class JobExtractionService {
         )
       : []
 
-    await this.resourceService.update(accountId, resourceId, {
-      fields: [
-        ...(customer
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.customer)
-                  .fieldId,
-                valueInput: { resourceId: customer.id },
-              },
-            ]
-          : []),
-        ...(data.needDate
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.needDate)
-                  .fieldId,
-                valueInput: { string: data.needDate },
-              },
-            ]
-          : []),
-        ...(data.paymentTerms
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.paymentTerms)
-                  .fieldId,
-                valueInput: { number: data.paymentTerms },
-              },
-            ]
-          : []),
-      ],
-    })
+    await this.resourceService.withUpdatePatch(
+      accountId,
+      resourceId,
+      (patch) => {
+        const needDate = coerceDateStringToISO8601(data.needDate)
+
+        if (customer) patch.setResourceId(fields.customer, customer.id)
+        if (needDate) patch.setDate(fields.needDate, needDate)
+        if (data.paymentTerms)
+          patch.setNumber(fields.paymentTerms, data.paymentTerms)
+      },
+    )
 
     for (const lineItem of data.lineItems ?? []) {
       const needDate = coerceDateStringToISO8601(lineItem.needDate)
 
-      await this.resourceService.create(accountId, 'Part', {
-        fields: [
-          ...(resourceId
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.job)
-                    .fieldId,
-                  valueInput: { resourceId },
-                },
-              ]
-            : []),
-          ...(lineItem.partName
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.partName)
-                    .fieldId,
-                  valueInput: { string: lineItem.partName },
-                },
-              ]
-            : []),
-          ...(lineItem.quantity
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.quantity)
-                    .fieldId,
-                  valueInput: { number: lineItem.quantity },
-                },
-              ]
-            : []),
-          ...(lineItem.unitCost
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitCost)
-                    .fieldId,
-                  valueInput: { number: lineItem.unitCost },
-                },
-              ]
-            : []),
-          ...(needDate
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
-                    .fieldId,
-                  valueInput: { date: needDate },
-                },
-              ]
-            : []),
-          ...(lineItem.otherNotes
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(
-                    lineSchema,
-                    fields.otherNotes,
-                  ).fieldId,
-                  valueInput: { string: lineItem.otherNotes },
-                },
-              ]
-            : []),
-        ],
+      await this.resourceService.withCreatePatch(accountId, 'Part', (patch) => {
+        if (resourceId) patch.setResourceId(fields.job, resourceId)
+        if (lineItem.partName)
+          patch.setString(fields.partName, lineItem.partName)
+        if (lineItem.quantity)
+          patch.setNumber(fields.quantity, lineItem.quantity)
+        if (lineItem.unitCost)
+          patch.setNumber(fields.unitCost, lineItem.unitCost)
+        if (needDate) patch.setDate(fields.needDate, needDate)
+        if (lineItem.otherNotes)
+          patch.setString(fields.otherNotes, lineItem.otherNotes)
       })
     }
   }

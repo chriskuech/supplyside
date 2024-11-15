@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { FieldTypeSchema } from './field-type'
-import { ValueSchema } from './value'
-import { ResourceTypeSchema } from './resource-type'
 import { CostSchema } from './cost'
+import { FieldTypeSchema } from './field-type'
+import { ResourceTypeSchema } from './resource-type'
+import { ValueSchema } from './value'
 
 export const ResourceFieldSchema = z.object({
   fieldId: z.string(),
@@ -14,6 +14,7 @@ export const ResourceFieldSchema = z.object({
 
 export const ResourceSchema = z.object({
   id: z.string(),
+  createdAt: z.string(),
   accountId: z.string(),
   templateId: z.string().nullable(),
   type: ResourceTypeSchema,

@@ -38,12 +38,10 @@ export class PoService {
     )?.date
 
     if (!existingIssuedDate) {
-      await this.resourceService.updateResourceField(
+      await this.resourceService.withUpdatePatch(
         accountId,
-        'Purchase',
         resourceId,
-        fields.issuedDate,
-        { date: new Date().toISOString() },
+        (patch) => patch.setDate(fields.issuedDate, new Date().toISOString()),
       )
     }
 
@@ -65,12 +63,8 @@ export class PoService {
       },
     })
 
-    await this.resourceService.updateResourceField(
-      accountId,
-      'Purchase',
-      resourceId,
-      fields.document,
-      { fileId },
+    await this.resourceService.withUpdatePatch(accountId, resourceId, (patch) =>
+      patch.setFileId(fields.document, fileId),
     )
   }
 

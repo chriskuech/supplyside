@@ -8,7 +8,7 @@ import {
   useMemo,
 } from 'react'
 import { GridFilterModel } from '@mui/x-data-grid'
-import { Resource, Schema } from '@supplyside/model'
+import { Resource, SchemaData } from '@supplyside/model'
 import { useRouter } from 'next/navigation'
 import { debounce } from 'remeda'
 import { GridApiPro } from '@mui/x-data-grid-pro'
@@ -16,7 +16,7 @@ import ResourceTable from './table/ResourceTable'
 
 type Props = {
   tableKey: string
-  schema: Schema
+  schemaData: SchemaData
   resources: Resource[]
   initialGridFilterModel?: GridFilterModel
   unFilterableFieldIds?: string[]
@@ -25,7 +25,7 @@ type Props = {
 
 export const ListPageResourceTable: FC<Props> = ({
   tableKey,
-  schema,
+  schemaData,
   resources,
   initialGridFilterModel,
   unFilterableFieldIds,
@@ -53,7 +53,7 @@ export const ListPageResourceTable: FC<Props> = ({
   return (
     <ResourceTable
       tableKey={tableKey}
-      schema={schema}
+      schemaData={schemaData}
       resources={resources}
       initialGridFilterModel={initialGridFilterModel}
       saveGridFilterModel={saveGridFilterModelDebounced}

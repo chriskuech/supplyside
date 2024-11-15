@@ -110,7 +110,7 @@ export default function MatchControl({ resource }: Props) {
                 ) : (
                   <ResourceTable
                     tableKey={MatchControl.name}
-                    schema={purchaseSchema}
+                    schemaData={purchaseSchema}
                     resources={unlinkedPurchases}
                     initialQuery={[poNumber, vendorName]
                       .filter(isTruthy)

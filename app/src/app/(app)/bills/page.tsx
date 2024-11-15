@@ -1,5 +1,5 @@
 import { fail } from 'assert'
-import { fields, selectSchemaFieldUnsafe } from '@supplyside/model'
+import { fields, Schema } from '@supplyside/model'
 import { GridFilterItem } from '@mui/x-data-grid'
 import { BillsInboxControl } from './BillsInboxControl'
 import GridApiCharts from './charts/GridApiCharts'
@@ -11,15 +11,12 @@ export default async function Bills({
 }: {
   searchParams: Record<string, unknown>
 }) {
-  const billSchema = (await readSchema('Bill')) ?? fail('Bill schema not found')
-
-  const billRecurringField = selectSchemaFieldUnsafe(
-    billSchema,
-    fields.recurring,
-  )
+  const billSchemaData =
+    (await readSchema('Bill')) ?? fail('Bill schema not found')
+  const schema = new Schema(billSchemaData)
 
   const recurringBillsFilter: GridFilterItem = {
-    field: billRecurringField.fieldId,
+    field: schema.getField(fields.recurring).fieldId,
     operator: 'is',
     value: 'false',
   }

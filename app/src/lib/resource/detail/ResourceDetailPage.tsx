@@ -7,9 +7,9 @@ import {
   OptionTemplate,
   Resource,
   Schema,
+  SchemaData,
   fields,
   selectResourceFieldValue,
-  selectSchemaField,
 } from '@supplyside/model'
 import ResourceForm from '../ResourceForm'
 import { ResourceDrawer } from '../ResourceDrawer'
@@ -29,8 +29,8 @@ import CancelResourceButton from './CancelResourceButton'
 import EditResourceControl from './EditResourceButton'
 
 type Props = {
-  schema: Schema
-  lineSchema?: Schema
+  schemaData: SchemaData
+  lineSchema?: SchemaData
   resource: Resource
   tools: (fontSize: 'small' | 'medium' | 'large') => readonly ReactNode[]
   isReadOnly?: boolean
@@ -51,7 +51,7 @@ type Props = {
 }
 
 export default function ResourceDetailPage({
-  schema,
+  schemaData,
   lineSchema,
   resource,
   tools: customTools,
@@ -112,7 +112,8 @@ export default function ResourceDetailPage({
     </>
   )
 
-  const nameField = selectSchemaField(schema, fields.name)
+  const schema = new Schema(schemaData)
+
   const nameValue = selectResourceFieldValue(resource, fields.name)
 
   return (
@@ -147,11 +148,11 @@ export default function ResourceDetailPage({
             </Stack>
             <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="h3">
-                {nameField ? (
+                {schema.implements(fields.name) ? (
                   <Box width={600}>
                     <FieldControl
                       inputId="nameField"
-                      schema={schema}
+                      schemaData={schemaData}
                       resource={resource}
                       field={fields.name}
                       inputProps={{
@@ -193,14 +194,14 @@ export default function ResourceDetailPage({
         <Container sx={{ py: 5 }}>
           <Stack spacing={5}>
             {isReadOnly ? (
-              <ReadOnlyFieldsView schema={schema} resource={resource} />
+              <ReadOnlyFieldsView schemaData={schemaData} resource={resource} />
             ) : (
-              <ResourceForm schema={schema} resource={resource} />
+              <ResourceForm schemaData={schemaData} resource={resource} />
             )}
             {children}
             {linesBacklinkField && lineSchema && (
               <LinesAndCosts
-                lineSchema={lineSchema}
+                lineSchemaData={lineSchema}
                 resource={resource}
                 lineQuery={{
                   '==': [{ var: linesBacklinkField.name }, resource.id],
@@ -211,7 +212,7 @@ export default function ResourceDetailPage({
                     valueInput: { resourceId: resource.id },
                   },
                 ]}
-                hideColumns={match(schema.resourceType)
+                hideColumns={match(schemaData.resourceType)
                   .with('Bill', () => [fields.bill])
                   .with('Job', () => [fields.job])
                   .with('Purchase', () => [fields.purchase])
@@ -233,7 +234,7 @@ export default function ResourceDetailPage({
       <ResourceDrawer searchParams={searchParams} />
       <CompareModal
         resource={resource}
-        schema={schema}
+        schemaData={schemaData}
         searchParams={searchParams}
       />
     </>

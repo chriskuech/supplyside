@@ -1,8 +1,8 @@
 import {
   AddressSchema,
   ContactSchema,
-  Schema,
-  SchemaField,
+  SchemaData,
+  SchemaFieldData,
 } from '@supplyside/model'
 import { isTruthy } from 'remeda'
 import { P, match } from 'ts-pattern'
@@ -10,7 +10,8 @@ import { ZodType, ZodTypeAny, z } from 'zod'
 import { mapValueModelToEntity } from '../resource/mappers'
 import { FieldModel, SchemaModel } from './model'
 
-export const mapSchemaModelToEntity = (model: SchemaModel): Schema => ({
+export const mapSchemaModelToEntity = (model: SchemaModel): SchemaData => ({
+  accountId: model.accountId,
   resourceType: model.resourceType,
   sections: model.Section.flatMap((s) => ({
     id: s.id,
@@ -25,7 +26,7 @@ export const mapSchemaModelToEntity = (model: SchemaModel): Schema => ({
     .map(mapFieldModelToEntity),
 })
 
-export const mapFieldModelToEntity = (model: FieldModel): SchemaField => ({
+export const mapFieldModelToEntity = (model: FieldModel): SchemaFieldData => ({
   fieldId: model.id,
   templateId: model.templateId,
   name: model.name,
@@ -42,16 +43,16 @@ export const mapFieldModelToEntity = (model: FieldModel): SchemaField => ({
   isRequired: model.isRequired,
 })
 
-const nameEnum = (field: SchemaField) =>
+const nameEnum = (field: SchemaFieldData) =>
   z.enum(field.options.map((o) => o.name) as [string, ...string[]])
 
-const resolveNames = (field: SchemaField, names: string[]) =>
+const resolveNames = (field: SchemaFieldData, names: string[]) =>
   names
     .map((name) => field.options.find((o) => o.name === name)?.id)
     .filter(isTruthy)
 
 const mapSchemaFieldToZodType = (
-  field: SchemaField,
+  field: SchemaFieldData,
 ): ZodTypeAny | undefined => {
   let schema: ZodTypeAny | undefined = match(field.type)
     .with('Address', () => AddressSchema.optional())
@@ -105,7 +106,7 @@ const mapSchemaFieldToZodType = (
   return schema
 }
 
-export const mapSchemaEntityToZod = (schema: Schema): ZodType =>
+export const mapSchemaEntityToZod = (schema: SchemaData): ZodType =>
   schema.fields.reduce((acc, field) => {
     const fieldSchema = mapSchemaFieldToZodType(field)
 

@@ -9,7 +9,7 @@ type Props = {
 }
 
 export const StepsControl = async ({ part }: Props) => {
-  const [stepSchema, steps] = await Promise.all([
+  const [stepSchemaData, steps] = await Promise.all([
     readSchema(part.accountId, 'Step'),
     readResources(part.accountId, 'Step', {
       where: {
@@ -31,8 +31,14 @@ export const StepsControl = async ({ part }: Props) => {
     }),
   )
 
-  if (!stepSchema || !steps)
+  if (!stepSchemaData || !steps)
     return <Alert severity="error">Failed to load steps</Alert>
 
-  return <StepsView stepSchema={stepSchema} steps={expandedSteps} part={part} />
+  return (
+    <StepsView
+      stepSchemaData={stepSchemaData}
+      steps={expandedSteps}
+      part={part}
+    />
+  )
 }

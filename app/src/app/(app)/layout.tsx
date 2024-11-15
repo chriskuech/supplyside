@@ -15,11 +15,11 @@ import {
 } from '@mui/icons-material'
 import {
   OptionTemplate,
+  Schema,
   billStatusOptions,
   fields,
   jobStatusOptions,
   purchaseStatusOptions,
-  selectSchemaFieldOptionUnsafe,
 } from '@supplyside/model'
 import { ItemLink } from './NavItem'
 import { AccountMenu } from '@/lib/ux/appbar/AccountMenu'
@@ -39,28 +39,34 @@ export default async function Layout({
   children: React.ReactNode
 }) {
   const { userId, accountId } = await requireSession()
-  const [user, account, accounts, jobSchema, purchaseSchema, billSchema] =
-    await Promise.all([
-      readSelf(userId),
-      readAccount(accountId),
-      readAccounts(),
-      readSchema(accountId, 'Job'),
-      readSchema(accountId, 'Purchase'),
-      readSchema(accountId, 'Bill'),
-    ])
+  const [
+    user,
+    account,
+    accounts,
+    jobSchemaData,
+    purchaseSchemaData,
+    billSchemaData,
+  ] = await Promise.all([
+    readSelf(userId),
+    readAccount(accountId),
+    readAccounts(),
+    readSchema(accountId, 'Job'),
+    readSchema(accountId, 'Purchase'),
+    readSchema(accountId, 'Bill'),
+  ])
 
-  assert(jobSchema && purchaseSchema && billSchema)
+  assert(jobSchemaData && purchaseSchemaData && billSchemaData)
+
+  const jobSchema = new Schema(jobSchemaData)
+  const purchaseSchema = new Schema(purchaseSchemaData)
+  const billSchema = new Schema(billSchemaData)
 
   const jobStatusOptionId = (optionRef: OptionTemplate) =>
-    selectSchemaFieldOptionUnsafe(jobSchema, fields.jobStatus, optionRef).id
+    jobSchema.getFieldOption(fields.jobStatus, optionRef).id
   const purchaseStatusOptionId = (optionRef: OptionTemplate) =>
-    selectSchemaFieldOptionUnsafe(
-      purchaseSchema,
-      fields.purchaseStatus,
-      optionRef,
-    ).id
+    purchaseSchema.getFieldOption(fields.purchaseStatus, optionRef).id
   const billStatusOptionId = (optionRef: OptionTemplate) =>
-    selectSchemaFieldOptionUnsafe(billSchema, fields.billStatus, optionRef).id
+    billSchema.getFieldOption(fields.billStatus, optionRef).id
 
   const gettingOpenJobs = readResources(accountId, 'Job', {
     where: {
@@ -125,7 +131,7 @@ export default async function Layout({
           ],
         },
         {
-          '==': [{ var: fields.recurring.name }, false],
+          '!=': [{ var: fields.recurring.name }, true],
         },
       ],
     },

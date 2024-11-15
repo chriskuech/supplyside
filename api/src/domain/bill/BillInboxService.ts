@@ -1,7 +1,7 @@
 import { ResourceService } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import { BadRequestError } from '@supplyside/api/integrations/fastify/BadRequestError'
-import { fields, selectSchemaFieldUnsafe } from '@supplyside/model'
+import { fields } from '@supplyside/model'
 import { inject, injectable } from 'inversify'
 import { Message } from 'postmark'
 import YAML from 'yaml'
@@ -90,11 +90,6 @@ export class BillInboxService {
           ]
         : []
 
-    const billSchema = await this.schemaService.readMergedSchema(
-      account.id,
-      'Bill',
-    )
-
     const fileIds = await Promise.all(
       [meta, ...emails, ...attachments].map(async (file) => {
         const { id: blobId } = await this.blobService.createBlob(account.id, {
@@ -111,15 +106,13 @@ export class BillInboxService {
       }),
     )
 
-    const bill = await this.resourceService.create(account.id, 'Bill', {
-      fields: [
-        {
-          fieldId: selectSchemaFieldUnsafe(billSchema, fields.billAttachments)
-            .fieldId,
-          valueInput: { fileIds },
-        },
-      ],
-    })
+    const bill = await this.resourceService.withCreatePatch(
+      account.id,
+      'Bill',
+      (patch) => {
+        patch.setFileIds(fields.billAttachments, fileIds)
+      },
+    )
 
     await this.billExtractionService.extractContent(account.id, bill.id)
   }

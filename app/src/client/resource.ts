@@ -1,9 +1,5 @@
 import 'server-only'
-import {
-  Resource,
-  ResourceType,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { Resource, ResourceType, Schema } from '@supplyside/model'
 import { components } from '@supplyside/api'
 import { stringify } from 'qs'
 import { revalidateTag } from 'next/cache'
@@ -23,23 +19,13 @@ export const createResource = async (
 ) => {
   revalidateTag('Resources')
 
-  const schema = await readSchema(accountId, resourceType)
-  if (!schema) return
+  const schemaData = await readSchema(accountId, resourceType)
+  if (!schemaData) return
 
-  const resolvedFields = fields.map(({ field, valueInput }) => {
-    if ('fieldId' in field) {
-      return { fieldId: field.fieldId, valueInput }
-    }
+  const resolvedFields = fields.map(({ field: fieldRef, valueInput }) => {
+    const { fieldId } = new Schema(schemaData).getField(fieldRef)
 
-    if (!('templateId' in field)) {
-      throw new Error('FieldData must have fieldId or templateId')
-    }
-
-    return {
-      fieldId: selectSchemaFieldUnsafe(schema, { templateId: field.templateId })
-        .fieldId,
-      valueInput,
-    }
+    return { fieldId, valueInput }
   })
 
   const { data: resource } = await client().POST(
@@ -123,22 +109,12 @@ export const updateResource = async (
   const current = await readResource(accountId, resourceId)
   if (!current) return
 
-  const schema = await readSchema(accountId, current.type)
-  if (!schema) return
+  const schemaData = await readSchema(accountId, current.type)
+  if (!schemaData) return
 
-  const resolvedFields = fields.map(({ field, valueInput }) => {
-    if ('fieldId' in field) {
-      return { fieldId: field.fieldId, valueInput }
-    }
+  const resolvedFields = fields.map(({ field: fieldRef, valueInput }) => {
+    const { fieldId } = new Schema(schemaData).getField(fieldRef)
 
-    if (!('templateId' in field)) {
-      throw new Error(
-        'FieldData must have fieldId or templateId. FieldData: ' +
-          JSON.stringify(fields, null, 2),
-      )
-    }
-
-    const { fieldId } = selectSchemaFieldUnsafe(schema, field)
     return { fieldId, valueInput }
   })
 

@@ -5,28 +5,28 @@ import {
   Typography,
 } from '@mui/material'
 import { ExpandMore } from '@mui/icons-material'
-import { Schema, SchemaField } from '@supplyside/model'
+import { SchemaData, SchemaFieldData } from '@supplyside/model'
 import AddSectionControl from './AddSectionControl'
 import SchemaSectionsControl from './SchemaSectionsControl'
 
 type Props = {
-  fields: SchemaField[]
-  schemas: Schema[]
+  fields: SchemaFieldData[]
+  schemas: SchemaData[]
 }
 
 export default function SchemasControl({ fields, schemas }: Props) {
   return (
     <>
-      {schemas.map((schema) => (
-        <Accordion key={schema.resourceType}>
+      {schemas.map((schemaData) => (
+        <Accordion key={schemaData.resourceType}>
           <AccordionSummary expandIcon={<ExpandMore />}>
             <Typography variant="h6" gutterBottom>
-              {schema.resourceType}
+              {schemaData.resourceType}
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <AddSectionControl schema={schema} />
-            <SchemaSectionsControl fields={fields} schema={schema} />
+            <AddSectionControl schemaData={schemaData} />
+            <SchemaSectionsControl fields={fields} schemaData={schemaData} />
           </AccordionDetails>
         </Accordion>
       ))}

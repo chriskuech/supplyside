@@ -8,14 +8,14 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { Resource, Schema, File } from '@supplyside/model'
+import { Resource, File, SchemaData } from '@supplyside/model'
 import { Close } from '@mui/icons-material'
 import ResourceForm from './ResourceForm'
 import { getPreviewPath } from '@/app/api/download/[filename]/util'
 
 type Props = {
   resource: Resource
-  schema: Schema
+  schemaData: SchemaData
   file: File | undefined
   isOpen: boolean
   onClose: (path: string) => void
@@ -23,7 +23,7 @@ type Props = {
 
 export function CompareModalView({
   resource,
-  schema,
+  schemaData,
   onClose,
   isOpen,
   file,
@@ -59,7 +59,7 @@ export function CompareModalView({
             >
               <Box height="100%" overflow="auto">
                 <ResourceForm
-                  schema={schema}
+                  schemaData={schemaData}
                   resource={resource}
                   singleColumn
                 />

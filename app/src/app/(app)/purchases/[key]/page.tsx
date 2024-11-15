@@ -31,7 +31,7 @@ export default async function PurchaseDetail({
   params: { key: string }
   searchParams: Record<string, unknown>
 }) {
-  const { resource, schema, lineSchema, user } = await readDetailPageModel(
+  const { resource, schemaData, lineSchema, user } = await readDetailPageModel(
     'Purchase',
     key,
   )
@@ -59,7 +59,7 @@ export default async function PurchaseDetail({
 
   const isDraft = status.templateId === purchaseStatusOptions.draft.templateId
 
-  const hasInvalidFields = isMissingRequiredFields(schema, resource)
+  const hasInvalidFields = isMissingRequiredFields(schemaData, resource)
   const poFile = selectResourceFieldValue(resource, fields.document)?.file
 
   const vendorTemplateId = selectResourceFieldValue(resource, fields.vendor)
@@ -86,7 +86,7 @@ export default async function PurchaseDetail({
         },
       ]}
       lineSchema={lineSchema ?? undefined}
-      schema={schema}
+      schemaData={schemaData}
       resource={resource}
       searchParams={searchParams}
       tools={(fontSize) => [
@@ -112,7 +112,7 @@ export default async function PurchaseDetail({
           : []),
         <TrackingControl
           key={TrackingControl.name}
-          schema={schema}
+          schemaData={schemaData}
           resource={resource}
           fontSize={fontSize}
         />,
@@ -136,13 +136,13 @@ export default async function PurchaseDetail({
           : []),
         <PurchaseAttachmentsControl
           key={PurchaseAttachmentsControl.name}
-          schema={schema}
+          schemaData={schemaData}
           resource={resource}
           fontSize={fontSize}
         />,
         <AssigneeToolbarControl
           key={AssigneeToolbarControl.name}
-          schema={schema}
+          schemaData={schemaData}
           resource={resource}
           fontSize={fontSize}
         />,

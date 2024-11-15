@@ -1,7 +1,7 @@
 import {
   fields,
   Resource,
-  Schema,
+  SchemaData,
   selectResourceFieldValue,
 } from '@supplyside/model'
 import { Box, Divider, Stack, Typography } from '@mui/material'
@@ -11,15 +11,16 @@ import { formatMoney } from '@/lib/format'
 
 export const PartView: FC<{
   part: Resource
-  partSchema: Schema
+  partSchemaData: SchemaData
+  i: number
   stepsControl: ReactNode
-}> = ({ part, partSchema, stepsControl }) => (
+}> = ({ part, partSchemaData, stepsControl }) => (
   <Stack spacing={2} direction="row" alignItems="start">
     <Stack spacing={1} flexGrow={1}>
       <Stack direction="row" alignItems="center" spacing={1}>
         <Box flexGrow={1}>
           <FieldControl
-            schema={partSchema}
+            schemaData={partSchemaData}
             resource={part}
             inputId={`part-name-${part.id}`}
             field={fields.partName}
@@ -30,7 +31,7 @@ export const PartView: FC<{
         </Box>
         <Box>
           <FieldControl
-            schema={partSchema}
+            schemaData={partSchemaData}
             resource={part}
             inputId={`need-date-${part.id}`}
             field={fields.needDate}
@@ -42,7 +43,7 @@ export const PartView: FC<{
       </Stack>
       <Box>
         <FieldControl
-          schema={partSchema}
+          schemaData={partSchemaData}
           resource={part}
           inputId={`other-notes-${part.id}`}
           field={fields.otherNotes}
@@ -58,7 +59,7 @@ export const PartView: FC<{
       <Stack direction="row" alignItems="center" spacing={1}>
         <Box width={100}>
           <FieldControl
-            schema={partSchema}
+            schemaData={partSchemaData}
             resource={part}
             inputId={`quantity-${part.id}`}
             field={fields.quantity}
@@ -70,7 +71,7 @@ export const PartView: FC<{
         <Box>&times;</Box>
         <Box width={140}>
           <FieldControl
-            schema={partSchema}
+            schemaData={partSchemaData}
             resource={part}
             inputId={`unit-cost-${part.id}`}
             field={fields.unitCost}

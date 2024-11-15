@@ -1,5 +1,5 @@
 import { fail } from 'assert'
-import { fields, selectSchemaFieldUnsafe } from '@supplyside/model'
+import { fields, Schema } from '@supplyside/model'
 import { GridFilterItem } from '@mui/x-data-grid'
 import ListPage from '@/lib/resource/ListPage'
 import { readSchema } from '@/actions/schema'
@@ -9,15 +9,12 @@ export default async function PurchaseLines({
 }: {
   searchParams: Record<string, unknown>
 }) {
-  const purchaseLineSchema =
+  const purchaseLineSchemaData =
     (await readSchema('PurchaseLine')) ?? fail('PurchaseLine schema not found')
-  const purchaseField = selectSchemaFieldUnsafe(
-    purchaseLineSchema,
-    fields.purchase,
-  )
+  const purchaseLineSchema = new Schema(purchaseLineSchemaData)
 
   const purchasesLines: GridFilterItem = {
-    field: purchaseField.fieldId,
+    field: purchaseLineSchema.getField(fields.purchase).fieldId,
     operator: 'isNotEmpty',
   }
 

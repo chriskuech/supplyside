@@ -4,14 +4,12 @@ import {
   JsonLogicSchema,
   OrderBySchema,
 } from '@supplyside/api/domain/resource/json-logic/types'
-import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
 import {
   ResourceSchema,
   ResourceTypeSchema,
   ValueInputSchema,
   ValueResourceSchema,
   fields,
-  selectSchemaFieldUnsafe,
 } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -117,30 +115,24 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         body: { resourceType, fields: fieldsInput, userId },
       }) => {
         const service = container.resolve(ResourceService)
-        const schemaService = container.resolve(SchemaService)
 
-        const resource = await service.create(
+        const resource = await service.withCreatePatch(
           accountId,
           resourceType,
-          { fields: fieldsInput },
-          userId,
+          (patch) => {
+            for (const { fieldId, valueInput } of fieldsInput ?? []) {
+              patch.setPatch({ fieldId }, valueInput)
+            }
+            if (userId && patch.schema.implements(fields.assignee)) {
+              patch.setUserId(fields.assignee, userId)
+            }
+          },
         )
 
-        if (resource.type === 'Job') {
-          const schema = await schemaService.readMergedSchema(accountId, 'Part')
-          await service.create(
-            accountId,
-            'Part',
-            {
-              fields: [
-                {
-                  fieldId: selectSchemaFieldUnsafe(schema, fields.job).fieldId,
-                  valueInput: { resourceId: resource.id },
-                },
-              ],
-            },
-            userId,
-          )
+        if (resourceType === 'Job') {
+          await service.withCreatePatch(accountId, 'Part', (patch) => {
+            patch.setResourceId(fields.job, resource.id)
+          })
         }
 
         return resource
@@ -218,14 +210,16 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           200: ResourceSchema,
         },
       },
-      handler: async (req) => {
+      handler: async ({ params: { accountId, resourceId }, body }) => {
         const service = container.resolve(ResourceService)
 
-        const resource = await service.update(
-          req.params.accountId,
-          req.params.resourceId,
-          {
-            fields: req.body,
+        const resource = await service.withUpdatePatch(
+          accountId,
+          resourceId,
+          (patch) => {
+            for (const { fieldId, valueInput } of body) {
+              patch.setPatch({ fieldId }, valueInput)
+            }
           },
         )
 

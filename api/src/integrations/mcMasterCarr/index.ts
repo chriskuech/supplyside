@@ -6,8 +6,6 @@ import {
   Cxml,
   fields,
   resources,
-  selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe,
   unitOfMeasureOptions,
 } from '@supplyside/model'
 import assert, { fail } from 'assert'
@@ -68,37 +66,31 @@ export class McMasterService {
         },
       )
 
-    const vendorSchema = await this.schemaService.readMergedSchema(
-      accountId,
-      'Vendor',
-    )
     const mcMasterCarrSystemResource = resources.mcMasterCarrVendor
-
     if (!mcMasterCarrVendor) {
-      await this.resourceService.create(accountId, 'Vendor', {
-        templateId: mcMasterCarrSystemResource.templateId,
-        fields: mcMasterCarrSystemResource.fields.map((f) => ({
-          fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).fieldId,
-          valueInput: f.value,
-        })),
-      })
+      await this.resourceService.withCreatePatch(
+        accountId,
+        'Vendor',
+        (patch) => {
+          patch.patchedTemplateId = mcMasterCarrSystemResource.templateId
+          for (const { field, value } of mcMasterCarrSystemResource.fields) {
+            patch.setPatch(field, value)
+          }
+        },
+      )
     } else {
-      await this.resourceService.update(accountId, mcMasterCarrVendor.id, {
-        fields: mcMasterCarrSystemResource.fields.map((f) => ({
-          fieldId: selectSchemaFieldUnsafe(vendorSchema, f.field).fieldId,
-          valueInput: f.value,
-        })),
-      })
-
-      if (!mcMasterCarrVendor.templateId) {
-        await this.resourceService.updateTemplateId(
-          accountId,
-          mcMasterCarrVendor.id,
-          {
-            templateId: mcMasterCarrSystemResource.templateId,
-          },
-        )
-      }
+      await this.resourceService.withUpdatePatch(
+        accountId,
+        mcMasterCarrVendor.id,
+        (patch) => {
+          for (const { field, value } of mcMasterCarrSystemResource.fields) {
+            patch.setPatch(field, value)
+          }
+          if (!mcMasterCarrVendor.templateId) {
+            patch.patchedTemplateId = mcMasterCarrSystemResource.templateId
+          }
+        },
+      )
     }
 
     await this.prisma.account.update({
@@ -118,11 +110,11 @@ export class McMasterService {
     )
 
     if (mcMasterCarrVendor) {
-      await this.resourceService.updateTemplateId(
+      await this.resourceService.withUpdatePatch(
         accountId,
         mcMasterCarrVendor.id,
-        {
-          templateId: null,
+        (patch) => {
+          patch.patchedTemplateId = null
         },
       )
     }
@@ -166,12 +158,8 @@ export class McMasterService {
       throw new Error('punchout session url not found')
     }
 
-    await this.resourceService.updateResourceField(
-      accountId,
-      'Purchase',
-      resourceId,
-      fields.punchoutSessionUrl,
-      { string: punchoutSessionUrl },
+    await this.resourceService.withUpdatePatch(accountId, resourceId, (patch) =>
+      patch.setString(fields.punchoutSessionUrl, punchoutSessionUrl),
     )
 
     return punchoutSessionUrl
@@ -295,12 +283,8 @@ export class McMasterService {
 
     this.authenticatePoom(sender.domain, sender.identity, sender.sharedSecret)
 
-    await this.resourceService.updateResourceField(
-      accountId,
-      'Purchase',
-      orderId,
-      fields.issuedDate,
-      { date: orderDate.toISOString() },
+    await this.resourceService.withUpdatePatch(accountId, orderId, (patch) =>
+      patch.setDate(fields.issuedDate, orderDate.toISOString()),
     )
 
     for (const line of lines) {
@@ -315,99 +299,24 @@ export class McMasterService {
 
       assert(description && quantity && unitOfMeasure && unitPrice)
 
-      const lineSchema = await this.schemaService.readMergedSchema(
+      await this.resourceService.withCreatePatch(
         accountId,
         'PurchaseLine',
-      )
-      const itemNameFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.itemName,
-      ).fieldId
-      const orderFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.purchase,
-      ).fieldId
-      const quantityFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.quantity,
-      ).fieldId
-      const unitPriceFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.unitCost,
-      ).fieldId
-      const itemNumberFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.itemNumber,
-      ).fieldId
-      const notesFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.otherNotes,
-      ).fieldId
-      const lineUnitofMesureFieldId = selectSchemaFieldUnsafe(
-        lineSchema,
-        fields.unitOfMeasure,
-      ).fieldId
-      const lineUnitOfMeasureOptionId = selectSchemaFieldOptionUnsafe(
-        lineSchema,
-        fields.unitOfMeasure,
-        unitOfMeasure,
-      ).id
+        (patch) => {
+          const uom = patch.schema.getFieldOption(
+            fields.unitOfMeasure,
+            unitOfMeasure,
+          )
 
-      const createdLine = await this.resourceService.create(
-        accountId,
-        'PurchaseLine',
-        {
-          fields: [
-            {
-              fieldId: itemNameFieldId,
-              valueInput: { string: description },
-            },
-            {
-              fieldId: orderFieldId,
-              valueInput: { resourceId: orderId },
-            },
-            {
-              fieldId: lineUnitofMesureFieldId,
-              valueInput: { optionId: lineUnitOfMeasureOptionId },
-            },
-            {
-              fieldId: lineUnitofMesureFieldId,
-              valueInput: { optionId: lineUnitOfMeasureOptionId },
-            },
-            ...(notes
-              ? [
-                  {
-                    fieldId: notesFieldId,
-                    valueInput: { string: notes },
-                  },
-                ]
-              : []),
-            ...(supplierPartID
-              ? [
-                  {
-                    fieldId: itemNumberFieldId,
-                    valueInput: { string: supplierPartID },
-                  },
-                ]
-              : []),
-          ],
+          patch.setString(fields.itemName, description)
+          patch.setResourceId(fields.purchase, orderId)
+          patch.setOption(fields.unitOfMeasure, uom)
+          patch.setNumber(fields.quantity, quantity)
+          patch.setNumber(fields.unitCost, unitPrice)
+          if (notes) patch.setString(fields.otherNotes, notes)
+          if (supplierPartID) patch.setString(fields.itemNumber, supplierPartID)
         },
       )
-
-      // Updating the resource to trigger calculations
-      //TODO: update createResource to trigger calculations
-      this.resourceService.update(accountId, createdLine.id, {
-        fields: [
-          {
-            fieldId: quantityFieldId,
-            valueInput: { number: quantity },
-          },
-          {
-            fieldId: unitPriceFieldId,
-            valueInput: { number: unitPrice },
-          },
-        ],
-      })
     }
   }
 }

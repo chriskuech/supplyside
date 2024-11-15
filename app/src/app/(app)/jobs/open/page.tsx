@@ -1,10 +1,5 @@
 import { fail } from 'assert'
-import {
-  fields,
-  jobStatusOptions,
-  selectSchemaFieldOptionUnsafe,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, jobStatusOptions, Schema } from '@supplyside/model'
 import { GridFilterItem } from '@mui/x-data-grid'
 import GridApiCharts from '../charts/GridApiCharts'
 import ListPage from '@/lib/resource/ListPage'
@@ -15,16 +10,16 @@ export default async function OpenJobs({
 }: {
   searchParams: Record<string, unknown>
 }) {
-  const jobSchema = (await readSchema('Job')) ?? fail('Job schema not found')
+  const jobSchemaData =
+    (await readSchema('Job')) ?? fail('Job schema not found')
+  const jobSchema = new Schema(jobSchemaData)
 
-  const jobStatusField = selectSchemaFieldUnsafe(jobSchema, fields.jobStatus)
-  const jobStatusPaidOptionId = selectSchemaFieldOptionUnsafe(
-    jobSchema,
+  const jobStatusField = jobSchema.getField(fields.jobStatus)
+  const jobStatusPaidOptionId = jobSchema.getFieldOption(
     fields.jobStatus,
     jobStatusOptions.paid,
   ).id
-  const jobStatusCanceledOptionId = selectSchemaFieldOptionUnsafe(
-    jobSchema,
+  const jobStatusCanceledOptionId = jobSchema.getFieldOption(
     fields.jobStatus,
     jobStatusOptions.canceled,
   ).id

@@ -3,12 +3,7 @@ import {
   ResourceService,
 } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import {
-  fields,
-  Resource,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
@@ -89,12 +84,20 @@ export class QuickBooksCustomerService {
 
         if (!customer || !!customer.templateId) return
 
-        return this.resourceService.update(accountId, customer.id, {
-          fields: await this.mapQuickBooksCustomerToResourceFields(
-            accountId,
-            quickBooksCustomer,
-          ),
-        })
+        const patches = await this.mapQuickBooksCustomerToResourceFields(
+          accountId,
+          quickBooksCustomer,
+        )
+
+        return this.resourceService.withUpdatePatch(
+          accountId,
+          customer.id,
+          (patch) => {
+            for (const { fieldId, valueInput } of patches) {
+              patch.setPatch({ fieldId }, valueInput)
+            }
+          },
+        )
       }),
     )
 
@@ -112,19 +115,36 @@ export class QuickBooksCustomerService {
 
       if (customer) {
         if (customer.templateId) return
-        await this.resourceService.update(accountId, customer.id, {
-          fields: await this.mapQuickBooksCustomerToResourceFields(
-            accountId,
-            quickBooksCustomerToAdd,
-          ),
-        })
+
+        const patches = await this.mapQuickBooksCustomerToResourceFields(
+          accountId,
+          quickBooksCustomerToAdd,
+        )
+
+        await this.resourceService.withUpdatePatch(
+          accountId,
+          customer.id,
+          (patch) => {
+            for (const { fieldId, valueInput } of patches) {
+              patch.setPatch({ fieldId }, valueInput)
+            }
+          },
+        )
       } else {
-        await this.resourceService.create(accountId, 'Customer', {
-          fields: await this.mapQuickBooksCustomerToResourceFields(
-            accountId,
-            quickBooksCustomerToAdd,
-          ),
-        })
+        const patches = await this.mapQuickBooksCustomerToResourceFields(
+          accountId,
+          quickBooksCustomerToAdd,
+        )
+
+        await this.resourceService.withCreatePatch(
+          accountId,
+          'Customer',
+          (patch) => {
+            for (const { fieldId, valueInput } of patches) {
+              patch.setPatch({ fieldId }, valueInput)
+            }
+          },
+        )
       }
     }
   }
@@ -133,22 +153,15 @@ export class QuickBooksCustomerService {
     accountId: string,
     quickBooksCustomer: Customer['Customer'],
   ): Promise<ResourceFieldInput[]> {
-    const customerSchema = await this.schemaService.readMergedSchema(
+    const customerSchema = await this.schemaService.readSchema(
       accountId,
       'Customer',
     )
-    const customerNameField = selectSchemaFieldUnsafe(
-      customerSchema,
-      fields.name,
-    )
-    const quickBooksCustomerIdField = selectSchemaFieldUnsafe(
-      customerSchema,
+    const customerNameField = customerSchema.getField(fields.name)
+    const quickBooksCustomerIdField = customerSchema.getField(
       fields.quickBooksCustomerId,
     )
-    const primaryAddressField = selectSchemaFieldUnsafe(
-      customerSchema,
-      fields.primaryAddress,
-    )
+    const primaryAddressField = customerSchema.getField(fields.primaryAddress)
 
     return [
       {
@@ -192,12 +205,14 @@ export class QuickBooksCustomerService {
       })
       .then((data) => readCustomerSchema.parse(data.json))
 
-    await this.resourceService.updateResourceField(
+    await this.resourceService.withUpdatePatch(
       accountId,
-      'Customer',
       customer.id,
-      fields.quickBooksCustomerId,
-      { string: quickBooksCustomer.Customer.Id },
+      (patch) =>
+        patch.setString(
+          fields.quickBooksCustomerId,
+          quickBooksCustomer.Customer.Id,
+        ),
     )
 
     return quickBooksCustomer

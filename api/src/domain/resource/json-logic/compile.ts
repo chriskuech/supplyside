@@ -1,5 +1,6 @@
 import { FieldType, Value } from '@prisma/client'
-import { Schema, SchemaField, selectSchemaFieldUnsafe } from '@supplyside/model'
+import { Schema, SchemaFieldData } from '@supplyside/model'
+import { isNullish } from 'remeda'
 import { P, match } from 'ts-pattern'
 import { mapUuidToBase64, sanitizeValue } from './sanitize'
 import { JsonLogic, OrderBy } from './types'
@@ -8,7 +9,8 @@ export type MapToSqlParams = {
   accountId: string
   schema: Schema
   where: JsonLogic | undefined
-  orderBy: OrderBy[] | undefined
+  orderBy?: OrderBy[] | undefined
+  take?: number | undefined
 }
 
 export const createSql = ({
@@ -16,6 +18,7 @@ export const createSql = ({
   schema,
   where,
   orderBy,
+  take,
 }: MapToSqlParams) => /* sql */ `
     WITH "View" AS (
       SELECT
@@ -30,12 +33,13 @@ export const createSql = ({
         ].join(', ')}
       FROM "Resource"
       WHERE "Resource"."accountId" = '${accountId}'
-        AND "type" = '${schema.resourceType}'
+        AND "type" = '${schema.type}'
     )
     SELECT "_id"
     FROM "View"
     ${where ? `WHERE ${createWhere(where, schema)}` : ''}
     ${orderBy ? `ORDER BY ${createOrderBy(orderBy)}` : ''}
+    ${take ? `LIMIT ${take}` : ''}
   `
 
 const createWhere = (where: JsonLogic, schema: Schema): string =>
@@ -49,12 +53,12 @@ const createWhere = (where: JsonLogic, schema: Schema): string =>
     .with(
       { '==': P.any },
       ({ '==': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} = ${sanitizeValue(val)}`,
+        `${resolveFieldNameToColumn(schema, var_)} ${isNullish(val) ? `= ${sanitizeValue(val)}` : `IS NULL`}`,
     )
     .with(
       { '!=': P.any },
       ({ '!=': [{ var: var_ }, val] }) =>
-        `${resolveFieldNameToColumn(schema, var_)} <> ${sanitizeValue(val)}`,
+        `${resolveFieldNameToColumn(schema, var_)} ${isNullish(val) ? `<> ${sanitizeValue(val)}` : `IS NOT NULL`}`,
     )
     .with(
       { '<': P.any },
@@ -81,7 +85,7 @@ const createWhere = (where: JsonLogic, schema: Schema): string =>
 const createOrderBy = (orderBy: OrderBy[]) =>
   orderBy.map((o) => `${sanitizeValue(o.var)} ${o.dir}`).join(', ')
 
-const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
+const createPropertySubquery = ({ type, fieldId }: SchemaFieldData) =>
   match(type)
     .with(
       'Address',
@@ -161,7 +165,7 @@ const mapFieldTypeToValueColumn = (t: PrimitiveFieldType) =>
     .exhaustive()
 
 const resolveFieldNameToColumn = (schema: Schema, fieldName: string) => {
-  const { fieldId } = selectSchemaFieldUnsafe(schema, { name: fieldName })
+  const { fieldId } = schema.getField({ name: fieldName })
 
   return `"${mapUuidToBase64(fieldId)}"`
 }

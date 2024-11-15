@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { SchemaFieldService } from '@supplyside/api/domain/schema/SchemaFieldService'
 import { OptionPatch } from '@supplyside/api/router/api/accounts/fields'
-import { fields, SchemaField } from '@supplyside/model'
+import { fields, SchemaFieldData } from '@supplyside/model'
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
@@ -69,7 +69,7 @@ export class QuickBooksAccountService {
 
   async syncQuickBooksAccountField(
     accountId: string,
-    accountFields: SchemaField[],
+    accountFields: SchemaFieldData[],
     allQuickBooksAccounts: Account['Account'][],
   ): Promise<void> {
     const quickBooksAccounts = allQuickBooksAccounts?.filter(
@@ -90,7 +90,7 @@ export class QuickBooksAccountService {
 
   async syncQuickBooksIncomeAccountField(
     accountId: string,
-    accountFields: SchemaField[],
+    accountFields: SchemaFieldData[],
     allQuickBooksAccounts: Account['Account'][],
   ): Promise<void> {
     const quickBooksAccounts = allQuickBooksAccounts?.filter(
@@ -115,7 +115,7 @@ export class QuickBooksAccountService {
 
   async syncAccountOptionsToField(
     accountId: string,
-    field: SchemaField,
+    field: SchemaFieldData,
     quickBooksAccounts: AccountQuery['QueryResponse']['Account'],
   ): Promise<void> {
     const quickBooksAccountNames =

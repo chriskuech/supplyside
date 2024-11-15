@@ -3,12 +3,7 @@ import {
   ResourceService,
 } from '@supplyside/api/domain/resource/ResourceService'
 import { SchemaService } from '@supplyside/api/domain/schema/SchemaService'
-import {
-  Resource,
-  fields,
-  selectResourceFieldValue,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { Resource, fields, selectResourceFieldValue } from '@supplyside/model'
 import assert from 'assert'
 import OAuthClient from 'intuit-oauth'
 import { inject, injectable } from 'inversify'
@@ -84,12 +79,20 @@ export class QuickBooksVendorService {
 
         if (!vendor || !!vendor.templateId) return
 
-        return this.resourceService.update(accountId, vendor.id, {
-          fields: await this.mapQuickBooksVendorToResourceFields(
-            accountId,
-            quickBooksVendor,
-          ),
-        })
+        const updateFields = await this.mapQuickBooksVendorToResourceFields(
+          accountId,
+          quickBooksVendor,
+        )
+
+        return this.resourceService.withUpdatePatch(
+          accountId,
+          vendor.id,
+          (patch) => {
+            for (const field of updateFields) {
+              patch.setPatch(field, field.valueInput)
+            }
+          },
+        )
       }),
     )
 
@@ -106,19 +109,35 @@ export class QuickBooksVendorService {
 
       if (vendor) {
         if (vendor.templateId) return
-        await this.resourceService.update(accountId, vendor.id, {
-          fields: await this.mapQuickBooksVendorToResourceFields(
-            accountId,
-            quickBooksVendorToAdd,
-          ),
-        })
+
+        const fields = await this.mapQuickBooksVendorToResourceFields(
+          accountId,
+          quickBooksVendorToAdd,
+        )
+
+        await this.resourceService.withUpdatePatch(
+          accountId,
+          vendor.id,
+          (patch) => {
+            for (const field of fields) {
+              patch.setPatch(field, field.valueInput)
+            }
+          },
+        )
       } else {
-        await this.resourceService.create(accountId, 'Vendor', {
-          fields: await this.mapQuickBooksVendorToResourceFields(
-            accountId,
-            quickBooksVendorToAdd,
-          ),
-        })
+        const patches = await this.mapQuickBooksVendorToResourceFields(
+          accountId,
+          quickBooksVendorToAdd,
+        )
+        await this.resourceService.withCreatePatch(
+          accountId,
+          'Vendor',
+          (patch) => {
+            for (const { fieldId, valueInput } of patches) {
+              patch.setPatch({ fieldId }, valueInput)
+            }
+          },
+        )
       }
     }
   }
@@ -141,12 +160,8 @@ export class QuickBooksVendorService {
       })
       .then((data) => readVendorSchema.parse(data.json))
 
-    await this.resourceService.updateResourceField(
-      accountId,
-      'Vendor',
-      vendor.id,
-      fields.quickBooksVendorId,
-      { string: quickBooksVendor.Vendor.Id },
+    await this.resourceService.withUpdatePatch(accountId, vendor.id, (patch) =>
+      patch.setString(fields.quickBooksVendorId, quickBooksVendor.Vendor.Id),
     )
 
     return quickBooksVendor
@@ -238,19 +253,15 @@ export class QuickBooksVendorService {
     accountId: string,
     quickBooksVendor: Vendor['Vendor'],
   ): Promise<ResourceFieldInput[]> {
-    const vendorSchema = await this.schemaService.readMergedSchema(
+    const vendorSchema = await this.schemaService.readSchema(
       accountId,
       'Vendor',
     )
-    const vendorNameField = selectSchemaFieldUnsafe(vendorSchema, fields.name)
-    const quickBooksVendorIdField = selectSchemaFieldUnsafe(
-      vendorSchema,
+    const vendorNameField = vendorSchema.getField(fields.name)
+    const quickBooksVendorIdField = vendorSchema.getField(
       fields.quickBooksVendorId,
     )
-    const primaryAddressField = selectSchemaFieldUnsafe(
-      vendorSchema,
-      fields.primaryAddress,
-    )
+    const primaryAddressField = vendorSchema.getField(fields.primaryAddress)
 
     return [
       {

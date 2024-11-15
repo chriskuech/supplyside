@@ -3,12 +3,7 @@ import {
   dataExtractionPrompt,
 } from '@supplyside/api/extraction'
 import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
-import {
-  fields,
-  selectResourceFieldValue,
-  selectSchemaField,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, selectResourceFieldValue } from '@supplyside/model'
 import { FastifyBaseLogger } from 'fastify'
 import { inject, injectable } from 'inversify'
 import { z } from 'zod'
@@ -184,10 +179,9 @@ export class PurchaseExtractionService {
     resourceId: string,
     logger: FastifyBaseLogger,
   ) {
-    const [schema, resource, lineSchema] = await Promise.all([
-      this.schemaService.readMergedSchema(accountId, 'Purchase'),
+    const [schema, resource] = await Promise.all([
+      this.schemaService.readSchema(accountId, 'Purchase'),
       this.resourceService.read(accountId, resourceId),
-      this.schemaService.readMergedSchema(accountId, 'PurchaseLine'),
     ])
 
     const { files } =
@@ -195,8 +189,7 @@ export class PurchaseExtractionService {
 
     if (!files?.length) return
 
-    const incotermsOptions =
-      selectSchemaField(schema, fields.incoterms)?.options ?? []
+    const incotermsOptions = schema.getField(fields.incoterms)?.options ?? []
 
     const data = await this.openai.extractContent({
       systemPrompt: prompt({
@@ -222,139 +215,47 @@ export class PurchaseExtractionService {
       (o) => o.name === data.incoterms,
     )?.id
 
-    await this.resourceService.update(accountId, resourceId, {
-      fields: [
-        ...(data.poNumber
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.poNumber)
-                  .fieldId,
-                valueInput: { string: data.poNumber },
-              },
-            ]
-          : []),
-        ...(vendor
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.vendor).fieldId,
-                valueInput: { resourceId: vendor.id },
-              },
-            ]
-          : []),
-        ...(data.purchaseDescription
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(
-                  schema,
-                  fields.purchaseDescription,
-                ).fieldId,
-                valueInput: { string: data.purchaseDescription },
-              },
-            ]
-          : []),
-        ...(data.paymentTerms
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.paymentTerms)
-                  .fieldId,
-                valueInput: { number: data.paymentTerms },
-              },
-            ]
-          : []),
-        ...(data.taxable
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.taxable)
-                  .fieldId,
-                valueInput: { boolean: data.taxable },
-              },
-            ]
-          : []),
-        ...(incotermsOptionId
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(schema, fields.incoterms)
-                  .fieldId,
-                valueInput: { optionId: incotermsOptionId },
-              },
-            ]
-          : []),
-      ],
-      costs: data.itemizedCosts,
-    })
+    await this.resourceService.withUpdatePatch(
+      accountId,
+      resourceId,
+      (patch) => {
+        for (const cost of data.itemizedCosts ?? []) {
+          patch.addCost(cost)
+        }
+
+        if (data.poNumber) patch.setString(fields.poNumber, data.poNumber)
+        if (vendor) patch.setResourceId(fields.vendor, vendor.id)
+        if (data.purchaseDescription)
+          patch.setString(fields.purchaseDescription, data.purchaseDescription)
+        if (data.paymentTerms)
+          patch.setNumber(fields.paymentTerms, data.paymentTerms)
+        if (data.taxable) patch.setBoolean(fields.taxable, data.taxable)
+        if (incotermsOptionId)
+          patch.setOption(fields.incoterms, { id: incotermsOptionId })
+      },
+    )
 
     for (const lineItem of data.lineItems ?? []) {
       const needDate = coerceDateStringToISO8601(lineItem.needDate)
 
-      await this.resourceService.create(accountId, 'PurchaseLine', {
-        fields: [
-          ...(resourceId
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.purchase)
-                    .fieldId,
-                  valueInput: { resourceId },
-                },
-              ]
-            : []),
-          ...(lineItem.itemName
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName)
-                    .fieldId,
-                  valueInput: { string: lineItem.itemName },
-                },
-              ]
-            : []),
-          ...(lineItem.quantity
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.quantity)
-                    .fieldId,
-                  valueInput: { number: lineItem.quantity },
-                },
-              ]
-            : []),
-          ...(lineItem.unitCost
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitCost)
-                    .fieldId,
-                  valueInput: { number: lineItem.unitCost },
-                },
-              ]
-            : []),
-          ...(lineItem.totalCost
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.totalCost)
-                    .fieldId,
-                  valueInput: { number: lineItem.totalCost },
-                },
-              ]
-            : []),
-          ...(needDate
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
-                    .fieldId,
-                  valueInput: { date: needDate },
-                },
-              ]
-            : []),
-          ...(lineItem.itemNumber
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(
-                    lineSchema,
-                    fields.itemNumber,
-                  ).fieldId,
-                  valueInput: { string: lineItem.itemNumber },
-                },
-              ]
-            : []),
-        ],
-      })
+      await this.resourceService.withCreatePatch(
+        accountId,
+        'PurchaseLine',
+        (patch) => {
+          if (resourceId) patch.setResourceId(fields.purchase, resourceId)
+          if (lineItem.itemName)
+            patch.setString(fields.itemName, lineItem.itemName)
+          if (lineItem.quantity)
+            patch.setNumber(fields.quantity, lineItem.quantity)
+          if (lineItem.unitCost)
+            patch.setNumber(fields.unitCost, lineItem.unitCost)
+          if (lineItem.totalCost)
+            patch.setNumber(fields.totalCost, lineItem.totalCost)
+          if (needDate) patch.setDate(fields.needDate, needDate)
+          if (lineItem.itemNumber)
+            patch.setString(fields.itemNumber, lineItem.itemNumber)
+        },
+      )
     }
   }
 }

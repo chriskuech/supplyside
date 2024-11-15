@@ -3,8 +3,8 @@ import {
   fields,
   jobStatusOptions,
   OptionTemplate,
+  Schema,
   selectResourceFieldValue,
-  selectSchemaFieldOptionUnsafe,
 } from '@supplyside/model'
 import dayjs from 'dayjs'
 import { sortBy } from 'remeda'
@@ -18,9 +18,11 @@ import { readResources } from '@/actions/resource'
 import OptionChip from '@/lib/resource/fields/views/OptionChip'
 
 export default async function OverdueInvoices() {
-  const jobSchema = (await readSchema('Job')) ?? fail('Job schema not found')
+  const schemaData = (await readSchema('Job')) ?? fail('Job schema not found')
+  const schema = new Schema(schemaData)
+
   const getStatusOptionId = (optionRef: OptionTemplate) =>
-    selectSchemaFieldOptionUnsafe(jobSchema, fields.jobStatus, optionRef).id
+    schema.getFieldOption(fields.jobStatus, optionRef).id
 
   const resources = await readResources('Job', {
     where: {
@@ -78,11 +80,7 @@ export default async function OverdueInvoices() {
                   size="small"
                 />
               </Tooltip>
-              <TotalCostControl
-                schema={jobSchema}
-                resource={resource}
-                size="small"
-              />
+              <TotalCostControl resource={resource} size="small" />
             </Stack>
           }
         />

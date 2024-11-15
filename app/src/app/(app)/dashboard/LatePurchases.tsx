@@ -3,8 +3,8 @@ import {
   fields,
   OptionTemplate,
   purchaseStatusOptions,
+  Schema,
   selectResourceFieldValue,
-  selectSchemaFieldOptionUnsafe,
 } from '@supplyside/model'
 import dayjs from 'dayjs'
 import { sortBy } from 'remeda'
@@ -18,14 +18,12 @@ import { readResources } from '@/actions/resource'
 import OptionChip from '@/lib/resource/fields/views/OptionChip'
 
 export default async function LatePurchases() {
-  const purchaseSchema =
+  const schemaData =
     (await readSchema('Purchase')) ?? fail('Purchase schema not found')
+  const schema = new Schema(schemaData)
+
   const getStatusOptionId = (optionRef: OptionTemplate) =>
-    selectSchemaFieldOptionUnsafe(
-      purchaseSchema,
-      fields.purchaseStatus,
-      optionRef,
-    ).id
+    schema.getFieldOption(fields.purchaseStatus, optionRef).id
 
   const resources = await readResources('Purchase', {
     where: {
@@ -90,11 +88,7 @@ export default async function LatePurchases() {
                 />
               </Tooltip>
 
-              <TotalCostControl
-                resource={resource}
-                schema={purchaseSchema}
-                size="small"
-              />
+              <TotalCostControl resource={resource} size="small" />
             </Stack>
           }
         />

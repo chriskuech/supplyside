@@ -3,12 +3,7 @@ import {
   dataExtractionPrompt,
 } from '@supplyside/api/extraction'
 import { OpenAiService } from '@supplyside/api/integrations/openai/OpenAiService'
-import {
-  fields,
-  selectResourceFieldValue,
-  selectSchemaField,
-  selectSchemaFieldUnsafe,
-} from '@supplyside/model'
+import { fields, selectResourceFieldValue } from '@supplyside/model'
 import { fail } from 'assert'
 import { inject, injectable } from 'inversify'
 import { z } from 'zod'
@@ -175,10 +170,9 @@ export class BillExtractionService {
   ) {}
 
   async extractContent(accountId: string, resourceId: string) {
-    const [billSchema, billResource, lineSchema] = await Promise.all([
-      this.schemaService.readMergedSchema(accountId, 'Bill'),
+    const [billSchema, billResource] = await Promise.all([
+      this.schemaService.readSchema(accountId, 'Bill'),
       this.resourceService.read(accountId, resourceId),
-      this.schemaService.readMergedSchema(accountId, 'PurchaseLine'),
     ])
 
     const billFiles =
@@ -188,7 +182,7 @@ export class BillExtractionService {
     if (!billFiles.length) return
 
     const paymentMethodOptions =
-      selectSchemaField(billSchema, fields.paymentMethod)?.options ?? []
+      billSchema.getField(fields.paymentMethod)?.options ?? []
 
     const data = await this.openai.extractContent({
       systemPrompt: prompt({
@@ -220,157 +214,53 @@ export class BillExtractionService {
           })
         : []
 
-    const paymentMethodOptionId = paymentMethodOptions.find(
-      (o) => o.name === data.paymentMethod,
-    )?.id
+    await this.resourceService.withUpdatePatch(
+      accountId,
+      resourceId,
+      (patch) => {
+        const invoiceDate = coerceDateStringToISO8601(data.invoiceDate)
+        const paymentMethodOptionId = paymentMethodOptions.find(
+          (o) => o.name === data.paymentMethod,
+        )?.id
 
-    await this.resourceService.update(accountId, resourceId, {
-      fields: [
-        ...(purchase
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(billSchema, fields.purchase)
-                  .fieldId,
-                valueInput: { resourceId: purchase.id },
-              },
-            ]
-          : []),
-        ...(data.poNumber
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(billSchema, fields.poNumber)
-                  .fieldId,
-                valueInput: { string: data.poNumber },
-              },
-            ]
-          : []),
-        ...(vendor
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(billSchema, fields.vendor)
-                  .fieldId,
-                valueInput: { resourceId: vendor.id },
-              },
-            ]
-          : []),
-        ...(data.invoiceNumber
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(
-                  billSchema,
-                  fields.invoiceNumber,
-                ).fieldId,
-                valueInput: { string: data.invoiceNumber },
-              },
-            ]
-          : []),
-        ...(paymentMethodOptionId
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(
-                  billSchema,
-                  fields.paymentMethod,
-                ).fieldId,
-                valueInput: { optionId: paymentMethodOptionId },
-              },
-            ]
-          : []),
-        ...(data.invoiceDate && !isNaN(new Date(data.invoiceDate).getTime())
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(billSchema, fields.invoiceDate)
-                  .fieldId,
-                valueInput: { date: new Date(data.invoiceDate).toISOString() },
-              },
-            ]
-          : []),
-        ...(data.paymentTerms
-          ? [
-              {
-                fieldId: selectSchemaFieldUnsafe(
-                  billSchema,
-                  fields.paymentTerms,
-                ).fieldId,
-                valueInput: { number: data.paymentTerms },
-              },
-            ]
-          : []),
-      ],
-      costs: data.itemizedCosts,
-    })
+        for (const cost of data.itemizedCosts ?? []) {
+          patch.addCost(cost)
+        }
+
+        if (purchase) patch.setResourceId(fields.purchase, purchase.id)
+        if (data.poNumber) patch.setString(fields.poNumber, data.poNumber)
+        if (vendor) patch.setResourceId(fields.vendor, vendor.id)
+        if (data.invoiceNumber)
+          patch.setString(fields.invoiceNumber, data.invoiceNumber)
+        if (paymentMethodOptionId)
+          patch.setOption(fields.paymentMethod, { id: paymentMethodOptionId })
+        if (invoiceDate) patch.setDate(fields.invoiceDate, invoiceDate)
+        if (data.paymentTerms)
+          patch.setNumber(fields.paymentTerms, data.paymentTerms)
+      },
+    )
 
     for (const lineItem of data.lineItems ?? []) {
       const needDate = coerceDateStringToISO8601(lineItem.needDate)
 
-      await this.resourceService.create(accountId, 'PurchaseLine', {
-        fields: [
-          ...(resourceId
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.bill)
-                    .fieldId,
-                  valueInput: { resourceId },
-                },
-              ]
-            : []),
-          ...(lineItem.itemName
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.itemName)
-                    .fieldId,
-                  valueInput: { string: lineItem.itemName },
-                },
-              ]
-            : []),
-          ...(lineItem.quantity
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.quantity)
-                    .fieldId,
-                  valueInput: { number: lineItem.quantity },
-                },
-              ]
-            : []),
-          ...(lineItem.unitCost
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.unitCost)
-                    .fieldId,
-                  valueInput: { number: lineItem.unitCost },
-                },
-              ]
-            : []),
-          ...(lineItem.totalCost
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.totalCost)
-                    .fieldId,
-                  valueInput: { number: lineItem.totalCost },
-                },
-              ]
-            : []),
-          ...(needDate
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(lineSchema, fields.needDate)
-                    .fieldId,
-                  valueInput: { date: needDate },
-                },
-              ]
-            : []),
-          ...(lineItem.itemNumber
-            ? [
-                {
-                  fieldId: selectSchemaFieldUnsafe(
-                    lineSchema,
-                    fields.itemNumber,
-                  ).fieldId,
-                  valueInput: { string: lineItem.itemNumber },
-                },
-              ]
-            : []),
-        ],
-      })
+      await this.resourceService.withCreatePatch(
+        accountId,
+        'PurchaseLine',
+        (patch) => {
+          if (resourceId) patch.setResourceId(fields.bill, resourceId)
+          if (lineItem.itemName)
+            patch.setString(fields.itemName, lineItem.itemName)
+          if (lineItem.quantity)
+            patch.setNumber(fields.quantity, lineItem.quantity)
+          if (lineItem.unitCost)
+            patch.setNumber(fields.unitCost, lineItem.unitCost)
+          if (lineItem.totalCost)
+            patch.setNumber(fields.totalCost, lineItem.totalCost)
+          if (needDate) patch.setDate(fields.needDate, needDate)
+          if (lineItem.itemNumber)
+            patch.setString(fields.itemNumber, lineItem.itemNumber)
+        },
+      )
     }
   }
 }
