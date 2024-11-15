@@ -636,11 +636,6 @@ const _fields = {
 
 export const fields: Record<keyof typeof _fields, FieldTemplate> = _fields
 
-export const findTemplateField = (templateId: string | null | undefined) =>
-  templateId
-    ? Object.values(fields).find((field) => field.templateId === templateId)
-    : undefined
-
 // Ensure that the templateIds are unique
 deepStrictEqual(
   pipe(

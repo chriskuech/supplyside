@@ -24,10 +24,10 @@ import { Box, Stack, TextField } from '@mui/material'
 import { FC } from 'react'
 import { z } from 'zod'
 import { isPlainObject } from 'remeda'
-import { SchemaField, Section } from '@supplyside/model'
+import { SchemaFieldData, Section } from '@supplyside/model'
 
 type Props = {
-  fields: SchemaField[]
+  fields: SchemaFieldData[]
   section: Section
   onChange: (fieldIds: string[]) => void
 }
@@ -40,7 +40,7 @@ export default function SectionFieldsControl({
   const fieldIds = new Set(section.fields.map((sf) => sf.fieldId))
 
   return (
-    <Autocomplete<SchemaField, true, boolean, true>
+    <Autocomplete<SchemaFieldData, true, boolean, true>
       multiple
       disableClearable={fields
         .filter((f) => fieldIds.has(f.fieldId))
@@ -68,7 +68,7 @@ export default function SectionFieldsControl({
 }
 
 const SortableChip: FC<{
-  field: SchemaField
+  field: SchemaFieldData
   onRemove: (fieldId: string) => void
 }> = ({ field, onRemove }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -97,7 +97,7 @@ const SortableChip: FC<{
 }
 
 const SortableChips: FC<{
-  fields: SchemaField[]
+  fields: SchemaFieldData[]
   onChange: (fieldIds: string[]) => void
 }> = ({ fields, onChange }) => {
   const sensors = useSensors(

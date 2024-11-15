@@ -2,7 +2,7 @@ import {
   AddressSchema,
   ContactSchema,
   SchemaData,
-  SchemaField,
+  SchemaFieldData,
 } from '@supplyside/model'
 import { isTruthy } from 'remeda'
 import { P, match } from 'ts-pattern'
@@ -26,7 +26,7 @@ export const mapSchemaModelToEntity = (model: SchemaModel): SchemaData => ({
     .map(mapFieldModelToEntity),
 })
 
-export const mapFieldModelToEntity = (model: FieldModel): SchemaField => ({
+export const mapFieldModelToEntity = (model: FieldModel): SchemaFieldData => ({
   fieldId: model.id,
   templateId: model.templateId,
   name: model.name,
@@ -43,16 +43,16 @@ export const mapFieldModelToEntity = (model: FieldModel): SchemaField => ({
   isRequired: model.isRequired,
 })
 
-const nameEnum = (field: SchemaField) =>
+const nameEnum = (field: SchemaFieldData) =>
   z.enum(field.options.map((o) => o.name) as [string, ...string[]])
 
-const resolveNames = (field: SchemaField, names: string[]) =>
+const resolveNames = (field: SchemaFieldData, names: string[]) =>
   names
     .map((name) => field.options.find((o) => o.name === name)?.id)
     .filter(isTruthy)
 
 const mapSchemaFieldToZodType = (
-  field: SchemaField,
+  field: SchemaFieldData,
 ): ZodTypeAny | undefined => {
   let schema: ZodTypeAny | undefined = match(field.type)
     .with('Address', () => AddressSchema.optional())

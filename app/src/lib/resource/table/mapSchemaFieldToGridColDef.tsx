@@ -9,7 +9,6 @@ import {
   SchemaField,
   Value,
   emptyValue,
-  findTemplateField,
   formatInlineAddress,
   resources,
   selectResourceFieldValue,
@@ -118,8 +117,7 @@ export const mapSchemaFieldToGridColDef = (
       .with('Address', () => 300)
       .exhaustive(),
 
-  editable:
-    options.isEditable && !findTemplateField(field.templateId)?.isDerived,
+  editable: options.isEditable && !field.template?.isDerived,
 
   ...(['Select', 'MultiSelect'].includes(field.type)
     ? {
@@ -451,7 +449,7 @@ export const mapSchemaFieldToGridColDef = (
   // Only called if `renderCell` returns `undefined`
   valueFormatter: (_, resource) => {
     const value = selectResourceFieldValue(resource, field)
-    const template = findTemplateField(field.templateId)
+    const template = field.template
 
     const formatted = match<FieldType>(field.type)
       .with('Date', () =>

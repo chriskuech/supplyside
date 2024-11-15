@@ -6,7 +6,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Modal from '@mui/material/Modal'
 import { FC, useState } from 'react'
-import { SchemaField } from '@supplyside/model'
+import { SchemaField, SchemaFieldData } from '@supplyside/model'
 import UpdateFieldForm from './UpdateFieldForm'
 import { useConfirmation } from '@/lib/confirmation'
 import { deleteField, updateField } from '@/actions/field'
@@ -20,7 +20,7 @@ export default function FieldsTable({ fields }: Props) {
   const [field, setField] = useState<SchemaField>()
   const confirm = useConfirmation()
 
-  const columns: GridColDef<SchemaField>[] = [
+  const columns: GridColDef<SchemaFieldData>[] = [
     {
       field: 'name',
       headerName: 'Name',
@@ -98,7 +98,7 @@ export default function FieldsTable({ fields }: Props) {
 
   return (
     <>
-      <DataGrid<SchemaField>
+      <DataGrid<SchemaFieldData>
         columns={columns}
         rows={fields}
         rowSelection={false}

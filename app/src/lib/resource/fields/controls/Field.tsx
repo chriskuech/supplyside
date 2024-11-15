@@ -25,12 +25,12 @@ import {
 } from 'react'
 import { debounce } from 'remeda'
 import {
+  FieldTemplate,
   MCMASTER_CARR_NAME,
   Resource,
-  SchemaField,
+  SchemaFieldData,
   Value,
   emptyValue,
-  findTemplateField,
   resources,
 } from '@supplyside/model'
 import { Option } from '@supplyside/model'
@@ -53,7 +53,7 @@ type InputProps = SlotProps<
 export type Props = {
   inputId: string
   resource: Resource
-  field: SchemaField
+  field: SchemaFieldData & { template: FieldTemplate | null }
   value: Value | undefined
   onChange: (value: Value) => void
   inline?: boolean
@@ -111,7 +111,7 @@ function Field(
 
   dayjs.extend(utc)
 
-  const templateField = findTemplateField(field.templateId)
+  const templateField = field.template
   const canEditOptions =
     !templateField?.options || templateField.isOptionsEditable
 
@@ -231,14 +231,14 @@ function Field(
         }
         slotProps={{
           input: {
-            startAdornment: findTemplateField(field.templateId)?.prefix && (
+            startAdornment: field.template?.prefix && (
               <InputAdornment position="start">
-                {findTemplateField(field.templateId)?.prefix}
+                {field.template.prefix}
               </InputAdornment>
             ),
-            endAdornment: findTemplateField(field.templateId)?.suffix && (
+            endAdornment: field.template?.suffix && (
               <InputAdornment position="end">
-                {findTemplateField(field.templateId)?.suffix}
+                {field.template.suffix}
               </InputAdornment>
             ),
             ...inputProps,

@@ -3,7 +3,7 @@ import { SchemaFieldService } from '@supplyside/api/domain/schema/SchemaFieldSer
 import {
   FieldTypeSchema,
   ResourceTypeSchema,
-  SchemaField,
+  SchemaFieldData,
   SchemaFieldSchema,
   ValueInputSchema,
 } from '@supplyside/model'
@@ -102,7 +102,7 @@ export const mountFields = async <App extends FastifyInstance>(app: App) =>
       handler: async ({
         params: { accountId, fieldId },
         body,
-      }): Promise<SchemaField> => {
+      }): Promise<SchemaFieldData> => {
         const service = container.resolve(SchemaFieldService)
         const field = await service.update(accountId, fieldId, body)
 

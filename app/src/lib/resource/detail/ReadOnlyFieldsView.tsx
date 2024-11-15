@@ -1,7 +1,7 @@
 import { Info, Check, Clear } from '@mui/icons-material'
 import { Stack, Typography, Tooltip, Box, Chip } from '@mui/material'
 import { match } from 'ts-pattern'
-import { Resource, SchemaData, findTemplateField } from '@supplyside/model'
+import { Resource, Schema, SchemaData } from '@supplyside/model'
 import { Masonry } from '@mui/lab'
 import Linkify from 'linkify-react'
 import FileField from '../fields/controls/FileField'
@@ -19,6 +19,7 @@ type Props = {
 }
 
 export default function ReadOnlyFieldsView({ schemaData, resource }: Props) {
+  const schema = new Schema(schemaData)
   return (
     <Masonry columns={3} spacing={5}>
       {schemaData.sections.map((section) => (
@@ -88,7 +89,9 @@ export default function ReadOnlyFieldsView({ schemaData, resource }: Props) {
                       ({ templateId, value: { number } }) => {
                         if (number === null) return '-'
 
-                        const { prefix } = findTemplateField(templateId) ?? {}
+                        const prefix =
+                          templateId &&
+                          schema.getField({ templateId }).template?.prefix
 
                         return prefix ? `${prefix} ${number}` : number
                       },

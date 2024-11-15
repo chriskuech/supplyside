@@ -1,5 +1,5 @@
 import { FieldType, Value } from '@prisma/client'
-import { Schema, SchemaField } from '@supplyside/model'
+import { Schema, SchemaFieldData } from '@supplyside/model'
 import { isNullish } from 'remeda'
 import { P, match } from 'ts-pattern'
 import { mapUuidToBase64, sanitizeValue } from './sanitize'
@@ -24,7 +24,7 @@ export const createSql = ({
       SELECT
         ${[
           '"Resource"."id" AS "_id"',
-          ...schema.schema.fields.map(
+          ...schema.fields.map(
             (f) =>
               `(${createPropertySubquery(f)}) AS "${mapUuidToBase64(
                 f.fieldId,
@@ -85,7 +85,7 @@ const createWhere = (where: JsonLogic, schema: Schema): string =>
 const createOrderBy = (orderBy: OrderBy[]) =>
   orderBy.map((o) => `${sanitizeValue(o.var)} ${o.dir}`).join(', ')
 
-const createPropertySubquery = ({ type, fieldId }: SchemaField) =>
+const createPropertySubquery = ({ type, fieldId }: SchemaFieldData) =>
   match(type)
     .with(
       'Address',

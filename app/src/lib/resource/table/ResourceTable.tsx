@@ -30,7 +30,7 @@ import {
 } from '@mui/icons-material'
 import { ComponentType, MutableRefObject, useMemo, useState } from 'react'
 import { z } from 'zod'
-import { fields, Resource, SchemaData } from '@supplyside/model'
+import { fields, Resource, Schema, SchemaData } from '@supplyside/model'
 import { P, match } from 'ts-pattern'
 import { useRouter } from 'next/navigation'
 import { mapSchemaFieldToGridColDef } from './mapSchemaFieldToGridColDef'
@@ -77,6 +77,7 @@ export default function ResourceTable({
   specialColumnWidths,
   ...props
 }: Props) {
+  const schema = new Schema(schemaData)
   const isChartsEnabled = Charts !== undefined
   const [showCharts, setShowCharts] = useState(isChartsEnabled)
   const [isGridRendered, setIsGridRendered] = useState(false)
@@ -101,7 +102,7 @@ export default function ResourceTable({
             type: 'number',
             editable: false,
           },
-      ...schemaData.fields.map((field) =>
+      ...schema.fields.map((field) =>
         mapSchemaFieldToGridColDef(field, {
           isEditable,
           isFilterable: !unFilterableFieldIds.includes(field.fieldId),
@@ -131,7 +132,7 @@ export default function ResourceTable({
     ],
     [
       indexed,
-      schemaData.fields,
+      schema.fields,
       isEditable,
       unFilterableFieldIds,
       specialColumnWidths,

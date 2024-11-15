@@ -1,10 +1,16 @@
 import { Alert, Box, Container, Stack, Typography } from '@mui/material'
+import { fields, SchemaFieldData } from '@supplyside/model'
 import SchemasControl from './schemas/SchemasControl'
 import AddFieldButton from './fields/AddFieldButton'
 import FieldsTable from './fields/FieldsTable'
 import { readFields } from '@/client/field'
 import { requireSession } from '@/session'
 import { readCustomSchemas } from '@/client/schema'
+
+const findTemplate = (field: SchemaFieldData) =>
+  field.templateId
+    ? Object.values(fields).find((f) => f.templateId === field.templateId)
+    : null
 
 export default async function Configuration() {
   const { accountId } = await requireSession()
@@ -36,7 +42,12 @@ export default async function Configuration() {
               Add, update, and remove Fields to be referenced in your Schemas.
             </Typography>
           </Box>
-          <FieldsTable fields={fields} />
+          <FieldsTable
+            fields={fields.map((f) => ({
+              ...f,
+              template: findTemplate(f) ?? null,
+            }))}
+          />
         </Stack>
         <Stack spacing={2}>
           <Box>
