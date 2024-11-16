@@ -25,6 +25,12 @@ const recalculatePaymentDueDateFromNeedDate = (patch: ResourcePatch) => {
   )
     return
 
+  if (
+    patch.schema.implements(fields.invoiceDate) &&
+    patch.getDate(fields.invoiceDate)
+  )
+    return
+
   const needDate = patch.getDate(fields.needDate)
   const paymentTerms = patch.getNumber(fields.paymentTerms)
 
