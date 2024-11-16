@@ -106,8 +106,8 @@ const StatusTrackerView: FC<StatusTrackerViewProps> = ({
     .with('dark', () => '#111111')
     .exhaustive()
   const inactiveTextColor = match(theme)
-    .with('light', () => '#eeeeee')
-    .with('dark', () => '#333333')
+    .with('light', () => 'rgba(255, 255, 255, 0.6)')
+    .with('dark', () => 'rgba(255, 255, 255, 0.3)')
     .exhaustive()
 
   const happyPath = allStatuses.filter(
