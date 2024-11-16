@@ -102,7 +102,11 @@ const StatusTrackerView: FC<StatusTrackerViewProps> = ({
   } = useTheme()
 
   const inactiveColor = match(theme)
-    .with('light', () => '#cccccc')
+    .with('light', () => '#dddddd')
+    .with('dark', () => '#111111')
+    .exhaustive()
+  const inactiveTextColor = match(theme)
+    .with('light', () => '#eeeeee')
     .with('dark', () => '#333333')
     .exhaustive()
 
@@ -153,7 +157,7 @@ const StatusTrackerView: FC<StatusTrackerViewProps> = ({
                 textShadow: `0 1px 5px rgba(0 0 0 / ${isActive ? 0.5 : 0.2})`,
                 height: '100%',
               }}
-              color={!isActive ? 'rgba(255, 255, 255, 0.6)' : 'white'}
+              color={!isActive ? inactiveTextColor : 'white'}
               fontWeight="bold"
               fontSize="1.2em"
             >

@@ -9,7 +9,7 @@ export const billStatusOptions = {
   draft: {
     templateId: 'abababbb-3f5e-4d2d-8f0f-3e8f2c4c4b5c',
     name: 'Draft',
-    color: '#e0e0e0',
+    color: '#888888',
   },
   submitted: {
     templateId: '45b2ab63-6c20-4548-aafa-027286d03759',
@@ -37,7 +37,7 @@ export const jobStatusOptions = {
   draft: {
     templateId: '6280f9fb-5d27-4d0c-8d7e-12ceb064dc5e',
     name: 'Draft',
-    color: '#e0e0e0',
+    color: '#888888',
   },
   ordered: {
     templateId: '1a18eb92-20c3-418d-aff2-723520d21207',
@@ -75,7 +75,7 @@ export const purchaseStatusOptions = {
   draft: {
     templateId: '84c65f46-b8dd-43bf-9bbe-537b816fdeb5',
     name: 'Draft',
-    color: '#e0e0e0',
+    color: '#888888',
   },
   submitted: {
     templateId: '45b2ab63-6c20-4548-8427-027286d03759',
