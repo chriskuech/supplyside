@@ -235,6 +235,11 @@ const _fields = {
     type: 'Textarea',
     description: 'Brief, identifiable description of the customer',
   },
+  customerPoNumber: {
+    templateId: 'f86f46a3-0114-4ffe-8d98-9798777ef206',
+    name: 'Customer PO Number',
+    type: 'Text',
+  },
   customerReferenceNumber: {
     templateId: 'cb1b5458-b938-4b5b-aa50-41065f4a84c8',
     name: 'Customer Reference Number',

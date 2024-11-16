@@ -29,6 +29,7 @@ Purchases and Quotes all share a common structure consisting of 3 sections:
 ## Header information
 
 * "customerName" - the name of the customer who placed the Purchase Order and will be receiving the finished goods.
+* "customerPoNumber" - the customer's purchase order number.
 * "needDate" - the date the customer needs the finished goods.
 * "paymentTerms" - payment terms expressed in days. For example, "Net 30" is expressed as 30.
 
@@ -63,6 +64,7 @@ Use the ISO 8601 Date Only format, ex: 2023-01-31.
 
 {
   "customerName": "Acme Corp.",
+  "customerPoNumber": "1234567890",
   "needDate": "2023-01-31",
   "paymentTerms": 30,
   "lineItems": [
@@ -105,6 +107,7 @@ Use the ISO 8601 Date Only format, ex: 2023-01-31.
 
 export const ExtractedJobDataSchema = z.object({
   customerName: z.string().optional(),
+  customerPoNumber: z.string().optional(),
   needDate: z.string().optional(),
   paymentTerms: z.number().optional(),
   lineItems: z.array(
@@ -160,6 +163,8 @@ export class JobExtractionService {
         const needDate = coerceDateStringToISO8601(data.needDate)
 
         if (customer) patch.setResourceId(fields.customer, customer.id)
+        if (data.customerPoNumber)
+          patch.setString(fields.customerPoNumber, data.customerPoNumber)
         if (needDate) patch.setDate(fields.needDate, needDate)
         if (data.paymentTerms)
           patch.setNumber(fields.paymentTerms, data.paymentTerms)
