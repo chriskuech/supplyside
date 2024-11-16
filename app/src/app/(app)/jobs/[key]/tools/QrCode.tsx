@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Popover, Stack } from '@mui/material'
+import { Popover, Stack } from '@mui/material'
 import { QrCode2 } from '@mui/icons-material'
 import { IconButton } from '@mui/material'
 import { QRCodeSVG } from 'qrcode.react'
