@@ -79,18 +79,22 @@ export const schemas: SchemaTemplate[] = [
       fields.itemizedCosts,
       fields.subtotalCost,
       fields.totalCost,
-      fields.paymentDueDate,
       fields.receivedAllPurchases,
       fields.quickBooksInvoiceId,
     ],
     sections: [
       {
         name: 'Job Info',
-        fields: [fields.customer, fields.needDate, fields.paymentTerms],
+        fields: [fields.customer, fields.needDate],
       },
       {
         name: 'Accounting Info',
-        fields: [fields.quickBooksIncomeAccount],
+        fields: [
+          fields.quickBooksIncomeAccount,
+          fields.paymentTerms,
+          fields.paymentDueDate,
+          fields.invoiceDate,
+        ],
       },
       {
         name: 'Schedule Info',

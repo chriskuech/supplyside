@@ -269,7 +269,6 @@ const _fields = {
     templateId: 'c2b2f1b5-7d2f-4b3b-9d8e-4a8f9e3c0b7b',
     name: 'Invoice Date',
     type: 'Date',
-    isRequired: true,
     defaultToToday: true,
     description: 'Date the invoice was issued',
   },
