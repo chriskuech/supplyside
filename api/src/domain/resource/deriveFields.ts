@@ -3,6 +3,17 @@ import { isNumber } from 'remeda'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 
+const setInvoiceDate = (patch: ResourcePatch) => {
+  if (
+    !patch.schema.implements(fields.jobStatus, fields.invoiceDate) ||
+    !patch.hasPatch(fields.jobStatus) ||
+    patch.hasPatch(fields.invoiceDate)
+  )
+    return
+
+  patch.setDate(fields.invoiceDate, new Date().toISOString())
+}
+
 const recalculatePaymentDueDateFromNeedDate = (patch: ResourcePatch) => {
   if (
     !patch.schema.implements(
@@ -122,6 +133,7 @@ const recalculateProductionDays = (patch: ResourcePatch) => {
 }
 
 export const deriveFields = (patch: ResourcePatch) => {
+  setInvoiceDate(patch)
   setStartDate(patch)
   recalculatePaymentDueDateFromNeedDate(patch)
   recalculatePaymentDueDateFromInvoiceDate(patch)
