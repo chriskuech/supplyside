@@ -11,6 +11,7 @@ import CallToAction from './cta/CallToAction'
 import { PartsControl } from './PartsControl'
 import { ScheduleControl } from './tools/ScheduleControl'
 import { PaymentControl } from './tools/PaymentControl'
+import { QrCode } from './tools/QrCode'
 import { TotalCostControl } from '@/lib/resource/TotalCostControl'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
@@ -92,6 +93,7 @@ export default async function JobDetail({
               />,
             ]
           : []),
+        ...(!isDraft ? [<QrCode key={QrCode.name} fontSize={fontSize} />] : []),
         <TotalCostControl
           key={TotalCostControl.name}
           resource={resource}
