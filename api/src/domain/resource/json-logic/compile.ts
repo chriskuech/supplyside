@@ -1,6 +1,5 @@
 import { FieldType, Value } from '@prisma/client'
 import { FieldReference, Schema, SchemaFieldData } from '@supplyside/model'
-import { isNullish } from 'remeda'
 import { P, match } from 'ts-pattern'
 import { sanitizeValue } from './sanitize'
 import { JsonLogic, OrderBy } from './types'
@@ -51,15 +50,29 @@ const createWhere = (where: JsonLogic, schema: Schema): string =>
     .with({ or: P.any }, ({ or: clauses }) =>
       clauses.map((c) => `(${createWhere(c, schema)})`).join(' OR '),
     )
-    .with(
-      { '==': P.any },
-      ({ '==': [{ var: name }, val] }) =>
-        `${resolveColumn(schema, { name })} ${!isNullish(val) ? `= ${sanitizeValue(val)}` : `IS NULL`}`,
+    .with({ '==': P.any }, ({ '==': [{ var: name }, val] }) =>
+      match(val)
+        .with(null, () => `${resolveColumn(schema, { name })} IS NULL`)
+        .with(
+          P.union('true', 'false'),
+          () =>
+            `${resolveColumn(schema, { name })} IS ${val === 'true' ? 'TRUE' : 'FALSE'}`,
+        )
+        .otherwise(
+          () => `${resolveColumn(schema, { name })} = ${sanitizeValue(val)}`,
+        ),
     )
-    .with(
-      { '!=': P.any },
-      ({ '!=': [{ var: name }, val] }) =>
-        `${resolveColumn(schema, { name })} ${!isNullish(val) ? `<> ${sanitizeValue(val)}` : `IS NOT NULL`}`,
+    .with({ '!=': P.any }, ({ '!=': [{ var: name }, val] }) =>
+      match(val)
+        .with(null, () => `${resolveColumn(schema, { name })} IS NOT NULL`)
+        .with(
+          P.union('true', 'false'),
+          () =>
+            `${resolveColumn(schema, { name })} IS NOT ${val === 'true' ? 'TRUE' : 'FALSE'}`,
+        )
+        .otherwise(
+          () => `${resolveColumn(schema, { name })} <> ${sanitizeValue(val)}`,
+        ),
     )
     .with(
       { '<': P.any },
