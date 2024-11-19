@@ -28,7 +28,7 @@ import {
 } from '@mui/icons-material'
 import { FC } from 'react'
 import NextLink from 'next/link'
-import { createResource, deleteResource } from '@/actions/resource'
+import { createPurchaseStep, createWorkCenterStep, deleteStep } from './actions'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import OptionChip from '@/lib/resource/fields/views/OptionChip'
 import ReadonlyTextarea from '@/lib/resource/fields/views/ReadonlyTextarea'
@@ -40,7 +40,11 @@ type Props = {
   part: Resource
 }
 
+const missingNeedDateTooltip = 'Need Date is required to add Steps'
+
 export default function StepsView({ stepSchemaData, steps, part }: Props) {
+  const needDate = selectResourceFieldValue(part, fields.needDate)?.date
+
   return (
     <Card variant="outlined">
       <Stack
@@ -54,46 +58,42 @@ export default function StepsView({ stepSchemaData, steps, part }: Props) {
         <Typography variant="h6" gutterBottom flexGrow={1}>
           Steps
         </Typography>
-        <Button
-          startIcon={<Add />}
-          size="small"
-          onClick={() =>
-            createResource('Step', [
-              {
-                field: fields.part,
-                valueInput: { resourceId: part.id },
-              },
-            ])
+        <Tooltip
+          title={
+            !needDate
+              ? missingNeedDateTooltip
+              : 'Add a Production Step representing work completed at a Work Center'
           }
-          sx={{ height: 'min-content' }}
-          variant="text"
         >
-          Work Center
-        </Button>
-        <Button
-          startIcon={<Add />}
-          size="small"
-          onClick={() =>
-            createResource('Purchase', []).then(
-              (purchase: Resource | undefined) =>
-                purchase &&
-                createResource('Step', [
-                  {
-                    field: fields.part,
-                    valueInput: { resourceId: part.id },
-                  },
-                  {
-                    field: fields.purchase,
-                    valueInput: { resourceId: purchase.id },
-                  },
-                ]),
-            )
+          <Button
+            startIcon={<Add />}
+            size="small"
+            onClick={() => createWorkCenterStep(part.id)}
+            sx={{ height: 'min-content' }}
+            variant="text"
+            disabled={!needDate}
+          >
+            Work Center
+          </Button>
+        </Tooltip>
+        <Tooltip
+          title={
+            !needDate
+              ? missingNeedDateTooltip
+              : 'Add a Production Step linked to a Purchase Order, such as for materials or outside processing'
           }
-          sx={{ height: 'min-content' }}
-          variant="text"
         >
-          Purchase
-        </Button>
+          <Button
+            startIcon={<Add />}
+            size="small"
+            onClick={() => createPurchaseStep(part.id)}
+            sx={{ height: 'min-content' }}
+            variant="text"
+            disabled={!needDate}
+          >
+            Purchase
+          </Button>
+        </Tooltip>
       </Stack>
       <Stack divider={<Divider />}>
         {steps.map(({ step, purchase }, i) => (
@@ -206,6 +206,22 @@ const StepView: FC<StepViewProps> = ({
                 </Button>
               )}
               {status && <OptionChip size="small" option={status} />}
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Tooltip title="The number of days required to complete the step, for Job scheduling.">
+                  <FormLabel sx={{ fontSize: '0.7em', height: 'fit-content' }}>
+                    Production
+                    <br />
+                    Days <Info color="primary" sx={{ fontSize: '1em' }} />
+                  </FormLabel>
+                </Tooltip>
+                <Box width={120}>
+                  <FieldControl
+                    schemaData={stepSchema}
+                    resource={step}
+                    field={fields.productionDays}
+                  />
+                </Box>
+              </Stack>
               {needDate && (
                 <Tooltip title="Need Date">
                   <strong>{formatDate(needDate) ?? '-'}</strong>
@@ -273,7 +289,7 @@ const StepView: FC<StepViewProps> = ({
       </Stack>
 
       <Box py={0.5}>
-        <IconButton onClick={() => deleteResource(step.id)} size="small">
+        <IconButton onClick={() => deleteStep(step.id)} size="small">
           <Close />
         </IconButton>
       </Box>

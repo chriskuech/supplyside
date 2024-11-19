@@ -515,7 +515,6 @@ export class ResourceService {
               for (const field of fields) {
                 const fieldPatch = patch.getPatch(field)
                 if (fieldPatch) {
-                  console.log('fieldPatch', fieldPatch)
                   const { fieldId, valueInput } = fieldPatch
                   childPatch.setPatch({ fieldId }, valueInput)
                 }
