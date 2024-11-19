@@ -90,8 +90,8 @@ export const readResources = async (
         path: { accountId },
         query: {
           resourceType,
-          where,
-          orderBy,
+          where: where ? JSON.stringify(where) : undefined,
+          orderBy: orderBy ? JSON.stringify(orderBy) : undefined,
         },
       },
       querySerializer: stringify,
