@@ -32,14 +32,14 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           resourceType: ResourceTypeSchema,
           where: z
             .string()
-            .transform((s) => JSON.parse(s))
-            .pipe(JsonLogicSchema)
-            .optional(),
+            .optional()
+            .transform((a) => (a ? JSON.parse(a) : undefined))
+            .pipe(JsonLogicSchema.optional()),
           orderBy: z
             .string()
-            .transform((s) => JSON.parse(s))
-            .pipe(z.array(OrderBySchema))
-            .optional(),
+            .optional()
+            .transform((a) => (a ? JSON.parse(a) : undefined))
+            .pipe(z.array(OrderBySchema).optional()),
         }),
         response: {
           200: z.array(ResourceSchema),
