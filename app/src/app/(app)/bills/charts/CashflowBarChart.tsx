@@ -209,7 +209,7 @@ export default function CashflowBarChart({
         series={[
           ...totalCosts.map((tc) => ({
             type: 'bar' as const,
-            stack: 'by status',
+            stack: 'unique',
             data: tc.totalsByWeek,
             color: Object.values(billStatusOptions).find(
               (option) => option.templateId === tc.statusTemplateId,
@@ -222,7 +222,7 @@ export default function CashflowBarChart({
           })),
           {
             type: 'bar',
-            stack: 'by status',
+            stack: 'unique',
             label: 'Recurring Bills',
             data: totalRecurringCosts,
             color: grey[300],
