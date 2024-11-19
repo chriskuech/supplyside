@@ -318,12 +318,27 @@ export class ResourceService {
   }
 
   async delete(accountId: string, resourceId: string): Promise<void> {
-    const model = await this.prisma.resource.delete({
+    const resource = await this.prisma.resource.findUniqueOrThrow({
       where: { id: resourceId, accountId },
       include: resourceInclude,
     })
 
-    const entity = mapResourceModelToEntity(model)
+    const entity = mapResourceModelToEntity(resource)
+
+    if (entity.type === 'Job') {
+      const parts = await this.list(accountId, 'Part', {
+        where: {
+          '==': [{ var: fields.job.name }, resourceId],
+        },
+      })
+
+      await Promise.all(parts.map((part) => this.delete(accountId, part.id)))
+    }
+
+    await this.prisma.resource.delete({
+      where: { id: resourceId, accountId },
+    })
+
     if (entity.type === 'PurchaseLine') {
       const purchaseId = selectResourceFieldValue(entity, fields.purchase)
         ?.resource?.id
