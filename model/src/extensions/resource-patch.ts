@@ -63,6 +63,10 @@ export class ResourcePatch {
     return fieldRefs.some((fieldRef) => this.hasPatch(fieldRef))
   }
 
+  hasAllPatches(...fieldRefs: FieldReference[]) {
+    return fieldRefs.every((fieldRef) => this.hasPatch(fieldRef))
+  }
+
   hasOption(fieldRef: FieldReference, optionRef: OptionReference) {
     const option = this.schema.getFieldOption(fieldRef, optionRef)
 
