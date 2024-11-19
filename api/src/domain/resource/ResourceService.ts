@@ -843,6 +843,7 @@ export class ResourceService {
       fields.recurrenceIntervalOffsetInDays.templateId,
       fields.recurrenceIntervalUnits.templateId,
       fields.recurrenceStartedAt.templateId,
+      fields.recurrenceLastExecutionDate.templateId,
     ]
 
     const destination = await match(source.type)
@@ -864,7 +865,7 @@ export class ResourceService {
                   fields.invoiceDate.templateId,
                 ].includes(templateId as string)
               )
-                return
+                continue
 
               patch.setPatch(
                 { fieldId },
