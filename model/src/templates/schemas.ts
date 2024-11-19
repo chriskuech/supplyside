@@ -123,6 +123,7 @@ export const schemas: SchemaTemplate[] = [
       fields.otherNotes,
       fields.operator,
       fields.dateCompleted,
+      fields.workCenter,
     ],
   },
   {
