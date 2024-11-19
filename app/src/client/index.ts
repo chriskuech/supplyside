@@ -5,7 +5,7 @@ import { config } from '@/config'
 
 // shim until react cache is released
 const cache = <T>(fn: () => T): (() => T) => {
-  let value: T | undefined = undefined
+  let value: T
   return () => {
     value ??= fn()
     return value

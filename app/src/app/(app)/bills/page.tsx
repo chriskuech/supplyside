@@ -5,6 +5,7 @@ import { BillsInboxControl } from './BillsInboxControl'
 import GridApiCharts from './charts/GridApiCharts'
 import { readSchema } from '@/actions/schema'
 import ListPage from '@/lib/resource/ListPage'
+import { readResources } from '@/actions/resource'
 
 export default async function Bills({
   searchParams,
@@ -21,6 +22,12 @@ export default async function Bills({
     value: 'false',
   }
 
+  const recurringBills = await readResources('Bill', {
+    where: {
+      and: [{ '==': [{ var: fields.recurring.name }, true] }],
+    },
+  })
+
   return (
     <ListPage
       tableKey="billsList"
@@ -29,6 +36,7 @@ export default async function Bills({
       filterItems={[recurringBillsFilter]}
       callToActions={[<BillsInboxControl key={BillsInboxControl.name} />]}
       Charts={GridApiCharts}
+      recurringResources={recurringBills}
     />
   )
 }

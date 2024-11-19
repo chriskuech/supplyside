@@ -90,6 +90,7 @@ enum ResourceType {
   Bill
   Customer
   Job
+  Operation
   Part
   Purchase
   PurchaseLine

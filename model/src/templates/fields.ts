@@ -9,7 +9,7 @@ export const billStatusOptions = {
   draft: {
     templateId: 'abababbb-3f5e-4d2d-8f0f-3e8f2c4c4b5c',
     name: 'Draft',
-    color: '#e0e0e0',
+    color: '#888888',
   },
   submitted: {
     templateId: '45b2ab63-6c20-4548-aafa-027286d03759',
@@ -37,7 +37,7 @@ export const jobStatusOptions = {
   draft: {
     templateId: '6280f9fb-5d27-4d0c-8d7e-12ceb064dc5e',
     name: 'Draft',
-    color: '#e0e0e0',
+    color: '#888888',
   },
   ordered: {
     templateId: '1a18eb92-20c3-418d-aff2-723520d21207',
@@ -75,7 +75,7 @@ export const purchaseStatusOptions = {
   draft: {
     templateId: '84c65f46-b8dd-43bf-9bbe-537b816fdeb5',
     name: 'Draft',
-    color: '#e0e0e0',
+    color: '#888888',
   },
   submitted: {
     templateId: '45b2ab63-6c20-4548-8427-027286d03759',
@@ -203,12 +203,18 @@ const _fields = {
     templateId: 'b0069350-92a0-4d02-8eae-c2a04405c94b',
     name: 'Billing Address',
     type: 'Address',
-    description: 'Indicates the ship-to address on the order',
+    description: 'Indicates the bill-to address on the order',
   },
   billingContact: {
     templateId: 'de26b300-e05b-4d50-9289-3f940c7b0901',
     name: 'Billing Contact',
     type: 'Contact',
+  },
+  coc: {
+    templateId: '8f3deb18-be94-45af-97f8-a2d3714a9d24',
+    name: 'COC',
+    type: 'Checkbox',
+    description: 'Certificate of Conformance is required',
   },
   completed: {
     templateId: 'eae730a6-0f61-40d0-b185-9fced487186c',
@@ -235,10 +241,24 @@ const _fields = {
     type: 'Textarea',
     description: 'Brief, identifiable description of the customer',
   },
+  customerPoNumber: {
+    templateId: 'f86f46a3-0114-4ffe-8d98-9798777ef206',
+    name: 'Customer PO Number',
+    type: 'Text',
+    description: "Purchase order # as indicated on the customer's PO",
+  },
   customerReferenceNumber: {
     templateId: 'cb1b5458-b938-4b5b-aa50-41065f4a84c8',
     name: 'Customer Reference Number',
     type: 'Text',
+    description: "The vendor's unique ID for your organization",
+  },
+  dateCompleted: {
+    templateId: '69d7b7e4-d09f-4e04-b4d4-1ac303357fe4',
+    name: 'Date Completed',
+    type: 'Date',
+    isDerived: true,
+    description: 'The date the operation was completed',
   },
   deliveryDate: {
     templateId: '92c3cc4e-a915-4606-bcea-67f352280d3d',
@@ -249,6 +269,24 @@ const _fields = {
     templateId: 'cb4a0c88-df20-485d-9881-e2c3b1b2b180',
     name: 'Document',
     type: 'File',
+  },
+  fai: {
+    templateId: '0970bcfa-2056-459a-8882-7a2eed64d165',
+    name: 'FAI',
+    type: 'Checkbox',
+    description: 'First article inspection report required',
+  },
+  finishing: {
+    templateId: 'abc13f51-25cb-44cd-a043-25ad5be2c429',
+    name: 'Finishing',
+    type: 'Checkbox',
+    description: 'Finishing report required',
+  },
+  hardware: {
+    templateId: 'ace90424-0bc2-4935-91c0-692de8c472a6',
+    name: 'Hardware',
+    type: 'Checkbox',
+    description: 'Hardware report required',
   },
   hours: {
     templateId: '1d235f99-62d0-4691-b991-44d6db3381aa',
@@ -265,11 +303,16 @@ const _fields = {
     type: 'Select',
     description: 'International commercial terms',
   },
+  inspection: {
+    templateId: '48319611-583f-4b90-b65b-79782b9f6e50',
+    name: 'Inspection',
+    type: 'Checkbox',
+    description: 'Final inspection report required',
+  },
   invoiceDate: {
     templateId: 'c2b2f1b5-7d2f-4b3b-9d8e-4a8f9e3c0b7b',
     name: 'Invoice Date',
     type: 'Date',
-    isRequired: true,
     defaultToToday: true,
     description: 'Date the invoice was issued',
   },
@@ -283,7 +326,7 @@ const _fields = {
     templateId: '6c2f58e8-2f6e-47cc-b109-904e74d1067b',
     name: 'Issued Date',
     type: 'Date',
-    description: 'Date the order was issued',
+    description: 'Date the purchase order was issued',
   },
   itemDescription: {
     templateId: 'f7b4e0f7-a1b1-4e1e-8f7b-4e0f7e1e7e5d',
@@ -295,7 +338,7 @@ const _fields = {
     templateId: '403dd522-a972-4a24-8012-936f56135d41',
     name: 'Item Name',
     type: 'Text',
-    description: 'Unique identifier for a item',
+    description: 'Identifying name for a item',
   },
   itemNumber: {
     templateId: '9e0115e1-e10c-4e21-a399-47ad9bfc1a6f',
@@ -327,7 +370,7 @@ const _fields = {
     name: 'Part',
     type: 'Resource',
     resourceType: 'Part',
-    description: 'Contains all info related to a specific line item',
+    description: 'Contains all info related to a specific part',
   },
   jobStatus: {
     templateId: '70912291-2b48-4e1f-9300-b7dbca8ce5ab',
@@ -339,6 +382,12 @@ const _fields = {
       optionTemplateId: jobStatusOptions.draft.templateId,
     },
     isRequired: true,
+  },
+  materialTraceability: {
+    templateId: '398800e1-d6a4-492e-a1c3-6f717245b71b',
+    name: 'Material Traceability',
+    type: 'Checkbox',
+    description: 'Material traceability report required',
   },
   name: {
     templateId: 'aebb8b9f-d49a-4d5b-b6cf-453bfad847b4',
@@ -353,11 +402,16 @@ const _fields = {
     description: 'Represents the latest delivery date',
     isRequired: true,
   },
+  operator: {
+    templateId: '7c6a68ca-3f98-4b23-a3c3-2ba75b9e3458',
+    name: 'Operator',
+    type: 'User',
+    description: 'The user who completed the operation',
+  },
   otherNotes: {
     templateId: 'ca79749f-b8f0-4a76-b4bf-080fae2d229b',
     name: 'Other Notes',
     type: 'Textarea',
-    description: 'Other notes included in the purchase order header',
   },
   partName: {
     templateId: '068b53c3-332a-40d8-a559-990145960d1d',
@@ -369,20 +423,20 @@ const _fields = {
     templateId: 'c056ca91-7f40-45d2-ae01-cd4bc66c09f2',
     name: 'PO Number',
     type: 'Text',
-    description: 'Unique identifier for a Purchase Order',
+    description: 'Unique identifier for a purchase order',
   },
   paymentDueDate: {
     templateId: 'e2c3b1b2-180c-4a8f-9e3c-0b7bcb4a0c88',
     name: 'Payment Due Date',
     type: 'Date',
     isRequired: true,
-    description: 'Vendor bill payment due date',
+    description: 'Payment due date',
   },
   paymentMethod: {
     templateId: '6afca34e-8501-4dfe-bb6b-2b1028999a08',
     name: 'Payment Method',
     type: 'Select',
-    description: 'Required form of payment',
+    description: 'Form of payment',
   },
   paymentTerms: {
     templateId: '8a9c85a4-1aea-4c0c-9cd2-51c6943aaaf7',
@@ -396,7 +450,7 @@ const _fields = {
     templateId: 'b735b67c-be50-4859-9242-00572b4d32cb',
     name: 'PO Recipient',
     type: 'Contact',
-    description: 'Primary vendor recipient for orders',
+    description: 'Primary recipient for a purchase order',
   },
   primaryAddress: {
     templateId: '58e1e7ae-2dab-44e2-b741-e47eddd7a626',
@@ -408,13 +462,13 @@ const _fields = {
     templateId: 'b36205ce-50b8-45cf-beb2-c2ad927aeb34',
     name: 'Primary Contact',
     type: 'Contact',
-    description: 'Primary contact for orders',
+    description: 'Primary customer contact',
   },
   productionDays: {
     templateId: '86a40299-a47f-4428-866b-0c116ef8aebd',
     name: 'Production Days',
     type: 'Number',
-    description: 'Number of days to produce the item',
+    description: 'Number of days in production',
     defaultValue: { number: 1 },
     isRequired: true,
     suffix: 'Days',
@@ -429,7 +483,7 @@ const _fields = {
     name: 'Purchase',
     type: 'Resource',
     resourceType: 'Purchase',
-    description: 'Contains all info related to a specific order',
+    description: 'Contains all info related to a specific purchase order',
   },
   purchaseAttachments: {
     templateId: '3a0f3e04-b4ac-4266-9d4e-bac5091d0922',
@@ -440,19 +494,19 @@ const _fields = {
     templateId: 'f7b4e0f7-e1e7-4e1e-abad-4e0f7e1e7e5d',
     name: 'Purchase Description',
     type: 'Textarea',
-    description: 'Brief, identifiable internal order description',
+    description: 'Brief, identifiable internal purchase description',
   },
   purchaseNotes: {
     templateId: '3749e137-c1d8-474a-9539-ba9b82cd6e94',
     name: 'Purchase Notes',
     type: 'Textarea',
-    description: 'Purchase notes included in the purchase order header',
+    description: 'Notes included in the purchase order header',
   },
   purchaseStatus: {
     templateId: 'd51e1004-c999-4ac1-8692-ff3d966c5dc3',
     name: 'Purchase Status',
     type: 'Select',
-    description: 'Lifecycle states of an order',
+    description: 'Lifecycle states of a purchase order',
     options: Object.values(purchaseStatusOptions),
     defaultValue: {
       optionTemplateId: purchaseStatusOptions.draft.templateId,
@@ -496,15 +550,23 @@ const _fields = {
     type: 'Select',
     isRequired: true,
   },
+  quoteLink: {
+    templateId: '0a2b605b-b807-42a6-a815-74d68c6100e7',
+    name: 'Quote Link',
+    type: 'Text',
+    description: 'URL to quote file for the job',
+  },
   receivedAllPurchases: {
     templateId: '5fec4a3c-6221-4319-88d4-762713a1db4e',
     name: 'Received All Purchases?',
     type: 'Checkbox',
+    description: 'Indicates all linked purchases have been received',
   },
   recurring: {
     templateId: '22fe79c3-b72d-46bb-b166-e2836e66f153',
     name: 'Recurring',
     type: 'Checkbox',
+    description: 'Indicates if a bill is recurring',
     defaultValue: { boolean: false },
   },
   recurrenceInterval: {
@@ -528,6 +590,11 @@ const _fields = {
     name: 'Recurrence start date',
     type: 'Date',
   },
+  recurrenceLastExecutionDate: {
+    templateId: '26925525-7848-4964-a6ad-6487dd9fb9b6',
+    name: 'Last recurrence execution date',
+    type: 'Date',
+  },
   parentRecurrentBill: {
     templateId: '66d9103f-46c6-4d10-ad76-1ace430c1d25',
     name: 'Parent Recurring Bill',
@@ -540,6 +607,12 @@ const _fields = {
     type: 'Resource',
     resourceType: 'Bill',
   },
+  sequenceNumber: {
+    templateId: '55391d0f-1b58-4db2-a3f2-5c6d9ef9086d',
+    name: 'Sequence Number',
+    type: 'Number',
+    description: 'The sequence number of the operation',
+  },
   shippingAccountNumber: {
     templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
     name: 'Shipping Account Number',
@@ -550,13 +623,13 @@ const _fields = {
     templateId: '848fe67b-ee4f-4c68-bdaa-3089622337f6',
     name: 'Shipping Address',
     type: 'Address',
-    description: 'Indicates the ship-to address on the order',
+    description: 'Indicates the ship-to address on the purchase',
   },
   shippingMethod: {
     templateId: '01bcb707-bd68-4726-8220-65bd19eee224',
     name: 'Shipping Method',
     type: 'Select',
-    description: 'Required form of shipping',
+    description: 'Form of shipping',
   },
   startDate: {
     templateId: '4b523fd9-35ce-44d8-abc8-a1bd9b05097a',
@@ -577,20 +650,26 @@ const _fields = {
     templateId: '8e61b78c-6e8c-4863-a7fd-af55fa66503f',
     name: 'Taxable',
     type: 'Checkbox',
-    description: 'Indicate if the order is taxable',
+    description: 'Indicate if the purchase is taxable',
   },
   termsAndConditions: {
     templateId: '156bdd18-42d2-427b-bcfe-97b7214c401e',
     name: 'Terms & Conditions',
     type: 'Textarea',
-    description: 'Terms language included on the purchase order',
+    description: 'Terms and conditions included on the purchase order',
   },
   totalCost: {
     templateId: '507b8699-64af-4f8f-9319-b63c48827c61',
     name: 'Total Cost',
     type: 'Money',
-    description: 'Total value of a purchase',
+    description: 'Total dollar value',
     isDerived: true,
+  },
+  traceability: {
+    templateId: '844ea06b-875c-4a88-86c3-c94bb5caaec9',
+    name: 'Traceability',
+    type: 'Checkbox',
+    description: 'Traceability report',
   },
   trackingNumber: {
     templateId: 'b34ecc5f-fad2-4cff-b4a5-1d14244c60c6',

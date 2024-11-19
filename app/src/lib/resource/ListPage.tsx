@@ -1,6 +1,6 @@
 import { Alert, Box, Container, Stack, Typography } from '@mui/material'
 import { ComponentType, MutableRefObject, ReactNode } from 'react'
-import { ResourceType } from '@supplyside/model'
+import { Resource, ResourceType } from '@supplyside/model'
 import { z } from 'zod'
 import { GridFilterItem, GridFilterModel } from '@mui/x-data-grid'
 import { GridApiPro } from '@mui/x-data-grid-pro'
@@ -18,7 +18,11 @@ type Props = {
   searchParams: Record<string, unknown>
   filterItems?: GridFilterItem[]
   title?: string
-  Charts?: ComponentType<{ gridApiRef: MutableRefObject<GridApiPro> }>
+  Charts?: ComponentType<{
+    gridApiRef: MutableRefObject<GridApiPro>
+    recurringResources?: Resource[]
+  }>
+  recurringResources?: Resource[]
 }
 
 export default async function ListPage({
@@ -29,6 +33,7 @@ export default async function ListPage({
   filterItems = [],
   title,
   Charts,
+  recurringResources,
 }: Props) {
   const { accountId } = await requireSession()
   const [schemaData, resources] = await Promise.all([
@@ -96,6 +101,7 @@ export default async function ListPage({
             initialGridFilterModel={initialGridFilterModel}
             unFilterableFieldIds={filterItems.map((item) => item.field)}
             Charts={Charts}
+            recurringResources={recurringResources}
           />
         </Stack>
       </Container>

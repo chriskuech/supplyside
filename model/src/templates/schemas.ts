@@ -20,6 +20,7 @@ export const schemas: SchemaTemplate[] = [
       fields.recurrenceStartedAt,
       fields.parentRecurrentBill,
       fields.parentClonedBill,
+      fields.recurrenceLastExecutionDate,
     ],
     sections: [
       {
@@ -79,23 +80,51 @@ export const schemas: SchemaTemplate[] = [
       fields.itemizedCosts,
       fields.subtotalCost,
       fields.totalCost,
-      fields.paymentDueDate,
       fields.receivedAllPurchases,
       fields.quickBooksInvoiceId,
+      fields.invoiceDate,
     ],
     sections: [
       {
         name: 'Job Info',
-        fields: [fields.customer, fields.needDate, fields.paymentTerms],
+        fields: [fields.customer, fields.needDate, fields.customerPoNumber],
       },
       {
         name: 'Accounting Info',
-        fields: [fields.quickBooksIncomeAccount],
+        fields: [
+          fields.quickBooksIncomeAccount,
+          fields.paymentTerms,
+          fields.paymentDueDate,
+        ],
+      },
+      {
+        name: 'Quality Info',
+        fields: [
+          fields.traceability,
+          fields.coc,
+          fields.fai,
+          fields.materialTraceability,
+          fields.hardware,
+          fields.finishing,
+          fields.inspection,
+        ],
       },
       {
         name: 'Schedule Info',
         fields: [fields.startDate, fields.productionDays],
       },
+    ],
+  },
+  {
+    resourceType: 'Operation',
+    fields: [
+      fields.sequenceNumber,
+      fields.completed,
+      fields.name,
+      fields.otherNotes,
+      fields.operator,
+      fields.dateCompleted,
+      fields.workCenter,
     ],
   },
   {

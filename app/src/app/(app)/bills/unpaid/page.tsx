@@ -5,6 +5,7 @@ import { BillsInboxControl } from '../BillsInboxControl'
 import GridApiCharts from '../charts/GridApiCharts'
 import ListPage from '@/lib/resource/ListPage'
 import { readSchema } from '@/actions/schema'
+import { readResources } from '@/actions/resource'
 
 export default async function UnpaidBills({
   searchParams,
@@ -14,6 +15,12 @@ export default async function UnpaidBills({
   const billSchemaData =
     (await readSchema('Bill')) ?? fail('Bill schema not found')
   const billSchema = new Schema(billSchemaData)
+
+  const recurringBills = await readResources('Bill', {
+    where: {
+      and: [{ '==': [{ var: fields.recurring.name }, true] }],
+    },
+  })
 
   const billStatusField = billSchema.getField(fields.billStatus)
   const billStatusPaidOptionId = billSchema.getFieldOption(
@@ -54,6 +61,7 @@ export default async function UnpaidBills({
       title="Unpaid Bills"
       callToActions={[<BillsInboxControl key={BillsInboxControl.name} />]}
       Charts={GridApiCharts}
+      recurringResources={recurringBills}
     />
   )
 }

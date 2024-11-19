@@ -23,10 +23,8 @@ import { download, preview } from '@/app/api/download/[filename]/util'
 const canPreview = (contentType: string) =>
   contentType === 'application/pdf' ||
   contentType.startsWith('image/') ||
-  contentType.startsWith('model/')
-
-const canCompare = (contentType: string) =>
-  contentType === 'application/pdf' || contentType.startsWith('image/')
+  contentType.startsWith('model/') ||
+  contentType.startsWith('text/')
 
 type Props = {
   files: File[]
@@ -45,27 +43,29 @@ export default function FilesField({ files, isReadOnly, onChange }: Props) {
         {files.map((file) => (
           <Stack key={file.id} direction="row" alignItems="center">
             <Typography flexGrow={1}>{file.name || '-'}</Typography>
-            {canCompare(file.contentType) && (
-              <Tooltip title="Compare File to Fields">
-                <IconButton
-                  onClick={() => push(`${pathname}?compareToFileId=${file.id}`)}
-                >
-                  <VerticalSplit />
-                </IconButton>
-              </Tooltip>
-            )}
             {canPreview(file.contentType) && (
-              <Tooltip title="View File">
-                <IconButton
-                  onClick={() => {
-                    file.contentType.startsWith('model/')
-                      ? getCadPreviewUrl(file.id).then(window.open)
-                      : preview(file)
-                  }}
-                >
-                  <Visibility />
-                </IconButton>
-              </Tooltip>
+              <>
+                <Tooltip title="Compare File to Fields">
+                  <IconButton
+                    onClick={() =>
+                      push(`${pathname}?compareToFileId=${file.id}`)
+                    }
+                  >
+                    <VerticalSplit />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="View File">
+                  <IconButton
+                    onClick={() => {
+                      file.contentType.startsWith('model/')
+                        ? getCadPreviewUrl(file.id).then(window.open)
+                        : preview(file)
+                    }}
+                  >
+                    <Visibility />
+                  </IconButton>
+                </Tooltip>
+              </>
             )}
             <Tooltip title="Download File">
               <IconButton onClick={() => download(file)}>

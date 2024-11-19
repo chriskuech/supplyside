@@ -12,7 +12,7 @@ import {
   ValueResource,
   billStatusOptions,
   fields,
-  intervalUnits,
+  getNextResourceCreationDate,
   jobStatusOptions,
   purchaseStatusOptions,
   selectResourceFieldValue,
@@ -21,7 +21,7 @@ import { fail } from 'assert'
 import dayjs, { Dayjs } from 'dayjs'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter.js'
 import { inject, injectable } from 'inversify'
-import { isNullish, map, pipe, sum } from 'remeda'
+import { map, pipe, sum } from 'remeda'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 import { SchemaService } from '../schema/SchemaService'
@@ -318,12 +318,27 @@ export class ResourceService {
   }
 
   async delete(accountId: string, resourceId: string): Promise<void> {
-    const model = await this.prisma.resource.delete({
+    const resource = await this.prisma.resource.findUniqueOrThrow({
       where: { id: resourceId, accountId },
       include: resourceInclude,
     })
 
-    const entity = mapResourceModelToEntity(model)
+    const entity = mapResourceModelToEntity(resource)
+
+    if (entity.type === 'Job') {
+      const parts = await this.list(accountId, 'Part', {
+        where: {
+          '==': [{ var: fields.job.name }, resourceId],
+        },
+      })
+
+      await Promise.all(parts.map((part) => this.delete(accountId, part.id)))
+    }
+
+    await this.prisma.resource.delete({
+      where: { id: resourceId, accountId },
+    })
+
     if (entity.type === 'PurchaseLine') {
       const purchaseId = selectResourceFieldValue(entity, fields.purchase)
         ?.resource?.id
@@ -461,112 +476,89 @@ export class ResourceService {
 
   private async handleResourceUpdate(patch: ResourcePatch) {
     const resource = patch.resource ?? fail('Resource is required')
+    const { accountId, type } = patch.schema
 
-    if (patch.schema.type === 'Job') {
-      if (patch.hasPatch(fields.customer)) {
-        await this.updateChildren(patch.schema.accountId, resource.id, {
-          childResourceType: 'Part',
-          backlinkFieldTemplate: fields.job,
-          field: fields.customer,
-          valueInput: {
-            resourceId: patch.getResourceId(fields.customer),
-          },
-        })
-      }
-      if (patch.hasPatch(fields.needDate)) {
-        await this.updateChildren(resource.accountId, resource.id, {
-          childResourceType: 'Part',
-          backlinkFieldTemplate: fields.job,
-          field: fields.needDate,
-          valueInput: {
-            date: patch.getDate(fields.needDate) ?? null,
-          },
-        })
-      }
-    }
+    const relations = [
+      {
+        from: 'Bill',
+        to: 'PurchaseLine',
+        backlink: fields.bill,
+        fields: [],
+        lines: true,
+      },
+      {
+        from: 'Customer',
+        to: 'Job',
+        backlink: fields.customer,
+        fields: [fields.paymentTerms, fields.paymentMethod, fields.poRecipient],
+        lines: false,
+      },
+      {
+        from: 'Job',
+        to: 'Part',
+        backlink: fields.job,
+        fields: [fields.customer, fields.needDate],
+        lines: true,
+      },
+      {
+        from: 'Purchase',
+        to: 'PurchaseLine',
+        backlink: fields.purchase,
+        fields: [fields.needDate, fields.vendor],
+        lines: true,
+      },
+      {
+        from: 'Vendor',
+        to: 'Purchase',
+        backlink: fields.vendor,
+        fields: [fields.paymentTerms, fields.paymentMethod, fields.poRecipient],
+        lines: false,
+      },
+    ] as const
 
-    if (patch.schema.type === 'Part') {
-      const jobId = patch.getResourceId(fields.job)
-      if (jobId) {
-        if (patch.hasPatch(fields.totalCost)) {
-          await this.recalculateSubtotalCost(resource.accountId, 'Job', jobId)
-        }
-
-        if (patch.hasPatch(fields.job)) {
-          const job = await this.read(resource.accountId, jobId)
-
-          await this.withUpdatePatch(
-            resource.accountId,
-            resource.id,
-            (patch) => {
-              patch.setResourceId(
-                fields.customer,
-                selectResourceFieldValue(job, fields.customer)?.resource?.id ??
-                  null,
-              )
-              patch.setDate(
-                fields.needDate,
-                selectResourceFieldValue(job, fields.needDate)?.date ?? null,
-              )
+    await Promise.all([
+      ...relations
+        .filter(({ from }) => from === type)
+        .map(async ({ to, backlink, fields }) => {
+          const children = await this.list(accountId, to, {
+            where: {
+              '==': [{ var: backlink.name }, resource.id],
             },
-          )
-        }
-      }
-    }
-
-    if (patch.schema.type === 'Purchase') {
-      if (patch.hasPatch(fields.vendor)) {
-        await this.updateChildren(resource.accountId, resource.id, {
-          childResourceType: 'PurchaseLine',
-          backlinkFieldTemplate: fields.purchase,
-          field: fields.vendor,
-          valueInput: {
-            resourceId:
-              selectResourceFieldValue(resource, fields.vendor)?.resource?.id ??
-              null,
-          },
-        })
-      }
-
-      if (patch.hasPatch(fields.job) || patch.hasPatch(fields.purchaseStatus)) {
-        const jobId = selectResourceFieldValue(resource, fields.job)?.resource
-          ?.id
-        if (jobId) {
-          await this.recalculateReceivedAllPurchases(resource.accountId, jobId)
-        }
-      }
-    }
-
-    if (patch.schema.type === 'PurchaseLine') {
-      const purchaseId = selectResourceFieldValue(resource, fields.purchase)
-        ?.resource?.id
-      const billId = selectResourceFieldValue(resource, fields.bill)?.resource
-        ?.id
-
-      if (purchaseId && patch.hasPatch(fields.totalCost)) {
-        await this.recalculateSubtotalCost(
-          resource.accountId,
-          'Purchase',
-          purchaseId,
-        )
-      }
-
-      if (billId && patch.hasPatch(fields.totalCost)) {
-        await this.recalculateSubtotalCost(resource.accountId, 'Bill', billId)
-      }
-
-      if (purchaseId && patch.hasPatch(fields.purchase)) {
-        const purchase = await this.read(resource.accountId, purchaseId)
-
-        await this.withUpdatePatch(resource.accountId, resource.id, (patch) => {
-          patch.setResourceId(
-            fields.vendor,
-            selectResourceFieldValue(purchase, fields.vendor)?.resource?.id ??
-              null,
-          )
-        })
-      }
-    }
+          })
+          for (const child of children) {
+            await this.withUpdatePatch(accountId, child.id, (childPatch) => {
+              for (const field of fields) {
+                const fieldPatch = patch.getPatch(field)
+                if (fieldPatch) {
+                  const { fieldId, valueInput } = fieldPatch
+                  childPatch.setPatch({ fieldId }, valueInput)
+                }
+              }
+            })
+          }
+        }),
+      ...relations
+        .filter(({ to }) => to === type)
+        .map(async ({ from, backlink, fields, lines }) => {
+          if (patch.hasPatch(backlink)) {
+            const parentId = patch.getResourceId(backlink)
+            if (parentId) {
+              await this.withUpdatePatch(accountId, parentId, (childPatch) => {
+                for (const field of fields) {
+                  const fieldPatch = patch.getPatch(field)
+                  if (fieldPatch) {
+                    const { fieldId, valueInput } = fieldPatch
+                    childPatch.setPatch({ fieldId }, valueInput)
+                  }
+                }
+              })
+              if (lines) {
+                await this.recalculateSubtotalCost(accountId, from, parentId)
+              }
+            }
+          }
+        }),
+    ])
   }
 
   async cloneResource(accountId: string, resourceId: string) {
@@ -816,65 +808,6 @@ export class ResourceService {
     })
   }
 
-  private async recalculateReceivedAllPurchases(
-    accountId: string,
-    resourceId: string,
-  ) {
-    const [job, purchases] = await Promise.all([
-      this.read(accountId, resourceId),
-      this.list(accountId, 'Purchase', {
-        where: {
-          '==': [{ var: fields.job.name }, resourceId],
-        },
-      }),
-    ])
-
-    await this.withUpdatePatch(accountId, job.id, (patch) => {
-      patch.setBoolean(
-        fields.receivedAllPurchases,
-        purchases.every((purchase) =>
-          [
-            purchaseStatusOptions.received.templateId,
-            purchaseStatusOptions.canceled.templateId,
-          ].includes(
-            selectResourceFieldValue(purchase, fields.purchaseStatus)?.option
-              ?.templateId as string,
-          ),
-        ),
-      )
-    })
-  }
-
-  private async updateChildren(
-    accountId: string,
-    resourceId: string,
-    {
-      childResourceType,
-      backlinkFieldTemplate,
-      field,
-      valueInput,
-    }: {
-      childResourceType: ResourceType
-      backlinkFieldTemplate: FieldTemplate
-      field: FieldTemplate
-      valueInput: ValueInput
-    },
-  ) {
-    const children = await this.list(accountId, childResourceType, {
-      where: {
-        '==': [{ var: backlinkFieldTemplate.name }, resourceId],
-      },
-    })
-
-    await Promise.all(
-      children.map((child) =>
-        this.withUpdatePatch(accountId, child.id, (patch) => {
-          patch.setPatch(field, valueInput)
-        }),
-      ),
-    )
-  }
-
   async createRecurringResources(accountId: string) {
     const activeRecurringBills = await this.list(accountId, 'Bill', {
       where: {
@@ -887,78 +820,21 @@ export class ResourceService {
 
     if (!activeRecurringBills.length) return
 
-    const bills = await this.list(accountId, 'Bill', {
-      where: { '==': [{ var: fields.recurring.name }, false] },
-    })
-
-    const orderedBillsByLatest = bills.sort((bill1, bill2) =>
-      dayjs(bill1.createdAt).isAfter(dayjs(bill2.createdAt)) ? -1 : 1,
-    )
-
     await Promise.all(
       activeRecurringBills.map(async (recurringBill) => {
-        const recurrenceStartedAt = selectResourceFieldValue(
-          recurringBill,
-          fields.recurrenceStartedAt,
-        )?.date
-        const recurrenceInterval = selectResourceFieldValue(
-          recurringBill,
-          fields.recurrenceInterval,
-        )?.number
-        const recurrenceIntervalOffsetInDays = selectResourceFieldValue(
-          recurringBill,
-          fields.recurrenceIntervalOffsetInDays,
-        )?.number
-        const recurrenceIntervalUnitTemplateId = selectResourceFieldValue(
-          recurringBill,
-          fields.recurrenceIntervalUnits,
-        )?.option?.templateId
-
-        if (
-          isNullish(recurrenceInterval) ||
-          isNullish(recurrenceIntervalUnitTemplateId)
-        )
-          return
-
-        const lastCreatedResource = orderedBillsByLatest.find(
-          (bill) =>
-            selectResourceFieldValue(bill, fields.parentRecurrentBill)?.resource
-              ?.id === recurringBill.id,
-        )
-
-        const startDate =
-          lastCreatedResource &&
-          dayjs(lastCreatedResource.createdAt).isAfter(
-            dayjs(recurrenceStartedAt),
-          )
-            ? lastCreatedResource.createdAt
-            : recurrenceStartedAt
-
-        const getNextCreationDate = (date: Dayjs) => {
-          return match(recurrenceIntervalUnitTemplateId)
-            .with(intervalUnits.days.templateId, () =>
-              date.add(recurrenceInterval, 'day'),
-            )
-            .with(intervalUnits.weeks.templateId, () =>
-              date
-                .add(recurrenceInterval, 'week')
-                .set('day', recurrenceIntervalOffsetInDays ?? 0),
-            )
-            .with(intervalUnits.months.templateId, () =>
-              date
-                .add(recurrenceInterval, 'month')
-                .set('date', recurrenceIntervalOffsetInDays ?? 0),
-            )
-            .otherwise(() => fail('Interval unit option not supported'))
-        }
-
         const newResourcesCreationDates = []
 
-        let nextCreationDate = getNextCreationDate(dayjs(startDate))
+        let nextCreationDate = getNextResourceCreationDate(recurringBill)
 
-        while (!nextCreationDate.isSameOrAfter(dayjs(), 'day')) {
-          newResourcesCreationDates.push(nextCreationDate)
-          nextCreationDate = getNextCreationDate(nextCreationDate)
+        while (
+          nextCreationDate &&
+          !nextCreationDate.isSameOrAfter(dayjs(), 'day')
+        ) {
+          newResourcesCreationDates.push(nextCreationDate.clone())
+          nextCreationDate = getNextResourceCreationDate(
+            recurringBill,
+            nextCreationDate,
+          )
         }
 
         // `Resource.key` is (currently) created transactionally and thus not parallelizable
@@ -981,6 +857,7 @@ export class ResourceService {
       fields.recurrenceIntervalOffsetInDays.templateId,
       fields.recurrenceIntervalUnits.templateId,
       fields.recurrenceStartedAt.templateId,
+      fields.recurrenceLastExecutionDate.templateId,
     ]
 
     const destination = await match(source.type)
@@ -1002,7 +879,7 @@ export class ResourceService {
                   fields.invoiceDate.templateId,
                 ].includes(templateId as string)
               )
-                return
+                continue
 
               patch.setPatch(
                 { fieldId },
@@ -1030,6 +907,13 @@ export class ResourceService {
             toResourceId: destination.id,
           }),
         ])
+
+        await this.withUpdatePatch(accountId, recurringResourceId, (patch) => {
+          patch.setDate(
+            fields.recurrenceLastExecutionDate,
+            creationDate.toISOString(),
+          )
+        })
 
         return destination
       })

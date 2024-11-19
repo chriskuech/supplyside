@@ -13,7 +13,6 @@ import {
 } from '@supplyside/model'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { parse } from 'qs'
 import { pick } from 'remeda'
 import { z } from 'zod'
 import { mountCosts } from './costs'
@@ -29,14 +28,19 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         params: z.object({
           accountId: z.string().uuid(),
         }),
-        querystring: z.preprocess(
-          (a) => parse(a as string),
-          z.object({
-            resourceType: ResourceTypeSchema,
-            where: JsonLogicSchema.optional(),
-            orderBy: z.array(OrderBySchema).optional(),
-          }),
-        ),
+        querystring: z.object({
+          resourceType: ResourceTypeSchema,
+          where: z
+            .string()
+            .optional()
+            .transform((a) => (a ? JSON.parse(a) : undefined))
+            .pipe(JsonLogicSchema.optional()),
+          orderBy: z
+            .string()
+            .optional()
+            .transform((a) => (a ? JSON.parse(a) : undefined))
+            .pipe(z.array(OrderBySchema).optional()),
+        }),
         response: {
           200: z.array(ResourceSchema),
         },
@@ -44,11 +48,11 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       },
       handler: async ({
         params: { accountId },
-        query: { resourceType, where },
+        query: { resourceType, ...query },
       }) => {
         const service = container.resolve(ResourceService)
 
-        const resources = await service.list(accountId, resourceType, { where })
+        const resources = await service.list(accountId, resourceType, query)
 
         return resources
       },

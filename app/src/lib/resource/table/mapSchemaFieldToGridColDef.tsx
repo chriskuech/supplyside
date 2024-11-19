@@ -467,6 +467,7 @@ export const mapSchemaFieldToGridColDef = (
           : value?.number,
       )
       .with(P.union('Text', 'Textarea'), () => value?.string)
+      .with('Files', () => value?.files.length || '')
       .otherwise(() => undefined)
 
     return formatted ?? ''

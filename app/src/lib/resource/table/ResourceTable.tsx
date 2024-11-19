@@ -59,8 +59,12 @@ type Props = {
   initialGridFilterModel?: GridFilterModel
   saveGridFilterModel?: (model: GridFilterModel) => void
   unFilterableFieldIds?: string[]
-  Charts?: ComponentType<{ gridApiRef: MutableRefObject<GridApiPro> }>
+  Charts?: ComponentType<{
+    gridApiRef: MutableRefObject<GridApiPro>
+    recurringResources?: Resource[]
+  }>
   specialColumnWidths?: ColumnWidths
+  recurringResources?: Resource[]
 } & Partial<DataGridProProps<Row>>
 
 export default function ResourceTable({
@@ -75,6 +79,7 @@ export default function ResourceTable({
   unFilterableFieldIds = [],
   Charts,
   specialColumnWidths,
+  recurringResources,
   ...props
 }: Props) {
   const schema = new Schema(schemaData)
@@ -145,7 +150,14 @@ export default function ResourceTable({
     <>
       {isChartsEnabled && (
         <Collapse in={showCharts} timeout="auto" unmountOnExit>
-          <Box pb={4}>{isGridRendered && <Charts gridApiRef={apiRef} />}</Box>
+          <Box pb={4}>
+            {isGridRendered && (
+              <Charts
+                gridApiRef={apiRef}
+                recurringResources={recurringResources}
+              />
+            )}
+          </Box>
         </Collapse>
       )}
       <DataGridPro<Row>
@@ -169,7 +181,10 @@ export default function ResourceTable({
                 scroll: false,
               }),
             )
-            .with(P.union('Part', 'PurchaseLine', 'Step'), () => null)
+            .with(
+              P.union('Operation', 'Part', 'PurchaseLine', 'Step'),
+              () => null,
+            )
             .exhaustive()
         }
         initialState={{
