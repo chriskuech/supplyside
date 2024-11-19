@@ -1,12 +1,14 @@
 import { fail } from 'assert'
 import dayjs, { Dayjs } from 'dayjs'
 import isBetween from 'dayjs/plugin/isBetween'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import { match } from 'ts-pattern'
 import { fields, intervalUnits } from '../templates'
 import { Resource } from '../types'
 import { selectResourceFieldValue } from './resource'
 
 dayjs.extend(isBetween)
+dayjs.extend(isSameOrAfter)
 
 export const getNextResourceCreationDate = (
   recurringResource: Resource,
