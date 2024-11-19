@@ -22,15 +22,17 @@ import {
 import {
   billStatusOptions,
   fields,
+  getNextResourceCreationDate,
   Resource,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import isBetween from 'dayjs/plugin/isBetween'
 import { useMemo } from 'react'
 import { ChartsNoDataOverlay } from '@mui/x-charts/ChartsOverlay'
 import { Typography } from '@mui/material'
+import { grey } from '@mui/material/colors'
 import { formatMoney } from '@/lib/format'
 import { billStatusOrder } from '@/lib/constants/status'
 
@@ -39,9 +41,13 @@ dayjs.extend(isBetween)
 
 type Props = {
   resources: Resource[]
+  recurringResources: Resource[]
 }
 
-export default function CashflowBarChart({ resources }: Props) {
+export default function CashflowBarChart({
+  resources,
+  recurringResources,
+}: Props) {
   const today = dayjs(new Date()).day(1)
 
   const weeks = useMemo((): string[] => {
@@ -76,6 +82,40 @@ export default function CashflowBarChart({ resources }: Props) {
 
     return weeks
   }, [resources, today])
+
+  const extrapolatedResources: { creationDate: Dayjs; totalCosts: number }[] =
+    useMemo(
+      () =>
+        recurringResources.flatMap((recurringResource) => {
+          const totalCost = selectResourceFieldValue(
+            recurringResource,
+            fields.totalCost,
+          )?.number
+
+          let nextCreationDate = getNextResourceCreationDate(recurringResource)
+
+          const finalDate = weeks[weeks.length - 1]
+          const resources = []
+          while (
+            nextCreationDate &&
+            finalDate &&
+            nextCreationDate.isBefore(finalDate)
+          ) {
+            resources.push({
+              creationDate: nextCreationDate,
+              totalCosts: totalCost ?? 0,
+            })
+
+            nextCreationDate = getNextResourceCreationDate(
+              recurringResource,
+              nextCreationDate,
+            )
+          }
+
+          return resources
+        }),
+      [recurringResources, weeks],
+    )
 
   const totalCosts = useMemo((): {
     statusTemplateId: string
@@ -140,6 +180,25 @@ export default function CashflowBarChart({ resources }: Props) {
     [today, weeks],
   )
 
+  const totalRecurringCosts = useMemo(
+    () =>
+      weeks.map((date) => {
+        const total = pipe(
+          extrapolatedResources,
+          filter((resource) =>
+            resource.creationDate.isBetween(
+              dayjs(date),
+              dayjs(date).add(7, 'days'),
+            ),
+          ),
+          sumBy((resource) => resource.totalCosts),
+        )
+
+        return total
+      }),
+    [extrapolatedResources, weeks],
+  )
+
   const chartHasData = !!totalCosts.length
 
   return (
@@ -147,19 +206,30 @@ export default function CashflowBarChart({ resources }: Props) {
       <Typography variant="h6">Weekly Cashflow</Typography>
       <ResponsiveChartContainer
         sx={{ padding: 1, marginLeft: 2, overflow: 'visible' }}
-        series={totalCosts.map((tc) => ({
-          type: 'bar',
-          stack: 'by status',
-          data: tc.totalsByWeek,
-          color: Object.values(billStatusOptions).find(
-            (option) => option.templateId === tc.statusTemplateId,
-          )?.color,
-          label: Object.values(billStatusOptions).find(
-            (option) => option.templateId === tc.statusTemplateId,
-          )?.name,
-          valueFormatter: (value) =>
-            formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
-        }))}
+        series={[
+          ...totalCosts.map((tc) => ({
+            type: 'bar' as const,
+            stack: 'by status',
+            data: tc.totalsByWeek,
+            color: Object.values(billStatusOptions).find(
+              (option) => option.templateId === tc.statusTemplateId,
+            )?.color,
+            label: Object.values(billStatusOptions).find(
+              (option) => option.templateId === tc.statusTemplateId,
+            )?.name,
+            valueFormatter: (value: number | null) =>
+              formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
+          })),
+          {
+            type: 'bar',
+            stack: 'by status',
+            label: 'Recurring Bills',
+            data: totalRecurringCosts,
+            color: grey[300],
+            valueFormatter: (value) =>
+              formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
+          },
+        ]}
         xAxis={[{ data: weeks, scaleType: 'band' }]}
         yAxis={[
           {

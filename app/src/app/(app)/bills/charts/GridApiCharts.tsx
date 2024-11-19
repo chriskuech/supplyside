@@ -13,10 +13,12 @@ import Charts from './Charts'
 
 type Props = {
   gridApiRef: MutableRefObject<GridApiPro>
+  recurringResources?: Resource[]
 }
 
 export default function GridApiCharts({
   gridApiRef,
+  recurringResources,
 }: PropsWithChildren<Props>) {
   const [resources, setResources] = useState<Resource[]>()
 
@@ -27,5 +29,10 @@ export default function GridApiCharts({
     })
   }, [gridApiRef])
 
-  return <Charts resources={resources ?? []} />
+  return (
+    <Charts
+      resources={resources ?? []}
+      recurringResources={recurringResources ?? []}
+    />
+  )
 }

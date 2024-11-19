@@ -20,6 +20,7 @@ export const schemas: SchemaTemplate[] = [
       fields.recurrenceStartedAt,
       fields.parentRecurrentBill,
       fields.parentClonedBill,
+      fields.recurrenceLastExecutionDate,
     ],
     sections: [
       {

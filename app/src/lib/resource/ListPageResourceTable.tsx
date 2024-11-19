@@ -21,6 +21,7 @@ type Props = {
   initialGridFilterModel?: GridFilterModel
   unFilterableFieldIds?: string[]
   Charts?: ComponentType<{ gridApiRef: MutableRefObject<GridApiPro> }>
+  recurringResources?: Resource[]
 }
 
 export const ListPageResourceTable: FC<Props> = ({
@@ -30,6 +31,7 @@ export const ListPageResourceTable: FC<Props> = ({
   initialGridFilterModel,
   unFilterableFieldIds,
   Charts,
+  recurringResources,
 }) => {
   const router = useRouter()
 
@@ -59,6 +61,7 @@ export const ListPageResourceTable: FC<Props> = ({
       saveGridFilterModel={saveGridFilterModelDebounced}
       unFilterableFieldIds={unFilterableFieldIds}
       Charts={Charts}
+      recurringResources={recurringResources}
     />
   )
 }

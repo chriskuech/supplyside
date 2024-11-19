@@ -580,6 +580,11 @@ const _fields = {
     name: 'Recurrence start date',
     type: 'Date',
   },
+  recurrenceLastExecutionDate: {
+    templateId: '26925525-7848-4964-a6ad-6487dd9fb9b6',
+    name: 'Last recurrence execution date',
+    type: 'Date',
+  },
   parentRecurrentBill: {
     templateId: '66d9103f-46c6-4d10-ad76-1ace430c1d25',
     name: 'Parent Recurring Bill',
