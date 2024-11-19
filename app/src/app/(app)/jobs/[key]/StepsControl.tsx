@@ -1,5 +1,6 @@
 import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
 import { Alert } from '@mui/material'
+import { sortBy } from 'remeda'
 import StepsView from './StepsView'
 import { readSchema } from '@/client/schema'
 import { readResource, readResources } from '@/client/resource'
@@ -15,7 +16,8 @@ export const StepsControl = async ({ part }: Props) => {
       where: {
         '==': [{ var: fields.part.name }, part.id],
       },
-      orderBy: [{ var: fields.startDate.name }],
+      // TODO: this doesn't work
+      // orderBy: [{ var: fields.deliveryDate.name, dir: 'asc' }],
     }),
   ])
   const expandedSteps = await Promise.all(
@@ -31,13 +33,18 @@ export const StepsControl = async ({ part }: Props) => {
     }),
   )
 
+  const sortedSteps = sortBy(
+    expandedSteps,
+    (s) => selectResourceFieldValue(s.step, fields.deliveryDate)?.date ?? '',
+  )
+
   if (!stepSchemaData || !steps)
     return <Alert severity="error">Failed to load steps</Alert>
 
   return (
     <StepsView
       stepSchemaData={stepSchemaData}
-      steps={expandedSteps}
+      steps={sortedSteps}
       part={part}
     />
   )

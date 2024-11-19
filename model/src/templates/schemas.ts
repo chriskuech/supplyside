@@ -115,6 +115,18 @@ export const schemas: SchemaTemplate[] = [
     ],
   },
   {
+    resourceType: 'Operation',
+    fields: [
+      fields.sequenceNumber,
+      fields.completed,
+      fields.name,
+      fields.otherNotes,
+      fields.operator,
+      fields.dateCompleted,
+      fields.workCenter,
+    ],
+  },
+  {
     resourceType: 'Part',
     fields: [
       fields.job,

@@ -1,4 +1,6 @@
+import { BadRequestError } from '@supplyside/api/integrations/fastify/BadRequestError'
 import { ResourcePatch, fields, jobStatusOptions } from '@supplyside/model'
+import dayjs from 'dayjs'
 import { isNumber } from 'remeda'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
@@ -12,6 +14,16 @@ const setInvoiceDate = (patch: ResourcePatch) => {
     return
 
   patch.setDate(fields.invoiceDate, new Date().toISOString())
+}
+
+const setCompleted = (patch: ResourcePatch) => {
+  if (
+    !patch.schema.implements(fields.completed, fields.dateCompleted) ||
+    !patch.hasPatch(fields.completed)
+  )
+    return
+
+  patch.setDate(fields.dateCompleted, new Date().toISOString())
 }
 
 const recalculatePaymentDueDateFromNeedDate = (patch: ResourcePatch) => {
@@ -138,7 +150,65 @@ const recalculateProductionDays = (patch: ResourcePatch) => {
   patch.setNumber(fields.productionDays, Math.ceil(hours / 8))
 }
 
+export const inferSchedulingFields = (patch: ResourcePatch): void => {
+  if (
+    !patch.schema.implements(
+      fields.startDate,
+      fields.productionDays,
+      fields.deliveryDate,
+    ) ||
+    !patch.hasAnyPatch(
+      fields.startDate,
+      fields.productionDays,
+      fields.deliveryDate,
+    )
+  )
+    return
+
+  const startDate = patch.getDate(fields.startDate)
+  const productionDays = patch.getNumber(fields.productionDays)
+  const deliveryDate = patch.getDate(fields.deliveryDate)
+
+  if (
+    patch.hasAnyPatch(fields.startDate, fields.productionDays) &&
+    startDate &&
+    productionDays
+  ) {
+    patch.setDate(
+      fields.deliveryDate,
+      dayjs(startDate).add(productionDays, 'days').toISOString(),
+    )
+
+    return
+  }
+
+  if (
+    !patch.hasPatch(fields.startDate) &&
+    patch.hasPatch(fields.deliveryDate) &&
+    productionDays
+  ) {
+    patch.setDate(
+      fields.startDate,
+      dayjs(deliveryDate).subtract(productionDays, 'days').toISOString(),
+    )
+
+    return
+  }
+
+  if (
+    startDate &&
+    productionDays &&
+    deliveryDate &&
+    dayjs(startDate).add(productionDays, 'days').toISOString() !== deliveryDate
+  ) {
+    throw new BadRequestError(
+      `Start date (${startDate}) + production days (${productionDays}) must equal delivery date (${deliveryDate})`,
+    )
+  }
+}
+
 export const deriveFields = (patch: ResourcePatch) => {
+  setCompleted(patch)
   setInvoiceDate(patch)
   setStartDate(patch)
   recalculatePaymentDueDateFromNeedDate(patch)
@@ -147,4 +217,5 @@ export const deriveFields = (patch: ResourcePatch) => {
   recalculateItemizedCosts(patch)
   recalculateDocumentTotalCost(patch)
   recalculateProductionDays(patch)
+  inferSchedulingFields(patch)
 }
