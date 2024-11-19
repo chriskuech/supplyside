@@ -12,7 +12,7 @@ import {
   ValueResource,
   billStatusOptions,
   fields,
-  intervalUnits,
+  getNextResourceCreationDate,
   jobStatusOptions,
   purchaseStatusOptions,
   selectResourceFieldValue,
@@ -21,7 +21,7 @@ import { fail } from 'assert'
 import dayjs, { Dayjs } from 'dayjs'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter.js'
 import { inject, injectable } from 'inversify'
-import { isNullish, map, pipe, sum } from 'remeda'
+import { map, pipe, sum } from 'remeda'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 import { SchemaService } from '../schema/SchemaService'
@@ -805,78 +805,21 @@ export class ResourceService {
 
     if (!activeRecurringBills.length) return
 
-    const bills = await this.list(accountId, 'Bill', {
-      where: { '==': [{ var: fields.recurring.name }, false] },
-    })
-
-    const orderedBillsByLatest = bills.sort((bill1, bill2) =>
-      dayjs(bill1.createdAt).isAfter(dayjs(bill2.createdAt)) ? -1 : 1,
-    )
-
     await Promise.all(
       activeRecurringBills.map(async (recurringBill) => {
-        const recurrenceStartedAt = selectResourceFieldValue(
-          recurringBill,
-          fields.recurrenceStartedAt,
-        )?.date
-        const recurrenceInterval = selectResourceFieldValue(
-          recurringBill,
-          fields.recurrenceInterval,
-        )?.number
-        const recurrenceIntervalOffsetInDays = selectResourceFieldValue(
-          recurringBill,
-          fields.recurrenceIntervalOffsetInDays,
-        )?.number
-        const recurrenceIntervalUnitTemplateId = selectResourceFieldValue(
-          recurringBill,
-          fields.recurrenceIntervalUnits,
-        )?.option?.templateId
-
-        if (
-          isNullish(recurrenceInterval) ||
-          isNullish(recurrenceIntervalUnitTemplateId)
-        )
-          return
-
-        const lastCreatedResource = orderedBillsByLatest.find(
-          (bill) =>
-            selectResourceFieldValue(bill, fields.parentRecurrentBill)?.resource
-              ?.id === recurringBill.id,
-        )
-
-        const startDate =
-          lastCreatedResource &&
-          dayjs(lastCreatedResource.createdAt).isAfter(
-            dayjs(recurrenceStartedAt),
-          )
-            ? lastCreatedResource.createdAt
-            : recurrenceStartedAt
-
-        const getNextCreationDate = (date: Dayjs) => {
-          return match(recurrenceIntervalUnitTemplateId)
-            .with(intervalUnits.days.templateId, () =>
-              date.add(recurrenceInterval, 'day'),
-            )
-            .with(intervalUnits.weeks.templateId, () =>
-              date
-                .add(recurrenceInterval, 'week')
-                .set('day', recurrenceIntervalOffsetInDays ?? 0),
-            )
-            .with(intervalUnits.months.templateId, () =>
-              date
-                .add(recurrenceInterval, 'month')
-                .set('date', recurrenceIntervalOffsetInDays ?? 0),
-            )
-            .otherwise(() => fail('Interval unit option not supported'))
-        }
-
         const newResourcesCreationDates = []
 
-        let nextCreationDate = getNextCreationDate(dayjs(startDate))
+        let nextCreationDate = getNextResourceCreationDate(recurringBill)
 
-        while (!nextCreationDate.isSameOrAfter(dayjs(), 'day')) {
-          newResourcesCreationDates.push(nextCreationDate)
-          nextCreationDate = getNextCreationDate(nextCreationDate)
+        while (
+          nextCreationDate &&
+          !nextCreationDate.isSameOrAfter(dayjs(), 'day')
+        ) {
+          newResourcesCreationDates.push(nextCreationDate.clone())
+          nextCreationDate = getNextResourceCreationDate(
+            recurringBill,
+            nextCreationDate,
+          )
         }
 
         // `Resource.key` is (currently) created transactionally and thus not parallelizable
@@ -899,6 +842,7 @@ export class ResourceService {
       fields.recurrenceIntervalOffsetInDays.templateId,
       fields.recurrenceIntervalUnits.templateId,
       fields.recurrenceStartedAt.templateId,
+      fields.recurrenceLastExecutionDate.templateId,
     ]
 
     const destination = await match(source.type)
@@ -920,7 +864,7 @@ export class ResourceService {
                   fields.invoiceDate.templateId,
                 ].includes(templateId as string)
               )
-                return
+                continue
 
               patch.setPatch(
                 { fieldId },
@@ -948,6 +892,13 @@ export class ResourceService {
             toResourceId: destination.id,
           }),
         ])
+
+        await this.withUpdatePatch(accountId, recurringResourceId, (patch) => {
+          patch.setDate(
+            fields.recurrenceLastExecutionDate,
+            creationDate.toISOString(),
+          )
+        })
 
         return destination
       })
