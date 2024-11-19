@@ -169,12 +169,6 @@ export const inferSchedulingFields = (patch: ResourcePatch): void => {
   const productionDays = patch.getNumber(fields.productionDays)
   const deliveryDate = patch.getDate(fields.deliveryDate)
 
-  console.log(
-    `startDate: ${startDate}, productionDays: ${productionDays}, deliveryDate: ${deliveryDate}, hasAnyPatch: ${patch.hasAnyPatch(
-      fields.startDate,
-      fields.productionDays,
-    )}, hasPatch: ${patch.hasPatch(fields.deliveryDate)}`,
-  )
   if (
     patch.hasAnyPatch(fields.startDate, fields.productionDays) &&
     startDate &&
