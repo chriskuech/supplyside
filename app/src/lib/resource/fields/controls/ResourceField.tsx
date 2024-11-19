@@ -61,8 +61,9 @@ function ResourceField(
         field: match(resourceType)
           .with(P.union('Customer', 'Vendor', 'WorkCenter'), () => fields.name)
           .with('Purchase', () => fields.poNumber)
-          .with(P.union('Bill', 'PurchaseLine', 'Job', 'Part', 'Step'), () =>
-            fail('Not implemented'),
+          .with(
+            P.union('Bill', 'PurchaseLine', 'Job', 'Part', 'Operation', 'Step'),
+            () => fail('Not implemented'),
           )
           .exhaustive(),
         valueInput: { string: nameOrNumber },

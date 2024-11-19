@@ -169,7 +169,10 @@ export default function ResourceTable({
                 scroll: false,
               }),
             )
-            .with(P.union('Part', 'PurchaseLine', 'Step'), () => null)
+            .with(
+              P.union('Operation', 'Part', 'PurchaseLine', 'Step'),
+              () => null,
+            )
             .exhaustive()
         }
         initialState={{

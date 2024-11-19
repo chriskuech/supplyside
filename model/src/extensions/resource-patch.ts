@@ -1,4 +1,9 @@
-import { FieldReference, OptionReference, Schema } from '.'
+import {
+  FieldReference,
+  mapValueToValueInput,
+  OptionReference,
+  Schema,
+} from '.'
 import { Cost, Resource, ValueInput } from '../types'
 
 export type FieldPatch = {
@@ -131,17 +136,8 @@ export class ResourcePatch {
     this.setPatch(fieldRef, { userId })
   }
 
-  setPatch(fieldRef: FieldReference, valueInput: ValueInput) {
-    const { fieldId } = this.schema.getField(fieldRef)
-
-    this._patches = [
-      ...this._patches.filter((p) => p.fieldId !== fieldId),
-      { fieldId, valueInput },
-    ]
-  }
-
-  private getPatch(fieldRef: FieldReference): FieldPatch | undefined {
-    const { fieldId } = this.schema.getField(fieldRef)
+  getPatch(fieldRef: FieldReference): FieldPatch | undefined {
+    const { type, fieldId } = this.schema.getField(fieldRef)
 
     const patch = this._patches.find((p) => p.fieldId === fieldId)
     if (patch) return patch
@@ -149,6 +145,15 @@ export class ResourcePatch {
     const rf = this.resource?.fields.find((f) => f.fieldId === fieldId)
     if (!rf) return
 
-    return { fieldId, valueInput: rf.value }
+    return { fieldId, valueInput: mapValueToValueInput(type, rf.value) }
+  }
+
+  setPatch(fieldRef: FieldReference, valueInput: ValueInput) {
+    const { fieldId } = this.schema.getField(fieldRef)
+
+    this._patches = [
+      ...this._patches.filter((p) => p.fieldId !== fieldId),
+      { fieldId, valueInput },
+    ]
   }
 }

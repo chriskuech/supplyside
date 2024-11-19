@@ -9,11 +9,21 @@ const setInvoiceDate = (patch: ResourcePatch) => {
   if (
     !patch.schema.implements(fields.jobStatus, fields.invoiceDate) ||
     !patch.hasPatch(fields.jobStatus) ||
-    patch.hasPatch(fields.invoiceDate)
+    !patch.hasOption(fields.jobStatus, jobStatusOptions.invoiced)
   )
     return
 
   patch.setDate(fields.invoiceDate, new Date().toISOString())
+}
+
+const setCompleted = (patch: ResourcePatch) => {
+  if (
+    !patch.schema.implements(fields.completed, fields.dateCompleted) ||
+    !patch.hasPatch(fields.completed)
+  )
+    return
+
+  patch.setDate(fields.dateCompleted, new Date().toISOString())
 }
 
 const recalculatePaymentDueDateFromNeedDate = (patch: ResourcePatch) => {
@@ -204,6 +214,7 @@ export const inferSchedulingFields = (patch: ResourcePatch): void => {
 }
 
 export const deriveFields = (patch: ResourcePatch) => {
+  setCompleted(patch)
   setInvoiceDate(patch)
   setStartDate(patch)
   recalculatePaymentDueDateFromNeedDate(patch)

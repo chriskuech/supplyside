@@ -97,9 +97,33 @@ export const schemas: SchemaTemplate[] = [
         ],
       },
       {
+        name: 'Quality Info',
+        fields: [
+          fields.traceability,
+          fields.coc,
+          fields.fai,
+          fields.materialTraceability,
+          fields.hardware,
+          fields.finishing,
+          fields.inspection,
+        ],
+      },
+      {
         name: 'Schedule Info',
         fields: [fields.startDate, fields.productionDays],
       },
+    ],
+  },
+  {
+    resourceType: 'Operation',
+    fields: [
+      fields.sequenceNumber,
+      fields.completed,
+      fields.name,
+      fields.otherNotes,
+      fields.operator,
+      fields.dateCompleted,
+      fields.workCenter,
     ],
   },
   {
