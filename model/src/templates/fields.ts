@@ -251,7 +251,7 @@ const _fields = {
     templateId: 'cb1b5458-b938-4b5b-aa50-41065f4a84c8',
     name: 'Customer Reference Number',
     type: 'Text',
-    description: 'The vendor's unique ID for your organization',  
+    description: "The vendor's unique ID for your organization",
   },
   deliveryDate: {
     templateId: '92c3cc4e-a915-4606-bcea-67f352280d3d',
