@@ -3,6 +3,7 @@ import { Resource, ResourceType, Schema } from '@supplyside/model'
 import { components } from '@supplyside/api'
 import { stringify } from 'qs'
 import { revalidateTag } from 'next/cache'
+import { sortBy } from 'remeda'
 import { readSchema } from './schema'
 import { client } from '.'
 import { Session } from '@/session'
@@ -178,7 +179,9 @@ export const findResourcesByNameOrPoNumber = async (
     },
   )
 
-  return resources
+  if (!resources) return
+
+  return sortBy(resources, (r) => r.name)
 }
 
 export const copyFromResource = async (
