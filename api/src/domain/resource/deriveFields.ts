@@ -7,7 +7,7 @@ const setInvoiceDate = (patch: ResourcePatch) => {
   if (
     !patch.schema.implements(fields.jobStatus, fields.invoiceDate) ||
     !patch.hasPatch(fields.jobStatus) ||
-    patch.hasPatch(fields.invoiceDate)
+    !patch.hasOption(fields.jobStatus, jobStatusOptions.invoiced)
   )
     return
 
