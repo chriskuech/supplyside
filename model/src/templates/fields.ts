@@ -250,6 +250,13 @@ const _fields = {
     name: 'Customer Reference Number',
     type: 'Text',
   },
+  dateCompleted: {
+    templateId: '69d7b7e4-d09f-4e04-b4d4-1ac303357fe4',
+    name: 'Date Completed',
+    type: 'Date',
+    isDerived: true,
+    description: 'The date the operation was completed',
+  },
   deliveryDate: {
     templateId: '92c3cc4e-a915-4606-bcea-67f352280d3d',
     name: 'Delivery Date',
@@ -386,6 +393,12 @@ const _fields = {
     type: 'Date',
     description: 'Represents the latest delivery date',
     isRequired: true,
+  },
+  operator: {
+    templateId: '7c6a68ca-3f98-4b23-a3c3-2ba75b9e3458',
+    name: 'Operator',
+    type: 'User',
+    description: 'The user who completed the operation',
   },
   otherNotes: {
     templateId: 'ca79749f-b8f0-4a76-b4bf-080fae2d229b',
@@ -578,6 +591,12 @@ const _fields = {
     name: 'Parent Cloned Bill',
     type: 'Resource',
     resourceType: 'Bill',
+  },
+  sequenceNumber: {
+    templateId: '55391d0f-1b58-4db2-a3f2-5c6d9ef9086d',
+    name: 'Sequence Number',
+    type: 'Number',
+    description: 'The sequence number of the operation',
   },
   shippingAccountNumber: {
     templateId: 'e6f5b7c4-8f5e-4f2d-8d0f-3e8f2c4c4b5c',
