@@ -62,11 +62,9 @@ const createWhere = (where: JsonLogic, schema: Schema): string =>
     )
     .with({ '!=': P.any }, ({ '!=': [{ var: name }, val] }) =>
       match(val)
-        .with(null, () => `${resolveColumn(schema, { name })} IS NOT NULL`)
         .with(
-          P.union(true, false),
-          () =>
-            `${resolveColumn(schema, { name })} IS NOT ${val ? 'TRUE' : 'FALSE'}`,
+          P.union(null, true, false),
+          () => `${resolveColumn(schema, { name })} IS NOT ${val}`,
         )
         .otherwise(
           () => `${resolveColumn(schema, { name })} <> ${sanitizeValue(val)}`,
