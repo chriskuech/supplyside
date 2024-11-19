@@ -210,6 +210,11 @@ const _fields = {
     name: 'Billing Contact',
     type: 'Contact',
   },
+  coc: {
+    templateId: '8f3deb18-be94-45af-97f8-a2d3714a9d24',
+    name: 'COC',
+    type: 'Checkbox',
+  },
   completed: {
     templateId: 'eae730a6-0f61-40d0-b185-9fced487186c',
     name: 'Completed?',
@@ -255,6 +260,21 @@ const _fields = {
     name: 'Document',
     type: 'File',
   },
+  fai: {
+    templateId: '0970bcfa-2056-459a-8882-7a2eed64d165',
+    name: 'FAI',
+    type: 'Checkbox',
+  },
+  finishing: {
+    templateId: 'abc13f51-25cb-44cd-a043-25ad5be2c429',
+    name: 'Finishing',
+    type: 'Checkbox',
+  },
+  hardware: {
+    templateId: 'ace90424-0bc2-4935-91c0-692de8c472a6',
+    name: 'Hardware',
+    type: 'Checkbox',
+  },
   hours: {
     templateId: '1d235f99-62d0-4691-b991-44d6db3381aa',
     name: 'Hours',
@@ -269,6 +289,11 @@ const _fields = {
     name: 'Incoterms',
     type: 'Select',
     description: 'International commercial terms',
+  },
+  inspection: {
+    templateId: '48319611-583f-4b90-b65b-79782b9f6e50',
+    name: 'Inspection',
+    type: 'Checkbox',
   },
   invoiceDate: {
     templateId: 'c2b2f1b5-7d2f-4b3b-9d8e-4a8f9e3c0b7b',
@@ -343,6 +368,11 @@ const _fields = {
       optionTemplateId: jobStatusOptions.draft.templateId,
     },
     isRequired: true,
+  },
+  materialTraceability: {
+    templateId: '398800e1-d6a4-492e-a1c3-6f717245b71b',
+    name: 'Material Traceability',
+    type: 'Checkbox',
   },
   name: {
     templateId: 'aebb8b9f-d49a-4d5b-b6cf-453bfad847b4',
@@ -500,6 +530,11 @@ const _fields = {
     type: 'Select',
     isRequired: true,
   },
+  quoteLink: {
+    templateId: '0a2b605b-b807-42a6-a815-74d68c6100e7',
+    name: 'Quote Link',
+    type: 'Text',
+  },
   receivedAllPurchases: {
     templateId: '5fec4a3c-6221-4319-88d4-762713a1db4e',
     name: 'Received All Purchases?',
@@ -595,6 +630,11 @@ const _fields = {
     type: 'Money',
     description: 'Total value of a purchase',
     isDerived: true,
+  },
+  traceability: {
+    templateId: '844ea06b-875c-4a88-86c3-c94bb5caaec9',
+    name: 'Traceability',
+    type: 'Checkbox',
   },
   trackingNumber: {
     templateId: 'b34ecc5f-fad2-4cff-b4a5-1d14244c60c6',
