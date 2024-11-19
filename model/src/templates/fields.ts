@@ -274,13 +274,13 @@ const _fields = {
     templateId: '0970bcfa-2056-459a-8882-7a2eed64d165',
     name: 'FAI',
     type: 'Checkbox',
-    description: 'First article inspection report required',  
+    description: 'First article inspection report required',
   },
   finishing: {
     templateId: 'abc13f51-25cb-44cd-a043-25ad5be2c429',
     name: 'Finishing',
     type: 'Checkbox',
-    description: 'Finishing report required',  
+    description: 'Finishing report required',
   },
   hardware: {
     templateId: 'ace90424-0bc2-4935-91c0-692de8c472a6',
