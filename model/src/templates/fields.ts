@@ -556,12 +556,6 @@ const _fields = {
     type: 'Text',
     description: 'URL to quote file for the job',
   },
-  receivedAllPurchases: {
-    templateId: '5fec4a3c-6221-4319-88d4-762713a1db4e',
-    name: 'Received All Purchases?',
-    type: 'Checkbox',
-    description: 'Indicates all linked purchases have been received',
-  },
   recurring: {
     templateId: '22fe79c3-b72d-46bb-b166-e2836e66f153',
     name: 'Recurring',

@@ -1,12 +1,4 @@
-import { CheckCircle, Cancel } from '@mui/icons-material'
-import {
-  Box,
-  Card,
-  CardContent,
-  Stack,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Box, Card, CardContent, Stack, Typography } from '@mui/material'
 import {
   Resource,
   SchemaData,
@@ -26,10 +18,6 @@ type Props = {
 }
 
 export const OrderedCta: FC<Props> = ({ schemaData, resource }) => {
-  const receivedAllPurchases = selectResourceFieldValue(
-    resource,
-    fields.receivedAllPurchases,
-  )?.boolean
   const needDateString = selectResourceFieldValue(
     resource,
     fields.needDate,
@@ -60,28 +48,6 @@ export const OrderedCta: FC<Props> = ({ schemaData, resource }) => {
           alignItems="center"
         >
           <Stack width="fit-content" spacing={2} alignItems="center">
-            <Tooltip
-              title={
-                receivedAllPurchases
-                  ? 'This Job has received all linked Purchases'
-                  : 'This Job has not received all linked Purchases'
-              }
-            >
-              <Stack direction="row" alignItems="center" spacing={1}>
-                {receivedAllPurchases ? (
-                  <CheckCircle color="success" fontSize="large" />
-                ) : (
-                  <Cancel color="error" fontSize="large" />
-                )}
-                <Typography variant="h5">
-                  {receivedAllPurchases ? (
-                    <>Received All Purchases</>
-                  ) : (
-                    <>Waiting for Purchases</>
-                  )}
-                </Typography>
-              </Stack>
-            </Tooltip>
             <Typography variant="h5" fontWeight="normal">
               <strong>{daysUntilStartDate}</strong> days until Start Date
             </Typography>

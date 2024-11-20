@@ -80,7 +80,6 @@ export const schemas: SchemaTemplate[] = [
       fields.itemizedCosts,
       fields.subtotalCost,
       fields.totalCost,
-      fields.receivedAllPurchases,
       fields.quickBooksInvoiceId,
       fields.invoiceDate,
     ],
