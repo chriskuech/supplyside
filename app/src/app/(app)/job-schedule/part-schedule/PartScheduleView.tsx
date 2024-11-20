@@ -1,13 +1,24 @@
 'use client'
 
 import { fail } from 'assert'
-import { Box, Stack, Tooltip, Typography, useTheme } from '@mui/material'
+import {
+  Box,
+  Collapse,
+  FormControlLabel,
+  Stack,
+  Switch,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material'
 import NextLink from 'next/link'
 import {
   AttachMoney,
+  BarChart,
   Business,
   Close,
   Link as LinkIcon,
+  PieChart,
   PrecisionManufacturing,
   ShoppingBag,
 } from '@mui/icons-material'
@@ -57,6 +68,7 @@ export const PartScheduleView = ({
     ),
   )
   const [filter, setFilter] = useState<string>('')
+  const [showCharts, setShowCharts] = useState(false)
 
   const parts = useMemo(() => {
     const partsByJobStatus = unfilteredParts.filter((part) =>
@@ -93,7 +105,27 @@ export const PartScheduleView = ({
     <GanttChart
       drawerHeader={
         <Stack height="100%">
-          <Typography variant="h4">Part Schedule</Typography>
+          <Typography variant="h4">
+            Part Schedule
+            <FormControlLabel
+              sx={{ float: 'right', mr: 0, color: 'primary.main' }}
+              control={
+                <Switch
+                  size="small"
+                  checked={showCharts}
+                  onChange={(e) => setShowCharts(e.target.checked)}
+                />
+              }
+              label={
+                <Tooltip title="Hide/Show Cashflow">
+                  <Stack direction="row" alignItems="center">
+                    <PieChart fontSize="small" />
+                    <BarChart fontSize="small" />
+                  </Stack>
+                </Tooltip>
+              }
+            />
+          </Typography>
           <Box flexGrow={1} />
           <Stack spacing={1}>
             <JobStatusFiltersControl
@@ -102,7 +134,12 @@ export const PartScheduleView = ({
             />
             <QuickfilterControl filter={filter} onFilterChange={setFilter} />
             <Typography variant="subtitle1" fontSize={12}>
-              <Stack direction="row" justifyContent="end" spacing={1}>
+              <Stack
+                direction="row"
+                justifyContent="end"
+                alignItems="center"
+                spacing={1}
+              >
                 <Box>
                   <strong>{parts.length}</strong> Parts
                 </Box>
@@ -115,7 +152,11 @@ export const PartScheduleView = ({
           <Box flexGrow={1} />
         </Stack>
       }
-      stageHeader={<Charts resources={jobs} />}
+      stageHeader={
+        <Collapse in={showCharts}>
+          <Charts resources={jobs} />
+        </Collapse>
+      }
       headerHeight={300}
       items={parts.map((part) => ({
         id: part.id,
