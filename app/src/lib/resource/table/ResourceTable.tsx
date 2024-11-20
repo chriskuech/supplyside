@@ -37,7 +37,7 @@ import { mapSchemaFieldToGridColDef } from './mapSchemaFieldToGridColDef'
 import { Row, Column } from './types'
 import { handleProcessRowUpdate } from './processRowUpdate'
 import { usePersistDatagridState } from './usePersistDatagridState'
-import { deleteResource } from '@/actions/resource'
+import { deleteResource, deleteResourceAsAdmin } from '@/actions/resource'
 
 type FieldNames = keyof typeof fields
 export type ColumnWidths = Partial<Record<FieldNames, number>>
@@ -65,6 +65,7 @@ type Props = {
   }>
   specialColumnWidths?: ColumnWidths
   recurringResources?: Resource[]
+  isAdmin?: boolean
 } & Partial<DataGridProProps<Row>>
 
 export default function ResourceTable({
@@ -80,6 +81,7 @@ export default function ResourceTable({
   Charts,
   specialColumnWidths,
   recurringResources,
+  isAdmin = false,
   ...props
 }: Props) {
   const schema = new Schema(schemaData)
@@ -121,11 +123,13 @@ export default function ResourceTable({
             {
               field: '_delete',
               headerName: 'Delete',
-              renderCell: ({ row: { id: resourceId } }) => (
+              renderCell: ({ row: { accountId, id: resourceId } }) => (
                 <IconButton
                   onClick={(e) => {
                     e.stopPropagation()
-                    deleteResource(resourceId)
+                    isAdmin
+                      ? deleteResourceAsAdmin(accountId, resourceId)
+                      : deleteResource(resourceId)
                   }}
                 >
                   <Clear />
@@ -141,6 +145,7 @@ export default function ResourceTable({
       isEditable,
       unFilterableFieldIds,
       specialColumnWidths,
+      isAdmin,
     ],
   )
 

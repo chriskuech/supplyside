@@ -3,7 +3,7 @@
 import { fail } from 'assert'
 import { FieldTemplate, OptionTemplate, Schema } from '@supplyside/model'
 import { requireSession } from '@/session'
-import { withAccountId, withSession } from '@/authz'
+import { withAccountId, withGlobalAdmin, withSession } from '@/authz'
 import * as client from '@/client/resource'
 import { readSchema } from '@/client/schema'
 
@@ -12,6 +12,7 @@ export const readResource = withAccountId(client.readResource)
 export const readResources = withAccountId(client.readResources)
 export const updateResource = withAccountId(client.updateResource)
 export const deleteResource = withAccountId(client.deleteResource)
+export const deleteResourceAsAdmin = withGlobalAdmin(client.deleteResource)
 export const findResourcesByNameOrPoNumber = withAccountId(
   client.findResourcesByNameOrPoNumber,
 )
