@@ -179,6 +179,19 @@ export const inferSchedulingFields = (patch: ResourcePatch): void => {
   const deliveryDate = patch.getDate(fields.deliveryDate)
 
   if (
+    patch.hasAnyPatch(fields.productionDays, fields.deliveryDate) &&
+    productionDays &&
+    deliveryDate
+  ) {
+    patch.setDate(
+      fields.startDate,
+      dayjs(deliveryDate).subtract(productionDays, 'days').toISOString(),
+    )
+
+    return
+  }
+
+  if (
     patch.hasAnyPatch(fields.startDate, fields.productionDays) &&
     startDate &&
     productionDays
