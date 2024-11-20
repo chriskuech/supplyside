@@ -27,7 +27,10 @@ export class Schema {
     return {
       ...field,
       template: field.templateId
-        ? Schema.findTemplateField(field.templateId)
+        ? (Schema.findTemplateField(field.templateId) ??
+          fail(
+            `Template field ${JSON.stringify(fieldRef)} does not exist in accounts/${this.accountId}/schemas/${this.type}/fields/${this.type}`,
+          ))
         : null,
     }
   }
@@ -75,9 +78,8 @@ export class Schema {
   }
 
   private static findTemplateField(templateId: string) {
-    return (
-      Object.values(fields).find((field) => field.templateId === templateId) ??
-      fail(`Template field ${templateId} does not exist`)
+    return Object.values(fields).find(
+      (field) => field.templateId === templateId,
     )
   }
 }

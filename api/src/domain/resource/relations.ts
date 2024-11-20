@@ -32,8 +32,9 @@ export const relations = [
     link: fields.customer,
     syncedFields: [
       fields.paymentTerms,
-      fields.paymentMethod,
-      fields.primaryContact,
+      // (BUG?) these are specced but not in the schema
+      // fields.paymentMethod,
+      // fields.primaryContact,
     ],
     syncType: 'once',
   },
