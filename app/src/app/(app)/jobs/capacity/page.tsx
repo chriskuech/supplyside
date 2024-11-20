@@ -37,7 +37,7 @@ export default async function Page({
       <ResourceDrawer searchParams={searchParams} />
       <Stack py={2} px={4} spacing={2}>
         <Stack direction="row" justifyContent="space-between">
-          <Typography variant="h4">Work Center Schedule</Typography>
+          <Typography variant="h4">Capacity</Typography>
           <WeekControl
             startDate={startDate}
             week={week}

@@ -35,7 +35,7 @@ import { pick, pipe, values } from 'remeda'
 import Fuse from 'fuse.js'
 import GanttChart from '../gantt-chart/GanttChart'
 import { GanttChartEvent } from '../gantt-chart/GanttChartItem'
-import Charts from '../../jobs/charts/Charts'
+import Charts from '../../charts/Charts'
 import { PartModel } from './PartModel'
 import JobStatusFiltersControl from './JobStatusFilterControl'
 import { QuickfilterControl } from './QuickfilterControl'
@@ -106,7 +106,7 @@ export const PartScheduleView = ({
       drawerHeader={
         <Stack height="100%">
           <Typography variant="h4">
-            Part Schedule
+            Schedule
             <FormControlLabel
               sx={{ float: 'right', mr: 0, color: 'primary.main' }}
               control={

@@ -74,7 +74,7 @@ export const Sidenav: FC<Props> = ({ accounts }) => {
                   <ItemLink
                     key={rt}
                     title={rt}
-                    href={`/db/${account.key}/${rt.toLowerCase()}`}
+                    href={`/admin/accounts/${account.key}/${rt.toLowerCase()}`}
                     icon={i === 0 ? <Storage /> : undefined}
                   />
                 ))}

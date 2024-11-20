@@ -1,15 +1,5 @@
-import ListPage from '@/lib/resource/ListPage'
+import { redirect } from 'next/navigation'
 
-export default async function Purchases({
-  searchParams,
-}: {
-  searchParams: Record<string, unknown>
-}) {
-  return (
-    <ListPage
-      tableKey="purchasesList"
-      resourceType="Purchase"
-      searchParams={searchParams}
-    />
-  )
+export default function Purchases() {
+  redirect('/purchases/all')
 }
