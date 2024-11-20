@@ -104,6 +104,7 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
         coerceDate(selectResourceFieldValue(part, fields.needDate)?.date) ??
         null,
       job: selectResourceFieldValue(part, fields.job)?.resource ?? null,
+      quantity: selectResourceFieldValue(part, fields.quantity)?.number ?? null,
     }))
 
   const numParts = rows.length

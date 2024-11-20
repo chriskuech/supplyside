@@ -10,6 +10,7 @@ type Row = {
   ready: boolean | null
   completed: boolean | null
   partName: string | null
+  quantity: number | null
   hours: number | null
   startDate: Date | null
   deliveryDate: Date | null
@@ -44,6 +45,11 @@ export const StepsTable = ({ rows }: Props) => {
           headerName: 'Part Name',
           flex: 1,
           type: 'string',
+        },
+        {
+          field: 'quantity',
+          headerName: 'Quantity',
+          type: 'number',
         },
         {
           field: 'hours',
