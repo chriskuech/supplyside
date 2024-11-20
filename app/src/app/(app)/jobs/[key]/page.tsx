@@ -73,12 +73,6 @@ export default async function JobDetail({
           href: `/jobs/${resource.key}`,
         },
       ]}
-      linkedResources={[
-        {
-          resourceType: 'Purchase',
-          backlinkField: fields.job,
-        },
-      ]}
       schemaData={schemaData}
       resource={resource}
       searchParams={searchParams}
