@@ -4,10 +4,10 @@ import { useEventListener } from './useEventListener'
 type Position = { x: number; y: number }
 
 type Params = {
-  onDrag: (ds: Position) => void
+  onDrop: (ds: Position) => void
 }
 
-export const useDrag = ({ onDrag }: Params) => {
+export const useDrag = ({ onDrop: onDrag }: Params) => {
   const [start, setStart] = useState<Position | null>(null)
   const [current, setCurrent] = useState<Position | null>(null)
   const delta = useMemo(
@@ -46,6 +46,7 @@ export const useDrag = ({ onDrag }: Params) => {
     delta,
     isDragging: start !== null,
     onMouseDown: (e: React.MouseEvent) => {
+      e.stopPropagation()
       setStart({ x: e.clientX, y: e.clientY })
     },
   }
