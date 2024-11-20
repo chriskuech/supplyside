@@ -4,7 +4,7 @@ import { fail } from 'assert'
 import { fields, selectResourceFieldValue } from '@supplyside/model'
 import { map, pipe, sortBy } from 'remeda'
 import { PartModel } from './PartModel'
-import { readResource, readResources, updateResource } from '@/client/resource'
+import { readResource, readResources } from '@/client/resource'
 import { requireSession } from '@/session'
 
 const coerce = (value: string | null | undefined): Date | null =>
@@ -72,39 +72,4 @@ export async function getParts(): Promise<PartModel[]> {
       } satisfies PartModel
     }),
   )
-}
-
-export async function updatePartPaymentDueDate(
-  partId: string,
-  paymentDueDate: Date,
-) {
-  const { accountId } = await requireSession()
-  await updateResource(accountId, partId, [
-    {
-      field: fields.paymentDueDate,
-      valueInput: {
-        string: paymentDueDate.toISOString(),
-      },
-    },
-  ])
-}
-
-export async function updatePartNeedByDate(partId: string, needByDate: Date) {
-  const { accountId } = await requireSession()
-  await updateResource(accountId, partId, [
-    {
-      field: fields.needDate,
-      valueInput: { string: needByDate.toISOString() },
-    },
-  ])
-}
-
-export async function updateStepStartDate(stepId: string, startDate: Date) {
-  const { accountId } = await requireSession()
-  await updateResource(accountId, stepId, [
-    {
-      field: fields.startDate,
-      valueInput: { string: startDate.toISOString() },
-    },
-  ])
 }
