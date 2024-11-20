@@ -663,7 +663,7 @@ const _fields = {
     templateId: '844ea06b-875c-4a88-86c3-c94bb5caaec9',
     name: 'Traceability',
     type: 'Checkbox',
-    description: 'Traceability report',
+    description: 'Traceability report required',
   },
   trackingNumber: {
     templateId: 'b34ecc5f-fad2-4cff-b4a5-1d14244c60c6',
