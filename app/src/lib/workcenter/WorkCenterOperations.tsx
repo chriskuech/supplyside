@@ -56,6 +56,7 @@ export const WorkCenterOperations: React.FC<
             fields.dateCompleted,
             fields.operator,
             fields.workCenter,
+            fields.otherNotes,
           ]}
         />
       </Card>
