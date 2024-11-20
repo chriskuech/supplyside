@@ -11,7 +11,7 @@ import {
   PrecisionManufacturing,
   ShoppingBag,
 } from '@mui/icons-material'
-import { green, lightBlue, purple, red } from '@mui/material/colors'
+import { green, lightBlue, purple, red, grey } from '@mui/material/colors'
 import { useMemo, useState } from 'react'
 import {
   fields,
@@ -240,8 +240,11 @@ export const PartScheduleView = ({
             if (!step.start || !step.days) return []
 
             const borderRadius = 8
-            const color =
-              step.type === 'WorkCenter' ? lightBlue[500] : purple[300]
+            const color = step.isCompleted
+              ? grey[500]
+              : step.type === 'WorkCenter'
+                ? lightBlue[500]
+                : purple[300]
 
             return {
               id: 'step-' + step.id,
@@ -276,12 +279,14 @@ export const PartScheduleView = ({
                       mode === 'dark'
                         ? 'rgba(0, 0, 0, 0.7)'
                         : 'rgba(255, 255, 255, 0.7)',
-                    backgroundColor: isDragging
-                      ? hexToRgba(color, 0.9)
-                      : hexToRgba(color, 0.5),
-                    borderColor: isDragging
-                      ? hexToRgba(color, 1)
-                      : hexToRgba(color, 0.6),
+                    backgroundColor:
+                      isDragging || step.isCompleted
+                        ? hexToRgba(color, 0.9)
+                        : hexToRgba(color, 0.5),
+                    borderColor:
+                      isDragging || step.isCompleted
+                        ? hexToRgba(color, 1)
+                        : hexToRgba(color, 0.6),
                   }}
                 >
                   {step.type === 'WorkCenter' ? (

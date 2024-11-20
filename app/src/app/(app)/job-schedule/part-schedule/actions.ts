@@ -60,6 +60,9 @@ export async function getParts(): Promise<PartModel[]> {
                 days:
                   selectResourceFieldValue(step, fields.productionDays)
                     ?.number ?? null,
+                isCompleted:
+                  selectResourceFieldValue(step, fields.completed)?.boolean ??
+                  false,
               }) as const,
           ),
           sortBy((s) => s.start ?? new Date(0)),

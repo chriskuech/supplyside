@@ -13,6 +13,7 @@ export type PartModel = {
     id: string
     isFirst: boolean
     isLast: boolean
+    isCompleted: boolean
     type: 'Purchase' | 'WorkCenter'
     start: Date | null
     days: number | null
