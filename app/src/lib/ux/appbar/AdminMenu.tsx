@@ -34,7 +34,7 @@ export default function AdminMenu({ user, account, accounts }: Props) {
           variant="text"
           color="warning"
           component={NextLink}
-          href="/accounts"
+          href="/admin"
           size="small"
           onClick={() => impersonate(user.accountId)}
         >

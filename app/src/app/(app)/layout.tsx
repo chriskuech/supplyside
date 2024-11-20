@@ -173,7 +173,7 @@ export default async function Layout({
           <Box>
             <ItemLink
               title="All Jobs"
-              href="/jobs"
+              href="/jobs/all"
               icon={<Build fontSize="small" />}
             />
             <ItemLink
@@ -188,13 +188,13 @@ export default async function Layout({
             />
             <ItemLink title="Closed Jobs" href="/jobs/closed" />
             <ItemLink
-              title="Jobs Schedule"
-              href="/job-schedule"
+              title="Schedule"
+              href="/jobs/schedule"
               icon={<ViewTimelineOutlined fontSize="small" />}
             />
             <ItemLink
-              title="Work Center Schedule"
-              href="/workcenter-schedule"
+              title="Capacity"
+              href="/jobs/capacity"
               icon={<DataUsage fontSize="small" />}
             />
             <ItemLink
@@ -211,7 +211,7 @@ export default async function Layout({
           <Box>
             <ItemLink
               title="All Purchases"
-              href="/purchases"
+              href="/purchases/all"
               icon={<ShoppingBag fontSize="small" />}
             />
             <ItemLink
@@ -234,7 +234,7 @@ export default async function Layout({
           <Box>
             <ItemLink
               title="All Bills"
-              href="/bills"
+              href="/bills/all"
               icon={<Receipt fontSize="small" />}
             />
             <ItemLink

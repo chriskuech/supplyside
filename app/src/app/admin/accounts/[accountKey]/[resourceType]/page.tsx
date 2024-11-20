@@ -1,5 +1,7 @@
 import { resourceTypes } from '@supplyside/model'
 import { notFound } from 'next/navigation'
+import { Box, Breadcrumbs, Link, Stack } from '@mui/material'
+import NextLink from 'next/link'
 import { ResourceTable } from '@/lib/resource/table'
 import { readResources } from '@/client/resource'
 import { readAccounts } from '@/client/account'
@@ -26,11 +28,35 @@ export default async function Page({
   if (!resources) return notFound()
 
   return (
-    <ResourceTable
-      schemaData={schema}
-      resources={resources}
-      isEditable
-      isAdmin
-    />
+    <Stack height="100%">
+      <Box px={1.5} py={0.5} borderBottom={1} borderColor="divider">
+        <Breadcrumbs sx={{ fontSize: '0.7em', textTransform: 'uppercase' }}>
+          <Link
+            underline="hover"
+            color="inherit"
+            href="/accounts"
+            component={NextLink}
+          >
+            Accounts
+          </Link>
+          <Link
+            underline="hover"
+            color="inherit"
+            href={`/admin/accounts/${account.key}`}
+          >
+            {account.key}
+          </Link>
+          <Box color="text.primary">{resourceType}s</Box>
+        </Breadcrumbs>
+      </Box>
+      <Box flexGrow={1} overflow="auto">
+        <ResourceTable
+          schemaData={schema}
+          resources={resources}
+          isEditable
+          isAdmin
+        />
+      </Box>
+    </Stack>
   )
 }
