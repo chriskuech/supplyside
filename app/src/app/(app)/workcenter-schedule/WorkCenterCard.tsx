@@ -35,11 +35,12 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
       where: {
         and: [
           { '==': [{ var: fields.workCenter.name }, workCenter.id] },
-          { '>=': [{ var: fields.startDate.name }, startDate] },
-          { '<': [{ var: fields.startDate.name }, endDate] },
+          { '>=': [{ var: fields.startDate.name }, startDate.toISOString()] },
+          { '<': [{ var: fields.startDate.name }, endDate.toISOString()] },
         ],
       },
-      orderBy: [{ var: fields.startDate.name }],
+      // TODO: fix this
+      // orderBy: [{ var: fields.startDate.name }],
     }),
     readSchema(workCenter.accountId, 'Step'),
   ])
