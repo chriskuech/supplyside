@@ -31,7 +31,11 @@ export const GanttChartEventBar = ({
     delta: moveDelta,
   } = useDrag({
     onDrop: ({ x }) =>
-      onChange?.({ startDate: dayjs(startDate).add(x, 'day').toDate() }),
+      onChange?.({
+        startDate: dayjs(startDate)
+          .add(Math.round(x / dim), 'day')
+          .toDate(),
+      }),
   })
 
   return (

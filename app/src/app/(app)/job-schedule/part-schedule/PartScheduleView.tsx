@@ -157,7 +157,9 @@ export const PartScheduleView = ({
               </Tooltip>
             )}
             {part.jobStatusOption && (
-              <OptionChip option={part.jobStatusOption} size="small" />
+              <Tooltip title="Job Status">
+                <OptionChip option={part.jobStatusOption} size="small" />
+              </Tooltip>
             )}
             <Box
               display="flex"
