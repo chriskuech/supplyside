@@ -548,6 +548,7 @@ const _fields = {
     templateId: 'fb45b99b-9052-4df8-961a-8046149ea873',
     name: 'QuickBooks Income Account',
     type: 'Select',
+    description: 'The accounting category for this job's invoice',
     isRequired: true,
   },
   quoteLink: {
