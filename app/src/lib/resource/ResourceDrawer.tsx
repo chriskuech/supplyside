@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { match } from 'ts-pattern'
 import { fields, selectResourceFieldValue } from '@supplyside/model'
 import QuickBooksLink from '../quickBooks/QuickBooksLink'
+import { WorkCenterOperations } from '../workcenter/WorkCenterOperations'
 import { ResourceDrawerView } from './ResourceDrawerView'
 import { CompareModal } from './CompareModal'
 import { readResource } from '@/actions/resource'
@@ -68,7 +69,11 @@ export const ResourceDrawer = async ({
           })
           .otherwise(() => [])}
         onClose={close}
-      />
+      >
+        {resource?.type === 'WorkCenter' && (
+          <WorkCenterOperations workCenterId={resource.id} />
+        )}
+      </ResourceDrawerView>
       {resource && schema && (
         <CompareModal
           resource={resource}

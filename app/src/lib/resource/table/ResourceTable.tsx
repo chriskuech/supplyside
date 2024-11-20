@@ -30,7 +30,13 @@ import {
 } from '@mui/icons-material'
 import { ComponentType, MutableRefObject, useMemo, useState } from 'react'
 import { z } from 'zod'
-import { fields, Resource, Schema, SchemaData } from '@supplyside/model'
+import {
+  fields,
+  FieldTemplate,
+  Resource,
+  Schema,
+  SchemaData,
+} from '@supplyside/model'
 import { P, match } from 'ts-pattern'
 import { useRouter } from 'next/navigation'
 import { mapSchemaFieldToGridColDef } from './mapSchemaFieldToGridColDef'
@@ -57,6 +63,7 @@ type Props = {
   indexed?: boolean
   initialQuery?: string
   initialGridFilterModel?: GridFilterModel
+  hideId?: boolean
   saveGridFilterModel?: (model: GridFilterModel) => void
   unFilterableFieldIds?: string[]
   Charts?: ComponentType<{
@@ -66,6 +73,7 @@ type Props = {
   specialColumnWidths?: ColumnWidths
   recurringResources?: Resource[]
   isAdmin?: boolean
+  hideFields?: FieldTemplate[]
 } & Partial<DataGridProProps<Row>>
 
 export default function ResourceTable({
@@ -81,10 +89,17 @@ export default function ResourceTable({
   Charts,
   specialColumnWidths,
   recurringResources,
+  hideFields,
+  hideId,
   isAdmin = false,
   ...props
 }: Props) {
-  const schema = new Schema(schemaData)
+  const schema = new Schema({
+    ...schemaData,
+    fields: schemaData.fields.filter(
+      (field) => !hideFields?.some((f) => f.templateId === field.templateId),
+    ),
+  })
   const isChartsEnabled = Charts !== undefined
   const [showCharts, setShowCharts] = useState(isChartsEnabled)
   const [isGridRendered, setIsGridRendered] = useState(false)
@@ -95,20 +110,26 @@ export default function ResourceTable({
 
   const columns = useMemo<Column[]>(
     () => [
-      indexed
-        ? {
-            field: 'index',
-            headerName: '#',
-            type: 'number',
-            editable: false,
-            width: 30,
-          }
-        : {
-            field: 'key',
-            headerName: 'ID',
-            type: 'number',
-            editable: false,
-          },
+      ...(indexed
+        ? [
+            {
+              field: 'index',
+              headerName: '#',
+              type: 'number',
+              editable: false,
+              width: 30,
+            } satisfies Column,
+          ]
+        : !hideId
+          ? [
+              {
+                field: 'key',
+                headerName: 'ID',
+                type: 'number',
+                editable: false,
+              } satisfies Column,
+            ]
+          : []),
       ...schema.fields.map((field) =>
         mapSchemaFieldToGridColDef(field, {
           isEditable,
@@ -141,6 +162,7 @@ export default function ResourceTable({
     ],
     [
       indexed,
+      hideId,
       schema.fields,
       isEditable,
       unFilterableFieldIds,

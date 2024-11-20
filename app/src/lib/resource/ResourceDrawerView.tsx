@@ -10,12 +10,14 @@ type ResourceFieldDrawerProps = {
   state: { schema: SchemaData; resource: Resource } | undefined
   tools: readonly ReactNode[]
   onClose: (path: string) => void
+  children?: ReactNode
 }
 
 export const ResourceDrawerView = ({
   state,
   tools,
   onClose,
+  children,
 }: ResourceFieldDrawerProps) => (
   <Drawer
     open={!!state}
@@ -23,9 +25,9 @@ export const ResourceDrawerView = ({
     anchor="right"
   >
     {state && (
-      <Stack p={2} minWidth={500}>
+      <Stack p={2} width={500} spacing={4}>
         <Stack direction="row" alignItems="center">
-          <Typography variant="h5" sx={{ p: 2 }} flexGrow={1}>
+          <Typography variant="h5" flexGrow={1}>
             {state.schema.resourceType.replace(/([a-z])([A-Z])/g, '$1 $2')}{' '}
             details
           </Typography>
@@ -41,6 +43,7 @@ export const ResourceDrawerView = ({
           schemaData={state.schema}
           singleColumn
         />
+        {children}
       </Stack>
     )}
   </Drawer>
