@@ -30,7 +30,11 @@ export const CapacityGauge: FC<Props> = ({
       valueMax={totalStepCount}
       width={90}
       height={90}
-      text={Math.round((completedStepCount / totalStepCount) * 100) + '%'}
+      text={
+        totalStepCount
+          ? Math.round((completedStepCount / totalStepCount) * 100) + '%'
+          : ''
+      }
     />
   </Tooltip>
 )
