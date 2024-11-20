@@ -1,7 +1,15 @@
+import { container } from '@supplyside/api/di'
 import { BadRequestError } from '@supplyside/api/integrations/fastify/BadRequestError'
-import { ResourcePatch, fields, jobStatusOptions } from '@supplyside/model'
+import {
+  ResourcePatch,
+  fields,
+  jobStatusOptions,
+  selectResourceFieldValue,
+} from '@supplyside/model'
 import dayjs from 'dayjs'
 import { isNumber } from 'remeda'
+import { ResourceService } from './ResourceService'
+import { mapValueToValueInput } from './mappers'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 
@@ -207,7 +215,91 @@ export const inferSchedulingFields = (patch: ResourcePatch): void => {
   }
 }
 
-export const deriveFields = (patch: ResourcePatch) => {
+const pullInPaymentFields = async (patch: ResourcePatch) => {
+  if (
+    !patch.schema.implements(
+      fields.paymentTerms,
+      fields.paymentMethod,
+      fields.poRecipient,
+    )
+  )
+    return
+
+  const resourceService = container.get(ResourceService)
+
+  await Promise.all(
+    [fields.vendor, fields.customer].map(async (field) => {
+      if (patch.schema.implements(field)) {
+        const resourceId = patch.getResourceId(field)
+        if (!resourceId) return
+
+        const resource = await resourceService.read(
+          patch.schema.accountId,
+          resourceId,
+        )
+
+        ;[
+          fields.paymentTerms,
+          fields.paymentMethod,
+          fields.poRecipient,
+        ].forEach((field) => {
+          const value = selectResourceFieldValue(resource, field)
+          if (!value) return
+
+          patch.setPatch(field, mapValueToValueInput(field.type, value))
+        })
+      }
+    }),
+  )
+}
+
+const pullInParentFields = async (patch: ResourcePatch) => {
+  const relations = [
+    {
+      parent: 'Job',
+      child: 'Part',
+      link: fields.job,
+      syncedFields: [fields.customer, fields.needDate],
+    },
+    {
+      parent: 'Purchase',
+      child: 'PurchaseLine',
+      link: fields.purchase,
+      syncedFields: [fields.vendor, fields.needDate],
+    },
+  ]
+
+  const resourceService = container.get(ResourceService)
+
+  await Promise.all(
+    relations.map(async (relation) => {
+      if (
+        patch.schema.type !== relation.child ||
+        !patch.hasPatch(relation.link)
+      )
+        return
+
+      const parentId = patch.getResourceId(relation.link)
+      if (!parentId) return
+
+      const resource = await resourceService.read(
+        patch.schema.accountId,
+        parentId,
+      )
+
+      relation.syncedFields.forEach((field) => {
+        const value = selectResourceFieldValue(resource, field)
+        if (!value) return
+
+        patch.setPatch(field, mapValueToValueInput(field.type, value))
+      })
+    }),
+  )
+}
+
+export const deriveFields = async (patch: ResourcePatch) => {
+  await pullInParentFields(patch)
+  await pullInPaymentFields(patch)
   setCompleted(patch)
   setInvoiceDate(patch)
   setStartDate(patch)

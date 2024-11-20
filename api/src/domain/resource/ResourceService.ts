@@ -139,7 +139,7 @@ export class ResourceService {
       }
     }
 
-    deriveFields(patch)
+    await deriveFields(patch)
 
     const model = await this.prisma.resource.create({
       data: {
@@ -166,7 +166,7 @@ export class ResourceService {
 
     patch.resource = entity
 
-    await this.handleResourceUpdate(patch)
+    await this.handlePatch(patch)
 
     return entity
   }
@@ -219,7 +219,7 @@ export class ResourceService {
   async update(patch: ResourcePatch) {
     const resource = patch.resource ?? fail('Resource is required')
 
-    deriveFields(patch)
+    await deriveFields(patch)
 
     if (patch.schema.implements(fields.name) && patch.hasPatch(fields.name)) {
       const name = patch.getString(fields.name)
@@ -312,7 +312,7 @@ export class ResourceService {
 
     patch.resource = entity
 
-    await this.handleResourceUpdate(patch)
+    await this.handlePatch(patch)
 
     return entity
   }
@@ -474,91 +474,25 @@ export class ResourceService {
     })
   }
 
-  private async handleResourceUpdate(patch: ResourcePatch) {
-    const resource = patch.resource ?? fail('Resource is required')
+  private async handlePatch(patch: ResourcePatch) {
     const { accountId, type } = patch.schema
 
-    const relations = [
-      {
-        from: 'Bill',
-        to: 'PurchaseLine',
-        backlink: fields.bill,
-        fields: [],
-        lines: true,
-      },
-      {
-        from: 'Customer',
-        to: 'Job',
-        backlink: fields.customer,
-        fields: [fields.paymentTerms, fields.paymentMethod, fields.poRecipient],
-        lines: false,
-      },
-      {
-        from: 'Job',
-        to: 'Part',
-        backlink: fields.job,
-        fields: [fields.customer, fields.needDate],
-        lines: true,
-      },
-      {
-        from: 'Purchase',
-        to: 'PurchaseLine',
-        backlink: fields.purchase,
-        fields: [fields.needDate, fields.vendor],
-        lines: true,
-      },
-      {
-        from: 'Vendor',
-        to: 'Purchase',
-        backlink: fields.vendor,
-        fields: [fields.paymentTerms, fields.paymentMethod, fields.poRecipient],
-        lines: false,
-      },
-    ] as const
+    if (type === 'PurchaseLine') {
+      await Promise.all(
+        [fields.bill, fields.purchase].map(async (field) => {
+          if (!patch.hasAnyPatch(fields.totalCost, field)) return
 
-    await Promise.all([
-      ...relations
-        .filter(({ from }) => from === type)
-        .map(async ({ to, backlink, fields }) => {
-          const children = await this.list(accountId, to, {
-            where: {
-              '==': [{ var: backlink.name }, resource.id],
-            },
-          })
-          for (const child of children) {
-            await this.withUpdatePatch(accountId, child.id, (childPatch) => {
-              for (const field of fields) {
-                const fieldPatch = patch.getPatch(field)
-                if (fieldPatch) {
-                  const { fieldId, valueInput } = fieldPatch
-                  childPatch.setPatch({ fieldId }, valueInput)
-                }
-              }
-            })
-          }
+          const resourceId = patch.getResourceId(field)
+          if (!resourceId) return
+
+          await this.recalculateSubtotalCost(
+            accountId,
+            field.resourceType ?? fail('Resource type is required'),
+            resourceId,
+          )
         }),
-      ...relations
-        .filter(({ to }) => to === type)
-        .map(async ({ from, backlink, fields, lines }) => {
-          if (patch.hasPatch(backlink)) {
-            const parentId = patch.getResourceId(backlink)
-            if (parentId) {
-              await this.withUpdatePatch(accountId, parentId, (childPatch) => {
-                for (const field of fields) {
-                  const fieldPatch = patch.getPatch(field)
-                  if (fieldPatch) {
-                    const { fieldId, valueInput } = fieldPatch
-                    childPatch.setPatch({ fieldId }, valueInput)
-                  }
-                }
-              })
-              if (lines) {
-                await this.recalculateSubtotalCost(accountId, from, parentId)
-              }
-            }
-          }
-        }),
-    ])
+      )
+    }
   }
 
   async cloneResource(accountId: string, resourceId: string) {
