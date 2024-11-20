@@ -17,7 +17,7 @@ import {
   purchaseStatusOptions,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import { fail } from 'assert'
+import assert, { fail } from 'assert'
 import dayjs, { Dayjs } from 'dayjs'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter.js'
 import { inject, injectable } from 'inversify'
@@ -477,24 +477,28 @@ export class ResourceService {
 
   private async handlePatch(patch: ResourcePatch) {
     const resourceId = patch.resource?.id ?? fail('Patch is missing resourceId')
-    const { accountId, type } = patch.schema
+    const { accountId } = patch.schema
 
-    if (type === 'PurchaseLine') {
-      await Promise.all(
-        [fields.bill, fields.purchase].map(async (field) => {
-          if (!patch.hasAnyPatch(fields.totalCost, field)) return
+    await Promise.all(
+      [fields.bill, fields.job, fields.purchase].map(async (link) => {
+        assert(link.resourceType)
 
-          const resourceId = patch.getResourceId(field)
-          if (!resourceId) return
+        if (
+          !patch.schema.implements(link) ||
+          !patch.hasAnyPatch(fields.totalCost, link)
+        )
+          return
 
-          await this.recalculateSubtotalCost(
-            accountId,
-            field.resourceType ?? fail('Resource type is required'),
-            resourceId,
-          )
-        }),
-      )
-    }
+        const resourceId = patch.getResourceId(link)
+        if (!resourceId) return
+
+        await this.recalculateSubtotalCost(
+          accountId,
+          link.resourceType,
+          resourceId,
+        )
+      }),
+    )
 
     await Promise.all(
       relations
