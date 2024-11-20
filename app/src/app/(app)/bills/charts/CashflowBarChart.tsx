@@ -1,5 +1,6 @@
 'use client'
 
+import { fail } from 'assert'
 import {
   BarPlot,
   ChartsReferenceLine,
@@ -32,9 +33,10 @@ import isBetween from 'dayjs/plugin/isBetween'
 import { useMemo } from 'react'
 import { ChartsNoDataOverlay } from '@mui/x-charts/ChartsOverlay'
 import { Typography } from '@mui/material'
-import { grey } from '@mui/material/colors'
+import { grey, red } from '@mui/material/colors'
 import { formatMoney } from '@/lib/format'
 import { billStatusOrder } from '@/lib/constants/status'
+import { CASHFLOW_WEEKS } from '@/lib/constants/charts'
 
 dayjs.extend(weekOfYear)
 dayjs.extend(isBetween)
@@ -48,40 +50,15 @@ export default function CashflowBarChart({
   resources,
   recurringResources,
 }: Props) {
-  const today = dayjs(new Date()).day(1)
+  const weekStart = dayjs(new Date()).day(1)
 
-  const weeks = useMemo((): string[] => {
-    const paymentDueDates = resources
-      .map(
-        (resource) =>
-          selectResourceFieldValue(resource, fields.paymentDueDate)?.date,
-      )
-      .filter(isTruthy)
-      .toSorted()
-      .map((s) => dayjs(s).day(1))
-
-    const minPaymentDueDate = paymentDueDates.at(0)
-    const maxPaymentDueDate = paymentDueDates.at(-1)
-    if (!minPaymentDueDate || !maxPaymentDueDate) return []
-
-    const startDate = minPaymentDueDate.isSame(maxPaymentDueDate)
-      ? minPaymentDueDate
-      : minPaymentDueDate.isBefore(today, 'day')
-        ? minPaymentDueDate
-        : today
-
-    const endDate = maxPaymentDueDate.isAfter(today, 'day')
-      ? maxPaymentDueDate
-      : today
-
-    const numberOfWeeks = Math.ceil(endDate.diff(startDate, 'w', true))
-
-    const weeks = range(0, numberOfWeeks || 1).map((number) =>
-      startDate.week(startDate.week() + number).format('MM/DD/YYYY'),
-    )
-
-    return weeks
-  }, [resources, today])
+  const weeks = useMemo(
+    (): string[] =>
+      range(0, CASHFLOW_WEEKS).map((number) =>
+        weekStart.week(weekStart.week() + number).format('MM/DD/YYYY'),
+      ),
+    [weekStart],
+  )
 
   const extrapolatedResources: { creationDate: Dayjs; totalCosts: number }[] =
     useMemo(
@@ -143,6 +120,7 @@ export default function CashflowBarChart({
         }
       }),
       filter(isTruthy),
+      filter((r) => r.paymentDueDate.isAfter(weekStart)),
       map(({ paymentDueDate, totalCost, statusTemplateId }) => ({
         week: weeks.find((week, i) => {
           const weekDate = dayjs(week)
@@ -173,11 +151,11 @@ export default function CashflowBarChart({
     )
 
     return totalsByStatuses
-  }, [weeks, resources])
+  }, [weeks, resources, weekStart])
 
   const currentWeek = useMemo(
-    () => weeks.find((week) => today.isSame(dayjs(week), 'd')),
-    [today, weeks],
+    () => weeks.find((week) => weekStart.isSame(dayjs(week), 'd')),
+    [weekStart, weeks],
   )
 
   const totalRecurringCosts = useMemo(
@@ -199,6 +177,43 @@ export default function CashflowBarChart({
     [extrapolatedResources, weeks],
   )
 
+  const overdueBillsTotal = useMemo(
+    () =>
+      pipe(
+        resources,
+        filter((r) => {
+          const paymentDueDate = selectResourceFieldValue(
+            r,
+            fields.paymentDueDate,
+          )?.date
+
+          const billStatusTemplateId = selectResourceFieldValue(
+            r,
+            fields.billStatus,
+          )?.option?.templateId
+
+          const statusOrder =
+            billStatusTemplateId && billStatusOrder[billStatusTemplateId]
+
+          const billIsNotPaid =
+            !!statusOrder &&
+            statusOrder <
+              (billStatusOrder[billStatusOptions.paid.templateId] ??
+                fail('Bill status paid order not found'))
+
+          return (
+            !!paymentDueDate &&
+            billIsNotPaid &&
+            dayjs(paymentDueDate).isBefore(weekStart)
+          )
+        }),
+        sumBy(
+          (r) => selectResourceFieldValue(r, fields.totalCost)?.number ?? 0,
+        ),
+      ),
+    [resources, weekStart],
+  )
+
   const chartHasData = !!totalCosts.length
 
   return (
@@ -210,7 +225,7 @@ export default function CashflowBarChart({
           ...totalCosts.map((tc) => ({
             type: 'bar' as const,
             stack: 'unique',
-            data: tc.totalsByWeek,
+            data: [null, ...tc.totalsByWeek],
             color: Object.values(billStatusOptions).find(
               (option) => option.templateId === tc.statusTemplateId,
             )?.color,
@@ -218,23 +233,37 @@ export default function CashflowBarChart({
               (option) => option.templateId === tc.statusTemplateId,
             )?.name,
             valueFormatter: (value: number | null) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
+              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
           })),
           {
             type: 'bar',
             stack: 'unique',
             label: 'Recurring Bills',
-            data: totalRecurringCosts,
+            data: [null, ...totalRecurringCosts],
             color: grey[300],
             valueFormatter: (value) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
+              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
+          },
+          {
+            type: 'bar',
+            stack: 'unique',
+            label: 'overdue',
+            color: red[200],
+            data: [overdueBillsTotal],
+            valueFormatter: (value: number | null) =>
+              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
           },
         ]}
-        xAxis={[{ data: weeks, scaleType: 'band' }]}
+        xAxis={[
+          {
+            data: ['overdue', ...weeks.map((w) => dayjs(w).format('MM/YY'))],
+            scaleType: 'band',
+          },
+        ]}
         yAxis={[
           {
             valueFormatter: (value) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
+              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
           },
         ]}
       >
