@@ -25,5 +25,12 @@ export default async function Page({
   const resources = await readResources(account.id, resourceType, {})
   if (!resources) return notFound()
 
-  return <ResourceTable schemaData={schema} resources={resources} isEditable />
+  return (
+    <ResourceTable
+      schemaData={schema}
+      resources={resources}
+      isEditable
+      isAdmin
+    />
+  )
 }
