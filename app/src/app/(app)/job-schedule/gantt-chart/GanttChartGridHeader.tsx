@@ -30,6 +30,7 @@ export const GanttChartGridHeader: FC<Props> = ({
         sx={{
           rotate: '-60deg',
           transformOrigin: 'left center',
+          '::selection': { backgroundColor: 'transparent' },
         }}
       >
         {dayjs(startDate).add(i, 'day').format('M/DD/YYYY')}
@@ -46,6 +47,7 @@ export const GanttChartGridHeader: FC<Props> = ({
       sx={{
         rotate: '-60deg',
         transformOrigin: 'left center',
+        '::selection': { backgroundColor: 'transparent' },
       }}
     >
       Today

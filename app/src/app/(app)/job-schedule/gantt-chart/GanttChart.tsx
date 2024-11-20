@@ -2,15 +2,16 @@
 
 import assert from 'assert'
 import { Box, Divider, Paper, Stack } from '@mui/material'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
+import { entries, filter, groupBy, map, pipe } from 'remeda'
 import { DragBar } from './DragBar'
 import { GanttChartGridHeader } from './GanttChartGridHeader'
 import { GanttChartGrid } from './GanttChartGrid'
 import GanttChartToday from './GanttChartToday'
-import { GanttChartBlock } from './GanttChartBlock'
 import { GanttChartItem } from './GanttChartItem'
+import { GanttChartEventBar } from './GanttChartEventBar'
 
 dayjs.extend(utc)
 
@@ -53,6 +54,22 @@ export default function GanttChart({
 
     frameRef.current.scrollLeft = scrollOffset
   })
+
+  useEffect(() => {
+    const duplicateIds: string[] = pipe(
+      items,
+      map((e) => e.id),
+      groupBy((id) => id),
+      entries(),
+      filter(([, events]) => events.length > 1),
+      map(([id]) => id),
+    )
+
+    assert(
+      !duplicateIds.length,
+      `Duplicate event ids: ${duplicateIds.map((id) => id).join(', ')}`,
+    )
+  }, [drawerWidth, items])
 
   return (
     <Stack direction="row" minHeight="100%" width="100%" position="relative">
@@ -122,15 +139,15 @@ export default function GanttChart({
             numCols={numWeeks * 7}
           />
           <GanttChartToday columnWidth={dim} startDate={minDate} />
-          {items.flatMap((item) =>
+          {items.flatMap((item, index) =>
             item.events.map((e) => (
-              <GanttChartBlock
+              <GanttChartEventBar
                 key={e.id}
-                startDate={e.startDate}
-                length={e.days}
-              >
-                {e.children}
-              </GanttChartBlock>
+                dim={dim}
+                index={index}
+                minDate={minDate}
+                event={e}
+              />
             )),
           )}
         </Box>

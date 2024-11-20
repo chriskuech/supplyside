@@ -1,60 +1,296 @@
 'use client'
 
-import { Box, Stack } from '@mui/material'
+import { fail } from 'assert'
+import { Box, Stack, Tooltip, Typography, useTheme } from '@mui/material'
 import NextLink from 'next/link'
-import { Link as LinkIcon } from '@mui/icons-material'
+import {
+  AttachMoney,
+  Business,
+  Close,
+  Link as LinkIcon,
+  PrecisionManufacturing,
+  ShoppingBag,
+} from '@mui/icons-material'
+import { green, lightBlue, red } from '@mui/material/colors'
+import { useMemo, useState } from 'react'
+import {
+  fields,
+  jobStatusOptions,
+  OptionTemplate,
+  Resource,
+  selectResourceFieldValue,
+} from '@supplyside/model'
+import { pick, pipe, values } from 'remeda'
+import Fuse from 'fuse.js'
 import GanttChart from '../gantt-chart/GanttChart'
+import { GanttChartEvent } from '../gantt-chart/GanttChartItem'
+import Charts from '../../jobs/charts/Charts'
 import { PartModel } from './PartModel'
+import JobStatusFiltersControl from './JobStatusFilterControl'
+import { QuickfilterControl } from './QuickfilterControl'
+import { formatMoney } from '@/lib/format'
+import OptionChip from '@/lib/resource/fields/views/OptionChip'
+import { updateResource } from '@/actions/resource'
 
-export const PartScheduleView = ({ parts }: { parts: PartModel[] }) => (
-  <GanttChart
-    drawerHeader="Gantt chart header"
-    stageHeader="stage header"
-    headerHeight={200}
-    items={parts.map((part) => ({
-      id: part.id,
-      label: (
-        <Stack
-          width="100%"
-          height="100%"
-          direction="row"
-          alignItems="center"
-          px={1}
-          component={NextLink}
-          href={`/jobs/${part.jobKey}`}
-          sx={{
-            color: 'inherit',
-            textDecoration: 'inherit',
-            '& .row-link-icon': {
-              opacity: 0,
-            },
-            '&:hover .row-link-icon': {
-              opacity: 0.5,
-            },
-          }}
-        >
-          {part.name}
-          <Box flexGrow={1} />
-          <LinkIcon className="row-link-icon" />
-        </Stack>
+const hexToRgba = (hex: string, alpha: number = 1): string => {
+  const [r, g, b] = hex.match(/\w\w/g)?.map((x) => parseInt(x, 16)) ?? fail()
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+export type PartScheduleViewProps = {
+  jobs: Resource[]
+  parts: PartModel[]
+}
+
+export const PartScheduleView = ({
+  jobs: unfilteredJobs,
+  parts: unfilteredParts,
+}: PartScheduleViewProps) => {
+  const {
+    palette: { mode },
+  } = useTheme()
+  const [jobStatuses, setJobStatuses] = useState<OptionTemplate[]>(
+    pipe(
+      jobStatusOptions,
+      pick(['draft', 'ordered', 'inProcess', 'shipped']),
+      values(),
+    ),
+  )
+  const [filter, setFilter] = useState<string>('')
+
+  const parts = useMemo(() => {
+    const partsByJobStatus = unfilteredParts.filter((part) =>
+      jobStatuses.some(
+        (status) => part.jobStatusOption?.templateId === status.templateId,
       ),
-      events: [
-        ...part.steps.flatMap((step) => {
-          if (!step.start || !step.days) return []
+    )
 
-          return {
-            id: step.id,
-            days: step.days,
-            startDate: step.start,
-            onChange: () => {},
-            children: (
-              <Box height="100%" width="100%" sx={{ background: 'blue' }}>
-                {step.name}
+    if (!filter) return partsByJobStatus
+
+    return new Fuse(partsByJobStatus, {
+      keys: ['name', 'customer.name'],
+      // 0 = perfect match
+      // 1 = everything
+      threshold: 0.3,
+    })
+      .search(filter)
+      .map(({ item }) => item)
+  }, [filter, jobStatuses, unfilteredParts])
+
+  const jobs = useMemo(
+    () =>
+      unfilteredJobs.filter((job) =>
+        jobStatuses.some(
+          (js) =>
+            js.templateId ===
+            selectResourceFieldValue(job, fields.jobStatus)?.option?.templateId,
+        ),
+      ),
+    [jobStatuses, unfilteredJobs],
+  )
+
+  return (
+    <GanttChart
+      drawerHeader={
+        <Stack height="100%">
+          <Typography variant="h4">Part Schedule</Typography>
+          <Box flexGrow={1} />
+          <Stack spacing={1}>
+            <JobStatusFiltersControl
+              onJobStatusChange={(statuses) => setJobStatuses(statuses)}
+              jobStatuses={jobStatuses}
+            />
+            <QuickfilterControl filter={filter} onFilterChange={setFilter} />
+            <Typography variant="subtitle1" fontSize={12}>
+              <Stack direction="row" justifyContent="end" spacing={1}>
+                <Box>
+                  <strong>{parts.length}</strong> Parts
+                </Box>
+                <Box>
+                  <strong>{jobs.length}</strong> Jobs
+                </Box>
+              </Stack>
+            </Typography>
+          </Stack>
+          <Box flexGrow={1} />
+        </Stack>
+      }
+      stageHeader={<Charts resources={jobs} />}
+      headerHeight={300}
+      items={parts.map((part) => ({
+        id: part.id,
+        label: (
+          <Stack
+            width="100%"
+            height="100%"
+            direction="row"
+            alignItems="center"
+            px={1}
+            component={NextLink}
+            spacing={2}
+            href={`/jobs/${part.jobKey}`}
+            sx={{
+              color: 'inherit',
+              textDecoration: 'inherit',
+              '& .row-link-icon': { display: 'none' },
+              '&:hover .row-link-icon': { display: 'block' },
+              '& .row-id': { display: 'block' },
+              '&:hover .row-id': { display: 'none' },
+            }}
+          >
+            {part.name && <Box>{part.name}</Box>}
+            <Box flexGrow={1} />
+            {part.customer && (
+              <Tooltip title="Customer">
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Business opacity={0.5} />
+                  {part.customer.name}
+                </Stack>
+              </Tooltip>
+            )}
+            {!!part.totalCost && (
+              <Tooltip title="Total Cost">
+                <Stack direction="row" alignItems="center">
+                  <AttachMoney opacity={0.5} sx={{ mr: -0.5 }} />
+                  {formatMoney(part.totalCost, { style: undefined })}
+                </Stack>
+              </Tooltip>
+            )}
+            {part.jobStatusOption && (
+              <OptionChip option={part.jobStatusOption} size="small" />
+            )}
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="end"
+              width={30}
+              sx={{ opacity: 0.5 }}
+            >
+              <LinkIcon className="row-link-icon" />
+              <Box className="row-id" sx={{ fontSize: '0.8rem' }}>
+                #{part.jobKey}
               </Box>
-            ),
-          }
-        }),
-      ],
-    }))}
-  />
-)
+            </Box>
+          </Stack>
+        ),
+        events: [
+          ...(part.needBy
+            ? [
+                {
+                  id: 'need-date-' + part.id,
+                  days: 1,
+                  startDate: part.needBy,
+                  children: ({ isDragging }) => (
+                    <Tooltip title="Need Date">
+                      <Box
+                        width="100%"
+                        height="100%"
+                        borderRight="3px solid"
+                        borderColor={red[500]}
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        color={red[500]}
+                        sx={{
+                          boxShadow: isDragging
+                            ? `0 0 0 2px ${hexToRgba(red[500], 0.5)}`
+                            : undefined,
+                        }}
+                      >
+                        <Close />
+                      </Box>
+                    </Tooltip>
+                  ),
+                } satisfies GanttChartEvent,
+              ]
+            : []),
+          ...(part.paymentDue
+            ? [
+                {
+                  id: 'payment-due-date-' + part.id,
+                  days: 1,
+                  startDate: part.paymentDue,
+                  children: ({ isDragging }) => (
+                    <Tooltip title="Payment Due Date">
+                      <Box
+                        width="100%"
+                        height="100%"
+                        borderRight="3px solid"
+                        borderColor={green[500]}
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        color={green[500]}
+                        sx={{
+                          boxShadow: isDragging
+                            ? `0 0 0 2px ${hexToRgba(green[500], 0.5)}`
+                            : undefined,
+                        }}
+                      >
+                        <AttachMoney />
+                      </Box>
+                    </Tooltip>
+                  ),
+                } satisfies GanttChartEvent,
+              ]
+            : []),
+          ...part.steps.flatMap((step) => {
+            if (!step.start || !step.days) return []
+
+            const borderRadius = 8
+
+            return {
+              id: 'step-' + step.id,
+              days: step.days,
+              startDate: step.start,
+              onChange: ({ startDate, days }) =>
+                updateResource(step.id, [
+                  {
+                    field: fields.startDate,
+                    valueInput: { date: startDate?.toISOString() },
+                  },
+                  {
+                    field: fields.productionDays,
+                    valueInput: { number: days },
+                  },
+                ]),
+              children: ({ isDragging }) => (
+                <Box
+                  height="100%"
+                  width="100%"
+                  display="flex"
+                  flexDirection="row"
+                  alignItems="center"
+                  justifyContent="center"
+                  sx={{
+                    borderTopLeftRadius: step.isFirst ? borderRadius : 0,
+                    borderBottomLeftRadius: step.isFirst ? borderRadius : 0,
+                    borderTopRightRadius: step.isLast ? borderRadius : 0,
+                    borderBottomRightRadius: step.isLast ? borderRadius : 0,
+                    border: '1.5px solid',
+                    color:
+                      mode === 'dark'
+                        ? 'rgba(0, 0, 0, 0.7)'
+                        : 'rgba(255, 255, 255, 0.7)',
+                    backgroundColor: isDragging
+                      ? hexToRgba(lightBlue[500], 0.9)
+                      : hexToRgba(lightBlue[500], 0.5),
+                    borderColor: isDragging
+                      ? hexToRgba(lightBlue[500], 1)
+                      : hexToRgba(lightBlue[500], 0.6),
+                  }}
+                >
+                  {step.type === 'WorkCenter' ? (
+                    <PrecisionManufacturing />
+                  ) : (
+                    <ShoppingBag />
+                  )}
+                </Box>
+              ),
+            } satisfies GanttChartEvent
+          }),
+        ] satisfies GanttChartEvent[],
+      }))}
+    />
+  )
+}
