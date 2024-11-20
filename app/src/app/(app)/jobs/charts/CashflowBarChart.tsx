@@ -1,5 +1,6 @@
 'use client'
 
+import { fail } from 'assert'
 import {
   BarPlot,
   ChartsReferenceLine,
@@ -31,8 +32,10 @@ import isBetween from 'dayjs/plugin/isBetween'
 import { useMemo } from 'react'
 import { ChartsNoDataOverlay } from '@mui/x-charts/ChartsOverlay'
 import { Typography } from '@mui/material'
+import { red } from '@mui/material/colors'
 import { formatMoney } from '@/lib/format'
 import { jobStatusOrder } from '@/lib/constants/status'
+import { CASHFLOW_WEEKS } from '@/lib/constants/charts'
 
 dayjs.extend(weekOfYear)
 dayjs.extend(isBetween)
@@ -42,40 +45,15 @@ type Props = {
 }
 
 export default function CashflowBarChart({ resources }: Props) {
-  const today = dayjs(new Date()).day(1)
+  const weekStart = dayjs(new Date()).day(1)
 
-  const weeks = useMemo((): string[] => {
-    const paymentDueDates = resources
-      .map(
-        (resource) =>
-          selectResourceFieldValue(resource, fields.paymentDueDate)?.date,
-      )
-      .filter(isTruthy)
-      .toSorted()
-      .map((s) => dayjs(s).day(1))
-
-    const minPaymentDueDate = paymentDueDates.at(0)
-    const maxPaymentDueDate = paymentDueDates.at(-1)
-    if (!minPaymentDueDate || !maxPaymentDueDate) return []
-
-    const startDate = minPaymentDueDate.isSame(maxPaymentDueDate)
-      ? minPaymentDueDate
-      : minPaymentDueDate.isBefore(today, 'day')
-        ? minPaymentDueDate
-        : today
-
-    const endDate = maxPaymentDueDate.isAfter(today, 'day')
-      ? maxPaymentDueDate
-      : today
-
-    const numberOfWeeks = Math.ceil(endDate.diff(startDate, 'w', true))
-
-    const weeks = range(0, numberOfWeeks || 1).map((number) =>
-      startDate.week(startDate.week() + number).format('M/D'),
-    )
-
-    return weeks
-  }, [resources, today])
+  const weeks = useMemo(
+    (): string[] =>
+      range(0, CASHFLOW_WEEKS).map((number) =>
+        weekStart.week(weekStart.week() + number).format('MM/DD/YYYY'),
+      ),
+    [weekStart],
+  )
 
   const totalCosts = useMemo((): {
     statusTemplateId: string
@@ -103,6 +81,7 @@ export default function CashflowBarChart({ resources }: Props) {
         }
       }),
       filter(isTruthy),
+      filter((r) => r.paymentDueDate.isAfter(weekStart)),
       map(({ paymentDueDate, totalCost, statusTemplateId }) => ({
         week: weeks.find((week, i) => {
           const weekDate = dayjs(week)
@@ -133,11 +112,48 @@ export default function CashflowBarChart({ resources }: Props) {
     )
 
     return totalsByStatuses
-  }, [weeks, resources])
+  }, [weeks, resources, weekStart])
 
   const currentWeek = useMemo(
-    () => weeks.find((week) => today.isSame(dayjs(week), 'd')),
-    [today, weeks],
+    () => weeks.find((week) => weekStart.isSame(dayjs(week), 'd')),
+    [weekStart, weeks],
+  )
+
+  const overdueJobsTotal = useMemo(
+    () =>
+      pipe(
+        resources,
+        filter((r) => {
+          const paymentDueDate = selectResourceFieldValue(
+            r,
+            fields.paymentDueDate,
+          )?.date
+
+          const jobStatusTemplateId = selectResourceFieldValue(
+            r,
+            fields.jobStatus,
+          )?.option?.templateId
+
+          const statusOrder =
+            jobStatusTemplateId && jobStatusOrder[jobStatusTemplateId]
+
+          const jobIsNotPaid =
+            !!statusOrder &&
+            statusOrder <
+              (jobStatusOrder[jobStatusOptions.paid.templateId] ??
+                fail('job status paid order not found'))
+
+          return (
+            !!paymentDueDate &&
+            jobIsNotPaid &&
+            dayjs(paymentDueDate).isBefore(weekStart)
+          )
+        }),
+        sumBy(
+          (r) => selectResourceFieldValue(r, fields.totalCost)?.number ?? 0,
+        ),
+      ),
+    [resources, weekStart],
   )
 
   const chartHasData = !!totalCosts.length
@@ -147,24 +163,40 @@ export default function CashflowBarChart({ resources }: Props) {
       <Typography variant="h6">Weekly Cashflow</Typography>
       <ResponsiveChartContainer
         sx={{ padding: 1, marginLeft: 2, overflow: 'visible' }}
-        series={totalCosts.map((tc) => ({
-          type: 'bar',
-          stack: 'by status',
-          data: tc.totalsByWeek,
-          color: Object.values(jobStatusOptions).find(
-            (option) => option.templateId === tc.statusTemplateId,
-          )?.color,
-          label: Object.values(jobStatusOptions).find(
-            (option) => option.templateId === tc.statusTemplateId,
-          )?.name,
-          valueFormatter: (value) =>
-            formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
-        }))}
-        xAxis={[{ data: weeks, scaleType: 'band' }]}
+        series={[
+          ...totalCosts.map((tc) => ({
+            type: 'bar' as const,
+            stack: 'unique',
+            data: [null, ...tc.totalsByWeek],
+            color: Object.values(jobStatusOptions).find(
+              (option) => option.templateId === tc.statusTemplateId,
+            )?.color,
+            label: Object.values(jobStatusOptions).find(
+              (option) => option.templateId === tc.statusTemplateId,
+            )?.name,
+            valueFormatter: (value: number | null) =>
+              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
+          })),
+          {
+            type: 'bar',
+            stack: 'unique',
+            label: 'overdue',
+            color: red[200],
+            data: [overdueJobsTotal],
+            valueFormatter: (value: number | null) =>
+              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
+          },
+        ]}
+        xAxis={[
+          {
+            data: ['overdue', ...weeks.map((w) => dayjs(w).format('MM/DD'))],
+            scaleType: 'band',
+          },
+        ]}
         yAxis={[
           {
             valueFormatter: (value) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '',
+              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
           },
         ]}
       >
