@@ -11,7 +11,7 @@ COPY ./api/package.json ./api/package-lock.json* ./api/
 RUN cd ./api && npm ci
 
 COPY ./app/package.json ./app/package-lock.json* ./app/
-RUN cd ./app && npm ci
+RUN cd ./app && npm ci && npm install sharp
 
 COPY ./model ./model
 COPY ./api ./api
