@@ -3,23 +3,24 @@
 import {
   Autocomplete,
   Box,
+  Button,
   Fade,
-  IconButton,
   Stack,
   TextField,
   Tooltip,
 } from '@mui/material'
 import NextLink from 'next/link'
-import { ManageAccounts } from '@mui/icons-material'
 import { useState } from 'react'
+import { User } from '@supplyside/model'
 import { impersonate } from '@/session'
 
 type Props = {
+  user: User
   account: { id: string; name: string }
   accounts: { id: string; name: string }[]
 }
 
-export default function AdminMenu({ account, accounts }: Props) {
+export default function AdminMenu({ user, account, accounts }: Props) {
   const [isHover, setIsHover] = useState(false)
 
   return (
@@ -29,14 +30,16 @@ export default function AdminMenu({ account, accounts }: Props) {
       onMouseLeave={() => setIsHover(false)}
     >
       <Tooltip title="Manage Accounts">
-        <IconButton
+        <Button
+          variant="text"
           color="warning"
           component={NextLink}
           href="/accounts"
-          size="large"
+          size="small"
+          onClick={() => impersonate(user.accountId)}
         >
-          <ManageAccounts fontSize="large" />
-        </IconButton>
+          {account.name}
+        </Button>
       </Tooltip>
       <Fade in={isHover} timeout={300}>
         <Stack

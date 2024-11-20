@@ -154,6 +154,11 @@ export default async function Layout({
     <Stack direction="row" height="100vh" width="100vw">
       <Stack width="min-content" m={2} spacing={2}>
         <NavLogo />
+        {user?.isGlobalAdmin && account && accounts && (
+          <Box>
+            <AdminMenu account={account} accounts={accounts} user={user} />
+          </Box>
+        )}
         <Box>
           <ItemLink
             icon={<Speed fontSize="small" />}
@@ -276,9 +281,6 @@ export default async function Layout({
         <Stack direction="row" justifyContent="space-evenly">
           {account && <AccountMenu />}
           {user && <UserMenu self={user} />}
-          {user?.isGlobalAdmin && account && accounts && (
-            <AdminMenu account={account} accounts={accounts} />
-          )}
         </Stack>
       </Stack>
       <Card
