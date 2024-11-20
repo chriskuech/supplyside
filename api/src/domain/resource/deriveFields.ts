@@ -10,6 +10,7 @@ import dayjs from 'dayjs'
 import { isNumber } from 'remeda'
 import { ResourceService } from './ResourceService'
 import { mapValueToValueInput } from './mappers'
+import { relations } from './relations'
 
 const millisecondsPerDay = 24 * 60 * 60 * 1000
 
@@ -215,60 +216,7 @@ export const inferSchedulingFields = (patch: ResourcePatch): void => {
   }
 }
 
-const pullInPaymentFields = async (patch: ResourcePatch) => {
-  if (
-    !patch.schema.implements(
-      fields.paymentTerms,
-      fields.paymentMethod,
-      fields.poRecipient,
-    )
-  )
-    return
-
-  const resourceService = container.get(ResourceService)
-
-  await Promise.all(
-    [fields.vendor, fields.customer].map(async (field) => {
-      if (patch.schema.implements(field)) {
-        const resourceId = patch.getResourceId(field)
-        if (!resourceId) return
-
-        const resource = await resourceService.read(
-          patch.schema.accountId,
-          resourceId,
-        )
-
-        ;[
-          fields.paymentTerms,
-          fields.paymentMethod,
-          fields.poRecipient,
-        ].forEach((field) => {
-          const value = selectResourceFieldValue(resource, field)
-          if (!value) return
-
-          patch.setPatch(field, mapValueToValueInput(field.type, value))
-        })
-      }
-    }),
-  )
-}
-
 const pullInParentFields = async (patch: ResourcePatch) => {
-  const relations = [
-    {
-      parent: 'Job',
-      child: 'Part',
-      link: fields.job,
-      syncedFields: [fields.customer, fields.needDate],
-    },
-    {
-      parent: 'Purchase',
-      child: 'PurchaseLine',
-      link: fields.purchase,
-      syncedFields: [fields.vendor, fields.needDate],
-    },
-  ]
-
   const resourceService = container.get(ResourceService)
 
   await Promise.all(
@@ -287,19 +235,18 @@ const pullInParentFields = async (patch: ResourcePatch) => {
         parentId,
       )
 
-      relation.syncedFields.forEach((field) => {
+      for (const field of relation.syncedFields) {
         const value = selectResourceFieldValue(resource, field)
-        if (!value) return
+        if (!value) continue
 
         patch.setPatch(field, mapValueToValueInput(field.type, value))
-      })
+      }
     }),
   )
 }
 
 export const deriveFields = async (patch: ResourcePatch) => {
   await pullInParentFields(patch)
-  await pullInPaymentFields(patch)
   setCompleted(patch)
   setInvoiceDate(patch)
   setStartDate(patch)

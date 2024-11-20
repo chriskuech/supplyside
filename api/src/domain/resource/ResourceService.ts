@@ -35,6 +35,7 @@ import {
   mapValueToValueInput,
 } from './mappers'
 import { resourceInclude } from './model'
+import { relations } from './relations'
 
 dayjs.extend(isSameOrAfter)
 
@@ -475,6 +476,7 @@ export class ResourceService {
   }
 
   private async handlePatch(patch: ResourcePatch) {
+    const resourceId = patch.resource?.id ?? fail('Patch is missing resourceId')
     const { accountId, type } = patch.schema
 
     if (type === 'PurchaseLine') {
@@ -493,6 +495,36 @@ export class ResourceService {
         }),
       )
     }
+
+    await Promise.all(
+      relations
+        .filter(
+          (r) =>
+            r.syncType === 'sync' &&
+            r.parent === patch.schema.type &&
+            patch.hasAnyPatch(...r.syncedFields),
+        )
+        .map(async (r) => {
+          const children = await this.list(accountId, r.child, {
+            where: {
+              '==': [{ var: r.link.name }, resourceId],
+            },
+          })
+
+          await Promise.all(
+            children.map(({ accountId, id }) =>
+              this.withUpdatePatch(accountId, id, (childPatch) =>
+                r.syncedFields
+                  .map((f) => patch.getPatch(f))
+                  .filter((f) => !!f)
+                  .forEach(({ fieldId, valueInput }) =>
+                    childPatch.setPatch({ fieldId }, valueInput),
+                  ),
+              ),
+            ),
+          )
+        }),
+    )
   }
 
   async cloneResource(accountId: string, resourceId: string) {
