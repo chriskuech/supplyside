@@ -7,6 +7,8 @@ import { ScrollProvider } from '@/lib/ux/ScrollContext'
 import { systemAccountId } from '@/lib/const'
 import { readAccounts } from '@/client/account'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Layout({
   children,
 }: {
