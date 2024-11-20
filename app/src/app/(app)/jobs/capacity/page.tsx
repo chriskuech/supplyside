@@ -1,7 +1,9 @@
 import { Alert, Box, Stack, Typography } from '@mui/material'
 import { redirect } from 'next/navigation'
+import { fields, selectResourceFieldValue } from '@supplyside/model'
 import { WorkCenterCard } from './WorkCenterCard'
 import { WeekControl } from './WeekControl'
+import { CapacityGauge } from './CapacityGauge'
 import { readResources } from '@/client/resource'
 import { requireSession } from '@/session'
 import { ResourceDrawer } from '@/lib/resource/ResourceDrawer'
@@ -32,12 +34,39 @@ export default async function Page({
   const startDate = new Date(startOfWeek.getTime() + week * millisecondsPerWeek)
   const endDate = new Date(startDate.getTime() + millisecondsPerWeek)
 
+  const allSteps = await readResources(accountId, 'Step', {
+    where: {
+      and: [
+        { '>=': [{ var: fields.startDate.name }, startDate.toISOString()] },
+        { '<': [{ var: fields.startDate.name }, endDate.toISOString()] },
+      ],
+    },
+  })
+
+  if (!allSteps) return <Alert severity="error">Failed to load</Alert>
+
+  const workCenterSteps = allSteps.filter(
+    (step) => selectResourceFieldValue(step, fields.workCenter)?.resource,
+  )
+
+  const completedSteps = workCenterSteps.filter(
+    (step) => selectResourceFieldValue(step, fields.completed)?.boolean,
+  )
+
   return (
     <>
       <ResourceDrawer searchParams={searchParams} />
       <Stack py={2} px={4} spacing={2}>
-        <Stack direction="row" justifyContent="space-between">
-          <Typography variant="h4">Capacity</Typography>
+        <Stack direction="row" spacing={2}>
+          <Typography variant="h4" flexGrow={1}>
+            Capacity
+          </Typography>
+          <Box>
+            <CapacityGauge
+              completedStepCount={completedSteps.length}
+              totalStepCount={workCenterSteps.length}
+            />
+          </Box>
           <WeekControl
             startDate={startDate}
             week={week}
