@@ -109,10 +109,6 @@ export const schemas: SchemaTemplate[] = [
           fields.inspection,
         ],
       },
-      {
-        name: 'Schedule Info',
-        fields: [fields.startDate, fields.productionDays],
-      },
     ],
   },
   {
