@@ -115,7 +115,7 @@ export const schemas: SchemaTemplate[] = [
     fields: [
       fields.sequenceNumber,
       fields.completed,
-      fields.name,
+      fields.operationName,
       fields.otherNotes,
       fields.operator,
       fields.dateCompleted,
