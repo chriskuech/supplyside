@@ -520,24 +520,19 @@ export class ResourceService {
       )
     }
 
-    if (type === 'Step' && patch.hasPatch(fields.deliveryDate)) {
-      if (!patch.resource) return
-      const purchase = selectResourceFieldValue(
-        patch.resource,
-        fields.purchase,
-      )?.resource
+    await (async () => {
+      if (type === 'Step' && patch.hasPatch(fields.deliveryDate)) {
+        if (!patch.resource) return
+        const purchaseId = patch.getResourceId(fields.purchase)
+        const deliveryDate = patch.getDate(fields.deliveryDate)
 
-      const deliveryDate = selectResourceFieldValue(
-        patch.resource,
-        fields.deliveryDate,
-      )?.date
-
-      if (purchase && deliveryDate) {
-        this.withUpdatePatch(accountId, purchase.id, (patch) => {
-          patch.setDate(fields.needDate, deliveryDate)
-        })
+        if (purchaseId && deliveryDate) {
+          await this.withUpdatePatch(accountId, purchaseId, (patch) => {
+            patch.setDate(fields.needDate, deliveryDate)
+          })
+        }
       }
-    }
+    })()
 
     // copy operations from work center to step
     await (async () => {
