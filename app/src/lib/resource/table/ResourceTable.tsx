@@ -36,14 +36,20 @@ import {
   Resource,
   Schema,
   SchemaData,
+  selectResourceFieldValue,
 } from '@supplyside/model'
 import { P, match } from 'ts-pattern'
 import { useRouter } from 'next/navigation'
+import { map, pipe, sortBy } from 'remeda'
 import { mapSchemaFieldToGridColDef } from './mapSchemaFieldToGridColDef'
 import { Row, Column } from './types'
 import { handleProcessRowUpdate } from './processRowUpdate'
 import { usePersistDatagridState } from './usePersistDatagridState'
-import { deleteResource, deleteResourceAsAdmin } from '@/actions/resource'
+import {
+  deleteResource,
+  deleteResourceAsAdmin,
+  updateResource,
+} from '@/actions/resource'
 
 type FieldNames = keyof typeof fields
 export type ColumnWidths = Partial<Record<FieldNames, number>>
@@ -94,10 +100,14 @@ export default function ResourceTable({
   isAdmin = false,
   ...props
 }: Props) {
-  const schema = new Schema({
+  const schema = new Schema(schemaData)
+  const tableSchema = new Schema({
     ...schemaData,
     fields: schemaData.fields.filter(
-      (field) => !hideFields?.some((f) => f.templateId === field.templateId),
+      (field) =>
+        ![fields.sequenceNumber, ...(hideFields ?? [])].some(
+          (hf) => hf.templateId === field.templateId,
+        ),
     ),
   })
   const isChartsEnabled = Charts !== undefined
@@ -106,11 +116,29 @@ export default function ResourceTable({
   const { apiRef, initialState, saveStateToLocalstorage } =
     usePersistDatagridState(tableKey)
 
+  const isSequence = schema.implements(fields.sequenceNumber)
+
   const { push } = useRouter()
+
+  const rows = useMemo(
+    () =>
+      pipe(
+        resources,
+        map((resource, i) => ({
+          ...resource,
+          index: isSequence
+            ? (selectResourceFieldValue(resource, fields.sequenceNumber)
+                ?.number ?? -Infinity)
+            : i + 1,
+        })),
+        sortBy(({ index }) => index),
+      ),
+    [isSequence, resources],
+  )
 
   const columns = useMemo<Column[]>(
     () => [
-      ...(indexed
+      ...(indexed || isSequence
         ? [
             {
               field: 'index',
@@ -130,7 +158,7 @@ export default function ResourceTable({
               } satisfies Column,
             ]
           : []),
-      ...schema.fields.map((field) =>
+      ...tableSchema.fields.map((field) =>
         mapSchemaFieldToGridColDef(field, {
           isEditable,
           isFilterable: !unFilterableFieldIds.includes(field.fieldId),
@@ -162,8 +190,9 @@ export default function ResourceTable({
     ],
     [
       indexed,
+      isSequence,
       hideId,
-      schema.fields,
+      tableSchema.fields,
       isEditable,
       unFilterableFieldIds,
       specialColumnWidths,
@@ -192,12 +221,13 @@ export default function ResourceTable({
         ref={() => setIsGridRendered(true)}
         apiRef={apiRef}
         columns={columns}
-        rows={resources.map((resource, i) => ({ ...resource, index: i + 1 }))}
+        rows={rows}
         editMode="cell"
         rowSelection={false}
         autoHeight
         density="standard"
         processRowUpdate={handleProcessRowUpdate}
+        rowReordering={isSequence && isEditable}
         onRowClick={({ row: { type, key, id } }: { row: Row }) =>
           match(type)
             .with(P.union('Bill', 'Job', 'Purchase', 'WorkCenter'), () =>
@@ -230,6 +260,21 @@ export default function ResourceTable({
         onColumnOrderChange={saveStateToLocalstorage}
         onFilterModelChange={saveGridFilterModel}
         onSortModelChange={saveStateToLocalstorage}
+        onRowOrderChange={async ({ oldIndex, row, targetIndex }) => {
+          const newOrder = [...rows]
+          newOrder.splice(oldIndex, 1)
+          newOrder.splice(targetIndex, 0, row as Row)
+          await Promise.all(
+            newOrder.map((resource, i) => {
+              updateResource(resource.id, [
+                {
+                  field: fields.sequenceNumber,
+                  valueInput: { number: i + 1 },
+                },
+              ])
+            }),
+          )
+        }}
         slots={{
           toolbar: () => (
             <GridToolbarContainer>
