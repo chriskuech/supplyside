@@ -330,7 +330,7 @@ const StepView: FC<StepViewProps> = ({
                         valueInput: { number: operations.length + 1 },
                       },
                     ]}
-                    buttonProps={{ size: 'small', variant: 'text' }}
+                    buttonProps={{ size: 'small' }}
                   />
                 </Stack>
 
