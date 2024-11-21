@@ -165,6 +165,7 @@ export default function ResourceTable({
           width: isValidColumnWidth(specialColumnWidths, field.name)
             ? specialColumnWidths?.[field.name]
             : undefined,
+          schemaData,
         }),
       ),
       ...(isEditable
@@ -196,6 +197,7 @@ export default function ResourceTable({
       isEditable,
       unFilterableFieldIds,
       specialColumnWidths,
+      schemaData,
       isAdmin,
     ],
   )

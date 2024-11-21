@@ -6,9 +6,11 @@ import { GridApplyQuickFilter } from '@mui/x-data-grid/models/colDef/gridColDef'
 import {
   FieldType,
   MCMASTER_CARR_NAME,
+  SchemaData,
   SchemaField,
   Value,
   emptyValue,
+  fields,
   formatInlineAddress,
   resources,
   selectResourceFieldValue,
@@ -33,6 +35,7 @@ import UserCard from '../fields/views/UserCard'
 import ResourceFieldView from '../fields/views/ResourceFieldView'
 import AddressCard from '../fields/views/AddressCard'
 import OptionChip from '../fields/views/OptionChip'
+import FieldControl from '../fields/FieldControl'
 import FieldGridEditCell from './FieldGridEditCell'
 import { Cell, Column, Display, Row } from './types'
 import { formatDate, formatMoney } from '@/lib/format'
@@ -87,6 +90,7 @@ export const mapSchemaFieldToGridColDef = (
     isEditable: boolean
     isFilterable?: boolean
     width?: number
+    schemaData: SchemaData
   },
 ): Column => ({
   field: field.fieldId,
@@ -158,9 +162,6 @@ export const mapSchemaFieldToGridColDef = (
 
   sortComparator: (v1, v2, param1, param2) =>
     match(field.type)
-      .with('Number', () =>
-        gridNumberComparator(v1?.number, v2?.number, param1, param2),
-      )
       .with('Address', () =>
         gridStringOrNumberComparator(
           v1?.address && formatInlineAddress(v1.address),
@@ -202,21 +203,21 @@ export const mapSchemaFieldToGridColDef = (
       .with('Money', () =>
         gridStringOrNumberComparator(v1?.number, v2?.number, param1, param2),
       )
-      .with('Resource', () =>
+      .with(P.union('MultiSelect'), () =>
         gridStringOrNumberComparator(
-          v1?.resource?.name,
-          v2?.resource?.name,
+          v1?.options.length,
+          v2?.options.length,
           param1,
           param2,
         ),
       )
-      .with(P.union('Text', 'Textarea'), () =>
-        gridStringOrNumberComparator(v1?.string, v2?.string, param1, param2),
+      .with('Number', () =>
+        gridNumberComparator(v1?.number, v2?.number, param1, param2),
       )
-      .with(P.union('User'), () =>
+      .with('Resource', () =>
         gridStringOrNumberComparator(
-          v1?.user?.name,
-          v2?.user?.name,
+          v1?.resource?.name,
+          v2?.resource?.name,
           param1,
           param2,
         ),
@@ -229,10 +230,13 @@ export const mapSchemaFieldToGridColDef = (
           param2,
         ),
       )
-      .with(P.union('MultiSelect'), () =>
+      .with(P.union('Text', 'Textarea'), () =>
+        gridStringOrNumberComparator(v1?.string, v2?.string, param1, param2),
+      )
+      .with(P.union('User'), () =>
         gridStringOrNumberComparator(
-          v1?.options.length,
-          v2?.options.length,
+          v1?.user?.name,
+          v2?.user?.name,
           param1,
           param2,
         ),
@@ -384,18 +388,27 @@ export const mapSchemaFieldToGridColDef = (
           ),
       )
       .with('Checkbox', () =>
-        match(value?.boolean)
-          .with(true, () => (
-            <Box display="flex" justifyContent="flex-end" width="100%">
-              <Check />
-            </Box>
-          ))
-          .with(false, () => (
-            <Box display="flex" justifyContent="flex-end" width="100%">
-              <Close />
-            </Box>
-          ))
-          .otherwise(() => null),
+        field.templateId === fields.completed.templateId &&
+        options.isEditable ? (
+          <FieldControl
+            resource={resource}
+            schemaData={options.schemaData}
+            field={fields.completed}
+          />
+        ) : (
+          match(value?.boolean)
+            .with(true, () => (
+              <Box display="flex" justifyContent="flex-end" width="100%">
+                <Check />
+              </Box>
+            ))
+            .with(false, () => (
+              <Box display="flex" justifyContent="flex-end" width="100%">
+                <Close />
+              </Box>
+            ))
+            .otherwise(() => null)
+        ),
       )
       .with(
         'Contact',
