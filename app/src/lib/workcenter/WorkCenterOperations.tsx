@@ -48,6 +48,7 @@ export const WorkCenterOperations: React.FC<
         sx={{ borderColor: 'divider', borderWidth: 1, borderStyle: 'solid' }}
       >
         <ResourceTable
+          tableKey="workCenterOperations"
           schemaData={operationSchema}
           resources={operations}
           isEditable

@@ -2,7 +2,7 @@
 
 import { Drawer, Stack, Typography } from '@mui/material'
 import { Resource, SchemaData } from '@supplyside/model'
-import { ReactNode } from 'react'
+import { FC, ReactNode } from 'react'
 import ResourceForm from './ResourceForm'
 import DeleteResourceButton from './DeleteResourceButton'
 
@@ -13,12 +13,12 @@ type ResourceFieldDrawerProps = {
   children?: ReactNode
 }
 
-export const ResourceDrawerView = ({
+export const ResourceDrawerView: FC<ResourceFieldDrawerProps> = ({
   state,
   tools,
   onClose,
   children,
-}: ResourceFieldDrawerProps) => (
+}) => (
   <Drawer
     open={!!state}
     onClose={() => onClose(window.location.pathname)}
