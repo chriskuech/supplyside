@@ -85,7 +85,6 @@ export default function StepsView({
               size="small"
               onClick={() => createWorkCenterStep(part.id)}
               sx={{ height: 'min-content' }}
-              variant="text"
               disabled={!needDate}
             >
               Work Center
@@ -105,7 +104,6 @@ export default function StepsView({
               size="small"
               onClick={() => createPurchaseStep(part.id)}
               sx={{ height: 'min-content' }}
-              variant="text"
               disabled={!needDate}
             >
               Purchase
@@ -190,7 +188,6 @@ const StepView: FC<StepViewProps> = ({
           <>
             <Stack direction="row" spacing={2} alignItems="center">
               <Button
-                variant="text"
                 sx={{
                   alignItems: 'center',
                   '& .end-icon': {
