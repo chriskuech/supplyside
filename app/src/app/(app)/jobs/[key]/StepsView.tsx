@@ -190,6 +190,7 @@ const StepView: FC<StepViewProps> = ({
           <>
             <Stack direction="row" spacing={2} alignItems="center">
               <Button
+                variant="text"
                 sx={{
                   alignItems: 'center',
                   '& .end-icon': {
