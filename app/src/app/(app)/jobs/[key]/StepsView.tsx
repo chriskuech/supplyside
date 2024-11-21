@@ -37,6 +37,7 @@ import { formatDate } from '@/lib/format'
 import ResourceTable from '@/lib/resource/table/ResourceTable'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
+import { useConfirmation } from '@/lib/confirmation'
 
 type Props = {
   stepSchemaData: SchemaData
@@ -145,6 +146,7 @@ const StepView: FC<StepViewProps> = ({
   operationSchema,
   operations,
 }) => {
+  const confirm = useConfirmation()
   const operationsFrameRef = useRef<HTMLDivElement>(null)
   const operationsFrameBox = useResizeObserver(operationsFrameRef)
 
@@ -351,7 +353,18 @@ const StepView: FC<StepViewProps> = ({
       </Stack>
 
       <Box py={0.5}>
-        <IconButton onClick={() => deleteStep(step.id)} size="small">
+        <IconButton
+          onClick={async () => {
+            const isConfirmed = await confirm({
+              title: 'Delete Step',
+              content: 'Are you sure you want to delete this step?',
+            })
+            if (!isConfirmed) return
+
+            deleteStep(step.id)
+          }}
+          size="small"
+        >
           <Close />
         </IconButton>
       </Box>
