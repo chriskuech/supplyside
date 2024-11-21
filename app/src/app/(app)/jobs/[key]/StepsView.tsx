@@ -326,6 +326,10 @@ const StepView: FC<StepViewProps> = ({
                         field: fields.step,
                         valueInput: { resourceId: step.id },
                       },
+                      {
+                        field: fields.sequenceNumber,
+                        valueInput: { number: operations.length + 1 },
+                      },
                     ]}
                     buttonProps={{ size: 'small', variant: 'text' }}
                   />

@@ -35,6 +35,10 @@ export const WorkCenterOperations: React.FC<
               field: fields.workCenter,
               valueInput: { resourceId: workCenterId },
             },
+            {
+              field: fields.sequenceNumber,
+              valueInput: { number: operations.length + 1 },
+            },
           ]}
         />
       </Stack>

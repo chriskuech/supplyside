@@ -477,14 +477,15 @@ export class ResourceService {
 
   private async handlePatch(patch: ResourcePatch) {
     const resourceId = patch.resource?.id ?? fail('Patch is missing resourceId')
-    const { accountId } = patch.schema
+    const { accountId, type } = patch.schema
 
+    // recalculate subtotal cost for parent resources
     await Promise.all(
       [fields.bill, fields.job, fields.purchase].map(async (link) => {
         assert(link.resourceType)
 
         if (
-          !patch.schema.implements(link) ||
+          !patch.schema.implements(fields.totalCost, link) ||
           !patch.hasAnyPatch(fields.totalCost, link)
         )
           return
@@ -500,6 +501,39 @@ export class ResourceService {
       }),
     )
 
+    // copy operations from work center to step
+    await (async () => {
+      if (type !== 'Step') return
+
+      const workCenterId = patch.getResourceId(fields.workCenter)
+      if (!workCenterId) return
+
+      const operations = await this.list(accountId, 'Operation', {
+        where: {
+          '==': [{ var: fields.workCenter.name }, workCenterId],
+        },
+      })
+
+      for (const operation of operations) {
+        const name = selectResourceFieldValue(
+          operation,
+          fields.operationName,
+        )?.string
+        const sequenceNumber = selectResourceFieldValue(
+          operation,
+          fields.sequenceNumber,
+        )?.number
+
+        await this.withCreatePatch(accountId, 'Operation', (patch) => {
+          patch.setResourceId(fields.step, resourceId)
+          if (name) patch.setString(fields.operationName, name)
+          if (sequenceNumber)
+            patch.setNumber(fields.sequenceNumber, sequenceNumber)
+        })
+      }
+    })()
+
+    // sync children
     await Promise.all(
       relations
         .filter(

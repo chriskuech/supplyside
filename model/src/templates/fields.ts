@@ -402,6 +402,12 @@ const _fields = {
     description: 'Represents the latest delivery date',
     isRequired: true,
   },
+  operationName: {
+    templateId: 'a834b732-39fc-415c-8944-fa6fc2202c96',
+    name: 'Operation Name',
+    type: 'Text',
+    description: 'The name of the operation',
+  },
   operator: {
     templateId: '7c6a68ca-3f98-4b23-a3c3-2ba75b9e3458',
     name: 'Operator',
