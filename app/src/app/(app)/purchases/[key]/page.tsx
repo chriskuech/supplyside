@@ -7,6 +7,7 @@ import {
   resources,
   selectResourceFieldValue,
 } from '@supplyside/model'
+import { isTruthy } from 'remeda'
 import ApproveButton from './cta/ApproveButton'
 import SkipButton from './cta/SkipButton'
 import StatusTransitionButton from './cta/StatusTransitionButton'
@@ -20,7 +21,7 @@ import PunchoutButton from './cta/PunchoutButton'
 import { readDetailPageModel } from '@/lib/resource/detail/actions'
 import ResourceDetailPage from '@/lib/resource/detail/ResourceDetailPage'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
-import { readResources } from '@/actions/resource'
+import { readResource, readResources } from '@/actions/resource'
 import ResourceLink from '@/lib/resource/ResourceLink'
 import { StatusTrackerSlab } from '@/lib/ux/StatusTrackerSlab'
 
@@ -49,9 +50,27 @@ export default async function PurchaseDetail({
     }),
   ])
 
-  const purchaseHasLines = !!purchaseLines?.length
+  const steps = await readResources('Step', {
+    where: {
+      '==': [{ var: fields.purchase.name }, resource.id],
+    },
+  })
 
-  const purchaseJob = selectResourceFieldValue(resource, fields.job)?.resource
+  const linkedParts =
+    steps
+      ?.map((s) => selectResourceFieldValue(s, fields.part)?.resource)
+      .filter(isTruthy) ?? []
+
+  const parts = await Promise.all(
+    linkedParts.map((part) => readResource(part.id)),
+  )
+
+  const linkedJobs = parts
+    .filter(isTruthy)
+    .map((part) => selectResourceFieldValue(part, fields.job)?.resource)
+    .filter(isTruthy)
+
+  const purchaseHasLines = !!purchaseLines?.length
 
   const status =
     selectResourceFieldValue(resource, fields.purchaseStatus)?.option ??
@@ -99,17 +118,15 @@ export default async function PurchaseDetail({
             fontSize={fontSize}
           />
         )) ?? []),
-        ...(purchaseJob
-          ? [
-              <ResourceLink
-                key={resource.id}
-                href={`/jobs/${purchaseJob.key}`}
-                label="Job"
-                resourceKey={purchaseJob.key}
-                fontSize={fontSize}
-              />,
-            ]
-          : []),
+        linkedJobs.map((job) => (
+          <ResourceLink
+            key={job.id}
+            href={`/jobs/${job.key}`}
+            label="Job"
+            resourceKey={job.key}
+            fontSize={fontSize}
+          />
+        )),
         <TrackingControl
           key={TrackingControl.name}
           schemaData={schemaData}
