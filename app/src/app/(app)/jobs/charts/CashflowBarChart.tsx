@@ -30,7 +30,6 @@ import dayjs from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import isBetween from 'dayjs/plugin/isBetween'
 import { useMemo } from 'react'
-import { ChartsNoDataOverlay } from '@mui/x-charts/ChartsOverlay'
 import { Typography } from '@mui/material'
 import { red } from '@mui/material/colors'
 import { formatMoney } from '@/lib/format'
@@ -156,8 +155,6 @@ export default function CashflowBarChart({ resources }: Props) {
     [resources, weekStart],
   )
 
-  const chartHasData = !!totalCosts.length
-
   return (
     <>
       <Typography variant="h6">Weekly Cashflow</Typography>
@@ -201,19 +198,18 @@ export default function CashflowBarChart({ resources }: Props) {
         ]}
       >
         <BarPlot />
-        {chartHasData && <ChartsTooltip />}
+        <ChartsTooltip />
         <ChartsXAxis />
         <ChartsYAxis />
         {currentWeek && (
           <ChartsReferenceLine
-            x={currentWeek}
+            x={dayjs(currentWeek).format('MM/DD')}
             lineStyle={{ stroke: 'red' }}
             labelStyle={{ fontSize: '12', stroke: 'red' }}
             label="today"
             labelAlign="start"
           />
         )}
-        {!chartHasData && <ChartsNoDataOverlay />}
       </ResponsiveChartContainer>
     </>
   )
