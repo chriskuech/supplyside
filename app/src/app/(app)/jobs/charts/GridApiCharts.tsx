@@ -21,6 +21,11 @@ export default function GridApiCharts({
   const [resources, setResources] = useState<Resource[]>()
 
   useLayoutEffect(() => {
+    const rows = gridFilteredSortedRowEntriesSelector(gridApiRef)
+    setResources(rows.map((row) => row.model as Resource))
+  }, [gridApiRef])
+
+  useLayoutEffect(() => {
     gridApiRef.current.subscribeEvent('rowsSet', () => {
       const rows = gridFilteredSortedRowEntriesSelector(gridApiRef)
       setResources(rows.map((row) => row.model as Resource))
