@@ -34,6 +34,10 @@ const setCompleted = (patch: ResourcePatch) => {
     return
 
   patch.setDate(fields.dateCompleted, new Date().toISOString())
+
+  if (patch.actorUserId) {
+    patch.setUserId(fields.operator, patch.actorUserId)
+  }
 }
 
 const recalculatePaymentDueDateFromNeedDate = (patch: ResourcePatch) => {

@@ -6,7 +6,7 @@ import { revalidateTag } from 'next/cache'
 import { sortBy } from 'remeda'
 import { readSchema } from './schema'
 import { client } from '.'
-import { Session } from '@/session'
+import { requireSession, Session } from '@/session'
 import { FieldData } from '@/actions/types'
 
 export type OrderBy = components['schemas']['OrderBy']
@@ -32,10 +32,13 @@ export const createResource = async (
   const { data: resource } = await client().POST(
     '/api/accounts/{accountId}/resources/',
     {
+      headers: {
+        'x-user-id': userId,
+      },
       params: {
         path: { accountId: accountId },
       },
-      body: { resourceType, fields: resolvedFields, userId },
+      body: { resourceType, fields: resolvedFields },
     },
   )
 
@@ -107,6 +110,8 @@ export const updateResource = async (
   resourceId: string,
   fields: FieldData[],
 ) => {
+  const { userId } = await requireSession()
+
   const current = await readResource(accountId, resourceId)
   if (!current) return
 
@@ -124,6 +129,9 @@ export const updateResource = async (
   const { data: resource } = await client().PATCH(
     '/api/accounts/{accountId}/resources/{resourceId}/',
     {
+      headers: {
+        'x-user-id': userId,
+      },
       params: {
         path: { accountId, resourceId },
       },

@@ -92,12 +92,14 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       method: 'POST',
       url: '/',
       schema: {
+        headers: z.object({
+          'x-user-id': z.string().uuid().optional(),
+        }),
         params: z.object({
           accountId: z.string().uuid(),
         }),
         body: z.object({
           resourceType: ResourceTypeSchema,
-          userId: z.string().uuid().optional(),
           fields: z
             .array(
               z.object({
@@ -113,14 +115,17 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       },
       handler: async ({
         params: { accountId },
-        body: { resourceType, fields: fieldsInput, userId },
+        headers: { 'x-user-id': userId },
+        body: { resourceType, fields: fieldsInput },
       }) => {
         const service = container.resolve(ResourceService)
 
         const resource = await service.withCreatePatch(
           accountId,
           resourceType,
-          (patch) => {
+          async (patch) => {
+            patch.actorUserId = userId
+
             for (const { fieldId, valueInput } of fieldsInput ?? []) {
               patch.setPatch({ fieldId }, valueInput)
             }
@@ -197,6 +202,9 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
       method: 'PATCH',
       url: '/:resourceId/',
       schema: {
+        headers: z.object({
+          'x-user-id': z.string().uuid().optional(),
+        }),
         params: z.object({
           accountId: z.string().uuid(),
           resourceId: z.string().uuid(),
@@ -211,13 +219,19 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           200: ResourceSchema,
         },
       },
-      handler: async ({ params: { accountId, resourceId }, body }) => {
+      handler: async ({
+        params: { accountId, resourceId },
+        headers: { 'x-user-id': userId },
+        body,
+      }) => {
         const service = container.resolve(ResourceService)
 
         const resource = await service.withUpdatePatch(
           accountId,
           resourceId,
           (patch) => {
+            patch.actorUserId = userId
+
             for (const { fieldId, valueInput } of body) {
               patch.setPatch({ fieldId }, valueInput)
             }

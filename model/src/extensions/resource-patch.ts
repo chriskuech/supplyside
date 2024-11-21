@@ -18,6 +18,7 @@ export class ResourcePatch {
   private _patches: FieldPatch[] = []
   private _templateId: string | null = null
 
+  actorUserId?: string | undefined
   resource?: Resource | undefined
 
   constructor(
@@ -96,6 +97,10 @@ export class ResourcePatch {
 
   getString(fieldRef: FieldReference) {
     return this.getPatch(fieldRef)?.valueInput.string
+  }
+
+  getUserId(fieldRef: FieldReference) {
+    return this.getPatch(fieldRef)?.valueInput.userId
   }
 
   setBoolean(fieldRef: FieldReference, boolean: boolean | null) {
