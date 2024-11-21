@@ -337,6 +337,7 @@ const StepView: FC<StepViewProps> = ({
                 {!!operations.length && (
                   <Box width={operationsFrameBox?.width ?? 0} overflow="auto">
                     <ResourceTable
+                      tableKey="operations"
                       schemaData={operationSchema}
                       resources={operations}
                       isEditable
