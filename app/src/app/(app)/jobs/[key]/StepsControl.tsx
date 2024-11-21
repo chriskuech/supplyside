@@ -10,7 +10,7 @@ type Props = {
 }
 
 export const StepsControl = async ({ part }: Props) => {
-  const [stepSchemaData, steps] = await Promise.all([
+  const [stepSchemaData, steps, operationSchema] = await Promise.all([
     readSchema(part.accountId, 'Step'),
     readResources(part.accountId, 'Step', {
       where: {
@@ -19,6 +19,7 @@ export const StepsControl = async ({ part }: Props) => {
       // TODO: this doesn't work
       // orderBy: [{ var: fields.deliveryDate.name, dir: 'asc' }],
     }),
+    readSchema(part.accountId, 'Operation'),
   ])
   const expandedSteps = await Promise.all(
     (steps ?? []).map(async (step) => {
@@ -29,7 +30,13 @@ export const StepsControl = async ({ part }: Props) => {
         ? await readResource(part.accountId, purchaseId)
         : undefined
 
-      return { step, purchase }
+      const operations = await readResources(part.accountId, 'Operation', {
+        where: {
+          '==': [{ var: fields.step.name }, step.id],
+        },
+      })
+
+      return { step, purchase, operations }
     }),
   )
 
@@ -38,13 +45,14 @@ export const StepsControl = async ({ part }: Props) => {
     (s) => selectResourceFieldValue(s.step, fields.deliveryDate)?.date ?? '',
   )
 
-  if (!stepSchemaData || !steps)
+  if (!stepSchemaData || !steps || !operationSchema)
     return <Alert severity="error">Failed to load steps</Alert>
 
   return (
     <StepsView
       stepSchemaData={stepSchemaData}
       steps={sortedSteps}
+      operationSchema={operationSchema}
       part={part}
     />
   )

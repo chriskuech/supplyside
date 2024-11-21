@@ -28,7 +28,8 @@ const setInvoiceDate = (patch: ResourcePatch) => {
 const setCompleted = (patch: ResourcePatch) => {
   if (
     !patch.schema.implements(fields.completed, fields.dateCompleted) ||
-    !patch.hasPatch(fields.completed)
+    !patch.hasPatch(fields.completed) ||
+    !patch.getBoolean(fields.completed)
   )
     return
 

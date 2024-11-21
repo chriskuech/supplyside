@@ -19,6 +19,7 @@ import {
 } from '@mui/material'
 import {
   Add,
+  Assignment,
   Checklist,
   Close,
   Info,
@@ -26,23 +27,36 @@ import {
   ShoppingBag,
   StoreMallDirectory,
 } from '@mui/icons-material'
-import { FC } from 'react'
+import { FC, useRef } from 'react'
 import NextLink from 'next/link'
 import { createPurchaseStep, createWorkCenterStep, deleteStep } from './actions'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import OptionChip from '@/lib/resource/fields/views/OptionChip'
 import ReadonlyTextarea from '@/lib/resource/fields/views/ReadonlyTextarea'
 import { formatDate } from '@/lib/format'
+import ResourceTable from '@/lib/resource/table/ResourceTable'
+import CreateResourceButton from '@/lib/resource/CreateResourceButton'
+import { useResizeObserver } from '@/hooks/useResizeObserver'
 
 type Props = {
   stepSchemaData: SchemaData
-  steps: { step: Resource; purchase: Resource | undefined }[]
+  operationSchema: SchemaData
+  steps: {
+    step: Resource
+    purchase: Resource | undefined
+    operations: Resource[] | undefined
+  }[]
   part: Resource
 }
 
 const missingNeedDateTooltip = 'Need Date is required to add Steps'
 
-export default function StepsView({ stepSchemaData, steps, part }: Props) {
+export default function StepsView({
+  stepSchemaData,
+  operationSchema,
+  steps,
+  part,
+}: Props) {
   const needDate = selectResourceFieldValue(part, fields.needDate)?.date
 
   return (
@@ -65,16 +79,18 @@ export default function StepsView({ stepSchemaData, steps, part }: Props) {
               : 'Add a Production Step representing work completed at a Work Center'
           }
         >
-          <Button
-            startIcon={<Add />}
-            size="small"
-            onClick={() => createWorkCenterStep(part.id)}
-            sx={{ height: 'min-content' }}
-            variant="text"
-            disabled={!needDate}
-          >
-            Work Center
-          </Button>
+          <span>
+            <Button
+              startIcon={<Add />}
+              size="small"
+              onClick={() => createWorkCenterStep(part.id)}
+              sx={{ height: 'min-content' }}
+              variant="text"
+              disabled={!needDate}
+            >
+              Work Center
+            </Button>
+          </span>
         </Tooltip>
         <Tooltip
           title={
@@ -83,26 +99,30 @@ export default function StepsView({ stepSchemaData, steps, part }: Props) {
               : 'Add a Production Step linked to a Purchase Order, such as for materials or outside processing'
           }
         >
-          <Button
-            startIcon={<Add />}
-            size="small"
-            onClick={() => createPurchaseStep(part.id)}
-            sx={{ height: 'min-content' }}
-            variant="text"
-            disabled={!needDate}
-          >
-            Purchase
-          </Button>
+          <span>
+            <Button
+              startIcon={<Add />}
+              size="small"
+              onClick={() => createPurchaseStep(part.id)}
+              sx={{ height: 'min-content' }}
+              variant="text"
+              disabled={!needDate}
+            >
+              Purchase
+            </Button>
+          </span>
         </Tooltip>
       </Stack>
       <Stack divider={<Divider />}>
-        {steps.map(({ step, purchase }, i) => (
+        {steps.map(({ step, purchase, operations = [] }, i) => (
           <StepView
             key={step.id}
             stepSchemaData={stepSchemaData}
             step={step}
             purchase={purchase}
             index={i + 1}
+            operationSchema={operationSchema}
+            operations={operations}
           />
         ))}
       </Stack>
@@ -115,6 +135,8 @@ type StepViewProps = {
   step: Resource
   purchase: Resource | undefined
   index: number
+  operationSchema: SchemaData
+  operations: Resource[]
 }
 
 const StepView: FC<StepViewProps> = ({
@@ -122,7 +144,12 @@ const StepView: FC<StepViewProps> = ({
   step,
   purchase,
   index,
+  operationSchema,
+  operations,
 }) => {
+  const operationsFrameRef = useRef<HTMLDivElement>(null)
+  const operationsFrameBox = useResizeObserver(operationsFrameRef)
+
   const needDate =
     purchase && selectResourceFieldValue(purchase, fields.needDate)?.date
   const status =
@@ -284,6 +311,44 @@ const StepView: FC<StepViewProps> = ({
               field={fields.otherNotes}
               inputProps={{ placeholder: 'Notes' }}
             />
+
+            <Card variant="outlined">
+              <Stack spacing={1} ref={operationsFrameRef}>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  px={2}
+                  py={1}
+                >
+                  <Typography variant="h6">
+                    <Assignment color="disabled" /> Operations
+                  </Typography>
+                  <CreateResourceButton
+                    resourceType="Operation"
+                    fields={[
+                      {
+                        field: fields.step,
+                        valueInput: { resourceId: step.id },
+                      },
+                    ]}
+                    buttonProps={{ size: 'small', variant: 'text' }}
+                  />
+                </Stack>
+
+                {!!operations.length && (
+                  <Box width={operationsFrameBox?.width ?? 0} overflow="auto">
+                    <ResourceTable
+                      schemaData={operationSchema}
+                      resources={operations}
+                      isEditable
+                      hideId
+                      slots={{ toolbar: undefined }}
+                      hideFields={[fields.step, fields.workCenter]}
+                    />
+                  </Box>
+                )}
+              </Stack>
+            </Card>
           </>
         )}
       </Stack>
