@@ -501,6 +501,7 @@ export class ResourceService {
       }),
     )
 
+    // sync completed from purchase to steps
     if (
       type === 'Purchase' &&
       patch.hasOption(fields.purchaseStatus, purchaseStatusOptions.received)
@@ -520,23 +521,23 @@ export class ResourceService {
       )
     }
 
+    // sync need date from step to purchase
     await (async () => {
-      if (type === 'Step' && patch.hasPatch(fields.deliveryDate)) {
-        if (!patch.resource) return
-        const purchaseId = patch.getResourceId(fields.purchase)
-        const deliveryDate = patch.getDate(fields.deliveryDate)
+      if (type !== 'Step' || !patch.hasPatch(fields.deliveryDate)) return
 
-        if (purchaseId && deliveryDate) {
-          await this.withUpdatePatch(accountId, purchaseId, (patch) => {
-            patch.setDate(fields.needDate, deliveryDate)
-          })
-        }
-      }
+      const purchaseId = patch.getResourceId(fields.purchase)
+      const deliveryDate = patch.getDate(fields.deliveryDate)
+
+      if (!purchaseId || !deliveryDate) return
+
+      await this.withUpdatePatch(accountId, purchaseId, (patch) => {
+        patch.setDate(fields.needDate, deliveryDate)
+      })
     })()
 
     // copy operations from work center to step
     await (async () => {
-      if (type !== 'Step') return
+      if (type !== 'Step' || !patch.hasPatch(fields.workCenter)) return
 
       const workCenterId = patch.getResourceId(fields.workCenter)
       if (!workCenterId) return
