@@ -120,6 +120,7 @@ export const schemas: SchemaTemplate[] = [
       fields.operator,
       fields.dateCompleted,
       fields.workCenter,
+      fields.step,
     ],
   },
   {

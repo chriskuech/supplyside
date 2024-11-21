@@ -634,6 +634,12 @@ const _fields = {
     defaultToToday: true,
     description: 'Date the schedule starts',
   },
+  step: {
+    templateId: '593e378f-a6be-4054-b899-821bb3c13b2f',
+    name: 'Step',
+    type: 'Resource',
+    resourceType: 'Step',
+  },
   subtotalCost: {
     templateId: '3234298a-d186-424e-a4b4-7678b4eec7d0',
     name: 'Subtotal Cost',
