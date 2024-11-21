@@ -314,14 +314,10 @@ const StepView: FC<StepViewProps> = ({
 
             <Card variant="outlined">
               <Stack spacing={1} ref={operationsFrameRef}>
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  px={2}
-                  py={1}
-                >
-                  <Typography variant="h6">
-                    <Assignment color="disabled" /> Operations
+                <Stack direction="row" alignItems="center" p={1} spacing={1}>
+                  <Assignment color="disabled" />
+                  <Typography variant="h6" flexGrow={1}>
+                    Operations
                   </Typography>
                   <CreateResourceButton
                     resourceType="Operation"
