@@ -8,6 +8,7 @@ type Props = {
   index: number
   minDate: Dayjs
   event: GanttChartEvent
+  locked: boolean
 }
 
 export const GanttChartEventBar = ({
@@ -15,6 +16,7 @@ export const GanttChartEventBar = ({
   index,
   minDate,
   event: { id, onChange, startDate, days, children },
+  locked,
 }: Props) => {
   const {
     onMouseDown: onResizeStart,
@@ -46,8 +48,8 @@ export const GanttChartEventBar = ({
       left={dim * dayjs(startDate).diff(minDate, 'day') + (moveDelta?.x ?? 0)}
       width={dim * days + (resizeDelta?.x ?? 0)}
       height={dim}
-      onMouseDown={onMoveStart}
-      sx={{ cursor: onChange ? 'grab' : 'default' }}
+      onMouseDown={locked ? undefined : onMoveStart}
+      sx={{ cursor: locked ? 'default' : onChange ? 'grab' : 'default' }}
     >
       {children({ isDragging: isMoving || isResizing })}
       <Box
@@ -56,8 +58,10 @@ export const GanttChartEventBar = ({
         width={dim / 4}
         top={0}
         right={0}
-        sx={{ cursor: 'col-resize' }}
-        onMouseDown={onResizeStart}
+        sx={{
+          cursor: locked ? 'default' : onChange ? 'col-resize' : 'default',
+        }}
+        onMouseDown={locked ? undefined : onResizeStart}
       />
     </Box>
   )

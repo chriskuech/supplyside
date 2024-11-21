@@ -103,6 +103,7 @@ export const PartScheduleView = ({
 
   return (
     <GanttChart
+      locked
       drawerHeader={
         <Stack height="100%">
           <Typography variant="h4">
@@ -228,13 +229,14 @@ export const PartScheduleView = ({
                       <Box
                         width="100%"
                         height="100%"
-                        borderRight="3px solid"
+                        borderLeft="3px solid"
                         borderColor={red[500]}
                         display="flex"
                         justifyContent="center"
                         alignItems="center"
                         color={red[500]}
                         sx={{
+                          borderRight: '3px solid transparent',
                           boxShadow: isDragging
                             ? `0 0 0 2px ${hexToRgba(red[500], 0.5)}`
                             : undefined,
@@ -265,6 +267,7 @@ export const PartScheduleView = ({
                         alignItems="center"
                         color={green[500]}
                         sx={{
+                          borderLeft: '3px solid transparent',
                           boxShadow: isDragging
                             ? `0 0 0 2px ${hexToRgba(green[500], 0.5)}`
                             : undefined,

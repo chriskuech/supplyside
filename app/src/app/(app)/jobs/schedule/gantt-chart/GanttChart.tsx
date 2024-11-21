@@ -32,6 +32,7 @@ export type GanttChartProps = {
   stageHeader: React.ReactNode
   headerHeight: number
   items: GanttChartItem[]
+  locked: boolean
 }
 
 const initialScrollOffset = dim
@@ -41,6 +42,7 @@ export default function GanttChart({
   drawerHeader,
   stageHeader,
   items,
+  locked,
 }: GanttChartProps) {
   const [drawerWidth, setDrawerWidth] = useState(initialDrawerWidth)
   const [scrollOffset, setScrollOffset] = useState(initialScrollOffset)
@@ -147,6 +149,7 @@ export default function GanttChart({
                 index={index}
                 minDate={minDate}
                 event={e}
+                locked={locked}
               />
             )),
           )}
