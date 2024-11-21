@@ -501,6 +501,39 @@ export class ResourceService {
       }),
     )
 
+    if (
+      type === 'Purchase' &&
+      patch.hasOption(fields.purchaseStatus, purchaseStatusOptions.received)
+    ) {
+      const purchaseSteps = await this.list(accountId, 'Step', {
+        where: {
+          '==': [{ var: fields.purchase.name }, resourceId],
+        },
+      })
+
+      await Promise.all(
+        purchaseSteps.map((step) =>
+          this.withUpdatePatch(accountId, step.id, (patch) => {
+            patch.setBoolean(fields.completed, true)
+          }),
+        ),
+      )
+    }
+
+    await (async () => {
+      if (type === 'Step' && patch.hasPatch(fields.deliveryDate)) {
+        if (!patch.resource) return
+        const purchaseId = patch.getResourceId(fields.purchase)
+        const deliveryDate = patch.getDate(fields.deliveryDate)
+
+        if (purchaseId && deliveryDate) {
+          await this.withUpdatePatch(accountId, purchaseId, (patch) => {
+            patch.setDate(fields.needDate, deliveryDate)
+          })
+        }
+      }
+    })()
+
     // copy operations from work center to step
     await (async () => {
       if (type !== 'Step') return
