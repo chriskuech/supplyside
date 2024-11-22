@@ -58,10 +58,10 @@ export const createPurchaseStep = async (partId: string) => {
     },
   ])
 
-  const needDate = await getNeedDate(partId)
-  assert(needDate, 'No need date found')
+  // const needDate = await getNeedDate(partId)
+  // assert(needDate, 'No need date found')
 
-  await reschedulePart(partId, needDate)
+  // await reschedulePart(partId, needDate)
 }
 
 export const createWorkCenterStep = async (partId: string) => {
@@ -80,10 +80,10 @@ export const createWorkCenterStep = async (partId: string) => {
     },
   ])
 
-  const needDate = await getNeedDate(partId)
-  assert(needDate, 'No need date found')
+  // const needDate = await getNeedDate(partId)
+  // assert(needDate, 'No need date found')
 
-  await reschedulePart(partId, needDate)
+  // await reschedulePart(partId, needDate)
 }
 
 export const deleteStep = async (stepId: string) => {
@@ -97,8 +97,6 @@ export const deleteStep = async (stepId: string) => {
 
   const needDate = selectResourceFieldValue(step, fields.needDate)?.date
   if (!needDate) return
-
-  await reschedulePart(partId, dayjs(needDate))
 }
 
 const getNextStartDate = async (partId: string): Promise<Dayjs | undefined> => {
@@ -129,77 +127,4 @@ const getNeedDate = async (partId: string): Promise<Dayjs | undefined> => {
   assert(needDate, 'No need date found')
 
   return dayjs(needDate)
-}
-
-const reschedulePart = async (partId: string, needDate: Dayjs) => {
-  const unorderedSteps = await readResources('Step', {
-    where: { '==': [{ var: fields.part.name }, partId] },
-  })
-  assert(unorderedSteps, 'No steps found')
-
-  type Step = {
-    id: string
-    startDate: Dayjs | undefined
-    productionDays: number
-    deliveryDate: Dayjs | undefined
-  }
-
-  const currentSteps: Step[] = pipe(
-    unorderedSteps,
-    map((step) => {
-      const startDate = selectResourceFieldValue(step, fields.startDate)?.date
-      const productionDays = selectResourceFieldValue(
-        step,
-        fields.productionDays,
-      )?.number
-      const deliveryDate = selectResourceFieldValue(
-        step,
-        fields.deliveryDate,
-      )?.date
-
-      return {
-        id: step.id,
-        startDate: startDate ? dayjs(startDate) : undefined,
-        productionDays: productionDays ?? 0,
-        deliveryDate: deliveryDate ? dayjs(deliveryDate) : undefined,
-      }
-    }),
-    sortBy((step) => step.deliveryDate?.toISOString() ?? ''),
-  )
-
-  const { steps: updatedSteps } = currentSteps.reduceRight(
-    ({ steps, deadline }, step) => {
-      const startDate = deadline.subtract(step.productionDays, 'day')
-      const deliveryDate = deadline
-
-      return {
-        steps: [...steps, { ...step, startDate, deliveryDate }],
-        deadline: startDate,
-      }
-    },
-    { steps: [] as Step[], deadline: needDate },
-  )
-
-  await Promise.all(
-    zip(currentSteps, updatedSteps)
-      .filter(
-        ([currentStep, updatedStep]) =>
-          currentStep.startDate !== updatedStep.startDate ||
-          currentStep.deliveryDate !== updatedStep.deliveryDate,
-      )
-      .map(([, updatedStep]) => updatedStep)
-      .map(
-        async (step) =>
-          await updateResource(step.id, [
-            {
-              field: fields.startDate,
-              valueInput: { date: step.startDate?.toISOString() },
-            },
-            {
-              field: fields.deliveryDate,
-              valueInput: { date: step.deliveryDate?.toISOString() },
-            },
-          ]),
-      ),
-  )
 }
