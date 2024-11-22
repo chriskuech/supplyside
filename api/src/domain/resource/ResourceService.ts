@@ -21,7 +21,7 @@ import assert, { fail } from 'assert'
 import dayjs, { Dayjs } from 'dayjs'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter.js'
 import { inject, injectable } from 'inversify'
-import { map, pipe, sortBy, sum, zip } from 'remeda'
+import { isTruthy, map, pipe, sortBy, sum, zip } from 'remeda'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 import { SchemaService } from '../schema/SchemaService'
@@ -587,6 +587,80 @@ export class ResourceService {
         if (!partId) return
 
         await this.rescheduleSteps(accountId, partId)
+      }
+    })()
+
+    // sync start date and delivery date to parent resources
+    await (async () => {
+      if (
+        type === 'Step' &&
+        patch.hasAnyPatch(fields.startDate, fields.deliveryDate)
+      ) {
+        const startDate = patch.getDate(fields.startDate)
+        if (!startDate) return
+
+        const partId = patch.getResourceId(fields.part)
+        if (!partId) return
+
+        const steps = await this.list(accountId, 'Step', {
+          where: {
+            '==': [{ var: fields.part.name }, partId],
+          },
+        })
+
+        const minStartDate =
+          steps
+            .map((s) => selectResourceFieldValue(s, fields.startDate)?.date)
+            .filter(isTruthy)
+            .sort()
+            .at(0) ?? null
+        const maxDeliveryDate =
+          steps
+            .map((s) => selectResourceFieldValue(s, fields.deliveryDate)?.date)
+            .filter(isTruthy)
+            .sort()
+            .at(-1) ?? null
+
+        await this.withUpdatePatch(accountId, partId, (patch) => {
+          patch.setDate(fields.startDate, minStartDate)
+          patch.setDate(fields.deliveryDate, maxDeliveryDate)
+        })
+      }
+
+      if (
+        type === 'Part' &&
+        patch.hasAnyPatch(fields.startDate, fields.deliveryDate)
+      ) {
+        const startDate = patch.getDate(fields.startDate)
+        if (!startDate) return
+
+        const jobId = patch.getResourceId(fields.job)
+        if (!jobId) return
+
+        const parts = await this.list(accountId, 'Part', {
+          where: {
+            '==': [{ var: fields.job.name }, jobId],
+          },
+        })
+
+        const minStartDate =
+          parts
+            .map((p) => selectResourceFieldValue(p, fields.startDate)?.date)
+            .filter(isTruthy)
+            .sort()
+            .at(0) ?? null
+
+        const maxDeliveryDate =
+          parts
+            .map((p) => selectResourceFieldValue(p, fields.deliveryDate)?.date)
+            .filter(isTruthy)
+            .sort()
+            .at(-1) ?? null
+
+        await this.withUpdatePatch(accountId, jobId, (patch) => {
+          patch.setDate(fields.startDate, minStartDate)
+          patch.setDate(fields.deliveryDate, maxDeliveryDate)
+        })
       }
     })()
 

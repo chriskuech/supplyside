@@ -16,9 +16,6 @@ import { WorkCenterLink } from './WorkCenterLink'
 import { readResource, readResources } from '@/client/resource'
 import { readSchema } from '@/client/schema'
 
-const coerceDate = (value: string | null | undefined): Date | null =>
-  value ? new Date(value) : null
-
 type Props = {
   workCenter: Resource
   startDate: Date
@@ -94,15 +91,10 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
         selectResourceFieldValue(step, fields.completed)?.boolean ?? null,
       partName: selectResourceFieldValue(part, fields.partName)?.string ?? null,
       hours: selectResourceFieldValue(step, fields.hours)?.number ?? null,
-      startDate:
-        coerceDate(selectResourceFieldValue(step, fields.startDate)?.date) ??
-        null,
+      startDate: selectResourceFieldValue(step, fields.startDate)?.date ?? null,
       deliveryDate:
-        coerceDate(selectResourceFieldValue(step, fields.deliveryDate)?.date) ??
-        null,
-      needDate:
-        coerceDate(selectResourceFieldValue(part, fields.needDate)?.date) ??
-        null,
+        selectResourceFieldValue(step, fields.deliveryDate)?.date ?? null,
+      needDate: selectResourceFieldValue(part, fields.needDate)?.date ?? null,
       job: selectResourceFieldValue(part, fields.job)?.resource ?? null,
       quantity: selectResourceFieldValue(part, fields.quantity)?.number ?? null,
     }))
