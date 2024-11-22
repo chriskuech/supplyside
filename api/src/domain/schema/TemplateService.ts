@@ -65,7 +65,7 @@ export class TemplateService {
           type,
           resourceType,
           isRequired,
-          defaultToToday,
+          defaultToToday: defaultToToday ?? false,
         },
         update: {
           name,
@@ -73,7 +73,7 @@ export class TemplateService {
           description: description ?? null,
           type,
           resourceType,
-          defaultToToday,
+          defaultToToday: defaultToToday ?? false,
           DefaultValue: {
             update: {
               boolean: defaultValue?.boolean ?? null,
