@@ -1,7 +1,10 @@
 import { Box } from '@mui/material'
 import dayjs, { Dayjs } from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import { GanttChartEvent } from './GanttChartItem'
 import { useDrag } from '@/hooks/useDrag'
+
+dayjs.extend(utc)
 
 type Props = {
   dim: number
@@ -45,7 +48,9 @@ export const GanttChartEventBar = ({
       key={id}
       position="absolute"
       top={dim * index}
-      left={dim * dayjs(startDate).diff(minDate, 'day') + (moveDelta?.x ?? 0)}
+      left={
+        dim * dayjs(startDate).utc().diff(minDate, 'day') + (moveDelta?.x ?? 0)
+      }
       width={dim * days + (resizeDelta?.x ?? 0)}
       height={dim}
       onMouseDown={locked ? undefined : onMoveStart}
