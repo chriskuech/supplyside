@@ -10,6 +10,7 @@ import {
   Refresh,
   Close,
   Login,
+  DataObject,
 } from '@mui/icons-material'
 import { usePathname } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
@@ -76,6 +77,14 @@ export const Sidenav: FC<Props> = ({ accounts }) => {
                     title={rt}
                     href={`/admin/accounts/${account.key}/${rt.toLowerCase()}`}
                     icon={i === 0 ? <Storage /> : undefined}
+                  />
+                ))}
+                {resourceTypes.map((rt, i) => (
+                  <ItemLink
+                    key={rt}
+                    title={rt}
+                    href={`/admin/accounts/${account.key}/schemas/${rt.toLowerCase()}`}
+                    icon={i === 0 ? <DataObject /> : undefined}
                   />
                 ))}
                 <ItemLink
