@@ -264,26 +264,6 @@ const StepView: FC<StepViewProps> = ({
           <Box flexShrink={0} pt={1}>
             <CalendarMonth color="disabled" />
           </Box>
-          <Box flex={3}>
-            <Typography variant="caption" gutterBottom>
-              Start Date
-            </Typography>
-            <FieldControl
-              field={fields.startDate}
-              resource={step}
-              schemaData={stepSchema}
-            />
-          </Box>
-          <Box flex={3}>
-            <Typography variant="caption" gutterBottom>
-              Delivery Date
-            </Typography>
-            <FieldControl
-              field={fields.deliveryDate}
-              resource={step}
-              schemaData={stepSchema}
-            />
-          </Box>
           <Box flex={2}>
             <Typography variant="caption" gutterBottom>
               Production Hours
@@ -301,6 +281,26 @@ const StepView: FC<StepViewProps> = ({
             </Typography>
             <FieldControl
               field={fields.productionDays}
+              resource={step}
+              schemaData={stepSchema}
+            />
+          </Box>
+          <Box flex={3}>
+            <Typography variant="caption" gutterBottom>
+              Start Date
+            </Typography>
+            <FieldControl
+              field={fields.startDate}
+              resource={step}
+              schemaData={stepSchema}
+            />
+          </Box>
+          <Box flex={3}>
+            <Typography variant="caption" gutterBottom>
+              Delivery Date
+            </Typography>
+            <FieldControl
+              field={fields.deliveryDate}
               resource={step}
               schemaData={stepSchema}
             />

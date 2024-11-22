@@ -17,7 +17,7 @@ export const WeekControl = ({ startDate, week, onChange }: Props) => (
         size="small"
         color="primary"
         onClick={() => onChange(week - 1)}
-        sx={{ visibility: week === 0 ? 'hidden' : 'visible', h: 'fit-content' }}
+        sx={{ h: 'fit-content' }}
       >
         <ChevronLeft />
       </IconButton>
