@@ -568,102 +568,25 @@ export class ResourceService {
     })()
 
     await (async () => {
-      // reschedule steps
-      if (type !== 'Step' || patch.hasPatch(fields.productionDays)) return
+      if (type === 'Step' && patch.hasPatch(fields.productionDays)) {
+        const productionDays = patch.getNumber(fields.productionDays)
+        if (!productionDays) return
 
-      console.log('reschedule steps')
+        const partId = patch.getResourceId(fields.part)
+        if (!partId) return
 
-      const partId = patch.getResourceId(fields.part)
-      if (!partId) return
-
-      console.log('partId', partId)
-      const part = await this.read(accountId, partId)
-      const needDateString = selectResourceFieldValue(
-        part,
-        fields.needDate,
-      )?.date
-      if (!needDateString) return
-      const needDate = dayjs(needDateString)
-
-      console.log('needDate', needDate.toISOString())
-
-      const unorderedSteps = await this.list(accountId, 'Step', {
-        where: { '==': [{ var: fields.part.name }, partId] },
-      })
-
-      console.log('unorderedSteps', unorderedSteps)
-
-      type Step = {
-        id: string
-        startDate: Dayjs | undefined
-        productionDays: number
-        deliveryDate: Dayjs | undefined
+        await this.rescheduleSteps(accountId, partId)
       }
 
-      const currentSteps: Step[] = pipe(
-        unorderedSteps,
-        map((step) => {
-          const startDate = selectResourceFieldValue(
-            step,
-            fields.startDate,
-          )?.date
-          const productionDays = selectResourceFieldValue(
-            step,
-            fields.productionDays,
-          )?.number
-          const deliveryDate = selectResourceFieldValue(
-            step,
-            fields.deliveryDate,
-          )?.date
+      if (type === 'Part' && patch.hasPatch(fields.needDate)) {
+        const needDate = patch.getDate(fields.needDate)
+        if (!needDate) return
 
-          return {
-            id: step.id,
-            startDate: startDate ? dayjs(startDate) : undefined,
-            productionDays: productionDays ?? 0,
-            deliveryDate: deliveryDate ? dayjs(deliveryDate) : undefined,
-          }
-        }),
-        sortBy((step) => step.deliveryDate?.toISOString() ?? ''),
-      )
+        const partId = patch.resource?.id
+        if (!partId) return
 
-      const { steps: updatedSteps } = currentSteps.reduceRight(
-        ({ steps, deadline }, step) => {
-          const startDate = deadline.subtract(step.productionDays, 'day')
-          const deliveryDate = deadline
-
-          return {
-            steps: [...steps, { ...step, startDate, deliveryDate }],
-            deadline: startDate,
-          }
-        },
-        { steps: [] as Step[], deadline: needDate },
-      )
-
-      console.log('updatedSteps', updatedSteps)
-      await Promise.all(
-        zip(currentSteps, updatedSteps)
-          .filter(
-            ([currentStep, updatedStep]) =>
-              currentStep.startDate !== updatedStep.startDate ||
-              currentStep.deliveryDate !== updatedStep.deliveryDate,
-          )
-          .map(([, updatedStep]) => updatedStep)
-          .map(
-            async (step) =>
-              await this.withUpdatePatch(accountId, step.id, (patch) => {
-                patch.setDate(
-                  fields.startDate,
-                  step.startDate?.toISOString() ?? null,
-                )
-                patch.setDate(
-                  fields.deliveryDate,
-                  step.deliveryDate?.toISOString() ?? null,
-                )
-              }),
-          ),
-      )
-
-      console.log('done')
+        await this.rescheduleSteps(accountId, partId)
+      }
     })()
 
     // sync children
@@ -1057,5 +980,82 @@ export class ResourceService {
       .otherwise(() => fail('Recurring resource type not supported'))
 
     return destination
+  }
+
+  private async rescheduleSteps(accountId: string, partId: string) {
+    const part = await this.read(accountId, partId)
+    const needDateString = selectResourceFieldValue(part, fields.needDate)?.date
+    if (!needDateString) return
+    const needDate = dayjs(needDateString)
+
+    const unorderedSteps = await this.list(accountId, 'Step', {
+      where: { '==': [{ var: fields.part.name }, partId] },
+    })
+
+    type Step = {
+      id: string
+      startDate: Dayjs | undefined
+      productionDays: number
+      deliveryDate: Dayjs | undefined
+    }
+
+    const currentSteps: Step[] = pipe(
+      unorderedSteps,
+      map((step) => {
+        const startDate = selectResourceFieldValue(step, fields.startDate)?.date
+        const productionDays = selectResourceFieldValue(
+          step,
+          fields.productionDays,
+        )?.number
+        const deliveryDate = selectResourceFieldValue(
+          step,
+          fields.deliveryDate,
+        )?.date
+
+        return {
+          id: step.id,
+          startDate: startDate ? dayjs(startDate) : undefined,
+          productionDays: productionDays ?? 0,
+          deliveryDate: deliveryDate ? dayjs(deliveryDate) : undefined,
+        }
+      }),
+      sortBy((step) => step.deliveryDate?.toISOString() ?? ''),
+    )
+
+    const { steps: updatedSteps } = currentSteps.reduceRight(
+      ({ steps, deadline }, step) => {
+        const startDate = deadline.subtract(step.productionDays, 'day')
+        const deliveryDate = deadline
+
+        return {
+          steps: [...steps, { ...step, startDate, deliveryDate }],
+          deadline: startDate,
+        }
+      },
+      { steps: [] as Step[], deadline: needDate },
+    )
+
+    await Promise.all(
+      zip(currentSteps, updatedSteps)
+        .filter(
+          ([currentStep, updatedStep]) =>
+            currentStep.startDate !== updatedStep.startDate ||
+            currentStep.deliveryDate !== updatedStep.deliveryDate,
+        )
+        .map(([, updatedStep]) => updatedStep)
+        .map(
+          async (step) =>
+            await this.withUpdatePatch(accountId, step.id, (patch) => {
+              patch.setDate(
+                fields.startDate,
+                step.startDate?.toISOString() ?? null,
+              )
+              patch.setDate(
+                fields.deliveryDate,
+                step.deliveryDate?.toISOString() ?? null,
+              )
+            }),
+        ),
+    )
   }
 }
