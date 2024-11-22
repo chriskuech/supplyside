@@ -14,7 +14,7 @@ export async function getParts(): Promise<PartModel[]> {
   const { accountId } = await requireSession()
   const parts = (await readResources(accountId, 'Part')) ?? []
 
-  return await Promise.all(
+  const unsortedParts = await Promise.all(
     parts.map(async (part) => {
       const jobRef = selectResourceFieldValue(part, fields.job)?.resource
       if (!jobRef) return fail('Part does not have a Job')
@@ -75,4 +75,6 @@ export async function getParts(): Promise<PartModel[]> {
       } satisfies PartModel
     }),
   )
+
+  return sortBy(unsortedParts, (p) => p.needBy ?? new Date(0))
 }
