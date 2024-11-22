@@ -3,7 +3,11 @@
 import { DataGridPro } from '@mui/x-data-grid-pro'
 import { ValueResource, fields } from '@supplyside/model'
 import { useRouter } from 'next/navigation'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import { updateResource } from '@/actions/resource'
+
+dayjs.extend(utc)
 
 type Row = {
   id: string
@@ -12,9 +16,9 @@ type Row = {
   partName: string | null
   quantity: number | null
   hours: number | null
-  startDate: Date | null
-  deliveryDate: Date | null
-  needDate: Date | null
+  startDate: string | null
+  deliveryDate: string | null
+  needDate: string | null
   job: ValueResource | null
 }
 
@@ -59,12 +63,18 @@ export const StepsTable = ({ rows }: Props) => {
         {
           field: 'startDate',
           headerName: 'Start Date',
-          type: 'date',
+          type: 'string',
+          valueGetter: (e, { startDate }) =>
+            startDate ? dayjs(startDate).utc().format('MM/DD/YYYY') : null,
         },
         {
           field: 'deliveryDate',
           headerName: 'Delivery Date',
-          type: 'date',
+          type: 'string',
+          valueGetter: (e, { deliveryDate }) =>
+            deliveryDate
+              ? dayjs(deliveryDate).utc().format('MM/DD/YYYY')
+              : null,
         },
       ]}
       rows={rows}
