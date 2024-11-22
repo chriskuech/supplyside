@@ -11,7 +11,6 @@ import {
   Button,
   Card,
   Divider,
-  FormLabel,
   IconButton,
   Stack,
   Tooltip,
@@ -20,23 +19,22 @@ import {
 import {
   Add,
   Assignment,
+  CalendarMonth,
   Checklist,
   Close,
-  Info,
   Link,
   ShoppingBag,
+  StickyNote2,
   StoreMallDirectory,
 } from '@mui/icons-material'
-import { FC, useRef } from 'react'
+import { FC } from 'react'
 import NextLink from 'next/link'
 import { createPurchaseStep, createWorkCenterStep, deleteStep } from './actions'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import OptionChip from '@/lib/resource/fields/views/OptionChip'
 import ReadonlyTextarea from '@/lib/resource/fields/views/ReadonlyTextarea'
-import { formatDate } from '@/lib/format'
 import ResourceTable from '@/lib/resource/table/ResourceTable'
 import CreateResourceButton from '@/lib/resource/CreateResourceButton'
-import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useConfirmation } from '@/lib/confirmation'
 
 type Props = {
@@ -147,11 +145,7 @@ const StepView: FC<StepViewProps> = ({
   operations,
 }) => {
   const confirm = useConfirmation()
-  const operationsFrameRef = useRef<HTMLDivElement>(null)
-  const operationsFrameBox = useResizeObserver(operationsFrameRef)
 
-  const needDate =
-    purchase && selectResourceFieldValue(purchase, fields.needDate)?.date
   const status =
     purchase &&
     selectResourceFieldValue(purchase, fields.purchaseStatus)?.option
@@ -162,199 +156,38 @@ const StepView: FC<StepViewProps> = ({
     purchase && selectResourceFieldValue(purchase, fields.vendor)?.resource
 
   return (
-    <Stack direction="row" spacing={1} p={2}>
-      <Box sx={{ opacity: 0.5 }} width={40} textAlign="right" py={1}>
-        <Typography
-          sx={{
-            opacity: 0.5,
-            display: 'inline',
-            fontSize: '0.7em',
-            verticalAlign: 'text-top',
-          }}
-        >
-          #
-        </Typography>
-        {index}
-      </Box>
+    <Box px={12} py={2} position="relative">
+      <Stack
+        position="absolute"
+        top={0}
+        left={0}
+        direction="row"
+        alignItems="center"
+        py={2}
+        spacing={1}
+      >
+        <Box sx={{ opacity: 0.5 }} width={40} textAlign="right">
+          <Typography
+            sx={{
+              opacity: 0.5,
+              display: 'inline',
+              fontSize: '0.7em',
+              verticalAlign: 'text-top',
+            }}
+          >
+            #
+          </Typography>
+          {index}
+        </Box>
 
-      <Box>
         <FieldControl
           schemaData={stepSchema}
           resource={step}
           field={fields.completed}
         />
-      </Box>
-
-      <Stack direction="column" spacing={1} flexGrow={1}>
-        {purchase ? (
-          <>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Button
-                variant="text"
-                sx={{
-                  alignItems: 'center',
-                  '& .end-icon': {
-                    visibility: 'hidden',
-                  },
-                  '&:hover .end-icon': {
-                    visibility: 'visible',
-                  },
-                  py: 1,
-                  overflow: 'ellipsis',
-                }}
-                component={NextLink}
-                href={`/purchases/${purchase.key}`}
-                startIcon={<ShoppingBag />}
-                endIcon={<Link className="end-icon" />}
-              >
-                Purchase #{purchase.key}
-              </Button>
-              <Box flexGrow={1} />
-              {vendor && (
-                <Button
-                  variant="text"
-                  sx={{
-                    alignItems: 'center',
-                    '& .end-icon': {
-                      visibility: 'hidden',
-                    },
-                    '&:hover .end-icon': {
-                      visibility: 'visible',
-                    },
-                    py: 1,
-                    overflow: 'ellipsis',
-                  }}
-                  component={NextLink}
-                  href={`/vendor/${vendor.key}`}
-                  startIcon={<StoreMallDirectory />}
-                  endIcon={<Link className="end-icon" />}
-                >
-                  {vendor.name}
-                </Button>
-              )}
-              {status && <OptionChip size="small" option={status} />}
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Tooltip title="The number of days required to complete the step, for Job scheduling.">
-                  <FormLabel sx={{ fontSize: '0.7em', height: 'fit-content' }}>
-                    Production
-                    <br />
-                    Days <Info color="primary" sx={{ fontSize: '1em' }} />
-                  </FormLabel>
-                </Tooltip>
-                <Box width={120}>
-                  <FieldControl
-                    schemaData={stepSchema}
-                    resource={step}
-                    field={fields.productionDays}
-                  />
-                </Box>
-              </Stack>
-              {needDate && (
-                <Tooltip title="Need Date">
-                  <strong>{formatDate(needDate) ?? '-'}</strong>
-                </Tooltip>
-              )}
-            </Stack>
-
-            {purchaseDescription && (
-              <ReadonlyTextarea value={purchaseDescription} />
-            )}
-          </>
-        ) : (
-          <>
-            <Stack direction="row" spacing={2}>
-              <Box flexGrow={1}>
-                <FieldControl
-                  schemaData={stepSchema}
-                  resource={step}
-                  field={fields.workCenter}
-                />
-              </Box>
-
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Tooltip title="The number of hours required to complete the step, for Work Center scheduling.">
-                  <FormLabel sx={{ fontSize: '0.7em', height: 'fit-content' }}>
-                    Production
-                    <br />
-                    Hours <Info color="primary" sx={{ fontSize: '1em' }} />
-                  </FormLabel>
-                </Tooltip>
-                <Box width={120}>
-                  <FieldControl
-                    schemaData={stepSchema}
-                    resource={step}
-                    field={fields.hours}
-                  />
-                </Box>
-              </Stack>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Tooltip title="The number of days required to complete the step, for Job scheduling.">
-                  <FormLabel sx={{ fontSize: '0.7em', height: 'fit-content' }}>
-                    Production
-                    <br />
-                    Days <Info color="primary" sx={{ fontSize: '1em' }} />
-                  </FormLabel>
-                </Tooltip>
-                <Box width={120}>
-                  <FieldControl
-                    schemaData={stepSchema}
-                    resource={step}
-                    field={fields.productionDays}
-                  />
-                </Box>
-              </Stack>
-            </Stack>
-
-            <FieldControl
-              schemaData={stepSchema}
-              resource={step}
-              field={fields.otherNotes}
-              inputProps={{ placeholder: 'Notes' }}
-            />
-
-            <Card variant="outlined">
-              <Stack spacing={1} ref={operationsFrameRef}>
-                <Stack direction="row" alignItems="center" p={1} spacing={1}>
-                  <Assignment color="disabled" />
-                  <Typography variant="h6" flexGrow={1}>
-                    Operations
-                  </Typography>
-                  <CreateResourceButton
-                    resourceType="Operation"
-                    fields={[
-                      {
-                        field: fields.step,
-                        valueInput: { resourceId: step.id },
-                      },
-                      {
-                        field: fields.sequenceNumber,
-                        valueInput: { number: operations.length + 1 },
-                      },
-                    ]}
-                    buttonProps={{ size: 'small' }}
-                  />
-                </Stack>
-
-                {!!operations.length && (
-                  <Box width={operationsFrameBox?.width ?? 0} overflow="auto">
-                    <ResourceTable
-                      tableKey="operations"
-                      schemaData={operationSchema}
-                      resources={operations}
-                      isEditable
-                      hideId
-                      slots={{ toolbar: undefined }}
-                      hideFields={[fields.step, fields.workCenter]}
-                    />
-                  </Box>
-                )}
-              </Stack>
-            </Card>
-          </>
-        )}
       </Stack>
 
-      <Box py={0.5}>
+      <Box px={4} py={2.5} position="absolute" top={0} right={0}>
         <IconButton
           onClick={async () => {
             const isConfirmed = await confirm({
@@ -370,6 +203,171 @@ const StepView: FC<StepViewProps> = ({
           <Close />
         </IconButton>
       </Box>
-    </Stack>
+
+      <Stack direction="column" spacing={2} flexGrow={1}>
+        {purchase ? (
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Button
+              variant="text"
+              sx={{
+                alignItems: 'center',
+                '& .end-icon': {
+                  visibility: 'hidden',
+                },
+                '&:hover .end-icon': {
+                  visibility: 'visible',
+                },
+                py: 1,
+                overflow: 'ellipsis',
+              }}
+              component={NextLink}
+              href={`/purchases/${purchase.key}`}
+              startIcon={<ShoppingBag />}
+              endIcon={<Link className="end-icon" />}
+            >
+              Purchase #{purchase.key}
+            </Button>
+            <Box flexGrow={1} />
+            {vendor && (
+              <Button
+                variant="text"
+                sx={{
+                  alignItems: 'center',
+                  '& .end-icon': {
+                    visibility: 'hidden',
+                  },
+                  '&:hover .end-icon': {
+                    visibility: 'visible',
+                  },
+                  py: 1,
+                  overflow: 'ellipsis',
+                }}
+                component={NextLink}
+                href={`/vendor/${vendor.key}`}
+                startIcon={<StoreMallDirectory />}
+                endIcon={<Link className="end-icon" />}
+              >
+                {vendor.name}
+              </Button>
+            )}
+            {status && <OptionChip size="small" option={status} />}
+          </Stack>
+        ) : (
+          <FieldControl
+            schemaData={stepSchema}
+            resource={step}
+            field={fields.workCenter}
+          />
+        )}
+
+        <Stack direction="row" spacing={1}>
+          <Box flexShrink={0} pt={1}>
+            <CalendarMonth color="disabled" />
+          </Box>
+          <Box flex={3}>
+            <Typography variant="caption" gutterBottom>
+              Start Date
+            </Typography>
+            <FieldControl
+              field={fields.startDate}
+              resource={step}
+              schemaData={stepSchema}
+            />
+          </Box>
+          <Box flex={3}>
+            <Typography variant="caption" gutterBottom>
+              Delivery Date
+            </Typography>
+            <FieldControl
+              field={fields.deliveryDate}
+              resource={step}
+              schemaData={stepSchema}
+            />
+          </Box>
+          <Box flex={2}>
+            <Typography variant="caption" gutterBottom>
+              Production Hours
+            </Typography>
+            <FieldControl
+              field={fields.hours}
+              resource={step}
+              schemaData={stepSchema}
+              disabled={!!purchase}
+            />
+          </Box>
+          <Box flex={2}>
+            <Typography variant="caption" gutterBottom>
+              Production Days
+            </Typography>
+            <FieldControl
+              field={fields.productionDays}
+              resource={step}
+              schemaData={stepSchema}
+            />
+          </Box>
+        </Stack>
+
+        {(!purchase || purchaseDescription) && (
+          <Stack direction="row" spacing={1}>
+            <Box flexShrink={0}>
+              <StickyNote2 color="disabled" />
+            </Box>
+            <Box flexGrow={1}>
+              {purchase ? (
+                <ReadonlyTextarea value={purchaseDescription ?? '-'} />
+              ) : (
+                <FieldControl
+                  schemaData={stepSchema}
+                  resource={step}
+                  field={fields.otherNotes}
+                  inputProps={{ placeholder: 'Notes' }}
+                />
+              )}
+            </Box>
+          </Stack>
+        )}
+
+        {!purchase && (
+          <Stack spacing={1}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Assignment color="disabled" />
+              <Typography variant="h6" flexGrow={1}>
+                Operations
+              </Typography>
+              <CreateResourceButton
+                resourceType="Operation"
+                fields={[
+                  {
+                    field: fields.step,
+                    valueInput: { resourceId: step.id },
+                  },
+                  {
+                    field: fields.sequenceNumber,
+                    valueInput: { number: operations.length + 1 },
+                  },
+                ]}
+                buttonProps={{ size: 'small' }}
+              />
+            </Stack>
+
+            {!!operations.length && (
+              <Box pl={4}>
+                <Card variant="outlined">
+                  <ResourceTable
+                    tableKey="operations"
+                    schemaData={operationSchema}
+                    resources={operations}
+                    isEditable
+                    hideId
+                    slots={{ toolbar: undefined }}
+                    hideFields={[fields.step, fields.workCenter]}
+                  />
+                </Card>
+              </Box>
+            )}
+          </Stack>
+        )}
+      </Stack>
+    </Box>
   )
 }

@@ -184,8 +184,8 @@ const reschedulePart = async (partId: string, needDate: Dayjs) => {
     zip(currentSteps, updatedSteps)
       .filter(
         ([currentStep, updatedStep]) =>
-          currentStep.deliveryDate !== updatedStep.deliveryDate ||
-          currentStep.startDate !== updatedStep.startDate,
+          currentStep.startDate !== updatedStep.startDate ||
+          currentStep.deliveryDate !== updatedStep.deliveryDate,
       )
       .map(([, updatedStep]) => updatedStep)
       .map(
