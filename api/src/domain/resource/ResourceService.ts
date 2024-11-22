@@ -567,6 +567,7 @@ export class ResourceService {
       }
     })()
 
+    // reschedule steps
     await (async () => {
       if (type === 'Step' && patch.hasPatch(fields.productionDays)) {
         const productionDays = patch.getNumber(fields.productionDays)
