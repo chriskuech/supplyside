@@ -984,14 +984,16 @@ export class ResourceService {
   }
 
   private async rescheduleSteps(accountId: string, partId: string) {
-    const part = await this.read(accountId, partId)
+    const [part, unorderedSteps] = await Promise.all([
+      this.read(accountId, partId),
+      this.list(accountId, 'Step', {
+        where: { '==': [{ var: fields.part.name }, partId] },
+      }),
+    ])
+
     const needDateString = selectResourceFieldValue(part, fields.needDate)?.date
     if (!needDateString) return
     const needDate = dayjs(needDateString)
-
-    const unorderedSteps = await this.list(accountId, 'Step', {
-      where: { '==': [{ var: fields.part.name }, partId] },
-    })
 
     type Step = {
       id: string
