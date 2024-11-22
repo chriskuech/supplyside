@@ -4,6 +4,7 @@ import { Box, Typography, Chip, Stack } from '@mui/material'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { FC, ReactNode } from 'react'
+import { useMobileDrawer } from './MobileContext'
 
 export const ItemLink: FC<{
   title: string
@@ -11,6 +12,8 @@ export const ItemLink: FC<{
   icon?: ReactNode
   count?: number
 }> = ({ title, href, icon, count }) => {
+  const { setIsOpen } = useMobileDrawer()
+
   const pathname = usePathname()
 
   const isActive = href.toLowerCase() === pathname.toLowerCase()
@@ -37,7 +40,11 @@ export const ItemLink: FC<{
               color: 'text.primary',
             },
           }}
-          lineHeight="1.7em"
+          lineHeight={{
+            xs: '2.5em',
+            md: '1.7em',
+          }}
+          onClick={() => setIsOpen(false)}
         >
           {icon && (
             <Box
