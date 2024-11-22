@@ -21,7 +21,7 @@ import assert, { fail } from 'assert'
 import dayjs, { Dayjs } from 'dayjs'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter.js'
 import { inject, injectable } from 'inversify'
-import { map, pipe, sum } from 'remeda'
+import { map, pipe, sortBy, sum, zip } from 'remeda'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
 import { SchemaService } from '../schema/SchemaService'
@@ -567,6 +567,29 @@ export class ResourceService {
       }
     })()
 
+    // reschedule steps
+    await (async () => {
+      if (type === 'Step' && patch.hasPatch(fields.productionDays)) {
+        const productionDays = patch.getNumber(fields.productionDays)
+        if (!productionDays) return
+
+        const partId = patch.getResourceId(fields.part)
+        if (!partId) return
+
+        await this.rescheduleSteps(accountId, partId)
+      }
+
+      if (type === 'Part' && patch.hasPatch(fields.needDate)) {
+        const needDate = patch.getDate(fields.needDate)
+        if (!needDate) return
+
+        const partId = patch.resource?.id
+        if (!partId) return
+
+        await this.rescheduleSteps(accountId, partId)
+      }
+    })()
+
     // sync children
     await Promise.all(
       relations
@@ -958,5 +981,84 @@ export class ResourceService {
       .otherwise(() => fail('Recurring resource type not supported'))
 
     return destination
+  }
+
+  private async rescheduleSteps(accountId: string, partId: string) {
+    const [part, unorderedSteps] = await Promise.all([
+      this.read(accountId, partId),
+      this.list(accountId, 'Step', {
+        where: { '==': [{ var: fields.part.name }, partId] },
+      }),
+    ])
+
+    const needDateString = selectResourceFieldValue(part, fields.needDate)?.date
+    if (!needDateString) return
+    const needDate = dayjs(needDateString)
+
+    type Step = {
+      id: string
+      startDate: Dayjs | undefined
+      productionDays: number
+      deliveryDate: Dayjs | undefined
+    }
+
+    const currentSteps: Step[] = pipe(
+      unorderedSteps,
+      map((step) => {
+        const startDate = selectResourceFieldValue(step, fields.startDate)?.date
+        const productionDays = selectResourceFieldValue(
+          step,
+          fields.productionDays,
+        )?.number
+        const deliveryDate = selectResourceFieldValue(
+          step,
+          fields.deliveryDate,
+        )?.date
+
+        return {
+          id: step.id,
+          startDate: startDate ? dayjs(startDate) : undefined,
+          productionDays: productionDays ?? 0,
+          deliveryDate: deliveryDate ? dayjs(deliveryDate) : undefined,
+        }
+      }),
+      sortBy((step) => step.deliveryDate?.toISOString() ?? ''),
+    )
+
+    const { steps: updatedSteps } = currentSteps.reduceRight(
+      ({ steps, deadline }, step) => {
+        const startDate = deadline.subtract(step.productionDays, 'day')
+        const deliveryDate = deadline
+
+        return {
+          steps: [...steps, { ...step, startDate, deliveryDate }],
+          deadline: startDate,
+        }
+      },
+      { steps: [] as Step[], deadline: needDate },
+    )
+
+    await Promise.all(
+      zip(currentSteps, updatedSteps)
+        .filter(
+          ([currentStep, updatedStep]) =>
+            currentStep.startDate !== updatedStep.startDate ||
+            currentStep.deliveryDate !== updatedStep.deliveryDate,
+        )
+        .map(([, updatedStep]) => updatedStep)
+        .map(
+          async (step) =>
+            await this.withUpdatePatch(accountId, step.id, (patch) => {
+              patch.setDate(
+                fields.startDate,
+                step.startDate?.toISOString() ?? null,
+              )
+              patch.setDate(
+                fields.deliveryDate,
+                step.deliveryDate?.toISOString() ?? null,
+              )
+            }),
+        ),
+    )
   }
 }

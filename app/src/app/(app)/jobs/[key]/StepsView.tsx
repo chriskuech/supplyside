@@ -293,6 +293,7 @@ const StepView: FC<StepViewProps> = ({
               field={fields.startDate}
               resource={step}
               schemaData={stepSchema}
+              disabled
             />
           </Box>
           <Box flex={3}>
@@ -303,6 +304,7 @@ const StepView: FC<StepViewProps> = ({
               field={fields.deliveryDate}
               resource={step}
               schemaData={stepSchema}
+              disabled
             />
           </Box>
         </Stack>
