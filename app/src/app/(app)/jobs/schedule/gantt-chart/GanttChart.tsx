@@ -71,7 +71,7 @@ export default function GanttChart({
       !duplicateIds.length,
       `Duplicate event ids: ${duplicateIds.map((id) => id).join(', ')}`,
     )
-  }, [drawerWidth, items])
+  }, [items])
 
   return (
     <Stack direction="row" minHeight="100%" width="100%" position="relative">
