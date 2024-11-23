@@ -22,8 +22,8 @@ export default async function Layout({
         <Card
           component={Box}
           flexGrow={1}
-          margin={1}
-          borderRadius={1}
+          margin={{ xs: 0, md: 1 }}
+          borderRadius={{ xs: 0, md: 1 }}
           elevation={0}
           variant="elevation"
           position="relative"

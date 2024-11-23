@@ -8,22 +8,15 @@ export function ToggleMobileDrawer() {
   const { setIsOpen } = useMobileDrawer()
 
   return (
-    <Box padding={2}>
-      <Box
-        sx={{
-          display: { xs: 'block', md: 'none' },
-        }}
+    <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+      <IconButton
+        onClick={() => setIsOpen(true)}
+        size="large"
+        color="inherit"
+        aria-label="menu"
       >
-        <IconButton
-          onClick={() => setIsOpen(true)}
-          size="large"
-          edge="start"
-          color="inherit"
-          aria-label="menu"
-        >
-          <Menu />
-        </IconButton>
-      </Box>
+        <Menu />
+      </IconButton>
     </Box>
   )
 }

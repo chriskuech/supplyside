@@ -15,14 +15,8 @@ export default function MobileDrawer({ children }: MobileDrawerProps) {
       anchor="left"
       open={isOpen}
       onClose={() => setIsOpen(false)}
-      PaperProps={{
-        sx: {
-          width: 350,
-        },
-      }}
-      sx={{
-        display: { md: 'none' },
-      }}
+      PaperProps={{ sx: { width: 350 } }}
+      sx={{ display: { md: 'none' } }}
     >
       <Box
         sx={{
