@@ -280,6 +280,9 @@ export default function NetCashflowChart({
     [jobsTotalCosts, billsTotalCosts, recurringBillsTotalCosts, weeks],
   )
 
+  const valueFormatter = (value: number | null) =>
+    formatMoney(value, { maximumFractionDigits: 0 }) ?? '-'
+
   return (
     <>
       <Typography variant="h6">Weekly Net Cashflow</Typography>
@@ -292,8 +295,7 @@ export default function NetCashflowChart({
             data: [null, ...jobsTotalCosts],
             color: blue[300],
             label: 'Jobs',
-            valueFormatter: (value: number | null) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
+            valueFormatter: valueFormatter,
           },
           {
             type: 'bar' as const,
@@ -304,8 +306,7 @@ export default function NetCashflowChart({
             ],
             color: teal[300],
             label: 'Bills',
-            valueFormatter: (value: number | null) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
+            valueFormatter: valueFormatter,
           },
           {
             type: 'bar' as const,
@@ -318,8 +319,7 @@ export default function NetCashflowChart({
             ],
             color: teal[100],
             label: 'Recurring Bills',
-            valueFormatter: (value: number | null) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
+            valueFormatter: valueFormatter,
           },
           {
             type: 'bar',
@@ -327,8 +327,7 @@ export default function NetCashflowChart({
             label: 'Overdue Jobs',
             color: red[100],
             data: [overdueJobsTotal],
-            valueFormatter: (value: number | null) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
+            valueFormatter: valueFormatter,
           },
           {
             type: 'bar',
@@ -336,16 +335,14 @@ export default function NetCashflowChart({
             label: 'Overdue Bills',
             color: red[200],
             data: [overdueBillsTotal * -1],
-            valueFormatter: (value: number | null) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
+            valueFormatter: valueFormatter,
           },
           {
             type: 'line',
             data: [overdueJobsTotal - overdueBillsTotal, ...netTotals],
             color: green[600],
             label: 'Net Total',
-            valueFormatter: (value: number | null) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
+            valueFormatter: valueFormatter,
           },
         ]}
         xAxis={[
@@ -356,8 +353,7 @@ export default function NetCashflowChart({
         ]}
         yAxis={[
           {
-            valueFormatter: (value) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
+            valueFormatter: valueFormatter,
           },
         ]}
       >
