@@ -100,16 +100,20 @@ export default function ResourceTable({
   isAdmin = false,
   ...props
 }: Props) {
-  const schema = new Schema(schemaData)
-  const tableSchema = new Schema({
-    ...schemaData,
-    fields: schemaData.fields.filter(
-      (field) =>
-        ![fields.sequenceNumber, ...(hideFields ?? [])].some(
-          (hf) => hf.templateId === field.templateId,
+  const schema = useMemo(() => new Schema(schemaData), [schemaData])
+  const tableSchema = useMemo(
+    () =>
+      new Schema({
+        ...schemaData,
+        fields: schemaData.fields.filter(
+          (field) =>
+            ![fields.sequenceNumber, ...(hideFields ?? [])].some(
+              (hf) => hf.templateId === field.templateId,
+            ),
         ),
-    ),
-  })
+      }),
+    [schemaData, hideFields],
+  )
   const isChartsEnabled = Charts !== undefined
   const [showCharts, setShowCharts] = useState(isChartsEnabled)
   const [isGridRendered, setIsGridRendered] = useState(false)
@@ -193,7 +197,7 @@ export default function ResourceTable({
       indexed,
       isSequence,
       hideId,
-      tableSchema.fields,
+      tableSchema,
       isEditable,
       unFilterableFieldIds,
       specialColumnWidths,
