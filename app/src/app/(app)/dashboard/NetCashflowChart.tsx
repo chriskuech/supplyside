@@ -33,7 +33,7 @@ import weekOfYear from 'dayjs/plugin/weekOfYear'
 import isBetween from 'dayjs/plugin/isBetween'
 import { useMemo } from 'react'
 import { Typography } from '@mui/material'
-import { blue, green, red, teal } from '@mui/material/colors'
+import { blue, green, grey, red } from '@mui/material/colors'
 import { formatMoney } from '@/lib/format'
 import { billStatusOrder, jobStatusOrder } from '@/lib/constants/status'
 import { CASHFLOW_WEEKS } from '@/lib/constants/charts'
@@ -280,8 +280,10 @@ export default function NetCashflowChart({
     [jobsTotalCosts, billsTotalCosts, recurringBillsTotalCosts, weeks],
   )
 
-  const valueFormatter = (value: number | null) =>
-    formatMoney(value, { maximumFractionDigits: 0 }) ?? '-'
+  // Hack to hide the items on the tooltip that do not have a value
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const valueFormatter = (value: number | null): any =>
+    formatMoney(value, { maximumFractionDigits: 0 }) ?? null
 
   return (
     <>
@@ -293,7 +295,7 @@ export default function NetCashflowChart({
             type: 'bar' as const,
             stack: 'unique',
             data: [null, ...jobsTotalCosts],
-            color: blue[300],
+            color: green[300],
             label: 'Jobs',
             valueFormatter: valueFormatter,
           },
@@ -304,7 +306,7 @@ export default function NetCashflowChart({
               null,
               ...billsTotalCosts.map((cost) => (cost ? cost * -1 : null)),
             ],
-            color: teal[300],
+            color: blue[300],
             label: 'Bills',
             valueFormatter: valueFormatter,
           },
@@ -317,14 +319,14 @@ export default function NetCashflowChart({
                 cost ? cost * -1 : null,
               ),
             ],
-            color: teal[100],
+            color: grey[300],
             label: 'Recurring Bills',
             valueFormatter: valueFormatter,
           },
           {
             type: 'bar',
             stack: 'unique',
-            label: 'Overdue Jobs',
+            label: 'Jobs',
             color: red[100],
             data: [overdueJobsTotal],
             valueFormatter: valueFormatter,
@@ -332,7 +334,7 @@ export default function NetCashflowChart({
           {
             type: 'bar',
             stack: 'unique',
-            label: 'Overdue Bills',
+            label: 'Bills',
             color: red[200],
             data: [overdueBillsTotal * -1],
             valueFormatter: valueFormatter,
@@ -340,7 +342,7 @@ export default function NetCashflowChart({
           {
             type: 'line',
             data: [overdueJobsTotal - overdueBillsTotal, ...netTotals],
-            color: green[600],
+            color: green[700],
             label: 'Net Total',
             valueFormatter: valueFormatter,
           },
