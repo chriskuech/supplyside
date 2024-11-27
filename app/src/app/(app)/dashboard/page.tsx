@@ -72,7 +72,7 @@ export default async function Dashboard() {
       <Typography variant="h4" gutterBottom>
         Dashboard
       </Typography>
-      <Stack height={200}>
+      <Stack height={400}>
         <NetCashflowChart
           jobs={jobs ?? []}
           bills={bills ?? []}

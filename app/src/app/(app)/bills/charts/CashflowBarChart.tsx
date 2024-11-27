@@ -213,6 +213,11 @@ export default function CashflowBarChart({
     [resources, weekStart],
   )
 
+  // Hack to hide the items on the tooltip that do not have a value
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const valueFormatter = (value: number | null): any =>
+    formatMoney(value, { maximumFractionDigits: 0 }) ?? null
+
   return (
     <>
       <Typography variant="h6">Weekly Cashflow</Typography>
@@ -229,8 +234,7 @@ export default function CashflowBarChart({
             label: Object.values(billStatusOptions).find(
               (option) => option.templateId === tc.statusTemplateId,
             )?.name,
-            valueFormatter: (value: number | null) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
+            valueFormatter,
           })),
           {
             type: 'bar',
@@ -247,8 +251,7 @@ export default function CashflowBarChart({
             label: 'overdue',
             color: red[200],
             data: [overdueBillsTotal],
-            valueFormatter: (value: number | null) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
+            valueFormatter,
           },
         ]}
         xAxis={[
@@ -257,12 +260,7 @@ export default function CashflowBarChart({
             scaleType: 'band',
           },
         ]}
-        yAxis={[
-          {
-            valueFormatter: (value) =>
-              formatMoney(value, { maximumFractionDigits: 0 }) ?? '-',
-          },
-        ]}
+        yAxis={[{ valueFormatter }]}
       >
         <BarPlot />
         <ChartsTooltip />
