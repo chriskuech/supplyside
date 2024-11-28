@@ -51,6 +51,18 @@ export const StepsTable = ({ rows }: Props) => {
           type: 'string',
         },
         {
+          field: 'customerName',
+          headerName: 'Customer',
+          flex: 1,
+          type: 'string',
+        },
+        {
+          field: 'customerPoNumber',
+          headerName: 'Customer PO',
+          flex: 1,
+          type: 'string',
+        },
+        {
           field: 'quantity',
           headerName: 'Quantity',
           type: 'number',

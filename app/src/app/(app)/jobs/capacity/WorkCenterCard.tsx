@@ -90,6 +90,10 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
       completed:
         selectResourceFieldValue(step, fields.completed)?.boolean ?? null,
       partName: selectResourceFieldValue(part, fields.partName)?.string ?? null,
+      customerName:
+        selectResourceFieldValue(part, fields.customer)?.resource?.name ?? null,
+      customerPoNumber:
+        selectResourceFieldValue(part, fields.customerPoNumber)?.string ?? null,
       hours: selectResourceFieldValue(step, fields.hours)?.number ?? null,
       startDate: selectResourceFieldValue(step, fields.startDate)?.date ?? null,
       deliveryDate:
