@@ -19,12 +19,7 @@ export const GanttChartGridHeader: FC<Props> = ({
   startDate,
   numDays,
 }) => (
-  <Box
-    height={`${height}px`}
-    marginTop={`${-height}px`}
-    position="relative"
-    sx={{ outline: '1px solid red' }}
-  >
+  <Box height={`${height}px`} marginTop={`${-height}px`} position="relative">
     {/* Headers */}
     {range(0, numDays).map((i) => (
       <Box
