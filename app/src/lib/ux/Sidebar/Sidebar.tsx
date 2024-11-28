@@ -134,18 +134,26 @@ export default async function Sidebar() {
     },
   })
 
-  const [inProcessJobs, openJobs, openPurchases, unpaidBills] =
+  const gettingRecurringBills = readResources(accountId, 'Bill', {
+    where: {
+      '==': [{ var: fields.recurring.name }, true],
+    },
+  })
+
+  const [inProcessJobs, openJobs, openPurchases, unpaidBills, recurringBills] =
     await Promise.all([
       gettingInProcessJobs,
       gettingOpenJobs,
       gettingOpenPurchases,
       gettingUnpaidBills,
+      gettingRecurringBills,
     ])
 
   const openJobCount = openJobs?.length ?? 0
   const inProcessJobCount = inProcessJobs?.length ?? 0
   const openPurchaseCount = openPurchases?.length ?? 0
   const unpaidBillCount = unpaidBills?.length ?? 0
+  const recurringBillCount = recurringBills?.length ?? 0
 
   return (
     <Stack
@@ -259,6 +267,7 @@ export default async function Sidebar() {
             title="Recurring Bills"
             href="/bills/recurring"
             icon={<EventRepeat fontSize="small" />}
+            count={recurringBillCount}
           />
           <ItemLink
             title="Lines"
