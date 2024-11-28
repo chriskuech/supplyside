@@ -4,8 +4,9 @@ import dayjs, { Dayjs } from 'dayjs'
 import { FC } from 'react'
 import { range } from 'remeda'
 
+const height = 100
+
 type Props = {
-  height: number
   gridCellWidth: number
   gridCellHeight: number
   startDate: Dayjs
@@ -13,13 +14,17 @@ type Props = {
 }
 
 export const GanttChartGridHeader: FC<Props> = ({
-  height,
   gridCellWidth,
   gridCellHeight,
   startDate,
   numDays,
 }) => (
-  <Box height={`${height}px`} marginTop={`${-height}px`} position="relative">
+  <Box
+    height={`${height}px`}
+    marginTop={`${-height}px`}
+    position="relative"
+    sx={{ outline: '1px solid red' }}
+  >
     {/* Headers */}
     {range(0, numDays).map((i) => (
       <Box

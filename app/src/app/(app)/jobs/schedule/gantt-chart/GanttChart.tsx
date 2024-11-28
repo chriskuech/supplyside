@@ -18,36 +18,33 @@ dayjs.extend(utc)
 const isScrolledToRight = (element: HTMLElement): boolean =>
   element.scrollLeft + element.clientWidth >= element.scrollWidth
 
-const gridCellWidth = 30
-const gridCellHeight = 60
-
-const topDim = 180
-
-const minDrawerWidth = 450
-const initialDrawerWidth = 500
-const maxDrawerWidth = 800
-const clampDrawerWidth = (width: number) =>
-  Math.min(Math.max(width, minDrawerWidth), maxDrawerWidth)
-
 export type GanttChartProps = {
+  gridCellWidth: number
+  gridCellHeight: number
   drawerHeader: React.ReactNode
   stageHeader: React.ReactNode
   headerHeight: number
   items: GanttChartItem[]
   locked: boolean
+  minDrawerWidth: number
+  initialDrawerWidth: number
+  maxDrawerWidth: number
 }
 
-const initialScrollOffset = gridCellWidth
-
 export default function GanttChart({
+  gridCellWidth,
+  gridCellHeight,
   headerHeight,
   drawerHeader,
   stageHeader,
   items,
   locked,
+  minDrawerWidth,
+  initialDrawerWidth,
+  maxDrawerWidth,
 }: GanttChartProps) {
   const [drawerWidth, setDrawerWidth] = useState(initialDrawerWidth)
-  const [scrollOffset, setScrollOffset] = useState(initialScrollOffset)
+  const [scrollOffset, setScrollOffset] = useState(gridCellWidth)
   const [minDate, setMinDate] = useState(dayjs().utc().day(0).startOf('day'))
   const [numWeeks, setNumWeeks] = useState(12)
 
@@ -74,6 +71,9 @@ export default function GanttChart({
       `Duplicate event ids: ${duplicateIds.map((id) => id).join(', ')}`,
     )
   }, [items])
+
+  const clampDrawerWidth = (width: number) =>
+    Math.min(Math.max(width, minDrawerWidth), maxDrawerWidth)
 
   return (
     <Stack direction="row" minHeight="100%" width="100%" position="relative">
@@ -123,7 +123,6 @@ export default function GanttChart({
         <Box height={headerHeight} />
 
         <GanttChartGridHeader
-          height={topDim}
           gridCellWidth={gridCellWidth}
           gridCellHeight={gridCellHeight}
           startDate={minDate}

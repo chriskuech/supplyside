@@ -100,6 +100,11 @@ export const PartScheduleView = ({
   return (
     <GanttChart
       locked
+      gridCellWidth={30}
+      gridCellHeight={60}
+      minDrawerWidth={400}
+      initialDrawerWidth={500}
+      maxDrawerWidth={800}
       drawerHeader={
         <Stack height="100%">
           <Typography variant="h4">
@@ -154,7 +159,7 @@ export const PartScheduleView = ({
           <Charts resources={jobs} />
         </Collapse>
       }
-      headerHeight={300}
+      headerHeight={330}
       items={parts.map((part) => ({
         id: part.id,
         label: <PartInformation part={part} />,
