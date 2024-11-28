@@ -1,6 +1,6 @@
 import { fail } from 'assert'
 import dayjs, { Dayjs } from 'dayjs'
-import dayOfYear from 'dayjs/plugin/dayOfYear'
+import dayOfYear from 'dayjs/plugin/dayOfYear.js'
 import isBetween from 'dayjs/plugin/isBetween.js'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter.js'
 import { match } from 'ts-pattern'
