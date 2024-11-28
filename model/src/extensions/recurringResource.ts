@@ -1,5 +1,6 @@
 import { fail } from 'assert'
 import dayjs, { Dayjs } from 'dayjs'
+import dayOfYear from 'dayjs/plugin/dayOfYear'
 import isBetween from 'dayjs/plugin/isBetween.js'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter.js'
 import { match } from 'ts-pattern'
@@ -9,6 +10,7 @@ import { selectResourceFieldValue } from './resource'
 
 dayjs.extend(isBetween)
 dayjs.extend(isSameOrAfter)
+dayjs.extend(dayOfYear)
 
 export const getNextResourceCreationDate = (
   recurringResource: Resource,
@@ -35,36 +37,77 @@ export const getNextResourceCreationDate = (
     fields.recurrenceStartedAt,
   )?.date
 
-  const startDate =
-    recurrenceLastExecutionDate &&
-    recurrenceStartedAt &&
-    dayjs(recurrenceStartedAt).isBefore(dayjs(recurrenceLastExecutionDate))
-      ? recurrenceLastExecutionDate
-      : recurrenceStartedAt
+  const offsetInDays = recurrenceIntervalOffsetInDays ?? 0
 
-  if (!startDate || !recurrenceInterval || !recurrenceIntervalUnitTemplateId)
+  if (
+    !recurrenceInterval ||
+    !recurrenceIntervalUnitTemplateId ||
+    !recurrenceStartedAt
+  )
     return null
 
-  const lastDate = date || dayjs(startDate)
+  // Calculate first trigger date
+  if (
+    !date &&
+    (!recurrenceLastExecutionDate ||
+      dayjs(recurrenceStartedAt).isAfter(dayjs(recurrenceLastExecutionDate)))
+  ) {
+    const recurrenceStartDate = dayjs(recurrenceStartedAt)
+
+    return match(recurrenceIntervalUnitTemplateId)
+      .with(intervalUnits.days.templateId, () =>
+        recurrenceStartDate.add(recurrenceInterval, 'day'),
+      )
+      .with(intervalUnits.weeks.templateId, () => {
+        if (recurrenceStartDate.day() <= offsetInDays) {
+          return recurrenceStartDate.set('day', offsetInDays)
+        }
+
+        return recurrenceStartDate
+          .add(recurrenceInterval, 'week')
+          .set('day', offsetInDays)
+      })
+      .with(intervalUnits.months.templateId, () => {
+        if (recurrenceStartDate.date() <= offsetInDays) {
+          return recurrenceStartDate.set('date', offsetInDays)
+        }
+
+        return recurrenceStartDate
+          .add(recurrenceInterval, 'month')
+          .set('date', offsetInDays)
+      })
+      .with(intervalUnits.years.templateId, () => {
+        if (recurrenceStartDate.dayOfYear() <= offsetInDays) {
+          return recurrenceStartDate.dayOfYear(offsetInDays)
+        }
+
+        return recurrenceStartDate
+          .add(recurrenceInterval, 'year')
+          .set('date', offsetInDays)
+      })
+      .otherwise(() => fail('Interval unit option not supported'))
+  }
+
+  const lastExecutionDate = date || dayjs(recurrenceLastExecutionDate)
 
   return match(recurrenceIntervalUnitTemplateId)
     .with(intervalUnits.days.templateId, () =>
-      lastDate.add(recurrenceInterval, 'day'),
+      dayjs(lastExecutionDate).add(recurrenceInterval, 'day'),
     )
     .with(intervalUnits.weeks.templateId, () =>
-      lastDate
+      dayjs(lastExecutionDate)
         .add(recurrenceInterval, 'week')
-        .set('day', recurrenceIntervalOffsetInDays ?? 0),
+        .set('day', offsetInDays),
     )
     .with(intervalUnits.months.templateId, () =>
-      lastDate
+      dayjs(lastExecutionDate)
         .add(recurrenceInterval, 'month')
-        .set('date', recurrenceIntervalOffsetInDays ?? 0),
+        .set('date', offsetInDays),
     )
     .with(intervalUnits.years.templateId, () =>
-      lastDate
+      dayjs(lastExecutionDate)
         .add(recurrenceInterval, 'year')
-        .set('date', recurrenceIntervalOffsetInDays ?? 0),
+        .set('date', offsetInDays),
     )
     .otherwise(() => fail('Interval unit option not supported'))
 }

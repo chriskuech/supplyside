@@ -955,29 +955,25 @@ export class ResourceService {
 
     if (!activeRecurringBills.length) return
 
-    await Promise.all(
-      activeRecurringBills.map(async (recurringBill) => {
-        const newResourcesCreationDates = []
+    // `Resource.key` is (currently) created transactionally and thus not parallelizable
+    for (const recurringBill of activeRecurringBills) {
+      const newResourcesCreationDates = []
 
-        let nextCreationDate = getNextResourceCreationDate(recurringBill)
+      let nextCreationDate = getNextResourceCreationDate(recurringBill)
 
-        while (
-          nextCreationDate &&
-          !nextCreationDate.isSameOrAfter(dayjs(), 'day')
-        ) {
-          newResourcesCreationDates.push(nextCreationDate.clone())
-          nextCreationDate = getNextResourceCreationDate(
-            recurringBill,
-            nextCreationDate,
-          )
-        }
+      while (nextCreationDate && !nextCreationDate.isAfter(dayjs(), 'day')) {
+        newResourcesCreationDates.push(nextCreationDate.clone())
+        nextCreationDate = getNextResourceCreationDate(
+          recurringBill,
+          nextCreationDate,
+        )
+      }
 
-        // `Resource.key` is (currently) created transactionally and thus not parallelizable
-        for (const date of newResourcesCreationDates) {
-          await this.createRecurringResource(accountId, recurringBill.id, date)
-        }
-      }),
-    )
+      // `Resource.key` is (currently) created transactionally and thus not parallelizable
+      for (const date of newResourcesCreationDates) {
+        await this.createRecurringResource(accountId, recurringBill.id, date)
+      }
+    }
   }
 
   async createRecurringResource(
