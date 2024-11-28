@@ -13,6 +13,7 @@ import {
 import { readSchema } from '@/client/schema'
 import { readSelf } from '@/client/user'
 import { Account, readAccount } from '@/client/account'
+import { FieldData } from '@/actions/types'
 
 type DetailPageModel = {
   session: Session
@@ -59,9 +60,12 @@ export const readDetailPageModel = async (
   return { session, resource, schemaData, lineSchema, account, user }
 }
 
-export const cloneResource = async (resourceId: string) => {
+export const cloneResource = async (
+  resourceId: string,
+  fields?: FieldData[],
+) => {
   const { accountId } = await requireSession()
-  const resource = await clientCloneResource(accountId, resourceId)
+  const resource = await clientCloneResource(accountId, resourceId, fields)
 
   if (!resource) return
 

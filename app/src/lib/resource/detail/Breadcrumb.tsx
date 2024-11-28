@@ -20,7 +20,7 @@ type Props = {
   tools?: ReactNode[]
   path: { label: string; href: string }[]
   status?: Option
-  title?: string[]
+  title?: ReactNode[]
 }
 
 export default function Breadcrumb({ path, tools, status, title }: Props) {

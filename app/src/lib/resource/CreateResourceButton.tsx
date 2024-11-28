@@ -8,7 +8,7 @@ import { enqueueSnackbar } from 'notistack'
 import { createResource } from '@/actions/resource'
 import { FieldData } from '@/actions/types'
 
-type Props = {
+export type CreateResourceButtonProps = {
   label?: string
   resourceType: ResourceType
   fields?: FieldData[]
@@ -20,7 +20,7 @@ export default function CreateResourceButton({
   resourceType,
   fields = [],
   buttonProps,
-}: Props) {
+}: CreateResourceButtonProps) {
   const router = useRouter()
 
   const shouldRedirect = ['Bill', 'Job', 'Purchase'].includes(resourceType)

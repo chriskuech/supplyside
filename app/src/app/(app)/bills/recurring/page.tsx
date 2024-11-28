@@ -27,6 +27,10 @@ export default async function RecurringBills({
       filterItems={[recurringBillsFilter]}
       title="Recurring Bills"
       callToActions={[<BillsInboxControl key={BillsInboxControl.name} />]}
+      createResourceButtonProps={{
+        label: 'Recurring Bill',
+        fields: [{ field: fields.recurring, valueInput: { boolean: true } }],
+      }}
     />
   )
 }

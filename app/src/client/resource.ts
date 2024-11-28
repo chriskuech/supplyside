@@ -152,7 +152,11 @@ export const deleteResource = async (accountId: string, resourceId: string) => {
   })
 }
 
-export const cloneResource = async (accountId: string, resourceId: string) => {
+export const cloneResource = async (
+  accountId: string,
+  resourceId: string,
+  fields?: FieldData[],
+) => {
   revalidateTag('Resources')
 
   const { data: resource } = await client().POST(
@@ -161,6 +165,7 @@ export const cloneResource = async (accountId: string, resourceId: string) => {
       params: {
         path: { accountId, resourceId },
       },
+      body: fields,
     },
   )
 

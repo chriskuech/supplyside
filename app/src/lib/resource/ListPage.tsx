@@ -4,7 +4,9 @@ import { Resource, ResourceType } from '@supplyside/model'
 import { z } from 'zod'
 import { GridFilterItem, GridFilterModel } from '@mui/x-data-grid'
 import { GridApiPro } from '@mui/x-data-grid-pro'
-import CreateResourceButton from './CreateResourceButton'
+import CreateResourceButton, {
+  CreateResourceButtonProps,
+} from './CreateResourceButton'
 import { ResourceDrawer } from './ResourceDrawer'
 import { ListPageResourceTable } from './ListPageResourceTable'
 import { requireSession } from '@/session'
@@ -23,6 +25,7 @@ type Props = {
     recurringResources?: Resource[]
   }>
   recurringResources?: Resource[]
+  createResourceButtonProps?: Partial<CreateResourceButtonProps>
 }
 
 export default async function ListPage({
@@ -34,6 +37,7 @@ export default async function ListPage({
   title,
   Charts,
   recurringResources,
+  createResourceButtonProps,
 }: Props) {
   const { accountId } = await requireSession()
   const [schemaData, resources] = await Promise.all([
@@ -85,6 +89,7 @@ export default async function ListPage({
                         size: 'large',
                         color: 'secondary',
                       }}
+                      {...createResourceButtonProps}
                     />,
                   ]
                 : []),

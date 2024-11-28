@@ -46,7 +46,7 @@ type Props = {
     currentStatus: Option
   }
   specialColumnWidths?: ColumnWidths
-  title?: string[]
+  title?: ReactNode[]
 }
 
 export default function ResourceDetailPage({

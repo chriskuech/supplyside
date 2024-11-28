@@ -264,14 +264,34 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
           accountId: z.string().uuid(),
           resourceId: z.string().uuid(),
         }),
+        body: z
+          .array(
+            z.object({
+              fieldId: z.string().uuid(),
+              valueInput: ValueInputSchema,
+            }),
+          )
+          .optional(),
         response: {
           200: ResourceSchema,
         },
       },
-      handler: async ({ params: { accountId, resourceId } }) => {
+      handler: async ({ params: { accountId, resourceId }, body }) => {
         const service = container.resolve(ResourceService)
 
-        const resource = await service.cloneResource(accountId, resourceId)
+        let resource = await service.cloneResource(accountId, resourceId)
+
+        if (body) {
+          resource = await service.withUpdatePatch(
+            accountId,
+            resource.type,
+            (patch) => {
+              for (const { fieldId, valueInput } of body) {
+                patch.setPatch({ fieldId }, valueInput)
+              }
+            },
+          )
+        }
 
         return resource
       },

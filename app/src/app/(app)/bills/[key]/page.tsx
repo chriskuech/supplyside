@@ -4,7 +4,8 @@ import {
   fields,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import { Container } from '@mui/material'
+import { Container, Stack, Tooltip } from '@mui/material'
+import { EventRepeat } from '@mui/icons-material'
 import CallToAction from './CallToAction'
 import { BillAttachmentsControl } from './tools/BillAttachmentsControl'
 import AssigneeToolbarControl from '@/lib/resource/detail/AssigneeToolbarControl'
@@ -65,12 +66,16 @@ export default async function BillsDetail({
 
   return (
     <ResourceDetailPage
-      status={{
-        cancelStatusOptionTemplate: billStatusOptions.canceled,
-        draftStatusOptionTemplate: billStatusOptions.draft,
-        statusFieldTemplate: fields.billStatus,
-        currentStatus: status,
-      }}
+      status={
+        !isRecurring
+          ? {
+              cancelStatusOptionTemplate: billStatusOptions.canceled,
+              draftStatusOptionTemplate: billStatusOptions.draft,
+              statusFieldTemplate: fields.billStatus,
+              currentStatus: status,
+            }
+          : undefined
+      }
       path={[
         {
           label: 'Bills',
@@ -127,7 +132,7 @@ export default async function BillsDetail({
               />,
             ]
           : []),
-        ...(isDraft && !parentRecurringBill
+        ...(!parentRecurringBill && !isRecurring
           ? [
               <RecurringControl
                 key={RecurringControl.name}
@@ -151,6 +156,17 @@ export default async function BillsDetail({
       ]}
       linesBacklinkField={fields.bill}
       isReadOnly={!isDraft}
+      title={
+        isRecurring
+          ? [
+              <Stack justifyContent="center" key={EventRepeat.name}>
+                <Tooltip title="Recurring Bill">
+                  <EventRepeat fontSize="small" color="action" />
+                </Tooltip>
+              </Stack>,
+            ]
+          : undefined
+      }
       actions={
         <>
           {!isRecurring ? (
