@@ -5,12 +5,13 @@ import {
   Alert,
   Box,
   Stack,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { fields, Resource, selectResourceFieldValue } from '@supplyside/model'
 import { FC, PropsWithChildren } from 'react'
 import { isTruthy, sum } from 'remeda'
-import { ExpandMore } from '@mui/icons-material'
+import { Circle, CircleOutlined, ExpandMore } from '@mui/icons-material'
 import { StepsTable } from './StepsTable'
 import { WorkCenterLink } from './WorkCenterLink'
 import { readResource, readResources } from '@/client/resource'
@@ -128,6 +129,25 @@ export const WorkCenterCard: FC<PropsWithChildren<Props>> = async ({
           <Typography>
             <strong>{totalHours}</strong> Total Hours
           </Typography>
+          <Tooltip
+            title={
+              <>
+                <Typography fontSize="1em" fontWeight="bold">
+                  {totalHours > 40 ? 'Over' : totalHours < 40 ? 'Under' : 'At'}{' '}
+                  Capacity
+                </Typography>
+                <Typography textAlign="right" fontSize="0.8em">
+                  {totalHours} / 40 hrs
+                </Typography>
+              </>
+            }
+          >
+            {totalHours >= 40 ? (
+              <Circle color={totalHours > 40 ? 'error' : 'success'} />
+            ) : (
+              <CircleOutlined color="success" />
+            )}
+          </Tooltip>
         </Stack>
       </AccordionSummary>
       <AccordionDetails sx={{ px: 0 }}>
