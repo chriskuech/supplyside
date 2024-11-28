@@ -1,5 +1,5 @@
 import { Box, Container, Divider, Stack, Typography } from '@mui/material'
-import { PropsWithChildren, ReactNode } from 'react'
+import { Fragment, PropsWithChildren, ReactNode } from 'react'
 import { match } from 'ts-pattern'
 import {
   FieldTemplate,
@@ -9,8 +9,8 @@ import {
   Schema,
   SchemaData,
   fields,
-  selectResourceFieldValue,
 } from '@supplyside/model'
+import { isTruthy } from 'remeda'
 import ResourceForm from '../ResourceForm'
 import { ResourceDrawer } from '../ResourceDrawer'
 import DeleteResourceButton from '../DeleteResourceButton'
@@ -46,8 +46,7 @@ type Props = {
     currentStatus: Option
   }
   specialColumnWidths?: ColumnWidths
-  header?: ReactNode
-  customerName?: string
+  title?: string[]
 }
 
 export default function ResourceDetailPage({
@@ -64,57 +63,51 @@ export default function ResourceDetailPage({
   status,
   specialColumnWidths,
   children,
-  header,
-  customerName,
+  title,
 }: PropsWithChildren<Props>) {
-  const baseTools = (fontSize: 'small' | 'medium' | 'large') => (
-    <>
-      {resource.type !== 'Vendor' && (
-        <DuplicateResourceButton
-          key={DuplicateResourceButton.name}
-          resourceId={resource.id}
-          resourceType={resource.type}
+  const baseTools = (fontSize: 'small' | 'medium' | 'large') => [
+    resource.type !== 'Vendor' && (
+      <DuplicateResourceButton
+        key={DuplicateResourceButton.name}
+        resourceId={resource.id}
+        resourceType={resource.type}
+        fontSize={fontSize}
+      />
+    ),
+    status && (
+      <>
+        <EditResourceControl
           fontSize={fontSize}
-        />
-      )}
-      {status && (
-        <>
-          <EditResourceControl
-            fontSize={fontSize}
-            draftStatusOptionTemplate={status.draftStatusOptionTemplate}
-            statusFieldTemplate={status.statusFieldTemplate}
-            resourceId={resource.id}
-          />
-          <CancelResourceButton
-            resourceId={resource.id}
-            fontSize={fontSize}
-            statusFieldTemplate={status.statusFieldTemplate}
-            cancelStatusOptionTemplate={status.cancelStatusOptionTemplate}
-          />
-        </>
-      )}
-      {!resource.templateId && (
-        <DeleteResourceButton
-          key={DeleteResourceButton.name}
-          resourceType={resource.type}
+          draftStatusOptionTemplate={status.draftStatusOptionTemplate}
+          statusFieldTemplate={status.statusFieldTemplate}
           resourceId={resource.id}
-          size={fontSize}
         />
-      )}
-    </>
-  )
+        <CancelResourceButton
+          resourceId={resource.id}
+          fontSize={fontSize}
+          statusFieldTemplate={status.statusFieldTemplate}
+          cancelStatusOptionTemplate={status.cancelStatusOptionTemplate}
+        />
+      </>
+    ),
+    !resource.templateId && (
+      <DeleteResourceButton
+        key={DeleteResourceButton.name}
+        resourceType={resource.type}
+        resourceId={resource.id}
+        size={fontSize}
+      />
+    ),
+  ]
 
-  const tools = (fontSize: 'small' | 'medium' | 'large') => (
-    <>
-      {customTools(fontSize)}
-      <Divider key={Divider.name} orientation="vertical" flexItem />
-      {baseTools(fontSize)}
-    </>
-  )
+  const tools = (fontSize: 'small' | 'medium' | 'large') =>
+    [
+      ...customTools(fontSize),
+      <Divider key={Divider.name} orientation="vertical" flexItem />,
+      ...baseTools(fontSize),
+    ].filter(isTruthy)
 
   const schema = new Schema(schemaData)
-
-  const nameValue = selectResourceFieldValue(resource, fields.name)
 
   return (
     <>
@@ -122,31 +115,38 @@ export default function ResourceDetailPage({
         path={path}
         tools={tools('small')}
         status={status?.currentStatus}
-        name={nameValue?.string ?? undefined}
-        customerName={customerName}
+        title={title}
       />
       <Stack>
         <HandleJustCloned />
         <Container sx={{ py: 5 }}>
           <Box>
             <Stack direction="row" alignItems="center">
-              <Typography variant="overline">
+              <Typography variant="overline" display="flex" alignItems="center">
                 {resource.type.replace(/([a-z])([A-Z])/g, '$1 $2')} #
                 {resource.key}
-                {customerName && (
-                  <>
-                    {' '}
-                    <Typography fontSize={17} color="divider" display="inline">
-                      •
-                    </Typography>
-                    {customerName}
-                  </>
+                {title?.reduce(
+                  (acc, title) => (
+                    <Fragment>
+                      {acc}
+                      <Typography
+                        fontSize={17}
+                        color="divider"
+                        display="inline"
+                        mx={0.5}
+                      >
+                        •
+                      </Typography>
+                      {title}
+                    </Fragment>
+                  ),
+                  <></>,
                 )}
               </Typography>
               <Box flexGrow={1} />
               {baseTools('small')}
             </Stack>
-            <Stack direction="row" alignItems="center" spacing={1}>
+            <Stack direction="row" alignItems="center" spacing={0.5}>
               <Typography variant="h3">
                 {schema.implements(fields.name) ? (
                   <Box width={600}>
@@ -181,11 +181,6 @@ export default function ResourceDetailPage({
                 </Box>
               ))}
             </Stack>
-            {header && (
-              <Stack mt={1} direction="row" alignItems="start" spacing={1}>
-                {header}
-              </Stack>
-            )}
           </Box>
         </Container>
 

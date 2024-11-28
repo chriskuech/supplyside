@@ -11,26 +11,19 @@ import {
   Typography,
 } from '@mui/material'
 import NextLink from 'next/link'
-import { ReactNode } from 'react'
+import { Fragment, ReactNode } from 'react'
 import { Option } from '@supplyside/model'
 import OptionChip from '../fields/views/OptionChip'
 import { useScrollContext } from '@/lib/ux/ScrollContext'
 
 type Props = {
-  tools?: ReactNode
+  tools?: ReactNode[]
   path: { label: string; href: string }[]
   status?: Option
-  name?: string
-  customerName?: string
+  title?: string[]
 }
 
-export default function Breadcrumb({
-  path,
-  tools,
-  status,
-  name,
-  customerName,
-}: Props) {
+export default function Breadcrumb({ path, tools, status, title }: Props) {
   const offset = useScrollContext()
 
   return (
@@ -76,34 +69,23 @@ export default function Breadcrumb({
               ))}
             </Breadcrumbs>
 
-            {name && (
-              <>
-                <Typography fontSize={17} color="divider">
-                  •
-                </Typography>
-                <Typography
-                  variant="overline"
-                  textTransform="none"
-                  color="text.secondary"
-                >
-                  {name}
-                </Typography>
-              </>
-            )}
-
-            {customerName && (
-              <>
-                <Typography fontSize={17} color="divider">
-                  •
-                </Typography>
-                <Typography
-                  variant="overline"
-                  textTransform="none"
-                  color="text.secondary"
-                >
-                  {customerName}
-                </Typography>
-              </>
+            {title?.reduce(
+              (acc, title) => (
+                <>
+                  {acc}
+                  <Typography fontSize={17} color="divider">
+                    •
+                  </Typography>
+                  <Typography
+                    variant="overline"
+                    textTransform="none"
+                    color="text.secondary"
+                  >
+                    {title}
+                  </Typography>
+                </>
+              ),
+              <></>,
             )}
 
             {status && (
@@ -114,7 +96,7 @@ export default function Breadcrumb({
 
             <Box flexGrow={1} />
 
-            {tools}
+            {tools?.map((tool, i) => <Fragment key={i}>{tool}</Fragment>)}
           </Stack>
         </Container>
       </Collapse>

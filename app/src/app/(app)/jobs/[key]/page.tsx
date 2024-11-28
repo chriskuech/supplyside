@@ -54,9 +54,13 @@ export default async function JobDetail({
 
   return (
     <ResourceDetailPage
-      customerName={
-        selectResourceFieldValue(resource, fields.customer)?.resource?.name
-      }
+      title={[
+        selectResourceFieldValue(resource, fields.name)?.string ?? '',
+        selectResourceFieldValue(resource, fields.customer)?.resource?.name ??
+          '',
+        selectResourceFieldValue(resource, fields.customerPoNumber)?.string ??
+          '',
+      ]}
       status={{
         cancelStatusOptionTemplate: jobStatusOptions.canceled,
         draftStatusOptionTemplate: jobStatusOptions.draft,
