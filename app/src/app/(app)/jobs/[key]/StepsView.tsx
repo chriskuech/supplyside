@@ -22,6 +22,7 @@ import {
   CalendarMonth,
   Checklist,
   Close,
+  ViewSidebar,
   Link,
   ShoppingBag,
   StickyNote2,
@@ -227,7 +228,6 @@ const StepView: FC<StepViewProps> = ({
             >
               Purchase #{purchase.key}
             </Button>
-            <Box flexGrow={1} />
             {vendor && (
               <Button
                 variant="text"
@@ -243,21 +243,24 @@ const StepView: FC<StepViewProps> = ({
                   overflow: 'ellipsis',
                 }}
                 component={NextLink}
-                href={`/vendor/${vendor.key}`}
+                href={`?drawerResourceId=${vendor.id}`}
                 startIcon={<StoreMallDirectory />}
-                endIcon={<Link className="end-icon" />}
+                endIcon={<ViewSidebar className="end-icon" />}
               >
                 {vendor.name}
               </Button>
             )}
+            <Box flexGrow={1} />
             {status && <OptionChip size="small" option={status} />}
           </Stack>
         ) : (
-          <FieldControl
-            schemaData={stepSchema}
-            resource={step}
-            field={fields.workCenter}
-          />
+          <Box width="fit-content" minWidth={230}>
+            <FieldControl
+              schemaData={stepSchema}
+              resource={step}
+              field={fields.workCenter}
+            />
+          </Box>
         )}
 
         <Stack direction="row" spacing={1}>
