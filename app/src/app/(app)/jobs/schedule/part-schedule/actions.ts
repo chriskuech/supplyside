@@ -44,7 +44,7 @@ export async function getParts(): Promise<PartModel[]> {
         jobStatusOption:
           selectResourceFieldValue(job, fields.jobStatus)?.option ?? null,
         customerPoNumber:
-          selectResourceFieldValue(part, fields.customerPoNumber)?.string ??
+          selectResourceFieldValue(job, fields.customerPoNumber)?.string ??
           null,
         quantity:
           selectResourceFieldValue(part, fields.quantity)?.number ?? null,
