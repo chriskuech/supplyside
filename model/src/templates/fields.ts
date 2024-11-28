@@ -158,10 +158,8 @@ export const unitOfMeasureOptions = {
 export const intervalUnits = {
   days: { templateId: '0aede79d-24d8-408c-a769-46a01a3f50c7', name: 'Day' },
   weeks: { templateId: '005724e4-32a6-41b6-b861-754d9a1d7763', name: 'Week' },
-  months: {
-    templateId: 'fcd4cead-9ce0-4631-8fdc-3c4f16b78524',
-    name: 'Month',
-  },
+  months: { templateId: 'fcd4cead-9ce0-4631-8fdc-3c4f16b78524', name: 'Month' },
+  years: { templateId: '6a83c019-ad77-4c33-bf5c-860633e2837d', name: 'Year' },
 }
 
 const _fields = {

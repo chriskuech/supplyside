@@ -61,5 +61,10 @@ export const getNextResourceCreationDate = (
         .add(recurrenceInterval, 'month')
         .set('date', recurrenceIntervalOffsetInDays ?? 0),
     )
+    .with(intervalUnits.years.templateId, () =>
+      lastDate
+        .add(recurrenceInterval, 'year')
+        .set('date', recurrenceIntervalOffsetInDays ?? 0),
+    )
     .otherwise(() => fail('Interval unit option not supported'))
 }
