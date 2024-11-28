@@ -43,6 +43,11 @@ export async function getParts(): Promise<PartModel[]> {
           selectResourceFieldValue(part, fields.customer)?.resource ?? null,
         jobStatusOption:
           selectResourceFieldValue(job, fields.jobStatus)?.option ?? null,
+        customerPoNumber:
+          selectResourceFieldValue(part, fields.customerPoNumber)?.string ??
+          null,
+        quantity:
+          selectResourceFieldValue(part, fields.quantity)?.number ?? null,
         steps: pipe(
           steps,
           map(

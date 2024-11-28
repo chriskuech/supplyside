@@ -11,13 +11,10 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
-import NextLink from 'next/link'
 import {
   AttachMoney,
   BarChart,
-  Business,
   Close,
-  Link as LinkIcon,
   PieChart,
   PrecisionManufacturing,
   ShoppingBag,
@@ -39,8 +36,7 @@ import Charts from '../../charts/Charts'
 import { PartModel } from './PartModel'
 import JobStatusFiltersControl from './JobStatusFilterControl'
 import { QuickfilterControl } from './QuickfilterControl'
-import { formatMoney } from '@/lib/format'
-import OptionChip from '@/lib/resource/fields/views/OptionChip'
+import PartInformation from './PartInformation'
 import { updateResource } from '@/actions/resource'
 
 const hexToRgba = (hex: string, alpha: number = 1): string => {
@@ -161,62 +157,7 @@ export const PartScheduleView = ({
       headerHeight={300}
       items={parts.map((part) => ({
         id: part.id,
-        label: (
-          <Stack
-            width="100%"
-            height="100%"
-            direction="row"
-            alignItems="center"
-            px={1}
-            component={NextLink}
-            spacing={2}
-            href={`/jobs/${part.jobKey}`}
-            sx={{
-              color: 'inherit',
-              textDecoration: 'inherit',
-              '& .row-link-icon': { display: 'none' },
-              '&:hover .row-link-icon': { display: 'block' },
-              '& .row-id': { display: 'block' },
-              '&:hover .row-id': { display: 'none' },
-            }}
-          >
-            {part.name && <Box>{part.name}</Box>}
-            <Box flexGrow={1} />
-            {part.customer && (
-              <Tooltip title="Customer">
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <Business opacity={0.5} />
-                  {part.customer.name}
-                </Stack>
-              </Tooltip>
-            )}
-            {!!part.totalCost && (
-              <Tooltip title="Total Cost">
-                <Stack direction="row" alignItems="center">
-                  <AttachMoney opacity={0.5} sx={{ mr: -0.5 }} />
-                  {formatMoney(part.totalCost, { style: undefined })}
-                </Stack>
-              </Tooltip>
-            )}
-            {part.jobStatusOption && (
-              <Tooltip title="Job Status">
-                <OptionChip option={part.jobStatusOption} size="small" />
-              </Tooltip>
-            )}
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="end"
-              width={30}
-              sx={{ opacity: 0.5 }}
-            >
-              <LinkIcon className="row-link-icon" />
-              <Box className="row-id" sx={{ fontSize: '0.8rem' }}>
-                #{part.jobKey}
-              </Box>
-            </Box>
-          </Stack>
-        ),
+        label: <PartInformation part={part} />,
         events: [
           ...(part.needBy
             ? [

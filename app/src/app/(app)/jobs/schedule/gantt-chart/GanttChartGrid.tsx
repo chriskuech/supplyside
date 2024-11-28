@@ -3,12 +3,18 @@ import { FC, Fragment } from 'react'
 import { range } from 'remeda'
 
 type Props = {
-  dim: number
+  gridCellWidth: number
+  gridCellHeight: number
   numRows: number
   numCols: number
 }
 
-export const GanttChartGrid: FC<Props> = ({ dim, numRows, numCols }) => (
+export const GanttChartGrid: FC<Props> = ({
+  gridCellWidth,
+  gridCellHeight,
+  numRows,
+  numCols,
+}) => (
   <>
     {/* Cols */}
     {range(0, numCols / 7).flatMap((i) => (
@@ -16,9 +22,9 @@ export const GanttChartGrid: FC<Props> = ({ dim, numRows, numCols }) => (
         <Box
           position="absolute"
           height="100%"
-          width={dim}
+          width={gridCellWidth}
           top={0}
-          left={i * 7 * dim}
+          left={i * 7 * gridCellWidth}
           sx={{
             outline: '1px solid',
             outlineOffset: '-0.5px',
@@ -31,9 +37,9 @@ export const GanttChartGrid: FC<Props> = ({ dim, numRows, numCols }) => (
             key={`${i}-${j}`}
             position="absolute"
             height="100%"
-            width={dim}
+            width={gridCellWidth}
             top={0}
-            left={(i * 7 + j) * dim}
+            left={(i * 7 + j) * gridCellWidth}
             sx={{
               outline: '1px solid',
               outlineOffset: '-0.5px',
@@ -44,9 +50,9 @@ export const GanttChartGrid: FC<Props> = ({ dim, numRows, numCols }) => (
         <Box
           position="absolute"
           height="100%"
-          width={dim}
+          width={gridCellWidth}
           top={0}
-          left={(i * 7 + 6) * dim}
+          left={(i * 7 + 6) * gridCellWidth}
           sx={{
             outline: '1px solid',
             outlineOffset: '-0.5px',
@@ -66,9 +72,9 @@ export const GanttChartGrid: FC<Props> = ({ dim, numRows, numCols }) => (
           outlineColor: 'divider',
           outlineOffset: '-0.5px',
         }}
-        top={i * dim}
-        width={dim * numCols}
-        height={dim}
+        top={i * gridCellHeight}
+        width={gridCellWidth * numCols}
+        height={gridCellHeight}
       />
     ))}
   </>

@@ -8,6 +8,8 @@ export type PartModel = {
   paymentDue: Date | null
   totalCost: number | null
   customer: ValueResource | null
+  customerPoNumber: string | null
+  quantity: number | null
   jobStatusOption: Option | null
   steps: {
     id: string

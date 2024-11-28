@@ -18,7 +18,9 @@ dayjs.extend(utc)
 const isScrolledToRight = (element: HTMLElement): boolean =>
   element.scrollLeft + element.clientWidth >= element.scrollWidth
 
-const dim = 30
+const gridCellWidth = 30
+const gridCellHeight = 60
+
 const topDim = 180
 
 const minDrawerWidth = 450
@@ -35,7 +37,7 @@ export type GanttChartProps = {
   locked: boolean
 }
 
-const initialScrollOffset = dim
+const initialScrollOffset = gridCellWidth
 
 export default function GanttChart({
   headerHeight,
@@ -94,7 +96,7 @@ export default function GanttChart({
           width="100%"
         >
           {items.map(({ id, label }) => (
-            <Box key={id} height={dim} width="100%">
+            <Box key={id} height={gridCellHeight} width="100%">
               {label}
             </Box>
           ))}
@@ -112,7 +114,7 @@ export default function GanttChart({
           } else if (e.currentTarget.scrollLeft === 0) {
             setNumWeeks((weeks) => weeks + 1)
             setMinDate((minDate) => minDate.add(-1, 'week').startOf('day'))
-            setScrollOffset(dim * 7)
+            setScrollOffset(gridCellWidth * 7)
           } else {
             setScrollOffset(e.currentTarget.scrollLeft)
           }
@@ -122,30 +124,33 @@ export default function GanttChart({
 
         <GanttChartGridHeader
           height={topDim}
-          dim={dim}
+          gridCellWidth={gridCellWidth}
+          gridCellHeight={gridCellHeight}
           startDate={minDate}
           numDays={numWeeks * 7}
         />
 
         <Box
           position="relative"
-          width={`${numWeeks * 7 * dim}px`}
-          height={`${items.length * dim}px`}
+          width={`${numWeeks * 7 * gridCellWidth}px`}
+          height={`${items.length * gridCellHeight}px`}
           sx={{ outline: '1px solid divider' }}
           top={0}
           left={0}
         >
           <GanttChartGrid
-            dim={dim}
+            gridCellWidth={gridCellWidth}
+            gridCellHeight={gridCellHeight}
             numRows={items.length}
             numCols={numWeeks * 7}
           />
-          <GanttChartToday columnWidth={dim} startDate={minDate} />
+          <GanttChartToday columnWidth={gridCellWidth} startDate={minDate} />
           {items.flatMap((item, index) =>
             item.events.map((e) => (
               <GanttChartEventBar
                 key={e.id}
-                dim={dim}
+                gridCellWidth={gridCellWidth}
+                gridCellHeight={gridCellHeight}
                 index={index}
                 minDate={minDate}
                 event={e}

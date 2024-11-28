@@ -7,7 +7,8 @@ import { useDrag } from '@/hooks/useDrag'
 dayjs.extend(utc)
 
 type Props = {
-  dim: number
+  gridCellWidth: number
+  gridCellHeight: number
   index: number
   minDate: Dayjs
   event: GanttChartEvent
@@ -15,7 +16,8 @@ type Props = {
 }
 
 export const GanttChartEventBar = ({
-  dim,
+  gridCellWidth,
+  gridCellHeight,
   index,
   minDate,
   event: { id, onChange, startDate, days, children },
@@ -27,7 +29,7 @@ export const GanttChartEventBar = ({
     delta: resizeDelta,
   } = useDrag({
     onDrop: ({ x }) =>
-      onChange?.({ days: Math.max(1, days + Math.round(x / dim)) }),
+      onChange?.({ days: Math.max(1, days + Math.round(x / gridCellWidth)) }),
   })
 
   const {
@@ -38,7 +40,7 @@ export const GanttChartEventBar = ({
     onDrop: ({ x }) =>
       onChange?.({
         startDate: dayjs(startDate)
-          .add(Math.round(x / dim), 'day')
+          .add(Math.round(x / gridCellWidth), 'day')
           .toDate(),
       }),
   })
@@ -47,12 +49,13 @@ export const GanttChartEventBar = ({
     <Box
       key={id}
       position="absolute"
-      top={dim * index}
+      top={gridCellHeight * index}
       left={
-        dim * dayjs(startDate).utc().diff(minDate, 'day') + (moveDelta?.x ?? 0)
+        gridCellWidth * dayjs(startDate).utc().diff(minDate, 'day') +
+        (moveDelta?.x ?? 0)
       }
-      width={dim * days + (resizeDelta?.x ?? 0)}
-      height={dim}
+      width={gridCellWidth * days + (resizeDelta?.x ?? 0)}
+      height={gridCellHeight}
       onMouseDown={locked ? undefined : onMoveStart}
       sx={{ cursor: locked ? 'default' : onChange ? 'grab' : 'default' }}
     >
@@ -60,7 +63,7 @@ export const GanttChartEventBar = ({
       <Box
         position="absolute"
         height="100%"
-        width={dim / 4}
+        width={gridCellWidth / 4}
         top={0}
         right={0}
         sx={{

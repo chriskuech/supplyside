@@ -6,14 +6,16 @@ import { range } from 'remeda'
 
 type Props = {
   height: number
-  dim: number
+  gridCellWidth: number
+  gridCellHeight: number
   startDate: Dayjs
   numDays: number
 }
 
 export const GanttChartGridHeader: FC<Props> = ({
   height,
-  dim,
+  gridCellWidth,
+  gridCellHeight,
   startDate,
   numDays,
 }) => (
@@ -23,8 +25,8 @@ export const GanttChartGridHeader: FC<Props> = ({
       <Box
         key={i}
         position="absolute"
-        top={height - dim / 2}
-        left={i * dim + dim / 2}
+        top={height - gridCellHeight / 2}
+        left={i * gridCellWidth + gridCellWidth / 2}
         color="GrayText"
         fontSize={10}
         sx={{
@@ -38,9 +40,10 @@ export const GanttChartGridHeader: FC<Props> = ({
     ))}
     <Box
       position="absolute"
-      top={height - dim / 2}
+      top={height - gridCellHeight / 2}
       left={
-        dayjs().startOf('day').diff(startDate, 'days') * dim + dim * (5 / 6)
+        dayjs().startOf('day').diff(startDate, 'days') * gridCellWidth +
+        gridCellWidth * (5 / 6)
       }
       color={amber[500]}
       fontSize={10}
