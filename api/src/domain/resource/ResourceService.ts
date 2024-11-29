@@ -503,7 +503,7 @@ export class ResourceService {
 
     // Sync completed field from operations to step
     await (async () => {
-      if (type === 'Operation' && patch.hasPatch(fields.completed)) {
+      if (type === 'Operation' && patch.hasPatch(fields.completed) && patch.getBoolean(fields.completed)) {
         const stepId = patch.getResourceId(fields.step)
 
         if (!stepId) return
