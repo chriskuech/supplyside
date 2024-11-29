@@ -501,7 +501,7 @@ export class ResourceService {
       }),
     )
 
-    // Complete step when all operations are complete
+    // Sync completed field from operations to step
     await (async () => {
       if (type === 'Operation' && patch.hasPatch(fields.completed)) {
         const stepId = patch.getResourceId(fields.step)
