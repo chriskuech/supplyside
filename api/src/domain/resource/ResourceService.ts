@@ -501,6 +501,30 @@ export class ResourceService {
       }),
     )
 
+    // Complete step when all operations are complete
+    await (async () => {
+      if (type === 'Operation' && patch.hasPatch(fields.completed)) {
+        const stepId = patch.getResourceId(fields.step)
+
+        if (!stepId) return
+
+        const stepOperations = await this.list(accountId, 'Operation', {
+          where: {
+            '==': [{ var: fields.step.name }, stepId],
+          },
+        })
+
+        const allOperationsCompleted = stepOperations.every(
+          (operation) =>
+            selectResourceFieldValue(operation, fields.completed)?.boolean,
+        )
+
+        await this.withUpdatePatch(accountId, stepId, (patch) => {
+          patch.setBoolean(fields.completed, allOperationsCompleted)
+        })
+      }
+    })()
+
     // sync completed from purchase to steps
     if (
       type === 'Purchase' &&
