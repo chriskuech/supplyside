@@ -93,7 +93,8 @@ export default function FilePreviewField({
       />
       {file ? (
         imageSrc ? (
-          <Image src={imageSrc} alt={file.name} width={170} height={85} />
+          // <Image src={imageSrc} alt={file.name} width={170} height={85} />
+          <Image src={imageSrc} alt={file.name} width={1024} height={1024} />
         ) : (
           <Box display="flex" flexDirection="column" alignItems="center">
             <Check color="success" />
