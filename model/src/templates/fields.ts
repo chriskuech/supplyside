@@ -662,6 +662,12 @@ const _fields = {
     type: 'Textarea',
     description: 'Terms and conditions included on the purchase order',
   },
+  thumbnail: {
+    templateId: '97c53f3f-9eec-42bc-bd37-72e3e5b67e0b',
+    name: 'Thumbnail',
+    type: 'File',
+    description: 'Thumbnail image for the resource',
+  },
   totalCost: {
     templateId: '507b8699-64af-4f8f-9319-b63c48827c61',
     name: 'Total Cost',

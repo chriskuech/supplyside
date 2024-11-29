@@ -56,11 +56,11 @@ export default function FilesField({ files, isReadOnly, onChange }: Props) {
                 </Tooltip>
                 <Tooltip title="View File">
                   <IconButton
-                    onClick={() => {
+                    onClick={() =>
                       file.contentType.startsWith('model/')
                         ? getCadPreviewUrl(file.id).then(window.open)
                         : preview(file)
-                    }}
+                    }
                   >
                     <Visibility />
                   </IconButton>

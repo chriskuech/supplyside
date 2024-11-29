@@ -68,17 +68,27 @@ export const PartView: FC<{
         {formatMoney(selectResourceFieldValue(part, fields.totalCost)?.number)}
       </Typography>
     </Stack>
-    <Box>
-      <FieldControl
-        schemaData={partSchemaData}
-        resource={part}
-        inputId={`other-notes-${part.id}`}
-        field={fields.otherNotes}
-        inputProps={{
-          placeholder: 'Other Notes',
-        }}
-      />
-    </Box>
+    <Stack direction="row" spacing={1}>
+      <Box width="fit-content">
+        <FieldControl
+          resource={part}
+          schemaData={partSchemaData}
+          field={fields.thumbnail}
+          isImageDropzone
+        />
+      </Box>
+      <Box flexGrow={1}>
+        <FieldControl
+          schemaData={partSchemaData}
+          resource={part}
+          inputId={`other-notes-${part.id}`}
+          field={fields.otherNotes}
+          inputProps={{
+            placeholder: 'Other Notes',
+          }}
+        />
+      </Box>
+    </Stack>
     <Box pt={1} overflow="hidden">
       {stepsControl}
     </Box>

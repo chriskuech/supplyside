@@ -3,6 +3,7 @@ import { ConfigService } from '@supplyside/api/ConfigService'
 import { PrismaService } from '@supplyside/api/integrations/PrismaService'
 import { randomUUID } from 'crypto'
 import { inject, injectable } from 'inversify'
+import occtImport from 'occt-import-js'
 import { Blob, BlobWithData } from './entity'
 
 const containerName = 'app-data'
@@ -45,6 +46,12 @@ export class BlobService {
         name: blobName,
       },
     })
+
+    if (blob.mimeType === 'model/step') {
+      const occt = await occtImport()
+      const result = occt.ReadStepFile(new Uint8Array(data.buffer), null)
+      console.log({ result })
+    }
 
     return blob
   }

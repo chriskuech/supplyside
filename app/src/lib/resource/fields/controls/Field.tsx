@@ -61,6 +61,7 @@ export type Props = {
   disabled?: boolean
   inputProps?: InputProps | undefined
   datePickerProps?: DatePickerProps<Dayjs, false> | undefined
+  isImageDropzone?: boolean
 }
 
 function Field(
@@ -75,6 +76,7 @@ function Field(
     disabled,
     inputProps,
     datePickerProps,
+    isImageDropzone,
   }: Props,
   ref: ForwardedRef<HTMLInputElement>,
 ) {
@@ -164,10 +166,9 @@ function Field(
     .with('File', () => (
       <FileField
         isReadOnly={disabled}
-        resourceId={resource.id}
-        fieldId={field.fieldId}
         file={value?.file ?? null}
         onChange={(file) => handleChange({ ...emptyValue, file })}
+        isImageDropzone={isImageDropzone}
       />
     ))
     .with('Files', () => (

@@ -3,19 +3,34 @@ import { Close, Download, UploadFile, Visibility } from '@mui/icons-material'
 import { IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { useRef } from 'react'
 import { File } from '@supplyside/model'
+import FilePreviewField from './FilePreviewField'
 import { uploadFile } from '@/actions/file'
 import { download, preview } from '@/app/api/download/[filename]/util'
 
 type Props = {
-  resourceId: string
-  fieldId: string
   file: File | null
   isReadOnly?: boolean
   onChange?: (file: File | null) => void
+  isImageDropzone?: boolean
 }
 
-export default function FileField({ file, isReadOnly, onChange }: Props) {
+export default function FileField({
+  file,
+  isReadOnly,
+  onChange,
+  isImageDropzone,
+}: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  if (isImageDropzone) {
+    return (
+      <FilePreviewField
+        file={file}
+        isReadOnly={isReadOnly}
+        onChange={onChange}
+      />
+    )
+  }
 
   return (
     <Stack direction="row" alignItems="center">

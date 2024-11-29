@@ -24,6 +24,7 @@ import { inject, injectable } from 'inversify'
 import { isTruthy, map, pipe, sortBy, sum, zip } from 'remeda'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
+import { PartRenderingService } from '../part/PartRenderingService'
 import { SchemaService } from '../schema/SchemaService'
 import { deriveFields } from './deriveFields'
 import { createSql } from './json-logic/compile'
@@ -55,6 +56,8 @@ export class ResourceService {
   constructor(
     @inject(PrismaService) private readonly prisma: PrismaService,
     @inject(SchemaService) private readonly schemaService: SchemaService,
+    @inject(PartRenderingService)
+    private readonly partRenderingService: PartRenderingService,
   ) {}
 
   async read(accountId: string, resourceId: string): Promise<Resource> {
@@ -478,6 +481,29 @@ export class ResourceService {
   private async handlePatch(patch: ResourcePatch) {
     const resourceId = patch.resource?.id ?? fail('Patch is missing resourceId')
     const { accountId, type } = patch.schema
+
+    await (async () => {
+      if (
+        !patch.schema.implements(fields.thumbnail) ||
+        !patch.hasPatch(fields.thumbnail)
+      ) {
+        return
+      }
+
+      const resource = patch.resource ?? fail('Patch is missing resource')
+      const file = selectResourceFieldValue(resource, fields.thumbnail)?.file
+
+      if (file?.contentType !== 'model/step') return
+
+      const thumbnail = await this.partRenderingService.render(
+        accountId,
+        file.blobId,
+      )
+
+      await this.withUpdatePatch(accountId, resource.id, (patch) => {
+        patch.setFileId(fields.thumbnail, thumbnail.id)
+      })
+    })()
 
     // recalculate subtotal cost for parent resources
     await Promise.all(
