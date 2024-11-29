@@ -284,7 +284,7 @@ export const mountResources = async <App extends FastifyInstance>(app: App) =>
         if (body) {
           resource = await service.withUpdatePatch(
             accountId,
-            resource.type,
+            resource.id,
             (patch) => {
               for (const { fieldId, valueInput } of body) {
                 patch.setPatch({ fieldId }, valueInput)
