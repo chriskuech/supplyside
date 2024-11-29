@@ -1,15 +1,16 @@
 import { File } from '@supplyside/model'
+import { fail } from 'assert'
 import { createCanvas } from 'canvas'
 import Color from 'color'
 import { inject, injectable } from 'inversify'
 import occtImport from 'occt-import-js'
-import { chunk, map, pipe } from 'remeda'
+import { chunk, clamp, map, pipe } from 'remeda'
 import { BlobService } from '../blob/BlobService'
 import { FileService } from '../file/FileService'
 
-type Vec2 = [number, number]
-type Vec3 = [number, number, number]
-type Triangle = [Vec3, Vec3, Vec3]
+type Vec2 = readonly [number, number]
+type Vec3 = readonly [number, number, number]
+type Triangle = readonly [Vec3, Vec3, Vec3]
 
 const baseColor = Color('rgb(65, 154, 248)')
 const lightSource: Vec3 = [1, 1, 1]
@@ -84,6 +85,8 @@ export class PartRenderingService {
       throw new Error('No mesh found')
     }
 
+    const vertices = chunk(mesh.attributes.position.array, 3) as Vec3[]
+
     // Create a canvas
     const width = 1024
     const height = 1024
@@ -91,8 +94,6 @@ export class PartRenderingService {
     const ctx = canvas.getContext('2d')
 
     // Calculate bounding box to normalize size
-    const vertices = chunk(mesh.attributes.position.array, 3) as Vec3[]
-
     const minX = Math.min(...vertices.map(([x]) => x))
     const maxX = Math.max(...vertices.map(([x]) => x))
     const minY = Math.min(...vertices.map(([, y]) => y))
@@ -106,11 +107,14 @@ export class PartRenderingService {
 
     // Normalize vertices to fit into a unit cube centered at the origin
     const maxDimension = Math.max(objectWidth, objectHeight, objectDepth)
-    const normalizedVertices = vertices.map(([x, y, z]) => [
-      (x - (minX + maxX) / 2) / maxDimension,
-      (y - (minY + maxY) / 2) / maxDimension,
-      (z - (minZ + maxZ) / 2) / maxDimension,
-    ])
+    const normalizedVertices = vertices.map(
+      ([x, y, z]) =>
+        [
+          (x - (minX + maxX) / 2) / maxDimension,
+          (y - (minY + maxY) / 2) / maxDimension,
+          (z - (minZ + maxZ) / 2) / maxDimension,
+        ] as const,
+    )
 
     const scale = Math.min(width, height) * 0.9
     const offsetX = width / 2
@@ -129,13 +133,21 @@ export class PartRenderingService {
 
     const project = ([x, y, z]: Vec3): Vec2 => {
       const [rx, ry] = rotateX([x, y, z])
+
       return [offsetX + rx * scale, offsetY - ry * scale]
     }
 
     // Extract meshes and render
     const triangles: Triangle[] = pipe(
       chunk(mesh.index.array, 3),
-      map((e) => e.map((i) => normalizedVertices[i]) as Triangle),
+      map(
+        ([a, b, c]) =>
+          [
+            normalizedVertices[a],
+            normalizedVertices[b ?? fail()],
+            normalizedVertices[c ?? fail()],
+          ] as Triangle,
+      ),
     )
 
     const calculateAverageZ = ([p1, p2, p3]: Triangle): number => {
@@ -149,42 +161,31 @@ export class PartRenderingService {
 
     // Render each triangle with flat shading and lighting
     for (const [p1, p2, p3] of sortedTriangles) {
-      const [p1x, p1y] = project(p1)
-      const [p2x, p2y] = project(p2)
-      const [p3x, p3y] = project(p3)
+      const faces = [
+        [p1, p2, p3],
+        [p3, p2, p1],
+      ] as const
 
-      const normal = [
-        calculateNormal([p1, p2, p3]),
-        calculateNormal([p3, p2, p1]),
-      ].find(([, , z]) => z > 0) ?? [0, 0, 0]
+      for (const [p1, p2, p3] of faces) {
+        const [p1x, p1y] = project(p1)
+        const [p2x, p2y] = project(p2)
+        const [p3x, p3y] = project(p3)
 
-      const lighting = calculateLighting(normal)
-      const shadedColor = baseColor.lightness(100 * lighting).hex()
+        const normal = calculateNormal([p1, p2, p3])
 
-      ctx.fillStyle = shadedColor
-      ctx.beginPath()
-      ctx.moveTo(p1x, p1y)
-      ctx.lineTo(p2x, p2y)
-      ctx.lineTo(p3x, p3y)
-      ctx.closePath()
-      ctx.fill()
+        const lighting = calculateLighting(normal)
+        const shadedColor = baseColor
+          .lightness(100 * clamp(lighting, { min: 0, max: 1 }))
+          .hex()
 
-      // Render the triangle in the opposite direction to treat it as two-faced
-      const [p1xRev, p1yRev] = project(p1)
-      const [p2xRev, p2yRev] = project(p2)
-      const [p3xRev, p3yRev] = project(p3)
-
-      const normalRev = calculateNormal([p3, p2, p1])
-      const lightingRev = calculateLighting(normalRev)
-      const shadedColorRev = baseColor.lightness(100 * lightingRev).hex()
-
-      ctx.fillStyle = shadedColorRev
-      ctx.beginPath()
-      ctx.moveTo(p1xRev, p1yRev)
-      ctx.lineTo(p2xRev, p2yRev)
-      ctx.lineTo(p3xRev, p3yRev)
-      ctx.closePath()
-      ctx.fill()
+        ctx.fillStyle = shadedColor
+        ctx.beginPath()
+        ctx.moveTo(p1x, p1y)
+        ctx.lineTo(p2x, p2y)
+        ctx.lineTo(p3x, p3y)
+        ctx.closePath()
+        ctx.fill()
+      }
     }
 
     // Export the canvas to a PNG buffer
