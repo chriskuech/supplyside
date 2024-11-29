@@ -1,4 +1,5 @@
 import 'server-only'
+import assert from 'assert'
 import { Resource, ResourceType, Schema } from '@supplyside/model'
 import { components } from '@supplyside/api'
 import { stringify } from 'qs'
@@ -159,17 +160,28 @@ export const cloneResource = async (
 ) => {
   revalidateTag('Resources')
 
-  const { data: resource } = await client().POST(
+  const resource = await readResource(accountId, resourceId)
+  assert(resource, 'Resource not found')
+
+  const schemaData = await readSchema(accountId, resource.type)
+  assert(schemaData, 'Schema not found')
+
+  const schema = new Schema(schemaData)
+
+  const { data: newResource } = await client().POST(
     '/api/accounts/{accountId}/resources/{resourceId}/clone/',
     {
       params: {
         path: { accountId, resourceId },
       },
-      body: fields,
+      body: fields?.map(({ field, valueInput }) => ({
+        fieldId: schema.getField(field).fieldId,
+        valueInput,
+      })),
     },
   )
 
-  return resource
+  return newResource
 }
 
 export const findResourcesByNameOrPoNumber = async (
