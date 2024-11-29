@@ -50,6 +50,7 @@ import {
   deleteResourceAsAdmin,
   updateResource,
 } from '@/actions/resource'
+import useLocalStorageState from '@/hooks/useLocalStorageState'
 
 type FieldNames = keyof typeof fields
 export type ColumnWidths = Partial<Record<FieldNames, number>>
@@ -115,7 +116,11 @@ export default function ResourceTable({
     [schemaData, hideFields],
   )
   const isChartsEnabled = Charts !== undefined
-  const [showCharts, setShowCharts] = useState(isChartsEnabled)
+  const [showCharts, setShowCharts] = useLocalStorageState<boolean>(
+    tableKey + '__isChartsEnabled',
+    isChartsEnabled,
+  )
+
   const [isGridRendered, setIsGridRendered] = useState(false)
   const { apiRef, initialState, saveStateToLocalstorage } =
     usePersistDatagridState(tableKey)
