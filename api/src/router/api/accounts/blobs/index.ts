@@ -7,6 +7,8 @@ import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
+const mb = Math.pow(2, 20)
+
 export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
   app.addContentTypeParser('*', { parseAs: 'buffer' }, (req, body, done) =>
     Buffer.isBuffer(body) ? done(null, body) : done(new Error('Invalid body')),
@@ -15,6 +17,7 @@ export const mountBlobs = async <App extends FastifyInstance>(app: App) => {
   return app
     .withTypeProvider<ZodTypeProvider>()
     .route({
+      bodyLimit: 50 * mb,
       method: 'POST',
       url: '/',
       schema: {
