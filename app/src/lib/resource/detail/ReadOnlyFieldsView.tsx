@@ -61,12 +61,7 @@ export default function ReadOnlyFieldsView({ schemaData, resource }: Props) {
                       date ? formatDate(date) : '-',
                     )
                     .with({ fieldType: 'File' }, ({ value }) => (
-                      <FileField
-                        resourceId={resource.id}
-                        fieldId={field.fieldId}
-                        file={value.file}
-                        isReadOnly
-                      />
+                      <FileField file={value.file} isReadOnly />
                     ))
                     .with({ fieldType: 'Files' }, ({ value }) => (
                       <FilesField files={value.files} isReadOnly />
