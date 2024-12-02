@@ -26,6 +26,7 @@ import { match } from 'ts-pattern'
 import { z } from 'zod'
 import { BlobService } from '../blob/BlobService'
 import { FileService } from '../file/FileService'
+import { ThumbnailRenderingService } from '../part/ThumbnailRenderingService'
 import { SchemaService } from '../schema/SchemaService'
 import { deriveFields } from './deriveFields'
 import { createSql } from './json-logic/compile'
@@ -59,6 +60,8 @@ export class ResourceService {
     @inject(SchemaService) private readonly schemaService: SchemaService,
     @inject(BlobService) private readonly blobService: BlobService,
     @inject(FileService) private readonly fileService: FileService,
+    @inject(ThumbnailRenderingService)
+    private readonly thumbnailRenderingService: ThumbnailRenderingService,
   ) {}
 
   async read(accountId: string, resourceId: string): Promise<Resource> {
@@ -496,26 +499,8 @@ export class ResourceService {
 
       if (file?.contentType !== 'model/step') return
 
-      const thumbnailResponse = await fetch(
-        'https://supplyside-thumbnails-integration-gqeba2fgfjhjdce2.westus2-01.azurewebsites.net/render',
-        {
-          method: 'POST',
-          body: file.blobId,
-          headers: {
-            'Content-Type': 'model/step',
-          },
-        },
-      )
-
-      const thumbnailBlob = await this.blobService.createBlob(accountId, {
-        contentType: 'image/png',
-        buffer: Buffer.from(await thumbnailResponse.arrayBuffer()),
-      })
-
-      const thumbnailFile = await this.fileService.create(accountId, {
-        name: 'thumbnail',
-        blobId: thumbnailBlob.id,
-      })
+      const thumbnailFile =
+        await this.thumbnailRenderingService.renderThumbnail(file)
 
       await this.withUpdatePatch(accountId, resource.id, (patch) => {
         patch.setFileId(fields.thumbnail, thumbnailFile.id)
