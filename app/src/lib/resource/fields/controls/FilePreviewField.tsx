@@ -13,6 +13,9 @@ type Props = {
   onChange?: (file: File | null) => void
 }
 
+const WIDTH = 130
+const HEIGHT = 130
+
 export default function FilePreviewField({
   file,
   isReadOnly,
@@ -53,8 +56,8 @@ export default function FilePreviewField({
         borderStyle: 'solid',
         borderColor: 'divider',
         position: 'relative',
-        width: 170,
-        height: 85,
+        width: WIDTH,
+        height: HEIGHT,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -64,19 +67,6 @@ export default function FilePreviewField({
         },
       }}
     >
-      <Typography
-        variant="overline"
-        sx={{
-          opacity: 0.5,
-          position: 'absolute',
-          top: 4,
-          left: 4,
-          p: 0,
-          lineHeight: 1,
-        }}
-      >
-        Thumbnail
-      </Typography>
       <input
         style={{ display: 'none' }}
         type="file"
@@ -93,17 +83,40 @@ export default function FilePreviewField({
       />
       {file ? (
         imageSrc ? (
-          // <Image src={imageSrc} alt={file.name} width={170} height={85} />
-          <Image src={imageSrc} alt={file.name} width={1024} height={1024} />
+          <Image
+            src={imageSrc}
+            alt={file.name}
+            width={WIDTH}
+            height={HEIGHT}
+            style={{
+              width: WIDTH,
+              height: HEIGHT,
+            }}
+          />
         ) : (
           <Box display="flex" flexDirection="column" alignItems="center">
             <Check color="success" />
           </Box>
         )
       ) : (
-        <Typography sx={{ opacity: 0.5 }} textAlign="center" fontSize={12}>
-          Drag & Drop a file <br /> or click to upload
-        </Typography>
+        <>
+          <Typography sx={{ opacity: 0.5 }} textAlign="center" fontSize={12}>
+            Drag & Drop a file <br /> or click to upload
+          </Typography>
+          <Typography
+            variant="overline"
+            sx={{
+              opacity: 0.5,
+              position: 'absolute',
+              top: 4,
+              left: 4,
+              p: 0,
+              lineHeight: 1,
+            }}
+          >
+            Thumbnail
+          </Typography>
+        </>
       )}
       {file && isHovered && !isReadOnly && onChange && (
         <Box position="absolute" top={0} right={0}>

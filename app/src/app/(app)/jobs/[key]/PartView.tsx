@@ -17,7 +17,7 @@ export const PartView: FC<{
 }> = ({ part, partSchemaData, stepsControl }) => (
   <Stack spacing={1} flexGrow={1}>
     <Stack direction="row" alignItems="start" spacing={1}>
-      <Stack spacing={4} alignItems="center">
+      <Stack spacing={1} alignItems="end">
         <FieldControl
           resource={part}
           schemaData={partSchemaData}
