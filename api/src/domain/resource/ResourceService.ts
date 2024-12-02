@@ -24,7 +24,8 @@ import { inject, injectable } from 'inversify'
 import { isTruthy, map, pipe, sortBy, sum, zip } from 'remeda'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
-import { PartRenderingService } from '../part/PartRenderingService'
+import { BlobService } from '../blob/BlobService'
+import { FileService } from '../file/FileService'
 import { SchemaService } from '../schema/SchemaService'
 import { deriveFields } from './deriveFields'
 import { createSql } from './json-logic/compile'
@@ -56,8 +57,8 @@ export class ResourceService {
   constructor(
     @inject(PrismaService) private readonly prisma: PrismaService,
     @inject(SchemaService) private readonly schemaService: SchemaService,
-    @inject(PartRenderingService)
-    private readonly partRenderingService: PartRenderingService,
+    @inject(BlobService) private readonly blobService: BlobService,
+    @inject(FileService) private readonly fileService: FileService,
   ) {}
 
   async read(accountId: string, resourceId: string): Promise<Resource> {
@@ -495,13 +496,29 @@ export class ResourceService {
 
       if (file?.contentType !== 'model/step') return
 
-      const thumbnail = await this.partRenderingService.render(
-        accountId,
-        file.blobId,
+      const thumbnailResponse = await fetch(
+        'https://supplyside-thumbnails-integration-gqeba2fgfjhjdce2.westus2-01.azurewebsites.net/render',
+        {
+          method: 'POST',
+          body: file.blobId,
+          headers: {
+            'Content-Type': 'model/step',
+          },
+        },
       )
 
+      const thumbnailBlob = await this.blobService.createBlob(accountId, {
+        contentType: 'image/png',
+        buffer: Buffer.from(await thumbnailResponse.arrayBuffer()),
+      })
+
+      const thumbnailFile = await this.fileService.create(accountId, {
+        name: 'thumbnail',
+        blobId: thumbnailBlob.id,
+      })
+
       await this.withUpdatePatch(accountId, resource.id, (patch) => {
-        patch.setFileId(fields.thumbnail, thumbnail.id)
+        patch.setFileId(fields.thumbnail, thumbnailFile.id)
       })
     })()
 
