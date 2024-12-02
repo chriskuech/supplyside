@@ -8,6 +8,8 @@ import {
 } from '@supplyside/model'
 import dayjs from 'dayjs'
 import { isNumber } from 'remeda'
+import { FileService } from '../file/FileService'
+import { ThumbnailRenderingService } from '../part/ThumbnailRenderingService'
 import { ResourceService } from './ResourceService'
 import { mapValueToValueInput } from './mappers'
 import { relations } from './relations'
@@ -263,8 +265,41 @@ const pullInParentFields = async (patch: ResourcePatch) => {
   )
 }
 
+async function setThumbnail(patch: ResourcePatch) {
+  if (
+    !patch.schema.implements(fields.thumbnail, fields.partAttachments) ||
+    !patch.hasPatch(fields.partAttachments) ||
+    patch.hasPatch(fields.thumbnail)
+  )
+    return
+
+  const thumbnailService = container.get(ThumbnailRenderingService)
+  const fileService = container.get(FileService)
+
+  const existingFileIds =
+    patch.resource?.fields
+      .find((f) => f.templateId === fields.thumbnail.templateId)
+      ?.value.files.map((f) => f.id) ?? []
+  const newFileIds = patch.getFileIds(fields.partAttachments)
+  const addedFileIds = newFileIds.filter((id) => !existingFileIds.includes(id))
+
+  const addedFiles = await Promise.all(
+    addedFileIds.map((fileId) =>
+      fileService.read(patch.schema.accountId, fileId),
+    ),
+  )
+
+  const stepFile = addedFiles.find((f) => f.contentType === 'model/step')
+  if (!stepFile) return
+
+  const thumbnail = await thumbnailService.renderThumbnail(stepFile)
+
+  patch.setFileId(fields.thumbnail, thumbnail.id)
+}
+
 export const deriveFields = async (patch: ResourcePatch) => {
   await pullInParentFields(patch)
+  await setThumbnail(patch)
   setCompleted(patch)
   setInvoiceDate(patch)
   setStartDate(patch)

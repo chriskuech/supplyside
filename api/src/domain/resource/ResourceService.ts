@@ -24,9 +24,6 @@ import { inject, injectable } from 'inversify'
 import { isTruthy, map, pipe, sortBy, sum, zip } from 'remeda'
 import { match } from 'ts-pattern'
 import { z } from 'zod'
-import { BlobService } from '../blob/BlobService'
-import { FileService } from '../file/FileService'
-import { ThumbnailRenderingService } from '../part/ThumbnailRenderingService'
 import { SchemaService } from '../schema/SchemaService'
 import { deriveFields } from './deriveFields'
 import { createSql } from './json-logic/compile'
@@ -58,10 +55,6 @@ export class ResourceService {
   constructor(
     @inject(PrismaService) private readonly prisma: PrismaService,
     @inject(SchemaService) private readonly schemaService: SchemaService,
-    @inject(BlobService) private readonly blobService: BlobService,
-    @inject(FileService) private readonly fileService: FileService,
-    @inject(ThumbnailRenderingService)
-    private readonly thumbnailRenderingService: ThumbnailRenderingService,
   ) {}
 
   async read(accountId: string, resourceId: string): Promise<Resource> {
@@ -485,27 +478,6 @@ export class ResourceService {
   private async handlePatch(patch: ResourcePatch) {
     const resourceId = patch.resource?.id ?? fail('Patch is missing resourceId')
     const { accountId, type } = patch.schema
-
-    await (async () => {
-      if (
-        !patch.schema.implements(fields.thumbnail) ||
-        !patch.hasPatch(fields.thumbnail)
-      ) {
-        return
-      }
-
-      const resource = patch.resource ?? fail('Patch is missing resource')
-      const file = selectResourceFieldValue(resource, fields.thumbnail)?.file
-
-      if (file?.contentType !== 'model/step') return
-
-      const thumbnailFile =
-        await this.thumbnailRenderingService.renderThumbnail(file)
-
-      await this.withUpdatePatch(accountId, resource.id, (patch) => {
-        patch.setFileId(fields.thumbnail, thumbnailFile.id)
-      })
-    })()
 
     // recalculate subtotal cost for parent resources
     await Promise.all(
