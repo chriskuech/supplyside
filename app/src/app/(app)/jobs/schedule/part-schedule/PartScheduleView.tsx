@@ -76,7 +76,7 @@ export const PartScheduleView = ({
     if (!filter) return partsByJobStatus
 
     return new Fuse(partsByJobStatus, {
-      keys: ['name', 'customer.name'],
+      keys: ['name', 'customer.name', 'customerPoNumber'],
       // 0 = perfect match
       // 1 = everything
       threshold: 0.3,
