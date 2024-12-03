@@ -1,6 +1,6 @@
 import { Box, Stack } from '@mui/material'
 import NextLink from 'next/link'
-import { PartModel } from './PartModel'
+import { PartModel } from './types'
 import { formatMoney } from '@/lib/format'
 import OptionChip from '@/lib/resource/fields/views/OptionChip'
 
@@ -16,7 +16,8 @@ export default function PartInformation({ part }: PartInformationProps) {
       justifyContent="space-evenly"
       component={NextLink}
       href={`/jobs/${part.jobKey}`}
-      px={1}
+      pl={4}
+      pr={1}
       sx={{
         color: 'inherit',
         textDecoration: 'inherit',

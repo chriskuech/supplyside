@@ -1,6 +1,5 @@
 'use client'
 
-import { fail } from 'assert'
 import {
   Box,
   Collapse,
@@ -11,15 +10,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
-import {
-  AttachMoney,
-  BarChart,
-  Close,
-  PieChart,
-  PrecisionManufacturing,
-  ShoppingBag,
-} from '@mui/icons-material'
-import { green, lightBlue, purple, red, grey } from '@mui/material/colors'
+import { BarChart, PieChart } from '@mui/icons-material'
 import { useMemo, useState } from 'react'
 import {
   fields,
@@ -30,19 +21,16 @@ import {
 } from '@supplyside/model'
 import { pick, pipe, values } from 'remeda'
 import Fuse from 'fuse.js'
+import { match } from 'ts-pattern'
 import GanttChart from '../gantt-chart/GanttChart'
-import { GanttChartEvent } from '../gantt-chart/GanttChartItem'
 import Charts from '../../charts/Charts'
-import { PartModel } from './PartModel'
+import { PartModel } from './types'
 import JobStatusFiltersControl from './JobStatusFilterControl'
 import { QuickfilterControl } from './QuickfilterControl'
-import PartInformation from './PartInformation'
-import { updateResource } from '@/actions/resource'
-
-const hexToRgba = (hex: string, alpha: number = 1): string => {
-  const [r, g, b] = hex.match(/\w\w/g)?.map((x) => parseInt(x, 16)) ?? fail()
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
+import { GroupingControl } from './GroupingControl'
+import { mapJobGroup } from './mappers'
+import { mapWorkCenterGroup } from './mappers'
+import { groupByJob, groupByWorkCenter } from './grouping'
 
 export type PartScheduleViewProps = {
   jobs: Resource[]
@@ -65,6 +53,7 @@ export const PartScheduleView = ({
   )
   const [filter, setFilter] = useState<string>('')
   const [showCharts, setShowCharts] = useState(false)
+  const [grouping, setGrouping] = useState<'workCenter' | 'job'>('job')
 
   const parts = useMemo(() => {
     const partsByJobStatus = unfilteredParts.filter((part) =>
@@ -76,7 +65,12 @@ export const PartScheduleView = ({
     if (!filter) return partsByJobStatus
 
     return new Fuse(partsByJobStatus, {
-      keys: ['name', 'customer.name', 'customerPoNumber'],
+      keys: [
+        'name',
+        'customer.name',
+        'customerPoNumber',
+        'steps.linkedResource.name',
+      ],
       // 0 = perfect match
       // 1 = everything
       threshold: 0.3,
@@ -84,6 +78,17 @@ export const PartScheduleView = ({
       .search(filter)
       .map(({ item }) => item)
   }, [filter, jobStatuses, unfilteredParts])
+
+  const items = useMemo(
+    () =>
+      match(grouping)
+        .with('workCenter', () =>
+          mapWorkCenterGroup(groupByWorkCenter(parts), { mode }),
+        )
+        .with('job', () => mapJobGroup(groupByJob(parts), { mode }))
+        .exhaustive(),
+    [grouping, parts, mode],
+  )
 
   const jobs = useMemo(
     () =>
@@ -135,21 +140,27 @@ export const PartScheduleView = ({
               jobStatuses={jobStatuses}
             />
             <QuickfilterControl filter={filter} onFilterChange={setFilter} />
-            <Typography variant="subtitle1" fontSize={12}>
-              <Stack
-                direction="row"
-                justifyContent="end"
-                alignItems="center"
-                spacing={1}
-              >
-                <Box>
-                  <strong>{parts.length}</strong> Parts
-                </Box>
-                <Box>
-                  <strong>{jobs.length}</strong> Jobs
-                </Box>
-              </Stack>
-            </Typography>
+            <Stack direction="row" justifyContent="space-between">
+              <GroupingControl
+                grouping={grouping}
+                onGroupingChange={(grouping) => setGrouping(grouping)}
+              />
+              <Typography variant="subtitle1" fontSize={12}>
+                <Stack
+                  direction="row"
+                  justifyContent="end"
+                  alignItems="center"
+                  spacing={1}
+                >
+                  <Box>
+                    <strong>{parts.length}</strong> Parts
+                  </Box>
+                  <Box>
+                    <strong>{jobs.length}</strong> Jobs
+                  </Box>
+                </Stack>
+              </Typography>
+            </Stack>
           </Stack>
           <Box flexGrow={1} />
         </Stack>
@@ -160,136 +171,7 @@ export const PartScheduleView = ({
         </Collapse>
       }
       headerHeight={330}
-      items={parts.map((part) => ({
-        id: part.id,
-        label: <PartInformation part={part} />,
-        events: [
-          ...(part.needBy
-            ? [
-                {
-                  id: 'need-date-' + part.id,
-                  days: 1,
-                  startDate: part.needBy,
-                  children: ({ isDragging }) => (
-                    <Tooltip title="Need Date">
-                      <Box
-                        width="100%"
-                        height="100%"
-                        borderLeft="3px solid"
-                        borderColor={red[500]}
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                        color={red[500]}
-                        sx={{
-                          borderRight: '3px solid transparent',
-                          boxShadow: isDragging
-                            ? `0 0 0 2px ${hexToRgba(red[500], 0.5)}`
-                            : undefined,
-                        }}
-                      >
-                        <Close />
-                      </Box>
-                    </Tooltip>
-                  ),
-                } satisfies GanttChartEvent,
-              ]
-            : []),
-          ...(part.paymentDue
-            ? [
-                {
-                  id: 'payment-due-date-' + part.id,
-                  days: 1,
-                  startDate: part.paymentDue,
-                  children: ({ isDragging }) => (
-                    <Tooltip title="Payment Due Date">
-                      <Box
-                        width="100%"
-                        height="100%"
-                        borderRight="3px solid"
-                        borderColor={green[500]}
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                        color={green[500]}
-                        sx={{
-                          borderLeft: '3px solid transparent',
-                          boxShadow: isDragging
-                            ? `0 0 0 2px ${hexToRgba(green[500], 0.5)}`
-                            : undefined,
-                        }}
-                      >
-                        <AttachMoney />
-                      </Box>
-                    </Tooltip>
-                  ),
-                } satisfies GanttChartEvent,
-              ]
-            : []),
-          ...part.steps.flatMap((step) => {
-            if (!step.start || !step.days) return []
-
-            const borderRadius = 8
-            const color = step.isCompleted
-              ? grey[500]
-              : step.type === 'WorkCenter'
-                ? lightBlue[500]
-                : purple[300]
-
-            return {
-              id: 'step-' + step.id,
-              days: step.days,
-              startDate: step.start,
-              onChange: ({ startDate, days }) =>
-                updateResource(step.id, [
-                  {
-                    field: fields.startDate,
-                    valueInput: { date: startDate?.toISOString() },
-                  },
-                  {
-                    field: fields.productionDays,
-                    valueInput: { number: days },
-                  },
-                ]),
-              children: ({ isDragging }) => (
-                <Box
-                  height="100%"
-                  width="100%"
-                  display="flex"
-                  flexDirection="row"
-                  alignItems="center"
-                  justifyContent="center"
-                  sx={{
-                    borderTopLeftRadius: step.isFirst ? borderRadius : 0,
-                    borderBottomLeftRadius: step.isFirst ? borderRadius : 0,
-                    borderTopRightRadius: step.isLast ? borderRadius : 0,
-                    borderBottomRightRadius: step.isLast ? borderRadius : 0,
-                    border: '1.5px solid',
-                    color:
-                      mode === 'dark'
-                        ? 'rgba(0, 0, 0, 0.7)'
-                        : 'rgba(255, 255, 255, 0.7)',
-                    backgroundColor:
-                      isDragging || step.isCompleted
-                        ? hexToRgba(color, 0.9)
-                        : hexToRgba(color, 0.5),
-                    borderColor:
-                      isDragging || step.isCompleted
-                        ? hexToRgba(color, 1)
-                        : hexToRgba(color, 0.6),
-                  }}
-                >
-                  {step.type === 'WorkCenter' ? (
-                    <PrecisionManufacturing />
-                  ) : (
-                    <ShoppingBag />
-                  )}
-                </Box>
-              ),
-            } satisfies GanttChartEvent
-          }),
-        ] satisfies GanttChartEvent[],
-      }))}
+      items={items}
     />
   )
 }

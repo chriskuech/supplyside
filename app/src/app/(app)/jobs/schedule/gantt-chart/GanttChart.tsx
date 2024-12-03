@@ -57,7 +57,7 @@ export default function GanttChart({
   })
 
   useEffect(() => {
-    const duplicateIds: string[] = pipe(
+    const duplicateIds = pipe(
       items,
       map((e) => e.id),
       groupBy((id) => id),

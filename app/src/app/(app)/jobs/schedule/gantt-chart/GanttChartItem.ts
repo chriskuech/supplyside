@@ -10,6 +10,12 @@ export type GanttChartEvent = {
   children: (state: GanttChartEventState) => React.ReactNode
 }
 
+export type GanttChartGroup = {
+  id: string
+  label: React.ReactNode
+  items: GanttChartItem[]
+}
+
 export type GanttChartItem = {
   id: string
   label: React.ReactNode

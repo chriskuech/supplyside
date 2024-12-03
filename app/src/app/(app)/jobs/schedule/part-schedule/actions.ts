@@ -3,7 +3,7 @@
 import { fail } from 'assert'
 import { fields, selectResourceFieldValue } from '@supplyside/model'
 import { map, pipe, sortBy } from 'remeda'
-import { PartModel } from './PartModel'
+import { PartModel } from './types'
 import { readResource, readResources } from '@/client/resource'
 import { requireSession } from '@/session'
 
@@ -31,6 +31,7 @@ export async function getParts(): Promise<PartModel[]> {
 
       return {
         id: part.id,
+        jobId: jobRef.id,
         jobKey: jobRef.key,
         name: selectResourceFieldValue(part, fields.partName)?.string ?? null,
         needBy: coerce(selectResourceFieldValue(part, fields.needDate)?.date),
@@ -57,6 +58,10 @@ export async function getParts(): Promise<PartModel[]> {
                 type: selectResourceFieldValue(step, fields.purchase)?.resource
                   ? 'Purchase'
                   : 'WorkCenter',
+                linkedResource:
+                  selectResourceFieldValue(step, fields.purchase)?.resource ??
+                  selectResourceFieldValue(step, fields.workCenter)?.resource ??
+                  null,
                 name:
                   selectResourceFieldValue(step, fields.name)?.string ?? null,
                 start: coerce(
