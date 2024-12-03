@@ -290,11 +290,7 @@ async function setThumbnailFromFiles(patch: ResourcePatch) {
   const stepFile = addedFiles.find((f) => f.contentType === 'model/step')
   if (!stepFile) return
 
-  const thumbnail = await container
-    .get(ThumbnailRenderingService)
-    .renderThumbnail(stepFile)
-
-  patch.setFileId(fields.thumbnail, thumbnail.id)
+  patch.setFileId(fields.thumbnail, stepFile.id)
 }
 
 async function renderThumbnail(patch: ResourcePatch) {
