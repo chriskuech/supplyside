@@ -42,6 +42,9 @@ export default async function OverdueBills() {
         {
           '<': [{ var: fields.paymentDueDate.name }, new Date().toISOString()],
         },
+        {
+          '==': [{ var: fields.recurring.name }, null],
+        },
       ],
     },
   })
