@@ -8,6 +8,8 @@ import {
 } from '@supplyside/model'
 import dayjs from 'dayjs'
 import { isNumber } from 'remeda'
+import { FileService } from '../file/FileService'
+import { ThumbnailRenderingService } from '../part/ThumbnailRenderingService'
 import { ResourceService } from './ResourceService'
 import { mapValueToValueInput } from './mappers'
 import { relations } from './relations'
@@ -263,8 +265,61 @@ const pullInParentFields = async (patch: ResourcePatch) => {
   )
 }
 
+async function setThumbnailFromFiles(patch: ResourcePatch) {
+  if (
+    !patch.schema.implements(fields.thumbnail, fields.partAttachments) ||
+    !patch.hasPatch(fields.partAttachments) ||
+    patch.hasPatch(fields.thumbnail)
+  )
+    return
+
+  const existingFileIds =
+    patch.resource?.fields
+      .find((f) => f.templateId === fields.thumbnail.templateId)
+      ?.value.files.map((f) => f.id) ?? []
+  const newFileIds = patch.getFileIds(fields.partAttachments)
+  const addedFileIds = newFileIds.filter((id) => !existingFileIds.includes(id))
+
+  const fileService = container.get(FileService)
+  const addedFiles = await Promise.all(
+    addedFileIds.map((fileId) =>
+      fileService.read(patch.schema.accountId, fileId),
+    ),
+  )
+
+  const stepFile = addedFiles.find((f) => f.contentType === 'model/step')
+  if (!stepFile) return
+
+  patch.setFileId(fields.thumbnail, stepFile.id)
+}
+
+async function renderThumbnail(patch: ResourcePatch) {
+  if (
+    !patch.schema.implements(fields.thumbnail) ||
+    !patch.hasPatch(fields.thumbnail)
+  )
+    return
+
+  const fileId = patch.getFileId(fields.thumbnail)
+  if (!fileId) return
+
+  const originalThumbnail = await container
+    .get(FileService)
+    .read(patch.schema.accountId, fileId)
+
+  if (originalThumbnail.contentType !== 'model/step') return
+
+  const newThumbnail = await container
+    .get(ThumbnailRenderingService)
+    .renderThumbnail(originalThumbnail)
+
+  patch.setFileId(fields.thumbnail, newThumbnail.id)
+}
+
 export const deriveFields = async (patch: ResourcePatch) => {
   await pullInParentFields(patch)
+  await setThumbnailFromFiles(patch)
+  await renderThumbnail(patch)
   setCompleted(patch)
   setInvoiceDate(patch)
   setStartDate(patch)

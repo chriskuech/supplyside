@@ -181,12 +181,6 @@ const _fields = {
     name: 'Bill Attachments',
     type: 'Files',
   },
-  billFiles: {
-    templateId: 'b4c4a6e9-6b7a-4f8b-92f4-a9264d0fa6e9',
-    name: 'Bill Files',
-    type: 'Files',
-    description: 'The final purchase order document',
-  },
   billStatus: {
     templateId: 'f2b7c7b4-3f5e-4d2d-8f0f-3e8f2c4c4b5c',
     name: 'Bill Status',
@@ -368,6 +362,11 @@ const _fields = {
     type: 'Resource',
     resourceType: 'Part',
     description: 'Contains all info related to a specific part',
+  },
+  partAttachments: {
+    templateId: '33058752-e070-4021-9667-32f9e4355e6a',
+    name: 'Part Attachments',
+    type: 'Files',
   },
   jobStatus: {
     templateId: '70912291-2b48-4e1f-9300-b7dbca8ce5ab',
@@ -661,6 +660,12 @@ const _fields = {
     name: 'Terms & Conditions',
     type: 'Textarea',
     description: 'Terms and conditions included on the purchase order',
+  },
+  thumbnail: {
+    templateId: '97c53f3f-9eec-42bc-bd37-72e3e5b67e0b',
+    name: 'Thumbnail',
+    type: 'File',
+    description: 'Thumbnail image for the resource',
   },
   totalCost: {
     templateId: '507b8699-64af-4f8f-9319-b63c48827c61',

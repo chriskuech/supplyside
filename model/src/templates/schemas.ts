@@ -134,6 +134,8 @@ export const schemas: SchemaTemplate[] = [
       fields.customer,
       fields.startDate,
       fields.deliveryDate,
+      fields.partAttachments,
+      fields.thumbnail,
     ],
     sections: [
       {

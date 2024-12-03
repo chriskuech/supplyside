@@ -87,6 +87,14 @@ export class ResourcePatch {
     return this.getPatch(fieldRef)?.valueInput.date
   }
 
+  getFileId(fieldRef: FieldReference) {
+    return this.getPatch(fieldRef)?.valueInput.fileId
+  }
+
+  getFileIds(fieldRef: FieldReference) {
+    return this.getPatch(fieldRef)?.valueInput.fileIds ?? []
+  }
+
   getNumber(fieldRef: FieldReference) {
     return this.getPatch(fieldRef)?.valueInput.number
   }
