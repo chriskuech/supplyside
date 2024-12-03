@@ -307,7 +307,7 @@ export default async function Sidebar() {
           aria-label="Contact Support"
           href="mailto:support@supplyside.io?subject=Support Request"
         >
-          <QuestionMark />
+          <QuestionMark fontSize="large" />
         </IconButton>
       </Stack>
     </Stack>
