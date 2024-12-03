@@ -4,8 +4,10 @@ import {
   SchemaData,
   selectResourceFieldValue,
 } from '@supplyside/model'
-import { Box, Divider, Stack, Typography } from '@mui/material'
+import { Box, Divider, IconButton, Stack, Typography } from '@mui/material'
 import { FC, ReactNode } from 'react'
+import { Print } from '@mui/icons-material'
+import NextLink from 'next/link'
 import FieldControl from '@/lib/resource/fields/FieldControl'
 import { formatMoney } from '@/lib/format'
 import AttachmentsToolbarControl from '@/lib/resource/detail/AttachmentsToolbarControl'
@@ -17,19 +19,33 @@ export const PartView: FC<{
 }> = ({ part, partSchemaData, stepsControl }) => (
   <Stack spacing={1} flexGrow={1}>
     <Stack direction="row" alignItems="start" spacing={1}>
-      <Stack spacing={1} alignItems="end">
+      <Stack spacing={1}>
         <FieldControl
           resource={part}
           schemaData={partSchemaData}
           field={fields.thumbnail}
           isImageDropzone
         />
-        <AttachmentsToolbarControl
-          schemaData={partSchemaData}
-          resource={part}
-          field={fields.partAttachments}
-          fontSize="large"
-        />
+        <Stack
+          direction="row"
+          justifyContent="space-evenly"
+          alignItems="center"
+        >
+          <IconButton
+            size="small"
+            component={NextLink}
+            href={`/integrations/internal/travelers/${part.id}`}
+            target="_blank"
+          >
+            <Print fontSize="large" />
+          </IconButton>
+          <AttachmentsToolbarControl
+            schemaData={partSchemaData}
+            resource={part}
+            field={fields.partAttachments}
+            fontSize="large"
+          />
+        </Stack>
       </Stack>
 
       <Divider orientation="vertical" flexItem />

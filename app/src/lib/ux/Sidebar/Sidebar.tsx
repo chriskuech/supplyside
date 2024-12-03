@@ -1,7 +1,7 @@
 'use server'
 
 import assert from 'assert'
-import { Box, Divider, Stack, Typography } from '@mui/material'
+import { Box, Divider, IconButton, Stack, Typography } from '@mui/material'
 import {
   Build,
   Business,
@@ -9,6 +9,7 @@ import {
   EventRepeat,
   List,
   PrecisionManufacturing,
+  QuestionMark,
   Receipt,
   ShoppingBag,
   Speed,
@@ -302,6 +303,12 @@ export default async function Sidebar() {
       <Stack direction="row" justifyContent="space-evenly">
         {account && <AccountMenu />}
         {user && <UserMenu self={user} />}
+        <IconButton
+          aria-label="Contact Support"
+          href="mailto:support@supplyside.io?subject=Support Request"
+        >
+          <QuestionMark fontSize="large" />
+        </IconButton>
       </Stack>
     </Stack>
   )
