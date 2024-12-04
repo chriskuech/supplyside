@@ -926,6 +926,7 @@ export class ResourceService {
       await this.withCreatePatch(accountId, lineResourceType, (patch) => {
         for (const { fieldId, fieldType, value } of line.fields) {
           if (backLinkField.fieldId === fieldId) continue
+          if (!lineSchema.implements({ fieldId })) continue
 
           patch.setPatch({ fieldId }, mapValueToValueInput(fieldType, value))
         }

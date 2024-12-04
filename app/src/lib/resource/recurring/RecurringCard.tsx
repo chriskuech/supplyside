@@ -39,6 +39,10 @@ export default function RecurringCard({ schemaData, resource }: Props) {
   const recurrenceInterval =
     selectResourceFieldValue(resource, fields.recurrenceInterval)?.number ??
     null
+  const recurrenceStarted = !!selectResourceFieldValue(
+    resource,
+    fields.recurrenceStartedAt,
+  )?.date
 
   const isValid =
     recurrenceInterval !== null && recurrenceIntervalUnits !== null
@@ -53,6 +57,8 @@ export default function RecurringCard({ schemaData, resource }: Props) {
     : !isRunning
       ? 'This recurring schedule is not running. Click the play button to start.'
       : undefined
+
+  const disabled = !isRecurring || recurrenceStarted
 
   return (
     <Card
@@ -99,7 +105,7 @@ export default function RecurringCard({ schemaData, resource }: Props) {
                 schemaData={schemaData}
                 resource={resource}
                 field={fields.recurrenceInterval}
-                disabled={!isRecurring}
+                disabled={disabled}
               />
             </Box>
 
@@ -108,7 +114,7 @@ export default function RecurringCard({ schemaData, resource }: Props) {
                 schemaData={schemaData}
                 resource={resource}
                 field={fields.recurrenceIntervalUnits}
-                disabled={!isRecurring}
+                disabled={disabled}
               />
             </Box>
 
@@ -125,7 +131,7 @@ export default function RecurringCard({ schemaData, resource }: Props) {
                     schemaData={schemaData}
                     resource={resource}
                     field={fields.recurrenceIntervalOffsetInDays}
-                    disabled={!isRecurring}
+                    disabled={disabled}
                   />
                 </Box>
 
