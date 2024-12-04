@@ -46,6 +46,9 @@ export const getNextResourceCreationDate = (
   )
     return null
 
+  const parsedRecurrenceInterval = Math.ceil(recurrenceInterval)
+  if (recurrenceInterval < 1) return
+
   // Calculate first trigger date
   if (
     !date &&
@@ -56,7 +59,7 @@ export const getNextResourceCreationDate = (
 
     return match(recurrenceIntervalUnitTemplateId)
       .with(intervalUnits.days.templateId, () =>
-        recurrenceStartDate.add(recurrenceInterval, 'day'),
+        recurrenceStartDate.add(parsedRecurrenceInterval, 'day'),
       )
       .with(intervalUnits.weeks.templateId, () => {
         if (recurrenceStartDate.day() <= offsetInDays) {
@@ -64,7 +67,7 @@ export const getNextResourceCreationDate = (
         }
 
         return recurrenceStartDate
-          .add(recurrenceInterval, 'week')
+          .add(parsedRecurrenceInterval, 'week')
           .set('day', offsetInDays)
       })
       .with(intervalUnits.months.templateId, () => {
@@ -73,7 +76,7 @@ export const getNextResourceCreationDate = (
         }
 
         return recurrenceStartDate
-          .add(recurrenceInterval, 'month')
+          .add(parsedRecurrenceInterval, 'month')
           .set('date', offsetInDays)
       })
       .with(intervalUnits.years.templateId, () => {
@@ -82,7 +85,7 @@ export const getNextResourceCreationDate = (
         }
 
         return recurrenceStartDate
-          .add(recurrenceInterval, 'year')
+          .add(parsedRecurrenceInterval, 'year')
           .set('date', offsetInDays)
       })
       .otherwise(() => fail('Interval unit option not supported'))
@@ -92,21 +95,21 @@ export const getNextResourceCreationDate = (
 
   return match(recurrenceIntervalUnitTemplateId)
     .with(intervalUnits.days.templateId, () =>
-      dayjs(lastExecutionDate).add(recurrenceInterval, 'day'),
+      dayjs(lastExecutionDate).add(parsedRecurrenceInterval, 'day'),
     )
     .with(intervalUnits.weeks.templateId, () =>
       dayjs(lastExecutionDate)
-        .add(recurrenceInterval, 'week')
+        .add(parsedRecurrenceInterval, 'week')
         .set('day', offsetInDays),
     )
     .with(intervalUnits.months.templateId, () =>
       dayjs(lastExecutionDate)
-        .add(recurrenceInterval, 'month')
+        .add(parsedRecurrenceInterval, 'month')
         .set('date', offsetInDays),
     )
     .with(intervalUnits.years.templateId, () =>
       dayjs(lastExecutionDate)
-        .add(recurrenceInterval, 'year')
+        .add(parsedRecurrenceInterval, 'year')
         .set('date', offsetInDays),
     )
     .otherwise(() => fail('Interval unit option not supported'))
