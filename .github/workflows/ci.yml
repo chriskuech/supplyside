@@ -59,7 +59,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Build and push app container image to registry
-        uses: docker/build-push-action@67a2d409c0a876cbe6b11854e3e25193efe4e62d # v6.12.0
+        uses: docker/build-push-action@ca877d9245402d1537745e0e356eab47c3520991 # v6.13.0
         with:
           push: true
           tags: supplyside.azurecr.io/app:${{ github.sha }}
@@ -108,7 +108,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Build and push api container image to registry
-        uses: docker/build-push-action@67a2d409c0a876cbe6b11854e3e25193efe4e62d # v6.12.0
+        uses: docker/build-push-action@ca877d9245402d1537745e0e356eab47c3520991 # v6.13.0
         with:
           push: true
           tags: supplyside.azurecr.io/api:${{ github.sha }}
