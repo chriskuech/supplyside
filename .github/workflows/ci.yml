@@ -1,0 +1,256 @@
+name: CI
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  lint-model:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+
+      - name: Lint model
+        run: cd model && npm ci && npm run lint
+
+  build-app:
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@6524bf65af31da8d45b59e8c27de4bd072b392f5 # v3.8.0
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: supplyside.azurecr.io
+          username: supplyside-github-actions
+          password: ${{ secrets.ACR_TOKEN }}
+
+      - name: Create build.json
+        shell: pwsh
+        run: |
+          $path = './app/src/app/api/health/build.json'
+          @{
+            commit    = $env:SHA
+            version   = $env:PR_NUMBER
+            timestamp = "$(Get-Date -Format 's')Z"
+          }
+          | ConvertTo-Json
+          | Set-Content -Path $path
+          Get-Content -Path $path
+        env:
+          SHA: ${{ github.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: Build and push app container image to registry
+        uses: docker/build-push-action@67a2d409c0a876cbe6b11854e3e25193efe4e62d # v6.12.0
+        with:
+          push: true
+          tags: supplyside.azurecr.io/app:${{ github.sha }}
+          context: .
+          file: .ops/Dockerfile.app
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-api:
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@6524bf65af31da8d45b59e8c27de4bd072b392f5 # v3.8.0
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: supplyside.azurecr.io
+          username: supplyside-github-actions
+          password: ${{ secrets.ACR_TOKEN }}
+
+      - name: Create build.json
+        shell: pwsh
+        run: |
+          $path = './api/src/data/build.json'
+          @{
+            commit    = $env:SHA
+            version   = $env:PR_NUMBER
+            timestamp = "$(Get-Date -Format 's')Z"
+          }
+          | ConvertTo-Json
+          | Set-Content -Path $path
+          Get-Content -Path $path
+        env:
+          SHA: ${{ github.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: Build and push api container image to registry
+        uses: docker/build-push-action@67a2d409c0a876cbe6b11854e3e25193efe4e62d # v6.12.0
+        with:
+          push: true
+          tags: supplyside.azurecr.io/api:${{ github.sha }}
+          context: .
+          file: .ops/Dockerfile.api
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    needs:
+      - lint-model
+      - build-app
+      - build-api
+    if: ${{ github.event_name != 'pull_request' }}
+
+    environment:
+      name: Integration
+      url: https://app-int.supplyside.io
+
+    env:
+      APP_BASE_URL: https://app-int.supplyside.io
+      API_BASE_URL: https://api-int.supplyside.io
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Tailscale
+        uses: tailscale/github-action@main
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Wait for Tailscale to be ready
+        shell: pwsh
+        run: |
+          # Wait for the hostname to resolve before attempting to connect to the database
+          $hostname = [System.Uri]::new($env:DATABASE_URL).Host
+          $retryInterval = 5 # seconds
+          $maxRetries = 10
+          for ($i = 1; $i -le $maxRetries; $i++) {
+              try {
+                  [System.Net.Dns]::GetHostAddresses($hostname)
+                  Write-Host "Hostname resolved successfully."
+                  break
+              } catch {
+                  Write-Host "Attempt $i failed. Retrying in $retryInterval seconds..."
+                  Start-Sleep -Seconds $retryInterval
+              }
+          }
+        env:
+          DATABASE_URL: ${{ secrets.DB_SERVER_URL }}/integration
+
+      - name: Run Prisma migrations
+        run: |
+          # Extract database connection details from DATABASE_URL
+          USER=$(echo $DATABASE_URL | sed -r 's|postgresql://([^:]+):.*|\1|')
+          PASSWORD=$(echo $DATABASE_URL | sed -r 's|postgresql://[^:]+:([^@]+)@.*|\1|')
+          HOST=$(echo $DATABASE_URL | sed -r 's|postgresql://[^@]+@([^:]+):.*|\1|')
+          PORT=$(echo $DATABASE_URL | sed -r 's|postgresql://[^@]+@[^:]+:([^/]+)/.*|\1|')
+          DBNAME=$(echo $DATABASE_URL | sed -r 's|postgresql://[^/]+/(.+)|\1|')
+          export PGPASSWORD=$PASSWORD
+
+          # Rollback failed migration if any
+          QUERY="SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NULL ORDER BY started_at LIMIT 1;"
+          FAILED_MIGRATION_NAME=$(psql -U $USER -h $HOST -p $PORT -d $DBNAME -t -c "$QUERY" | xargs)
+          if [ -n "$FAILED_MIGRATION_NAME" ]; then
+            echo "Rolling back failed migration: $FAILED_MIGRATION_NAME"
+            npx prisma migrate resolve --rolled-back $FAILED_MIGRATION_NAME
+          fi
+
+          # Deploy new migration
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DB_SERVER_URL }}/integration
+        working-directory: api
+
+      - name: Login to Docker
+        uses: docker/login-action@v3
+        with:
+          registry: supplyside.azurecr.io
+          username: supplyside-github-actions
+          password: ${{ secrets.ACR_TOKEN }}
+
+      - name: Push the Docker images
+        shell: pwsh
+        run: |
+          $sha = "${{ github.sha }}"
+          "api", "app" | ForEach-Object {
+            Write-Host "Pushing $_`:$sha"
+            docker pull supplyside.azurecr.io/$_`:$sha
+            docker tag supplyside.azurecr.io/$_`:$sha supplyside.azurecr.io/$_`:integration
+            docker push supplyside.azurecr.io/$_`:integration
+            Write-Host ""
+          }
+
+      - name: Wait for healthcheck
+        shell: pwsh
+        run: |
+          $timeoutInMinutes = 5
+          $waitInSeconds = 5
+
+          $timeout = (Get-Date).AddMinutes($timeoutInMinutes)
+
+          function Get-Health([string] $url) {
+            $res = Invoke-RestMethod -Uri $url -Method Get -ErrorAction SilentlyContinue
+            return $res -and $res.build.commit -eq $env:SHA
+          }
+
+          $appIsHealthy = $false
+          $apiIsHealthy = $false
+
+          do {
+            Start-Sleep -Seconds $waitInSeconds
+            Write-Host "~" -NoNewline
+
+            $newAppIsHealthy = Get-Health $env:APP_BASE_URL/api/health
+            $newApiIsHealthy = Get-Health $env:API_BASE_URL/health
+
+            if ($appIsHealthy -ne $newAppIsHealthy) {
+              Write-Host "App health change: $appIsHealthy => $newAppIsHealthy"
+              $appIsHealthy = $newAppIsHealthy
+            }
+
+            if ($apiIsHealthy -ne $newApiIsHealthy) {
+              Write-Host "API health change: $apiIsHealthy => $newApiIsHealthy"
+              $apiIsHealthy = $newApiIsHealthy
+            }
+
+            if ($appIsHealthy -and $apiIsHealthy) {
+              Write-Host "\nDeployment successful"
+              exit 0
+            }
+          } while ((Get-Date) -lt $timeout)
+
+          Write-Host "\nDeployment timed out after $timeoutInMinutes minutes"
+          exit 1
+
+        env:
+          SHA: ${{ github.sha }}
+
+      - name: Apply configuration
+        shell: pwsh
+        run: Invoke-RestMethod -ContentType 'application/json' -Method POST -Uri $env:API_BASE_URL/webhooks/post-deployment -Body '{}'

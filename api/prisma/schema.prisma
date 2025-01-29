@@ -1,0 +1,347 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "relationJoins", "nativeDistinct", "postgresqlExtensions", "tracing"]
+  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pg_trgm, uuidOssp(map: "uuid-ossp")]
+}
+
+model Session {
+  id        String    @id @default(uuid()) @db.Uuid
+  accountId String    @db.Uuid
+  userId    String    @db.Uuid
+  expiresAt DateTime  @db.Timestamp()
+  revokedAt DateTime? @db.Timestamp()
+
+  Account Account @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  User    User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Account {
+  id                      String    @id @default(uuid()) @db.Uuid
+  key                     String    @unique
+  name                    String    @unique
+  address                 String    @default("")
+  logoBlobId              String?   @unique @db.Uuid
+  quickBooksConnectedAt   DateTime?
+  quickBooksToken         Json?
+  plaidConnectedAt        DateTime?
+  plaidToken              String?
+  mcMasterCarrUsername    String?
+  mcMasterCarrPassword    String?
+  mcMasterCarrConnectedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  LogoBlob Blob? @relation(name: "logo", fields: [logoBlobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  User     User[]
+  Resource Resource[]
+  Field    Field[]
+  Schema   Schema[]
+  Blob     Blob[]     @relation(name: "owner")
+  File     File[]
+  Session  Session[]
+}
+
+model Blob {
+  id        String @id @default(uuid()) @db.Uuid
+  accountId String @db.Uuid
+  name      String
+  mimeType  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  OwnedBy Account  @relation(name: "owner", fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  LogoFor Account? @relation(name: "logo")
+  User    User?
+  File    File[]
+}
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  accountId       String    @db.Uuid
+  email           String    @unique
+  firstName       String?
+  lastName        String?
+  tsAndCsSignedAt DateTime?
+  imageBlobId     String?   @unique @db.Uuid
+  isAdmin         Boolean   @default(false)
+  isApprover      Boolean   @default(false)
+  tat             String?
+  tatExpiresAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ImageBlob Blob?     @relation(fields: [imageBlobId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  Value     Value[]
+  Session   Session[]
+}
+
+enum ResourceType {
+  Bill
+  Customer
+  Job
+  Operation
+  Part
+  Purchase
+  PurchaseLine
+  Step
+  Vendor
+  WorkCenter
+}
+
+model Resource {
+  id         String       @id @default(uuid()) @db.Uuid
+  accountId  String       @db.Uuid
+  type       ResourceType
+  key        Int          @db.Integer
+  templateId String?      @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Account       Account         @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ResourceField ResourceField[]
+  Value         Value[]
+  Cost          Cost[]
+
+  @@unique([accountId, type, key])
+  @@unique([accountId, templateId])
+}
+
+model ResourceField {
+  resourceId String @db.Uuid
+  fieldId    String @db.Uuid
+  valueId    String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Field    Field    @relation(fields: [fieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Value    Value    @relation(fields: [valueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([resourceId, fieldId])
+}
+
+enum FieldType {
+  Address
+  Checkbox
+  Contact
+  Date
+  File
+  Files
+  Money
+  MultiSelect
+  Number
+  Resource
+  Textarea
+  Select
+  Text
+  User
+}
+
+model Field {
+  id             String        @id @default(uuid()) @db.Uuid
+  accountId      String        @db.Uuid
+  type           FieldType
+  name           String
+  description    String?
+  resourceType   ResourceType?
+  templateId     String?       @db.Uuid
+  defaultValueId String        @db.Uuid
+  isRequired     Boolean       @default(false)
+  defaultToToday Boolean       @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Account            Account         @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  DefaultValue       Value           @relation(fields: [defaultValueId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  Option             Option[]
+  ResourceFieldValue ResourceField[]
+  SectionField       SectionField[]
+  SchemaField        SchemaField[]
+
+  @@unique([accountId, name])
+  @@unique([accountId, templateId])
+}
+
+model Option {
+  id         String  @id @default(uuid()) @db.Uuid
+  fieldId    String  @db.Uuid
+  name       String  @db.VarChar
+  order      Int     @db.Integer
+  templateId String? @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Field       Field         @relation(fields: [fieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Value       Value[]
+  ValueOption ValueOption[]
+
+  @@unique([fieldId, templateId])
+}
+
+model File {
+  id        String @id @default(uuid()) @db.Uuid
+  accountId String @db.Uuid
+  name      String
+  blobId    String @unique @db.Uuid
+
+  Blob      Blob        @relation(fields: [blobId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Account   Account     @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Value     Value[]
+  ValueFile ValueFile[]
+}
+
+model Address {
+  id            String  @id @default(uuid()) @db.Uuid
+  streetAddress String?
+  city          String?
+  state         String?
+  zip           String?
+  country       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Value Value[]
+}
+
+model Contact {
+  id    String  @id @default(uuid()) @db.Uuid
+  name  String?
+  title String?
+  email String?
+  phone String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Value Value[]
+}
+
+model Value {
+  id         String    @id @default(uuid()) @db.Uuid
+  addressId  String?   @db.Uuid
+  boolean    Boolean?
+  contactId  String?   @db.Uuid
+  date       DateTime? @db.Date
+  fileId     String?   @db.Uuid
+  number     Float?
+  optionId   String?   @db.Uuid
+  resourceId String?   @db.Uuid
+  string     String?
+  userId     String?   @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Address            Address?        @relation(fields: [addressId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  Contact            Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  File               File?           @relation(fields: [fileId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  Files              ValueFile[]
+  User               User?           @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  Option             Option?         @relation(fields: [optionId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  Resource           Resource?       @relation(fields: [resourceId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  ValueOption        ValueOption[]
+  ResourceFieldValue ResourceField[]
+  Field              Field[]
+}
+
+model ValueFile {
+  valueId String @db.Uuid
+  fileId  String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Value Value @relation(fields: [valueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  File  File  @relation(fields: [fileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([valueId, fileId])
+}
+
+model ValueOption {
+  valueId  String @db.Uuid
+  optionId String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Value  Value  @relation(fields: [valueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Option Option @relation(fields: [optionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([valueId, optionId])
+}
+
+model Schema {
+  id           String       @id @default(uuid()) @db.Uuid
+  accountId    String       @db.Uuid
+  resourceType ResourceType
+  isSystem     Boolean
+
+  Account     Account       @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Section     Section[]
+  SchemaField SchemaField[]
+
+  @@unique([accountId, resourceType, isSystem])
+}
+
+model SchemaField {
+  schemaId String @db.Uuid
+  fieldId  String @db.Uuid
+  order    Int    @db.Integer
+
+  Schema Schema @relation(fields: [schemaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Field  Field  @relation(fields: [fieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([schemaId, fieldId])
+}
+
+model Section {
+  id       String @id @default(uuid()) @db.Uuid
+  schemaId String @db.Uuid
+  name     String
+  order    Int    @db.Integer
+
+  Schema       Schema         @relation(fields: [schemaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  SectionField SectionField[]
+
+  @@unique([schemaId, name])
+}
+
+model SectionField {
+  sectionId String @db.Uuid
+  fieldId   String @db.Uuid
+  order     Int    @db.Integer
+
+  Section Section @relation(fields: [sectionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Field   Field   @relation(fields: [fieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([sectionId, fieldId])
+}
+
+model Cost {
+  id           String  @id @default(uuid()) @db.Uuid
+  resourceId   String  @db.Uuid
+  name         String  @default("") @db.VarChar
+  isPercentage Boolean @default(false) @db.Boolean
+  value        Float   @default(0) @db.Real
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}

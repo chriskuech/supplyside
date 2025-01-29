@@ -1,0 +1,119 @@
+name: CD
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+
+    environment:
+      name: Production
+      url: https://app.supplyside.io
+
+    env:
+      APP_BASE_URL: https://app.supplyside.io
+      API_BASE_URL: https://api.supplyside.io
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Tailscale
+        uses: tailscale/github-action@main
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Run Prisma migrations
+        run: |
+          # Extract database connection details from DATABASE_URL
+          USER=$(echo $DATABASE_URL | sed -r 's|postgresql://([^:]+):.*|\1|')
+          PASSWORD=$(echo $DATABASE_URL | sed -r 's|postgresql://[^:]+:([^@]+)@.*|\1|')
+          HOST=$(echo $DATABASE_URL | sed -r 's|postgresql://[^@]+@([^:]+):.*|\1|')
+          PORT=$(echo $DATABASE_URL | sed -r 's|postgresql://[^@]+@[^:]+:([^/]+)/.*|\1|')
+          DBNAME=$(echo $DATABASE_URL | sed -r 's|postgresql://[^/]+/(.+)|\1|')
+          export PGPASSWORD=$PASSWORD
+
+          # Rollback failed migration if any
+          QUERY="SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NULL ORDER BY started_at LIMIT 1;"
+          FAILED_MIGRATION_NAME=$(psql -U $USER -h $HOST -p $PORT -d $DBNAME -t -c "$QUERY" | xargs)
+          if [ -n "$FAILED_MIGRATION_NAME" ]; then
+            echo "Rolling back failed migration: $FAILED_MIGRATION_NAME"
+            npx prisma migrate resolve --rolled-back $FAILED_MIGRATION_NAME
+          fi
+
+          # Deploy new migration
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DB_SERVER_URL }}/production
+        working-directory: api
+
+      - name: Login to Docker
+        uses: docker/login-action@v3
+        with:
+          registry: supplyside.azurecr.io
+          username: supplyside-github-actions
+          password: ${{ secrets.ACR_TOKEN }}
+
+      - name: Push the Docker images
+        shell: pwsh
+        run: |
+          $sha = "${{ github.sha }}"
+          "api", "app" | ForEach-Object {
+            Write-Host "Pushing $_`:$sha"
+            docker pull supplyside.azurecr.io/$_`:integration
+            docker tag supplyside.azurecr.io/$_`:integration supplyside.azurecr.io/$_`:production
+            docker push supplyside.azurecr.io/$_`:production
+            Write-Host ""
+          }
+
+      - name: Wait for healthcheck
+        shell: pwsh
+        run: |
+          $timeoutInMinutes = 10
+          $waitInSeconds = 10
+
+          $timeout = (Get-Date).AddMinutes($timeoutInMinutes)
+
+          function Get-Health([string] $url) {
+            $res = Invoke-RestMethod -Uri $url -Method Get -ErrorAction SilentlyContinue
+            return $res -and $res.build.commit -eq $env:SHA
+          }
+
+          $appIsHealthy = $false
+          $apiIsHealthy = $false
+
+          do {
+            Start-Sleep -Seconds $waitInSeconds
+            Write-Host "~" -NoNewline
+
+            $newAppIsHealthy = Get-Health $env:APP_BASE_URL/api/health
+            $newApiIsHealthy = Get-Health $env:API_BASE_URL/health
+
+            if ($appIsHealthy -ne $newAppIsHealthy) {
+              Write-Host "App health change: $appIsHealthy => $newAppIsHealthy"
+              $appIsHealthy = $newAppIsHealthy
+            }
+
+            if ($apiIsHealthy -ne $newApiIsHealthy) {
+              Write-Host "API health change: $apiIsHealthy => $newApiIsHealthy"
+              $apiIsHealthy = $newApiIsHealthy
+            }
+
+            if ($appIsHealthy -and $apiIsHealthy) {
+              Write-Host "\nDeployment successful"
+              exit 0
+            }
+          } while ((Get-Date) -lt $timeout)
+
+          Write-Host "\nDeployment timed out after $timeoutInMinutes minutes"
+          exit 1
+  
+        env:
+          SHA: ${{ github.sha }}
+
+      - name: Apply configuration
+        shell: pwsh
+        run: Invoke-RestMethod -ContentType 'application/json' -Method POST -Uri $env:API_BASE_URL/webhooks/post-deployment -Body '{}'
+  

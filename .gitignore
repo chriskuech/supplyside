@@ -1,0 +1,4 @@
+node_modules
+.sentryclirc
+.env
+.DS_Store
